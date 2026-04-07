@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The LLM Engineering Landscape</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <meta property="og:title" content="The LLM Engineering Landscape — Towards Intelligence"/>
+  <meta property="og:description" content="A three-part map of what engineers actually build with large language models — disciplines, practical problems, and products."/>
+  <meta property="og:type" content="article"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:         #0e0e0f;
+      --surface:    #151516;
+      --surface2:   #1c1c1e;
+      --rule:       #2a2a2e;
+      --rule-lt:    #333338;
+      --ink:        #e0dbd2;
+      --ink-mid:    #d1cbbf;
+      --ink-dim:    #b0a99e;
+      --white:      #e8e3da;
+      --accent:     #c8a96e;
+      --accent-dim: #3a2e1a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* -- NAV -- */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(14, 14, 15, 0.94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em;
+      color: var(--white); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.active { color: var(--accent); }
+
+    /* -- LAYOUT -- */
+    .page-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* -- SIDEBAR TOC -- */
+    .toc {
+      position: sticky;
+      top: 5rem;
+      height: calc(100vh - 6rem);
+      overflow-y: auto;
+      padding: 2rem 0 2rem 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--rule) transparent;
+    }
+    .toc::-webkit-scrollbar { width: 4px; }
+    .toc::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
+    .toc::-webkit-scrollbar-track { background: transparent; }
+
+    .toc-part-label {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--accent);
+      margin-top: 1.6rem; margin-bottom: 0.5rem;
+      padding-left: 0.8rem;
+    }
+    .toc-part-label:first-child { margin-top: 0; }
+
+    .toc a {
+      display: block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 400;
+      color: var(--ink-dim);
+      text-decoration: none;
+      padding: 0.3rem 0.8rem;
+      border-left: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      line-height: 1.5;
+    }
+    .toc a:hover { color: var(--ink-mid); }
+    .toc a.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+    .toc a.toc-sub {
+      padding-left: 1.4rem;
+      font-size: 0.74rem;
+    }
+
+    /* -- MAIN CONTENT -- */
+    .main-content {
+      min-width: 0;
+      padding-bottom: 6rem;
+    }
+
+    /* -- HERO -- */
+    .hero {
+      padding: 8rem 0 4rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 4rem;
+    }
+    .hero-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      display: flex; align-items: center; gap: 0.8rem;
+      margin-bottom: 1.6rem;
+    }
+    .hero-kicker::before {
+      content: ''; display: block;
+      width: 32px; height: 1px; background: var(--accent);
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.6rem, 5vw, 4.2rem);
+      font-weight: 600; line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+    }
+    .hero-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .hero-subtitle {
+      font-size: 1.05rem; line-height: 1.8;
+      color: var(--ink-mid); max-width: 640px;
+      font-weight: 300; text-align: justify;
+    }
+
+    /* -- PART DIVIDER -- */
+    .part-divider {
+      padding: 4rem 0 2.5rem;
+      border-top: 1px solid var(--rule);
+      margin-top: 3rem;
+      position: relative;
+    }
+    .part-divider:first-of-type { margin-top: 0; border-top: none; }
+    .part-num {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .part-num::before {
+      content: ''; display: block;
+      width: 24px; height: 1px; background: var(--accent);
+    }
+    .part-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 600; line-height: 1.15;
+      color: var(--white); letter-spacing: -0.01em;
+    }
+    .part-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .part-subtitle {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; color: var(--ink-dim); line-height: 1.7;
+      margin-top: 0.6rem; max-width: 600px;
+    }
+
+    /* -- SECTION HEADINGS -- */
+    .section-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+      font-weight: 600; line-height: 1.2;
+      color: var(--white);
+      margin: 3rem 0 1rem;
+      padding-top: 1.5rem;
+    }
+    .section-heading .sh-num {
+      color: var(--accent);
+      font-style: italic;
+      font-weight: 400;
+      margin-right: 0.3rem;
+    }
+
+    /* -- SUBSECTION HEADINGS -- */
+    .subsection-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 600; line-height: 1.3;
+      color: var(--white);
+      margin: 2rem 0 0.6rem;
+    }
+
+    /* -- BODY TEXT -- */
+    .body-text {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem; color: var(--ink-mid); line-height: 1.8;
+      font-weight: 300; text-align: justify;
+      margin-bottom: 1rem;
+    }
+    .body-text strong { font-weight: 600; color: var(--ink); }
+    .body-text em { color: var(--ink); }
+
+    /* -- EXPLANATION / BLOCKQUOTE -- */
+    .explanation {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem; color: var(--ink-mid); line-height: 1.8;
+      font-weight: 300;
+      padding: 1.2rem 0 1.2rem 1.4rem;
+      border-left: 2px solid var(--accent-dim);
+      margin-bottom: 1.5rem;
+      text-align: justify;
+    }
+    .explanation strong { font-weight: 600; color: var(--ink); }
+
+    /* -- CHIPS / TAGS -- */
+    .chip-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 1.5rem; }
+    .chip {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink-dim);
+      padding: 0.35rem 0.8rem;
+      border: 1px solid var(--rule-lt); border-radius: 1px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* -- BULLET LIST -- */
+    .content-list {
+      list-style: none;
+      margin: 0.5rem 0 1.2rem;
+    }
+    .content-list li {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.96rem; color: var(--ink-mid);
+      font-weight: 300; line-height: 1.75;
+      padding: 0.25rem 0 0.25rem 1.4rem;
+      position: relative;
+      text-align: justify;
+    }
+    .content-list li::before {
+      content: '\2014';
+      position: absolute; left: 0;
+      color: var(--ink-dim); font-size: 0.85rem;
+    }
+    .content-list li strong { font-weight: 600; color: var(--ink); }
+
+    /* -- TABLES -- */
+    .content-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0 2rem;
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.92rem;
+    }
+    .content-table thead th {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent);
+      text-align: left;
+      padding: 0.8rem 1rem;
+      border-bottom: 2px solid var(--rule);
+    }
+    .content-table tbody td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--rule);
+      color: var(--ink-mid);
+      font-weight: 300;
+      line-height: 1.6;
+      vertical-align: top;
+    }
+    .content-table tbody td strong { font-weight: 600; color: var(--ink); }
+    .content-table tbody tr:hover td { color: var(--ink); }
+
+    /* -- CODE / ASCII BLOCKS -- */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      padding: 1.4rem 1.6rem;
+      margin: 1.5rem 0 2rem;
+      overflow-x: auto;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: var(--ink-dim);
+      white-space: pre;
+      border-radius: 2px;
+    }
+
+    /* -- LABEL -- */
+    .label {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .label::before {
+      content: ''; display: block;
+      width: 16px; height: 1px; background: var(--accent);
+    }
+
+    /* -- HEADACHE / NOTE BLOCK -- */
+    .note-block {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      padding: 1.4rem 1.6rem;
+      margin: 1.2rem 0 1.8rem;
+    }
+    .note-block .note-label {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.76rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .note-block p {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.94rem; color: var(--ink-dim); line-height: 1.7;
+      font-weight: 300; text-align: justify;
+    }
+    .note-block p strong { font-weight: 600; color: var(--ink); }
+
+    /* -- HORIZONTAL RULE -- */
+    .content-rule {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--rule-lt) 20%, var(--rule-lt) 80%, transparent);
+      margin: 2.5rem 0;
+    }
+
+    /* -- SCROLL REVEAL -- */
+    .reveal {
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* -- BACK TO TOP -- */
+    .back-to-top {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      width: 40px; height: 40px;
+      background: var(--surface2);
+      border: 1px solid var(--rule);
+      color: var(--ink-dim);
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 99;
+      border-radius: 2px;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .back-to-top:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* -- FOOTER -- */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 1.6rem 2rem;
+      background: var(--surface);
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem; color: var(--ink-dim);
+    }
+    .footer-copy {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.8rem; color: var(--ink-dim); letter-spacing: 0.05em;
+    }
+
+    /* -- RESPONSIVE -- */
+    @media (max-width: 960px) {
+      .page-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .toc { display: none; }
+      .main-content { padding: 0; }
+    }
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .page-layout { padding-left: 1.2rem; padding-right: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Towards Intelligence</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Roadmap</a></li>
+      <li><a href="cse.html">CS &amp; Engineering</a></li>
+      <li><a href="data-intelligence.html">Data &amp; Intelligence</a></li>
+      <li><a href="llm-engineering.html" class="active">LLM Engineering</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- BACK TO TOP -->
+<a href="#top" class="back-to-top" id="backToTop" aria-label="Back to top">&uarr;</a>
+
+<div class="page-layout" id="top">
+
+<!-- ===== SIDEBAR TOC ===== -->
+<aside class="toc" id="toc">
+
+  <div class="toc-part-label">Part 1 &mdash; Engineering Disciplines</div>
+  <a href="#p1-framing">Framing: Two Layers</a>
+  <a href="#p1-1">1. Model Infrastructure &amp; Inference</a>
+  <a href="#p1-2">2. LLM Application Engineering</a>
+  <a href="#p1-3">3. Agentic Systems Engineering</a>
+  <a href="#p1-4">4. Evaluation &amp; Quality</a>
+  <a href="#p1-5">5. LLMOps &amp; Production</a>
+  <a href="#p1-6">6. Safety &amp; Governance</a>
+  <a href="#p1-7">7. Enterprise Integration</a>
+  <a href="#p1-8">8. Human-AI Interaction</a>
+  <a href="#p1-buzzwords">How the Buzzwords Fit</a>
+  <a href="#p1-toplevel">Real Top-Level Topics</a>
+  <a href="#p1-evolution">How the Landscape Evolved</a>
+  <a href="#p1-summary-map">Summary Map</a>
+
+  <div class="toc-part-label">Part 2 &mdash; Practical Problems</div>
+  <a href="#p2-1">1. Getting Useful Output</a>
+  <a href="#p2-2">2. RAG &mdash; Giving It Information</a>
+  <a href="#p2-3">3. Tool Use / Function Calling</a>
+  <a href="#p2-4">4. Building Agent Loops</a>
+  <a href="#p2-5">5. Integrating with Real Systems</a>
+  <a href="#p2-6">6. Making It Work in Production</a>
+  <a href="#p2-7">7. Evals</a>
+  <a href="#p2-buzzmap">Buzzword Map</a>
+  <a href="#p2-realproject">On a Real Project</a>
+
+  <div class="toc-part-label">Part 3 &mdash; Products &amp; Focus</div>
+  <a href="#p3-1">1. Knowledge &amp; Document Intelligence</a>
+  <a href="#p3-2">2. Conversational Assistants</a>
+  <a href="#p3-3">3. Code Intelligence</a>
+  <a href="#p3-4">4. Data Extraction</a>
+  <a href="#p3-5">5. Content Generation</a>
+  <a href="#p3-6">6. Research &amp; Synthesis Agents</a>
+  <a href="#p3-7">7. Workflow Automation</a>
+  <a href="#p3-8">8. Personal AI</a>
+  <a href="#p3-9">9. AI-Native Tools</a>
+  <a href="#p3-10">10. Multimodal &amp; Domain Systems</a>
+  <a href="#p3-mapping">Product-to-Engineering Map</a>
+  <a href="#p3-focus">Where to Focus</a>
+
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main-content">
+
+<!-- HERO -->
+<div class="hero reveal" id="hero-section">
+  <div class="hero-kicker">Long-form Reference</div>
+  <h1 class="hero-title">The LLM Engineering<br><em>Landscape</em></h1>
+  <p class="hero-subtitle">
+    A three-part map of what engineers actually build with large language models &mdash; as of April 2026.
+  </p>
+</div>
+
+
+<!-- ============================================================ -->
+<!--  PART 1 — THE 8 ENGINEERING DISCIPLINES                      -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part1">
+  <div class="part-num">Part 1</div>
+  <h2 class="part-title">The 8 Engineering <em>Disciplines</em></h2>
+  <p class="part-subtitle">A practical map of what engineers and companies are actually building &mdash; organized by domain, not by buzzword.</p>
+</div>
+
+<!-- Framing -->
+<div class="reveal" id="p1-framing">
+  <h3 class="section-heading">Framing: Two Layers, One Landscape</h3>
+  <p class="body-text">
+    Before the categories: the LLM engineering landscape has two distinct layers that often get conflated.
+  </p>
+  <p class="body-text">
+    <strong>Layer 1 &mdash; Model Infrastructure:</strong> Everything involved in producing, hosting, and serving the model itself. This is mostly the domain of AI labs, cloud providers, and companies with the scale to run their own GPU clusters.
+  </p>
+  <p class="body-text">
+    <strong>Layer 2 &mdash; Application Engineering on top of models:</strong> Everything involved in building <em>useful systems</em> using those models as components. This is where 90% of industry engineering work happens &mdash; at startups, enterprises, and product teams.
+  </p>
+  <p class="body-text">
+    Most engineers, unless they work at an AI lab, live entirely in Layer 2. The distinction matters because people often conflate &ldquo;AI engineering&rdquo; with &ldquo;training models.&rdquo; They are different jobs.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== 1. Model Infrastructure ==================== -->
+<div class="reveal" id="p1-1">
+  <h3 class="section-heading"><span class="sh-num">1.</span> Model Infrastructure &amp; Inference Engineering</h3>
+  <p class="body-text">
+    <strong>What it is:</strong> The engineering discipline of producing, packaging, optimizing, and serving large language models at scale. This is the &ldquo;engine room&rdquo; layer.
+  </p>
+  <p class="body-text">
+    <strong>Why it exists:</strong> LLMs are expensive to run. A raw model from a research lab is not a production artifact &mdash; it needs optimization, packaging, hardware allocation, and a serving layer before it can be called via API. Getting cost and latency to acceptable levels requires serious engineering.
+  </p>
+  <p class="body-text">
+    <strong>Who works here:</strong> AI labs (Anthropic, OpenAI, Google DeepMind, Meta AI), cloud providers (AWS, Azure, GCP), and a few large enterprises running private deployments.
+  </p>
+
+  <div class="label">Subtopics</div>
+
+  <h4 class="subsection-heading">1a. Model Training &amp; Fine-Tuning Infrastructure</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Systems for training or adapting foundation models on new data &mdash; distributed training clusters, checkpointing, data pipelines, experiment tracking.</li>
+    <li><strong>Why it matters:</strong> Fine-tuning lets organizations adapt a general model to a specific domain (legal, medical, code) without training from scratch.</li>
+    <li><strong>What engineers build:</strong> Training orchestration pipelines (using frameworks like DeepSpeed, Megatron, PyTorch FSDP), data preprocessing pipelines, model registry systems.</li>
+  </ul>
+
+  <h4 class="subsection-heading">1b. Inference Optimization</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Techniques to make model inference faster and cheaper without significantly degrading quality. Includes quantization (reducing numeric precision from FP16 to INT4/INT8), KV cache management, speculative decoding, continuous batching, flash attention.</li>
+    <li><strong>Why it matters:</strong> A model that costs $10/M tokens unoptimized might cost $0.50/M tokens after optimization &mdash; a 20x difference that determines whether a product is economically viable.</li>
+    <li><strong>What engineers build:</strong> Custom CUDA kernels, inference runtimes (vLLM, TensorRT-LLM, llama.cpp), batching schedulers.</li>
+  </ul>
+
+  <h4 class="subsection-heading">1c. Model Serving &amp; Hosting</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> The platform layer that takes an optimized model and exposes it via a reliable, scalable API. Includes load balancing, autoscaling, GPU cluster orchestration, multi-region deployment.</li>
+    <li><strong>Why it matters:</strong> A model is useless without a reliable serving layer. This is where &ldquo;inference-as-a-service&rdquo; providers like Together.ai, Fireworks, Groq, and cloud provider managed endpoints operate.</li>
+    <li><strong>What engineers build:</strong> Model serving stacks (Triton, Ray Serve, vLLM), Kubernetes-based GPU schedulers, request routing layers.</li>
+  </ul>
+
+  <h4 class="subsection-heading">1d. Model Compression &amp; Distillation</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Techniques that produce smaller, faster models that approximate the behavior of larger ones &mdash; knowledge distillation, pruning, LoRA/QLoRA adapter training.</li>
+    <li><strong>Why it matters:</strong> Smaller models can run on edge devices, cost less, and have lower latency. Significant practical value for on-device or cost-sensitive deployments.</li>
+    <li><strong>What engineers build:</strong> Distillation training pipelines, adapter merge tooling, on-device model runtimes (ONNX, Core ML, ExecuTorch).</li>
+  </ul>
+
+  <h4 class="subsection-heading">1e. Context Window &amp; Memory Architecture (at the model level)</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Engineering choices around how models handle long context &mdash; sparse attention, retrieval-augmented pretraining, positional encoding schemes (RoPE, ALiBi), state space models (Mamba, RWKV) as alternatives.</li>
+    <li><strong>Why it matters:</strong> Context length limits what applications can do. Pushing from 4K to 128K to 1M+ token context windows fundamentally changes what you can build.</li>
+    <li><strong>What engineers build:</strong> Attention kernel implementations, long-context benchmarking rigs, hybrid architecture experiments.</li>
+  </ul>
+
+  <div class="chip-grid">
+    <span class="chip">Training &amp; Fine-Tuning</span>
+    <span class="chip">Inference Optimization</span>
+    <span class="chip">Model Serving</span>
+    <span class="chip">Compression &amp; Distillation</span>
+    <span class="chip">Long-Context Architecture</span>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== 2. LLM Application Engineering ==================== -->
+<div class="reveal" id="p1-2">
+  <h3 class="section-heading"><span class="sh-num">2.</span> LLM Application Engineering (Generative AI Systems)</h3>
+  <p class="body-text">
+    <strong>What it is:</strong> Building software systems and products that use language models as core components &mdash; the core application development layer of the GenAI era.
+  </p>
+  <p class="body-text">
+    <strong>Why it exists:</strong> A model API alone is not a product. Real products need context management, retrieval systems, prompt design, output handling, session state, and integration with existing software. This is the &ldquo;web development&rdquo; equivalent of the LLM era &mdash; the largest category by number of engineers working in it.
+  </p>
+  <p class="body-text">
+    <strong>Generative AI as a term</strong> maps most directly to this category: it refers to applications whose primary value comes from using generative models (text, image, code, audio) to produce useful outputs for users.
+  </p>
+
+  <div class="label">Subtopics</div>
+
+  <h4 class="subsection-heading">2a. Prompt Engineering &amp; System Design</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Designing the instructions, context, and input format given to a model to reliably produce useful outputs. Includes system prompts, few-shot examples, chain-of-thought elicitation, structured output prompting.</li>
+    <li><strong>Why it matters:</strong> The same model can behave completely differently based on how it&rsquo;s prompted. Prompt design is the primary lever application engineers have over model behavior without fine-tuning.</li>
+    <li><strong>What engineers build:</strong> Prompt libraries, prompt versioning systems, prompt testing frameworks, template systems.</li>
+  </ul>
+
+  <h4 class="subsection-heading">2b. Context Engineering &amp; Retrieval-Augmented Generation (RAG)</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> The practice of dynamically populating a model&rsquo;s context window with relevant information at request time &mdash; because models have fixed context limits and can&rsquo;t know everything. RAG is the primary implementation pattern: retrieve relevant chunks from a knowledge store, inject them into the prompt, let the model reason over them.</li>
+    <li><strong>Why it matters:</strong> Models are trained on data with a cutoff date and can&rsquo;t access private organizational knowledge. RAG bridges the gap without retraining. Most enterprise AI products involve some form of context injection.</li>
+    <li><strong>What engineers build:</strong> Document ingestion &amp; chunking pipelines; vector embedding pipelines (using models like text-embedding-3, Cohere Embed); vector databases &amp; search (Pinecone, Weaviate, pgvector, Qdrant); hybrid search systems (dense + sparse / BM25 + embeddings); re-ranking layers (cross-encoders, Cohere Rerank); context window packing strategies; Graph RAG (Microsoft&rsquo;s approach using knowledge graphs for multi-hop retrieval).</li>
+  </ul>
+
+  <h4 class="subsection-heading">2c. Structured Output &amp; Data Extraction</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Making models return well-formed, typed, parseable outputs rather than free-form text &mdash; JSON schemas, tool call responses, constrained decoding.</li>
+    <li><strong>Why it matters:</strong> Most software systems need structured data, not prose. Reliable structured output is what makes LLMs composable with the rest of a software stack.</li>
+    <li><strong>What engineers build:</strong> Output parsers (Pydantic, Instructor, Outlines), constrained generation pipelines, schema validation layers.</li>
+  </ul>
+
+  <h4 class="subsection-heading">2d. Multimodal Application Engineering</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Building applications that use models accepting or producing multiple modalities &mdash; text, images, audio, video, documents (PDFs, spreadsheets).</li>
+    <li><strong>Why it matters:</strong> Real-world data is multimodal. Document AI, vision-language apps, audio transcription + reasoning systems all require this.</li>
+    <li><strong>What engineers build:</strong> Document parsing pipelines, image + text combined retrieval systems, audio-to-text-to-action pipelines, video understanding systems.</li>
+  </ul>
+
+  <h4 class="subsection-heading">2e. Code Generation &amp; Developer Tooling</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Systems that use models to generate, review, explain, refactor, or test code. A distinct subdomain because of the specialized feedback loops involved (execution, testing, static analysis).</li>
+    <li><strong>Why it matters:</strong> One of the highest-ROI LLM use cases &mdash; code assistance directly accelerates software development. The category spawned a new class of products (Copilot, Cursor, Devin, Claude Code).</li>
+    <li><strong>What engineers build:</strong> IDE integrations, code review bots, test generation pipelines, repo-level code understanding systems, execution sandboxes.</li>
+  </ul>
+
+  <div class="chip-grid">
+    <span class="chip">Prompt Engineering</span>
+    <span class="chip">Context Engineering &amp; RAG</span>
+    <span class="chip">Structured Output</span>
+    <span class="chip">Multimodal Apps</span>
+    <span class="chip">Code Generation</span>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== 3. Agentic Systems ==================== -->
+<div class="reveal" id="p1-3">
+  <h3 class="section-heading"><span class="sh-num">3.</span> Agentic Systems Engineering</h3>
+  <p class="body-text">
+    <strong>What it is:</strong> Designing and building systems where a language model doesn&rsquo;t just respond to a single prompt but takes sequences of actions over time &mdash; planning, using tools, observing results, and iterating &mdash; to complete longer-horizon tasks.
+  </p>
+  <p class="body-text">
+    <strong>Why it exists:</strong> Most useful real-world tasks aren&rsquo;t single-turn Q&amp;A. Sending an email, researching a topic, writing a report, or debugging code all require multiple steps, tool use, decision-making, and course correction. Agentic systems are how you engineer LLMs to handle these tasks.
+  </p>
+  <p class="body-text">
+    <strong>Agentic AI as a term</strong> maps directly here: it refers to this class of systems where models operate with greater autonomy, make multi-step decisions, and interact with external environments.
+  </p>
+
+  <div class="label">Subtopics</div>
+
+  <h4 class="subsection-heading">3a. Tool Use &amp; Function Calling</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> The mechanism by which a model signals it wants to invoke an external function (an API call, database query, code execution, etc.), receives the result, and continues reasoning. Function calling is the primitive; tool use is the broader practice.</li>
+    <li><strong>Why it matters:</strong> Tool use is the primary mechanism that connects LLM reasoning to real-world systems. Without it, models are read-only. With it, they can act.</li>
+    <li><strong>What engineers build:</strong> Tool definitions (schemas), tool execution runtimes, result injection logic, tool call retry and error handling.</li>
+  </ul>
+
+  <h4 class="subsection-heading">3b. Model Context Protocol (MCP)</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> A standardized protocol (proposed by Anthropic, gaining broad adoption) that defines how applications expose tools, resources, and prompts to language models in a consistent, composable way &mdash; similar to what USB did for hardware peripherals.</li>
+    <li><strong>Why it matters:</strong> Before MCP, every framework and vendor had its own tool-calling interface. MCP creates an interoperability layer &mdash; a model can use any MCP-compliant server without custom integration code per tool.</li>
+    <li><strong>What engineers build:</strong> MCP servers (wrappers around APIs, databases, filesystems), MCP client implementations in frameworks, MCP registries, enterprise MCP gateway layers.</li>
+    <li><strong>Where it fits:</strong> MCP is an <em>integration standard</em> &mdash; it belongs under Tool Use &amp; Ecosystem Connectivity, not as a top-level domain of its own.</li>
+  </ul>
+
+  <h4 class="subsection-heading">3c. Agent Orchestration &amp; Planning</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> The logic layer that controls agent behavior &mdash; how a model decides what actions to take next, when to stop, how to decompose a goal into sub-tasks. Includes ReAct (Reason + Act), plan-and-execute, reflection loops, and self-correction patterns.</li>
+    <li><strong>Why it matters:</strong> A model with tools but no orchestration logic will behave erratically. Orchestration is the &ldquo;control flow&rdquo; of an agent system.</li>
+    <li><strong>What engineers build:</strong> Orchestration frameworks (LangGraph, LlamaIndex Workflows, CrewAI, custom FSMs), planning prompts, reflection/critique loops, goal decomposition logic.</li>
+  </ul>
+
+  <h4 class="subsection-heading">3d. Multi-Agent Systems</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Architectures where multiple specialized agents collaborate &mdash; one agent plans, another searches, another writes code, a critic reviews outputs &mdash; passing work between themselves.</li>
+    <li><strong>Why it matters:</strong> Some tasks benefit from specialization and parallelism. Multi-agent systems can be more capable than a single monolithic agent, though they introduce coordination complexity.</li>
+    <li><strong>What engineers build:</strong> Agent role definitions, message-passing architectures, supervisor/worker hierarchies, agent communication protocols, shared state management.</li>
+  </ul>
+
+  <h4 class="subsection-heading">3e. Memory &amp; State Management</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> The systems that give agents persistence beyond a single context window &mdash; short-term (in-context history), long-term (external memory stores), episodic (past task records), and semantic (extracted facts/preferences).</li>
+    <li><strong>Why it matters:</strong> Without memory, every agent interaction starts from zero. Memory is what makes agents feel like persistent, capable assistants rather than stateless responders.</li>
+    <li><strong>What engineers build:</strong> Conversation history managers, vector-store-backed memory retrieval, memory consolidation pipelines (compressing old context into summaries or facts), user profile stores.</li>
+  </ul>
+
+  <h4 class="subsection-heading">3f. Agent-Computer Interaction (ACI) &amp; Computer Use</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Agents that operate software interfaces directly &mdash; browsers, desktops, terminals, web scraping &mdash; by observing screenshots or DOM state and emitting actions (clicks, keystrokes).</li>
+    <li><strong>Why it matters:</strong> Not all systems have APIs. Computer use enables agents to automate tasks in legacy systems, web interfaces, and GUI tools that weren&rsquo;t built with API access in mind.</li>
+    <li><strong>What engineers build:</strong> Browser automation layers (Playwright + LLM control), screenshot-to-action pipelines, DOM parsing and action grounding, sandboxed execution environments.</li>
+  </ul>
+
+  <h4 class="subsection-heading">3g. Workflow Automation &amp; Agentic Pipelines</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Structured, deterministic or semi-deterministic pipelines where LLM calls are nodes in a larger workflow graph &mdash; combining LLM steps with deterministic code, conditionals, human-in-the-loop checkpoints, and external API calls.</li>
+    <li><strong>Why it matters:</strong> Not everything needs fully autonomous agents. For many business use cases, a workflow with defined steps and LLM reasoning at specific nodes is safer, more predictable, and more auditable than a fully autonomous agent.</li>
+    <li><strong>What engineers build:</strong> DAG-based workflow engines (Prefect, Temporal, LangGraph-style graphs), workflow state persistence, human approval gates, retry/fallback logic.</li>
+  </ul>
+
+  <div class="chip-grid">
+    <span class="chip">Tool Use &amp; Function Calling</span>
+    <span class="chip">MCP</span>
+    <span class="chip">Orchestration &amp; Planning</span>
+    <span class="chip">Multi-Agent Systems</span>
+    <span class="chip">Memory &amp; State</span>
+    <span class="chip">Computer Use (ACI)</span>
+    <span class="chip">Workflow Automation</span>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== 4. Evaluation ==================== -->
+<div class="reveal" id="p1-4">
+  <h3 class="section-heading"><span class="sh-num">4.</span> Evaluation, Testing &amp; Quality Engineering</h3>
+  <p class="body-text">
+    <strong>What it is:</strong> The discipline of measuring, testing, and systematically improving the quality of LLM-based systems &mdash; because traditional software testing methods don&rsquo;t work on probabilistic systems.
+  </p>
+  <p class="body-text">
+    <strong>Why it exists:</strong> You can&rsquo;t write unit tests with deterministic expected outputs for a language model. LLMs produce varied outputs, can hallucinate, and behave differently across model versions, prompt changes, and data distributions. A whole engineering sub-discipline has emerged to fill this gap.
+  </p>
+
+  <div class="label">Subtopics</div>
+
+  <h4 class="subsection-heading">4a. Benchmark Design &amp; Offline Evaluation</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Curating datasets of test cases with known correct answers (or rubrics) and running model/system outputs against them to get quantitative quality metrics.</li>
+    <li><strong>Why it matters:</strong> Without offline evals, you can&rsquo;t safely make changes &mdash; every prompt edit or model upgrade is a gamble. Good eval sets are the &ldquo;test suite&rdquo; of the LLM era.</li>
+    <li><strong>What engineers build:</strong> Eval datasets (golden sets), automated scoring pipelines, regression test runners, eval result dashboards.</li>
+  </ul>
+
+  <h4 class="subsection-heading">4b. LLM-as-Judge</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Using a capable LLM (often GPT-4 or Claude) as an automated evaluator of another model&rsquo;s output &mdash; scoring for accuracy, helpfulness, tone, factuality, style adherence.</li>
+    <li><strong>Why it matters:</strong> Human evaluation is expensive and slow. LLM-as-judge enables fast, scalable quality assessment at the cost of some reliability.</li>
+    <li><strong>What engineers build:</strong> Judge prompt templates, scoring rubrics, inter-rater agreement analysis vs. human labels, judge calibration systems.</li>
+  </ul>
+
+  <h4 class="subsection-heading">4c. Red-Teaming &amp; Adversarial Testing</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Proactively trying to elicit harmful, incorrect, or unintended behavior from a system &mdash; through prompt injection, jailbreak attempts, adversarial inputs, or edge case exploration.</li>
+    <li><strong>Why it matters:</strong> LLMs are susceptible to adversarial inputs in ways traditional software isn&rsquo;t. Red-teaming surfaces failure modes before users do.</li>
+    <li><strong>What engineers build:</strong> Automated red-team harnesses, prompt injection test suites, safety testing pipelines, adversarial input generators.</li>
+  </ul>
+
+  <h4 class="subsection-heading">4d. Hallucination Detection &amp; Factuality Evaluation</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Systems that check whether model-generated claims are grounded in source documents or factually accurate &mdash; using NLI (natural language inference), retrieval-based verification, or citation checking.</li>
+    <li><strong>Why it matters:</strong> Hallucination is the most visible failure mode of LLMs and the primary trust barrier in enterprise deployments.</li>
+    <li><strong>What engineers build:</strong> Faithfulness scorers (RAGAS, TruLens), citation extraction and verification pipelines, claim decomposition + verification chains.</li>
+  </ul>
+
+  <h4 class="subsection-heading">4e. A/B Testing &amp; Online Experimentation</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Running live traffic experiments comparing different prompts, models, or system configurations to measure real-world user satisfaction and task completion.</li>
+    <li><strong>Why it matters:</strong> Offline evals don&rsquo;t always predict online performance. Real user behavior is the ground truth.</li>
+    <li><strong>What engineers build:</strong> Feature flag systems for prompt/model variants, user feedback collection pipelines, statistical significance testing frameworks adapted for LLM outputs.</li>
+  </ul>
+
+  <div class="chip-grid">
+    <span class="chip">Benchmark Design</span>
+    <span class="chip">LLM-as-Judge</span>
+    <span class="chip">Red-Teaming</span>
+    <span class="chip">Hallucination Detection</span>
+    <span class="chip">A/B Testing</span>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== 5. LLMOps ==================== -->
+<div class="reveal" id="p1-5">
+  <h3 class="section-heading"><span class="sh-num">5.</span> LLMOps &amp; Production Engineering</h3>
+  <p class="body-text">
+    <strong>What it is:</strong> The operational engineering discipline of deploying, monitoring, maintaining, and iterating on LLM-based systems in production &mdash; the MLOps/DevOps equivalent for the LLM era.
+  </p>
+  <p class="body-text">
+    <strong>Why it exists:</strong> Getting a prototype working is easy. Running it reliably, cheaply, and safely for thousands of users while iterating on prompts, models, and features is hard. LLMOps is the discipline that makes this tractable.
+  </p>
+
+  <div class="label">Subtopics</div>
+
+  <h4 class="subsection-heading">5a. Observability &amp; Tracing</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Instrumenting LLM systems to capture every prompt, completion, tool call, latency measurement, token count, and cost &mdash; and making this queryable and alertable.</li>
+    <li><strong>Why it matters:</strong> LLM systems fail silently. Without tracing, debugging a bad output is like debugging without logs. Observability is the foundation of production LLM operations.</li>
+    <li><strong>What engineers build:</strong> LLM-specific tracing layers (LangSmith, Langfuse, Helicone, Arize Phoenix), prompt/response logging pipelines, cost attribution dashboards, latency percentile monitors.</li>
+  </ul>
+
+  <h4 class="subsection-heading">5b. Prompt &amp; Configuration Version Management</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Treating prompts, model configs, and tool schemas as versioned artifacts &mdash; with history, rollback, staged deployment, and linkage to eval results.</li>
+    <li><strong>Why it matters:</strong> Changing a system prompt is a code change with behavioral consequences. Without version control, you can&rsquo;t safely roll back a regression.</li>
+    <li><strong>What engineers build:</strong> Prompt registries, CI/CD pipelines that run evals on prompt changes before deployment, configuration management for model selection logic.</li>
+  </ul>
+
+  <h4 class="subsection-heading">5c. Cost Management &amp; Token Efficiency</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Engineering practices and systems that control API spend &mdash; prompt compression, caching, model routing (use cheap models when possible, expensive when necessary), output length control.</li>
+    <li><strong>Why it matters:</strong> Token costs are real operational costs. A naive implementation of an LLM feature can be 10&ndash;100x more expensive than an optimized one.</li>
+    <li><strong>What engineers build:</strong> Prompt caching layers (semantic caching with vector lookup), model routing systems (e.g., RouteLLM, cascade systems), token budget enforcement, cost alerting.</li>
+  </ul>
+
+  <h4 class="subsection-heading">5d. Semantic Caching</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Caching LLM responses not by exact input match but by semantic similarity &mdash; so near-duplicate queries hit the cache rather than triggering a new API call.</li>
+    <li><strong>Why it matters:</strong> In many applications, a significant fraction of queries are semantically similar. Caching can reduce costs and latency dramatically.</li>
+    <li><strong>What engineers build:</strong> Vector-similarity-based cache lookup layers, cache invalidation strategies, hit rate monitoring.</li>
+  </ul>
+
+  <h4 class="subsection-heading">5e. Deployment Patterns &amp; Model Switching</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Engineering patterns for managing the lifecycle of model dependencies &mdash; handling model deprecations, switching between providers (OpenAI, Anthropic, Gemini), managing fallbacks when a provider is down, blue/green deployments for model changes.</li>
+    <li><strong>Why it matters:</strong> Model APIs change without warning. Production systems need resilience patterns to avoid outages.</li>
+    <li><strong>What engineers build:</strong> LLM gateway/router layers (LiteLLM, custom routers), provider abstraction interfaces, fallback chains, model migration runbooks.</li>
+  </ul>
+
+  <h4 class="subsection-heading">5f. Streaming &amp; Latency Engineering</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Engineering for real-time, streaming token delivery &mdash; SSE/WebSocket infrastructure, first-token latency optimization, progressive rendering in UIs.</li>
+    <li><strong>Why it matters:</strong> User experience in chat and generation interfaces is dominated by perceived latency. Streaming is now table stakes for conversational products.</li>
+    <li><strong>What engineers build:</strong> Streaming response handlers, client-side progressive rendering, timeout and cancellation logic, backpressure handling.</li>
+  </ul>
+
+  <div class="chip-grid">
+    <span class="chip">Observability &amp; Tracing</span>
+    <span class="chip">Prompt Versioning</span>
+    <span class="chip">Cost Management</span>
+    <span class="chip">Semantic Caching</span>
+    <span class="chip">Model Switching</span>
+    <span class="chip">Streaming &amp; Latency</span>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== 6. Safety ==================== -->
+<div class="reveal" id="p1-6">
+  <h3 class="section-heading"><span class="sh-num">6.</span> Safety, Alignment &amp; Governance Engineering</h3>
+  <p class="body-text">
+    <strong>What it is:</strong> The engineering discipline of ensuring LLM-based systems behave within acceptable boundaries &mdash; producing outputs that are safe, accurate, unbiased, compliant, and aligned with organizational policies.
+  </p>
+  <p class="body-text">
+    <strong>Why it exists:</strong> Language models can produce harmful, incorrect, biased, or legally non-compliant outputs. For enterprises, this isn&rsquo;t an academic concern &mdash; it&rsquo;s a risk management and regulatory requirement. This category sits at the intersection of AI safety research and production engineering.
+  </p>
+
+  <div class="label">Subtopics</div>
+
+  <h4 class="subsection-heading">6a. Guardrails &amp; Content Moderation</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Input/output filtering layers that intercept harmful, inappropriate, or policy-violating content before it reaches users or the model &mdash; using classifiers, regex rules, LLM-based checkers, or third-party APIs.</li>
+    <li><strong>Why it matters:</strong> Consumer and enterprise deployments need reliable content controls. A deployed system without guardrails is a liability.</li>
+    <li><strong>What engineers build:</strong> Input sanitization pipelines, output classification layers (NSFW, PII, toxicity), guardrail frameworks (NeMo Guardrails, Guardrails.ai, Lakera), topic restriction systems.</li>
+  </ul>
+
+  <h4 class="subsection-heading">6b. Prompt Injection Defense</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Detection and mitigation of attacks where malicious content in retrieved documents or user inputs attempts to hijack the model&rsquo;s behavior &mdash; overriding system instructions, exfiltrating data, or triggering unauthorized actions.</li>
+    <li><strong>Why it matters:</strong> Agentic systems with tool access are particularly vulnerable &mdash; a successful prompt injection in an agent with email access could send emails on behalf of a user.</li>
+    <li><strong>What engineers build:</strong> Input validation layers, instruction hierarchy enforcement, sandboxed execution environments, anomaly detection on agent action sequences.</li>
+  </ul>
+
+  <h4 class="subsection-heading">6c. PII Detection &amp; Data Privacy</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Identifying and handling personally identifiable information in prompts and completions &mdash; redaction before sending to external APIs, anonymization pipelines, compliance with GDPR/HIPAA/CCPA.</li>
+    <li><strong>Why it matters:</strong> Many enterprise use cases involve sensitive data. Sending raw customer data to third-party APIs is a legal and reputational risk.</li>
+    <li><strong>What engineers build:</strong> PII entity recognition pipelines (using spaCy, Presidio), redaction/pseudonymization layers, data flow compliance tracking.</li>
+  </ul>
+
+  <h4 class="subsection-heading">6d. Bias Auditing &amp; Fairness Evaluation</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Systematically evaluating model and system outputs for discriminatory patterns across demographic groups &mdash; testing for differential treatment in hiring, lending, healthcare, and other high-stakes domains.</li>
+    <li><strong>Why it matters:</strong> AI systems deployed in regulated industries face fairness requirements. Bias can be baked in through training data or amplified through retrieval systems.</li>
+    <li><strong>What engineers build:</strong> Fairness benchmark suites, counterfactual evaluation pipelines, disparate impact analysis tooling.</li>
+  </ul>
+
+  <h4 class="subsection-heading">6e. Enterprise AI Governance &amp; Audit Trails</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Systems that enforce organizational policies on AI usage, maintain audit logs of AI-assisted decisions, enable human review workflows, and provide documentation for regulatory compliance.</li>
+    <li><strong>Why it matters:</strong> Regulated industries (finance, healthcare, legal) require explainability and audit trails for AI-assisted decisions. Governance tooling is becoming a requirement, not a nice-to-have.</li>
+    <li><strong>What engineers build:</strong> Decision logging systems, human-in-the-loop review workflows, policy enforcement layers, compliance reporting dashboards.</li>
+  </ul>
+
+  <div class="chip-grid">
+    <span class="chip">Guardrails</span>
+    <span class="chip">Prompt Injection Defense</span>
+    <span class="chip">PII &amp; Privacy</span>
+    <span class="chip">Bias Auditing</span>
+    <span class="chip">AI Governance</span>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== 7. Enterprise Integration ==================== -->
+<div class="reveal" id="p1-7">
+  <h3 class="section-heading"><span class="sh-num">7.</span> Enterprise Integration &amp; Platform Engineering</h3>
+  <p class="body-text">
+    <strong>What it is:</strong> The engineering work of connecting LLM capabilities into existing enterprise systems &mdash; data warehouses, CRMs, ERPs, communication platforms, identity systems &mdash; and building the internal platforms that teams use to deploy AI features.
+  </p>
+  <p class="body-text">
+    <strong>Why it exists:</strong> LLMs don&rsquo;t exist in isolation. Enterprise value comes from connecting AI reasoning to organizational data and workflows. This is where &ldquo;AI strategy&rdquo; becomes engineering work.
+  </p>
+
+  <div class="label">Subtopics</div>
+
+  <h4 class="subsection-heading">7a. Data Connectivity &amp; Ingestion Pipelines</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Building the pipelines that pull structured and unstructured data from enterprise sources (databases, SharePoint, Salesforce, email, Slack, Google Drive) and make it available for AI systems &mdash; via RAG, tool use, or fine-tuning.</li>
+    <li><strong>Why it matters:</strong> The quality of an AI system is bounded by the quality and freshness of its data. Data connectivity is frequently the hardest part of enterprise AI deployment.</li>
+    <li><strong>What engineers build:</strong> ETL pipelines feeding document stores, real-time sync connectors, data normalization layers, chunking and embedding refresh jobs.</li>
+  </ul>
+
+  <h4 class="subsection-heading">7b. Internal AI Platforms &amp; Developer Portals</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Internal platforms that abstract model access, enforce policies, manage costs, and give product teams a consistent interface for building AI features &mdash; rather than each team integrating directly with model APIs.</li>
+    <li><strong>Why it matters:</strong> At scale, uncoordinated AI feature development creates security risks, cost overruns, and inconsistent user experiences. Platform teams standardize the foundation.</li>
+    <li><strong>What engineers build:</strong> LLM gateway layers, internal SDKs and libraries, self-serve prompt/model management UIs, usage dashboards, rate limiting and quota management.</li>
+  </ul>
+
+  <h4 class="subsection-heading">7c. Authentication, Authorization &amp; Multi-Tenancy</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Engineering patterns for ensuring AI systems respect access controls &mdash; that retrieval systems only surface data a user is authorized to see, that agent tool calls are scoped to the right permissions, that multi-tenant deployments don&rsquo;t leak data between customers.</li>
+    <li><strong>Why it matters:</strong> A RAG system that ignores document ACLs is a data breach. Permission-aware retrieval is a hard engineering problem.</li>
+    <li><strong>What engineers build:</strong> Permission-filtered vector search, row-level security enforcement in retrieval layers, per-tenant context isolation, OAuth scoping for agent tool access.</li>
+  </ul>
+
+  <h4 class="subsection-heading">7d. CRM, ERP &amp; SaaS Integration</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Building the connectors and integration logic that let AI agents read from and write to systems like Salesforce, HubSpot, SAP, Workday, Zoho &mdash; via APIs, webhooks, and event streams.</li>
+    <li><strong>Why it matters:</strong> Automating business processes requires the AI to interact with the systems where work actually happens.</li>
+    <li><strong>What engineers build:</strong> API integration layers, webhook handlers, data synchronization logic, action execution wrappers (create record, update status, send email).</li>
+  </ul>
+
+  <div class="chip-grid">
+    <span class="chip">Data Connectivity</span>
+    <span class="chip">Internal AI Platforms</span>
+    <span class="chip">Auth &amp; Multi-Tenancy</span>
+    <span class="chip">CRM / ERP Integration</span>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== 8. Human-AI Interaction ==================== -->
+<div class="reveal" id="p1-8">
+  <h3 class="section-heading"><span class="sh-num">8.</span> Human-AI Interaction &amp; Product Engineering</h3>
+  <p class="body-text">
+    <strong>What it is:</strong> The engineering and design discipline focused on how humans interact with AI systems &mdash; conversational interfaces, copilot UX patterns, feedback collection, and the product architecture of AI-native applications.
+  </p>
+  <p class="body-text">
+    <strong>Why it exists:</strong> The interaction model between humans and AI systems is genuinely new and still being figured out. Chat, copilot, assistant, and agent UX patterns each have different engineering requirements, and getting them wrong produces low-adoption products.
+  </p>
+
+  <div class="label">Subtopics</div>
+
+  <h4 class="subsection-heading">8a. Conversational Interface Engineering</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Building the frontend and backend infrastructure for chat-based interfaces &mdash; message streaming, session management, conversation history, UI rendering for structured outputs (tables, code, markdown).</li>
+    <li><strong>Why it matters:</strong> Most user-facing LLM products are conversational. The engineering requirements (streaming, cancellation, message history, branching conversations) are specialized.</li>
+    <li><strong>What engineers build:</strong> Chat UIs (React, mobile), streaming rendering components, conversation session stores, message history APIs.</li>
+  </ul>
+
+  <h4 class="subsection-heading">8b. Copilot &amp; Inline Assistance Patterns</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Embedding AI assistance directly into existing product workflows &mdash; inline suggestions in text editors, smart autocomplete in forms, contextual recommendations in dashboards &mdash; rather than requiring users to switch to a chat interface.</li>
+    <li><strong>Why it matters:</strong> Users often don&rsquo;t want to &ldquo;go to a chatbot&rdquo; &mdash; they want help where they already are. Copilot patterns embed AI into the natural workflow.</li>
+    <li><strong>What engineers build:</strong> IDE extensions, document editor integrations, form field suggestion systems, hover-activated context panels.</li>
+  </ul>
+
+  <h4 class="subsection-heading">8c. Human-in-the-Loop Design</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Engineering patterns that bring humans into the agent loop at critical decision points &mdash; approval gates before high-stakes actions, review queues for AI-generated content, escalation paths when the model is uncertain.</li>
+    <li><strong>Why it matters:</strong> Fully autonomous AI is not appropriate for many decisions (legal, financial, medical). Well-designed human-in-the-loop systems preserve human oversight while still automating the tedious parts.</li>
+    <li><strong>What engineers build:</strong> Approval workflow UIs, confidence-thresholded escalation logic, review queue systems, human feedback collection interfaces.</li>
+  </ul>
+
+  <h4 class="subsection-heading">8d. Feedback Collection &amp; RLHF Infrastructure</h4>
+  <ul class="content-list">
+    <li><strong>What:</strong> Systems that collect human preference signals from production use &mdash; thumbs up/down, preference comparisons, corrections &mdash; and use these to improve model or system behavior over time.</li>
+    <li><strong>Why it matters:</strong> User feedback is a high-signal training signal. Capturing it systematically enables continuous improvement of both prompts and fine-tuned models.</li>
+    <li><strong>What engineers build:</strong> Feedback collection UI components, preference dataset pipelines, feedback annotation tooling, fine-tuning trigger pipelines.</li>
+  </ul>
+
+  <div class="chip-grid">
+    <span class="chip">Conversational Interfaces</span>
+    <span class="chip">Copilot Patterns</span>
+    <span class="chip">Human-in-the-Loop</span>
+    <span class="chip">Feedback &amp; RLHF</span>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== Buzzwords ==================== -->
+<div class="reveal" id="p1-buzzwords">
+  <h3 class="section-heading">How the Buzzwords Fit Together</h3>
+  <p class="body-text">
+    Here is a coherent map of the popular terms, showing where they actually live:
+  </p>
+
+  <div class="code-block">&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502;                         GENERATIVE AI (Broad Umbrella)                      &#x2502;
+&#x2502;                                                                             &#x2502;
+&#x2502;  Refers to: The era/class of applications where AI generates useful content &#x2502;
+&#x2502;  Maps to:   Primarily Category 2 (LLM Application Engineering) + parts of  &#x2502;
+&#x2502;             Categories 3, 7, and 8. Not a technical term &#x2014; a business era.  &#x2502;
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502;                         AGENTIC AI (Broad Umbrella)                         &#x2502;
+&#x2502;                                                                             &#x2502;
+&#x2502;  Refers to: The class of systems where models take multi-step actions        &#x2502;
+&#x2502;  Maps to:   Category 3 entirely (Agentic Systems Engineering)               &#x2502;
+&#x2502;  Contains:  Agents, copilots that act, workflows, autonomous task runners   &#x2502;
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</div>
+
+  <div class="label">Term-by-term breakdown</div>
+
+  <table class="content-table">
+    <thead>
+      <tr><th>Term</th><th>Where It Lives</th><th>What It Actually Is</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Generative AI</strong></td><td>Broad umbrella</td><td>A market/era label for products using generative models. Not a technical category.</td></tr>
+      <tr><td><strong>Agentic AI</strong></td><td>Category 3 umbrella</td><td>Systems where models plan and act, not just respond. Maps to Agentic Systems Engineering.</td></tr>
+      <tr><td><strong>Assistant</strong></td><td>Category 8 product pattern</td><td>A product shape &mdash; single-user, conversational, task-help focused. A chat interface with memory.</td></tr>
+      <tr><td><strong>Copilot</strong></td><td>Category 8 product pattern</td><td>A product shape &mdash; embedded in a workflow tool, providing inline help. Microsoft Copilot, GitHub Copilot, Cursor.</td></tr>
+      <tr><td><strong>Agent</strong></td><td>Category 3 implementation</td><td>A system configuration where a model has tools, can take multi-step actions, and operates with some autonomy.</td></tr>
+      <tr><td><strong>Workflow</strong></td><td>Category 3 / Category 7</td><td>A structured sequence of steps &mdash; some LLM, some deterministic &mdash; to complete a business process. Lower autonomy than an agent.</td></tr>
+      <tr><td><strong>RAG</strong></td><td>Category 2b implementation pattern</td><td>A technique for context injection. Lives under Context Engineering. Not a product or field.</td></tr>
+      <tr><td><strong>MCP</strong></td><td>Category 3b integration standard</td><td>A protocol that standardizes how tools/resources are exposed to models. Lives under Tool Use in Agentic Systems.</td></tr>
+      <tr><td><strong>Tool calling / function calling</strong></td><td>Category 3a primitive</td><td>The mechanism models use to invoke external functions. The primitive that enables agents.</td></tr>
+      <tr><td><strong>Memory</strong></td><td>Category 3e subsystem</td><td>A capability &mdash; how agents persist state across interactions. Can mean in-context, external store, or extracted facts.</td></tr>
+      <tr><td><strong>Prompt engineering</strong></td><td>Category 2a technique</td><td>A set of practices for designing model inputs. A technique, not a field.</td></tr>
+      <tr><td><strong>Orchestration</strong></td><td>Category 3c engineering concern</td><td>The control flow logic of agent systems &mdash; how to plan, sequence, and recover from failures.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== Top-Level Topics ==================== -->
+<div class="reveal" id="p1-toplevel">
+  <h3 class="section-heading">What the Real Top-Level Topics Are</h3>
+
+  <div class="label">True Engineering Domains (enduring, organization-worthy)</div>
+  <p class="body-text">These represent genuine engineering disciplines with their own bodies of knowledge, tools, career paths, and teams:</p>
+  <ul class="content-list">
+    <li><strong>Model Infrastructure &amp; Inference Engineering</strong> &mdash; for AI labs and infrastructure providers</li>
+    <li><strong>LLM Application Engineering</strong> &mdash; for any team building GenAI products</li>
+    <li><strong>Agentic Systems Engineering</strong> &mdash; for teams building autonomous or semi-autonomous AI systems</li>
+    <li><strong>Evaluation &amp; Quality Engineering</strong> &mdash; for anyone running LLM systems in production</li>
+    <li><strong>LLMOps &amp; Production Engineering</strong> &mdash; for platform and ops teams</li>
+    <li><strong>Safety, Alignment &amp; Governance Engineering</strong> &mdash; for regulated industries and responsible deployment</li>
+    <li><strong>Enterprise Integration &amp; Platform Engineering</strong> &mdash; for large organizations deploying AI at scale</li>
+    <li><strong>Human-AI Interaction &amp; Product Engineering</strong> &mdash; for product and frontend engineering teams</li>
+  </ul>
+
+  <div class="label">Subdomains (real technical areas, but components of the above)</div>
+  <ul class="content-list">
+    <li>RAG and context engineering (lives in Category 2)</li>
+    <li>Agent orchestration (lives in Category 3)</li>
+    <li>Vector databases (a tool used in Categories 2 and 3)</li>
+    <li>Prompt management (lives in Categories 2 and 5)</li>
+    <li>Fine-tuning and PEFT (lives in Category 1)</li>
+    <li>LLM observability (lives in Category 5)</li>
+    <li>Guardrails (lives in Category 6)</li>
+    <li>Memory systems (lives in Category 3)</li>
+  </ul>
+
+  <div class="label">Implementation Patterns (techniques, not fields)</div>
+  <div class="chip-grid">
+    <span class="chip">RAG</span>
+    <span class="chip">ReAct</span>
+    <span class="chip">Chain-of-Thought</span>
+    <span class="chip">Few-Shot Prompting</span>
+    <span class="chip">Speculative Decoding</span>
+    <span class="chip">Semantic Caching</span>
+    <span class="chip">Hybrid Search</span>
+    <span class="chip">Plan-and-Execute</span>
+    <span class="chip">Self-Reflection</span>
+    <span class="chip">Function Calling</span>
+  </div>
+
+  <div class="label">Protocol / Standard Layers</div>
+  <ul class="content-list">
+    <li><strong>MCP</strong> (Model Context Protocol) &mdash; tool interoperability standard</li>
+    <li><strong>OpenAI function calling schema</strong> &mdash; de facto tool call format</li>
+    <li><strong>LangChain tool interface</strong> &mdash; framework-level abstraction</li>
+  </ul>
+
+  <div class="label">Product Shapes / UX Patterns (not engineering domains)</div>
+  <div class="chip-grid">
+    <span class="chip">Chatbot / Assistant</span>
+    <span class="chip">Copilot</span>
+    <span class="chip">Autonomous Agent</span>
+    <span class="chip">AI Workflow</span>
+    <span class="chip">AI-Assisted Review</span>
+  </div>
+
+  <div class="label">Vendor / Framework Terminology (useful but not field names)</div>
+  <ul class="content-list">
+    <li><strong>LangChain, LlamaIndex, LangGraph</strong> &mdash; orchestration frameworks</li>
+    <li><strong>LangSmith, Langfuse, Helicone</strong> &mdash; observability tools</li>
+    <li><strong>OpenAI, Anthropic, Gemini</strong> &mdash; model providers</li>
+    <li><strong>Pinecone, Weaviate, Qdrant</strong> &mdash; vector database vendors</li>
+    <li><strong>CrewAI, AutoGen</strong> &mdash; multi-agent frameworks</li>
+  </ul>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== Evolution ==================== -->
+<div class="reveal" id="p1-evolution">
+  <h3 class="section-heading">How the Landscape Has Evolved (2022 &rarr; April 2026)</h3>
+
+  <h4 class="subsection-heading">2022&ndash;2023: The Chat Era</h4>
+  <p class="body-text">The dominant pattern was simple: system prompt + user message &rarr; model response. Products were mostly chatbots and text generators. RAG was the primary &ldquo;advanced&rdquo; technique. The main engineering challenge was making outputs good enough to be useful.</p>
+
+  <h4 class="subsection-heading">2023&ndash;2024: The Integration Era</h4>
+  <p class="body-text">Products moved beyond chat to embedding AI into workflows &mdash; code completion, document Q&amp;A, data extraction. RAG matured. Fine-tuning became accessible. Evaluation became a serious concern as teams discovered that demo quality &ne; production quality. Frameworks like LangChain exploded in adoption (and complexity).</p>
+
+  <h4 class="subsection-heading">2024&ndash;2025: The Agentic Era</h4>
+  <p class="body-text">The industry shifted from &ldquo;AI that answers questions&rdquo; to &ldquo;AI that does work.&rdquo; Tool use became central. Multi-step agents with real-world tool access (email, calendar, CRM, browser) became serious products. The challenge shifted from &ldquo;making good outputs&rdquo; to &ldquo;making safe, reliable, auditable multi-step actions.&rdquo; Orchestration, evaluation, and safety engineering became first-class concerns. MCP was introduced and rapidly adopted as an interoperability standard.</p>
+
+  <h4 class="subsection-heading">2025&ndash;2026: The Enterprise &amp; Platform Era</h4>
+  <p class="body-text">AI moved from pilot projects to production at scale. Enterprise concerns &mdash; governance, compliance, cost control, data privacy, integration with existing systems &mdash; became dominant engineering topics. Internal AI platforms proliferated. LLMOps matured into a recognized discipline. Multi-agent systems moved from research demos to production deployments in legal, finance, customer service, and software engineering. Computer use agents (browser + desktop automation) became commercially viable.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== Summary Map ==================== -->
+<div class="reveal" id="p1-summary-map">
+  <h3 class="section-heading">Summary Map</h3>
+
+  <div class="code-block">LLM Engineering Landscape
+&#x2502;
+&#x251C;&#x2500;&#x2500; 1. Model Infrastructure &amp; Inference Engineering
+&#x2502;       &#x251C;&#x2500;&#x2500; Training &amp; fine-tuning infrastructure
+&#x2502;       &#x251C;&#x2500;&#x2500; Inference optimization (quantization, KV cache, speculative decoding)
+&#x2502;       &#x251C;&#x2500;&#x2500; Model serving &amp; hosting
+&#x2502;       &#x251C;&#x2500;&#x2500; Model compression &amp; distillation
+&#x2502;       &#x2514;&#x2500;&#x2500; Long-context architecture
+&#x2502;
+&#x251C;&#x2500;&#x2500; 2. LLM Application Engineering (Generative AI Systems)
+&#x2502;       &#x251C;&#x2500;&#x2500; Prompt engineering &amp; system design
+&#x2502;       &#x251C;&#x2500;&#x2500; Context engineering &amp; RAG &#x2190; [RAG lives here]
+&#x2502;       &#x251C;&#x2500;&#x2500; Structured output &amp; data extraction
+&#x2502;       &#x251C;&#x2500;&#x2500; Multimodal application engineering
+&#x2502;       &#x2514;&#x2500;&#x2500; Code generation &amp; developer tooling
+&#x2502;
+&#x251C;&#x2500;&#x2500; 3. Agentic Systems Engineering (Agentic AI)
+&#x2502;       &#x251C;&#x2500;&#x2500; Tool use &amp; function calling &#x2190; [MCP lives here]
+&#x2502;       &#x251C;&#x2500;&#x2500; Agent orchestration &amp; planning
+&#x2502;       &#x251C;&#x2500;&#x2500; Multi-agent systems
+&#x2502;       &#x251C;&#x2500;&#x2500; Memory &amp; state management
+&#x2502;       &#x251C;&#x2500;&#x2500; Agent-computer interaction (computer use)
+&#x2502;       &#x2514;&#x2500;&#x2500; Workflow automation &amp; agentic pipelines
+&#x2502;
+&#x251C;&#x2500;&#x2500; 4. Evaluation, Testing &amp; Quality Engineering
+&#x2502;       &#x251C;&#x2500;&#x2500; Benchmark design &amp; offline evaluation
+&#x2502;       &#x251C;&#x2500;&#x2500; LLM-as-judge
+&#x2502;       &#x251C;&#x2500;&#x2500; Red-teaming &amp; adversarial testing
+&#x2502;       &#x251C;&#x2500;&#x2500; Hallucination detection
+&#x2502;       &#x2514;&#x2500;&#x2500; A/B testing &amp; online experimentation
+&#x2502;
+&#x251C;&#x2500;&#x2500; 5. LLMOps &amp; Production Engineering
+&#x2502;       &#x251C;&#x2500;&#x2500; Observability &amp; tracing
+&#x2502;       &#x251C;&#x2500;&#x2500; Prompt &amp; config version management
+&#x2502;       &#x251C;&#x2500;&#x2500; Cost management &amp; token efficiency
+&#x2502;       &#x251C;&#x2500;&#x2500; Semantic caching
+&#x2502;       &#x251C;&#x2500;&#x2500; Deployment patterns &amp; model switching
+&#x2502;       &#x2514;&#x2500;&#x2500; Streaming &amp; latency engineering
+&#x2502;
+&#x251C;&#x2500;&#x2500; 6. Safety, Alignment &amp; Governance Engineering
+&#x2502;       &#x251C;&#x2500;&#x2500; Guardrails &amp; content moderation
+&#x2502;       &#x251C;&#x2500;&#x2500; Prompt injection defense
+&#x2502;       &#x251C;&#x2500;&#x2500; PII detection &amp; data privacy
+&#x2502;       &#x251C;&#x2500;&#x2500; Bias auditing &amp; fairness evaluation
+&#x2502;       &#x2514;&#x2500;&#x2500; Enterprise AI governance &amp; audit trails
+&#x2502;
+&#x251C;&#x2500;&#x2500; 7. Enterprise Integration &amp; Platform Engineering
+&#x2502;       &#x251C;&#x2500;&#x2500; Data connectivity &amp; ingestion pipelines
+&#x2502;       &#x251C;&#x2500;&#x2500; Internal AI platforms &amp; developer portals
+&#x2502;       &#x251C;&#x2500;&#x2500; Authentication, authorization &amp; multi-tenancy
+&#x2502;       &#x2514;&#x2500;&#x2500; CRM/ERP/SaaS integration
+&#x2502;
+&#x2514;&#x2500;&#x2500; 8. Human-AI Interaction &amp; Product Engineering
+        &#x251C;&#x2500;&#x2500; Conversational interface engineering
+        &#x251C;&#x2500;&#x2500; Copilot &amp; inline assistance patterns
+        &#x251C;&#x2500;&#x2500; Human-in-the-loop design
+        &#x2514;&#x2500;&#x2500; Feedback collection &amp; RLHF infrastructure</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!--  PART 2 — THE 7 PRACTICAL PROBLEMS                           -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part2">
+  <div class="part-num">Part 2</div>
+  <h2 class="part-title">What Developers <em>Actually Build</em></h2>
+  <p class="part-subtitle">Organized by the problems you run into on real projects &mdash; not by academic taxonomy.</p>
+</div>
+
+<!-- ==================== P2-1. Getting Useful Output ==================== -->
+<div class="reveal" id="p2-1">
+  <h3 class="section-heading"><span class="sh-num">1.</span> Getting Useful Output from a Model</h3>
+  <p class="body-text">This is where everyone starts. You have a model API. You need it to do something reliably.</p>
+
+  <div class="label">What you're actually doing</div>
+  <ul class="content-list">
+    <li>Writing system prompts and iterating until behavior is consistent</li>
+    <li>Figuring out why it works 80% of the time and fails 20%</li>
+    <li>Getting the model to return structured data (JSON, specific fields) instead of prose</li>
+    <li>Preventing it from hallucinating, going off-topic, or ignoring instructions</li>
+    <li>Handling edge cases: empty responses, refusals, unexpected formats</li>
+  </ul>
+
+  <div class="label">Concrete things you build</div>
+  <ul class="content-list">
+    <li>System prompt + template with variable injection</li>
+    <li>Output parser (using Pydantic, Instructor, or a manual JSON parse + retry)</li>
+    <li>Retry logic when parsing fails or output is malformed</li>
+    <li>Fallback prompts or validation loops (&ldquo;if output doesn&rsquo;t match schema, ask again&rdquo;)</li>
+    <li>Prompt versioning &mdash; keeping track of what prompt is in prod vs. what you&rsquo;re testing</li>
+  </ul>
+
+  <div class="note-block">
+    <div class="note-label">The Main Headaches</div>
+    <p>Model behaves differently on different inputs even with the same prompt. Structured output breaks on edge cases (model adds extra text, wraps JSON in markdown fences). Prompt that works on GPT-4 breaks on Claude or Gemini. Output quality degrades when context gets long.</p>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P2-2. RAG ==================== -->
+<div class="reveal" id="p2-2">
+  <h3 class="section-heading"><span class="sh-num">2.</span> Giving the Model Information It Doesn&rsquo;t Have (RAG)</h3>
+  <p class="body-text">The model doesn&rsquo;t know your documents, your database, or last week&rsquo;s data. You need to get relevant information into its context at request time.</p>
+
+  <div class="label">What you're actually doing</div>
+  <ul class="content-list">
+    <li>Parsing documents (PDFs, Word docs, HTML, CSVs) into usable text</li>
+    <li>Deciding how to chunk that text so retrieval is meaningful</li>
+    <li>Embedding chunks into vectors and storing them</li>
+    <li>At query time: embedding the user&rsquo;s question, finding the closest chunks, stuffing them into the prompt</li>
+    <li>Tuning retrieval so the right chunks actually come back</li>
+  </ul>
+
+  <div class="label">Concrete things you build</div>
+  <ul class="content-list">
+    <li>Document ingestion pipeline: parse &rarr; clean &rarr; chunk &rarr; embed &rarr; store</li>
+    <li>Vector store setup (pgvector, Pinecone, Qdrant, Weaviate, or even FAISS locally)</li>
+    <li>Retrieval function: take query &rarr; embed &rarr; similarity search &rarr; return top-k chunks</li>
+    <li>Prompt template that injects retrieved context before the user&rsquo;s question</li>
+    <li>Re-ranking step when top-k retrieval isn&rsquo;t precise enough</li>
+    <li>Refresh/sync job to re-embed when documents change</li>
+  </ul>
+
+  <div class="note-block">
+    <div class="note-label">The Main Headaches</div>
+    <p>Chunking strategy matters a lot &mdash; too small loses context, too large dilutes relevance. Wrong chunks come back because the query phrasing doesn&rsquo;t match document phrasing. Retrieved context is irrelevant but model treats it as authoritative. Embedding model and generation model have different &ldquo;opinions&rdquo; of similarity. Keeping the vector store in sync with source data changes. Retrieval works fine in testing, fails on real user queries (distribution mismatch).</p>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P2-3. Tool Use ==================== -->
+<div class="reveal" id="p2-3">
+  <h3 class="section-heading"><span class="sh-num">3.</span> Giving the Model Capabilities (Tool Use / Function Calling)</h3>
+  <p class="body-text">You want the model to <em>do</em> things, not just <em>say</em> things &mdash; call an API, query a database, run code, look something up.</p>
+
+  <div class="label">What you're actually doing</div>
+  <ul class="content-list">
+    <li>Defining what tools exist (their name, parameters, description) as a schema</li>
+    <li>Passing tool definitions to the model along with the user&rsquo;s request</li>
+    <li>Detecting when the model decides to call a tool vs. answer directly</li>
+    <li>Executing the tool call in your code</li>
+    <li>Passing the result back to the model so it can continue</li>
+    <li>Handling errors: tool fails, wrong parameters, unauthorized</li>
+  </ul>
+
+  <div class="label">Concrete things you build</div>
+  <ul class="content-list">
+    <li>Tool definitions (JSON schema for each function the model can call)</li>
+    <li>Tool dispatcher: maps model&rsquo;s tool call &rarr; actual Python function</li>
+    <li>Tool execution sandbox (especially for code execution)</li>
+    <li>Result injection back into the conversation</li>
+    <li>Error handling and retry logic for failed tool calls</li>
+    <li>MCP server if you want to expose your tools to multiple models/clients in a standard way</li>
+  </ul>
+
+  <div class="note-block">
+    <div class="note-label">The Main Headaches</div>
+    <p>Model calls the wrong tool, or calls the right tool with wrong arguments. Model calls tools in a loop without making progress. Tool errors confuse the model and it either hallucinates a result or gets stuck. Parallel tool calls create race conditions. Permissions: model tries to call a tool the user doesn&rsquo;t have access to.</p>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P2-4. Agent Loops ==================== -->
+<div class="reveal" id="p2-4">
+  <h3 class="section-heading"><span class="sh-num">4.</span> Building Agent Loops</h3>
+  <p class="body-text">You want the model to handle a multi-step task on its own &mdash; break it down, use tools, check its work, produce a final answer.</p>
+
+  <div class="label">What you're actually doing</div>
+  <ul class="content-list">
+    <li>Building the loop: call model &rarr; check if it wants to use a tool &rarr; run tool &rarr; feed result back &rarr; repeat until done</li>
+    <li>Deciding when to stop (model says it&rsquo;s done, max iterations hit, output validated)</li>
+    <li>Handling the case where the agent goes in circles or gets stuck</li>
+    <li>Giving the agent memory of what it&rsquo;s already done in this session</li>
+    <li>Deciding how much to let the model plan autonomously vs. hardcoding the steps</li>
+  </ul>
+
+  <div class="label">Concrete things you build</div>
+  <ul class="content-list">
+    <li>The run loop itself (often a while loop in Python, or a state machine/graph)</li>
+    <li>State object that holds conversation history, tool results, and intermediate outputs</li>
+    <li>Termination conditions and max-iteration guards</li>
+    <li>Scratchpad or working memory for the agent to reason in</li>
+    <li>Checkpointing so long-running tasks can resume after failure</li>
+    <li>Human approval gate for irreversible actions (send email, delete record, make payment)</li>
+  </ul>
+
+  <div class="note-block">
+    <div class="note-label">The Main Headaches</div>
+    <p>Agent gets stuck in a tool-call loop or reasoning loop. Hard to debug &mdash; you get a wrong final answer and can&rsquo;t tell which step caused it. Latency: every tool call round-trips to the model, so a 5-step task is 5+ API calls. Cost: agentic tasks burn tokens fast. Reliability drops as task complexity grows &mdash; the more steps, the more chances to fail.</p>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P2-5. Real Systems ==================== -->
+<div class="reveal" id="p2-5">
+  <h3 class="section-heading"><span class="sh-num">5.</span> Integrating with Real Systems</h3>
+  <p class="body-text">Almost every useful LLM feature needs to read from or write to something &mdash; a database, a CRM, a file store, an email system.</p>
+
+  <div class="label">What you're actually doing</div>
+  <ul class="content-list">
+    <li>Wrapping external APIs as tool calls or retrieval sources</li>
+    <li>Pulling structured data into the model&rsquo;s context (CRM records, spreadsheets, logs)</li>
+    <li>Writing outputs back (update a CRM field, create a ticket, send a summary email)</li>
+    <li>Dealing with auth (OAuth tokens, API keys, scoped permissions)</li>
+    <li>Handling webhooks that trigger AI pipelines</li>
+  </ul>
+
+  <div class="label">Concrete things you build</div>
+  <ul class="content-list">
+    <li>API wrapper functions that the model can call as tools</li>
+    <li>Data formatters: take raw API response &rarr; clean it up &rarr; make it readable for the model</li>
+    <li>Write-back handlers: take model&rsquo;s structured output &rarr; map to API create/update call</li>
+    <li>OAuth flow and token refresh logic for external APIs</li>
+    <li>Webhook receivers that kick off AI processing pipelines</li>
+    <li>Queue system for async tasks (so a slow AI pipeline doesn&rsquo;t block the user)</li>
+  </ul>
+
+  <div class="note-block">
+    <div class="note-label">The Main Headaches</div>
+    <p>API rate limits: model triggers too many downstream calls too fast. Auth complexity: OAuth refresh, per-user tokens vs. service account. Data schemas change and break your prompts or parsers. Mapping free-form model output back to rigid API fields. Handling paginated data &mdash; model needs all the records but API returns pages.</p>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P2-6. Production ==================== -->
+<div class="reveal" id="p2-6">
+  <h3 class="section-heading"><span class="sh-num">6.</span> Making It Work in Production</h3>
+  <p class="body-text">Your prototype works. Now you need it to handle real traffic, not blow up your budget, and not mysteriously degrade.</p>
+
+  <div class="label">What you're actually doing</div>
+  <ul class="content-list">
+    <li>Adding logging so you can see what prompt went in and what came out</li>
+    <li>Tracking latency and cost per request</li>
+    <li>Setting up streaming so users see output as it&rsquo;s generated (not wait 10 seconds)</li>
+    <li>Caching repeated or similar requests</li>
+    <li>Adding timeouts, retries, and fallbacks when the API is slow or down</li>
+    <li>Deploying and thinking about how to update prompts without redeploying</li>
+  </ul>
+
+  <div class="label">Concrete things you build</div>
+  <ul class="content-list">
+    <li>Request/response logger (log prompt, completion, model, tokens, latency, cost)</li>
+    <li>Streaming response handler (SSE or WebSocket endpoint)</li>
+    <li>Semantic cache: look up similar past queries, return cached response if close enough</li>
+    <li>Retry wrapper with exponential backoff</li>
+    <li>Model router or fallback (if Claude is slow, fall back to GPT-4, or use a cheaper model for simple tasks)</li>
+    <li>Cost dashboard or alerts (alert when daily spend exceeds X)</li>
+    <li>Prompt stored in config or DB, not hardcoded, so you can change it without a deploy</li>
+  </ul>
+
+  <div class="note-block">
+    <div class="note-label">The Main Headaches</div>
+    <p>Token costs that seemed fine in testing are shocking in production. Latency is acceptable for simple queries but brutal for long-context or multi-step ones. Prompt regressions: you &ldquo;improved&rdquo; the prompt and it broke something you didn&rsquo;t test. Model API outages cascade into your product going down. No visibility into what&rsquo;s happening &mdash; users report bad outputs but you can&rsquo;t reproduce.</p>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P2-7. Evals ==================== -->
+<div class="reveal" id="p2-7">
+  <h3 class="section-heading"><span class="sh-num">7.</span> Making Sure It Actually Works (Evals)</h3>
+  <p class="body-text">This is the one area everyone under-invests in early and regrets later.</p>
+
+  <div class="label">What you're actually doing</div>
+  <ul class="content-list">
+    <li>Building a set of test cases: input &rarr; expected output (or rubric for judging output)</li>
+    <li>Running your system against those test cases automatically</li>
+    <li>Detecting regressions when you change a prompt, model, or retrieval config</li>
+    <li>Figuring out which failure modes matter most in production</li>
+  </ul>
+
+  <div class="label">Concrete things you build</div>
+  <ul class="content-list">
+    <li>Eval dataset: a spreadsheet or JSON file of inputs and expected outputs</li>
+    <li>Eval runner: for each test case, run the pipeline, compare output to expectation</li>
+    <li>Scoring function: exact match for structured outputs, LLM-as-judge for open-ended ones</li>
+    <li>CI hook that runs evals on every prompt change and blocks deploy if score drops</li>
+    <li>Error analysis view: look at which test cases fail and why</li>
+  </ul>
+
+  <div class="note-block">
+    <div class="note-label">The Main Headaches</div>
+    <p>You don&rsquo;t know you have a regression until users complain. Building a good eval set is slow and tedious &mdash; but skipping it always costs you more later. LLM-as-judge is noisy; hard to tell if a score drop is real or judge variance. Evals don&rsquo;t cover the long tail &mdash; your test cases are too clean compared to real user input. Evaluating retrieval quality (are the right chunks coming back?) is a separate problem from evaluating generation quality.</p>
+  </div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P2 Buzzword Map ==================== -->
+<div class="reveal" id="p2-buzzmap">
+  <h3 class="section-heading">How the Buzzwords Map to These Real Problems</h3>
+
+  <table class="content-table">
+    <thead>
+      <tr><th>Buzzword</th><th>What It Actually Is in Practice</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>RAG</strong></td><td>Section 2. A pattern for retrieval + context injection.</td></tr>
+      <tr><td><strong>Prompt engineering</strong></td><td>Section 1. Writing and iterating prompts until they&rsquo;re reliable.</td></tr>
+      <tr><td><strong>Function calling / tool use</strong></td><td>Section 3. Defining tools and handling model-initiated calls.</td></tr>
+      <tr><td><strong>MCP</strong></td><td>Section 3. A standard protocol for defining tools so one server works across multiple clients/models. Saves you writing custom integrations per model.</td></tr>
+      <tr><td><strong>Agents</strong></td><td>Section 4. Running the model in a loop with tools until a task is done.</td></tr>
+      <tr><td><strong>Memory</strong></td><td>Part of Section 4. Persisting state across turns so the agent knows what it already did.</td></tr>
+      <tr><td><strong>Orchestration</strong></td><td>Section 4 + Section 6. The control flow logic of agent loops. Frameworks like LangGraph, LlamaIndex Workflows, or just your own Python code.</td></tr>
+      <tr><td><strong>Agentic AI</strong></td><td>Sections 3 + 4 together. The broader term for &ldquo;AI that takes actions, not just answers.&rdquo;</td></tr>
+      <tr><td><strong>Generative AI</strong></td><td>Sections 1&ndash;7 collectively. The era/umbrella term. Not a specific engineering thing.</td></tr>
+      <tr><td><strong>Copilot</strong></td><td>A product shape built from Sections 1&ndash;3. AI embedded in your workflow tool, not a separate chat window.</td></tr>
+      <tr><td><strong>LLMOps</strong></td><td>Section 6. Running, monitoring, and maintaining LLM systems in production.</td></tr>
+      <tr><td><strong>Evals</strong></td><td>Section 7. The testing infrastructure for LLM systems.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P2 Real Project ==================== -->
+<div class="reveal" id="p2-realproject">
+  <h3 class="section-heading">What This Looks Like on a Real Project</h3>
+  <p class="body-text">If you&rsquo;re building an LLM-powered feature at work, here&rsquo;s the realistic order of problems you hit:</p>
+  <ul class="content-list">
+    <li><strong>Week 1:</strong> You get basic completions working. Output is sometimes good, sometimes wrong. You start on Section 1 &mdash; prompt iteration, structured output.</li>
+    <li><strong>Week 2&ndash;3:</strong> You need company-specific knowledge. You build Section 2 &mdash; document ingestion, vector store, retrieval pipeline.</li>
+    <li><strong>Week 3&ndash;4:</strong> You need the model to do things (look up data, create records). You build Section 3 &mdash; tool definitions, dispatcher, execution.</li>
+    <li><strong>Month 2:</strong> You want it to handle multi-step tasks. You&rsquo;re in Section 4 &mdash; the agent loop.</li>
+    <li><strong>Month 2&ndash;3:</strong> It&rsquo;s in production. Cost and latency are painful. You build Section 6 &mdash; caching, streaming, logging, retries.</li>
+    <li><strong>Ongoing:</strong> Something breaks and you don&rsquo;t know why. You reluctantly build Section 7 &mdash; an eval set. You wish you&rsquo;d built it in month 1.</li>
+  </ul>
+  <p class="body-text">Section 5 (external integrations) happens throughout &mdash; usually whenever you need to connect to a new data source or target system.</p>
+</div>
+
+
+<!-- ============================================================ -->
+<!--  PART 3 — THE 10 PRODUCT CATEGORIES + WHERE TO FOCUS          -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part3">
+  <div class="part-num">Part 3</div>
+  <h2 class="part-title">What People Actually <em>Ship</em></h2>
+  <p class="part-subtitle">The 10 product categories, the thinking behind each, and where to focus as an AI engineer.</p>
+</div>
+
+<div class="reveal">
+  <div class="explanation">
+    Every major LLM product category below is presented with the same structure: <strong>the insight</strong> (the &ldquo;aha&rdquo; that made someone think this was worth building), <strong>what it actually is</strong>, <strong>real examples</strong>, <strong>what makes it work</strong> (references back to Part 1 and Part 2), and <strong>where it breaks</strong> (the honest failure modes).
+  </div>
+</div>
+
+<!-- ==================== P3-1. Knowledge & Doc Intel ==================== -->
+<div class="reveal" id="p3-1">
+  <h3 class="section-heading"><span class="sh-num">1.</span> Knowledge &amp; Document Intelligence</h3>
+
+  <p class="body-text"><strong>The insight:</strong> Every organization has years of knowledge buried in documents &mdash; PDFs, wikis, manuals, reports, contracts &mdash; that nobody can find or use effectively. Traditional search returns a list of documents. Users want answers. The gap between &ldquo;the knowledge exists somewhere&rdquo; and &ldquo;I can actually access it&rdquo; is the problem.</p>
+
+  <p class="body-text"><strong>What it is:</strong> Systems that let users ask natural language questions against a private corpus of documents and get direct answers with citations &mdash; not a list of links.</p>
+
+  <p class="body-text"><strong>Real examples:</strong> Notion AI, Confluence AI (built into knowledge tools); Glean (enterprise search across all company tools); ChatPDF, AskYourPDF (consumer document Q&amp;A); internal enterprise tools built by most large companies.</p>
+
+  <p class="body-text"><strong>What makes it work:</strong> Primarily Part 2 Section 2 (RAG pipeline) &mdash; document ingestion, chunking, embedding, retrieval, context injection. The quality of retrieval is everything here. A good answer depends on the right chunks coming back.</p>
+
+  <div class="note-block">
+    <div class="note-label">Where It Breaks</div>
+    <p>Retrieval quality degrades with large, heterogeneous document collections. Model hallucinates when retrieved context is ambiguous. Multi-document reasoning (answer requires combining facts from 3 different docs) is hard. Keeping the index fresh as documents change.</p>
+  </div>
+  <p class="body-text"><strong>Maturity:</strong> Relatively well understood. The patterns are established. Differentiation is in retrieval quality, not the concept.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P3-2. Conversational Assistants ==================== -->
+<div class="reveal" id="p3-2">
+  <h3 class="section-heading"><span class="sh-num">2.</span> Conversational Assistants &amp; Support Automation</h3>
+
+  <p class="body-text"><strong>The insight:</strong> A large fraction of customer support, IT helpdesk, HR queries, and internal service requests are repetitive &mdash; the same 20% of question types make up 70% of volume. Agents spend most of their time answering things that have already been answered. The model is good at recognizing pattern questions and retrieving the right answer. Human time should be reserved for the exceptions.</p>
+
+  <p class="body-text"><strong>What it is:</strong> Chatbots and virtual agents that handle the high-volume, repetitive tier of service interactions, escalating to humans when they can&rsquo;t confidently resolve something.</p>
+
+  <p class="body-text"><strong>Real examples:</strong> Intercom Fin, Zendesk AI (customer support); ServiceNow AI (IT helpdesk); Workday Assistant (HR queries); dozens of vertical-specific bots in banking, telecom, e-commerce.</p>
+
+  <p class="body-text"><strong>What makes it work:</strong> Part 2 Section 1 (reliable outputs + structured responses) + Section 2 (RAG over knowledge base) + Section 5 (CRM/ticketing system integration for escalation and logging).</p>
+
+  <div class="note-block">
+    <div class="note-label">Where It Breaks</div>
+    <p>Confidently wrong answers erode user trust fast. Edge cases, angry customers, complex issues &mdash; the model handles these badly. Hard to keep the knowledge base fresh without a disciplined update process. Users learn to bypass the bot and ask for a human immediately.</p>
+  </div>
+  <p class="body-text"><strong>Maturity:</strong> One of the most deployed product categories. The concept is proven, but quality varies enormously based on how well the knowledge base and guardrails are built.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P3-3. Code Intelligence ==================== -->
+<div class="reveal" id="p3-3">
+  <h3 class="section-heading"><span class="sh-num">3.</span> Code Intelligence &amp; Developer Tools</h3>
+
+  <p class="body-text"><strong>The insight:</strong> Developers spend a disproportionate amount of their time on things that don&rsquo;t require deep thinking &mdash; writing boilerplate, looking up syntax, writing tests for logic they already understand, generating repetitive code patterns. That mechanical portion of the job is exactly what LLMs are good at. If you remove the friction from the mechanical parts, developers can spend more time on the actual thinking.</p>
+
+  <p class="body-text"><strong>What it is:</strong> Tools that assist developers inside their existing workflow &mdash; completing code, explaining it, reviewing it, generating tests, fixing bugs, navigating large codebases.</p>
+
+  <p class="body-text"><strong>Real examples:</strong> GitHub Copilot (IDE inline completion); Cursor (AI-native code editor); Claude Code (terminal-based coding agent); Devin, SWE-agent (fully autonomous software engineering agents); Coderabbit (AI code review in pull requests).</p>
+
+  <p class="body-text"><strong>What makes it work:</strong> Part 2 Section 1 (structured, reliable output &mdash; code is the strictest structured output there is) + Section 3 (tool use &mdash; run code, read files, execute tests) + Section 4 (agent loop for multi-file tasks).</p>
+
+  <div class="note-block">
+    <div class="note-label">Where It Breaks</div>
+    <p>Works well for isolated functions, degrades on large multi-file refactors. Model doesn&rsquo;t understand the full codebase context &mdash; misses conventions, existing patterns. Generated code looks correct but has subtle bugs (logic errors, security issues). The fully autonomous agent (Devin-style) still fails more than it succeeds on complex tasks.</p>
+  </div>
+  <p class="body-text"><strong>Maturity:</strong> Inline completion is mature and widely adopted. Full autonomous coding agents are still early &mdash; impressive demos but unreliable in production use.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P3-4. Data Extraction ==================== -->
+<div class="reveal" id="p3-4">
+  <h3 class="section-heading"><span class="sh-num">4.</span> Data Extraction &amp; Transformation</h3>
+
+  <p class="body-text"><strong>The insight:</strong> Enormous amounts of business value is locked in unstructured text &mdash; invoices, contracts, emails, forms, reports. Getting structured data out of these documents used to require either manual data entry or expensive custom ML models trained per document type. LLMs changed the economics completely: you can define the schema you want, show the model a document, and it extracts the fields. No training required.</p>
+
+  <p class="body-text"><strong>What it is:</strong> Pipelines that take unstructured documents as input and return structured, typed data &mdash; fields, values, relationships &mdash; that can be written to databases, fed into workflows, or used for analysis.</p>
+
+  <p class="body-text"><strong>Real examples:</strong> Reducto, Docsumo (invoice/receipt extraction); Ironclad AI (contract data extraction); Dust, Extend (document processing automation); most enterprise teams build this in-house for their specific document types.</p>
+
+  <p class="body-text"><strong>What makes it work:</strong> Part 2 Section 1 (structured output &mdash; this is fundamentally a &ldquo;return JSON&rdquo; problem) + Section 2 (parsing complex documents like PDFs, Word files, scanned images).</p>
+
+  <div class="note-block">
+    <div class="note-label">Where It Breaks</div>
+    <p>Scanned/low-quality documents degrade accuracy significantly. Novel document layouts the model hasn&rsquo;t &ldquo;seen&rdquo; cause field mismatches. High-stakes domains (legal, financial) have low tolerance for extraction errors. Long documents need chunking strategies that don&rsquo;t lose field context.</p>
+  </div>
+  <p class="body-text"><strong>Maturity:</strong> Well understood. The core technique (structured output prompting) is solid. The hard parts are document parsing quality and validation logic.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P3-5. Content Generation ==================== -->
+<div class="reveal" id="p3-5">
+  <h3 class="section-heading"><span class="sh-num">5.</span> Content Generation &amp; Automation</h3>
+
+  <p class="body-text"><strong>The insight:</strong> A large category of business content follows a predictable template &mdash; weekly reports, product descriptions, email campaigns, meeting summaries, job postings, release notes. The structure is fixed. Only the inputs change. Writing that content manually is time-consuming but not intellectually demanding. LLMs can handle the mechanical production while humans set the inputs and review the output.</p>
+
+  <p class="body-text"><strong>What it is:</strong> Systems that take structured inputs (data, bullet points, context) and generate polished text outputs &mdash; reports, summaries, marketing copy, emails, documentation.</p>
+
+  <p class="body-text"><strong>Real examples:</strong> Jasper, Copy.ai (marketing copy generation); Otter.ai (meeting transcription + summary); Gamma (presentation generation); most companies build internal versions for their specific content types (weekly reports, client summaries, product changelogs).</p>
+
+  <p class="body-text"><strong>What makes it work:</strong> Part 2 Section 1 (prompt design is the primary lever &mdash; template quality determines output quality). For data-driven content, Section 5 (pulling live data into the generation pipeline).</p>
+
+  <div class="note-block">
+    <div class="note-label">Where It Breaks</div>
+    <p>Generic outputs &mdash; content that&rsquo;s technically correct but bland and interchangeable. Factual errors when the model fills in gaps it wasn&rsquo;t given. Tone and brand voice are hard to maintain consistently at scale. Editing LLM output takes almost as long as writing it, for some content types.</p>
+  </div>
+  <p class="body-text"><strong>Maturity:</strong> Extremely widespread. The concept is commoditized. Competitive differentiation is in domain-specific quality, brand voice control, and workflow integration &mdash; not the generation itself.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P3-6. Research Agents ==================== -->
+<div class="reveal" id="p3-6">
+  <h3 class="section-heading"><span class="sh-num">6.</span> Research &amp; Synthesis Agents</h3>
+
+  <p class="body-text"><strong>The insight:</strong> Research is fundamentally a multi-step information task: identify sources, read them, extract relevant information, cross-reference, synthesize. The mechanical parts &mdash; finding sources, reading and extracting key points, organizing findings &mdash; can be automated. The judgment &mdash; deciding what&rsquo;s relevant, evaluating source quality, forming a view &mdash; still benefits from human oversight.</p>
+
+  <p class="body-text"><strong>What it is:</strong> Agents that take a research question, autonomously search for sources, read and extract information, synthesize findings, and produce a structured report &mdash; with or without human review at the end.</p>
+
+  <p class="body-text"><strong>Real examples:</strong> Perplexity (real-time web research + synthesis); OpenAI Deep Research, Gemini Deep Research; Elicit (academic research assistance); most major AI providers now offer a &ldquo;deep research&rdquo; mode.</p>
+
+  <p class="body-text"><strong>What makes it work:</strong> Part 2 Sections 3 + 4 (tool use + agent loop) &mdash; the agent needs web search as a tool, must iterate (search &rarr; read &rarr; decide what else to search &rarr; synthesize), and must know when it has enough information to stop.</p>
+
+  <div class="note-block">
+    <div class="note-label">Where It Breaks</div>
+    <p>Source quality is inconsistent &mdash; model doesn&rsquo;t reliably distinguish authoritative from unreliable. Synthesis is often surface-level aggregation rather than genuine insight. Hallucination in citations &mdash; model invents plausible-sounding sources. Loop management &mdash; agent either stops too early or searches indefinitely.</p>
+  </div>
+  <p class="body-text"><strong>Maturity:</strong> The concept is proven. Quality varies enormously. Currently best for breadth (getting an overview fast) rather than depth (expert-level analysis).</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P3-7. Workflow Automation ==================== -->
+<div class="reveal" id="p3-7">
+  <h3 class="section-heading"><span class="sh-num">7.</span> Workflow Automation &amp; AI Workers</h3>
+
+  <p class="body-text"><strong>The insight:</strong> Some recurring business workflows are almost entirely composed of: read information from somewhere &rarr; make a decision based on rules &rarr; take an action somewhere. A human does this, but it doesn&rsquo;t require human judgment for the majority of cases. If you give an LLM the right tools and a clear enough definition of the workflow, it can run the process. The human becomes the exception handler, not the routine processor.</p>
+
+  <p class="body-text"><strong>What it is:</strong> Agents that run recurring business processes end-to-end &mdash; processing incoming requests, making routing decisions, taking actions in connected systems, and escalating the exceptions they can&rsquo;t handle.</p>
+
+  <p class="body-text"><strong>Real examples:</strong> AI SDRs: read lead &rarr; research company &rarr; draft personalized outreach &rarr; send (Clay, 11x). AI recruiters: parse JD &rarr; screen resumes &rarr; schedule interviews &rarr; send communications. AI ops agents: monitor alerts &rarr; diagnose &rarr; run runbook &rarr; escalate if not resolved. AI finance ops: process invoices &rarr; match to POs &rarr; flag discrepancies &rarr; route for approval.</p>
+
+  <p class="body-text"><strong>What makes it work:</strong> Part 2 Section 3 (tool use &mdash; the agent needs to read/write real systems), Section 4 (agent loop for multi-step decision making), Section 5 (deep integration with CRM, email, calendar, ERP).</p>
+
+  <div class="note-block">
+    <div class="note-label">Where It Breaks</div>
+    <p>Edge cases: the long tail of unusual inputs the agent wasn&rsquo;t designed for. Error compounding: a wrong decision at step 2 corrupts every subsequent step. Trust: high-stakes actions (sending emails on behalf of someone, making payments) require human approval gates to be safe. Auditability: if something goes wrong, you need to know exactly what the agent did and why.</p>
+  </div>
+  <p class="body-text"><strong>Maturity:</strong> Early but moving fast. The simple, well-defined workflows (route this ticket, process this invoice) are working in production. Complex, judgment-heavy workflows are still unreliable.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P3-8. Personal AI ==================== -->
+<div class="reveal" id="p3-8">
+  <h3 class="section-heading"><span class="sh-num">8.</span> Personal AI &amp; Always-On Assistants</h3>
+
+  <p class="body-text"><strong>The insight:</strong> The dominant deployment of AI assistants &mdash; a browser tab you open when you remember to &mdash; is the wrong interaction model. Your email, calendar, communication tools, and workflows are where your actual work happens. If the AI lives there, it has context and can act. If it lives in a separate tab, you have to copy-paste information to it and it can&rsquo;t do anything for you. Whoever figures out the right &ldquo;ambient&rdquo; model for personal AI &mdash; always available, contextually aware, able to act on your behalf &mdash; wins.</p>
+
+  <p class="body-text"><strong>What it is:</strong> AI assistants deployed in the tools and communication channels people already use daily &mdash; Telegram, WhatsApp, Slack, email, voice &mdash; with persistent memory and the ability to take actions.</p>
+
+  <p class="body-text"><strong>Real examples:</strong> OpenClaw (self-hosted multi-agent system, Telegram interface); Claude, ChatGPT mobile apps (moving toward persistent memory + actions); Rabbit r1, Humane AI Pin (hardware-native personal agents &mdash; mostly failed in first attempt); various &ldquo;AI chief of staff&rdquo; products (Lindy, personal.ai).</p>
+
+  <p class="body-text"><strong>What makes it work:</strong> Part 2 Section 4 (persistent agent with memory), Section 3 (tool use for acting on your behalf), Section 5 (integrations with calendar, email, notes, communication tools). Deployment model matters as much as the AI &mdash; running on a server you control vs. a third-party SaaS changes what&rsquo;s possible.</p>
+
+  <div class="note-block">
+    <div class="note-label">Where It Breaks</div>
+    <p>Context management across long periods of use is unsolved. Trust and permissions: what should the AI be allowed to do without asking? Privacy: a truly helpful personal assistant needs access to sensitive personal information. Reliability: users stop using it after it makes one embarrassing or costly mistake.</p>
+  </div>
+  <p class="body-text"><strong>Maturity:</strong> Early. The concept is compelling and widely agreed upon. The execution &mdash; especially memory, trust, and permission models &mdash; is still being figured out across the industry.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P3-9. AI-Native Tools ==================== -->
+<div class="reveal" id="p3-9">
+  <h3 class="section-heading"><span class="sh-num">9.</span> AI-Native Tools (Reimagining Existing Software)</h3>
+
+  <p class="body-text"><strong>The insight:</strong> Most &ldquo;AI features&rdquo; are bolt-ons &mdash; a chat panel added to an existing tool, a &ldquo;generate with AI&rdquo; button in a form. The deeper opportunity is to ask: if you were designing this tool from scratch today with LLMs available, what would it actually look like? The answer is usually very different from &ldquo;existing tool + AI sidebar.&rdquo;</p>
+
+  <p class="body-text"><strong>What it is:</strong> Entirely new product categories where AI is the primary interface, not an add-on. The tool is built around the AI interaction model from the ground up.</p>
+
+  <p class="body-text"><strong>Real examples:</strong> Cursor (not &ldquo;VS Code + Copilot&rdquo; &mdash; a code editor where AI is the primary way you interact with code); v0 by Vercel (not &ldquo;design tool + AI&rdquo; &mdash; you describe UI in natural language, it generates and iterates); Perplexity (not &ldquo;Google + AI summary&rdquo; &mdash; search rebuilt with AI synthesis as the primary output); Replit Agent (not &ldquo;IDE + AI&rdquo; &mdash; you describe what you want to build, it builds it).</p>
+
+  <p class="body-text"><strong>What makes it work:</strong> Deeply integrated UX (Part 1 Category 8) &mdash; the AI isn&rsquo;t layered on top, it&rsquo;s woven into every interaction. The engineering is similar to other categories, but the product insight is different: you have to be willing to throw away the existing UX mental model.</p>
+
+  <div class="note-block">
+    <div class="note-label">Where It Breaks</div>
+    <p>Hard to get right &mdash; most attempts produce something that feels half-finished. Users have strong existing habits; changing the interaction model is slow. The AI needs to be good enough that it earns the new interaction model.</p>
+  </div>
+  <p class="body-text"><strong>Maturity:</strong> A few breakout examples but still early overall. The category is defined more by a product philosophy than a technical pattern.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== P3-10. Multimodal ==================== -->
+<div class="reveal" id="p3-10">
+  <h3 class="section-heading"><span class="sh-num">10.</span> Multimodal &amp; Specialized Domain Systems</h3>
+
+  <p class="body-text"><strong>The insight:</strong> Language is not the only modality that matters. Medical imaging, engineering diagrams, legal documents with tables and figures, audio recordings, video &mdash; these are where domain-specific value lives. General text LLMs weren&rsquo;t enough here. Multimodal models opened this up.</p>
+
+  <p class="body-text"><strong>What it is:</strong> Systems that process non-text inputs (images, audio, video, documents with visual structure) and produce useful outputs &mdash; diagnosis support, inspection reports, transcription + analysis, document understanding.</p>
+
+  <p class="body-text"><strong>Real examples:</strong> Abridge, Nabla (medical conversation AI &mdash; ambient scribe during doctor visits); Wayve, Waymo (vision + language for autonomous vehicles); Glassbox, Landing AI (visual inspection in manufacturing); Document AI systems handling charts, tables, diagrams in reports.</p>
+
+  <p class="body-text"><strong>What makes it work:</strong> Part 1 Category 2 (multimodal application engineering) &mdash; fundamentally about connecting vision/audio models to downstream workflows. The engineering challenge is usually in data pipeline quality, not the model itself.</p>
+
+  <div class="note-block">
+    <div class="note-label">Where It Breaks</div>
+    <p>High-stakes domains (medical, safety) have zero tolerance for errors. Multimodal models still lag behind text-only models on reasoning tasks. Data privacy is more sensitive with images/audio than text in many domains.</p>
+  </div>
+  <p class="body-text"><strong>Maturity:</strong> Highly domain-dependent. Medical ambient scribe is one of the most successful deployments of LLMs anywhere. Most other domains are still early.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== Product-to-Engineering Map ==================== -->
+<div class="reveal" id="p3-mapping">
+  <h3 class="section-heading">How These Products Map to the Engineering Work</h3>
+  <p class="body-text">This table shows how the product categories connect back to the practical engineering work in Part 2.</p>
+
+  <table class="content-table">
+    <thead>
+      <tr><th>Product Category</th><th>Primary Engineering Sections (Part 2)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Knowledge &amp; Document Intelligence</strong></td><td>&sect;2 (RAG), &sect;6 (production)</td></tr>
+      <tr><td><strong>Conversational Assistants</strong></td><td>&sect;1 (outputs), &sect;2 (RAG), &sect;5 (integrations)</td></tr>
+      <tr><td><strong>Code Intelligence</strong></td><td>&sect;1 (structured output), &sect;3 (tool use), &sect;4 (agents)</td></tr>
+      <tr><td><strong>Data Extraction</strong></td><td>&sect;1 (structured output), &sect;2 (doc parsing)</td></tr>
+      <tr><td><strong>Content Generation</strong></td><td>&sect;1 (prompting), &sect;5 (data integration)</td></tr>
+      <tr><td><strong>Research Agents</strong></td><td>&sect;3 (tool use), &sect;4 (agent loop)</td></tr>
+      <tr><td><strong>Workflow Automation</strong></td><td>&sect;3 (tool use), &sect;4 (agents), &sect;5 (integrations)</td></tr>
+      <tr><td><strong>Personal AI</strong></td><td>&sect;4 (agent + memory), &sect;3 (tool use), &sect;5 (integrations)</td></tr>
+      <tr><td><strong>AI-Native Tools</strong></td><td>All sections, but product design is the differentiator</td></tr>
+      <tr><td><strong>Multimodal &amp; Domain-Specific</strong></td><td>&sect;2 (doc parsing), domain-specific pipelines</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== Where to Focus ==================== -->
+<div class="reveal" id="p3-focus">
+  <h3 class="section-heading">Where to Focus as an AI Engineer</h3>
+  <p class="body-text">Not all of these areas are equal from a &ldquo;where should I invest my learning&rdquo; standpoint. Here&rsquo;s an honest breakdown.</p>
+
+  <div class="label">Worth Going Deep On</div>
+
+  <h4 class="subsection-heading">Agent Systems (orchestration, tool use, memory)</h4>
+  <p class="body-text">Still being actively figured out by the entire industry. There is no settled &ldquo;correct&rdquo; way to build reliable agents. Engineers who understand the failure modes &mdash; loops, error compounding, context management, permission models &mdash; are rare and valuable. The primitives (tool calling, loops, state management) are learnable. The judgment about when to use agents vs. structured workflows is harder and comes from building and breaking things.</p>
+
+  <h4 class="subsection-heading">Evaluation &amp; Testing for LLM Systems</h4>
+  <p class="body-text">Chronically under-invested in by most teams. Understanding how to build good eval sets, what to measure, how to detect regressions, and how to use LLM-as-judge reliably is a differentiating skill. Most developers know this matters and don&rsquo;t do it well. It&rsquo;s also one of the least &ldquo;exciting&rdquo; areas, which is exactly why there&rsquo;s skill scarcity here.</p>
+
+  <h4 class="subsection-heading">Production Engineering for LLM Systems</h4>
+  <p class="body-text">Observability, cost control, streaming, caching, reliability patterns &mdash; the gap between a demo and a production system is almost entirely in this area. Understanding how to instrument, optimize, and operate LLM-powered systems is what separates engineers who can ship prototypes from engineers who can run production systems.</p>
+
+  <h4 class="subsection-heading">RAG Quality Engineering</h4>
+  <p class="body-text">Basic RAG is easy and commoditized. Good RAG &mdash; hybrid search, re-ranking, GraphRAG for multi-hop reasoning, permission-aware retrieval, keeping indices fresh &mdash; is still hard. Most deployed RAG systems are mediocre. The engineer who can diagnose and fix retrieval quality problems is valuable on almost any enterprise AI project.</p>
+
+  <div class="label">Commoditizing Fast (Frameworks abstract this, don't over-invest)</div>
+
+  <h4 class="subsection-heading">Basic Prompting and Chat Completions</h4>
+  <p class="body-text">The primitives are stable, the documentation is good, the frameworks handle the boilerplate. You need to understand this well enough to use it &mdash; you don&rsquo;t need to specialize in it.</p>
+
+  <h4 class="subsection-heading">Setting Up a Basic RAG Pipeline</h4>
+  <p class="body-text">Spinning up a vector store, ingesting documents, running similarity search &mdash; this is a solved problem with good libraries and tutorials. The value is in what you do with RAG, not in knowing how to set one up.</p>
+
+  <h4 class="subsection-heading">Basic Chatbot Plumbing</h4>
+  <p class="body-text">Session management, message history, streaming &mdash; well understood, lots of reference implementations. Not where differentiation lives.</p>
+
+  <div class="label">Framework Churn &mdash; Be Careful Here</div>
+
+  <p class="body-text">The LLM tooling ecosystem moves fast. LangChain looked like the definitive framework in 2023 and is now contested. New orchestration frameworks appear monthly. New vector databases, new eval tools, new agent frameworks.</p>
+
+  <p class="body-text"><strong>The correct response to this:</strong> understand the primitives, not the frameworks. Know what RAG is doing at the level of &ldquo;embed &rarr; search &rarr; inject&rdquo; &mdash; then you can use any framework for it, or none. Know what an agent loop is doing at the level of &ldquo;call model &rarr; check for tool call &rarr; execute &rarr; loop&rdquo; &mdash; then LangGraph, CrewAI, raw Python are all just implementations of the same idea.</p>
+
+  <p class="body-text">Engineers who are framework-first get left behind when frameworks change. Engineers who understand the underlying patterns just pick up new frameworks in a day.</p>
+
+  <div class="label">Frontier Areas &mdash; High Upside, Still Early</div>
+
+  <h4 class="subsection-heading">Multi-Agent Coordination</h4>
+  <p class="body-text">Multiple agents collaborating, dividing work, checking each other &mdash; production-reliable multi-agent systems are still largely unsolved. The engineering problems are hard (coordination, shared state, avoiding contradictions). Worth watching and experimenting with, but don&rsquo;t bet a production system on it yet.</p>
+
+  <h4 class="subsection-heading">Computer Use &amp; Browser Agents</h4>
+  <p class="body-text">Agents that operate software interfaces directly &mdash; browsers, desktops, legacy systems. Technically viable as of 2025 but still too unreliable for most production use cases. High potential upside when it matures.</p>
+
+  <h4 class="subsection-heading">Long-Context Reasoning</h4>
+  <p class="body-text">Context windows have expanded to 1M+ tokens. Using that effectively &mdash; retrieval over very long context, multi-document synthesis, repository-level code understanding &mdash; is still an open engineering problem. As models get better at this, some RAG-heavy architectures may change significantly.</p>
+
+  <div class="label">The Honest Summary</div>
+
+  <p class="body-text">If you&rsquo;re orienting your learning for the next 2 years:</p>
+  <ul class="content-list">
+    <li><strong>Master the fundamentals</strong> of prompting, RAG, and tool use at the primitive level (not the framework level)</li>
+    <li><strong>Go deep on agents</strong> &mdash; this is where the interesting problems are and where the field is moving</li>
+    <li><strong>Take evals seriously</strong> &mdash; most people don&rsquo;t, it&rsquo;s a real differentiator</li>
+    <li><strong>Learn production engineering</strong> &mdash; observability, cost, reliability &mdash; this is what makes the difference between demo and deployment</li>
+    <li><strong>Ignore most framework releases</strong> &mdash; wait for things to settle, focus on the underlying concepts</li>
+    <li><strong>Watch the frontier</strong> &mdash; computer use, multi-agent, long-context &mdash; not to specialize yet, but so you&rsquo;re not surprised when they mature</li>
+  </ul>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== Three-Doc Map ==================== -->
+<div class="reveal">
+  <h3 class="section-heading">The Complete Three-Part Map</h3>
+
+  <div class="code-block">&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502;  Part 1: Engineering Landscape                           &#x2502;
+&#x2502;  The 8 engineering disciplines &#x2014; the skills and domains  &#x2502;
+&#x2502;  (what areas of expertise exist in this field)            &#x2502;
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+                            &#x2193;
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502;  Part 2: What Developers Actually Do                     &#x2502;
+&#x2502;  The 7 problem areas developers solve on projects         &#x2502;
+&#x2502;  (what you're doing when you sit down to build)           &#x2502;
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+                            &#x2193;
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502;  Part 3: What People Actually Ship                       &#x2502;
+&#x2502;  The 10 product categories + the thinking behind each     &#x2502;
+&#x2502;  + where to focus as an AI engineer                       &#x2502;
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</div>
+
+  <p class="body-text">The three parts answer three different questions:</p>
+  <ul class="content-list">
+    <li><strong>Part 1:</strong> What are the engineering disciplines in this field?</li>
+    <li><strong>Part 2:</strong> What problems do I solve on a real project?</li>
+    <li><strong>Part 3:</strong> What products exist, why do they exist, and where should I invest my learning?</li>
+  </ul>
+</div>
+
+</main>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-name">LLM Engineering Landscape</span>
+    <span class="footer-copy">&copy; 2026</span>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // TOC active section tracking
+  const tocLinks = document.querySelectorAll('.toc a');
+  const sections = [];
+  tocLinks.forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      const el = document.getElementById(href.slice(1));
+      if (el) sections.push({ el, link });
+    }
+  });
+
+  const tocObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const match = sections.find(s => s.el === entry.target);
+        if (match) match.link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => tocObserver.observe(s.el));
+
+  // Back to top button
+  const backBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    backBtn.classList.toggle('visible', window.scrollY > 600);
+  });
+</script>
+
+</body>
+</html>

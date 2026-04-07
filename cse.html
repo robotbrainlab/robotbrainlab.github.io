@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Computer Science &amp; Engineering</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <meta property="og:title" content="Computer Science & Engineering — Towards Intelligence"/>
+  <meta property="og:description" content="A structured guide to the discipline — from mathematical foundations through theoretical computer science to practical engineering at scale."/>
+  <meta property="og:type" content="article"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:         #0e0e0f;
+      --surface:    #151516;
+      --surface2:   #1c1c1e;
+      --rule:       #2a2a2e;
+      --rule-lt:    #333338;
+      --ink:        #e0dbd2;
+      --ink-mid:    #d1cbbf;
+      --ink-dim:    #b0a99e;
+      --white:      #e8e3da;
+      --accent:     #c8a96e;
+      --accent-dim: #3a2e1a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* -- NAV -- */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(14, 14, 15, 0.94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em;
+      color: var(--white); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.active { color: var(--accent); }
+
+    /* -- LAYOUT -- */
+    .page-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* -- SIDEBAR TOC -- */
+    .toc {
+      position: sticky;
+      top: 5rem;
+      height: calc(100vh - 6rem);
+      overflow-y: auto;
+      padding: 2rem 0 2rem 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--rule) transparent;
+    }
+    .toc::-webkit-scrollbar { width: 4px; }
+    .toc::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
+    .toc::-webkit-scrollbar-track { background: transparent; }
+
+    .toc-part-label {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--accent);
+      margin-top: 1.6rem; margin-bottom: 0.5rem;
+      padding-left: 0.8rem;
+    }
+    .toc-part-label:first-child { margin-top: 0; }
+
+    .toc a {
+      display: block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 400;
+      color: var(--ink-dim);
+      text-decoration: none;
+      padding: 0.3rem 0.8rem;
+      border-left: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      line-height: 1.5;
+    }
+    .toc a:hover { color: var(--ink-mid); }
+    .toc a.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+    .toc a.toc-sub {
+      padding-left: 1.4rem;
+      font-size: 0.74rem;
+    }
+
+    /* -- MAIN CONTENT -- */
+    .main-content {
+      min-width: 0;
+      padding-bottom: 6rem;
+    }
+
+    /* -- HERO -- */
+    .hero {
+      padding: 8rem 0 4rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 4rem;
+    }
+    .hero-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      display: flex; align-items: center; gap: 0.8rem;
+      margin-bottom: 1.6rem;
+    }
+    .hero-kicker::before {
+      content: ''; display: block;
+      width: 32px; height: 1px; background: var(--accent);
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.6rem, 5vw, 4.2rem);
+      font-weight: 600; line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+    }
+    .hero-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .hero-subtitle {
+      font-size: 1.05rem; line-height: 1.8;
+      color: var(--ink-mid); max-width: 640px;
+      font-weight: 300; text-align: justify;
+    }
+
+    /* -- PART DIVIDER -- */
+    .part-divider {
+      padding: 4rem 0 2.5rem;
+      border-top: 1px solid var(--rule);
+      margin-top: 3rem;
+      position: relative;
+    }
+    .part-divider:first-of-type { margin-top: 0; border-top: none; }
+    .part-num {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .part-num::before {
+      content: ''; display: block;
+      width: 24px; height: 1px; background: var(--accent);
+    }
+    .part-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 600; line-height: 1.15;
+      color: var(--white); letter-spacing: -0.01em;
+    }
+    .part-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .part-subtitle {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; color: var(--ink-dim); line-height: 1.7;
+      margin-top: 0.6rem; max-width: 600px;
+    }
+
+    /* -- SECTION HEADINGS -- */
+    .section-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+      font-weight: 600; line-height: 1.2;
+      color: var(--white);
+      margin: 3rem 0 1rem;
+      padding-top: 1.5rem;
+    }
+    .section-heading .sh-num {
+      color: var(--accent);
+      font-style: italic;
+      font-weight: 400;
+      margin-right: 0.3rem;
+    }
+
+    /* -- SUBSECTION HEADINGS -- */
+    .subsection-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 600; line-height: 1.3;
+      color: var(--white);
+      margin: 2rem 0 0.6rem;
+    }
+
+    /* -- BODY TEXT -- */
+    .body-text {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem; color: var(--ink-mid); line-height: 1.8;
+      font-weight: 300; text-align: justify;
+      margin-bottom: 1rem;
+    }
+    .body-text strong { font-weight: 600; color: var(--ink); }
+    .body-text em { color: var(--ink); }
+
+    /* -- EXPLANATION / BLOCKQUOTE -- */
+    .explanation {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem; color: var(--ink-mid); line-height: 1.8;
+      font-weight: 300;
+      padding: 1.2rem 0 1.2rem 1.4rem;
+      border-left: 2px solid var(--accent-dim);
+      margin-bottom: 1.5rem;
+      text-align: justify;
+    }
+    .explanation strong { font-weight: 600; color: var(--ink); }
+
+    /* -- HORIZONTAL RULE -- */
+    .content-rule {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--rule-lt) 20%, var(--rule-lt) 80%, transparent);
+      margin: 2.5rem 0;
+    }
+
+    /* -- SCROLL REVEAL -- */
+    .reveal {
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* -- BACK TO TOP -- */
+    .back-to-top {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      width: 40px; height: 40px;
+      background: var(--surface2);
+      border: 1px solid var(--rule);
+      color: var(--ink-dim);
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 99;
+      border-radius: 2px;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .back-to-top:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* -- FOOTER -- */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 1.6rem 2rem;
+      background: var(--surface);
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem; color: var(--ink-dim);
+    }
+    .footer-copy {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.8rem; color: var(--ink-dim); letter-spacing: 0.05em;
+    }
+
+    /* -- RESPONSIVE -- */
+    @media (max-width: 960px) {
+      .page-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .toc { display: none; }
+      .main-content { padding: 0; }
+    }
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .page-layout { padding-left: 1.2rem; padding-right: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Towards Intelligence</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Roadmap</a></li>
+      <li><a href="cse.html" class="active">CS &amp; Engineering</a></li>
+      <li><a href="data-intelligence.html">Data &amp; Intelligence</a></li>
+      <li><a href="llm-engineering.html">LLM Engineering</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- BACK TO TOP -->
+<a href="#top" class="back-to-top" id="backToTop" aria-label="Back to top">&uarr;</a>
+
+<div class="page-layout" id="top">
+
+<!-- ===== SIDEBAR TOC ===== -->
+<aside class="toc" id="toc">
+
+  <div class="toc-part-label">Introduction</div>
+  <a href="#intro">The Shape of the Discipline</a>
+
+  <div class="toc-part-label">Part 1 &mdash; Mathematics</div>
+  <a href="#math-intro">Why Mathematics First</a>
+  <a href="#discrete-math">Discrete Mathematics</a>
+
+  <div class="toc-part-label">Part 2 &mdash; Science: Fundamentals</div>
+  <a href="#fundamentals-intro">What Fundamentals Means</a>
+  <a href="#pl-compilers">Programming Languages &amp; Compilers</a>
+  <a href="#dsa">Data Structures &amp; Algorithms</a>
+  <a href="#theory-of-computation">Theory of Computation</a>
+
+  <div class="toc-part-label">Part 3 &mdash; Science: Systems</div>
+  <a href="#systems-intro">What Systems Means</a>
+  <a href="#databases">Databases</a>
+  <a href="#distributed-systems">Distributed Systems</a>
+  <a href="#operating-systems">Operating Systems</a>
+  <a href="#networks">Computer Networks</a>
+  <a href="#parallel-computing">Parallel &amp; Concurrent Computing</a>
+  <a href="#architecture">Computer Organization &amp; Architecture</a>
+
+  <div class="toc-part-label">Part 4 &mdash; Engineering: Building</div>
+  <a href="#building-intro">What Building Means</a>
+  <a href="#software-engineering">Software Engineering</a>
+  <a href="#infrastructure-engineering">Infrastructure Engineering</a>
+
+  <div class="toc-part-label">Part 5 &mdash; Engineering: Operating</div>
+  <a href="#operating-intro">What Operating Means</a>
+  <a href="#reliability-engineering">Reliability Engineering / SRE</a>
+  <a href="#performance-engineering">Performance Engineering</a>
+  <a href="#security-engineering">Security Engineering</a>
+  <a href="#observability-engineering">Observability Engineering</a>
+
+  <div class="toc-part-label">Closing</div>
+  <a href="#connections">How It All Connects</a>
+
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main-content">
+
+<!-- HERO -->
+<div class="hero reveal" id="hero-section">
+  <div class="hero-kicker">Long-form Reference</div>
+  <h1 class="hero-title">Computer Science &amp;<br><em>Engineering</em></h1>
+  <p class="hero-subtitle">
+    A structured guide to the discipline &mdash; from mathematical foundations through theoretical computer science to practical engineering at scale.
+  </p>
+</div>
+
+
+<!-- ============================================================ -->
+<!--  INTRODUCTION                                                  -->
+<!-- ============================================================ -->
+
+<div class="reveal" id="intro">
+  <h3 class="section-heading">The Shape of the Discipline</h3>
+  <p class="body-text">
+    Computer Science &amp; Engineering is not a single subject. It is a discipline that spans pure mathematics, theoretical science, systems design, and industrial-scale engineering &mdash; and the way you organize that span matters. This article splits CS&amp;E into two halves: <strong>Science</strong> and <strong>Engineering</strong>. That split is not arbitrary. Science and Engineering answer fundamentally different questions, demand different skills, and fail in different ways when neglected.
+  </p>
+  <p class="body-text">
+    <strong>Science</strong> asks: <em>how does computation work?</em> What makes an algorithm correct? Why does a distributed system fail in the ways it does? What are the theoretical limits of what a computer can solve? These are questions of understanding. Skipping them means you end up building things you cannot debug, optimize, or reason about when they break at 3 AM. You become someone who can follow a tutorial but cannot deviate from one.
+  </p>
+  <p class="body-text">
+    <strong>Engineering</strong> asks: <em>how do I build and run real systems?</em> Knowing how a B-tree works is Science; designing a database schema that survives production traffic is Engineering. Knowing what a deadlock is belongs to Science; building a deployment pipeline that catches deadlocks before they reach users belongs to Engineering. You need both, and in that order.
+  </p>
+  <p class="body-text">
+    Within Science, there is a further split between <strong>Fundamentals</strong> and <strong>Systems</strong>. Fundamentals covers the abstract core &mdash; computation theory, algorithms, language design &mdash; concepts that do not change regardless of what technology stack you use. Systems takes those ideas and grounds them in real infrastructure: how databases manage transactions, how operating systems schedule processes, how networks route packets. Fundamentals gives you the <em>what</em>; Systems gives you the <em>where it actually runs</em>.
+  </p>
+  <p class="body-text">
+    Within Engineering, the split is between <strong>Building</strong> and <strong>Operating</strong>. Building is about construction &mdash; writing software, setting up infrastructure, designing cloud architectures, establishing CI/CD pipelines. But building a system is only half the job. Operating is about keeping it alive: ensuring reliability through SRE practices, catching performance regressions before users do, hardening security posture, and maintaining observability so that when something goes wrong, you can actually find out why. A system that cannot be operated is a system that cannot be trusted.
+  </p>
+  <p class="body-text">
+    Before any of this, there is <strong>Mathematics</strong> &mdash; specifically discrete mathematics &mdash; which provides the formal language that all of computer science is built on. It sits at the very beginning because without it, the Science layer is just hand-waving.
+  </p>
+  <p class="body-text">
+    The progression is deliberate: Mathematics feeds Science, Science feeds Engineering, and within Engineering, Building feeds Operating. Each layer depends on the one before it. This article walks through all five parts in order, explaining what each topic covers, why it exists, and how it connects to everything else.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 1 — MATHEMATICS                                         -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part1">
+  <div class="part-num">Part 1</div>
+  <h2 class="part-title">Mathematics</h2>
+  <p class="part-subtitle">The formal language that computer science theory is built on.</p>
+</div>
+
+<div class="reveal" id="math-intro">
+  <h3 class="section-heading">Why Mathematics Comes First</h3>
+  <p class="body-text">
+    Every science has a mathematical foundation, but the mathematics that computer science depends on is distinctive. Physics relies on calculus and differential equations. Statistics relies on probability theory. Computer science relies on <strong>discrete mathematics</strong> &mdash; the study of countable, distinct structures rather than continuous ones. This is not a coincidence. Computers are discrete machines. They operate on bits, not on continuous functions. The mathematical structures that describe what computers do &mdash; logic, sets, graphs, relations &mdash; are inherently discrete.
+  </p>
+  <p class="body-text">
+    This is also why discrete math is the mathematical foundation <em>specific</em> to CS, as opposed to calculus, which is shared with essentially every other science and engineering discipline. Calculus is useful in CS (particularly in machine learning and numerical computing), but it is not the foundational language. Discrete math is.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="discrete-math">
+  <h3 class="section-heading"><span class="sh-num">1.</span> Discrete Mathematics</h3>
+  <p class="body-text">
+    Discrete mathematics is where CS meets formal reasoning. It covers logic (propositional and predicate), set theory, relations and functions, graph theory, combinatorics, number theory, and proof techniques (induction, contradiction, construction). These are not abstract curiosities &mdash; they are the tools you use to reason precisely about computational problems.
+  </p>
+  <p class="body-text">
+    Logic gives you the foundation for boolean expressions, database query languages, and circuit design. Set theory underlies type systems and relational databases. Graph theory is the backbone of network analysis, social graphs, dependency resolution, and route planning. Combinatorics shows up every time you need to count possibilities &mdash; how many ways can a system fail, how many test cases cover a specification, how many routes exist between two nodes. Proof techniques teach you how to establish that something is true, not just that it looks true in the cases you tested.
+  </p>
+  <p class="body-text">
+    The practical payoff is this: every algorithm analysis, every database query optimization, every network routing decision, every complexity argument has discrete math underneath it. When you study data structures and algorithms later, you will be writing proofs of correctness and analyzing recurrences. When you study distributed systems, you will be reasoning about graph connectivity and fault models. Without discrete math, those subjects become a collection of recipes you memorize rather than ideas you understand. With it, you can derive solutions rather than just recall them.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 2 — SCIENCE: FUNDAMENTALS                                -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part2">
+  <div class="part-num">Part 2</div>
+  <h2 class="part-title">Science &mdash; <em>Fundamentals</em></h2>
+  <p class="part-subtitle">The abstract theoretical core &mdash; how computation, languages, and algorithms work at a foundational level.</p>
+</div>
+
+<div class="reveal" id="fundamentals-intro">
+  <h3 class="section-heading">What Fundamentals Means</h3>
+  <p class="body-text">
+    The Fundamentals layer of CS is the theoretical core that does not change. Programming languages come and go. Frameworks have a half-life measured in years. But the ideas in this section &mdash; how languages are designed, how algorithms are analyzed, what computation itself can and cannot do &mdash; are as valid today as they were in 1970. They are the concepts that every other part of the discipline depends on.
+  </p>
+  <p class="body-text">
+    These three topics form a progression. Programming Languages and Compilers teaches you how the tools you use every day actually work &mdash; you stop being a consumer of languages and become someone who understands the design choices underneath them. Data Structures and Algorithms gives you the vocabulary and techniques for solving problems efficiently. Theory of Computation pushes further still, asking what problems are solvable at all, and which ones are fundamentally beyond reach. Together, they constitute the intellectual core of computer science as a science.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="pl-compilers">
+  <h3 class="section-heading"><span class="sh-num">2.</span> Programming Languages and Compilers</h3>
+  <p class="body-text">
+    This topic covers how programming languages are designed, how they work internally, and how source code becomes executable instructions. It spans syntax and semantics, type systems, parsing, code generation, intermediate representations, and runtime environments. Most programmers interact with languages purely as users. Studying programming languages and compilers turns you into someone who understands <em>why</em> languages make the design choices they do &mdash; why Python is dynamically typed, why Rust has a borrow checker, why Haskell enforces purity &mdash; and what trade-offs those choices involve.
+  </p>
+  <p class="body-text">
+    Compilers are among the most elegant pieces of software ever built. A compiler takes text &mdash; characters on a screen &mdash; and transforms it through a series of well-defined stages (lexing, parsing, type-checking, optimization, code generation) into machine instructions that hardware can execute. Each stage solves a distinct problem using ideas from formal language theory, graph algorithms, and discrete math. Understanding this pipeline demystifies what happens when you press &ldquo;run,&rdquo; and gives you a mental model for why certain code patterns are fast and others are slow at a level deeper than algorithmic complexity.
+  </p>
+  <p class="body-text">
+    Practically, this knowledge pays off whenever you write a parser, build a DSL (domain-specific language), work with code analysis tools, or need to understand why your language runtime behaves the way it does. It also gives you the conceptual foundation for understanding how LLMs process language tokens &mdash; a modern echo of the same parsing and generation ideas, implemented very differently.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="dsa">
+  <h3 class="section-heading"><span class="sh-num">3.</span> Data Structures and Algorithms</h3>
+  <p class="body-text">
+    This is the core of computer science problem-solving. Data structures are the ways you organize information &mdash; arrays, linked lists, trees, hash tables, heaps, graphs. Algorithms are the methods you use to operate on that information &mdash; sorting, searching, graph traversal, dynamic programming, greedy methods, divide-and-conquer. Algorithmic complexity analysis (Big-O notation) gives you the vocabulary to reason about whether a solution will scale: the difference between an O(n) algorithm and an O(n&sup2;) algorithm is the difference between a system that handles a million users and one that collapses at ten thousand.
+  </p>
+  <p class="body-text">
+    This topic is sometimes reduced to &ldquo;interview prep,&rdquo; which undersells it badly. The real value is not memorizing how to implement quicksort. It is developing the ability to look at a problem, recognize its structure, and choose (or design) an appropriate solution. When you see a problem that requires finding the shortest path, you should recognize it as a graph problem and know which algorithm fits. When a database query is slow, you should understand that the underlying issue is often an algorithmic one &mdash; a missing index turning an O(log n) lookup into an O(n) scan.
+  </p>
+  <p class="body-text">
+    Data Structures and Algorithms also connects directly to almost every other topic in CS. Databases use B-trees, hash indexes, and sort-merge joins. Operating systems use scheduling algorithms, page replacement algorithms, and priority queues. Compilers use graph coloring for register allocation. Distributed systems use consistent hashing for partitioning. This is the one topic that touches everything else, which is why it sits at the center of any CS curriculum.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="theory-of-computation">
+  <h3 class="section-heading"><span class="sh-num">4.</span> Theory of Computation</h3>
+  <p class="body-text">
+    Theory of Computation is the mathematical study of what computers can and cannot do. It covers three major areas: automata theory (finite automata, pushdown automata, Turing machines), computability theory (what problems are solvable by any computer, regardless of how much time and memory you give it), and complexity theory (what problems are solvable <em>efficiently</em>). This is the most abstract topic in the CS curriculum, and it is the one most engineers skip. That is understandable, and also a mistake.
+  </p>
+  <p class="body-text">
+    Computability gives you the framework to understand why some problems are fundamentally unsolvable. The Halting Problem &mdash; whether you can write a program that determines if any other program will finish &mdash; is provably impossible. This is not an engineering limitation. It is a mathematical fact. Understanding this changes how you think about verification, testing, and the limits of automation. Complexity theory extends this to problems that are theoretically solvable but practically intractable. The P vs NP question, NP-completeness, and reduction proofs give you a vocabulary for recognizing when a problem is likely to be hard &mdash; not because you haven&rsquo;t found the right algorithm yet, but because the problem has an inherent computational cost that no algorithm can avoid.
+  </p>
+  <p class="body-text">
+    Automata theory has surprisingly direct practical applications. Regular expressions are literally finite automata. Context-free grammars (the basis for pushdown automata) define the syntax of every programming language. When you write a regex, or define a parser, or design a protocol state machine, you are working with automata theory whether you know it or not. Understanding the theory tells you what these tools can and cannot express &mdash; why regexes cannot parse HTML, why certain validation tasks require a full parser, and where the boundaries between different classes of computation actually lie.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 3 — SCIENCE: SYSTEMS                                     -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part3">
+  <div class="part-num">Part 3</div>
+  <h2 class="part-title">Science &mdash; <em>Systems</em></h2>
+  <p class="part-subtitle">How real computing infrastructure is designed &mdash; from a single machine to distributed clusters.</p>
+</div>
+
+<div class="reveal" id="systems-intro">
+  <h3 class="section-heading">What Systems Means</h3>
+  <p class="body-text">
+    If Fundamentals gives you the abstract ideas, Systems grounds those ideas in real infrastructure. Fundamentals tells you how a hash table works; Systems (Databases) shows you how a storage engine uses hash indexes to serve queries under concurrent load with transactional guarantees. Fundamentals teaches you graph traversal; Systems (Networks) shows you how routing protocols use those algorithms to move packets across the internet.
+  </p>
+  <p class="body-text">
+    The six topics in this section cover the major systems that modern computing is built on: how data is stored (Databases), how computation spans machines (Distributed Systems), how a single machine manages its resources (Operating Systems), how machines communicate (Computer Networks), how work is parallelized (Parallel and Concurrent Computing), and how the hardware itself is designed (Computer Organization and Architecture). Each of these is a deep field in its own right. Together, they give you a complete picture of the infrastructure stack &mdash; from transistors to distributed cloud services.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="databases">
+  <h3 class="section-heading"><span class="sh-num">5.</span> Databases</h3>
+  <p class="body-text">
+    Databases are the most critical piece of infrastructure in almost every software system. This topic covers how data is stored, organized, queried, and managed reliably: the relational model, SQL, indexing, query optimization, transaction management (ACID properties), storage engines, and the internals of how database systems actually work. Understanding databases at a deep level is the difference between an application that works in a demo and one that works in production.
+  </p>
+  <p class="body-text">
+    At the surface level, databases seem simple &mdash; you write SQL, you get data back. But beneath that interface lies an extraordinary amount of engineering. A query optimizer decides the order of joins and which indexes to use, effectively solving a combinatorial optimization problem for every query you run. A storage engine manages how data is physically laid out on disk &mdash; whether it uses B-trees (great for reads) or LSM-trees (great for writes) fundamentally changes performance characteristics. Transaction management ensures that concurrent operations don&rsquo;t corrupt data, using isolation levels and locking strategies drawn directly from concurrency theory.
+  </p>
+  <p class="body-text">
+    The practical importance is hard to overstate. Slow applications are often slow because of database misuse &mdash; missing indexes, N+1 query patterns, improper schema design, or transactions held open too long. Understanding database internals lets you diagnose these problems from first principles rather than guessing. It also prepares you for the distributed databases topic in the next section, where all of these challenges get significantly harder because data is spread across multiple machines.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="distributed-systems">
+  <h3 class="section-heading"><span class="sh-num">6.</span> Distributed Systems</h3>
+  <p class="body-text">
+    Distributed systems is what happens when computation and data span multiple machines. It covers consensus protocols (Paxos, Raft), replication strategies, data partitioning, consistency models (strong, eventual, causal), fault tolerance, and the fundamental impossibility results that constrain system design &mdash; the CAP theorem, the FLP impossibility result, the Byzantine generals problem. Every modern system of any scale is distributed, from microservices architectures to cloud databases to message queues. Understanding distributed systems means understanding why things fail in production in the ways they do.
+  </p>
+  <p class="body-text">
+    The key insight of distributed systems is that failures are not exceptions &mdash; they are the normal operating condition. Networks partition. Machines crash. Clocks drift. Messages arrive out of order or not at all. The field exists because designing systems that remain correct despite these failures is extraordinarily difficult, and the trade-offs are often counterintuitive. The CAP theorem tells you that you cannot have strong consistency, availability, and partition tolerance simultaneously &mdash; you must choose. Understanding which trade-off your system makes is not academic trivia; it determines whether your application loses data or shows stale results during a network partition.
+  </p>
+  <p class="body-text">
+    This topic draws heavily on several Fundamentals concepts. Consensus protocols use ideas from the Theory of Computation (state machines, formal reasoning about correctness). Consistent hashing for partitioning is an algorithmic technique. Replication strategies involve concurrency control from Parallel Computing. Distributed Systems is, in many ways, the capstone of the Science track &mdash; the place where abstract theory meets the harshest real-world constraints.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="operating-systems">
+  <h3 class="section-heading"><span class="sh-num">7.</span> Operating Systems</h3>
+  <p class="body-text">
+    The operating system is the software layer that manages hardware resources and provides abstractions for everything else to run on. This topic covers processes and threads, memory management (virtual memory, paging, segmentation), file systems, CPU scheduling, concurrency primitives (mutexes, semaphores, condition variables), and system calls. Understanding operating systems gives you a mental model for what is actually happening when your code runs &mdash; where the CPU time goes, why things are slow, how memory is allocated, and what the kernel is doing on your behalf.
+  </p>
+  <p class="body-text">
+    The OS is the bridge between hardware and software. When you allocate memory in any programming language, the OS is managing virtual-to-physical address translation through page tables. When you create a thread, the OS scheduler decides when it runs. When you read a file, the OS file system translates your logical request into physical disk operations. Understanding this layer explains performance behaviors that are invisible from application code &mdash; why context switching is expensive, why memory-mapped I/O is fast, why your program uses more memory than you think.
+  </p>
+  <p class="body-text">
+    OS concepts also feed directly into other Systems topics. Operating system scheduling theory shows up in Databases (query scheduling), Distributed Systems (task scheduling across nodes), and Parallel Computing (thread scheduling). Virtual memory concepts underpin how containers and VMs achieve isolation. The concurrency primitives you learn in OS are the same ones you use in every concurrent program you write. This is one of those topics where the return on investment compounds &mdash; the concepts appear everywhere.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="networks">
+  <h3 class="section-heading"><span class="sh-num">8.</span> Computer Networks</h3>
+  <p class="body-text">
+    Computer Networks covers how machines communicate: the TCP/IP protocol stack, routing algorithms, DNS, HTTP, TLS, congestion control, and network architecture from the physical link layer through the application layer. Every web application, API call, cloud deployment, and distributed system depends on networking. When a user clicks a button and a response appears, dozens of networking protocols are cooperating to make that happen &mdash; and understanding those protocols means understanding latency, bandwidth, reliability, and the surprisingly complex machinery behind &ldquo;send a request, get a response.&rdquo;
+  </p>
+  <p class="body-text">
+    The layered architecture of networking (the OSI model or the simpler TCP/IP model) is itself an important lesson in system design. Each layer provides an abstraction that the layer above relies on. The physical layer handles bits on a wire. The data link layer handles frames between directly connected machines. The network layer (IP) handles routing across the internet. The transport layer (TCP/UDP) handles reliable delivery. The application layer (HTTP, DNS, TLS) provides the interfaces that applications actually use. This layered design allows each layer to evolve independently &mdash; a fundamental engineering principle that shows up in databases, operating systems, and software architecture.
+  </p>
+  <p class="body-text">
+    Networking knowledge is especially important for anyone working with distributed systems, cloud infrastructure, or web services. Understanding TCP explains why connections sometimes hang. Understanding DNS explains why deployments sometimes take time to propagate. Understanding TLS explains what actually happens during &ldquo;HTTPS&rdquo; and what a certificate really is. Understanding congestion control explains why your bulk data transfer slows down and how to fix it. These are not exotic edge cases &mdash; they are everyday debugging scenarios.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="parallel-computing">
+  <h3 class="section-heading"><span class="sh-num">9.</span> Parallel &amp; Concurrent Computing</h3>
+  <p class="body-text">
+    Parallel and Concurrent Computing covers how to make multiple things happen at the same time &mdash; and how to do it correctly. Concurrency is about structure: designing a program so that multiple tasks can make progress, whether or not they execute simultaneously. Parallelism is about execution: actually running multiple computations at the same time on multiple cores or machines. Both are essential in modern computing, and both are sources of some of the hardest bugs you will ever encounter.
+  </p>
+  <p class="body-text">
+    The topic covers threads, locks, synchronization primitives, race conditions, deadlocks, lock-free data structures, parallel algorithms, and concurrency models (shared memory, message passing, actors, CSP). With modern hardware being fundamentally parallel &mdash; multi-core CPUs, GPUs with thousands of cores, distributed clusters &mdash; understanding concurrency is no longer optional. A single-threaded program on a modern machine is using a fraction of the available computational power. But moving to concurrent execution introduces an entirely new class of problems: race conditions that manifest only under specific timing, deadlocks that freeze a system, data corruption from unsynchronized access.
+  </p>
+  <p class="body-text">
+    Concurrency bugs are notoriously difficult to reproduce, diagnose, and fix because they depend on timing and scheduling decisions made by the OS and hardware. This is why the topic connects so tightly to Operating Systems (which manages thread scheduling), to Theory of Computation (which provides formal models for reasoning about concurrent processes), and to Distributed Systems (where concurrency happens across machine boundaries with even fewer guarantees). Understanding concurrency at a theoretical level &mdash; not just &ldquo;how do I use threads in Python&rdquo; but &ldquo;what guarantees does this concurrent design actually provide&rdquo; &mdash; is what separates engineers who build reliable systems from those who build systems that work until they don&rsquo;t.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="architecture">
+  <h3 class="section-heading"><span class="sh-num">10.</span> Computer Organization &amp; Architecture</h3>
+  <p class="body-text">
+    Computer Organization and Architecture covers how computers actually work at the hardware level: CPU architecture, instruction sets (ISA), caches, memory hierarchy, pipelining, branch prediction, and the relationship between hardware design and software performance. This is the bottom of the stack &mdash; the physical reality that everything else is built on. Understanding architecture explains performance behaviors that have nothing to do with algorithmic complexity.
+  </p>
+  <p class="body-text">
+    The memory hierarchy is perhaps the most practically important concept. Modern CPUs are enormously faster than main memory &mdash; a cache hit might take 1 nanosecond while a main memory access takes 100 nanoseconds. This means that <em>how</em> you access data matters as much as <em>what</em> you compute. Code that accesses memory sequentially (good cache locality) can be orders of magnitude faster than code that accesses memory randomly, even if both perform the same number of operations. This explains why arrays are faster than linked lists in practice despite having worse theoretical complexity for insertion, and why matrix multiplication implementations that respect cache lines outperform naive implementations by 10x or more.
+  </p>
+  <p class="body-text">
+    Architecture knowledge also grounds your understanding of why certain abstractions exist. Virtual memory makes sense when you understand how page tables and TLBs work at the hardware level. Thread context switching costs make sense when you understand what the CPU needs to save and restore. GPU computing makes sense when you understand SIMD execution models. And the current revolution in AI hardware &mdash; TPUs, NPUs, custom accelerators &mdash; makes sense when you understand the gap between general-purpose CPU architecture and domain-specific design. This topic turns the machine from a black box into something you can reason about.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 4 — ENGINEERING: BUILDING                                -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part4">
+  <div class="part-num">Part 4</div>
+  <h2 class="part-title">Engineering &mdash; <em>Building</em></h2>
+  <p class="part-subtitle">Constructing software systems and the infrastructure they run on.</p>
+</div>
+
+<div class="reveal" id="building-intro">
+  <h3 class="section-heading">What Building Means</h3>
+  <p class="body-text">
+    The Building category is where Science turns into practice. Everything in Parts 1&ndash;3 gives you understanding. Building is where you use that understanding to construct real systems that solve real problems. The distinction is important: you can understand B-trees deeply and still write terrible production software if you do not know how to structure a codebase, manage dependencies, write tests, deploy reliably, or operate infrastructure.
+  </p>
+  <p class="body-text">
+    Building splits into two disciplines: <strong>Software Engineering</strong> and <strong>Infrastructure Engineering</strong>. Software Engineering is the practice of building software that is maintainable, testable, and scalable over time. Infrastructure Engineering is the practice of building and managing the platforms that software runs on. They are deeply interconnected &mdash; you cannot do one well without understanding the other &mdash; but they require different skills and different modes of thinking.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="software-engineering">
+  <h3 class="section-heading"><span class="sh-num">11.</span> Software Engineering</h3>
+  <p class="body-text">
+    Software Engineering is a discipline, not just &ldquo;writing code.&rdquo; The distinction matters. Anyone can write a script that works once. Software Engineering is the discipline of building systems that are maintainable, testable, and scalable &mdash; systems that can be evolved by teams of people over years without collapsing under their own weight. It covers design patterns, software architecture (monoliths, microservices, event-driven systems), testing strategies (unit, integration, end-to-end), code review practices, version control workflows, dependency management, and the principles that separate hobby code from professional software.
+  </p>
+  <p class="body-text">
+    The core challenge of software engineering is managing complexity over time. A small program written by one person can live in their head. A system built by a team, serving millions of users, evolving over years, cannot. Software engineering provides the tools and practices to manage that complexity: abstraction to hide irrelevant details, modularity to isolate changes, testing to catch regressions, architecture to organize the codebase so that teams can work independently, and design principles (SOLID, DRY, separation of concerns) to keep code comprehensible as it grows.
+  </p>
+  <p class="body-text">
+    This is also where the Science foundation pays off most visibly. Understanding algorithms tells you when a design choice will not scale. Understanding databases tells you how to design schemas that support your access patterns. Understanding distributed systems tells you which consistency guarantees your architecture actually provides. Software Engineering is the integration point where all the theoretical knowledge becomes practical decision-making.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="infrastructure-engineering">
+  <h3 class="section-heading"><span class="sh-num">12.</span> Infrastructure Engineering</h3>
+  <p class="body-text">
+    Infrastructure Engineering is the engineering of the platforms and systems that software runs on. It encompasses three related sub-disciplines: <strong>DevOps</strong>, <strong>Cloud Engineering</strong>, and <strong>Platform Engineering</strong>. Together, they represent the shift from &ldquo;it works on my machine&rdquo; to &ldquo;it works reliably for millions of users.&rdquo;
+  </p>
+  <p class="body-text">
+    <strong>DevOps</strong> (Development Operations) is the practice of bridging the gap between writing software and running it. It covers CI/CD pipelines (continuous integration and deployment), infrastructure as code, automated testing in deployment pipelines, configuration management, and the cultural practices that break down the traditional wall between development teams and operations teams. DevOps is fundamentally about feedback loops &mdash; making the cycle from code change to production deployment as fast and safe as possible. <strong>Cloud Engineering</strong> covers designing and managing infrastructure on AWS, GCP, Azure, or other cloud platforms. It involves networking (VPCs, load balancers), compute (containers, serverless, VMs), storage (object stores, block storage, managed databases), and the art of designing architectures that are cost-effective, scalable, and resilient. <strong>Platform Engineering</strong> is the discipline of building internal developer platforms &mdash; the tools and abstractions that make it easy for other engineers to ship software without needing to understand every detail of the underlying infrastructure.
+  </p>
+  <p class="body-text">
+    These three sub-disciplines have evolved as the industry matured. DevOps emerged in the 2000s as a reaction to slow, manual deployment processes. Cloud Engineering grew as organizations moved from managing physical servers to using cloud providers. Platform Engineering emerged more recently as organizations realized that giving every developer direct access to raw cloud APIs creates chaos &mdash; a curated platform with sensible defaults and guardrails is more productive. Understanding all three gives you the complete picture of how modern software gets from a developer&rsquo;s laptop to production at scale.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 5 — ENGINEERING: OPERATING                               -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part5">
+  <div class="part-num">Part 5</div>
+  <h2 class="part-title">Engineering &mdash; <em>Operating</em></h2>
+  <p class="part-subtitle">Keeping systems reliable, performant, secure, and observable in production.</p>
+</div>
+
+<div class="reveal" id="operating-intro">
+  <h3 class="section-heading">What Operating Means</h3>
+  <p class="body-text">
+    Building a system is only half the job. The other half &mdash; often the harder half &mdash; is keeping it alive. Operating is the set of disciplines concerned with the ongoing health, performance, security, and debuggability of systems in production. A startup that ships a product and cannot keep it running loses customers. An enterprise that builds a system and cannot secure it faces compliance failures and breaches. A team that deploys a service and cannot observe it spends every incident guessing.
+  </p>
+  <p class="body-text">
+    The four Operating disciplines form a complete picture of production health. <strong>Reliability Engineering</strong> ensures the system stays up. <strong>Performance Engineering</strong> ensures the system stays fast. <strong>Security Engineering</strong> ensures the system stays safe. <strong>Observability Engineering</strong> ensures the system stays understandable. These are not optional add-ons for mature organizations &mdash; they are necessary from the moment a system serves real users.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="reliability-engineering">
+  <h3 class="section-heading"><span class="sh-num">13.</span> Reliability Engineering / SRE</h3>
+  <p class="body-text">
+    Reliability Engineering is the practice of keeping systems running at scale. It emerged from Google&rsquo;s insight that you cannot operate complex systems with manual processes &mdash; you need engineering discipline, automation, and a principled approach to managing risk. The formalized version, Site Reliability Engineering (SRE), introduced concepts that have become industry standard: service level objectives (SLOs), error budgets, incident response procedures, capacity planning, and the philosophy that operations is a software engineering problem.
+  </p>
+  <p class="body-text">
+    The core idea of SRE is the error budget. Rather than pursuing 100% uptime (which is both impossible and economically irrational), you define an acceptable level of unreliability &mdash; say, 99.9% availability, which allows about 8.7 hours of downtime per year. As long as you are within that budget, you can take risks (deploy new features, run experiments). When you exhaust the budget, you slow down and invest in stability. This framing turns the perpetual tension between &ldquo;ship features&rdquo; and &ldquo;keep it stable&rdquo; into a quantitative, manageable trade-off.
+  </p>
+  <p class="body-text">
+    Reliability Engineering draws directly on Distributed Systems (understanding failure modes), Operating Systems (understanding resource exhaustion), and Software Engineering (automating operational tasks). It also connects forward to the other Operating disciplines: you cannot maintain reliability without observability (to detect problems), performance engineering (to prevent degradation), and security (to prevent adversarial disruptions). SRE is, in many ways, the orchestrator of the Operating layer.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="performance-engineering">
+  <h3 class="section-heading"><span class="sh-num">14.</span> Performance Engineering</h3>
+  <p class="body-text">
+    Performance Engineering is the discipline of making systems fast &mdash; and keeping them fast as they grow. It covers profiling, benchmarking, load testing, bottleneck identification, and optimization across the full stack: CPU, memory, I/O, network, database, and application logic. Performance problems are among the hardest to diagnose because they are emergent &mdash; they arise from the interaction of multiple components, not from a single bug. A slow query, a poorly configured connection pool, and a memory allocation pattern might each be fine individually but produce terrible latency together.
+  </p>
+  <p class="body-text">
+    The approach to performance engineering is empirical and systematic. You start with measurement (profiling, tracing, benchmarking), form hypotheses about bottlenecks, test changes, and measure again. This cycle requires understanding the entire stack. A CPU profile might point you to a hot function, but the real fix might be a database index change, a caching layer, or a different serialization format. Performance work is where your knowledge of algorithms (complexity), databases (query plans), operating systems (I/O scheduling), networks (latency), and architecture (cache behavior) all converge into a single diagnostic process.
+  </p>
+  <p class="body-text">
+    Performance engineering also has an important preventive dimension. Establishing performance budgets, running automated benchmarks in CI, tracking latency percentiles (p50, p95, p99) over time, and load testing before major releases are all practices that catch regressions before they reach users. Systems that are fast on day one and slow on day three hundred almost always got that way gradually, one small regression at a time, because nobody was watching.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="security-engineering">
+  <h3 class="section-heading"><span class="sh-num">15.</span> Security Engineering</h3>
+  <p class="body-text">
+    Security Engineering is the discipline of protecting systems, data, and users from adversarial threats. It covers application security (the OWASP Top 10 vulnerabilities: injection, broken authentication, XSS, and so on), threat modeling, authentication and authorization systems, encryption (at rest and in transit), secure coding practices, and zero-trust architecture. Security is not a feature you add at the end &mdash; it is a property of how the entire system is designed, built, and operated.
+  </p>
+  <p class="body-text">
+    The fundamental challenge of security is the asymmetry between attacker and defender. An attacker only needs to find one vulnerability. A defender needs to close all of them. This asymmetry means that security engineering is less about clever defenses and more about disciplined, systematic practices: input validation everywhere, least-privilege access by default, encryption as a baseline, regular dependency auditing, and the assumption that any component might be compromised. Threat modeling &mdash; systematically identifying what could go wrong and how likely it is &mdash; provides the framework for deciding where to invest limited security resources.
+  </p>
+  <p class="body-text">
+    Security connects to every other part of the discipline. Cryptography relies on number theory from Mathematics. Authentication protocols use ideas from Distributed Systems. Network security requires understanding of Computer Networks. Secure software design is a subset of Software Engineering. And security incidents are diagnosed using Observability. Every engineer needs at least a baseline understanding of security, because a system with beautiful architecture and zero security posture is a system waiting to be compromised.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="observability-engineering">
+  <h3 class="section-heading"><span class="sh-num">16.</span> Observability Engineering</h3>
+  <p class="body-text">
+    Observability Engineering is the discipline of making systems understandable from the outside by examining their outputs. It covers the three pillars of observability &mdash; logging, metrics, and distributed tracing &mdash; plus alerting, dashboarding, and the practices that make complex systems debuggable. When something goes wrong in production at 3 AM, observability is what determines whether you diagnose the problem in minutes or spend hours guessing.
+  </p>
+  <p class="body-text">
+    The distinction between monitoring and observability is important. Monitoring tells you when something is wrong (an alert fires because error rate exceeded 1%). Observability tells you <em>why</em> something is wrong (you can trace a failed request through ten microservices, see exactly where it broke, examine the state of the system at that moment, and determine the root cause without deploying new instrumentation). Monitoring is about known-unknowns &mdash; things you anticipated might fail. Observability is about unknown-unknowns &mdash; things you could not have predicted, which in complex systems are the majority of real incidents.
+  </p>
+  <p class="body-text">
+    Observability is the enabling discipline for everything else in the Operating layer. You cannot do reliability engineering without knowing when the system is degraded. You cannot do performance engineering without measuring latency and resource usage. You cannot do security engineering without audit logs and anomaly detection. Observability is the foundation that makes the other three operating disciplines possible, which is why investing in it early &mdash; before you think you need it &mdash; is one of the highest-leverage decisions an engineering team can make.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  HOW IT ALL CONNECTS                                           -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="connections">
+  <div class="part-num">Closing</div>
+  <h2 class="part-title">How It All <em>Connects</em></h2>
+  <p class="part-subtitle">The discipline is a progression, not a collection.</p>
+</div>
+
+<div class="reveal" id="connections-body">
+  <p class="body-text">
+    The structure of this article is not just organizational convenience. It reflects a genuine dependency chain. Mathematics provides the formal language &mdash; logic, proof, combinatorial reasoning &mdash; that the Science layer is built on. Without it, algorithms are recipes you memorize, complexity analysis is hand-waving, and correctness proofs are impossible.
+  </p>
+  <p class="body-text">
+    The Science layer splits into Fundamentals and Systems for a reason. Fundamentals gives you the abstract ideas &mdash; how algorithms work, what computation can and cannot do, how languages translate intent into execution. Systems takes those abstractions and instantiates them in real infrastructure. You need the abstractions first because they are what let you reason about systems from first principles rather than just memorizing configuration options.
+  </p>
+  <p class="body-text">
+    Engineering depends on Science in the same way that Science depends on Mathematics. You can learn to deploy a Kubernetes cluster without understanding operating systems, but when a pod gets OOM-killed and you don&rsquo;t understand virtual memory, you are debugging with a blindfold on. You can write microservices without understanding distributed systems, but when a network partition causes data inconsistency, the CAP theorem is not an academic curiosity &mdash; it is the explanation for why your system is behaving the way it is.
+  </p>
+  <p class="body-text">
+    Within Engineering, Building feeds Operating. You cannot operate a system you do not understand how to build. SRE practices assume you can write automation. Performance engineering assumes you can modify application code and database queries. Security engineering assumes you understand the software stack deeply enough to identify vulnerabilities. And all of Operating assumes Observability &mdash; you cannot improve what you cannot see.
+  </p>
+  <p class="body-text">
+    The full chain runs: <strong>Mathematics &rarr; Science (Fundamentals &rarr; Systems) &rarr; Engineering (Building &rarr; Operating)</strong>. Each link strengthens every link that follows. The temptation is always to skip ahead &mdash; to jump to Building without the Science, or to Operating without the Building. That works until it does not. And when it stops working, the gap in your foundation is exactly what makes the problem impossible to diagnose.
+  </p>
+  <p class="body-text">
+    This is the full landscape of Computer Science and Engineering. It is large, but it is not random. The structure is a map, and the progression is a path. You do not need to master every topic before moving to the next &mdash; but you do need to know the map well enough to understand where you are, what you are standing on, and what you are missing.
+  </p>
+</div>
+
+</main>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-name">Computer Science &amp; Engineering</span>
+    <span class="footer-copy">&copy; 2026</span>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // TOC active section tracking
+  const tocLinks = document.querySelectorAll('.toc a');
+  const sections = [];
+  tocLinks.forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      const el = document.getElementById(href.slice(1));
+      if (el) sections.push({ el, link });
+    }
+  });
+
+  const tocObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const match = sections.find(s => s.el === entry.target);
+        if (match) match.link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => tocObserver.observe(s.el));
+
+  // Back to top button
+  const backBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    backBtn.classList.toggle('visible', window.scrollY > 600);
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data &amp; Intelligence</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <meta property="og:title" content="Data & Intelligence — Towards Intelligence"/>
+  <meta property="og:description" content="A dual-track approach to AI and data — the Science track for theoretical depth, the Engineering track for hands-on building."/>
+  <meta property="og:type" content="article"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:         #0e0e0f;
+      --surface:    #151516;
+      --surface2:   #1c1c1e;
+      --rule:       #2a2a2e;
+      --rule-lt:    #333338;
+      --ink:        #e0dbd2;
+      --ink-mid:    #d1cbbf;
+      --ink-dim:    #b0a99e;
+      --white:      #e8e3da;
+      --accent:     #c8a96e;
+      --accent-dim: #3a2e1a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* -- NAV -- */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(14, 14, 15, 0.94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em;
+      color: var(--white); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.active { color: var(--accent); }
+
+    /* -- LAYOUT -- */
+    .page-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* -- SIDEBAR TOC -- */
+    .toc {
+      position: sticky;
+      top: 5rem;
+      height: calc(100vh - 6rem);
+      overflow-y: auto;
+      padding: 2rem 0 2rem 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--rule) transparent;
+    }
+    .toc::-webkit-scrollbar { width: 4px; }
+    .toc::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
+    .toc::-webkit-scrollbar-track { background: transparent; }
+
+    .toc-part-label {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--accent);
+      margin-top: 1.6rem; margin-bottom: 0.5rem;
+      padding-left: 0.8rem;
+    }
+    .toc-part-label:first-child { margin-top: 0; }
+
+    .toc a {
+      display: block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 400;
+      color: var(--ink-dim);
+      text-decoration: none;
+      padding: 0.3rem 0.8rem;
+      border-left: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      line-height: 1.5;
+    }
+    .toc a:hover { color: var(--ink-mid); }
+    .toc a.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+    .toc a.toc-sub {
+      padding-left: 1.4rem;
+      font-size: 0.74rem;
+    }
+
+    /* -- MAIN CONTENT -- */
+    .main-content {
+      min-width: 0;
+      padding-bottom: 6rem;
+    }
+
+    /* -- HERO -- */
+    .hero {
+      padding: 8rem 0 4rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 4rem;
+    }
+    .hero-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      display: flex; align-items: center; gap: 0.8rem;
+      margin-bottom: 1.6rem;
+    }
+    .hero-kicker::before {
+      content: ''; display: block;
+      width: 32px; height: 1px; background: var(--accent);
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.6rem, 5vw, 4.2rem);
+      font-weight: 600; line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+    }
+    .hero-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .hero-subtitle {
+      font-size: 1.05rem; line-height: 1.8;
+      color: var(--ink-mid); max-width: 640px;
+      font-weight: 300; text-align: justify;
+    }
+
+    /* -- PART DIVIDER -- */
+    .part-divider {
+      padding: 4rem 0 2.5rem;
+      border-top: 1px solid var(--rule);
+      margin-top: 3rem;
+      position: relative;
+    }
+    .part-divider:first-of-type { margin-top: 0; border-top: none; }
+    .part-num {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .part-num::before {
+      content: ''; display: block;
+      width: 24px; height: 1px; background: var(--accent);
+    }
+    .part-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 600; line-height: 1.15;
+      color: var(--white); letter-spacing: -0.01em;
+    }
+    .part-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .part-subtitle {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; color: var(--ink-dim); line-height: 1.7;
+      margin-top: 0.6rem; max-width: 600px;
+    }
+
+    /* -- SECTION HEADINGS -- */
+    .section-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+      font-weight: 600; line-height: 1.2;
+      color: var(--white);
+      margin: 3rem 0 1rem;
+      padding-top: 1.5rem;
+    }
+    .section-heading .sh-num {
+      color: var(--accent);
+      font-style: italic;
+      font-weight: 400;
+      margin-right: 0.3rem;
+    }
+
+    /* -- SUBSECTION HEADINGS -- */
+    .subsection-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 600; line-height: 1.3;
+      color: var(--white);
+      margin: 2rem 0 0.6rem;
+    }
+
+    /* -- BODY TEXT -- */
+    .body-text {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem; color: var(--ink-mid); line-height: 1.8;
+      font-weight: 300; text-align: justify;
+      margin-bottom: 1rem;
+    }
+    .body-text strong { font-weight: 600; color: var(--ink); }
+    .body-text em { color: var(--ink); }
+
+    /* -- EXPLANATION / BLOCKQUOTE -- */
+    .explanation {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem; color: var(--ink-mid); line-height: 1.8;
+      font-weight: 300;
+      padding: 1.2rem 0 1.2rem 1.4rem;
+      border-left: 2px solid var(--accent-dim);
+      margin-bottom: 1.5rem;
+      text-align: justify;
+    }
+    .explanation strong { font-weight: 600; color: var(--ink); }
+
+    /* -- CHIPS / TAGS -- */
+    .chip-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 1.5rem; }
+    .chip {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink-dim);
+      padding: 0.35rem 0.8rem;
+      border: 1px solid var(--rule-lt); border-radius: 1px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* -- BULLET LIST -- */
+    .content-list {
+      list-style: none;
+      margin: 0.5rem 0 1.2rem;
+    }
+    .content-list li {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.96rem; color: var(--ink-mid);
+      font-weight: 300; line-height: 1.75;
+      padding: 0.25rem 0 0.25rem 1.4rem;
+      position: relative;
+      text-align: justify;
+    }
+    .content-list li::before {
+      content: '\2014';
+      position: absolute; left: 0;
+      color: var(--ink-dim); font-size: 0.85rem;
+    }
+    .content-list li strong { font-weight: 600; color: var(--ink); }
+
+    /* -- LABEL -- */
+    .label {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .label::before {
+      content: ''; display: block;
+      width: 16px; height: 1px; background: var(--accent);
+    }
+
+    /* -- NOTE BLOCK -- */
+    .note-block {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      padding: 1.4rem 1.6rem;
+      margin: 1.2rem 0 1.8rem;
+    }
+    .note-block .note-label {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.76rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .note-block p {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.94rem; color: var(--ink-dim); line-height: 1.7;
+      font-weight: 300; text-align: justify;
+    }
+    .note-block p strong { font-weight: 600; color: var(--ink); }
+
+    /* -- HORIZONTAL RULE -- */
+    .content-rule {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--rule-lt) 20%, var(--rule-lt) 80%, transparent);
+      margin: 2.5rem 0;
+    }
+
+    /* -- MIRROR TABLE -- */
+    .mirror-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0 2rem;
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.92rem;
+    }
+    .mirror-table thead th {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent);
+      text-align: left;
+      padding: 0.8rem 1rem;
+      border-bottom: 2px solid var(--rule);
+    }
+    .mirror-table tbody td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--rule);
+      color: var(--ink-mid);
+      font-weight: 300;
+      line-height: 1.6;
+      vertical-align: top;
+    }
+    .mirror-table tbody td strong { font-weight: 600; color: var(--ink); }
+    .mirror-table tbody tr:hover td { color: var(--ink); }
+
+    /* -- SCROLL REVEAL -- */
+    .reveal {
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* -- BACK TO TOP -- */
+    .back-to-top {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      width: 40px; height: 40px;
+      background: var(--surface2);
+      border: 1px solid var(--rule);
+      color: var(--ink-dim);
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 99;
+      border-radius: 2px;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .back-to-top:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* -- FOOTER -- */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 1.6rem 2rem;
+      background: var(--surface);
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem; color: var(--ink-dim);
+    }
+    .footer-copy {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.8rem; color: var(--ink-dim); letter-spacing: 0.05em;
+    }
+
+    /* -- RESPONSIVE -- */
+    @media (max-width: 960px) {
+      .page-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .toc { display: none; }
+      .main-content { padding: 0; }
+    }
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .page-layout { padding-left: 1.2rem; padding-right: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Towards Intelligence</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Roadmap</a></li>
+      <li><a href="cse.html">CS &amp; Engineering</a></li>
+      <li><a href="data-intelligence.html" class="active">Data &amp; Intelligence</a></li>
+      <li><a href="llm-engineering.html">LLM Engineering</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- BACK TO TOP -->
+<a href="#top" class="back-to-top" id="backToTop" aria-label="Back to top">&uarr;</a>
+
+<div class="page-layout" id="top">
+
+<!-- ===== SIDEBAR TOC ===== -->
+<aside class="toc" id="toc">
+
+  <div class="toc-part-label">Introduction</div>
+  <a href="#intro">The Dual-Track Structure</a>
+
+  <div class="toc-part-label">Part 1 &mdash; The Five Topics</div>
+  <a href="#five-topics">Why This Progression</a>
+  <a href="#t-data-analysis" class="toc-sub">Data Analysis</a>
+  <a href="#t-ml" class="toc-sub">Machine Learning</a>
+  <a href="#t-dl" class="toc-sub">Deep Learning</a>
+  <a href="#t-nlp" class="toc-sub">NLP</a>
+  <a href="#t-transformers" class="toc-sub">Transformers &amp; LLMs</a>
+
+  <div class="toc-part-label">Part 2 &mdash; The Science Track</div>
+  <a href="#science-overview">Overview</a>
+  <a href="#sci-data-analysis" class="toc-sub">Data Analysis</a>
+  <a href="#sci-ml" class="toc-sub">Machine Learning</a>
+  <a href="#sci-dl" class="toc-sub">Deep Learning</a>
+  <a href="#sci-nlp" class="toc-sub">NLP</a>
+  <a href="#sci-transformers" class="toc-sub">Transformers &amp; LLMs</a>
+
+  <div class="toc-part-label">Part 3 &mdash; Engineering: Building</div>
+  <a href="#eng-overview">Overview</a>
+  <a href="#eng-se" class="toc-sub">Software Engineering</a>
+  <a href="#eng-data-analysis" class="toc-sub">Data Analysis</a>
+  <a href="#eng-ml" class="toc-sub">Machine Learning</a>
+  <a href="#eng-dl" class="toc-sub">Deep Learning</a>
+  <a href="#eng-nlp" class="toc-sub">NLP</a>
+  <a href="#eng-transformers" class="toc-sub">Transformers &amp; LLMs</a>
+  <a href="#eng-infra" class="toc-sub">Infrastructure Engineering</a>
+
+  <div class="toc-part-label">Part 4 &mdash; Engineering: Operating</div>
+  <a href="#operating">Operating ML Systems</a>
+
+  <div class="toc-part-label">Part 5 &mdash; State of the Art</div>
+  <a href="#sota">Tracking the Frontier</a>
+
+  <div class="toc-part-label">Closing</div>
+  <a href="#mirror">The Mirror</a>
+
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main-content">
+
+<!-- HERO -->
+<div class="hero reveal" id="hero-section">
+  <div class="hero-kicker">Long-form Reference</div>
+  <h1 class="hero-title">Data &amp; <em>Intelligence</em></h1>
+  <p class="hero-subtitle">
+    A dual-track approach to AI and data &mdash; the Science track for theoretical depth, the Engineering track for hands-on building &mdash; from data analysis to large language models.
+  </p>
+</div>
+
+
+<!-- ============================================================ -->
+<!--  INTRODUCTION                                                 -->
+<!-- ============================================================ -->
+
+<div class="reveal" id="intro">
+  <h3 class="section-heading">The Dual-Track Structure</h3>
+  <p class="body-text">
+    Data &amp; Intelligence is built around a single structural idea: every topic is studied twice, once through the lens of <strong>Science</strong> and once through the lens of <strong>Engineering</strong>. This is not a stylistic choice. It is a direct response to a problem that plagues most self-directed AI learning paths: they either emphasise theory to the point where you can derive a loss function on a whiteboard but have never trained a model on real data, or they emphasise tutorials and frameworks to the point where you can get a model running but have no idea why it is misbehaving, what assumptions it is making, or how to reason about its failures.
+  </p>
+  <p class="body-text">
+    The Science track builds <strong>mathematical intuition</strong>. Its materials are canonical textbooks and university lecture series &mdash; the kind of resources that the field is actually built on. The goal is not to memorise proofs. It is to develop the ability to read a research paper, understand a loss function, reason about why a model is failing, and know what guarantees an algorithm does and does not provide. This is the <em>why</em> track.
+  </p>
+  <p class="body-text">
+    The Engineering track builds <strong>practical fluency</strong>. Its materials are implementation-focused books, framework documentation, and code repositories. The goal is to actually build things &mdash; train models, clean data, deploy systems, debug the myriad ways training can silently go wrong. The Engineering track is further split into <strong>Building</strong> (writing the code, choosing the framework, structuring the experiment) and <strong>Operating</strong> (running models in production, monitoring drift, managing retraining). This is the <em>how</em> track.
+  </p>
+  <p class="body-text">
+    Both tracks cover the same five topics in the same order: Data Analysis, Machine Learning, Deep Learning, Natural Language Processing, and Transformers &amp; Large Language Models. This deliberate mirroring is the core design principle. When you study Machine Learning in the Science track, you learn the bias-variance tradeoff, regularisation theory, and generalisation bounds. When you study Machine Learning in the Engineering track, you learn Scikit-Learn, feature engineering, and how to build reproducible pipelines. Same topic, different angle, complementary understanding.
+  </p>
+  <p class="body-text">
+    The premise is simple: <strong>theory without practice is academic</strong> &mdash; you understand the mathematics but cannot ship anything. <strong>Practice without theory is fragile</strong> &mdash; you can follow a tutorial, but the moment something behaves unexpectedly, you have no mental model to fall back on. Both tracks together produce someone who can reason about <em>and</em> build intelligent systems.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 1 — THE FIVE TOPICS                                    -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part1">
+  <div class="part-num">Part 1</div>
+  <h2 class="part-title">The Five <em>Topics</em></h2>
+  <p class="part-subtitle">The progression that both tracks follow &mdash; and why the order matters.</p>
+</div>
+
+<div class="reveal" id="five-topics">
+  <h3 class="section-heading">Why This Progression</h3>
+  <p class="body-text">
+    The five topics are not an arbitrary curriculum. They trace the historical and conceptual arc of how the field of artificial intelligence actually developed, and each one provides the foundation that makes the next one possible. Skip a step and you will carry blind spots that become increasingly expensive the further you go. The order matters because understanding is cumulative &mdash; not just factually, but in the way you learn to think about problems.
+  </p>
+  <p class="body-text">
+    The progression starts at the ground level: working with raw data. It then moves through increasingly powerful methods for learning from that data, applies those methods to the most complex natural data we encounter &mdash; human language &mdash; and culminates in the architecture that has redefined the entire field. Here are the five stages and why each one precedes the next.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Topic 1 -->
+<div class="reveal" id="t-data-analysis">
+  <h3 class="section-heading"><span class="sh-num">1.</span> Data Analysis</h3>
+  <p class="body-text">
+    <strong>The foundation.</strong> Before you can build any model, you need to understand the data it will be trained on. Data analysis is the discipline of asking questions of data and drawing valid conclusions &mdash; understanding distributions, detecting patterns, identifying anomalies, and knowing when a result is statistically meaningful versus the product of noise or bias. This is where you develop the intuition for what data actually looks like in the wild: messy, incomplete, biased, surprising.
+  </p>
+  <p class="body-text">
+    Every subsequent topic in this progression assumes you can work fluently with data. Machine learning algorithms ingest data; if you do not understand the data, you cannot understand what the algorithm is actually learning. Starting here is not optional &mdash; it is the single most important investment in the entire path, because mistakes made at the data level propagate through everything built on top of it.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Topic 2 -->
+<div class="reveal" id="t-ml">
+  <h3 class="section-heading"><span class="sh-num">2.</span> Machine Learning</h3>
+  <p class="body-text">
+    <strong>Learning from data.</strong> Machine learning introduces the idea that a computer can learn patterns and make predictions from data without being explicitly programmed for every case. This covers the classical algorithms &mdash; linear models, decision trees, support vector machines, ensemble methods, clustering &mdash; and the theoretical framework that explains when and why they work: the bias-variance tradeoff, cross-validation, regularisation, generalisation theory.
+  </p>
+  <p class="body-text">
+    This comes after data analysis because ML algorithms are only as good as the data and features they receive. Understanding data well enough to clean it, transform it, and select the right features is what separates ML that works from ML that looks impressive in a notebook but fails in production. The classical ML toolkit also establishes the vocabulary and mental models &mdash; loss functions, optimisation, overfitting, evaluation metrics &mdash; that every subsequent topic builds on.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Topic 3 -->
+<div class="reveal" id="t-dl">
+  <h3 class="section-heading"><span class="sh-num">3.</span> Deep Learning</h3>
+  <p class="body-text">
+    <strong>The leap to representation learning.</strong> Deep learning is what happens when you stop manually engineering features and instead let neural networks learn their own representations directly from raw data. This is the conceptual leap: instead of telling the model what to look for (edges, frequencies, word counts), you give it the raw input and enough capacity to figure it out. Convolutional networks learn to see; recurrent networks learn to process sequences; the principles of backpropagation and gradient-based optimisation make it all possible.
+  </p>
+  <p class="body-text">
+    Deep learning comes after classical ML because you need to understand what manual feature engineering looks like before you can appreciate what it means to replace it. You also need the foundations of optimisation, loss functions, and overfitting from the ML stage to make sense of what happens during neural network training. Without that grounding, deep learning is a black box that sometimes works and sometimes does not, and you have no framework for understanding which or why.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Topic 4 -->
+<div class="reveal" id="t-nlp">
+  <h3 class="section-heading"><span class="sh-num">4.</span> Natural Language Processing</h3>
+  <p class="body-text">
+    <strong>Applying intelligence to language.</strong> Natural language processing takes everything from the ML and deep learning stages and applies it to the most complex, ambiguous, and context-dependent data humans produce: language. Text is not a matrix of pixel values or a table of measurements. It is sequential, nested, culturally embedded, and deeply ambiguous. NLP is where you confront these challenges &mdash; learning how to represent words and sentences computationally, how to model the structure of language, and how to build systems that can classify, translate, summarise, and generate text.
+  </p>
+  <p class="body-text">
+    NLP comes after deep learning because modern NLP is built on deep learning. Word embeddings, sequence-to-sequence models, attention mechanisms &mdash; these are all deep learning concepts applied to the language domain. Studying NLP before you understand neural networks means you would be learning the applications before understanding the machinery. The progression ensures you arrive at NLP already fluent in the tools it depends on.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Topic 5 -->
+<div class="reveal" id="t-transformers">
+  <h3 class="section-heading"><span class="sh-num">5.</span> Transformers &amp; Large Language Models</h3>
+  <p class="body-text">
+    <strong>The architecture that changed everything.</strong> The transformer, introduced in the 2017 paper &ldquo;Attention Is All You Need,&rdquo; replaced recurrence with self-attention and enabled a new paradigm: models that scale massively with data and compute, that can be pre-trained on vast corpora and then adapted to virtually any task. Large language models &mdash; GPT, Claude, Gemini, Llama &mdash; are the products of this architecture scaled to billions of parameters and trillions of tokens. They represent the current frontier of AI capability.
+  </p>
+  <p class="body-text">
+    This is the culmination of the entire progression. Transformers are deep learning architectures (you need deep learning). They are applied primarily to language (you need NLP). They are evaluated using ML principles like generalisation and evaluation metrics (you need classical ML). And their training data, biases, and failure modes can only be understood if you know how to analyse data (you need data analysis). Every preceding topic is load-bearing. Arriving at transformers without the foundations means you can use an API but you cannot reason about what the model is doing, why it fails, or how to improve it.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 2 — THE SCIENCE TRACK                                  -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part2">
+  <div class="part-num">Part 2</div>
+  <h2 class="part-title">The Science <em>Track</em></h2>
+  <p class="part-subtitle">Building mathematical intuition through canonical textbooks and university lecture series.</p>
+</div>
+
+<div class="reveal" id="science-overview">
+  <h3 class="section-heading">What the Science Track Is About</h3>
+  <p class="body-text">
+    The Science track is about developing the theoretical depth that lets you understand not just <em>what</em> works, but <em>why</em> it works and &mdash; critically &mdash; <em>when it will stop working</em>. The materials here are deliberately chosen: canonical textbooks that the field is built on (Wasserman, Hastie, Goodfellow, Jurafsky) and Stanford lecture series (CS229, CS230, CS231N, CS224N) that represent the gold standard of university-level instruction.
+  </p>
+  <p class="body-text">
+    The goal is not to become a mathematician. It is to build the kind of intuition that lets you read a paper and follow the argument, look at a loss curve and diagnose the problem, or hear a claim about a model&rsquo;s capabilities and know what assumptions are being made. This is the track that gives you the mental models to reason about AI systems at a level deeper than &ldquo;I fed it data and something came out.&rdquo;
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Science: Data Analysis -->
+<div class="reveal" id="sci-data-analysis">
+  <h3 class="section-heading"><span class="sh-num">1.</span> Data Analysis</h3>
+  <p class="body-text">
+    The Science track begins with statistical foundations. This means probability theory, distributions, estimation, hypothesis testing, confidence intervals, and the machinery of statistical inference. The canonical resource here is Larry Wasserman&rsquo;s <em>All of Statistics</em> &mdash; a textbook that compresses an entire statistics curriculum into a single volume with mathematical rigour but without the bloat. The title is only a slight exaggeration.
+  </p>
+  <p class="body-text">
+    What you are building at this stage is the ability to think precisely about data. Not &ldquo;this column has some missing values&rdquo; but &ldquo;the missingness pattern is non-random and correlated with the outcome variable, which means any imputation strategy will introduce bias into downstream estimates.&rdquo; Not &ldquo;this result looks significant&rdquo; but &ldquo;the p-value is low, but the effect size is tiny and the sample was not randomised, so this is likely a confound.&rdquo; Statistical literacy is the bedrock of everything that follows.
+  </p>
+  <p class="body-text">
+    Exploratory data analysis &mdash; the practice of looking at data before modelling it &mdash; is also grounded in theory here. Understanding what a distribution tells you, why the mean can mislead, when a correlation is meaningful versus spurious, and how to reason about the data-generating process that produced the numbers in front of you. This is not glamorous work, but it is the work that prevents you from building models on foundations of sand.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Science: ML -->
+<div class="reveal" id="sci-ml">
+  <h3 class="section-heading"><span class="sh-num">2.</span> Machine Learning</h3>
+  <p class="body-text">
+    The Science track&rsquo;s treatment of machine learning is mathematical. The core texts are <em>An Introduction to Statistical Learning</em> (ISLR) for accessible foundations and <em>The Elements of Statistical Learning</em> (ESL) for the full mathematical treatment, paired with Stanford&rsquo;s CS229 lectures. The focus is on understanding the theoretical framework: what does it mean for a model to generalise? What is the bias-variance tradeoff, precisely? What are the assumptions behind linear regression, logistic regression, SVMs, and tree-based methods? What happens when those assumptions are violated?
+  </p>
+  <p class="body-text">
+    Regularisation is studied not as a hyperparameter to tune, but as a principle: why adding a penalty term to the loss function reduces overfitting, how L1 and L2 regularisation produce different solutions, and what the Bayesian interpretation of regularisation reveals about the relationship between prior knowledge and data. Kernel methods are studied not as an algorithm to memorise, but as a conceptual framework for understanding how linear methods can be extended to non-linear problems by implicitly mapping data into higher-dimensional spaces.
+  </p>
+  <p class="body-text">
+    The payoff of this depth becomes clear when things go wrong in practice. When a model overfits, you do not just &ldquo;add more regularisation&rdquo; by trial and error &mdash; you understand why the model has too much capacity for the amount of data, and you reason about which intervention (more data, simpler model, regularisation, early stopping) is most appropriate. When a model underperforms, you can reason about whether the problem is bias (the model class cannot represent the true function) or variance (the model is too sensitive to the specific training set), and you know these are fundamentally different problems with different solutions.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Science: DL -->
+<div class="reveal" id="sci-dl">
+  <h3 class="section-heading"><span class="sh-num">3.</span> Deep Learning</h3>
+  <p class="body-text">
+    The canonical text here is Goodfellow, Bengio, and Courville&rsquo;s <em>Deep Learning</em>, paired with Stanford&rsquo;s CS230 and CS231N. The Science track treats deep learning as a mathematical discipline: backpropagation is derived as an application of the chain rule, gradient descent is analysed as an optimisation algorithm with known convergence properties and failure modes, and architectural choices are understood through the lens of the computational problems they solve.
+  </p>
+  <p class="body-text">
+    Why do gradients vanish in deep networks? Because repeated multiplication of values less than one in the chain rule produces exponentially small numbers. What does batch normalisation actually do? It normalises the input to each layer, reducing internal covariate shift and smoothing the optimisation landscape. Why do skip connections work? They provide a gradient highway that bypasses the vanishing gradient problem, allowing information (and gradients) to flow more easily through very deep networks. Why does the choice of activation function matter? Because it determines the gradient flow, the representation capacity, and whether the network can learn at all.
+  </p>
+  <p class="body-text">
+    The Science track also covers the optimisation landscape &mdash; the idea that training a neural network means navigating a high-dimensional, non-convex loss surface. Understanding saddle points, local minima, the role of learning rate schedules, and why SGD with momentum or Adam works better than vanilla gradient descent in practice. This mathematical grounding is what allows you to diagnose training problems: if your loss plateaus, you can reason about whether you are stuck in a saddle point, whether your learning rate is too low, or whether your model has insufficient capacity. Without the theory, you are guessing.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Science: NLP -->
+<div class="reveal" id="sci-nlp">
+  <h3 class="section-heading"><span class="sh-num">4.</span> Natural Language Processing</h3>
+  <p class="body-text">
+    The Science track for NLP is anchored by Jurafsky and Martin&rsquo;s <em>Speech and Language Processing</em> and Stanford&rsquo;s CS224N. The treatment begins with linguistic foundations &mdash; morphology, syntax, semantics, pragmatics &mdash; because understanding the structure of language is prerequisite to understanding how machines can process it. Language is not just a sequence of tokens; it has hierarchical structure, long-range dependencies, ambiguity at every level, and meaning that depends on context, speaker intent, and world knowledge.
+  </p>
+  <p class="body-text">
+    The theoretical progression traces the field&rsquo;s evolution: from hand-crafted rules and grammars (which worked for narrow tasks but could not scale), to statistical language models (n-grams, which captured local patterns but could not model long-range structure), to distributed representations (word2vec, GloVe, which embedded words in continuous vector spaces and captured semantic relationships), to neural sequence models (RNNs, LSTMs, which could process variable-length sequences but struggled with long dependencies), and finally to the attention mechanism that resolved the bottleneck.
+  </p>
+  <p class="body-text">
+    The Science track asks: why did each transition happen? What problem did each approach solve, and what new problem did it introduce? Why do rule-based systems fail to scale? Because language is too ambiguous and variable to capture with handwritten rules. Why do n-gram models fail at long-range dependencies? Because they only look at fixed-size local windows. Why do RNNs struggle with long sequences? Because of the vanishing gradient problem applied to sequential computation. Understanding this history is not academic nostalgia &mdash; it is the conceptual scaffold that makes the transformer architecture comprehensible as a solution to specific, well-understood problems.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Science: Transformers -->
+<div class="reveal" id="sci-transformers">
+  <h3 class="section-heading"><span class="sh-num">5.</span> Transformers &amp; Large Language Models</h3>
+  <p class="body-text">
+    The Science track culminates with the transformer architecture and the theoretical foundations of large language models. The essential starting point is the 2017 paper &ldquo;Attention Is All You Need&rdquo; by Vaswani et al. &mdash; not as a historical document to skim, but as a technical paper to understand deeply. The self-attention mechanism computes a weighted sum of value vectors, where the weights are determined by the compatibility (dot product) between query and key vectors. This simple operation, applied in parallel across all positions and stacked across layers, turns out to be extraordinarily powerful.
+  </p>
+  <p class="body-text">
+    Positional encodings are studied for what they reveal about the architecture&rsquo;s limitations: the transformer has no inherent notion of sequence order (unlike an RNN), so position must be injected explicitly. The original sinusoidal encodings, learned position embeddings, and more recent innovations like RoPE (Rotary Position Embeddings) and ALiBi all address the same fundamental problem in different ways. The encoder-decoder structure, the decoder-only architecture used by most modern LLMs, and the relationship between autoregressive generation and the training objective (next-token prediction) are all understood at the mathematical level.
+  </p>
+  <p class="body-text">
+    At the LLM scale, the Science track grapples with the questions that the field itself is still debating: what do these models actually learn? Is next-token prediction sufficient for understanding, or is it a sophisticated form of pattern matching? What do scaling laws tell us about the relationship between model size, data, and performance? What are the theoretical limits of in-context learning? The Science track does not need to answer these questions definitively &mdash; the field has not. But it equips you to engage with them seriously, to read the papers, follow the arguments, and form your own informed perspective rather than relying on hype or headline summaries.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 3 — THE ENGINEERING TRACK: BUILDING                    -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part3">
+  <div class="part-num">Part 3</div>
+  <h2 class="part-title">The Engineering Track &mdash; <em>Building</em></h2>
+  <p class="part-subtitle">Implementation-focused, practical, hands-on &mdash; the same five topics, from the builder&rsquo;s perspective.</p>
+</div>
+
+<div class="reveal" id="eng-overview">
+  <h3 class="section-heading">What the Engineering Track Covers</h3>
+  <p class="body-text">
+    The Engineering track mirrors the Science track topic-for-topic, but the resources and the mindset are entirely different. Where the Science track assigns Goodfellow&rsquo;s <em>Deep Learning</em> to explain the theory behind backpropagation, the Engineering track assigns Chollet&rsquo;s <em>Deep Learning with Python</em> to show you how to actually implement, train, and evaluate a neural network in Keras. Where the Science track asks &ldquo;why does this algorithm converge?&rdquo;, the Engineering track asks &ldquo;how do I get this model to converge on my data, with my GPU, in a reasonable amount of time?&rdquo;
+  </p>
+  <p class="body-text">
+    The Engineering track splits into two sub-disciplines. <strong>Software Engineering</strong> is about building the models and applications themselves &mdash; writing the training code, choosing the right libraries and frameworks, structuring experiments, and going from a research idea to working software. <strong>Infrastructure Engineering</strong> is about what sits underneath and around the model &mdash; the ML system design, data pipelines, feature stores, model registries, and serving infrastructure that make it possible to run models reliably at scale. You can write a beautiful model in a Jupyter notebook, but without the infrastructure to serve it, retrain it, and monitor it, it never leaves your laptop.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Engineering: Software Engineering label -->
+<div class="reveal" id="eng-se">
+  <div class="label">Software Engineering</div>
+</div>
+
+<!-- Engineering: Data Analysis -->
+<div class="reveal" id="eng-data-analysis">
+  <h3 class="section-heading"><span class="sh-num">1.</span> Data Analysis</h3>
+  <p class="body-text">
+    The Engineering track for data analysis is about <strong>Pandas, NumPy, and the practical workflows of exploratory data analysis</strong>. The canonical resource is Wes McKinney&rsquo;s <em>Python for Data Analysis</em>. Where the Science track asks &ldquo;what statistical conclusions can I draw from this data?&rdquo;, the Engineering track asks &ldquo;how do I load this CSV, clean the missing values, join it with another dataset, and produce a chart that actually answers the question?&rdquo;
+  </p>
+  <p class="body-text">
+    Practical data analysis means working with real-world data in all its imperfection: mixed data types, inconsistent encoding, duplicate records, implicit missing values, date formats that vary across rows, and datasets too large to fit in memory. The Engineering track teaches you to handle these problems fluently &mdash; using Pandas for data manipulation, NumPy for numerical computation, Matplotlib and Seaborn for visualisation, and Jupyter notebooks for the iterative exploration workflow that characterises real data analysis.
+  </p>
+  <p class="body-text">
+    The complementarity with the Science track is immediate. The Science track tells you that a bimodal distribution might indicate two distinct subpopulations in your data. The Engineering track shows you how to load the data, plot the distribution, identify the modes, split the data, and verify the hypothesis. One without the other is incomplete: statistical knowledge without the tools to apply it is inert, and tool proficiency without statistical reasoning produces attractive but potentially misleading charts.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Engineering: ML -->
+<div class="reveal" id="eng-ml">
+  <h3 class="section-heading"><span class="sh-num">2.</span> Machine Learning</h3>
+  <p class="body-text">
+    The practical side of ML centres on <strong>Scikit-Learn and the workflows of building, evaluating, and deploying models</strong>. The canonical resource is Aur&eacute;lien G&eacute;ron&rsquo;s <em>Hands-On Machine Learning with Scikit-Learn, Keras &amp; TensorFlow</em>. The Engineering track covers feature engineering (creating useful inputs from raw data), model selection (choosing the right algorithm for the problem), hyperparameter tuning (systematically searching the configuration space), cross-validation (reliably estimating model performance), and the Scikit-Learn pipeline abstraction that chains these steps into reproducible workflows.
+  </p>
+  <p class="body-text">
+    The gap between a Jupyter notebook experiment and a production ML system is enormous, and the Engineering track begins to address it here. This means learning to think about data splits correctly (never leaking information from test to train), handling class imbalance, encoding categorical variables properly, and building pipelines that can be serialised, version-controlled, and re-run on new data without manual intervention. It means understanding that a model with 99% accuracy on an imbalanced dataset might be useless, and knowing how to evaluate with the right metrics for the actual problem.
+  </p>
+  <p class="body-text">
+    The Science track says &ldquo;random forests reduce variance by averaging many high-variance, low-bias decision trees.&rdquo; The Engineering track says &ldquo;here is how you instantiate a RandomForestClassifier, set the hyperparameters, fit it to your training data, evaluate on a held-out set, and interpret the feature importance scores to explain the results to a stakeholder.&rdquo; Both are necessary. The theory tells you why the method works and when it will not; the practice tells you how to actually use it.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Engineering: DL -->
+<div class="reveal" id="eng-dl">
+  <h3 class="section-heading"><span class="sh-num">3.</span> Deep Learning</h3>
+  <p class="body-text">
+    Deep learning engineering means <strong>Keras, PyTorch, and the practice of building, training, and debugging neural networks</strong>. The canonical resource is Fran&ccedil;ois Chollet&rsquo;s <em>Deep Learning with Python</em>. The Engineering track covers what the theory does not: how to set up a training loop, how to manage GPU memory, how to implement custom layers and loss functions, how to handle data loading and augmentation at scale, and how to debug the many ways training can silently go wrong (NaN losses, mode collapse, gradient explosion, models that train but do not learn).
+  </p>
+  <p class="body-text">
+    GPU management is a practical concern that theory never mentions: understanding CUDA, managing VRAM, choosing batch sizes that fit in memory, using mixed-precision training to reduce memory footprint, and knowing when to use gradient accumulation as a workaround for limited hardware. The Engineering track teaches you that the difference between a model that trains in 2 hours and one that trains in 20 hours is often not the architecture but the engineering: data loading bottlenecks, suboptimal batch sizes, unnecessary data copies between CPU and GPU.
+  </p>
+  <p class="body-text">
+    The Science track explains why backpropagation mathematically computes the gradient of the loss with respect to every parameter. The Engineering track shows you what happens when you call <code>loss.backward()</code> in PyTorch, how to inspect gradients, how to use gradient clipping to prevent explosion, and how to use a learning rate finder to choose a reasonable starting point. The Science track derives the equations; the Engineering track makes them run on actual hardware and produce actual results.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Engineering: NLP -->
+<div class="reveal" id="eng-nlp">
+  <h3 class="section-heading"><span class="sh-num">4.</span> Natural Language Processing</h3>
+  <p class="body-text">
+    NLP engineering means <strong>building systems that work on real text</strong>: tokenisation, text preprocessing, training sequence models, implementing attention mechanisms, and confronting the practical challenges of language data. The resources here are the hands-on assignments from Stanford&rsquo;s CS224N and implementation-focused books like <em>Natural Language Processing in Action</em>. The emphasis is on getting your hands dirty with actual implementations, not just reading about architectures.
+  </p>
+  <p class="body-text">
+    The practical challenges of NLP are substantial and qualitatively different from working with numerical data. Text requires tokenisation (splitting raw strings into model-consumable units), which is itself a non-trivial engineering decision: character-level, word-level, subword (BPE, WordPiece, SentencePiece), each with different tradeoffs for vocabulary size, out-of-vocabulary handling, and computational efficiency. Text data is multilingual, noisy, domain-specific, and riddled with ambiguity. A system trained on news articles may fail completely on social media text, medical records, or legal documents. The Engineering track forces you to confront these realities.
+  </p>
+  <p class="body-text">
+    Implementing attention from scratch &mdash; writing the matrix multiplications, the masking, the softmax normalisation &mdash; is one of the most instructive exercises in the entire Engineering track. It bridges the Science track&rsquo;s mathematical description of attention with the reality of how it is computed in practice, and it reveals details that the equations hide: the importance of scaling the dot products (to prevent softmax saturation), the role of masking in decoder models (to enforce autoregressive generation), and the computational cost of the quadratic attention operation on long sequences.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Engineering: Transformers & LLMs -->
+<div class="reveal" id="eng-transformers">
+  <h3 class="section-heading"><span class="sh-num">5.</span> Transformers &amp; Large Language Models</h3>
+  <p class="body-text">
+    This is the largest and fastest-moving area in the Engineering track, and it covers the full spectrum from low-level model building to high-level application development. On one end, Sebastian Raschka&rsquo;s <em>Build a Large Language Model From Scratch</em> walks you through implementing a transformer from the ground up. On the other end, Chip Huyen&rsquo;s <em>AI Engineering</em> and the <em>LLM Engineer&rsquo;s Handbook</em> cover the full stack of building production-grade LLM applications: fine-tuning, prompt engineering, retrieval-augmented generation (RAG), API-based development, evaluation, and deployment.
+  </p>
+  <p class="body-text">
+    <strong>Fine-tuning</strong> is the practice of adapting a pre-trained model to a specific task or domain, and it comes with its own engineering challenges: dataset preparation, choosing between full fine-tuning and parameter-efficient methods (LoRA, QLoRA), managing training compute, and evaluating whether the fine-tuned model actually improves on the base model for your specific use case. <strong>Prompt engineering</strong> is the art and science of designing inputs that elicit useful outputs from a model without changing its weights. <strong>RAG</strong> is the pattern of augmenting a model&rsquo;s knowledge by retrieving relevant information at inference time and injecting it into the prompt. Together, these techniques form the core toolkit of modern LLM application engineering.
+  </p>
+  <p class="body-text">
+    The Engineering track here explicitly connects to the <a href="llm-engineering.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">LLM Engineering Landscape</a> article, which maps the full breadth of what engineers actually build with large language models. The progression from data analysis through ML, deep learning, and NLP to this point is what gives you the foundation to work at the LLM application layer with real understanding rather than surface-level API familiarity. You understand what the model is doing because you have studied the theory; you can build with it because you have studied the practice.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Engineering: Infrastructure -->
+<div class="reveal" id="eng-infra">
+  <div class="label">Infrastructure Engineering</div>
+  <h3 class="section-heading">ML Systems Design</h3>
+  <p class="body-text">
+    Infrastructure engineering is about the systems that sit underneath and around the model. A model in a notebook is a prototype. A model with proper infrastructure &mdash; data pipelines, feature stores, model registries, serving systems, and monitoring &mdash; is a product. This topic bridges the gap between data science and production engineering, and it is where the D&amp;I discipline connects most directly to the CS&amp;E discipline&rsquo;s infrastructure and DevOps foundations.
+  </p>
+  <p class="body-text">
+    <strong>Data pipelines</strong> handle the ingestion, cleaning, transformation, and versioning of training data. <strong>Feature stores</strong> manage the reusable feature definitions and computations that feed into models, ensuring consistency between training and serving. <strong>Model registries</strong> track model versions, metadata, and lineage. <strong>Serving systems</strong> take a trained model and expose it as a reliable, scalable API endpoint. <strong>Monitoring</strong> detects when a deployed model&rsquo;s performance degrades &mdash; because the input data distribution has shifted, because the world has changed, or because a bug has been introduced somewhere in the pipeline.
+  </p>
+  <p class="body-text">
+    The gap between &ldquo;my model works in a notebook&rdquo; and &ldquo;my model works in production&rdquo; is the central concern of ML infrastructure engineering. This gap is not about the model itself; it is about everything else: reproducibility (can you retrain the model and get the same results?), reliability (does the serving system handle load spikes gracefully?), observability (do you know when the model is making bad predictions?), and iteration speed (can you deploy a new model version without a two-week manual process?). Most ML projects that fail in production fail not because the model is bad, but because the infrastructure is missing or inadequate.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 4 — OPERATING                                          -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part4">
+  <div class="part-num">Part 4</div>
+  <h2 class="part-title">The Engineering Track &mdash; <em>Operating</em></h2>
+  <p class="part-subtitle">Keeping ML systems reliable, reproducible, and improving in production.</p>
+</div>
+
+<div class="reveal" id="operating">
+  <h3 class="section-heading">Operating ML Systems</h3>
+  <p class="body-text">
+    Building gets a model into production. Operating keeps it there. The Operating sub-track is still developing in this roadmap, but its scope and importance are clear. ML systems in production face a unique category of challenges that traditional software does not: <strong>model drift</strong> (the model&rsquo;s performance degrades over time because the real-world data distribution changes), <strong>data quality degradation</strong> (upstream data sources change format, introduce noise, or go offline), and <strong>reproducibility failures</strong> (a model retrained on &ldquo;the same data&rdquo; produces different results because of non-determinism in training, data ordering, or library version changes).
+  </p>
+  <p class="body-text">
+    Operating means monitoring deployed models continuously &mdash; not just checking if the server is up, but checking if the <em>predictions</em> are still good. It means managing retraining pipelines that automatically detect when a model needs to be refreshed and can execute the full train-evaluate-deploy cycle with appropriate safeguards. It means maintaining data lineage so you can trace any prediction back to the exact data and code that produced it. It means building the human-in-the-loop review processes that catch problems before they reach users.
+  </p>
+  <p class="body-text">
+    This area will cover MLOps practices, experiment tracking, A/B testing frameworks for model comparison, shadow deployment strategies (running a new model alongside the old one to compare outputs before switching), canary releases, rollback procedures, and the organisational processes that ensure ML systems are maintained with the same rigour as any other production software. The core insight is that ML systems are not &ldquo;deploy and forget&rdquo; &mdash; they are living systems that require ongoing attention, and the engineering practices for managing that ongoing attention are a discipline unto themselves.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 5 — STATE OF THE ART                                   -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part5">
+  <div class="part-num">Part 5</div>
+  <h2 class="part-title">State of the <em>Art</em></h2>
+  <p class="part-subtitle">The deliberately open-ended frontier &mdash; what has not settled into textbooks yet.</p>
+</div>
+
+<div class="reveal" id="sota">
+  <h3 class="section-heading">Tracking the Frontier</h3>
+  <p class="body-text">
+    The first four parts of this discipline &mdash; the five-topic progression through Science and Engineering, plus the Operating layer &mdash; cover material that is relatively stable. The textbooks exist, the courses are well-established, the concepts are not going to change next month. But AI is a field where the frontier moves fast enough that any static curriculum becomes incomplete within a year. State of the Art is the section that acknowledges this explicitly.
+  </p>
+  <p class="body-text">
+    This is a tracking area, not a teaching area. It covers new architectures (mixture-of-experts, state space models like Mamba, alternative attention mechanisms), new capabilities (multimodal understanding, long-context processing, reasoning and planning), new training paradigms (RLHF, DPO, constitutional AI, self-play), and emerging techniques that are promising but not yet proven enough to be part of the stable curriculum. The resources here are not textbooks &mdash; they are research papers, blog posts, conference talks, and open-source repositories. The goal is not mastery but awareness: knowing what is happening at the frontier, understanding the claims being made, and being able to evaluate whether a new technique is a genuine advance or incremental noise.
+  </p>
+  <p class="body-text">
+    The reason this section exists as part of the roadmap, rather than being treated as external reading, is that the boundary between &ldquo;state of the art&rdquo; and &ldquo;established practice&rdquo; is constantly shifting. Transformers themselves were state of the art in 2017; by 2020 they were standard; by 2024 they were the foundation of a trillion-dollar industry. Some of what is in the State of the Art section today will migrate into the stable curriculum as the field matures. Having a designated place to track these developments &mdash; rather than trying to force them into the existing structure prematurely &mdash; is itself a design decision that keeps the rest of the roadmap clean and reliable.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  THE MIRROR                                                   -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="mirror-section">
+  <div class="part-num">Closing</div>
+  <h2 class="part-title">The <em>Mirror</em></h2>
+  <p class="part-subtitle">The core design principle: two tracks, five topics, one integrated understanding.</p>
+</div>
+
+<div class="reveal" id="mirror">
+  <h3 class="section-heading">Why the Mirroring Matters</h3>
+  <p class="body-text">
+    The entire structure of Data &amp; Intelligence is built around one idea: the Science track and the Engineering track are mirrors. They cover the same five topics, in the same order, but from opposite perspectives. This is not redundancy. It is the mechanism by which shallow knowledge becomes deep understanding.
+  </p>
+
+  <table class="mirror-table">
+    <thead>
+      <tr>
+        <th>Topic</th>
+        <th>Science (the Why)</th>
+        <th>Engineering (the How)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Data Analysis</strong></td>
+        <td>Distributions, inference, statistical reasoning</td>
+        <td>Pandas, NumPy, EDA, data cleaning</td>
+      </tr>
+      <tr>
+        <td><strong>Machine Learning</strong></td>
+        <td>Bias-variance, regularisation, generalisation theory</td>
+        <td>Scikit-Learn, pipelines, feature engineering</td>
+      </tr>
+      <tr>
+        <td><strong>Deep Learning</strong></td>
+        <td>Backpropagation, optimisation, architectural principles</td>
+        <td>Keras, PyTorch, training loops, GPU management</td>
+      </tr>
+      <tr>
+        <td><strong>NLP</strong></td>
+        <td>Linguistic foundations, statistical language models</td>
+        <td>Tokenisation, preprocessing, implementing attention</td>
+      </tr>
+      <tr>
+        <td><strong>Transformers &amp; LLMs</strong></td>
+        <td>Self-attention, positional encodings, scaling laws</td>
+        <td>Fine-tuning, RAG, prompt engineering, LLM apps</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="body-text">
+    For every topic, the Science track gives you the mental model and the Engineering track gives you the practical skill. The Science track for Machine Learning teaches you that random forests reduce variance by averaging many high-variance, low-bias trees. The Engineering track teaches you how to instantiate the classifier, tune the hyperparameters, and interpret the feature importance scores. Separately, each gives you half an understanding. Together, they produce someone who can both reason about a problem and solve it.
+  </p>
+  <p class="body-text">
+    The mirroring also serves a diagnostic function. If you find the Engineering track easy but the Science track confusing, you have a tool proficiency gap &mdash; you can use the software but do not understand the underlying mathematics. If you find the Science track easy but the Engineering track frustrating, you have a practice gap &mdash; you understand the theory but struggle to translate it into working code. The dual-track structure makes these gaps visible so you can address them deliberately, rather than discovering them at the worst possible time &mdash; typically when a model fails in production and you cannot explain why.
+  </p>
+  <p class="body-text">
+    This is the core design principle of the Data &amp; Intelligence discipline. Not &ldquo;learn the theory, then learn the practice&rdquo; sequentially, but &ldquo;study them in parallel, topic by topic, so that each illuminates the other.&rdquo; The mirror is not a structural convenience. It is the learning strategy itself.
+  </p>
+</div>
+
+</main>
+
+</div><!-- end page-layout -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-name">Data &amp; Intelligence</span>
+    <span class="footer-copy">&copy; 2026</span>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // TOC active section tracking
+  const tocLinks = document.querySelectorAll('.toc a');
+  const sections = [];
+  tocLinks.forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      const el = document.getElementById(href.slice(1));
+      if (el) sections.push({ el, link });
+    }
+  });
+
+  const tocObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const match = sections.find(s => s.el === entry.target);
+        if (match) match.link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => tocObserver.observe(s.el));
+
+  // Back to top button
+  const backBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    backBtn.classList.toggle('visible', window.scrollY > 600);
+  });
+</script>
+
+</body>
+</html>
