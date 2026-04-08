@@ -17,10 +17,10 @@
       --surface2:   #1c1c1e;
       --rule:       #2a2a2e;
       --rule-lt:    #333338;
-      --ink:        #e0dbd2;
-      --ink-mid:    #d1cbbf;
-      --ink-dim:    #b0a99e;
-      --white:      #e8e3da;
+      --ink:        #e8e8e8;
+      --ink-mid:    #d4d4d4;
+      --ink-dim:    #a8a8a8;
+      --white:      #f8f8f8;
       --accent:     #c8a96e;
       --accent-dim: #3a2e1a;
     }
@@ -28,7 +28,6 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html {
       scroll-behavior: smooth;
-      scroll-snap-type: y proximity;
     }
 
     body {
@@ -71,11 +70,50 @@
     .nav-links { display: flex; gap: 2.2rem; list-style: none; }
     .nav-links a {
       font-family: 'Karla', sans-serif;
-      font-size: 0.84rem; font-weight: 500; letter-spacing: 0.1em;
+      font-size: 0.92rem; font-weight: 500; letter-spacing: 0.1em;
       text-transform: uppercase; color: var(--ink-mid);
       text-decoration: none; transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--accent); }
+
+    /* -- HAMBURGER -- */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 28px; height: 28px;
+      cursor: pointer;
+      background: none; border: none; padding: 0;
+    }
+    .nav-hamburger span {
+      display: block; width: 100%; height: 2px;
+      background: var(--ink); border-radius: 1px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 99;
+      background: rgba(14, 14, 15, 0.97);
+      backdrop-filter: blur(12px);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-family: 'Karla', sans-serif;
+      font-size: 1.1rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .mobile-menu a:hover { color: var(--accent); }
 
     /* -- PAGE WRAP -- */
     .page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
@@ -96,7 +134,6 @@
       border-bottom: none;
       display: flex;
       align-items: center;
-      scroll-snap-align: start;
       position: relative;
     }
     #hero::after {
@@ -107,7 +144,7 @@
     }
     .hero-kicker {
       font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.18em;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.18em;
       text-transform: uppercase; color: var(--accent);
       display: flex; align-items: center; gap: 0.8rem;
       margin-bottom: 1.6rem;
@@ -127,11 +164,11 @@
     .hero-name em { font-style: italic; font-weight: 400; color: var(--accent); }
     .hero-summary {
       font-size: 1.08rem; line-height: 1.85;
-      color: var(--ink-mid); max-width: 620px;
-      margin-bottom: 2.4rem; font-weight: 300;
+      color: var(--ink); max-width: 720px;
+      margin-bottom: 2.4rem; font-weight: 400;
       text-align: justify;
     }
-    .hero-summary strong { font-weight: 600; color: var(--ink); }
+    .hero-summary strong { font-weight: 600; color: var(--white); }
 
     /* -- SECTION COMMONS -- */
     .section-wrap {
@@ -139,7 +176,6 @@
       padding: 7rem 0 5rem;
       border-bottom: none;
       position: relative;
-      scroll-snap-align: start;
     }
     .section-wrap::after {
       content: '';
@@ -175,7 +211,7 @@
     }
     .section-num {
       font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.14em;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--ink-dim);
       padding-top: 0.3rem;
     }
@@ -187,8 +223,8 @@
     }
     .section-title em { font-style: italic; font-weight: 400; color: var(--accent); }
     .section-intro {
-      font-size: 0.96rem; color: var(--ink-mid); line-height: 1.75;
-      max-width: 520px; margin-top: 0.6rem;
+      font-size: 1.02rem; color: var(--ink); line-height: 1.75;
+      max-width: 680px; margin-top: 0.6rem;
       font-family: 'Karla', sans-serif;
       text-align: justify;
     }
@@ -196,20 +232,20 @@
     /* -- EXPLANATION BLOCK -- */
     .explanation {
       font-family: 'Source Serif 4', serif;
-      font-size: 1rem; color: var(--ink-mid); line-height: 1.8;
-      font-weight: 300;
+      font-size: 1rem; color: var(--ink); line-height: 1.8;
+      font-weight: 400;
       padding: 1.2rem 0 1.2rem 1.4rem;
       border-left: 2px solid var(--accent-dim);
       margin-bottom: 2rem;
       text-align: justify;
     }
-    .explanation strong { font-weight: 600; color: var(--ink); }
+    .explanation strong { font-weight: 600; color: var(--white); }
 
     /* -- DISCIPLINE ROW (The On-Ramp) -- */
     .discipline-group { margin-bottom: 2.5rem; }
     .discipline-label {
       font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.14em;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--accent);
       margin-bottom: 1rem;
       display: flex; align-items: center; gap: 0.8rem;
@@ -225,18 +261,18 @@
       padding: 0.8rem 0;
       border-bottom: 1px solid var(--rule);
       font-family: 'Source Serif 4', serif;
-      font-size: 1rem; color: var(--ink-mid);
-      font-weight: 300;
+      font-size: 1rem; color: var(--white);
+      font-weight: 400;
     }
     .course-item:first-child { border-top: 1px solid var(--rule); }
     .course-num {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 0.9rem; color: var(--ink-dim); font-style: italic;
+      font-size: 0.95rem; color: var(--ink-mid); font-style: italic;
       min-width: 24px;
     }
     .course-desc {
       font-family: 'Karla', sans-serif;
-      font-size: 0.86rem; color: var(--ink-dim); margin-top: 0.2rem;
+      font-size: 0.94rem; color: var(--ink-mid); margin-top: 0.2rem;
       line-height: 1.5;
     }
     .course-content { display: flex; flex-direction: column; }
@@ -246,7 +282,7 @@
     .chip-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .chip {
       font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em;
       text-transform: uppercase; color: var(--ink-dim);
       padding: 0.4rem 0.9rem;
       border: 1px solid var(--rule-lt); border-radius: 1px;
@@ -263,13 +299,13 @@
     }
     .tree-category {
       font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.14em;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--accent);
       margin-bottom: 0.8rem; margin-top: 1.6rem;
     }
     .tree-desc {
       font-family: 'Karla', sans-serif;
-      font-size: 0.9rem; color: var(--ink-dim); line-height: 1.65;
+      font-size: 0.96rem; color: var(--ink-mid); line-height: 1.65;
       margin-bottom: 1rem;
       text-align: justify;
     }
@@ -297,12 +333,12 @@
     .topic-item:hover::before { transform: scaleY(1); }
     .topic-name {
       font-family: 'Source Serif 4', serif;
-      font-size: 1rem; color: var(--ink-mid);
-      font-weight: 300; transition: color 0.2s;
+      font-size: 1rem; color: var(--ink);
+      font-weight: 400; transition: color 0.2s;
     }
     .topic-sub {
       font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; color: var(--ink-dim); letter-spacing: 0.06em;
+      font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.06em;
       white-space: nowrap;
     }
 
@@ -314,7 +350,7 @@
     }
     .track-subtitle {
       font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.14em;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--ink-dim);
       margin-bottom: 1.6rem;
     }
@@ -348,13 +384,13 @@
     .resource-list { display: flex; flex-direction: column; gap: 0.6rem; }
     .resource-item {
       font-family: 'Source Serif 4', serif;
-      font-size: 1rem; color: var(--ink-mid);
-      font-weight: 300;
+      font-size: 1rem; color: var(--ink);
+      font-weight: 400;
       line-height: 1.7;
       margin-bottom: 0.3rem;
     }
     .resource-item a {
-      color: var(--ink-mid);
+      color: var(--ink);
       text-decoration: none;
       border-bottom: 1px solid var(--rule-lt);
       transition: color 0.2s, border-color 0.2s;
@@ -366,7 +402,7 @@
     }
     .resource-type {
       font-family: 'Karla', sans-serif;
-      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em;
       text-transform: uppercase; color: var(--ink-dim);
       margin-left: 0.6rem;
       background: var(--surface2);
@@ -383,7 +419,7 @@
     }
     .note-label {
       font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.14em;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--accent);
       margin-bottom: 0.8rem;
     }
@@ -394,7 +430,7 @@
     }
     .note-desc {
       font-family: 'Karla', sans-serif;
-      font-size: 0.9rem; color: var(--ink-dim); line-height: 1.65;
+      font-size: 0.96rem; color: var(--ink-mid); line-height: 1.65;
       margin-bottom: 0.8rem;
       text-align: justify;
     }
@@ -405,7 +441,7 @@
     }
     .sub-chip {
       font-family: 'Karla', sans-serif;
-      font-size: 0.76rem; font-weight: 500; letter-spacing: 0.04em;
+      font-size: 0.84rem; font-weight: 500; letter-spacing: 0.04em;
       color: var(--ink-dim);
       padding: 0.25rem 0.6rem;
       border: 1px solid var(--rule); border-radius: 1px;
@@ -423,11 +459,11 @@
     }
     .footer-name {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 0.9rem; color: var(--ink-dim);
+      font-size: 0.95rem; color: var(--ink-dim);
     }
     .footer-copy {
       font-family: 'Karla', sans-serif;
-      font-size: 0.8rem; color: var(--ink-dim); letter-spacing: 0.05em;
+      font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.05em;
     }
 
     /* -- SCROLL REVEAL -- */
@@ -451,6 +487,7 @@
     }
     @media (max-width: 600px) {
       .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
       .nav-inner, .page-wrap, .section-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
     }
 
@@ -487,7 +524,7 @@
       top: 50%;
       transform: translateY(-50%);
       font-family: 'Karla', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.82rem;
       letter-spacing: 0.06em;
       color: var(--ink-dim);
       white-space: nowrap;
@@ -518,14 +555,25 @@
       <li><a href="#cse">CS &amp; Engineering</a></li>
       <li><a href="#data-intelligence">Data &amp; Intelligence</a></li>
     </ul>
+    <button class="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<div class="mobile-menu">
+  <a href="#hero" class="mobile-link">Overview</a>
+  <a href="#on-ramp" class="mobile-link">The On-Ramp</a>
+  <a href="#mathematics" class="mobile-link">Mathematics</a>
+  <a href="#cse" class="mobile-link">CS &amp; Engineering</a>
+  <a href="#data-intelligence" class="mobile-link">Data &amp; Intelligence</a>
+</div>
 
 <!-- HERO -->
 <section id="hero">
   <div class="section-inner">
     <div class="hero-kicker">Structured Learning Path</div>
-    <h1 class="hero-name">Towards<br><em>Intelligence</em></h1>
+    <h1 class="hero-name">Towards <em>Intelligence</em></h1>
     <p class="hero-summary">
       This roadmap organises two parallel disciplines &mdash;
       <strong>Computer Science &amp; Engineering</strong> and
@@ -801,7 +849,7 @@
     </div>
 
     <div style="margin-bottom: 2rem;">
-      <a href="cse.html" target="_blank" rel="noopener" class="item-link" style="font-family: 'Karla', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border-bottom-color: var(--accent-dim); display: inline-flex; align-items: center; gap: 0.4rem;">Read the complete CS &amp; Engineering guide &rarr;</a>
+      <a href="cse.html" target="_blank" rel="noopener" class="item-link" style="font-family: 'Karla', sans-serif; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border-bottom-color: var(--accent-dim); display: inline-flex; align-items: center; gap: 0.4rem;">Read the complete CS &amp; Engineering guide &rarr;</a>
     </div>
 
     <!-- Mathematics -->
@@ -833,20 +881,20 @@
         <div style="padding: 1.4rem 1.4rem; border-right: 1px solid var(--rule);">
           <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Fundamentals</div>
           <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Programming Languages and Compilers</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Data Structures and Algorithms</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Theory of Computation</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Programming Languages and Compilers</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Data Structures and Algorithms</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Theory of Computation</div>
           </div>
         </div>
         <div style="padding: 1.4rem 1.4rem;">
           <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Systems</div>
           <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Databases</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Distributed Systems</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Operating Systems</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Computer Networks</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Parallel &amp; Concurrent Computing</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Computer Organization &amp; Architecture</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Databases</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Distributed Systems</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Operating Systems</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Computer Networks</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Parallel &amp; Concurrent Computing</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Computer Organization &amp; Architecture</div>
           </div>
         </div>
       </div>
@@ -1000,21 +1048,21 @@
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--rule); margin-bottom: 2.5rem;">
         <div style="padding: 1.4rem 1.4rem; border-right: 1px solid var(--rule);">
           <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Building</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300; margin-bottom: 0.5rem;">Software Engineering</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300; margin-bottom: 0.3rem;">Infrastructure Engineering</div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400; margin-bottom: 0.5rem;">Software Engineering</div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400; margin-bottom: 0.3rem;">Infrastructure Engineering</div>
           <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-family: 'Karla', sans-serif; font-size: 0.78rem; color: var(--ink-dim);">&mdash; Development Operations (DevOps)</span>
-            <span style="font-family: 'Karla', sans-serif; font-size: 0.78rem; color: var(--ink-dim);">&mdash; Cloud Engineering</span>
-            <span style="font-family: 'Karla', sans-serif; font-size: 0.78rem; color: var(--ink-dim);">&mdash; Platform Engineering</span>
+            <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Development Operations (DevOps)</span>
+            <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Cloud Engineering</span>
+            <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Platform Engineering</span>
           </div>
         </div>
         <div style="padding: 1.4rem 1.4rem;">
           <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Operating</div>
           <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Reliability Engineering <span style="font-family: 'Karla', sans-serif; font-size: 0.78rem; color: var(--ink-dim);">&mdash; SRE</span></div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Performance Engineering</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-dim); font-weight: 300;">Security Engineering</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Observability Engineering</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Reliability Engineering <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; SRE</span></div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Performance Engineering</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Security Engineering</div>
+            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Observability Engineering</div>
           </div>
         </div>
       </div>
@@ -1180,7 +1228,7 @@
     </div>
 
     <div style="margin-bottom: 2rem;">
-      <a href="data-intelligence.html" target="_blank" rel="noopener" class="item-link" style="font-family: 'Karla', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border-bottom-color: var(--accent-dim); display: inline-flex; align-items: center; gap: 0.4rem;">Read the complete Data &amp; Intelligence guide &rarr;</a>
+      <a href="data-intelligence.html" target="_blank" rel="noopener" class="item-link" style="font-family: 'Karla', sans-serif; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border-bottom-color: var(--accent-dim); display: inline-flex; align-items: center; gap: 0.4rem;">Read the complete Data &amp; Intelligence guide &rarr;</a>
     </div>
 
     <!-- D&I Overview Grid -->
@@ -1188,27 +1236,27 @@
       <div style="padding: 1.4rem 1.4rem; border-right: 1px solid var(--rule);">
         <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Science</div>
         <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-          <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Data Analysis</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Machine Learning</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Deep Learning</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">NLP</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">Transformers &amp; LLMs</div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Data Analysis</div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Machine Learning</div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Deep Learning</div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">NLP</div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Transformers &amp; LLMs</div>
         </div>
       </div>
       <div style="padding: 1.4rem 1.4rem;">
         <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Engineering</div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300; margin-bottom: 0.5rem;">Building</div>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400; margin-bottom: 0.5rem;">Building</div>
         <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem; margin-bottom: 0.5rem;">
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.78rem; color: var(--ink-dim);">Software Engineering</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.78rem; color: var(--ink-dim);">&mdash; Data Analysis</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.78rem; color: var(--ink-dim);">&mdash; Machine Learning</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.78rem; color: var(--ink-dim);">&mdash; Deep Learning</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.78rem; color: var(--ink-dim);">&mdash; NLP</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.78rem; color: var(--ink-dim);">&mdash; Transformers &amp; LLMs</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">Software Engineering</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Data Analysis</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Machine Learning</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Deep Learning</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; NLP</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Transformers &amp; LLMs</span>
         </div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300; margin-bottom: 0.5rem;">Infrastructure Engineering</div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-dim); font-weight: 300; margin-bottom: 0.5rem;">Operating <span style="font-family: 'Karla', sans-serif; font-size: 0.78rem; color: var(--ink-dim);">&mdash; still developing</span></div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 0.96rem; color: var(--ink-mid); font-weight: 300;">State of the Art</div>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400; margin-bottom: 0.5rem;">Infrastructure Engineering</div>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400; margin-bottom: 0.5rem;">Operating</div>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">State of the Art</div>
       </div>
     </div>
 
@@ -1390,7 +1438,7 @@
           </div>
         </div>
         <div style="grid-column: 1 / -1;">
-          <a href="llm-engineering.html" target="_blank" rel="noopener" class="item-link" style="font-family: 'Karla', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border-bottom-color: var(--accent-dim); display: inline-flex; align-items: center; gap: 0.4rem;">Explore the Transformers &amp; LLM engineering landscape &rarr;</a>
+          <a href="llm-engineering.html" target="_blank" rel="noopener" class="item-link" style="font-family: 'Karla', sans-serif; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border-bottom-color: var(--accent-dim); display: inline-flex; align-items: center; gap: 0.4rem;">Explore the Transformers &amp; LLM engineering landscape &rarr;</a>
         </div>
       </div>
 
@@ -1458,7 +1506,7 @@
   // Scroll reveal
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.05 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
   // Active section tracking for dots + nav
@@ -1482,6 +1530,22 @@
 
   window.addEventListener('scroll', updateActiveSection, { passive: true });
   updateActiveSection();
+
+  // Mobile menu toggle
+  const hamburger = document.querySelector('.nav-hamburger');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+  });
+  document.querySelectorAll('.mobile-link').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
 
 </script>
 
