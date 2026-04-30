@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Computer Science &amp; Engineering</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
   <meta property="og:title" content="Computer Science & Engineering — Towards Intelligence"/>
   <meta property="og:description" content="A structured guide to the discipline — from mathematical foundations through theoretical computer science to practical engineering at scale."/>
   <meta property="og:type" content="article"/>
@@ -25,7 +25,7 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
 
     body {
       font-family: 'Source Serif 4', Georgia, serif;
@@ -33,10 +33,11 @@
       color: var(--ink);
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
     }
 
     /* -- NAV -- */
-    nav {
+    body > nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       background: rgba(14, 14, 15, 0.94);
       backdrop-filter: blur(8px);
@@ -125,14 +126,29 @@
     .toc::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
     .toc::-webkit-scrollbar-track { background: transparent; }
 
+    .toc a.toc-part-label,
     .toc-part-label {
+      display: block;
       font-family: 'Karla', sans-serif;
       font-size: 0.82rem; font-weight: 600; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--accent);
+      text-transform: uppercase;
+      color: var(--accent);
       margin-top: 1.6rem; margin-bottom: 0.5rem;
-      padding-left: 0.8rem;
+      padding: 0.3rem 0.8rem;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      line-height: 1.5;
     }
+    .toc a.toc-part-label:first-child,
     .toc-part-label:first-child { margin-top: 0; }
+    .toc a.toc-part-label:hover {
+      color: var(--white);
+    }
+    .toc a.toc-part-label.active {
+      border-left-color: var(--accent);
+      color: var(--accent);
+    }
 
     .toc a {
       display: block;
@@ -154,6 +170,12 @@
       padding-left: 1.4rem;
       font-size: 0.84rem;
     }
+    .toc a.toc-sub-sub {
+      padding-left: 2.4rem;
+      font-size: 0.82rem;
+      color: var(--ink-dim);
+    }
+    .toc a.toc-sub-sub:hover { color: var(--ink); }
 
     /* -- MAIN CONTENT -- */
     .main-content {
@@ -161,9 +183,26 @@
       padding-bottom: 6rem;
     }
 
+    /* -- BREADCRUMB -- */
+    .breadcrumb {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; letter-spacing: 0.04em;
+      color: var(--ink-dim);
+      padding-top: 6rem;
+      margin-bottom: 2rem;
+    }
+    .breadcrumb a {
+      color: var(--ink-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb .sep { margin: 0 0.5rem; color: var(--rule-lt); }
+    .breadcrumb .current { color: var(--ink-mid); }
+
     /* -- HERO -- */
     .hero {
-      padding: 8rem 0 4rem;
+      padding: 1rem 0 4rem;
       border-bottom: 1px solid var(--rule);
       margin-bottom: 4rem;
     }
@@ -191,6 +230,13 @@
       font-size: 1.05rem; line-height: 1.8;
       color: var(--ink); max-width: 720px;
       font-weight: 400; text-align: justify;
+    }
+    .hero-meta {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.82rem; letter-spacing: 0.06em;
+      color: var(--ink-dim);
+      margin-top: 1.6rem;
+      text-transform: uppercase;
     }
 
     /* -- PART DIVIDER -- */
@@ -280,6 +326,80 @@
       margin: 2.5rem 0;
     }
 
+    /* -- MAJOR SECTION (e.g. "Fundamentals" / "Systems" / "Building" / "Operating" as sub-sections of a Part) -- */
+    .major-section-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      margin-top: 4rem;
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .major-section-kicker::before {
+      content: ''; display: block;
+      width: 36px; height: 1px; background: var(--accent);
+    }
+    .major-section {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 2.8vw, 2.3rem);
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid var(--accent-dim);
+    }
+    .major-section em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .major-section-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.98rem; color: var(--ink-mid);
+      line-height: 1.7; max-width: 720px;
+      margin-bottom: 1.5rem;
+    }
+
+    /* -- SUB-DISCIPLINE HEADING (e.g. "Software Engineering" / "Infrastructure Engineering" as sub-parts of Building) -- */
+    .sub-discipline-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--ink-dim);
+      margin-top: 3rem;
+      margin-bottom: 0.4rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .sub-discipline-kicker::before {
+      content: ''; display: block;
+      width: 20px; height: 1px; background: var(--ink-dim);
+    }
+    .sub-discipline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.65rem; font-weight: 600;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .sub-discipline-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.94rem; color: var(--ink-mid);
+      line-height: 1.7; max-width: 720px;
+      margin-bottom: 1rem;
+    }
+
+    /* -- RESOURCES OUTRO LINK -- */
+    .resources-outro-link {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--accent); text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      margin-top: 1.4rem;
+      border-bottom: 1px solid var(--accent-dim);
+      padding-bottom: 0.2rem;
+      transition: border-color 0.2s;
+    }
+    .resources-outro-link:hover { border-color: var(--accent); }
+
     /* -- SCROLL REVEAL -- */
     .reveal {
       opacity: 0; transform: translateY(16px);
@@ -338,8 +458,28 @@
         grid-template-columns: 1fr;
         gap: 0;
       }
-      .toc { display: none; }
+      .toc {
+        position: static;
+        height: auto;
+        max-height: 50vh;
+        overflow-y: auto;
+        margin: 5.5rem 0 2rem;
+        padding: 1.4rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+      }
+      .toc::before {
+        content: "On This Page";
+        display: block;
+        font-family: 'Karla', sans-serif;
+        font-size: 0.88rem; font-weight: 600;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 0.8rem 0.8rem;
+      }
       .main-content { padding: 0; }
+      .breadcrumb { padding-top: 2rem; margin-bottom: 1rem; }
     }
     @media (max-width: 600px) {
       .nav-links { display: none; }
@@ -354,12 +494,11 @@
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="index.html" class="nav-logo">Towards Intelligence</a>
+    <a href="../index.html" class="nav-logo">Towards Intelligence</a>
     <ul class="nav-links">
-      <li><a href="index.html">Roadmap</a></li>
-      <li><a href="cse.html" class="active">CS &amp; Engineering</a></li>
-      <li><a href="data-intelligence.html">Data &amp; Intelligence</a></li>
-      <li><a href="llm-engineering.html">LLM Engineering</a></li>
+      <li><a href="../index.html#mathematics">Mathematics</a></li>
+      <li><a href="index.html" class="active">CS &amp; Engineering</a></li>
+      <li><a href="../index.html#data-intelligence">Data &amp; Intelligence</a></li>
     </ul>
     <button class="nav-hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -367,10 +506,10 @@
   </div>
 </nav>
 <div class="mobile-menu">
-  <a href="index.html" class="mobile-link">Roadmap</a>
-  <a href="cse.html" class="mobile-link">CS &amp; Engineering</a>
-  <a href="data-intelligence.html" class="mobile-link">Data &amp; Intelligence</a>
-  <a href="llm-engineering.html" class="mobile-link">LLM Engineering</a>
+  <a href="../index.html#mathematics" class="mobile-link">Mathematics</a>
+  <a href="index.html" class="mobile-link">CS &amp; Engineering</a>
+  <a href="../index.html#data-intelligence" class="mobile-link">Data &amp; Intelligence</a>
+  <a href="../data-intelligence/llm-engineering.html" class="mobile-link" target="_blank" rel="noopener">LLM Engineering</a>
 </div>
 
 <!-- BACK TO TOP -->
@@ -381,47 +520,47 @@
 <!-- ===== SIDEBAR TOC ===== -->
 <aside class="toc" id="toc">
 
-  <div class="toc-part-label">Introduction</div>
-  <a href="#intro">The Shape of the Discipline</a>
+  <a class="toc-part-label" href="#intro">Introduction</a>
 
-  <div class="toc-part-label">Part 1 &mdash; Mathematics</div>
-  <a href="#math-intro">Why Mathematics First</a>
-  <a href="#discrete-math">Discrete Mathematics</a>
+  <a class="toc-part-label" href="#part1">Part 1 &mdash; Science</a>
+  <a href="#fundamentals" class="toc-sub">Fundamentals</a>
+  <a href="#discrete-math" class="toc-sub-sub">Discrete Mathematics</a>
+  <a href="#pl-compilers" class="toc-sub-sub">Programming Languages &amp; Compilers</a>
+  <a href="#dsa" class="toc-sub-sub">Data Structures &amp; Algorithms</a>
+  <a href="#theory-of-computation" class="toc-sub-sub">Theory of Computation</a>
+  <a href="#systems" class="toc-sub">Systems</a>
+  <a href="#databases" class="toc-sub-sub">Databases</a>
+  <a href="#distributed-systems" class="toc-sub-sub">Distributed Systems</a>
+  <a href="#operating-systems" class="toc-sub-sub">Operating Systems</a>
+  <a href="#networks" class="toc-sub-sub">Computer Networks</a>
+  <a href="#parallel-computing" class="toc-sub-sub">Parallel &amp; Concurrent Computing</a>
+  <a href="#architecture" class="toc-sub-sub">Computer Organization &amp; Architecture</a>
 
-  <div class="toc-part-label">Part 2 &mdash; Science: Fundamentals</div>
-  <a href="#fundamentals-intro">What Fundamentals Means</a>
-  <a href="#pl-compilers">Programming Languages &amp; Compilers</a>
-  <a href="#dsa">Data Structures &amp; Algorithms</a>
-  <a href="#theory-of-computation">Theory of Computation</a>
+  <a class="toc-part-label" href="#part3-engineering">Part 2 &mdash; Engineering</a>
+  <a href="#building" class="toc-sub">Building</a>
+  <a href="#software-engineering-sub" class="toc-sub-sub">Software Engineering</a>
+  <a href="#infrastructure-engineering-sub" class="toc-sub-sub">Infrastructure Engineering</a>
+  <a href="#operating" class="toc-sub">Operating</a>
+  <a href="#reliability-engineering" class="toc-sub-sub">Reliability Engineering / SRE</a>
+  <a href="#performance-engineering" class="toc-sub-sub">Performance Engineering</a>
+  <a href="#security-engineering" class="toc-sub-sub">Security Engineering</a>
+  <a href="#observability-engineering" class="toc-sub-sub">Observability Engineering</a>
 
-  <div class="toc-part-label">Part 3 &mdash; Science: Systems</div>
-  <a href="#systems-intro">What Systems Means</a>
-  <a href="#databases">Databases</a>
-  <a href="#distributed-systems">Distributed Systems</a>
-  <a href="#operating-systems">Operating Systems</a>
-  <a href="#networks">Computer Networks</a>
-  <a href="#parallel-computing">Parallel &amp; Concurrent Computing</a>
-  <a href="#architecture">Computer Organization &amp; Architecture</a>
+  <a class="toc-part-label" href="#connections">Closing</a>
 
-  <div class="toc-part-label">Part 4 &mdash; Engineering: Building</div>
-  <a href="#building-intro">What Building Means</a>
-  <a href="#software-engineering">Software Engineering</a>
-  <a href="#infrastructure-engineering">Infrastructure Engineering</a>
-
-  <div class="toc-part-label">Part 5 &mdash; Engineering: Operating</div>
-  <a href="#operating-intro">What Operating Means</a>
-  <a href="#reliability-engineering">Reliability Engineering / SRE</a>
-  <a href="#performance-engineering">Performance Engineering</a>
-  <a href="#security-engineering">Security Engineering</a>
-  <a href="#observability-engineering">Observability Engineering</a>
-
-  <div class="toc-part-label">Closing</div>
-  <a href="#connections">How It All Connects</a>
+  <a class="toc-part-label" href="#resources-section">Resources</a>
 
 </aside>
 
 <!-- ===== MAIN CONTENT ===== -->
 <main class="main-content">
+
+<!-- BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="../index.html">Towards Intelligence</a>
+  <span class="sep">/</span>
+  <span class="current">CS &amp; Engineering</span>
+</nav>
 
 <!-- HERO -->
 <div class="hero reveal" id="hero-section">
@@ -430,6 +569,7 @@
   <p class="hero-subtitle">
     A structured guide to the discipline &mdash; from mathematical foundations through theoretical computer science to practical engineering at scale.
   </p>
+  <div class="hero-meta">Last updated &mdash; April 2026</div>
 </div>
 
 
@@ -455,10 +595,7 @@
     Within Engineering, the split is between <strong>Building</strong> and <strong>Operating</strong>. Building is about construction &mdash; writing software, setting up infrastructure, designing cloud architectures, establishing CI/CD pipelines. But building a system is only half the job. Operating is about keeping it alive: ensuring reliability through SRE practices, catching performance regressions before users do, hardening security posture, and maintaining observability so that when something goes wrong, you can actually find out why. A system that cannot be operated is a system that cannot be trusted.
   </p>
   <p class="body-text">
-    Before any of this, there is <strong>Mathematics</strong> &mdash; specifically discrete mathematics &mdash; which provides the formal language that all of computer science is built on. It sits at the very beginning because without it, the Science layer is just hand-waving.
-  </p>
-  <p class="body-text">
-    The progression is deliberate: Mathematics feeds Science, Science feeds Engineering, and within Engineering, Building feeds Operating. Each layer depends on the one before it. This article walks through all five parts in order, explaining what each topic covers, why it exists, and how it connects to everything else.
+    The progression is deliberate: Science feeds Engineering, and within Engineering, Building feeds Operating. Each layer depends on the one before it. This article walks through all four parts in order, explaining what each topic covers, why it exists, and how it connects to everything else.
   </p>
 </div>
 
@@ -466,22 +603,31 @@
 
 
 <!-- ============================================================ -->
-<!--  PART 1 — MATHEMATICS                                         -->
+<!--  PART 1 — SCIENCE                                              -->
 <!-- ============================================================ -->
 
 <div class="part-divider reveal" id="part1">
   <div class="part-num">Part 1</div>
-  <h2 class="part-title">Mathematics</h2>
-  <p class="part-subtitle">The formal language that computer science theory is built on.</p>
+  <h2 class="part-title"><em>Science</em></h2>
+  <p class="part-subtitle">The theoretical core of computer science. Science splits into two major sub-sections: <strong>Fundamentals</strong> (the abstract ideas &mdash; discrete math, algorithms, languages, computation theory) and <strong>Systems</strong> (real infrastructure &mdash; databases, operating systems, networks).</p>
 </div>
 
-<div class="reveal" id="math-intro">
-  <h3 class="section-heading">Why Mathematics Comes First</h3>
+<!-- ============================================================ -->
+<!--  MAJOR SECTION: FUNDAMENTALS                                   -->
+<!-- ============================================================ -->
+<div class="reveal" id="fundamentals">
+  <div class="major-section-kicker">Part 1 &mdash; Sub-section 1 of 2</div>
+  <h2 class="major-section"><em>Fundamentals</em></h2>
+  <p class="major-section-desc">The abstract theoretical core &mdash; how computation, languages, and algorithms work at a foundational level. Includes the discrete mathematics that all of CS theory is built on.</p>
+</div>
+
+<div class="reveal" id="fundamentals-intro">
+  <h3 class="section-heading">What Fundamentals Means</h3>
   <p class="body-text">
-    Every science has a mathematical foundation, but the mathematics that computer science depends on is distinctive. Physics relies on calculus and differential equations. Statistics relies on probability theory. Computer science relies on <strong>discrete mathematics</strong> &mdash; the study of countable, distinct structures rather than continuous ones. This is not a coincidence. Computers are discrete machines. They operate on bits, not on continuous functions. The mathematical structures that describe what computers do &mdash; logic, sets, graphs, relations &mdash; are inherently discrete.
+    The Fundamentals layer of CS is the theoretical core that does not change. Programming languages come and go. Frameworks have a half-life measured in years. But the ideas in this section &mdash; how languages are designed, how algorithms are analyzed, what computation itself can and cannot do, and the discrete mathematics underneath all of it &mdash; are as valid today as they were in 1970. They are the concepts that every other part of the discipline depends on.
   </p>
   <p class="body-text">
-    This is also why discrete math is the mathematical foundation <em>specific</em> to CS, as opposed to calculus, which is shared with essentially every other science and engineering discipline. Calculus is useful in CS (particularly in machine learning and numerical computing), but it is not the foundational language. Discrete math is.
+    These four topics form a progression. Discrete Mathematics gives you the formal language &mdash; logic, sets, graphs, proof techniques &mdash; that everything else is built on. Programming Languages and Compilers teaches you how the tools you use every day actually work &mdash; you stop being a consumer of languages and become someone who understands the design choices underneath them. Data Structures and Algorithms gives you the vocabulary and techniques for solving problems efficiently. Theory of Computation pushes further still, asking what problems are solvable at all, and which ones are fundamentally beyond reach. Together, they constitute the intellectual core of computer science as a science.
   </p>
 </div>
 
@@ -490,36 +636,13 @@
 <div class="reveal" id="discrete-math">
   <h3 class="section-heading"><span class="sh-num">1.</span> Discrete Mathematics</h3>
   <p class="body-text">
-    Discrete mathematics is where CS meets formal reasoning. It covers logic (propositional and predicate), set theory, relations and functions, graph theory, combinatorics, number theory, and proof techniques (induction, contradiction, construction). These are not abstract curiosities &mdash; they are the tools you use to reason precisely about computational problems.
+    Discrete mathematics is where CS meets formal reasoning. It covers logic (propositional and predicate), set theory, relations and functions, graph theory, combinatorics, number theory, and proof techniques (induction, contradiction, construction). These are not abstract curiosities &mdash; they are the tools you use to reason precisely about computational problems. Every science has a mathematical foundation; computer science&rsquo;s foundation is discrete because computers are discrete machines, operating on bits rather than continuous functions.
   </p>
   <p class="body-text">
     Logic gives you the foundation for boolean expressions, database query languages, and circuit design. Set theory underlies type systems and relational databases. Graph theory is the backbone of network analysis, social graphs, dependency resolution, and route planning. Combinatorics shows up every time you need to count possibilities &mdash; how many ways can a system fail, how many test cases cover a specification, how many routes exist between two nodes. Proof techniques teach you how to establish that something is true, not just that it looks true in the cases you tested.
   </p>
   <p class="body-text">
-    The practical payoff is this: every algorithm analysis, every database query optimization, every network routing decision, every complexity argument has discrete math underneath it. When you study data structures and algorithms later, you will be writing proofs of correctness and analyzing recurrences. When you study distributed systems, you will be reasoning about graph connectivity and fault models. Without discrete math, those subjects become a collection of recipes you memorize rather than ideas you understand. With it, you can derive solutions rather than just recall them.
-  </p>
-</div>
-
-<hr class="content-rule" />
-
-
-<!-- ============================================================ -->
-<!--  PART 2 — SCIENCE: FUNDAMENTALS                                -->
-<!-- ============================================================ -->
-
-<div class="part-divider reveal" id="part2">
-  <div class="part-num">Part 2</div>
-  <h2 class="part-title">Science &mdash; <em>Fundamentals</em></h2>
-  <p class="part-subtitle">The abstract theoretical core &mdash; how computation, languages, and algorithms work at a foundational level.</p>
-</div>
-
-<div class="reveal" id="fundamentals-intro">
-  <h3 class="section-heading">What Fundamentals Means</h3>
-  <p class="body-text">
-    The Fundamentals layer of CS is the theoretical core that does not change. Programming languages come and go. Frameworks have a half-life measured in years. But the ideas in this section &mdash; how languages are designed, how algorithms are analyzed, what computation itself can and cannot do &mdash; are as valid today as they were in 1970. They are the concepts that every other part of the discipline depends on.
-  </p>
-  <p class="body-text">
-    These three topics form a progression. Programming Languages and Compilers teaches you how the tools you use every day actually work &mdash; you stop being a consumer of languages and become someone who understands the design choices underneath them. Data Structures and Algorithms gives you the vocabulary and techniques for solving problems efficiently. Theory of Computation pushes further still, asking what problems are solvable at all, and which ones are fundamentally beyond reach. Together, they constitute the intellectual core of computer science as a science.
+    The practical payoff is this: every algorithm analysis, every database query optimization, every network routing decision, every complexity argument has discrete math underneath it. When you study data structures and algorithms next, you will be writing proofs of correctness and analyzing recurrences. When you study distributed systems, you will be reasoning about graph connectivity and fault models. Without discrete math, those subjects become a collection of recipes you memorize rather than ideas you understand. With it, you can derive solutions rather than just recall them.
   </p>
 </div>
 
@@ -572,13 +695,12 @@
 
 
 <!-- ============================================================ -->
-<!--  PART 3 — SCIENCE: SYSTEMS                                     -->
+<!--  MAJOR SECTION: SYSTEMS                                        -->
 <!-- ============================================================ -->
-
-<div class="part-divider reveal" id="part3">
-  <div class="part-num">Part 3</div>
-  <h2 class="part-title">Science &mdash; <em>Systems</em></h2>
-  <p class="part-subtitle">How real computing infrastructure is designed &mdash; from a single machine to distributed clusters.</p>
+<div class="reveal" id="systems">
+  <div class="major-section-kicker">Part 1 &mdash; Sub-section 2 of 2</div>
+  <h2 class="major-section"><em>Systems</em></h2>
+  <p class="major-section-desc">How real computing infrastructure is designed &mdash; from a single machine to distributed clusters.</p>
 </div>
 
 <div class="reveal" id="systems-intro">
@@ -688,23 +810,39 @@
 <!--  PART 4 — ENGINEERING: BUILDING                                -->
 <!-- ============================================================ -->
 
-<div class="part-divider reveal" id="part4">
-  <div class="part-num">Part 4</div>
-  <h2 class="part-title">Engineering &mdash; <em>Building</em></h2>
-  <p class="part-subtitle">Constructing software systems and the infrastructure they run on.</p>
+<div class="part-divider reveal" id="part3-engineering">
+  <div class="part-num">Part 2</div>
+  <h2 class="part-title"><em>Engineering</em></h2>
+  <p class="part-subtitle">Constructing software systems, running them in production, and keeping them alive. Engineering splits into two major sub-sections: <strong>Building</strong> (construction) and <strong>Operating</strong> (keeping it alive).</p>
+</div>
+
+<!-- ============================================================ -->
+<!--  MAJOR SECTION: BUILDING                                       -->
+<!-- ============================================================ -->
+<div class="reveal" id="building">
+  <div class="major-section-kicker">Part 2 &mdash; Sub-section 1 of 2</div>
+  <h2 class="major-section"><em>Building</em></h2>
+  <p class="major-section-desc">Constructing software systems and the infrastructure they run on. Building splits into two sub-disciplines: <strong>Software Engineering</strong> (writing the code) and <strong>Infrastructure Engineering</strong> (the platforms it runs on).</p>
 </div>
 
 <div class="reveal" id="building-intro">
   <h3 class="section-heading">What Building Means</h3>
   <p class="body-text">
-    The Building category is where Science turns into practice. Everything in Parts 1&ndash;3 gives you understanding. Building is where you use that understanding to construct real systems that solve real problems. The distinction is important: you can understand B-trees deeply and still write terrible production software if you do not know how to structure a codebase, manage dependencies, write tests, deploy reliably, or operate infrastructure.
+    The Building category is where Science turns into practice. Everything in Parts 1&ndash;2 gives you understanding. Building is where you use that understanding to construct real systems that solve real problems. The distinction is important: you can understand B-trees deeply and still write terrible production software if you do not know how to structure a codebase, manage dependencies, write tests, deploy reliably, or operate infrastructure.
   </p>
   <p class="body-text">
-    Building splits into two disciplines: <strong>Software Engineering</strong> and <strong>Infrastructure Engineering</strong>. Software Engineering is the practice of building software that is maintainable, testable, and scalable over time. Infrastructure Engineering is the practice of building and managing the platforms that software runs on. They are deeply interconnected &mdash; you cannot do one well without understanding the other &mdash; but they require different skills and different modes of thinking.
+    Building splits into two sub-disciplines: <strong>Software Engineering</strong> and <strong>Infrastructure Engineering</strong>. Software Engineering is the practice of building software that is maintainable, testable, and scalable over time. Infrastructure Engineering is the practice of building and managing the platforms that software runs on. They are deeply interconnected &mdash; you cannot do one well without understanding the other &mdash; but they require different skills and different modes of thinking.
   </p>
 </div>
 
 <hr class="content-rule" />
+
+<!-- Building → Software Engineering (first sub-discipline of Building) -->
+<div class="reveal" id="software-engineering-sub">
+  <div class="sub-discipline-kicker">Sub-discipline 1 of 2</div>
+  <h3 class="sub-discipline">Software Engineering</h3>
+  <p class="sub-discipline-desc">The discipline of building software that is maintainable, testable, and scalable over time &mdash; design patterns, architecture, testing, version control, and the principles that separate hobby code from professional software.</p>
+</div>
 
 <div class="reveal" id="software-engineering">
   <h3 class="section-heading"><span class="sh-num">11.</span> Software Engineering</h3>
@@ -720,6 +858,13 @@
 </div>
 
 <hr class="content-rule" />
+
+<!-- Building → Infrastructure Engineering (second sub-discipline of Building) -->
+<div class="reveal" id="infrastructure-engineering-sub">
+  <div class="sub-discipline-kicker">Sub-discipline 2 of 2</div>
+  <h3 class="sub-discipline">Infrastructure Engineering</h3>
+  <p class="sub-discipline-desc">Building and managing the platforms that software runs on &mdash; it encompasses three related sub-disciplines: <strong>Development Operations (DevOps)</strong>, <strong>Cloud Engineering</strong>, and <strong>Platform Engineering</strong>.</p>
+</div>
 
 <div class="reveal" id="infrastructure-engineering">
   <h3 class="section-heading"><span class="sh-num">12.</span> Infrastructure Engineering</h3>
@@ -738,13 +883,12 @@
 
 
 <!-- ============================================================ -->
-<!--  PART 5 — ENGINEERING: OPERATING                               -->
+<!--  MAJOR SECTION: OPERATING                                      -->
 <!-- ============================================================ -->
-
-<div class="part-divider reveal" id="part5">
-  <div class="part-num">Part 5</div>
-  <h2 class="part-title">Engineering &mdash; <em>Operating</em></h2>
-  <p class="part-subtitle">Keeping systems reliable, performant, secure, and observable in production.</p>
+<div class="reveal" id="operating">
+  <div class="major-section-kicker">Part 2 &mdash; Sub-section 2 of 2</div>
+  <h2 class="major-section"><em>Operating</em></h2>
+  <p class="major-section-desc">Keeping systems reliable, performant, secure, and observable in production. Building gets a system running; Operating keeps it alive.</p>
 </div>
 
 <div class="reveal" id="operating-intro">
@@ -832,22 +976,42 @@
 
 <div class="reveal" id="connections-body">
   <p class="body-text">
-    The structure of this article is not just organizational convenience. It reflects a genuine dependency chain. Mathematics provides the formal language &mdash; logic, proof, combinatorial reasoning &mdash; that the Science layer is built on. Without it, algorithms are recipes you memorize, complexity analysis is hand-waving, and correctness proofs are impossible.
+    The structure of this article is not just organizational convenience. It reflects a genuine dependency chain. Fundamentals begins with Discrete Mathematics &mdash; logic, proof, combinatorial reasoning &mdash; because every other topic in the Science layer is built on it. Without it, algorithms are recipes you memorize, complexity analysis is hand-waving, and correctness proofs are impossible.
   </p>
   <p class="body-text">
     The Science layer splits into Fundamentals and Systems for a reason. Fundamentals gives you the abstract ideas &mdash; how algorithms work, what computation can and cannot do, how languages translate intent into execution. Systems takes those abstractions and instantiates them in real infrastructure. You need the abstractions first because they are what let you reason about systems from first principles rather than just memorizing configuration options.
   </p>
   <p class="body-text">
-    Engineering depends on Science in the same way that Science depends on Mathematics. You can learn to deploy a Kubernetes cluster without understanding operating systems, but when a pod gets OOM-killed and you don&rsquo;t understand virtual memory, you are debugging with a blindfold on. You can write microservices without understanding distributed systems, but when a network partition causes data inconsistency, the CAP theorem is not an academic curiosity &mdash; it is the explanation for why your system is behaving the way it is.
+    Engineering depends on Science in the same way that Systems depends on Fundamentals. You can learn to deploy a Kubernetes cluster without understanding operating systems, but when a pod gets OOM-killed and you don&rsquo;t understand virtual memory, you are debugging with a blindfold on. You can write microservices without understanding distributed systems, but when a network partition causes data inconsistency, the CAP theorem is not an academic curiosity &mdash; it is the explanation for why your system is behaving the way it is.
   </p>
   <p class="body-text">
     Within Engineering, Building feeds Operating. You cannot operate a system you do not understand how to build. SRE practices assume you can write automation. Performance engineering assumes you can modify application code and database queries. Security engineering assumes you understand the software stack deeply enough to identify vulnerabilities. And all of Operating assumes Observability &mdash; you cannot improve what you cannot see.
   </p>
   <p class="body-text">
-    The full chain runs: <strong>Mathematics &rarr; Science (Fundamentals &rarr; Systems) &rarr; Engineering (Building &rarr; Operating)</strong>. Each link strengthens every link that follows. The temptation is always to skip ahead &mdash; to jump to Building without the Science, or to Operating without the Building. That works until it does not. And when it stops working, the gap in your foundation is exactly what makes the problem impossible to diagnose.
+    The full chain runs: <strong>Science (Fundamentals &rarr; Systems) &rarr; Engineering (Building &rarr; Operating)</strong>. Each link strengthens every link that follows. The temptation is always to skip ahead &mdash; to jump to Building without the Science, or to Operating without the Building. That works until it does not. And when it stops working, the gap in your foundation is exactly what makes the problem impossible to diagnose.
   </p>
   <p class="body-text">
     This is the full landscape of Computer Science and Engineering. It is large, but it is not random. The structure is a map, and the progression is a path. You do not need to master every topic before moving to the next &mdash; but you do need to know the map well enough to understand where you are, what you are standing on, and what you are missing.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ============================================================ -->
+<!--  RESOURCES                                                    -->
+<!-- ============================================================ -->
+<div class="part-divider reveal" id="resources-section">
+  <div class="part-num">Resources</div>
+  <h2 class="part-title"><em>Resources</em></h2>
+  <p class="part-subtitle">Every book, course, and practical resource referenced in this guide &mdash; curated and organised by track.</p>
+</div>
+
+<div class="reveal" id="resources-intro">
+  <p class="body-text">
+    Every textbook, course, and practical reference used in this guide is collected on the dedicated CS &amp; Engineering Resources page &mdash; organised in the same Science / Engineering structure you just read, with tables for Books and Courses across Fundamentals, Systems, Building, and Operating. Use it as a quick-reference when you&rsquo;re ready to pick what to study next.
+  </p>
+  <p style="margin-top: 1.4rem;">
+    <a href="resources.html" target="_blank" rel="noopener" class="resources-outro-link">Browse the full CS &amp; Engineering Resources page &rarr;</a>
   </p>
 </div>
 

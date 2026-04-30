@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data &amp; Intelligence Resources &mdash; Towards Intelligence</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
+  <meta property="og:title" content="Data & Intelligence Resources — Towards Intelligence"/>
+  <meta property="og:description" content="Curated textbooks, courses, and code repositories for data analysis, machine learning, deep learning, NLP, and large language models."/>
+  <meta property="og:type" content="article"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:         #0e0e0f;
+      --surface:    #151516;
+      --surface2:   #1c1c1e;
+      --rule:       #2a2a2e;
+      --rule-lt:    #333338;
+      --ink:        #e8e8e8;
+      --ink-mid:    #d4d4d4;
+      --ink-dim:    #a8a8a8;
+      --white:      #f8f8f8;
+      --accent:     #c8a96e;
+      --accent-dim: #3a2e1a;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--bg); color: var(--ink);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+    }
+    body > nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(14, 14, 15, 0.94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em;
+      color: var(--white); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.92rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-hamburger {
+      display: none;
+      flex-direction: column; justify-content: center;
+      gap: 5px; width: 28px; height: 28px;
+      cursor: pointer; background: none; border: none; padding: 0;
+    }
+    .nav-hamburger span {
+      display: block; width: 100%; height: 2px;
+      background: var(--ink); border-radius: 1px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .mobile-menu {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 99;
+      background: rgba(14, 14, 15, 0.97);
+      backdrop-filter: blur(12px);
+      flex-direction: column; justify-content: center; align-items: center;
+      gap: 2rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-family: 'Karla', sans-serif;
+      font-size: 1.1rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .mobile-menu a:hover { color: var(--accent); }
+
+    .page-wrap {
+      max-width: 900px; margin: 0 auto;
+      padding: 0 2rem 6rem;
+    }
+    .breadcrumb {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; letter-spacing: 0.04em;
+      color: var(--ink-dim);
+      padding-top: 6rem;
+    }
+    .breadcrumb a { color: var(--ink-dim); text-decoration: none; transition: color 0.2s; }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb .sep { margin: 0 0.5rem; color: var(--rule-lt); }
+    .breadcrumb .current { color: var(--ink-mid); }
+
+    .hero {
+      padding: 3rem 0 3rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 3rem;
+    }
+    .hero-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      display: flex; align-items: center; gap: 0.8rem;
+      margin-bottom: 1.4rem;
+    }
+    .hero-kicker::before {
+      content: ''; display: block;
+      width: 32px; height: 1px; background: var(--accent);
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+      font-weight: 600; line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      margin-bottom: 1rem;
+    }
+    .hero-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .hero-subtitle {
+      font-size: 1.02rem; line-height: 1.75;
+      color: var(--ink); max-width: 680px; font-weight: 400;
+    }
+    .hero-meta {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.82rem; letter-spacing: 0.06em;
+      color: var(--ink-dim);
+      margin-top: 1.4rem;
+      text-transform: uppercase;
+    }
+    .article-link {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--accent);
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      margin-top: 1.2rem;
+      border-bottom: 1px solid var(--accent-dim);
+      padding-bottom: 0.2rem;
+      transition: border-color 0.2s;
+    }
+    .article-link:hover { border-color: var(--accent); }
+
+    .track-header {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.9rem; font-weight: 600; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--accent);
+      margin: 3.5rem 0 0.3rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .track-header::before {
+      content: ''; display: block;
+      width: 28px; height: 1px; background: var(--accent);
+    }
+    .track-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.7rem; font-weight: 600;
+      color: var(--white);
+      margin-bottom: 0.4rem;
+    }
+    .track-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.94rem; color: var(--ink-mid);
+      line-height: 1.7; max-width: 720px;
+      margin-bottom: 1.6rem;
+    }
+    .sub-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; font-weight: 500;
+      color: var(--white);
+      margin-top: 2.4rem;
+      margin-bottom: 0.4rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .sub-label-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; color: var(--ink-dim);
+      line-height: 1.6; max-width: 720px;
+      margin-bottom: 0.4rem;
+    }
+
+    .resource-section { margin-bottom: 2.2rem; }
+    .resource-topic {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; font-weight: 600;
+      color: var(--white);
+      margin-bottom: 0.8rem;
+    }
+    .resource-list {
+      display: flex; flex-direction: column;
+      gap: 0.6rem;
+      border-top: 1px solid var(--rule);
+      padding-top: 0.9rem;
+    }
+    .resource-item {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem;
+      color: var(--ink);
+      font-weight: 400;
+      line-height: 1.7;
+    }
+    .resource-item a {
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule-lt);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .resource-item a:hover { color: var(--accent); border-color: var(--accent); }
+    .resource-type {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--ink-dim);
+      margin-left: 0.6rem;
+      background: var(--surface2);
+      padding: 0.15rem 0.5rem;
+      border-radius: 2px;
+    }
+
+    /* Tabular resources */
+    .resource-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.6rem;
+      margin-bottom: 3rem;
+      border: 1px solid var(--rule);
+    }
+    .resource-table thead th {
+      text-align: left;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.74rem; font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      border: 1px solid var(--rule);
+      background: var(--surface);
+      padding: 0.9rem 1rem;
+      vertical-align: middle;
+    }
+    .resource-table thead th.col-topic { width: 26%; }
+    .resource-table thead th.col-books,
+    .resource-table thead th.col-courses { width: 37%; }
+    .resource-table tbody td {
+      padding: 1.1rem 1rem;
+      border: 1px solid var(--rule);
+      vertical-align: top;
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.96rem;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+    .resource-table td.col-topic {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-weight: 500;
+      color: var(--white);
+      background: rgba(21, 21, 22, 0.4);
+    }
+    .resource-table .cell-item {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .resource-table .cell-item:last-child { margin-bottom: 0; }
+    .resource-table .cell-item a {
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule-lt);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .resource-table .cell-item a:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .resource-table .cell-type {
+      display: inline-block;
+      margin-left: 0.4rem;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.66rem; font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      background: var(--surface2);
+      padding: 0.1rem 0.4rem;
+      border-radius: 2px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .resource-table .cell-empty {
+      color: var(--ink-dim);
+      opacity: 0.35;
+    }
+
+    @media (max-width: 720px) {
+      .resource-table { border: none; }
+      .resource-table,
+      .resource-table thead,
+      .resource-table tbody,
+      .resource-table tr,
+      .resource-table th,
+      .resource-table td { display: block; width: 100%; }
+      .resource-table thead { display: none; }
+      .resource-table tbody tr {
+        border: 1px solid var(--rule);
+        padding: 1.2rem 1.2rem 0.8rem;
+        margin-bottom: 1rem;
+      }
+      .resource-table td {
+        padding: 0.4rem 0;
+        border: none;
+        background: transparent;
+      }
+      .resource-table td.col-topic {
+        font-size: 1.35rem;
+        margin-bottom: 0.6rem;
+        padding-bottom: 0.6rem;
+        border-bottom: 1px solid var(--rule-lt);
+      }
+      .resource-table td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-family: 'Karla', sans-serif;
+        font-size: 0.66rem; font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        margin-bottom: 0.3rem;
+        margin-top: 0.4rem;
+      }
+    }
+
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 1.6rem 2rem;
+      background: var(--surface);
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.96rem; color: var(--ink-dim);
+    }
+    .footer-copy {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.05em;
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .page-wrap { padding-left: 1.2rem; padding-right: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">Towards Intelligence</a>
+    <ul class="nav-links">
+      <li><a href="../index.html#mathematics">Mathematics</a></li>
+      <li><a href="../index.html#cse">CS &amp; Engineering</a></li>
+      <li><a href="index.html" class="active">Data &amp; Intelligence</a></li>
+    </ul>
+    <button class="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="../index.html#mathematics" class="mobile-link">Mathematics</a>
+  <a href="../index.html#cse" class="mobile-link">CS &amp; Engineering</a>
+  <a href="index.html" class="mobile-link">Data &amp; Intelligence</a>
+  <a href="llm-engineering.html" class="mobile-link" target="_blank" rel="noopener">LLM Engineering</a>
+</div>
+
+<div class="page-wrap">
+
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../index.html">Towards Intelligence</a>
+    <span class="sep">/</span>
+    <a href="index.html">Data &amp; Intelligence</a>
+    <span class="sep">/</span>
+    <span class="current">Resources</span>
+  </nav>
+
+  <div class="hero reveal">
+    <div class="hero-kicker">Curated Resources</div>
+    <h1 class="hero-title">Data &amp; Intelligence <em>Resources</em></h1>
+    <p class="hero-subtitle">
+      Two parallel tracks: the Science track for theoretical depth and the Engineering track for hands-on building. Each covers the same five topics with entirely different resources.
+    </p>
+    <div class="hero-meta">Last updated &mdash; April 2026</div>
+    <div><a href="index.html" class="article-link">&larr; Read the full Data &amp; Intelligence guide</a></div>
+  </div>
+
+  <!-- SCIENCE TRACK -->
+  <div class="track-header">Science</div>
+  <div class="track-title">Theory &amp; Foundations</div>
+  <div class="track-desc">Canonical textbooks and Stanford lecture series for building mathematical intuition. The goal is not memorisation &mdash; it is developing the ability to read a paper or reason about why a model is failing.</div>
+
+  <table class="resource-table reveal">
+    <thead>
+      <tr>
+        <th class="col-topic">Topic</th>
+        <th class="col-books">Books</th>
+        <th class="col-courses">Courses</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-topic">Data Analysis</td>
+        <td data-label="Books">
+          <span class="cell-item"><a href="https://link.springer.com/book/10.1007/978-0-387-21736-9" target="_blank" rel="noopener">All of Statistics &ndash; Larry Wasserman</a> <span class="cell-type">Textbook</span></span>
+        </td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+      <tr>
+        <td class="col-topic">Machine Learning</td>
+        <td data-label="Books">
+          <span class="cell-item"><a href="https://www.statlearning.com/" target="_blank" rel="noopener">An Introduction to Statistical Learning (ISLR)</a> <span class="cell-type">Textbook &middot; Free</span></span>
+          <span class="cell-item"><a href="https://hastie.su.domains/ElemStatLearn/" target="_blank" rel="noopener">The Elements of Statistical Learning (ESL)</a> <span class="cell-type">Textbook &middot; Free</span></span>
+        </td>
+        <td data-label="Courses">
+          <span class="cell-item"><a href="https://cs229.stanford.edu/" target="_blank" rel="noopener">CS229: Machine Learning &ndash; Stanford</a> <span class="cell-type">Lecture Notes</span></span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-topic">Deep Learning</td>
+        <td data-label="Books">
+          <span class="cell-item"><a href="https://www.deeplearningbook.org/" target="_blank" rel="noopener">Deep Learning &ndash; Goodfellow, Bengio &amp; Courville</a> <span class="cell-type">Textbook &middot; Free</span></span>
+        </td>
+        <td data-label="Courses">
+          <span class="cell-item"><a href="https://cs230.stanford.edu/" target="_blank" rel="noopener">CS230: Deep Learning &ndash; Stanford</a> <span class="cell-type">Course</span></span>
+          <span class="cell-item"><a href="https://cs231n.stanford.edu/" target="_blank" rel="noopener">CS231N: CNNs for Visual Recognition &ndash; Stanford</a> <span class="cell-type">Course</span></span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-topic">Natural Language Processing</td>
+        <td data-label="Books">
+          <span class="cell-item"><a href="https://web.stanford.edu/~jurafsky/slp3/" target="_blank" rel="noopener">Speech and Language Processing &ndash; Jurafsky &amp; Martin</a> <span class="cell-type">Textbook &middot; Free</span></span>
+        </td>
+        <td data-label="Courses">
+          <span class="cell-item"><a href="https://web.stanford.edu/class/cs224n/" target="_blank" rel="noopener">CS224N: NLP with Deep Learning &ndash; Stanford</a> <span class="cell-type">Course</span></span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-topic">Transformers &amp; LLMs</td>
+        <td data-label="Books">
+          <span class="cell-item"><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need &ndash; Vaswani et al.</a> <span class="cell-type">Paper &middot; Essential</span></span>
+        </td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ENGINEERING TRACK: BUILDING -->
+  <div class="track-header">Engineering</div>
+  <div class="track-title">Building</div>
+  <div class="track-desc">Getting a model from a notebook into production. Building splits into two sub-disciplines: <strong>Software Engineering</strong> (writing the model code, choosing frameworks, structuring experiments) and <strong>Infrastructure Engineering</strong> (the ML system architecture, data pipelines, feature stores, and serving infrastructure underneath).</div>
+
+  <div class="sub-label">Software Engineering</div>
+  <div class="sub-label-desc">Mirrors the Science track topic-for-topic, but with implementation-focused books and code repositories instead of theory.</div>
+
+  <table class="resource-table reveal">
+    <thead>
+      <tr>
+        <th class="col-topic">Topic</th>
+        <th class="col-books">Books</th>
+        <th class="col-courses">Courses</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-topic">Data Analysis</td>
+        <td data-label="Books">
+          <span class="cell-item"><a href="https://wesmckinney.com/book/" target="_blank" rel="noopener">Python for Data Analysis &ndash; Wes McKinney</a> <span class="cell-type">Book &middot; Free</span></span>
+        </td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+      <tr>
+        <td class="col-topic">Machine Learning</td>
+        <td data-label="Books">
+          <span class="cell-item"><a href="https://github.com/ageron/handson-ml3" target="_blank" rel="noopener">Hands-On Machine Learning with Scikit-Learn, Keras &amp; TensorFlow &ndash; G&eacute;ron</a> <span class="cell-type">Book &middot; Code</span></span>
+        </td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+      <tr>
+        <td class="col-topic">Deep Learning</td>
+        <td data-label="Books">
+          <span class="cell-item"><a href="https://github.com/fchollet/deep-learning-with-python-notebooks" target="_blank" rel="noopener">Deep Learning with Python &ndash; Fran&ccedil;ois Chollet</a> <span class="cell-type">Book &middot; Code</span></span>
+        </td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+      <tr>
+        <td class="col-topic">Natural Language Processing</td>
+        <td data-label="Books">
+          <span class="cell-item">Natural Language Processing in Action &ndash; Lane, Howard &amp; Hapke <span class="cell-type">Book</span></span>
+        </td>
+        <td data-label="Courses">
+          <span class="cell-item"><a href="https://web.stanford.edu/class/cs224n/" target="_blank" rel="noopener">CS224N: NLP with Deep Learning &ndash; Assignments</a> <span class="cell-type">Assignments</span></span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-topic">Transformers &amp; LLMs</td>
+        <td data-label="Books">
+          <span class="cell-item"><a href="https://github.com/nlp-with-transformers" target="_blank" rel="noopener">Natural Language Processing with Transformers &ndash; Tunstall et al.</a> <span class="cell-type">Book &middot; Code</span></span>
+          <span class="cell-item"><a href="https://github.com/rasbt/LLMs-from-scratch" target="_blank" rel="noopener">Build a Large Language Model From Scratch &ndash; Sebastian Raschka</a> <span class="cell-type">Book &middot; Code</span></span>
+          <span class="cell-item"><a href="https://github.com/HandsOnLLM/Hands-On-Large-Language-Models" target="_blank" rel="noopener">Hands-On Large Language Models &ndash; Alammar &amp; Grootendorst</a> <span class="cell-type">Book &middot; Code</span></span>
+          <span class="cell-item"><a href="https://github.com/PacktPublishing/LLM-Engineers-Handbook" target="_blank" rel="noopener">LLM Engineer&rsquo;s Handbook &ndash; Iusztin &amp; Labonne</a> <span class="cell-type">Book &middot; Code</span></span>
+          <span class="cell-item"><a href="https://huyenchip.com/books/" target="_blank" rel="noopener">AI Engineering &ndash; Chip Huyen</a> <span class="cell-type">Book</span></span>
+        </td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-family: 'Karla', sans-serif; font-size: 0.9rem; color: var(--ink-dim); margin-top: -1.6rem; margin-bottom: 3rem; padding-left: 0.2rem;">
+    Related: <a href="llm-engineering.html" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">The LLM Engineering Landscape</a> &mdash; a three-part deep dive into what engineers actually build with LLMs.
+  </p>
+
+  <!-- ENGINEERING TRACK: INFRASTRUCTURE (second sub-part of Building) -->
+  <div class="sub-label">Infrastructure Engineering</div>
+  <div class="sub-label-desc">The ML system design, data pipelines, feature stores, and serving infrastructure that makes models runnable at scale.</div>
+
+  <table class="resource-table reveal">
+    <thead>
+      <tr>
+        <th class="col-topic">Topic</th>
+        <th class="col-books">Books</th>
+        <th class="col-courses">Courses</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-topic">ML Systems Design</td>
+        <td data-label="Books">
+          <span class="cell-item"><a href="https://huyenchip.com/books/" target="_blank" rel="noopener">Designing Machine Learning Systems &ndash; Chip Huyen</a> <span class="cell-type">Book</span></span>
+        </td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-name">Data &amp; Intelligence Resources</span>
+    <span class="footer-copy">&copy; 2026</span>
+  </div>
+</footer>
+
+<script>
+  const hamburger = document.querySelector('.nav-hamburger');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+  });
+  document.querySelectorAll('.mobile-link').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>

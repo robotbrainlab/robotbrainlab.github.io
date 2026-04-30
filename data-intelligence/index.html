@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Data &amp; Intelligence</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
   <meta property="og:title" content="Data & Intelligence — Towards Intelligence"/>
   <meta property="og:description" content="A dual-track approach to AI and data — the Science track for theoretical depth, the Engineering track for hands-on building."/>
   <meta property="og:type" content="article"/>
@@ -25,7 +25,7 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
 
     body {
       font-family: 'Source Serif 4', Georgia, serif;
@@ -33,10 +33,11 @@
       color: var(--ink);
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
     }
 
     /* -- NAV -- */
-    nav {
+    body > nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       background: rgba(14, 14, 15, 0.94);
       backdrop-filter: blur(8px);
@@ -125,14 +126,29 @@
     .toc::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
     .toc::-webkit-scrollbar-track { background: transparent; }
 
+    .toc a.toc-part-label,
     .toc-part-label {
+      display: block;
       font-family: 'Karla', sans-serif;
       font-size: 0.82rem; font-weight: 600; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--accent);
+      text-transform: uppercase;
+      color: var(--accent);
       margin-top: 1.6rem; margin-bottom: 0.5rem;
-      padding-left: 0.8rem;
+      padding: 0.3rem 0.8rem;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      line-height: 1.5;
     }
+    .toc a.toc-part-label:first-child,
     .toc-part-label:first-child { margin-top: 0; }
+    .toc a.toc-part-label:hover {
+      color: var(--white);
+    }
+    .toc a.toc-part-label.active {
+      border-left-color: var(--accent);
+      color: var(--accent);
+    }
 
     .toc a {
       display: block;
@@ -154,6 +170,12 @@
       padding-left: 1.4rem;
       font-size: 0.84rem;
     }
+    .toc a.toc-sub-sub {
+      padding-left: 2.4rem;
+      font-size: 0.82rem;
+      color: var(--ink-dim);
+    }
+    .toc a.toc-sub-sub:hover { color: var(--ink); }
 
     /* -- MAIN CONTENT -- */
     .main-content {
@@ -161,9 +183,26 @@
       padding-bottom: 6rem;
     }
 
+    /* -- BREADCRUMB -- */
+    .breadcrumb {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; letter-spacing: 0.04em;
+      color: var(--ink-dim);
+      padding-top: 6rem;
+      margin-bottom: 2rem;
+    }
+    .breadcrumb a {
+      color: var(--ink-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb .sep { margin: 0 0.5rem; color: var(--rule-lt); }
+    .breadcrumb .current { color: var(--ink-mid); }
+
     /* -- HERO -- */
     .hero {
-      padding: 8rem 0 4rem;
+      padding: 1rem 0 4rem;
       border-bottom: 1px solid var(--rule);
       margin-bottom: 4rem;
     }
@@ -191,6 +230,13 @@
       font-size: 1.05rem; line-height: 1.8;
       color: var(--ink); max-width: 720px;
       font-weight: 400; text-align: justify;
+    }
+    .hero-meta {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.82rem; letter-spacing: 0.06em;
+      color: var(--ink-dim);
+      margin-top: 1.6rem;
+      text-transform: uppercase;
     }
 
     /* -- PART DIVIDER -- */
@@ -317,6 +363,66 @@
       width: 16px; height: 1px; background: var(--accent);
     }
 
+    /* -- MAJOR SECTION (e.g. "Building" / "Operating" as sub-sections of a Part) -- */
+    .major-section-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      margin-top: 4rem;
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .major-section-kicker::before {
+      content: ''; display: block;
+      width: 36px; height: 1px; background: var(--accent);
+    }
+    .major-section {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 2.8vw, 2.3rem);
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid var(--accent-dim);
+    }
+    .major-section em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .major-section-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.98rem; color: var(--ink-mid);
+      line-height: 1.7; max-width: 720px;
+      margin-bottom: 1.5rem;
+    }
+
+    /* -- SUB-DISCIPLINE HEADING (e.g. "Software Engineering" / "Infrastructure Engineering" as sub-parts of Building) -- */
+    .sub-discipline-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--ink-dim);
+      margin-top: 3rem;
+      margin-bottom: 0.4rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .sub-discipline-kicker::before {
+      content: ''; display: block;
+      width: 20px; height: 1px; background: var(--ink-dim);
+    }
+    .sub-discipline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.65rem; font-weight: 600;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .sub-discipline-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.94rem; color: var(--ink-mid);
+      line-height: 1.7; max-width: 720px;
+      margin-bottom: 1rem;
+    }
+
     /* -- NOTE BLOCK -- */
     .note-block {
       background: var(--surface);
@@ -346,6 +452,13 @@
     }
 
     /* -- MIRROR TABLE -- */
+    .table-wrap {
+      overflow-x: auto;
+      max-width: 100%;
+      margin: 2rem 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-wrap .mirror-table { margin: 0; }
     .mirror-table {
       width: 100%;
       border-collapse: collapse;
@@ -371,6 +484,159 @@
     }
     .mirror-table tbody td strong { font-weight: 600; color: var(--ink); }
     .mirror-table tbody tr:hover td { color: var(--ink); }
+
+    /* -- RESOURCE TABLES (end-of-guide Resources section) -- */
+    .track-header {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.9rem; font-weight: 600; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--accent);
+      margin: 3rem 0 0.3rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .track-header::before {
+      content: ''; display: block;
+      width: 28px; height: 1px; background: var(--accent);
+    }
+    .track-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.7rem; font-weight: 600;
+      color: var(--white);
+      margin-bottom: 0.4rem;
+    }
+    .track-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.94rem; color: var(--ink-mid);
+      line-height: 1.7; max-width: 720px;
+      margin-bottom: 1.6rem;
+    }
+    .sub-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; font-weight: 500;
+      color: var(--white);
+      margin-top: 2.4rem;
+      margin-bottom: 0.4rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .sub-label-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; color: var(--ink-dim);
+      line-height: 1.6; max-width: 720px;
+      margin-bottom: 0.4rem;
+    }
+    .resource-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.6rem;
+      margin-bottom: 3rem;
+    }
+    .resource-table thead th {
+      text-align: left;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.74rem; font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      border-bottom: 1px solid var(--rule);
+      padding: 0.9rem 1rem 0.9rem 0;
+      vertical-align: bottom;
+    }
+    .resource-table thead th.col-topic { width: 22%; }
+    .resource-table tbody td {
+      padding: 1.1rem 1rem 1.1rem 0;
+      border-bottom: 1px solid var(--rule-lt);
+      vertical-align: top;
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.96rem;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+    .resource-table tbody tr:last-child td { border-bottom: none; }
+    .resource-table td.col-topic {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-weight: 500;
+      color: var(--white);
+      padding-right: 1rem;
+    }
+    .resource-table .cell-item {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .resource-table .cell-item:last-child { margin-bottom: 0; }
+    .resource-table .cell-item a {
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule-lt);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .resource-table .cell-item a:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .resource-table .cell-type {
+      display: inline-block;
+      margin-left: 0.4rem;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.66rem; font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      background: var(--surface2);
+      padding: 0.1rem 0.4rem;
+      border-radius: 2px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .resource-table .cell-empty {
+      color: var(--ink-dim);
+      opacity: 0.35;
+    }
+    .resources-outro-link {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--accent); text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      margin-top: 1.4rem;
+      border-bottom: 1px solid var(--accent-dim);
+      padding-bottom: 0.2rem;
+      transition: border-color 0.2s;
+    }
+    .resources-outro-link:hover { border-color: var(--accent); }
+    @media (max-width: 720px) {
+      .resource-table,
+      .resource-table thead,
+      .resource-table tbody,
+      .resource-table tr,
+      .resource-table th,
+      .resource-table td { display: block; width: 100%; }
+      .resource-table thead { display: none; }
+      .resource-table tr {
+        border-bottom: 1px solid var(--rule);
+        padding: 1.2rem 0;
+      }
+      .resource-table tbody tr:last-child { border-bottom: none; }
+      .resource-table td {
+        padding: 0.4rem 0;
+        border: none;
+      }
+      .resource-table td.col-topic {
+        padding-right: 0;
+        font-size: 1.35rem;
+        margin-bottom: 0.5rem;
+      }
+      .resource-table td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-family: 'Karla', sans-serif;
+        font-size: 0.66rem; font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        margin-bottom: 0.3rem;
+        margin-top: 0.4rem;
+      }
+    }
 
     /* -- SCROLL REVEAL -- */
     .reveal {
@@ -430,8 +696,28 @@
         grid-template-columns: 1fr;
         gap: 0;
       }
-      .toc { display: none; }
+      .toc {
+        position: static;
+        height: auto;
+        max-height: 50vh;
+        overflow-y: auto;
+        margin: 5.5rem 0 2rem;
+        padding: 1.4rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+      }
+      .toc::before {
+        content: "On This Page";
+        display: block;
+        font-family: 'Karla', sans-serif;
+        font-size: 0.88rem; font-weight: 600;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 0.8rem 0.8rem;
+      }
       .main-content { padding: 0; }
+      .breadcrumb { padding-top: 2rem; margin-bottom: 1rem; }
     }
     @media (max-width: 600px) {
       .nav-links { display: none; }
@@ -446,12 +732,11 @@
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="index.html" class="nav-logo">Towards Intelligence</a>
+    <a href="../index.html" class="nav-logo">Towards Intelligence</a>
     <ul class="nav-links">
-      <li><a href="index.html">Roadmap</a></li>
-      <li><a href="cse.html">CS &amp; Engineering</a></li>
-      <li><a href="data-intelligence.html" class="active">Data &amp; Intelligence</a></li>
-      <li><a href="llm-engineering.html">LLM Engineering</a></li>
+      <li><a href="../index.html#mathematics">Mathematics</a></li>
+      <li><a href="../index.html#cse">CS &amp; Engineering</a></li>
+      <li><a href="index.html" class="active">Data &amp; Intelligence</a></li>
     </ul>
     <button class="nav-hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -459,10 +744,10 @@
   </div>
 </nav>
 <div class="mobile-menu">
-  <a href="index.html" class="mobile-link">Roadmap</a>
-  <a href="cse.html" class="mobile-link">CS &amp; Engineering</a>
-  <a href="data-intelligence.html" class="mobile-link">Data &amp; Intelligence</a>
-  <a href="llm-engineering.html" class="mobile-link">LLM Engineering</a>
+  <a href="../index.html#mathematics" class="mobile-link">Mathematics</a>
+  <a href="../index.html#cse" class="mobile-link">CS &amp; Engineering</a>
+  <a href="index.html" class="mobile-link">Data &amp; Intelligence</a>
+  <a href="llm-engineering.html" class="mobile-link" target="_blank" rel="noopener">LLM Engineering</a>
 </div>
 
 <!-- BACK TO TOP -->
@@ -473,48 +758,50 @@
 <!-- ===== SIDEBAR TOC ===== -->
 <aside class="toc" id="toc">
 
-  <div class="toc-part-label">Introduction</div>
-  <a href="#intro">The Dual-Track Structure</a>
+  <a class="toc-part-label" href="#intro">Introduction</a>
 
-  <div class="toc-part-label">Part 1 &mdash; The Five Topics</div>
-  <a href="#five-topics">Why This Progression</a>
+  <a class="toc-part-label" href="#part1">Part 1 &mdash; The Five Topics</a>
   <a href="#t-data-analysis" class="toc-sub">Data Analysis</a>
   <a href="#t-ml" class="toc-sub">Machine Learning</a>
   <a href="#t-dl" class="toc-sub">Deep Learning</a>
   <a href="#t-nlp" class="toc-sub">NLP</a>
   <a href="#t-transformers" class="toc-sub">Transformers &amp; LLMs</a>
 
-  <div class="toc-part-label">Part 2 &mdash; The Science Track</div>
-  <a href="#science-overview">Overview</a>
+  <a class="toc-part-label" href="#part2">Part 2 &mdash; The Science Track</a>
   <a href="#sci-data-analysis" class="toc-sub">Data Analysis</a>
   <a href="#sci-ml" class="toc-sub">Machine Learning</a>
   <a href="#sci-dl" class="toc-sub">Deep Learning</a>
   <a href="#sci-nlp" class="toc-sub">NLP</a>
   <a href="#sci-transformers" class="toc-sub">Transformers &amp; LLMs</a>
 
-  <div class="toc-part-label">Part 3 &mdash; Engineering: Building</div>
-  <a href="#eng-overview">Overview</a>
-  <a href="#eng-se" class="toc-sub">Software Engineering</a>
-  <a href="#eng-data-analysis" class="toc-sub">Data Analysis</a>
-  <a href="#eng-ml" class="toc-sub">Machine Learning</a>
-  <a href="#eng-dl" class="toc-sub">Deep Learning</a>
-  <a href="#eng-nlp" class="toc-sub">NLP</a>
-  <a href="#eng-transformers" class="toc-sub">Transformers &amp; LLMs</a>
-  <a href="#eng-infra" class="toc-sub">Infrastructure Engineering</a>
+  <a class="toc-part-label" href="#part3">Part 3 &mdash; The Engineering Track</a>
+  <a href="#building" class="toc-sub">Building</a>
+  <a href="#eng-se" class="toc-sub-sub">Software Engineering</a>
+  <a href="#eng-data-analysis" class="toc-sub-sub">Data Analysis</a>
+  <a href="#eng-ml" class="toc-sub-sub">Machine Learning</a>
+  <a href="#eng-dl" class="toc-sub-sub">Deep Learning</a>
+  <a href="#eng-nlp" class="toc-sub-sub">NLP</a>
+  <a href="#eng-transformers" class="toc-sub-sub">Transformers &amp; LLMs</a>
+  <a href="#eng-infra" class="toc-sub-sub">Infrastructure Engineering</a>
+  <a href="#operating-section" class="toc-sub">Operating</a>
 
-  <div class="toc-part-label">Part 4 &mdash; Engineering: Operating</div>
-  <a href="#operating">Operating ML Systems</a>
+  <a class="toc-part-label" href="#part4">Part 4 &mdash; State of the Art</a>
 
-  <div class="toc-part-label">Part 5 &mdash; State of the Art</div>
-  <a href="#sota">Tracking the Frontier</a>
+  <a class="toc-part-label" href="#mirror-section">Closing</a>
 
-  <div class="toc-part-label">Closing</div>
-  <a href="#mirror">The Mirror</a>
+  <a class="toc-part-label" href="#resources-section">Resources</a>
 
 </aside>
 
 <!-- ===== MAIN CONTENT ===== -->
 <main class="main-content">
+
+<!-- BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="../index.html">Towards Intelligence</a>
+  <span class="sep">/</span>
+  <span class="current">Data &amp; Intelligence</span>
+</nav>
 
 <!-- HERO -->
 <div class="hero reveal" id="hero-section">
@@ -523,6 +810,7 @@
   <p class="hero-subtitle">
     A dual-track approach to AI and data &mdash; the Science track for theoretical depth, the Engineering track for hands-on building &mdash; from data analysis to large language models.
   </p>
+  <div class="hero-meta">Last updated &mdash; April 2026</div>
 </div>
 
 
@@ -749,8 +1037,8 @@
 
 <div class="part-divider reveal" id="part3">
   <div class="part-num">Part 3</div>
-  <h2 class="part-title">The Engineering Track &mdash; <em>Building</em></h2>
-  <p class="part-subtitle">Implementation-focused, practical, hands-on &mdash; the same five topics, from the builder&rsquo;s perspective.</p>
+  <h2 class="part-title">The Engineering <em>Track</em></h2>
+  <p class="part-subtitle">Implementation-focused, practical, hands-on &mdash; from building the model to keeping it alive in production. The Engineering track splits into two major sub-sections: <strong>Building</strong> and <strong>Operating</strong>.</p>
 </div>
 
 <div class="reveal" id="eng-overview">
@@ -759,15 +1047,26 @@
     The Engineering track mirrors the Science track topic-for-topic, but the resources and the mindset are entirely different. Where the Science track assigns Goodfellow&rsquo;s <em>Deep Learning</em> to explain the theory behind backpropagation, the Engineering track assigns Chollet&rsquo;s <em>Deep Learning with Python</em> to show you how to actually implement, train, and evaluate a neural network in Keras. Where the Science track asks &ldquo;why does this algorithm converge?&rdquo;, the Engineering track asks &ldquo;how do I get this model to converge on my data, with my GPU, in a reasonable amount of time?&rdquo;
   </p>
   <p class="body-text">
-    The Engineering track splits into two sub-disciplines. <strong>Software Engineering</strong> is about building the models and applications themselves &mdash; writing the training code, choosing the right libraries and frameworks, structuring experiments, and going from a research idea to working software. <strong>Infrastructure Engineering</strong> is about what sits underneath and around the model &mdash; the ML system design, data pipelines, feature stores, model registries, and serving infrastructure that make it possible to run models reliably at scale. You can write a beautiful model in a Jupyter notebook, but without the infrastructure to serve it, retrain it, and monitor it, it never leaves your laptop.
+    The Engineering track is organised into two major sub-sections: <strong>Building</strong> and <strong>Operating</strong>. Building is the work of getting a model from a notebook to production &mdash; writing the model code, designing the infrastructure underneath it, setting up data pipelines and serving systems. Operating is the work of keeping it there &mdash; monitoring for drift, managing retraining cycles, ensuring reproducibility and reliability over time. Building each decomposes further into its own two sub-disciplines (Software Engineering and Infrastructure Engineering); Operating covers the MLOps practices that govern a model&rsquo;s production lifecycle. Building gets a model in; Operating keeps it alive.
   </p>
 </div>
 
 <hr class="content-rule" />
 
-<!-- Engineering: Software Engineering label -->
+<!-- ============================================================ -->
+<!--  MAJOR SECTION: BUILDING                                      -->
+<!-- ============================================================ -->
+<div class="reveal" id="building">
+  <div class="major-section-kicker">Part 3 &mdash; Sub-section 1 of 2</div>
+  <h2 class="major-section"><em>Building</em></h2>
+  <p class="major-section-desc">Getting a model from a notebook into production. Building splits into two sub-disciplines: <strong>Software Engineering</strong> (writing the model code) and <strong>Infrastructure Engineering</strong> (the system design underneath).</p>
+</div>
+
+<!-- Building → Software Engineering (first sub-discipline of Building) -->
 <div class="reveal" id="eng-se">
-  <div class="label">Software Engineering</div>
+  <div class="sub-discipline-kicker">Sub-discipline 1 of 2</div>
+  <h3 class="sub-discipline">Software Engineering</h3>
+  <p class="sub-discipline-desc">Building the models and applications themselves &mdash; writing the training code, choosing the right libraries and frameworks, structuring experiments, and going from a research idea to working software. This sub-discipline mirrors the Science track topic-for-topic across the same five areas below.</p>
 </div>
 
 <!-- Engineering: Data Analysis -->
@@ -850,9 +1149,14 @@
 
 <hr class="content-rule" />
 
-<!-- Engineering: Infrastructure -->
+<!-- Building → Infrastructure Engineering (second sub-discipline of Building) -->
 <div class="reveal" id="eng-infra">
-  <div class="label">Infrastructure Engineering</div>
+  <div class="sub-discipline-kicker">Sub-discipline 2 of 2</div>
+  <h3 class="sub-discipline">Infrastructure Engineering</h3>
+  <p class="sub-discipline-desc">What sits underneath and around the model &mdash; the ML system design, data pipelines, feature stores, model registries, and serving infrastructure that make it possible to run models reliably at scale.</p>
+</div>
+
+<div class="reveal" id="eng-ml-systems-design">
   <h3 class="section-heading">ML Systems Design</h3>
   <p class="body-text">
     Infrastructure engineering is about the systems that sit underneath and around the model. A model in a notebook is a prototype. A model with proper infrastructure &mdash; data pipelines, feature stores, model registries, serving systems, and monitoring &mdash; is a product. This topic bridges the gap between data science and production engineering, and it is where the D&amp;I discipline connects most directly to the CS&amp;E discipline&rsquo;s infrastructure and DevOps foundations.
@@ -869,13 +1173,12 @@
 
 
 <!-- ============================================================ -->
-<!--  PART 4 — OPERATING                                          -->
+<!--  MAJOR SECTION: OPERATING                                     -->
 <!-- ============================================================ -->
-
-<div class="part-divider reveal" id="part4">
-  <div class="part-num">Part 4</div>
-  <h2 class="part-title">The Engineering Track &mdash; <em>Operating</em></h2>
-  <p class="part-subtitle">Keeping ML systems reliable, reproducible, and improving in production.</p>
+<div class="reveal" id="operating-section">
+  <div class="major-section-kicker">Part 3 &mdash; Sub-section 2 of 2</div>
+  <h2 class="major-section"><em>Operating</em></h2>
+  <p class="major-section-desc">Keeping ML systems reliable, reproducible, and improving in production. Building gets a model into production; Operating keeps it there.</p>
 </div>
 
 <div class="reveal" id="operating">
@@ -895,11 +1198,11 @@
 
 
 <!-- ============================================================ -->
-<!--  PART 5 — STATE OF THE ART                                   -->
+<!--  PART 4 — STATE OF THE ART                                   -->
 <!-- ============================================================ -->
 
-<div class="part-divider reveal" id="part5">
-  <div class="part-num">Part 5</div>
+<div class="part-divider reveal" id="part4">
+  <div class="part-num">Part 4</div>
   <h2 class="part-title">State of the <em>Art</em></h2>
   <p class="part-subtitle">The deliberately open-ended frontier &mdash; what has not settled into textbooks yet.</p>
 </div>
@@ -936,7 +1239,7 @@
     The entire structure of Data &amp; Intelligence is built around one idea: the Science track and the Engineering track are mirrors. They cover the same five topics, in the same order, but from opposite perspectives. This is not redundancy. It is the mechanism by which shallow knowledge becomes deep understanding.
   </p>
 
-  <table class="mirror-table">
+  <div class="table-wrap"><table class="mirror-table">
     <thead>
       <tr>
         <th>Topic</th>
@@ -971,7 +1274,7 @@
         <td>Fine-tuning, RAG, prompt engineering, LLM apps</td>
       </tr>
     </tbody>
-  </table>
+  </table></div>
 
   <p class="body-text">
     For every topic, the Science track gives you the mental model and the Engineering track gives you the practical skill. The Science track for Machine Learning teaches you that random forests reduce variance by averaging many high-variance, low-bias trees. The Engineering track teaches you how to instantiate the classifier, tune the hyperparameters, and interpret the feature importance scores. Separately, each gives you half an understanding. Together, they produce someone who can both reason about a problem and solve it.
@@ -981,6 +1284,26 @@
   </p>
   <p class="body-text">
     This is the core design principle of the Data &amp; Intelligence discipline. Not &ldquo;learn the theory, then learn the practice&rdquo; sequentially, but &ldquo;study them in parallel, topic by topic, so that each illuminates the other.&rdquo; The mirror is not a structural convenience. It is the learning strategy itself.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ============================================================ -->
+<!--  RESOURCES                                                    -->
+<!-- ============================================================ -->
+<div class="part-divider reveal" id="resources-section">
+  <div class="part-num">Resources</div>
+  <h2 class="part-title"><em>Resources</em></h2>
+  <p class="part-subtitle">Every book, course, and practical resource referenced in this guide &mdash; curated and organised by track.</p>
+</div>
+
+<div class="reveal" id="resources-intro">
+  <p class="body-text">
+    Every textbook, course, and code repository referenced throughout this guide is collected on the dedicated Data &amp; Intelligence Resources page &mdash; organised in the same Science / Engineering structure you just read, with tables for Books, Courses, and Practical items. Use it as a quick-reference when you&rsquo;re ready to pick what to study next.
+  </p>
+  <p style="margin-top: 1.4rem;">
+    <a href="resources.html" target="_blank" rel="noopener" class="resources-outro-link">Browse the full Data &amp; Intelligence Resources page &rarr;</a>
   </p>
 </div>
 

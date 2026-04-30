@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CS &amp; Engineering On-Ramp &mdash; Towards Intelligence</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
+  <meta property="og:title" content="CS & Engineering On-Ramp — Towards Intelligence"/>
+  <meta property="og:description" content="Practical starter courses for Computer Science & Engineering — the fastest path to becoming employable, mapped against every CS&E topic in the grid."/>
+  <meta property="og:type" content="article"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:         #0e0e0f;
+      --surface:    #151516;
+      --surface2:   #1c1c1e;
+      --rule:       #2a2a2e;
+      --rule-lt:    #333338;
+      --ink:        #e8e8e8;
+      --ink-mid:    #d4d4d4;
+      --ink-dim:    #a8a8a8;
+      --white:      #f8f8f8;
+      --accent:     #c8a96e;
+      --accent-dim: #3a2e1a;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--bg); color: var(--ink);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+    }
+    body > nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(14, 14, 15, 0.94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em;
+      color: var(--white); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.92rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-hamburger {
+      display: none;
+      flex-direction: column; justify-content: center;
+      gap: 5px; width: 28px; height: 28px;
+      cursor: pointer; background: none; border: none; padding: 0;
+    }
+    .nav-hamburger span {
+      display: block; width: 100%; height: 2px;
+      background: var(--ink); border-radius: 1px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .mobile-menu {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 99;
+      background: rgba(14, 14, 15, 0.97);
+      backdrop-filter: blur(12px);
+      flex-direction: column; justify-content: center; align-items: center;
+      gap: 2rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-family: 'Karla', sans-serif;
+      font-size: 1.1rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .mobile-menu a:hover { color: var(--accent); }
+
+    .page-wrap {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 2rem 6rem;
+    }
+    .breadcrumb {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; letter-spacing: 0.04em;
+      color: var(--ink-dim);
+      padding-top: 6rem;
+    }
+    .breadcrumb a { color: var(--ink-dim); text-decoration: none; transition: color 0.2s; }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb .sep { margin: 0 0.5rem; color: var(--rule-lt); }
+    .breadcrumb .current { color: var(--ink-mid); }
+
+    .hero {
+      padding: 3rem 0 3rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 3rem;
+    }
+    .hero-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      display: flex; align-items: center; gap: 0.8rem;
+      margin-bottom: 1.4rem;
+    }
+    .hero-kicker::before {
+      content: ''; display: block;
+      width: 32px; height: 1px; background: var(--accent);
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+      font-weight: 600; line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      margin-bottom: 1rem;
+    }
+    .hero-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .hero-subtitle {
+      font-size: 1.02rem; line-height: 1.75;
+      color: var(--ink); max-width: 760px; font-weight: 400;
+    }
+    .hero-meta {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.82rem; letter-spacing: 0.06em;
+      color: var(--ink-dim);
+      margin-top: 1.4rem;
+      text-transform: uppercase;
+    }
+    .article-link {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--accent);
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      margin-top: 1.2rem;
+      border-bottom: 1px solid var(--accent-dim);
+      padding-bottom: 0.2rem;
+      transition: border-color 0.2s;
+    }
+    .article-link:hover { border-color: var(--accent); }
+
+    /* On-ramp table styles */
+    .onramp-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.6rem;
+      margin-bottom: 3rem;
+      border: 1px solid var(--rule);
+    }
+    .onramp-table thead th {
+      text-align: left;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.74rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink-dim);
+      border: 1px solid var(--rule); background: var(--surface);
+      padding: 0.9rem 1rem; vertical-align: middle;
+    }
+    .onramp-table tbody td {
+      padding: 1rem 1rem;
+      border: 1px solid var(--rule);
+      vertical-align: top;
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.96rem;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+    .onramp-table td.col-category,
+    .onramp-table td.col-topic {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      color: var(--white);
+      background: rgba(21, 21, 22, 0.4);
+    }
+    .onramp-table td.col-category { font-size: 1.1rem; vertical-align: middle; }
+    .onramp-table td.col-topic { font-size: 1.05rem; }
+    .onramp-table .cell-item {
+      display: block;
+      margin-bottom: 0.6rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px dashed var(--rule);
+    }
+    .onramp-table .cell-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .onramp-table .cell-item a {
+      color: var(--ink); text-decoration: none;
+      border-bottom: 1px solid var(--rule-lt);
+      transition: color 0.2s, border-color 0.2s;
+      font-weight: 500;
+    }
+    .onramp-table .cell-item a:hover {
+      color: var(--accent); border-bottom-color: var(--accent);
+    }
+    .onramp-table .cell-desc {
+      display: block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.8rem; color: var(--ink-dim);
+      margin-top: 0.2rem; line-height: 1.45;
+    }
+    .onramp-table .cell-empty { color: var(--ink-dim); opacity: 0.35; text-align: center; }
+    .onramp-table tr.track-divider td {
+      background: var(--surface);
+      border-left: none; border-right: none;
+      padding: 0.9rem 1rem;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent);
+    }
+    .onramp-table tr.track-divider td::before {
+      content: ''; display: inline-block;
+      width: 28px; height: 1px; background: var(--accent);
+      vertical-align: middle; margin-right: 0.8rem;
+    }
+    .onramp-table .cell-merged-note {
+      display: block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.66rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.7rem; padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--accent-dim);
+    }
+    .onramp-table .cell-explainer {
+      display: block;
+      margin-top: 0.9rem; padding-top: 0.8rem;
+      border-top: 1px dashed var(--rule-lt);
+      font-family: 'Karla', sans-serif;
+      font-size: 0.8rem; color: var(--ink-mid);
+      line-height: 1.6; font-style: normal;
+    }
+    .onramp-table .cell-explainer strong { color: var(--accent); font-weight: 600; }
+    .onramp-table .topic-sub {
+      display: block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.86rem; font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--ink-mid);
+      margin-top: 0.4rem;
+      padding-left: 0.6rem;
+      white-space: normal;
+    }
+    .onramp-table .topic-sub:first-of-type { margin-top: 0.6rem; }
+    .onramp-table .course-target {
+      display: inline-block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.62rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink-dim);
+      background: var(--surface2);
+      padding: 0.15rem 0.5rem;
+      border-radius: 2px;
+      margin-bottom: 0.4rem;
+      vertical-align: middle;
+    }
+    .onramp-table thead th.col-h-cat    { width: 18%; }
+    .onramp-table thead th.col-h-topic  { width: 38%; }
+    .onramp-table thead th.col-h-course { width: 44%; }
+
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 1.6rem 2rem;
+      background: var(--surface);
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.96rem; color: var(--ink-dim);
+    }
+    .footer-copy {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.05em;
+    }
+
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.65s ease, transform 0.65s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .page-wrap { padding-left: 1.2rem; padding-right: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">Towards Intelligence</a>
+    <ul class="nav-links">
+      <li><a href="../index.html#mathematics">Mathematics</a></li>
+      <li><a href="index.html" class="active">CS &amp; Engineering</a></li>
+      <li><a href="../index.html#data-intelligence">Data &amp; Intelligence</a></li>
+    </ul>
+    <button class="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="../index.html#mathematics" class="mobile-link">Mathematics</a>
+  <a href="index.html" class="mobile-link">CS &amp; Engineering</a>
+  <a href="../index.html#data-intelligence" class="mobile-link">Data &amp; Intelligence</a>
+  <a href="../data-intelligence/llm-engineering.html" class="mobile-link" target="_blank" rel="noopener">LLM Engineering</a>
+</div>
+
+<div class="page-wrap">
+
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../index.html">Towards Intelligence</a>
+    <span class="sep">/</span>
+    <a href="index.html">CS &amp; Engineering</a>
+    <span class="sep">/</span>
+    <span class="current">On-Ramp</span>
+  </nav>
+
+  <div class="hero reveal">
+    <div class="hero-kicker">Getting Started</div>
+    <h1 class="hero-title">CS &amp; Engineering <em>On-Ramp</em></h1>
+    <p class="hero-subtitle">
+      The fastest path to becoming employable in CS &amp; Engineering. Every topic from the CS&amp;E grid mapped systematically, grouped by track. Empty cells indicate topics with no on-ramp course &mdash; the academic depth for those lives on the Resources page.
+    </p>
+    <div class="hero-meta">Last updated &mdash; April 2026</div>
+    <div><a href="index.html" class="article-link">&larr; Read the full CS &amp; Engineering guide</a></div>
+  </div>
+
+  <table class="onramp-table reveal">
+    <thead>
+      <tr>
+        <th class="col-h-cat">Category</th>
+        <th class="col-h-topic">Topic</th>
+        <th class="col-h-course">Course</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="track-divider"><td colspan="3">Science Track</td></tr>
+      <tr>
+        <td class="col-category" rowspan="4">Fundamentals</td>
+        <td class="col-topic">Discrete Mathematics</td>
+        <td>
+          <span class="cell-item">
+            <a href="https://www.coursera.org/specializations/discrete-mathematics" target="_blank" rel="noopener">Discrete Mathematics</a>
+            <span class="cell-desc">Logic, sets, combinatorics, graph theory &mdash; the mathematical language CS theory is built on</span>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-topic">Programming Languages &amp; Compilers</td>
+        <td>
+          <span class="cell-item">
+            <a href="https://www.udemy.com/course/100-days-of-code/" target="_blank" rel="noopener">100 Days of Code</a>
+            <span class="cell-desc">Daily coding habit &mdash; build fluency through consistent practice</span>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-topic">Data Structures &amp; Algorithms</td>
+        <td>
+          <span class="cell-item">
+            <a href="https://www.coursera.org/specializations/packt-data-structures-and-algorithms-the-complete-masterclass" target="_blank" rel="noopener">Data Structures and Algorithms</a>
+            <span class="cell-desc">The backbone of all software &mdash; how data is organised and problems are solved</span>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-topic">Theory of Computation</td>
+        <td class="cell-empty">&mdash;</td>
+      </tr>
+      <tr>
+        <td class="col-category" rowspan="6">Systems</td>
+        <td class="col-topic">Databases</td>
+        <td>
+          <span class="cell-item">
+            <a href="https://www.coursera.org/learn/cpsc-6620-database-management-systems" target="_blank" rel="noopener">Database Management Systems</a>
+            <span class="cell-desc">How data is stored, queried, and managed at scale</span>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-topic">Distributed Systems</td>
+        <td rowspan="3">
+          <span class="cell-merged-note">Covers Distributed Systems + Operating Systems + Computer Networks</span>
+          <span class="cell-item">
+            <a href="https://www.coursera.org/specializations/cloud-computing" target="_blank" rel="noopener">Cloud Computing &mdash; UIUC</a>
+            <span class="cell-desc">Distributed-systems theory taught through a cloud lens &mdash; gossip protocols, consensus, MapReduce, key-value stores; one dedicated Cloud Networking course; lighter coverage of virtualization.</span>
+            <span class="cell-explainer">
+              <strong>About cloud computing.</strong> Cloud computing is a hybrid field. It has scientific underpinnings &mdash; the distributed-systems theory that makes geo-replicated state work reliably, the networking protocols that route packets across regions, the OS-level virtualization that isolates workloads &mdash; <em>and</em> a distinct engineering practice (cloud platforms, deployment, operations). This specialization sits on the scientific side: it draws on theory from Distributed Systems, Computer Networks, and Operating Systems to give you the cloud-relevant subset of each, rather than covering each topic in its full academic depth. For the practitioner side (AWS, IaC, serverless, day-to-day cloud work), see <strong>Cloud Engineering</strong> in the Engineering Track below.
+            </span>
+          </span>
+        </td>
+      </tr>
+      <tr><td class="col-topic">Operating Systems</td></tr>
+      <tr><td class="col-topic">Computer Networks</td></tr>
+      <tr><td class="col-topic">Parallel &amp; Concurrent Computing</td><td class="cell-empty">&mdash;</td></tr>
+      <tr><td class="col-topic">Computer Organization &amp; Architecture</td><td class="cell-empty">&mdash;</td></tr>
+      <tr class="track-divider"><td colspan="3">Engineering Track</td></tr>
+      <tr>
+        <td class="col-category" rowspan="2">Building</td>
+        <td class="col-topic">Software Engineering</td>
+        <td>
+          <span class="cell-item">
+            <a href="https://www.coursera.org/specializations/software-engineering" target="_blank" rel="noopener">Software Engineering</a>
+            <span class="cell-desc">Principles of building software that is maintainable, testable, and scalable</span>
+          </span>
+          <span class="cell-item">
+            <a href="https://www.coursera.org/specializations/oss-development-linux-git" target="_blank" rel="noopener">Open Source Software Development, Linux and Git Specialization</a>
+            <span class="cell-desc">The toolchain &mdash; version control, open-source workflows, and the Linux environment</span>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-topic">
+          Infrastructure Engineering
+          <span class="topic-sub">&mdash; DevOps</span>
+          <span class="topic-sub">&mdash; Cloud Engineering</span>
+          <span class="topic-sub">&mdash; Platform Engineering</span>
+        </td>
+        <td>
+          <span class="cell-item">
+            <span class="course-target">DevOps</span><br>
+            <a href="https://www.coursera.org/professional-certificates/devops-and-software-engineering" target="_blank" rel="noopener">DevOps</a>
+            <span class="cell-desc">Bridging development and operations &mdash; CI/CD, automation, deployment</span>
+            <span class="cell-explainer">
+              <strong>Note.</strong> Infrastructure Engineering has three sub-disciplines: DevOps, Cloud Engineering, and Platform Engineering. This course covers the <em>DevOps</em> sub-discipline specifically &mdash; the practices that bridge development and operations through automation. Cloud Engineering has its own on-ramp course (see below); Platform Engineering currently has no on-ramp course.
+            </span>
+          </span>
+          <span class="cell-item">
+            <span class="course-target">Cloud Engineering</span><br>
+            <a href="https://www.coursera.org/specializations/aws-fundamentals" target="_blank" rel="noopener">AWS Fundamentals</a>
+            <span class="cell-desc">Cloud-native architecture on AWS &mdash; security, migration patterns, serverless application design</span>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-category" rowspan="4">Operating</td>
+        <td class="col-topic">Reliability Engineering (SRE)</td>
+        <td class="cell-empty">&mdash;</td>
+      </tr>
+      <tr><td class="col-topic">Performance Engineering</td><td class="cell-empty">&mdash;</td></tr>
+      <tr><td class="col-topic">Security Engineering</td><td class="cell-empty">&mdash;</td></tr>
+      <tr><td class="col-topic">Observability Engineering</td><td class="cell-empty">&mdash;</td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-name">CS &amp; Engineering On-Ramp</span>
+    <span class="footer-copy">&copy; 2026</span>
+  </div>
+</footer>
+
+<script>
+  const hamburger = document.querySelector('.nav-hamburger');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+  });
+  document.querySelectorAll('.mobile-link').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.05 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>

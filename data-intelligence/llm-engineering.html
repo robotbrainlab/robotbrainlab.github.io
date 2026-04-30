@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The LLM Engineering Landscape</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
   <meta property="og:title" content="The LLM Engineering Landscape — Towards Intelligence"/>
   <meta property="og:description" content="A three-part map of what engineers actually build with large language models — disciplines, practical problems, and products."/>
   <meta property="og:type" content="article"/>
@@ -33,10 +33,11 @@
       color: var(--ink);
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
     }
 
     /* -- NAV -- */
-    nav {
+    body > nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       background: rgba(14, 14, 15, 0.94);
       backdrop-filter: blur(8px);
@@ -161,9 +162,26 @@
       padding-bottom: 6rem;
     }
 
+    /* -- BREADCRUMB -- */
+    .breadcrumb {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; letter-spacing: 0.04em;
+      color: var(--ink-dim);
+      padding-top: 6rem;
+      margin-bottom: 2rem;
+    }
+    .breadcrumb a {
+      color: var(--ink-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb .sep { margin: 0 0.5rem; color: var(--rule-lt); }
+    .breadcrumb .current { color: var(--ink-mid); }
+
     /* -- HERO -- */
     .hero {
-      padding: 8rem 0 4rem;
+      padding: 1rem 0 4rem;
       border-bottom: 1px solid var(--rule);
       margin-bottom: 4rem;
     }
@@ -191,6 +209,13 @@
       font-size: 1.05rem; line-height: 1.8;
       color: var(--ink); max-width: 720px;
       font-weight: 400; text-align: justify;
+    }
+    .hero-meta {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.82rem; letter-spacing: 0.06em;
+      color: var(--ink-dim);
+      margin-top: 1.6rem;
+      text-transform: uppercase;
     }
 
     /* -- PART DIVIDER -- */
@@ -305,6 +330,13 @@
     .content-list li strong { font-weight: 600; color: var(--ink); }
 
     /* -- TABLES -- */
+    .table-wrap {
+      overflow-x: auto;
+      max-width: 100%;
+      margin: 1.5rem 0 2rem;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-wrap .content-table { margin: 0; }
     .content-table {
       width: 100%;
       border-collapse: collapse;
@@ -445,8 +477,28 @@
         grid-template-columns: 1fr;
         gap: 0;
       }
-      .toc { display: none; }
+      .toc {
+        position: static;
+        height: auto;
+        max-height: 50vh;
+        overflow-y: auto;
+        margin: 5.5rem 0 2rem;
+        padding: 1.4rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+      }
+      .toc::before {
+        content: "On This Page";
+        display: block;
+        font-family: 'Karla', sans-serif;
+        font-size: 0.88rem; font-weight: 600;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 0.8rem 0.8rem;
+      }
       .main-content { padding: 0; }
+      .breadcrumb { padding-top: 2rem; margin-bottom: 1rem; }
     }
     @media (max-width: 600px) {
       .nav-links { display: none; }
@@ -461,12 +513,11 @@
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="index.html" class="nav-logo">Towards Intelligence</a>
+    <a href="../index.html" class="nav-logo">Towards Intelligence</a>
     <ul class="nav-links">
-      <li><a href="index.html">Roadmap</a></li>
-      <li><a href="cse.html">CS &amp; Engineering</a></li>
-      <li><a href="data-intelligence.html">Data &amp; Intelligence</a></li>
-      <li><a href="llm-engineering.html" class="active">LLM Engineering</a></li>
+      <li><a href="../index.html#mathematics">Mathematics</a></li>
+      <li><a href="../index.html#cse">CS &amp; Engineering</a></li>
+      <li><a href="../index.html#data-intelligence">Data &amp; Intelligence</a></li>
     </ul>
     <button class="nav-hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -474,9 +525,9 @@
   </div>
 </nav>
 <div class="mobile-menu">
-  <a href="index.html" class="mobile-link">Roadmap</a>
-  <a href="cse.html" class="mobile-link">CS &amp; Engineering</a>
-  <a href="data-intelligence.html" class="mobile-link">Data &amp; Intelligence</a>
+  <a href="../index.html#mathematics" class="mobile-link">Mathematics</a>
+  <a href="../index.html#cse" class="mobile-link">CS &amp; Engineering</a>
+  <a href="../index.html#data-intelligence" class="mobile-link">Data &amp; Intelligence</a>
   <a href="llm-engineering.html" class="mobile-link">LLM Engineering</a>
 </div>
 
@@ -533,6 +584,15 @@
 <!-- ===== MAIN CONTENT ===== -->
 <main class="main-content">
 
+<!-- BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="../index.html">Towards Intelligence</a>
+  <span class="sep">/</span>
+  <a href="../index.html#data-intelligence">Data &amp; Intelligence</a>
+  <span class="sep">/</span>
+  <span class="current">LLM Engineering</span>
+</nav>
+
 <!-- HERO -->
 <div class="hero reveal" id="hero-section">
   <div class="hero-kicker">Long-form Reference</div>
@@ -540,6 +600,7 @@
   <p class="hero-subtitle">
     A three-part map of what engineers actually build with large language models &mdash; as of April 2026.
   </p>
+  <div class="hero-meta">Last updated &mdash; April 2026</div>
 </div>
 
 
@@ -1079,7 +1140,7 @@
 
   <div class="label">Term-by-term breakdown</div>
 
-  <table class="content-table">
+  <div class="table-wrap"><table class="content-table">
     <thead>
       <tr><th>Term</th><th>Where It Lives</th><th>What It Actually Is</th></tr>
     </thead>
@@ -1097,7 +1158,7 @@
       <tr><td><strong>Prompt engineering</strong></td><td>Category 2a technique</td><td>A set of practices for designing model inputs. A technique, not a field.</td></tr>
       <tr><td><strong>Orchestration</strong></td><td>Category 3c engineering concern</td><td>The control flow logic of agent systems &mdash; how to plan, sequence, and recover from failures.</td></tr>
     </tbody>
-  </table>
+  </table></div>
 </div>
 
 <hr class="content-rule" />
@@ -1494,7 +1555,7 @@
 <div class="reveal" id="p2-buzzmap">
   <h3 class="section-heading">How the Buzzwords Map to These Real Problems</h3>
 
-  <table class="content-table">
+  <div class="table-wrap"><table class="content-table">
     <thead>
       <tr><th>Buzzword</th><th>What It Actually Is in Practice</th></tr>
     </thead>
@@ -1512,7 +1573,7 @@
       <tr><td><strong>LLMOps</strong></td><td>Section 6. Running, monitoring, and maintaining LLM systems in production.</td></tr>
       <tr><td><strong>Evals</strong></td><td>Section 7. The testing infrastructure for LLM systems.</td></tr>
     </tbody>
-  </table>
+  </table></div>
 </div>
 
 <hr class="content-rule" />
@@ -1764,7 +1825,7 @@
   <h3 class="section-heading">How These Products Map to the Engineering Work</h3>
   <p class="body-text">This table shows how the product categories connect back to the practical engineering work in Part 2.</p>
 
-  <table class="content-table">
+  <div class="table-wrap"><table class="content-table">
     <thead>
       <tr><th>Product Category</th><th>Primary Engineering Sections (Part 2)</th></tr>
     </thead>
@@ -1780,7 +1841,7 @@
       <tr><td><strong>AI-Native Tools</strong></td><td>All sections, but product design is the differentiator</td></tr>
       <tr><td><strong>Multimodal &amp; Domain-Specific</strong></td><td>&sect;2 (doc parsing), domain-specific pipelines</td></tr>
     </tbody>
-  </table>
+  </table></div>
 </div>
 
 <hr class="content-rule" />

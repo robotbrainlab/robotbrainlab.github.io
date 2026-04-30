@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="A structured learning path across Computer Science, Data & Intelligence, and Engineering — from mathematical foundations to large language models."/>
   <title>Towards Intelligence</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="icon" type="image/svg+xml" href="favicon/favicon.svg"/>
   <meta property="og:title" content="Towards Intelligence"/>
   <meta property="og:description" content="A structured learning path across Computer Science, Data & Intelligence, and Engineering — from mathematical foundations to large language models."/>
   <meta property="og:type" content="website"/>
@@ -36,6 +36,30 @@
       color: var(--ink);
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+    }
+
+    /* Overview grid: 2 columns on desktop, stacked on mobile */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--rule);
+      margin-top: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .overview-grid > .col {
+      padding: 1.4rem;
+    }
+    .overview-grid > .col:first-child {
+      border-right: 1px solid var(--rule);
+    }
+    @media (max-width: 720px) {
+      .overview-grid { grid-template-columns: 1fr; }
+      .overview-grid > .col:first-child {
+        border-right: none;
+        border-bottom: 1px solid var(--rule);
+      }
     }
 
     /* -- GLOBAL LINK STYLE -- */
@@ -51,7 +75,7 @@
     }
 
     /* -- NAV -- */
-    nav {
+    body > nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       background: rgba(14, 14, 15, 0.94);
       backdrop-filter: blur(8px);
@@ -341,6 +365,30 @@
       font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.06em;
       white-space: nowrap;
     }
+    .topic-sub-line {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.9rem; color: var(--ink-mid);
+      line-height: 1.55; margin-top: 0.2rem;
+      font-weight: 400;
+    }
+
+    /* Section action links (stripped sections) */
+    .section-links {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 2.5rem;
+    }
+    .section-link {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent-dim);
+      padding-bottom: 0.2rem;
+      transition: border-color 0.2s;
+    }
+    .section-link:hover { border-color: var(--accent); }
 
     /* -- DATA & INTELLIGENCE RESOURCE ROWS -- */
     .track-header {
@@ -549,8 +597,6 @@
   <div class="nav-inner">
     <a href="#hero" class="nav-logo">Towards Intelligence</a>
     <ul class="nav-links">
-      <li><a href="#hero">Overview</a></li>
-      <li><a href="#on-ramp">The On-Ramp</a></li>
       <li><a href="#mathematics">Mathematics</a></li>
       <li><a href="#cse">CS &amp; Engineering</a></li>
       <li><a href="#data-intelligence">Data &amp; Intelligence</a></li>
@@ -562,11 +608,10 @@
 </nav>
 
 <div class="mobile-menu">
-  <a href="#hero" class="mobile-link">Overview</a>
-  <a href="#on-ramp" class="mobile-link">The On-Ramp</a>
   <a href="#mathematics" class="mobile-link">Mathematics</a>
   <a href="#cse" class="mobile-link">CS &amp; Engineering</a>
   <a href="#data-intelligence" class="mobile-link">Data &amp; Intelligence</a>
+  <a href="data-intelligence/llm-engineering.html" class="mobile-link" target="_blank" rel="noopener">LLM Engineering</a>
 </div>
 
 <!-- HERO -->
@@ -588,236 +633,84 @@
 </section>
 
 <!-- ========================================== -->
-<!-- 01 / THE ON-RAMP                           -->
+<!-- 01 / MATHEMATICS                           -->
 <!-- ========================================== -->
-<section id="on-ramp" class="section-wrap">
+<section id="mathematics" class="section-wrap">
   <div class="section-watermark">01</div>
   <div class="section-inner">
     <div class="section-header">
-      <div class="section-num">01 &nbsp;/&nbsp; The On-Ramp</div>
-      <div>
-        <h2 class="section-title">Getting <em>Started</em></h2>
-        <p class="section-intro">
-          The fastest path to becoming employable &mdash; these courses build a
-          high-level overview of both disciplines and get you job-ready before
-          going deeper into the specialised theory and practice below.
-        </p>
-      </div>
-    </div>
-
-    <div class="explanation reveal">
-      These are not prerequisites in the academic sense &mdash; they are the fastest
-      path to becoming employable and understanding the landscape well enough to know
-      where to go deep. The CS&amp;E track gets you building real software with
-      real tools (code, databases, version control, deployment). The Data &amp; Intelligence
-      track gets you working with data and AI systems end-to-end. Together, they give you
-      enough working fluency to land a role and enough context to make the deeper sections
-      below actually make sense.
-    </div>
-
-    <!-- CS&E -->
-    <div class="discipline-group reveal">
-      <div class="discipline-label">Computer Science &amp; Engineering</div>
-      <div class="course-list">
-        <div class="course-item">
-          <span class="course-num">i</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.udemy.com/course/100-days-of-code/" target="_blank" rel="noopener">100 Days of Code</a>
-            <div class="course-desc">Daily coding habit &mdash; build fluency through consistent practice</div>
-          </div>
-        </div>
-        <div class="course-item">
-          <span class="course-num">ii</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.coursera.org/specializations/packt-data-structures-and-algorithms-the-complete-masterclass" target="_blank" rel="noopener">Data Structures and Algorithms</a>
-            <div class="course-desc">The backbone of all software &mdash; how data is organised and problems are solved</div>
-          </div>
-        </div>
-        <div class="course-item">
-          <span class="course-num">iii</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.coursera.org/learn/cpsc-6620-database-management-systems" target="_blank" rel="noopener">Database Management Systems</a>
-            <div class="course-desc">How data is stored, queried, and managed at scale</div>
-          </div>
-        </div>
-        <div class="course-item">
-          <span class="course-num">iv</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.coursera.org/specializations/oss-development-linux-git" target="_blank" rel="noopener">Open Source Software Development, Linux and Git Specialization</a>
-            <div class="course-desc">The toolchain &mdash; version control, open-source workflows, and the Linux environment</div>
-          </div>
-        </div>
-        <div class="course-item">
-          <span class="course-num">v</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.coursera.org/specializations/software-engineering" target="_blank" rel="noopener">Software Engineering</a>
-            <div class="course-desc">Principles of building software that is maintainable, testable, and scalable</div>
-          </div>
-        </div>
-        <div class="course-item">
-          <span class="course-num">vi</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.coursera.org/professional-certificates/devops-and-software-engineering" target="_blank" rel="noopener">DevOps</a>
-            <div class="course-desc">Bridging development and operations &mdash; CI/CD, automation, and deployment</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Data & Intelligence -->
-    <div class="discipline-group reveal">
-      <div class="discipline-label">Data &amp; Intelligence</div>
-      <div class="course-list">
-        <div class="course-item">
-          <span class="course-num">i</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.coursera.org/specializations/mathematics-for-machine-learning-and-data-science" target="_blank" rel="noopener">Mathematics for Data Science</a>
-            <div class="course-desc">The mathematical prerequisites &mdash; calculus, linear algebra, and statistics in context</div>
-          </div>
-        </div>
-        <div class="course-item">
-          <span class="course-num">ii</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.coursera.org/professional-certificates/ibm-data-analyst" target="_blank" rel="noopener">Data Analyst</a>
-            <div class="course-desc">Exploratory analysis, visualisation, and deriving insights from structured data</div>
-          </div>
-        </div>
-        <div class="course-item">
-          <span class="course-num">iii</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.coursera.org/professional-certificates/ai-engineer" target="_blank" rel="noopener">AI Engineer</a>
-            <div class="course-desc">End-to-end AI application development &mdash; from model selection to deployment</div>
-          </div>
-        </div>
-        <div class="course-item">
-          <span class="course-num">iv</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.coursera.org/professional-certificates/ibm-rag-and-agentic-ai" target="_blank" rel="noopener">IBM RAG and Agentic AI</a>
-            <div class="course-desc">Retrieval-augmented generation and building autonomous AI agents</div>
-          </div>
-        </div>
-        <div class="course-item">
-          <span class="course-num">v</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.coursera.org/specializations/mlops-machine-learning-duke" target="_blank" rel="noopener">MLOps</a>
-            <div class="course-desc">Operationalising machine learning &mdash; pipelines, monitoring, and model lifecycle</div>
-          </div>
-        </div>
-        <div class="course-item">
-          <span class="course-num">vi</span>
-          <div class="course-content">
-            <a class="item-link" href="https://www.coursera.org/specializations/large-language-model-operations" target="_blank" rel="noopener">LLMOps</a>
-            <div class="course-desc">The operational side of large language models &mdash; fine-tuning, serving, and evaluation</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div><!-- /section-inner -->
-</section>
-
-<!-- ========================================== -->
-<!-- 02 / MATHEMATICS                           -->
-<!-- ========================================== -->
-<section id="mathematics" class="section-wrap">
-  <div class="section-watermark">02</div>
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-num">02 &nbsp;/&nbsp; Mathematics</div>
+      <div class="section-num">01 &nbsp;/&nbsp; Mathematics</div>
       <div>
         <h2 class="section-title">Mathematical <em>Foundations</em></h2>
         <p class="section-intro">
           The mathematical layer that underpins everything else &mdash;
-          these topics recur across both disciplines at every level of depth.
+          a core pillar that both Computer Science and Data &amp; Intelligence build on top of.
         </p>
       </div>
     </div>
 
     <div class="explanation reveal">
-      Mathematics is not a separate track to &ldquo;finish&rdquo; &mdash; it is a foundation you
-      keep revisiting. <strong>Probability</strong> and <strong>Statistics</strong> are essential for
-      machine learning and data analysis. <strong>Linear Algebra</strong> is the language of neural
-      networks and dimensionality reduction. <strong>Undergraduate Mathematics</strong> (calculus,
-      real analysis) gives you the rigour to read research papers without hand-waving.
-      The order here is roughly progressive: school-level refreshers first, then
-      university-level depth, then the specific branches that matter most for AI and data work.
+      Mathematics is not a prerequisite you complete and then forget &mdash; it is the common
+      vocabulary. Computer Science leans on discrete mathematics and formal logic.
+      Data &amp; Intelligence leans on linear algebra, probability, and statistics. But the
+      boundary is not clean: modern machine learning is impossible without calculus, database
+      theory is impossible without combinatorics, and anything involving randomness requires
+      probability. Treating mathematics as a first-class pillar is not about rigour for its
+      own sake &mdash; it is about the fact that every interesting problem eventually reduces
+      to a mathematical question.
     </div>
 
-    <div class="reveal" style="margin-top: 2.5rem;">
-      <div class="resource-row">
-        <div class="resource-topic">School Mathematics</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://www.khanacademy.org/math" target="_blank" rel="noopener">Khan Academy: High School Math</a>
-            <span class="resource-type">Course &middot; Free</span>
-          </div>
+    <!-- Mathematics Overview Grid -->
+    <div class="reveal" style="border: 1px solid var(--rule); padding: 1.6rem 1.8rem; margin-top: 2.5rem; margin-bottom: 2.5rem;">
+      <div class="tree-category" style="margin-top: 0; margin-bottom: 1.2rem;">Foundations</div>
+      <div style="display: flex; flex-direction: column; gap: 0.9rem;">
+        <div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.05rem; color: var(--ink); font-weight: 500;">School Mathematics</div>
+          <div style="font-family: 'Karla', sans-serif; font-size: 0.86rem; color: var(--ink-dim); margin-top: 0.15rem;">Algebra, functions, trigonometry, pre-calculus &mdash; the foundation to revisit first.</div>
+        </div>
+        <div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.05rem; color: var(--ink); font-weight: 500;">Calculus &amp; Analysis</div>
+          <div style="font-family: 'Karla', sans-serif; font-size: 0.86rem; color: var(--ink-dim); margin-top: 0.15rem;">Single- and multivariable calculus &mdash; the mathematics of change and optimization.</div>
+        </div>
+        <div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.05rem; color: var(--ink); font-weight: 500;">Linear Algebra</div>
+          <div style="font-family: 'Karla', sans-serif; font-size: 0.86rem; color: var(--ink-dim); margin-top: 0.15rem;">Vectors, matrices, eigenvalues &mdash; the language of data and neural networks.</div>
+        </div>
+        <div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.05rem; color: var(--ink); font-weight: 500;">Probability</div>
+          <div style="font-family: 'Karla', sans-serif; font-size: 0.86rem; color: var(--ink-dim); margin-top: 0.15rem;">The mathematics of uncertainty &mdash; random variables, distributions, inference.</div>
+        </div>
+        <div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.05rem; color: var(--ink); font-weight: 500;">Statistics</div>
+          <div style="font-family: 'Karla', sans-serif; font-size: 0.86rem; color: var(--ink-dim); margin-top: 0.15rem;">Estimation, hypothesis testing, regression &mdash; reasoning from samples to populations.</div>
+        </div>
+        <div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.05rem; color: var(--ink); font-weight: 500;">Discrete Mathematics</div>
+          <div style="font-family: 'Karla', sans-serif; font-size: 0.86rem; color: var(--ink-dim); margin-top: 0.15rem;">Logic, sets, graphs, combinatorics &mdash; the formal foundation of computer science.</div>
         </div>
       </div>
+    </div>
 
-      <div class="resource-row">
-        <div class="resource-topic">Undergraduate Mathematics</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/" target="_blank" rel="noopener">Mathematics for Computer Science &ndash; MIT OCW</a>
-            <span class="resource-type">Course &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://www.khanacademy.org/math" target="_blank" rel="noopener">Khan Academy: Multivariable Calculus, Differential Equations</a>
-            <span class="resource-type">Course &middot; Free</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Probability</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://projects.iq.harvard.edu/stat110" target="_blank" rel="noopener">Introduction to Probability &ndash; Blitzstein &amp; Hwang</a>
-            <span class="resource-type">Textbook &middot; Free Lectures</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Statistics</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://link.springer.com/book/10.1007/978-0-387-21736-9" target="_blank" rel="noopener">All of Statistics &ndash; Larry Wasserman</a>
-            <span class="resource-type">Textbook</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Linear Algebra</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/" target="_blank" rel="noopener">Linear Algebra &ndash; Gilbert Strang, MIT OCW</a>
-            <span class="resource-type">Course &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            Linear Algebra Done Right &ndash; Sheldon Axler
-            <span class="resource-type">Textbook</span>
-          </div>
-        </div>
-      </div>
+    <div class="reveal section-links">
+      <a href="mathematics/index.html" class="section-link" target="_blank" rel="noopener">Read the Mathematics guide &rarr;</a>
+      <a href="mathematics/resources.html" class="section-link" target="_blank" rel="noopener">Browse resources &rarr;</a>
     </div>
   </div><!-- /section-inner -->
 </section>
 
 <!-- ========================================== -->
-<!-- 03 / COMPUTER SCIENCE & ENGINEERING        -->
+<!-- 02 / COMPUTER SCIENCE & ENGINEERING        -->
 <!-- ========================================== -->
 <section id="cse" class="section-wrap">
-  <div class="section-watermark">03</div>
+  <div class="section-watermark">02</div>
   <div class="section-inner">
     <div class="section-header">
-      <div class="section-num">03 &nbsp;/&nbsp; CS &amp; Engineering</div>
+      <div class="section-num">02 &nbsp;/&nbsp; CS &amp; Engineering</div>
       <div>
         <h2 class="section-title">Computer Science &amp; <em>Engineering</em></h2>
         <p class="section-intro">
           The full knowledge tree &mdash; organised as a deliberate progression
-          from mathematical foundations through theoretical computer science
-          to practical engineering at scale.
+          from on-ramp courses through theoretical foundations to practical engineering at scale.
         </p>
       </div>
     </div>
@@ -848,352 +741,68 @@
       actually find out why. A system that cannot be operated is a system that cannot be trusted.
     </div>
 
-    <div style="margin-bottom: 2rem;">
-      <a href="cse.html" target="_blank" rel="noopener" class="item-link" style="font-family: 'Karla', sans-serif; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border-bottom-color: var(--accent-dim); display: inline-flex; align-items: center; gap: 0.4rem;">Read the complete CS &amp; Engineering guide &rarr;</a>
-    </div>
-
-    <!-- Mathematics -->
-    <div class="tree-group reveal">
-      <div class="tree-discipline">Mathematics</div>
-      <div class="tree-desc">The formal language that CS theory is built on.</div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Discrete Mathematics</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/" target="_blank" rel="noopener">Mathematics for Computer Science &ndash; MIT OCW</a>
-            <span class="resource-type">Science &middot; Course &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            Discrete Mathematics and Its Applications &ndash; Kenneth Rosen
-            <span class="resource-type">Science &middot; Textbook</span>
-          </div>
+    <!-- CS&E Overview Grid -->
+    <div class="overview-grid reveal">
+      <div class="col">
+        <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Science</div>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Fundamentals</div>
+        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.9rem;">
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Discrete Mathematics</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Programming Languages &amp; Compilers</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Data Structures &amp; Algorithms</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Theory of Computation</span>
+        </div>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Systems</div>
+        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Databases</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Distributed Systems</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Operating Systems</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Computer Networks</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Parallel &amp; Concurrent Computing</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Computer Organization &amp; Architecture</span>
+        </div>
+      </div>
+      <div class="col">
+        <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Engineering</div>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Building</div>
+        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem; margin-bottom: 0.9rem;">
+          <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.2rem;">Software Engineering</span>
+          <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.6rem;">Infrastructure Engineering</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Development Operations (DevOps)</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Cloud Engineering</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Platform Engineering</span>
+        </div>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Operating</div>
+        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Reliability Engineering (SRE)</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Performance Engineering</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Security Engineering</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Observability Engineering</span>
         </div>
       </div>
     </div>
 
-    <!-- Science -->
-    <div class="tree-group reveal">
-      <div class="tree-discipline">Science</div>
-
-      <!-- Science overview: categories at a glance -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--rule); margin-bottom: 2.5rem;">
-        <div style="padding: 1.4rem 1.4rem; border-right: 1px solid var(--rule);">
-          <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Fundamentals</div>
-          <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Programming Languages and Compilers</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Data Structures and Algorithms</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Theory of Computation</div>
-          </div>
-        </div>
-        <div style="padding: 1.4rem 1.4rem;">
-          <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Systems</div>
-          <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Databases</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Distributed Systems</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Operating Systems</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Computer Networks</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Parallel &amp; Concurrent Computing</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Computer Organization &amp; Architecture</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tree-category">Fundamentals</div>
-      <div class="tree-desc">The theoretical core &mdash; how computation, languages, and algorithms work at a foundational level.</div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Programming Languages and Compilers</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://mitpress.mit.edu/sites/default/files/sicp/index.html" target="_blank" rel="noopener">Structure and Interpretation of Computer Programs (SICP) &ndash; Abelson &amp; Sussman</a>
-            <span class="resource-type">Textbook &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://craftinginterpreters.com/" target="_blank" rel="noopener">Crafting Interpreters &ndash; Robert Nystrom</a>
-            <span class="resource-type">Practical &middot; Free</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Data Structures and Algorithms</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            Introduction to Algorithms (CLRS) &ndash; Cormen, Leiserson, Rivest, Stein
-            <span class="resource-type">Textbook</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/" target="_blank" rel="noopener">MIT 6.006: Introduction to Algorithms</a>
-            <span class="resource-type">Course &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            The Algorithm Design Manual &ndash; Steven Skiena
-            <span class="resource-type">Practical</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://neetcode.io/" target="_blank" rel="noopener">Neetcode</a>
-            <span class="resource-type">Practice</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Theory of Computation</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            Introduction to the Theory of Computation &ndash; Michael Sipser
-            <span class="resource-type">Textbook</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="tree-category">Systems</div>
-      <div class="tree-desc">How real computing infrastructure is designed &mdash; from a single machine to distributed clusters.</div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Databases</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://15445.courses.cs.cmu.edu/" target="_blank" rel="noopener">CMU 15-445: Database Systems &ndash; Andy Pavlo</a>
-            <span class="resource-type">Course &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            Database Internals &ndash; Alex Petrov
-            <span class="resource-type">Textbook</span>
-          </div>
-          <div class="resource-item">
-            Designing Data-Intensive Applications &ndash; Martin Kleppmann
-            <span class="resource-type">Practical</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Distributed Systems</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://pdos.csail.mit.edu/6.824/" target="_blank" rel="noopener">MIT 6.824: Distributed Systems</a>
-            <span class="resource-type">Course &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            Designing Data-Intensive Applications &ndash; Martin Kleppmann
-            <span class="resource-type">Practical</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Operating Systems</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/" target="_blank" rel="noopener">Operating Systems: Three Easy Pieces (OSTEP) &ndash; Remzi &amp; Andrea Arpaci-Dusseau</a>
-            <span class="resource-type">Textbook &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://pdos.csail.mit.edu/6.828/2021/" target="_blank" rel="noopener">MIT 6.S081: Operating System Engineering</a>
-            <span class="resource-type">Practical &middot; Labs</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Computer Networks</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            Computer Networking: A Top-Down Approach &ndash; Kurose &amp; Ross
-            <span class="resource-type">Textbook</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://cs144.github.io/" target="_blank" rel="noopener">Stanford CS144: Introduction to Computer Networking</a>
-            <span class="resource-type">Course</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://beej.us/guide/bgnet/" target="_blank" rel="noopener">Beej&rsquo;s Guide to Network Programming</a>
-            <span class="resource-type">Practical &middot; Free</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Parallel &amp; Concurrent Computing</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            The Art of Multiprocessor Programming &ndash; Herlihy &amp; Shavit
-            <span class="resource-type">Textbook</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Computer Organization &amp; Architecture</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            Computer Organization and Design &ndash; Patterson &amp; Hennessy
-            <span class="resource-type">Textbook</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://www.nand2tetris.org/" target="_blank" rel="noopener">Nand2Tetris: Building a Modern Computer from First Principles</a>
-            <span class="resource-type">Practical &middot; Free</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Engineering -->
-    <div class="tree-group reveal">
-      <div class="tree-discipline">Engineering</div>
-
-      <!-- Engineering overview: categories at a glance -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--rule); margin-bottom: 2.5rem;">
-        <div style="padding: 1.4rem 1.4rem; border-right: 1px solid var(--rule);">
-          <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Building</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400; margin-bottom: 0.5rem;">Software Engineering</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400; margin-bottom: 0.3rem;">Infrastructure Engineering</div>
-          <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Development Operations (DevOps)</span>
-            <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Cloud Engineering</span>
-            <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Platform Engineering</span>
-          </div>
-        </div>
-        <div style="padding: 1.4rem 1.4rem;">
-          <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Operating</div>
-          <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Reliability Engineering <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; SRE</span></div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Performance Engineering</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Security Engineering</div>
-            <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Observability Engineering</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tree-category">Building</div>
-      <div class="tree-desc">Constructing software systems and the infrastructure they run on.</div>
-
-      <div class="resource-row">
-        <div class="resource-topic">
-          Software Engineering
-          <div class="sub-list" style="margin-top: 0.5rem;">
-            <span class="sub-chip">Software Engineering</span>
-          </div>
-        </div>
-        <div class="resource-list">
-          <div class="resource-item">
-            The Pragmatic Programmer &ndash; Hunt &amp; Thomas
-            <span class="resource-type">Book</span>
-          </div>
-          <div class="resource-item">
-            Clean Code &ndash; Robert C. Martin
-            <span class="resource-type">Book</span>
-          </div>
-          <div class="resource-item">
-            Designing Data-Intensive Applications &ndash; Martin Kleppmann
-            <span class="resource-type">Book</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">
-          Infrastructure Engineering
-          <div class="sub-list" style="margin-top: 0.5rem;">
-            <span class="sub-chip">Development Operations (DevOps)</span>
-            <span class="sub-chip">Cloud Engineering</span>
-            <span class="sub-chip">Platform Engineering</span>
-          </div>
-        </div>
-        <div class="resource-list">
-          <div class="resource-item">
-            The Phoenix Project &ndash; Kim, Behr &amp; Spafford
-            <span class="resource-type">Book</span>
-          </div>
-          <div class="resource-item">
-            Kubernetes in Action &ndash; Marko Luk&scaron;a
-            <span class="resource-type">Book</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="tree-category">Operating</div>
-      <div class="tree-desc">Keeping systems reliable, performant, secure, and observable in production.</div>
-
-      <div class="resource-row">
-        <div class="resource-topic">
-          Reliability Engineering
-          <div class="sub-list" style="margin-top: 0.5rem;">
-            <span class="sub-chip">Site Reliability Engineering</span>
-          </div>
-        </div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://sre.google/sre-book/table-of-contents/" target="_blank" rel="noopener">Site Reliability Engineering &ndash; Google</a>
-            <span class="resource-type">Book &middot; Free</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">
-          Performance Engineering
-          <div class="sub-list" style="margin-top: 0.5rem;">
-            <span class="sub-chip">Performance Engineering</span>
-          </div>
-        </div>
-        <div class="resource-list">
-          <div class="resource-item">
-            Systems Performance &ndash; Brendan Gregg
-            <span class="resource-type">Book</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">
-          Security Engineering
-          <div class="sub-list" style="margin-top: 0.5rem;">
-            <span class="sub-chip">Security Engineering</span>
-          </div>
-        </div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank" rel="noopener">OWASP Web Security Testing Guide</a>
-            <span class="resource-type">Guide &middot; Free</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">
-          Observability Engineering
-          <div class="sub-list" style="margin-top: 0.5rem;">
-            <span class="sub-chip">Observability Engineering</span>
-          </div>
-        </div>
-        <div class="resource-list">
-          <div class="resource-item">
-            Observability Engineering &ndash; Charity Majors, Liz Fong-Jones &amp; George Miranda
-            <span class="resource-type">Book</span>
-          </div>
-        </div>
-      </div>
+    <div class="reveal section-links">
+      <a href="cse/on-ramp.html" class="section-link" target="_blank" rel="noopener">On-Ramp courses &rarr;</a>
+      <a href="cse/index.html" class="section-link" target="_blank" rel="noopener">Read the CS &amp; Engineering guide &rarr;</a>
     </div>
   </div><!-- /section-inner -->
 </section>
 
 <!-- ========================================== -->
-<!-- 04 / DATA & INTELLIGENCE                   -->
+<!-- 03 / DATA & INTELLIGENCE                   -->
 <!-- ========================================== -->
 <section id="data-intelligence" class="section-wrap">
-  <div class="section-watermark">04</div>
+  <div class="section-watermark">03</div>
   <div class="section-inner">
     <div class="section-header">
-      <div class="section-num">04 &nbsp;/&nbsp; Data &amp; Intelligence</div>
+      <div class="section-num">03 &nbsp;/&nbsp; Data &amp; Intelligence</div>
       <div>
         <h2 class="section-title">Data &amp; <em>Intelligence</em></h2>
         <p class="section-intro">
-          A dual-track approach to AI and data &mdash; the Science track for
-          theoretical depth, the Engineering track for hands-on building &mdash;
-          both following the same progression from data analysis to large language models.
+          A dual-track approach to AI and data &mdash; from on-ramp courses through
+          theoretical depth and hands-on building, following the same progression
+          from data analysis to large language models.
         </p>
       </div>
     </div>
@@ -1227,269 +836,46 @@
       together produce someone who can reason about <em>and</em> build intelligent systems.
     </div>
 
-    <div style="margin-bottom: 2rem;">
-      <a href="data-intelligence.html" target="_blank" rel="noopener" class="item-link" style="font-family: 'Karla', sans-serif; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border-bottom-color: var(--accent-dim); display: inline-flex; align-items: center; gap: 0.4rem;">Read the complete Data &amp; Intelligence guide &rarr;</a>
-    </div>
-
     <!-- D&I Overview Grid -->
-    <div class="reveal" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--rule); margin-bottom: 2.5rem;">
-      <div style="padding: 1.4rem 1.4rem; border-right: 1px solid var(--rule);">
+    <div class="overview-grid reveal">
+      <div class="col">
         <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Science</div>
         <div style="display: flex; flex-direction: column; gap: 0.35rem;">
           <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Data Analysis</div>
           <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Machine Learning</div>
           <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Deep Learning</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">NLP</div>
+          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Natural Language Processing</div>
           <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Transformers &amp; LLMs</div>
         </div>
       </div>
-      <div style="padding: 1.4rem 1.4rem;">
+      <div class="col">
         <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Engineering</div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400; margin-bottom: 0.5rem;">Building</div>
-        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem; margin-bottom: 0.5rem;">
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">Software Engineering</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Data Analysis</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Machine Learning</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Deep Learning</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; NLP</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim);">&mdash; Transformers &amp; LLMs</span>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Building</div>
+        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem; margin-bottom: 0.9rem;">
+          <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.2rem;">Software Engineering</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Data Analysis</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Machine Learning</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Deep Learning</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Natural Language Processing</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Transformers &amp; LLMs</span>
+          <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.6rem;">Infrastructure Engineering</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; ML Systems Design</span>
         </div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400; margin-bottom: 0.5rem;">Infrastructure Engineering</div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400; margin-bottom: 0.5rem;">Operating</div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">State of the Art</div>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Operating</div>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500;">State of the Art</div>
       </div>
     </div>
 
-    <!-- SCIENCE TRACK -->
-    <div class="reveal" style="margin-bottom: 3.5rem;">
-      <div class="track-header">Science</div>
-      <div class="track-subtitle">Theory &amp; Foundations</div>
-
-      <div class="explanation">
-        The Science track is about building mathematical intuition. These are the canonical
-        textbooks and Stanford lecture series that the field is built on. The goal here is
-        not to memorise proofs, but to develop the ability to read a paper, understand a
-        loss function, or reason about why a model is failing &mdash; without reaching for
-        Stack Overflow first.
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Data Analysis</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://link.springer.com/book/10.1007/978-0-387-21736-9" target="_blank" rel="noopener">All of Statistics &ndash; Larry Wasserman</a>
-            <span class="resource-type">Textbook</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Machine Learning</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://www.statlearning.com/" target="_blank" rel="noopener">An Introduction to Statistical Learning (ISLR)</a>
-            <span class="resource-type">Textbook &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://hastie.su.domains/ElemStatLearn/" target="_blank" rel="noopener">The Elements of Statistical Learning (ESL)</a>
-            <span class="resource-type">Textbook &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://cs229.stanford.edu/" target="_blank" rel="noopener">CS229: Machine Learning &ndash; Stanford</a>
-            <span class="resource-type">Course &middot; Lecture Notes</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Deep Learning</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://www.deeplearningbook.org/" target="_blank" rel="noopener">Deep Learning &ndash; Goodfellow, Bengio &amp; Courville</a>
-            <span class="resource-type">Textbook &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://cs230.stanford.edu/" target="_blank" rel="noopener">CS230: Deep Learning &ndash; Stanford</a>
-            <span class="resource-type">Course</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://cs231n.stanford.edu/" target="_blank" rel="noopener">CS231N: CNNs for Visual Recognition &ndash; Stanford</a>
-            <span class="resource-type">Course</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Natural Language Processing</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://web.stanford.edu/~jurafsky/slp3/" target="_blank" rel="noopener">Speech and Language Processing &ndash; Jurafsky &amp; Martin</a>
-            <span class="resource-type">Textbook &middot; Free</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://web.stanford.edu/class/cs224n/" target="_blank" rel="noopener">CS224N: NLP with Deep Learning &ndash; Stanford</a>
-            <span class="resource-type">Course</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Transformers &amp; LLMs</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need &ndash; Vaswani et al.</a>
-            <span class="resource-type">Paper &middot; Essential</span>
-          </div>
-        </div>
-      </div>
+    <div class="reveal section-links">
+      <a href="data-intelligence/on-ramp.html" class="section-link" target="_blank" rel="noopener">On-Ramp courses &rarr;</a>
+      <a href="data-intelligence/index.html" class="section-link" target="_blank" rel="noopener">Read the Data &amp; Intelligence guide &rarr;</a>
     </div>
-
-    <!-- ENGINEERING TRACK -->
-    <div class="reveal" style="margin-bottom: 3.5rem;">
-      <div class="track-header">Engineering</div>
-      <div class="track-subtitle">Building &amp; Practice</div>
-
-      <div class="explanation">
-        The Engineering track mirrors the Science track topic-for-topic, but the resources
-        are entirely different. Where the Science track assigns a textbook like Goodfellow&rsquo;s
-        <em>Deep Learning</em> to explain the theory behind backpropagation, the Engineering
-        track assigns Chollet&rsquo;s <em>Deep Learning with Python</em> to show you how to
-        actually implement, train, and evaluate a neural network in Keras.
-        <br><br>
-        This track splits into two sub-disciplines. <strong>Software Engineering</strong> is
-        about building the models and applications themselves &mdash; writing the training code,
-        choosing the right libraries, structuring experiments, and going from a research idea
-        to working software. <strong>Infrastructure Engineering</strong> is about what sits
-        underneath and around the model &mdash; the ML system design, data pipelines, feature
-        stores, model registries, and serving infrastructure that make it possible to run models
-        reliably at scale. You can write a beautiful model in a notebook, but without the
-        infrastructure to serve it, retrain it, and monitor it, it never leaves your laptop.
-      </div>
-
-      <!-- Software Engineering -->
-      <div class="discipline-label" style="margin-bottom: 1.2rem; margin-top: 0;">Software Engineering</div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Data Analysis</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://wesmckinney.com/book/" target="_blank" rel="noopener">Python for Data Analysis &ndash; Wes McKinney</a>
-            <span class="resource-type">Book &middot; Free</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Machine Learning</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://github.com/ageron/handson-ml3" target="_blank" rel="noopener">Hands-On Machine Learning with Scikit-Learn, Keras &amp; TensorFlow &ndash; Aur&eacute;lien G&eacute;ron</a>
-            <span class="resource-type">Book &middot; Code</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Deep Learning</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://github.com/fchollet/deep-learning-with-python-notebooks" target="_blank" rel="noopener">Deep Learning with Python &ndash; Fran&ccedil;ois Chollet</a>
-            <span class="resource-type">Book &middot; Code</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Natural Language Processing</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://web.stanford.edu/class/cs224n/" target="_blank" rel="noopener">CS224N: NLP with Deep Learning &ndash; Assignments</a>
-            <span class="resource-type">Assignments</span>
-          </div>
-          <div class="resource-item">
-            Natural Language Processing in Action &ndash; Lane, Howard &amp; Hapke
-            <span class="resource-type">Book</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="resource-row">
-        <div class="resource-topic">Transformers &amp; LLMs</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://github.com/nlp-with-transformers" target="_blank" rel="noopener">Natural Language Processing with Transformers &ndash; Lewis Tunstall et al.</a>
-            <span class="resource-type">Book &middot; Code</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://github.com/rasbt/LLMs-from-scratch" target="_blank" rel="noopener">Build a Large Language Model From Scratch &ndash; Sebastian Raschka</a>
-            <span class="resource-type">Book &middot; Code</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://github.com/HandsOnLLM/Hands-On-Large-Language-Models" target="_blank" rel="noopener">Hands-On Large Language Models &ndash; Jay Alammar &amp; Maarten Grootendorst</a>
-            <span class="resource-type">Book &middot; Code</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://github.com/PacktPublishing/LLM-Engineers-Handbook" target="_blank" rel="noopener">LLM Engineer&rsquo;s Handbook &ndash; Iusztin &amp; Labonne</a>
-            <span class="resource-type">Book &middot; Code</span>
-          </div>
-          <div class="resource-item">
-            <a href="https://huyenchip.com/books/" target="_blank" rel="noopener">AI Engineering &ndash; Chip Huyen</a>
-            <span class="resource-type">Book</span>
-          </div>
-        </div>
-        <div style="grid-column: 1 / -1;">
-          <a href="llm-engineering.html" target="_blank" rel="noopener" class="item-link" style="font-family: 'Karla', sans-serif; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border-bottom-color: var(--accent-dim); display: inline-flex; align-items: center; gap: 0.4rem;">Explore the Transformers &amp; LLM engineering landscape &rarr;</a>
-        </div>
-      </div>
-
-      <!-- Infrastructure Engineering -->
-      <div class="discipline-label" style="margin-bottom: 1.2rem; margin-top: 2.5rem;">Infrastructure Engineering</div>
-
-      <div class="resource-row">
-        <div class="resource-topic">ML Systems Design</div>
-        <div class="resource-list">
-          <div class="resource-item">
-            <a href="https://huyenchip.com/books/" target="_blank" rel="noopener">Designing Machine Learning Systems &ndash; Chip Huyen</a>
-            <span class="resource-type">Book</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Operating -->
-    <div class="reveal" style="margin-bottom: 3.5rem;">
-      <div class="track-header">Engineering</div>
-      <div class="track-subtitle">Operating</div>
-
-      <div class="explanation">
-        This is the production side &mdash; monitoring model drift, managing retraining
-        pipelines, ensuring reliability and reproducibility of ML systems in the real world.
-        Resources and structure for this section are still being developed as the earlier
-        tracks solidify.
-      </div>
-    </div>
-
-    <!-- State of the Art -->
-    <div class="reveal" style="margin-bottom: 2rem;">
-      <div class="track-header">State of the Art</div>
-      <div class="track-subtitle">Emerging &amp; Evolving</div>
-
-      <div class="explanation">
-        A deliberately open-ended section. The field moves fast &mdash; new architectures,
-        new capabilities, new failure modes. This is where I track the papers, tools,
-        and techniques that haven&rsquo;t yet settled into textbooks but are shaping
-        where things are heading.
-      </div>
-    </div>
-
   </div><!-- /section-inner -->
 </section>
 
 <!-- PAGE DOTS -->
 <div class="page-dots">
   <a href="#hero" class="page-dot active" data-section="hero" data-label="Overview"></a>
-  <a href="#on-ramp" class="page-dot" data-section="on-ramp" data-label="The On-Ramp"></a>
   <a href="#mathematics" class="page-dot" data-section="mathematics" data-label="Mathematics"></a>
   <a href="#cse" class="page-dot" data-section="cse" data-label="CS & Engineering"></a>
   <a href="#data-intelligence" class="page-dot" data-section="data-intelligence" data-label="Data & Intelligence"></a>
@@ -1530,6 +916,17 @@
 
   window.addEventListener('scroll', updateActiveSection, { passive: true });
   updateActiveSection();
+
+  // Ensure page-load hash fragment (e.g. ../index.html#data-intelligence) jumps to the section
+  // once layout has settled — some browsers fail the native scroll-to-fragment on first paint.
+  if (location.hash) {
+    history.scrollRestoration = 'manual';
+    const jumpToHash = () => {
+      const target = document.getElementById(location.hash.slice(1));
+      if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
+    };
+    window.addEventListener('load', () => setTimeout(jumpToHash, 0));
+  }
 
   // Mobile menu toggle
   const hamburger = document.querySelector('.nav-hamburger');
