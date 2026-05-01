@@ -467,6 +467,24 @@
       border-radius: 2px;
     }
 
+    /* -- TREE SVG (AI taxonomy diagram) -- */
+    .tree-svg-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 1.8rem 0 2.4rem;
+      padding: 1.8rem 1.2rem;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+    }
+    .tree-svg {
+      display: block;
+      min-width: 720px;
+      max-width: 900px;
+      height: auto;
+      margin: 0 auto;
+    }
+
     /* -- MIRROR TABLE -- */
     .table-wrap {
       overflow-x: auto;
@@ -916,26 +934,80 @@
     Most people use the word &ldquo;AI&rdquo; to mean &ldquo;whatever I happen to be working on inside AI&rdquo;, and most career anxiety in this field comes from that ambiguity. Before deciding what to learn, what to apply to, or how to feel about the latest announcement, it helps to put yourself somewhere concrete on the map below. Three letters &mdash; S, R, or E &mdash; will sort every person calling themselves an AI worker into one of three branches with genuinely different daily work, different skills, different career economics, and different timescales of useful effort.
   </p>
 
-  <div class="code-block">AI
-&#x251C;&#x2500;&#x2500; Science      &larr; established theory: mathematics, statistics,
-&#x2502;                  neural-network fundamentals. The stable
-&#x2502;                  bedrock everything else is built on.
-&#x2502;
-&#x251C;&#x2500;&#x2500; Research     &larr; active discovery of new knowledge: new
-&#x2502;                  architectures, training methods, alignment
-&#x2502;                  techniques. What academic labs and frontier-
-&#x2502;                  company research arms produce.
-&#x2502;
-&#x2514;&#x2500;&#x2500; Engineering  &larr; applying science and research to build
-                       real systems. The focus of this guide.
+  <div class="tree-svg-wrap">
+    <svg class="tree-svg" viewBox="0 0 900 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="tree-title tree-desc">
+      <title id="tree-title">The AI tree</title>
+      <desc id="tree-desc">A taxonomy of AI work: Science (established theory), Research (active discovery), and Engineering (applying science and research to build real systems). Engineering further splits into Model Engineering and Application Engineering, with LLMs sitting under Application Engineering as the current frontier topic.</desc>
 
-    &#x251C;&#x2500;&#x2500; Model Engineering        &larr; modifies and runs
-    &#x2502;                              the models themselves
-    &#x2514;&#x2500;&#x2500; Application Engineering  &larr; builds systems and
-                                       products on top of models
+      <!-- CONNECTORS -->
+      <g fill="none" stroke="#c8a96e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55">
+        <!-- AI -> Science / Research / Engineering -->
+        <path d="M 70 64 V 342 H 130"/>
+        <path d="M 70 132 H 130"/>
+        <path d="M 70 232 H 130"/>
+        <!-- Engineering -> Model Eng / Application Eng -->
+        <path d="M 220 364 V 542 H 280"/>
+        <path d="M 220 442 H 280"/>
+        <!-- Application Engineering -> LLMs -->
+        <path d="M 410 564 V 642 H 460"/>
+      </g>
 
-        &#x2514;&#x2500;&#x2500; LLMs                      &larr; current frontier
-                                           topic</div>
+      <!-- BOXES -->
+      <!-- AI (root, accented) -->
+      <rect x="30" y="20" width="80" height="44" rx="4" fill="#3a2e1a" stroke="#c8a96e" stroke-width="1.5"/>
+      <text x="70" y="49" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="18" fill="#c8a96e">AI</text>
+
+      <!-- Science -->
+      <rect x="130" y="110" width="140" height="44" rx="4" fill="#1c1c1e" stroke="#333338" stroke-width="1.2"/>
+      <text x="200" y="139" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#f8f8f8">Science</text>
+
+      <!-- Research -->
+      <rect x="130" y="210" width="140" height="44" rx="4" fill="#1c1c1e" stroke="#333338" stroke-width="1.2"/>
+      <text x="200" y="239" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#f8f8f8">Research</text>
+
+      <!-- Engineering (accented; the focus of the guide) -->
+      <rect x="130" y="320" width="180" height="44" rx="4" fill="#3a2e1a" stroke="#c8a96e" stroke-width="1.5"/>
+      <text x="220" y="349" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#c8a96e">Engineering</text>
+
+      <!-- Model Engineering -->
+      <rect x="280" y="420" width="220" height="44" rx="4" fill="#1c1c1e" stroke="#333338" stroke-width="1.2"/>
+      <text x="390" y="449" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#f8f8f8">Model Engineering</text>
+
+      <!-- Application Engineering -->
+      <rect x="280" y="520" width="260" height="44" rx="4" fill="#1c1c1e" stroke="#333338" stroke-width="1.2"/>
+      <text x="410" y="549" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#f8f8f8">Application Engineering</text>
+
+      <!-- LLMs (accented; current frontier topic) -->
+      <rect x="460" y="620" width="120" height="44" rx="4" fill="#3a2e1a" stroke="#c8a96e" stroke-width="1.5"/>
+      <text x="520" y="649" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#c8a96e">LLMs</text>
+
+      <!-- ANNOTATIONS (right of each box) -->
+      <g font-family="'Karla', sans-serif" font-weight="400" font-size="12.5" fill="#a8a8a8">
+        <!-- Science -->
+        <text x="290" y="125">established theory: mathematics, statistics,</text>
+        <text x="290" y="143">neural-network fundamentals. The stable bedrock.</text>
+
+        <!-- Research -->
+        <text x="290" y="225">active discovery: new architectures, training,</text>
+        <text x="290" y="243">alignment. Frontier labs &amp; academic groups.</text>
+
+        <!-- Engineering -->
+        <text x="330" y="335">applying science and research to build real</text>
+        <text x="330" y="353" fill="#d4d4d4">systems. The focus of this guide.</text>
+
+        <!-- Model Engineering -->
+        <text x="520" y="437">modifies and runs the models themselves</text>
+        <text x="520" y="455">(fine-tuning, inference; MLOps in this site).</text>
+
+        <!-- Application Engineering -->
+        <text x="560" y="537">builds systems and products on top of</text>
+        <text x="560" y="555">existing models (RAG, agents; LLMOps).</text>
+
+        <!-- LLMs -->
+        <text x="600" y="637">current frontier topic.</text>
+      </g>
+    </svg>
+  </div>
 
   <p class="body-text">
     The taxonomy is more useful than the one you usually see in headlines &mdash; the one that splits AI by <em>subfield</em> (LLMs vs. vision vs. robotics vs. classical ML). The subfield split tells you which technical specialty someone is in; the Science / Research / Engineering split tells you what kind of work they actually do all day. For career decisions, the second is far more decisive. A vision-engineering job in 2026 has more in common with an LLM-engineering job than either has with vision <em>research</em>. The work is the work; the data type is the wrapper.
