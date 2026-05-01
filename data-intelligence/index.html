@@ -452,6 +452,21 @@
       margin: 2.5rem 0;
     }
 
+    /* -- CODE BLOCK (ASCII diagrams etc.) -- */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      padding: 1.4rem 1.6rem;
+      margin: 1.5rem 0 2rem;
+      overflow-x: auto;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--ink-mid);
+      white-space: pre;
+      border-radius: 2px;
+    }
+
     /* -- MIRROR TABLE -- */
     .table-wrap {
       overflow-x: auto;
@@ -771,9 +786,12 @@
   </div>
 </nav>
 <div class="mobile-menu">
-  <a href="../index.html#mathematics" class="mobile-link">Mathematics</a>
-  <a href="../index.html#cse" class="mobile-link">CS &amp; Engineering</a>
-  <a href="../index.html#data-intelligence" class="mobile-link">Data &amp; Intelligence</a>
+  <a href="#intro" class="mobile-link">Introduction</a>
+  <a href="#field-context" class="mobile-link">Field Context</a>
+  <a href="#part1" class="mobile-link">Five Topics</a>
+  <a href="#part2" class="mobile-link">Science Track</a>
+  <a href="#part3" class="mobile-link">Engineering Track</a>
+  <a href="#part4" class="mobile-link">State of the Art</a>
 </div>
 
 <!-- BACK TO TOP -->
@@ -895,59 +913,85 @@
 <div class="reveal" id="field-tree">
   <h3 class="section-heading">Where This Guide Sits in the AI Tree</h3>
   <p class="body-text">
-    The categories above are useful for naming what kind of AI you are looking at. But for orienting your own learning, a different cut helps more &mdash; one that asks <em>what kind of work</em> a person is doing inside AI, rather than what subfield they are in. There are three honest answers, and the entire rest of this guide is about exactly one of them.
+    Most people use the word &ldquo;AI&rdquo; to mean &ldquo;whatever I happen to be working on inside AI&rdquo;, and most career anxiety in this field comes from that ambiguity. Before deciding what to learn, what to apply to, or how to feel about the latest announcement, it helps to put yourself somewhere concrete on the map below. Three letters &mdash; S, R, or E &mdash; will sort every person calling themselves an AI worker into one of three branches with genuinely different daily work, different skills, different career economics, and different timescales of useful effort.
   </p>
 
   <div class="code-block">AI
-&#x251C;&#x2500;&#x2500; Science      &mdash; established theory: mathematics, statistics,
-&#x2502;                neural-network fundamentals. The stable bedrock
-&#x2502;                everything else is built on.
+&#x251C;&#x2500;&#x2500; Science      &larr; established theory: mathematics, statistics,
+&#x2502;                  neural-network fundamentals. The stable
+&#x2502;                  bedrock everything else is built on.
 &#x2502;
-&#x251C;&#x2500;&#x2500; Research     &mdash; active discovery of new knowledge: new
-&#x2502;                architectures, training methods, alignment
-&#x2502;                techniques. What academic labs and frontier-company
-&#x2502;                research arms produce.
+&#x251C;&#x2500;&#x2500; Research     &larr; active discovery of new knowledge: new
+&#x2502;                  architectures, training methods, alignment
+&#x2502;                  techniques. What academic labs and frontier-
+&#x2502;                  company research arms produce.
 &#x2502;
-&#x2514;&#x2500;&#x2500; Engineering  &mdash; applying science and research to build real
-                   systems. The focus of this guide.
-    &#x251C;&#x2500;&#x2500; Model Engineering        &mdash; modifies and runs the
-    &#x2502;                              models themselves
-    &#x2514;&#x2500;&#x2500; Application Engineering  &mdash; builds systems and
+&#x2514;&#x2500;&#x2500; Engineering  &larr; applying science and research to build
+                       real systems. The focus of this guide.
+
+    &#x251C;&#x2500;&#x2500; Model Engineering        &larr; modifies and runs
+    &#x2502;                              the models themselves
+    &#x2514;&#x2500;&#x2500; Application Engineering  &larr; builds systems and
                                        products on top of models
-                &#x2514;&#x2500;&#x2500; LLMs                  &mdash; current frontier topic</div>
+
+        &#x2514;&#x2500;&#x2500; LLMs                      &larr; current frontier
+                                           topic</div>
 
   <p class="body-text">
-    The diagram is small but it does a lot of work. It sorts every person in &ldquo;AI&rdquo; into one of three groups, each with very different daily work, very different skills, and very different career economics. Most confusion about &ldquo;what should I learn&rdquo; comes from people implicitly comparing themselves to a different branch of this tree than the one they are actually on.
+    The taxonomy is more useful than the one you usually see in headlines &mdash; the one that splits AI by <em>subfield</em> (LLMs vs. vision vs. robotics vs. classical ML). The subfield split tells you which technical specialty someone is in; the Science / Research / Engineering split tells you what kind of work they actually do all day. For career decisions, the second is far more decisive. A vision-engineering job in 2026 has more in common with an LLM-engineering job than either has with vision <em>research</em>. The work is the work; the data type is the wrapper.
   </p>
 
-  <h4 class="subsection-heading">Science &mdash; the part that doesn&rsquo;t move</h4>
+  <h4 class="subsection-heading">Science &mdash; the bedrock that doesn&rsquo;t move</h4>
   <p class="body-text">
-    <strong>Science</strong> is the layer that does not change from year to year. The mathematics behind backpropagation. The statistical learning theory that says when a model can generalise. The linear algebra and probability that the rest of the field reuses without re-deriving. These were true in 1990, they were true in 2015 when deep learning broke open, and they will be true in 2035. Researchers extend this layer occasionally; engineers consume it constantly. <a href="../index.html#mathematics" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">The Mathematics pillar</a> and the <strong>Science track</strong> inside this guide are how the curriculum addresses Science: a one-time investment that pays back forever.
+    The <strong>Science</strong> branch is the layer of established theory that the rest of AI rests on: linear algebra, multivariable calculus, probability and statistics, the foundations of optimisation, the statistical learning theory that says when a model can generalise, the architecture-agnostic mathematics of why backpropagation works. These ideas were true in 1990, they were true in 2015 when deep learning broke open, and they will be true in 2035. Whoever extends this layer is doing very long-cycle work &mdash; they are pure mathematicians, theoretical statisticians, and the small subset of computer scientists working on problems like generalisation bounds, expressivity proofs, or the information-theoretic foundations of learning. Their day involves whiteboards and proofs more than GPUs and training runs.
+  </p>
+  <p class="body-text">
+    Almost no one reading a roadmap site is on this branch as their primary work. But everyone benefits from <em>consuming</em> it: you read enough Science to understand the papers Research produces, to know what guarantees an algorithm does and does not provide, to feel the difference between &ldquo;the model usually works&rdquo; and &ldquo;the model has bounded error under these conditions.&rdquo; That is what the <a href="../index.html#mathematics" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Mathematics pillar</a> and the <strong>Science track</strong> within this guide are for &mdash; not so you can extend Science yourself, but so the Engineering work you actually do is grounded rather than cargo-culted. Spend the time once. The investment compounds for the rest of your career, because Science is the part that does not need to be re-learned every time the toolchain changes.
   </p>
 
   <h4 class="subsection-heading">Research &mdash; the part that moves every quarter</h4>
   <p class="body-text">
-    <strong>Research</strong> is the layer that produces new knowledge: new architectures (attention, mixture-of-experts, state-space models), new training regimes (RLHF, DPO, RLAIF), new evaluation methods, new theoretical frameworks. It is what frontier labs (OpenAI, Anthropic, Google DeepMind, Meta FAIR) and academic groups publish. Most developers <em>consume</em> research rather than produce it &mdash; you read the papers, understand the ideas, wait for the techniques to settle into mature tools, then use them. Reading papers is therefore a meta-skill on the Engineering track, not a goal in itself. The <a href="#field-developer" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">&ldquo;What Compounds for a Developer&rdquo;</a> section below treats it as exactly that.
+    The <strong>Research</strong> branch is what produces the new ideas: novel architectures (attention, mixture-of-experts, state-space models, diffusion variants), new training regimes (RLHF, DPO, RLAIF, constitutional AI), better evaluation methods, alignment techniques, scaling-law refinements, and the steady stream of arXiv papers that the rest of the field reads. The work is published &mdash; the currency of Research is the paper, not the product. The institutions are frontier labs (OpenAI, Anthropic, Google DeepMind, Meta FAIR), well-funded research arms (Mistral, DeepSeek, Inflection-style labs), and a long tail of academic groups. The pipeline runs on PhDs, post-docs, residencies, and the patience to spend six months on a single experiment that may or may not work.
+  </p>
+  <p class="body-text">
+    Most developers will not produce Research, even very good developers, and that is fine. But every developer should <em>consume</em> Research, because Research is what predicts the shape of Engineering work twelve to twenty-four months out. A capability that is in a paper today will be in your toolchain in a year and in your job description in two. The skill is reading: being able to skim an arXiv paper in fifteen minutes, extract the core idea, decide whether it actually changes anything for you, and move on. The <a href="#field-developer" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">&ldquo;What Compounds for a Developer&rdquo;</a> section later in this preamble treats paper-reading exactly that way: as a meta-skill on the Engineering branch, not a separate career.
   </p>
 
   <h4 class="subsection-heading">Engineering &mdash; what almost everyone reading this is doing</h4>
   <p class="body-text">
-    <strong>Engineering</strong> is the layer where science and research become products. It has its own internal split, and that split lines up exactly with the rest of this site:
+    The <strong>Engineering</strong> branch is the largest by headcount and the most consequential for products: it is where Science and Research turn into things people use. It is also the branch this entire guide is about. If you write code that calls an LLM, that fine-tunes a model, that ingests data and serves predictions, that wires retrieval to generation, that monitors a deployed system &mdash; you are doing Engineering. The work runs on training runs and pull requests, not on whiteboards or papers. The currency is shipped systems, not citations. And the timescale is weeks-to-quarters, not years.
+  </p>
+  <p class="body-text">
+    Engineering splits into two sub-branches that map cleanly onto the rest of this site:
   </p>
   <ul class="content-list">
-    <li><strong>Model Engineering</strong> &mdash; modifying or running the models themselves: dataset curation, fine-tuning, alignment (LoRA, DPO, RLHF), inference servers and optimisation (vLLM, KV-cache, quantisation), serving infrastructure. This is the same scope as the <strong>MLOps</strong> half of the merged Infrastructure Engineering &amp; Operating sub-section below, and as Domains 6&ndash;7 plus Project 4 of <a href="llm-engineering.html#part4" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Part 4 of the LLM Engineering Landscape</a>. Most engineers spend a small fraction of their career here &mdash; it is a deliberate detour, not a permanent home, for everyone except a few hundred specialists per organisation.</li>
-    <li><strong>Application Engineering</strong> &mdash; building systems and products on top of existing models: prompting, structured output, retrieval-augmented generation, agents and tool use, evaluation harnesses, production engineering, safety, cloud deployment. This is the <strong>LLMOps</strong> half of the merged sub-section below, and the bulk of Part 4&rsquo;s curriculum (Domains 1&ndash;5 and 8&ndash;13; Projects 1, 2, 3, 5, 6, 7). It is where most AI engineers actually work, and where most defensible products are actually built.</li>
+    <li><strong>Model Engineering</strong> &mdash; the work of modifying or running the models themselves. Dataset curation, supervised fine-tuning, preference alignment (LoRA, DPO, RLHF), inference servers and their optimisation (vLLM, KV-cache eviction, continuous batching, PagedAttention), quantisation for deployment, model merging, GPU memory management. The tools are PyTorch, Hugging Face, vLLM, bitsandbytes, Weights &amp; Biases. This is the <strong>MLOps</strong> half of the merged Infrastructure Engineering &amp; Operating sub-section later in this guide, and it is exactly Domains 6&ndash;7 and Project 4 of <a href="llm-engineering.html#part4" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Part 4 of the LLM Engineering Landscape</a>. Outside of frontier labs, most organisations need only a small handful of Model Engineers &mdash; this is a specialised role, not a default career path.</li>
+    <li><strong>Application Engineering</strong> &mdash; the work of building systems and products on top of existing models. Prompting and prompt versioning, structured output and validation, retrieval-augmented generation, agents and tool use, evaluation harnesses (RAGAS, LLM-as-judge, regression suites), observability and tracing (Langfuse, LangSmith), cost and latency engineering, safety guardrails, cloud deployment, the data flywheels that turn user feedback into better systems. The tools are FastAPI, Pydantic, vector databases, LangGraph or no framework at all, AWS or its peers, and an evaluation harness duct-taped to all of it. This is the <strong>LLMOps</strong> half of the merged sub-section below, and it is the bulk of Part 4&rsquo;s curriculum &mdash; Domains 1&ndash;5 and 8&ndash;13, and Projects 1, 2, 3, 5, 6, and 7. It is where the overwhelming majority of AI engineers actually work, and where the overwhelming majority of defensible AI products actually get built.</li>
   </ul>
   <p class="body-text">
-    The Model / Application split is not a hierarchy. It is a tooling boundary. A Model Engineer thinks about gradient checkpointing and KV-cache eviction; an Application Engineer thinks about retrieval quality and how to make an agent recover from a bad tool call. Both are real engineering, both pay well, both ship products. The difference is which side of the API they sit on.
+    The Model / Application split is not a hierarchy. It is a tooling boundary. A Model Engineer&rsquo;s mental model is dominated by the inside of the model: gradients, learning rates, parameter counts, KV-cache layouts, quantisation error. An Application Engineer&rsquo;s mental model is dominated by the outside of the model: prompts, retrieved context, tool schemas, evaluation rubrics, the user&rsquo;s actual task. Both are doing real engineering. Both pay well. Both ship products. The difference is which side of the model API they spend their time on, and that one decision &mdash; inside the box or outside the box &mdash; pulls the entire rest of the job description with it.
   </p>
 
   <h4 class="subsection-heading">Why LLMs sit at the bottom of the tree</h4>
   <p class="body-text">
-    The diagram puts <strong>LLMs</strong> as a single child of Application Engineering, but that hides the fact that LLMs are currently <em>most</em> of the work being done in that branch. Image and video generation, classical ML, robotics, scientific AI &mdash; these are all real and growing, but as of 2026 the centre of gravity for application engineering jobs and venture funding is firmly on language models, multimodal LLMs, and the agent systems built on top of them. That is why the <a href="llm-engineering.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">LLM Engineering Landscape</a> is its own long-form companion to this guide rather than a short section: the discipline has enough internal structure to warrant a four-part article on its own.
+    The diagram puts <strong>LLMs</strong> as a single child of Application Engineering, but that single line is hiding a lot. As of 2026, LLMs are not <em>one</em> of the things Application Engineering does &mdash; they are <em>most</em> of what it does, by headcount, by funding, and by attention. Image generation, video generation, classical ML (gradient-boosted trees still run more production systems than transformers do), robotics, scientific AI &mdash; these are all real branches and they all employ application engineers, but the centre of gravity for new hiring, new venture investment, and new product surface area is firmly on language models, multimodal LLMs, and the agent systems built on top of them. That is the empirical shape of the field today, and it is why this guide&rsquo;s long-form companion is the <a href="llm-engineering.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">LLM Engineering Landscape</a> rather than, say, a vision-engineering landscape: the discipline has enough internal structure right now to fill four parts of an article on its own.
   </p>
   <p class="body-text">
-    The shape of the tree will change. New branches will grow underneath Application Engineering as new model classes mature &mdash; a 2030 version of this diagram might give equal weight to robotics-foundation-model engineering, or to scientific-AI engineering, or to something we cannot name yet. The taxonomy of Science / Research / Engineering, however, is more stable. Whatever new technology arrives, somebody will be deriving its theory, somebody will be discovering its next variant, and somebody will be turning it into products that work. Knowing which of those three you are doing &mdash; and being honest about it &mdash; is the orientation that makes the rest of this guide actionable.
+    That dominance will not last forever. A 2030 version of this diagram might give equal weight to a robotics-foundation-model branch under Application Engineering, or to a scientific-AI branch, or to something we cannot name yet. The leaves under Engineering are an empirical claim about the present, not a structural one about the field. What does <em>not</em> change is the taxonomy above LLMs &mdash; the Science / Research / Engineering split, and the Model / Application split inside Engineering. Whatever new technology arrives, someone will derive its theory (Science), someone will discover its next variant (Research), and someone will turn it into products that actually work (Engineering, with a Model side and an Application side). The branches stay the same; only the leaves rotate.
+  </p>
+
+  <h4 class="subsection-heading">The honest career picture</h4>
+  <p class="body-text">
+    Three things are worth saying plainly, because they sit underneath most of the &ldquo;what should I learn&rdquo; confusion this section is meant to clear up.
+  </p>
+  <p class="body-text">
+    <strong>Most people who call themselves AI engineers are doing Application Engineering.</strong> They are building systems on top of an API or an open-weight model, instrumenting them, evaluating them, and shipping them. This is good news. It is the largest branch, the fastest-hiring branch, and the branch where the most defensible products are being built. The cultural marketing of the field &mdash; the news cycle dominated by frontier-lab announcements &mdash; makes Research feel like the &ldquo;real&rdquo; AI work and makes Application Engineering feel like glue code. That is a category error. Glue code that ships and stays up under load is the product; the frontier model is the supplier.
+  </p>
+  <p class="body-text">
+    <strong>Model Engineering is a deliberate detour, not a permanent home, for almost everyone.</strong> Spending a month or two fine-tuning a model, optimising inference for it, and deploying the result &mdash; the scope of Project 4 in the LLM Engineering Landscape &mdash; is enormously valuable for an Application Engineer because it demystifies the layer underneath the API. It is much less valuable as a career identity. The number of jobs that require deep Model Engineering specialisation, outside of the dozen or so frontier labs and a handful of open-source-first companies, is small and not growing in proportion to the rest of the field. Visit the branch. Take what is useful. Come back.
+  </p>
+  <p class="body-text">
+    <strong>The fractal pattern repeats inside Engineering.</strong> Even if your job sits squarely on the Engineering branch, your week contains internal Science moments (when you read a textbook chapter to understand attention well enough to debug a prompt), internal Research moments (when you read a paper, prototype a new technique, see whether it changes your evals), and internal Engineering moments (when you ship the change). Knowing which mode you are in at any given moment &mdash; long-cycle understanding, medium-cycle prototyping, or short-cycle shipping &mdash; is what keeps you from spending Engineering hours on Science problems or Science hours on Engineering problems. The tree above is not just a static taxonomy of who works on what. It is also, internally, a description of the rhythm a single engineer cycles through during a normal week.
   </p>
 </div>
 
