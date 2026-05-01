@@ -105,13 +105,14 @@
       display: none;
       flex-direction: column;
       justify-content: center;
+      align-items: center;
       gap: 5px;
-      width: 28px; height: 28px;
+      width: 44px; height: 44px;
       cursor: pointer;
       background: none; border: none; padding: 0;
     }
     .nav-hamburger span {
-      display: block; width: 100%; height: 2px;
+      display: block; width: 24px; height: 2px;
       background: var(--ink); border-radius: 1px;
       transition: transform 0.3s, opacity 0.3s;
     }
@@ -525,6 +526,11 @@
     @media (max-width: 860px) {
       .section-header { grid-template-columns: 1fr; gap: 0.8rem; margin-bottom: 2rem; }
       .resource-row { grid-template-columns: 1fr; gap: 0.6rem; }
+      .section-watermark {
+        top: 1.4rem;
+        right: 1.2rem;
+        font-size: clamp(3rem, 14vw, 4.5rem);
+      }
       div[style*="grid-template-columns: 1fr 1fr"] {
         grid-template-columns: 1fr !important;
       }
@@ -710,7 +716,7 @@
         <h2 class="section-title">Computer Science &amp; <em>Engineering</em></h2>
         <p class="section-intro">
           The full knowledge tree &mdash; organised as a deliberate progression
-          from on-ramp courses through theoretical foundations to practical engineering at scale.
+          from the on-ramp through theoretical foundations to practical engineering at scale.
         </p>
       </div>
     </div>
@@ -783,7 +789,7 @@
     </div>
 
     <div class="reveal section-links">
-      <a href="cse/on-ramp.html" class="section-link" target="_blank" rel="noopener">On-Ramp courses &rarr;</a>
+      <a href="cse/on-ramp.html" class="section-link" target="_blank" rel="noopener">The On-Ramp &rarr;</a>
       <a href="cse/index.html" class="section-link" target="_blank" rel="noopener">Read the CS &amp; Engineering guide &rarr;</a>
     </div>
   </div><!-- /section-inner -->
@@ -800,7 +806,7 @@
       <div>
         <h2 class="section-title">Data &amp; <em>Intelligence</em></h2>
         <p class="section-intro">
-          A dual-track approach to AI and data &mdash; from on-ramp courses through
+          A dual-track approach to AI and data &mdash; from the on-ramp through
           theoretical depth and hands-on building, following the same progression
           from data analysis to large language models.
         </p>
@@ -867,7 +873,7 @@
     </div>
 
     <div class="reveal section-links">
-      <a href="data-intelligence/on-ramp.html" class="section-link" target="_blank" rel="noopener">On-Ramp courses &rarr;</a>
+      <a href="data-intelligence/on-ramp.html" class="section-link" target="_blank" rel="noopener">The On-Ramp &rarr;</a>
       <a href="data-intelligence/index.html" class="section-link" target="_blank" rel="noopener">Read the Data &amp; Intelligence guide &rarr;</a>
     </div>
   </div><!-- /section-inner -->
