@@ -391,6 +391,61 @@
     }
     .section-link:hover { border-color: var(--accent); }
 
+    /* -- D&I MERGED-CELL BRACKET (Infrastructure Engineering + Operating share MLOps/LLMOps) -- */
+    .anchor-pair {
+      position: relative;
+      padding-left: 1.4rem;
+      margin-top: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+    .anchor-pair::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0.45rem; bottom: 0.45rem;
+      width: 2px;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+    .anchor-pair .anchor-label {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.98rem;
+      color: var(--ink);
+      font-weight: 500;
+      padding: 0.15rem 0;
+    }
+    .merged-content {
+      margin-top: 0.5rem;
+      margin-left: 1.4rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--accent-dim);
+      border-radius: 2px;
+      background: rgba(58, 46, 26, 0.18);
+    }
+    .merge-caption {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.74rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+    .ops-item { margin-bottom: 0.7rem; }
+    .ops-item:last-child { margin-bottom: 0; }
+    .ops-item-name {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.98rem;
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .ops-note {
+      margin-top: 0.4rem;
+      padding-left: 0.9rem;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem;
+      color: var(--ink-dim);
+      line-height: 1.55;
+      text-align: justify;
+      hyphens: auto;
+    }
+
     /* -- DATA & INTELLIGENCE RESOURCE ROWS -- */
     .track-header {
       font-family: 'Cormorant Garamond', serif;
@@ -593,6 +648,17 @@
 
     @media (max-width: 860px) {
       .page-dots { display: none; }
+    }
+
+    /* Justify prose in tables and grid cells (site-wide consistency) */
+    .cell-desc, .cell-explainer, .cell-merged-note,
+    .tree-desc, .ops-note,
+    .sub-label-desc, .track-desc,
+    .mirror-table tbody td:not(:first-child),
+    .content-table tbody td:not(:first-child),
+    .resource-table tbody td:not(:first-child) {
+      text-align: justify;
+      hyphens: auto;
     }
   </style>
 </head>
@@ -826,14 +892,17 @@
       practical fluency &mdash; understanding <em>how</em> to actually train, evaluate, ship,
       and iterate on real models.
       <br><br>
-      The Engineering track is further split into <strong>Building</strong> and
-      <strong>Operating</strong>, just like in CS&amp;E. Building covers
-      <strong>Software Engineering</strong> (writing the model code, building the application,
-      choosing the right framework) and <strong>Infrastructure Engineering</strong> (designing
-      the ML system architecture, data pipelines, feature stores, and serving infrastructure).
-      Operating covers the production lifecycle &mdash; monitoring model drift, managing
-      retraining pipelines, ensuring reproducibility, and keeping ML systems reliable at
-      scale. Building gets a model into production; Operating keeps it there.
+      The Engineering track has two halves: <strong>Software Engineering</strong>
+      (writing the model code, building the application, choosing the right framework),
+      and the build/operate loop &mdash; <strong>Infrastructure Engineering</strong>
+      and <strong>Operating</strong> &mdash; which collapses into a single shared
+      surface labelled <strong>MLOps and LLMOps</strong>. Unlike CS&amp;E, where Building
+      and Operating map to genuinely different jobs (DevOps versus
+      SRE/Performance/Security/Observability), in D&amp;I the same engineer designs the
+      pipeline, ships it, watches it drift, and retrains it &mdash; so the structural
+      anchors stay (Infrastructure Engineering, Operating) but the content sits in one
+      shared cell. MLOps covers the closed-loop discipline for ML systems; LLMOps is
+      the same loop specialised for LLM-based systems.
       <br><br>
       The deliberate mirroring between Science and Engineering is the point. Theory without
       practice is academic &mdash; you understand the math but cannot ship anything.
@@ -856,19 +925,44 @@
       </div>
       <div class="col">
         <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Engineering</div>
+
         <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Building</div>
-        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem; margin-bottom: 0.9rem;">
+        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem;">
           <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.2rem;">Software Engineering</span>
           <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Data Analysis</span>
           <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Machine Learning</span>
           <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Deep Learning</span>
           <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Natural Language Processing</span>
           <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Transformers &amp; LLMs</span>
-          <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.6rem;">Infrastructure Engineering</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; ML Systems Design</span>
         </div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Operating</div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500;">State of the Art</div>
+
+        <div class="anchor-pair">
+          <div class="anchor-label">Infrastructure Engineering</div>
+        </div>
+
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-top: 0.5rem; margin-bottom: 0.4rem;">Operating</div>
+
+        <div class="merged-content">
+          <div class="merge-caption">Spans Infrastructure Engineering + Operating</div>
+          <div class="ops-item">
+            <span class="ops-item-name">MLOps</span>
+            <div class="ops-note">
+              The build/operate loop for ML systems &mdash; training and feature pipelines,
+              model registries, deployment automation, drift monitoring, retraining cadences,
+              data lineage. Treats the model lifecycle as a closed loop rather than a one-shot ship.
+            </div>
+          </div>
+          <div class="ops-item">
+            <span class="ops-item-name">LLMOps</span>
+            <div class="ops-note">
+              The same closed-loop discipline specialised for LLM-based systems &mdash;
+              prompt and configuration version management, evaluation harnesses
+              (offline + LLM-as-judge), token-cost and latency monitoring, semantic caching,
+              prompt-injection defense, and the rest of the production concerns specific to
+              probabilistic, prompt-driven systems.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

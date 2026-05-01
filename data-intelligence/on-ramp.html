@@ -6,7 +6,7 @@
   <title>Data &amp; Intelligence On-Ramp &mdash; Towards Intelligence</title>
   <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
   <meta property="og:title" content="Data & Intelligence On-Ramp — Towards Intelligence"/>
-  <meta property="og:description" content="Practical starter courses for Data & Intelligence — the fastest path to becoming employable, mapped to the Science / Engineering grid with Building and Operating sub-tracks."/>
+  <meta property="og:description" content="Practical starter courses for Data & Intelligence — the fastest path to becoming employable, mapped to the Science / Engineering grid with Software Engineering and a merged MLOps & LLMOps sub-track."/>
   <meta property="og:type" content="article"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
@@ -264,6 +264,16 @@
       .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
       .page-wrap { padding-left: 1.2rem; padding-right: 1.2rem; }
     }
+    /* Justify prose in tables and grid cells (site-wide consistency) */
+    .cell-desc, .cell-explainer, .cell-merged-note,
+    .tree-desc, .ops-note,
+    .sub-label-desc, .track-desc,
+    .mirror-table tbody td:not(:first-child),
+    .content-table tbody td:not(:first-child),
+    .resource-table tbody td:not(:first-child) {
+      text-align: justify;
+      hyphens: auto;
+    }
   </style>
 </head>
 <body>
@@ -302,7 +312,7 @@
     <div class="hero-kicker">Getting Started</div>
     <h1 class="hero-title">Data &amp; Intelligence <em>On-Ramp</em></h1>
     <p class="hero-subtitle">
-      The fastest path to becoming employable in Data &amp; Intelligence. Topics mirror the D&amp;I grid; the same five topics appear in both Science and Engineering tracks (this is "the mirror"). Engineering splits into <strong>Building</strong> (constructing AI applications) and <strong>Operating</strong> (running them in production). Most Science Track cells are empty because the on-ramp focuses on practical certifications &mdash; academic Science-track resources live on the Resources page.
+      The fastest path to becoming employable in Data &amp; Intelligence. Topics mirror the D&amp;I grid; the same five topics appear in both Science and Engineering tracks (this is "the mirror"). The Engineering category column splits into <strong>Software Engineering</strong> (building the model code and applications) and a merged <strong>MLOps &amp; LLMOps</strong> row covering the Infrastructure Engineering and Operating disciplines &mdash; treated as one because the same engineer ships, watches, and retrains the system. Most Science Track cells are empty because the on-ramp focuses on practical certifications &mdash; academic Science-track resources live on the Resources page.
     </p>
     <div class="hero-meta">Last updated &mdash; April 2026</div>
     <div><a href="index.html" class="article-link">&larr; Read the full Data &amp; Intelligence guide</a></div>
@@ -338,9 +348,9 @@
       <!-- ENGINEERING TRACK -->
       <tr class="track-divider"><td colspan="3">Engineering Track</td></tr>
 
-      <!-- Building -->
+      <!-- Software Engineering -->
       <tr>
-        <td class="col-category" rowspan="5">Building</td>
+        <td class="col-category" rowspan="5">Software Engineering</td>
         <td class="col-topic">Data Analysis</td>
         <td>
           <span class="cell-item">
@@ -371,9 +381,9 @@
         </td>
       </tr>
 
-      <!-- Operating -->
+      <!-- MLOps & LLMOps (merged Infrastructure Engineering + Operating) -->
       <tr>
-        <td class="col-category" rowspan="4">Operating</td>
+        <td class="col-category" rowspan="4">MLOps &amp; LLMOps</td>
         <td class="col-topic">Machine Learning</td>
         <td rowspan="3">
           <span class="cell-merged-note">Covers Machine Learning + Deep Learning + NLP</span>

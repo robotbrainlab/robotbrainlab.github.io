@@ -369,6 +369,16 @@
       .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
       .page-wrap { padding-left: 1.2rem; padding-right: 1.2rem; }
     }
+    /* Justify prose in tables and grid cells (site-wide consistency) */
+    .cell-desc, .cell-explainer, .cell-merged-note,
+    .tree-desc, .ops-note,
+    .sub-label-desc, .track-desc,
+    .mirror-table tbody td:not(:first-child),
+    .content-table tbody td:not(:first-child),
+    .resource-table tbody td:not(:first-child) {
+      text-align: justify;
+      hyphens: auto;
+    }
   </style>
 </head>
 <body>
@@ -476,7 +486,7 @@
   <!-- ENGINEERING TRACK: BUILDING -->
   <div class="track-header">Engineering</div>
   <div class="track-title">Building</div>
-  <div class="track-desc">Getting a model from a notebook into production. Building splits into two sub-disciplines: <strong>Software Engineering</strong> (writing the model code, choosing frameworks, structuring experiments) and <strong>Infrastructure Engineering</strong> (the ML system architecture, data pipelines, feature stores, and serving infrastructure underneath).</div>
+  <div class="track-desc">Getting a model from a notebook into production &mdash; the model-code half of the Engineering track. Builds on <strong>Software Engineering</strong> (writing the model code, choosing frameworks, structuring experiments). The infrastructure underneath and the operational practices that keep models alive live in the merged <strong>Infrastructure Engineering &amp; Operating</strong> sub-track that follows, labelled <strong>MLOps &amp; LLMOps</strong>.</div>
 
   <div class="sub-label">Software Engineering</div>
   <div class="sub-label-desc">Mirrors the Science track topic-for-topic, but with implementation-focused books and code repositories instead of theory.</div>
@@ -538,9 +548,12 @@
     Related: <a href="llm-engineering.html" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">The LLM Engineering Landscape</a> &mdash; a three-part deep dive into what engineers actually build with LLMs.
   </p>
 
-  <!-- ENGINEERING TRACK: INFRASTRUCTURE (second sub-part of Building) -->
-  <div class="sub-label">Infrastructure Engineering</div>
-  <div class="sub-label-desc">The ML system design, data pipelines, feature stores, and serving infrastructure that makes models runnable at scale.</div>
+  <!-- ENGINEERING TRACK: INFRASTRUCTURE & OPERATING (merged: MLOps & LLMOps) -->
+  <div class="track-title">Infrastructure Engineering &amp; Operating</div>
+  <div class="track-desc">The build/operate loop for ML and LLM-based systems &mdash; pipelines, registries, deployment, drift monitoring, retraining, evaluation, cost and latency. Infrastructure Engineering and Operating are merged into a single sub-track because in D&amp;I the same engineer designs the infrastructure, ships it, watches it, and fixes it; the build/operate boundary is structural, not functional. The two anchors below &mdash; <strong>MLOps</strong> and <strong>LLMOps</strong> &mdash; cover both halves of that loop.</div>
+
+  <div class="sub-label">MLOps</div>
+  <div class="sub-label-desc">The closed-loop discipline for ML systems: training and feature pipelines, model registries, deployment automation, drift monitoring, retraining cadences, data lineage. Foundational reference is Chip Huyen&rsquo;s <em>Designing Machine Learning Systems</em>.</div>
 
   <table class="resource-table reveal">
     <thead>
@@ -556,7 +569,33 @@
         <td data-label="Books">
           <span class="cell-item"><a href="https://huyenchip.com/books/" target="_blank" rel="noopener">Designing Machine Learning Systems &ndash; Chip Huyen</a> <span class="cell-type">Book</span></span>
         </td>
-        <td data-label="Courses" class="cell-empty">&mdash;</td>
+        <td data-label="Courses">
+          <span class="cell-item"><a href="https://www.coursera.org/specializations/mlops-machine-learning-duke" target="_blank" rel="noopener">MLOps Specialization &ndash; Duke University</a> <span class="cell-type">Course</span></span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="sub-label">LLMOps</div>
+  <div class="sub-label-desc">The same closed-loop discipline specialised for LLM-based systems: prompt and configuration version management, evaluation harnesses, token-cost and latency monitoring, semantic caching, prompt-injection defense. See also the <a href="llm-engineering.html" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">LLM Engineering Landscape</a> for the full eight-discipline view.</div>
+
+  <table class="resource-table reveal">
+    <thead>
+      <tr>
+        <th class="col-topic">Topic</th>
+        <th class="col-books">Books</th>
+        <th class="col-courses">Courses</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-topic">LLM Operations</td>
+        <td data-label="Books">
+          <span class="cell-item"><a href="https://huyenchip.com/books/" target="_blank" rel="noopener">AI Engineering &ndash; Chip Huyen</a> <span class="cell-type">Book</span></span>
+        </td>
+        <td data-label="Courses">
+          <span class="cell-item"><a href="https://www.coursera.org/specializations/large-language-model-operations" target="_blank" rel="noopener">LLMOps Specialization</a> <span class="cell-type">Course</span></span>
+        </td>
       </tr>
     </tbody>
   </table>

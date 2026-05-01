@@ -741,6 +741,16 @@
       .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
       .page-layout { padding-left: 1.2rem; padding-right: 1.2rem; }
     }
+    /* Justify prose in tables and grid cells (site-wide consistency) */
+    .cell-desc, .cell-explainer, .cell-merged-note,
+    .tree-desc, .ops-note,
+    .sub-label-desc, .track-desc,
+    .mirror-table tbody td:not(:first-child),
+    .content-table tbody td:not(:first-child),
+    .resource-table tbody td:not(:first-child) {
+      text-align: justify;
+      hyphens: auto;
+    }
   </style>
 </head>
 <body>
@@ -798,8 +808,9 @@
   <a href="#eng-dl" class="toc-sub-sub">Deep Learning</a>
   <a href="#eng-nlp" class="toc-sub-sub">NLP</a>
   <a href="#eng-transformers" class="toc-sub-sub">Transformers &amp; LLMs</a>
-  <a href="#eng-infra" class="toc-sub-sub">Infrastructure Engineering</a>
-  <a href="#operating-section" class="toc-sub">Operating</a>
+  <a href="#mlops-llmops" class="toc-sub">Infrastructure Engineering &amp; Operating</a>
+  <a href="#eng-mlops" class="toc-sub-sub">MLOps</a>
+  <a href="#eng-llmops" class="toc-sub-sub">LLMOps</a>
 
   <a class="toc-part-label" href="#part4">Part 4 &mdash; State of the Art</a>
 
@@ -1054,7 +1065,7 @@
 <div class="part-divider reveal" id="part3">
   <div class="part-num">Part 3</div>
   <h2 class="part-title">The Engineering <em>Track</em></h2>
-  <p class="part-subtitle">Implementation-focused, practical, hands-on &mdash; from building the model to keeping it alive in production. The Engineering track splits into two major sub-sections: <strong>Building</strong> and <strong>Operating</strong>.</p>
+  <p class="part-subtitle">Implementation-focused, practical, hands-on &mdash; from building the model to keeping it alive in production. The Engineering track has two major sub-sections: <strong>Building</strong> (writing the model code itself) and a unified <strong>Infrastructure Engineering &amp; Operating</strong> layer covering <strong>MLOps</strong> and <strong>LLMOps</strong>.</p>
 </div>
 
 <div class="reveal" id="eng-overview">
@@ -1063,7 +1074,7 @@
     The Engineering track mirrors the Science track topic-for-topic, but the resources and the mindset are entirely different. Where the Science track assigns Goodfellow&rsquo;s <em>Deep Learning</em> to explain the theory behind backpropagation, the Engineering track assigns Chollet&rsquo;s <em>Deep Learning with Python</em> to show you how to actually implement, train, and evaluate a neural network in Keras. Where the Science track asks &ldquo;why does this algorithm converge?&rdquo;, the Engineering track asks &ldquo;how do I get this model to converge on my data, with my GPU, in a reasonable amount of time?&rdquo;
   </p>
   <p class="body-text">
-    The Engineering track is organised into two major sub-sections: <strong>Building</strong> and <strong>Operating</strong>. Building is the work of getting a model from a notebook to production &mdash; writing the model code, designing the infrastructure underneath it, setting up data pipelines and serving systems. Operating is the work of keeping it there &mdash; monitoring for drift, managing retraining cycles, ensuring reproducibility and reliability over time. Building each decomposes further into its own two sub-disciplines (Software Engineering and Infrastructure Engineering); Operating covers the MLOps practices that govern a model&rsquo;s production lifecycle. Building gets a model in; Operating keeps it alive.
+    The Engineering track is organised into two major sub-sections: <strong>Building</strong> and a merged <strong>Infrastructure Engineering &amp; Operating</strong> layer. Building is the model-code half &mdash; writing the training code, choosing the right libraries, structuring experiments. The merged Infrastructure &amp; Operating layer is the build/operate loop: pipelines, registries, deployment automation, drift monitoring, retraining, and the operational toolchain that keeps systems alive once they are shipped. Unlike CS&amp;E, where Building and Operating map to genuinely different jobs, in D&amp;I the same engineer designs the infrastructure, ships it, watches it, and fixes it &mdash; so the Infrastructure Engineering and Operating anchors share a single content surface labelled <strong>MLOps</strong> (the closed loop for ML systems) and <strong>LLMOps</strong> (the same loop specialised for LLM-based systems).
   </p>
 </div>
 
@@ -1075,12 +1086,11 @@
 <div class="reveal" id="building">
   <div class="major-section-kicker">Part 3 &mdash; Sub-section 1 of 2</div>
   <h2 class="major-section"><em>Building</em></h2>
-  <p class="major-section-desc">Getting a model from a notebook into production. Building splits into two sub-disciplines: <strong>Software Engineering</strong> (writing the model code) and <strong>Infrastructure Engineering</strong> (the system design underneath).</p>
+  <p class="major-section-desc">Getting a model from a notebook into production &mdash; writing the model code itself. The infrastructure underneath, and the operational practices that keep models alive, live in the merged <strong>Infrastructure Engineering &amp; Operating</strong> sub-section that follows.</p>
 </div>
 
-<!-- Building → Software Engineering (first sub-discipline of Building) -->
+<!-- Building → Software Engineering -->
 <div class="reveal" id="eng-se">
-  <div class="sub-discipline-kicker">Sub-discipline 1 of 2</div>
   <h3 class="sub-discipline">Software Engineering</h3>
   <p class="sub-discipline-desc">Building the models and applications themselves &mdash; writing the training code, choosing the right libraries and frameworks, structuring experiments, and going from a research idea to working software. This sub-discipline mirrors the Science track topic-for-topic across the same five areas below.</p>
 </div>
@@ -1165,48 +1175,48 @@
 
 <hr class="content-rule" />
 
-<!-- Building → Infrastructure Engineering (second sub-discipline of Building) -->
-<div class="reveal" id="eng-infra">
-  <div class="sub-discipline-kicker">Sub-discipline 2 of 2</div>
-  <h3 class="sub-discipline">Infrastructure Engineering</h3>
-  <p class="sub-discipline-desc">What sits underneath and around the model &mdash; the ML system design, data pipelines, feature stores, model registries, and serving infrastructure that make it possible to run models reliably at scale.</p>
+<!-- ============================================================ -->
+<!--  MAJOR SECTION: INFRASTRUCTURE ENGINEERING & OPERATING (merged) -->
+<!-- ============================================================ -->
+<div class="reveal" id="mlops-llmops">
+  <div class="major-section-kicker">Part 3 &mdash; Sub-section 2 of 2</div>
+  <h2 class="major-section">Infrastructure Engineering &amp; <em>Operating</em></h2>
+  <p class="major-section-desc">The build/operate loop for ML and LLM-based systems &mdash; pipelines, registries, deployment, drift monitoring, retraining, evaluation, cost and latency. This sub-section deliberately merges what would otherwise be a Building/Operating split because in D&amp;I the same engineer designs the infrastructure, ships it, watches it, and fixes it &mdash; the build/operate boundary is structural, not functional. The two anchors below &mdash; <strong>MLOps</strong> and <strong>LLMOps</strong> &mdash; cover both halves of that loop.</p>
 </div>
 
-<div class="reveal" id="eng-ml-systems-design">
-  <h3 class="section-heading">ML Systems Design</h3>
+<!-- MLOps -->
+<div class="reveal" id="eng-mlops">
+  <div class="sub-discipline-kicker">Sub-discipline 1 of 2</div>
+  <h3 class="sub-discipline">MLOps</h3>
+  <p class="sub-discipline-desc">The closed-loop discipline for ML systems &mdash; treats the model lifecycle (train, evaluate, ship, monitor, retrain) as a continuous process rather than a one-shot ship.</p>
+</div>
+
+<div class="reveal" id="eng-mlops-detail">
+  <h3 class="section-heading">What MLOps Covers</h3>
   <p class="body-text">
-    Infrastructure engineering is about the systems that sit underneath and around the model. A model in a notebook is a prototype. A model with proper infrastructure &mdash; data pipelines, feature stores, model registries, serving systems, and monitoring &mdash; is a product. This topic bridges the gap between data science and production engineering, and it is where the D&amp;I discipline connects most directly to the CS&amp;E discipline&rsquo;s infrastructure and DevOps foundations.
+    MLOps is what the data-science-meets-production seam actually looks like in practice. It covers the toolchain and the practices: <strong>training and feature pipelines</strong> (the ingestion, cleaning, transformation, and versioning of training data; the reusable feature definitions that ensure consistency between training and serving); <strong>model registries</strong> (tracking model versions, metadata, and lineage so any prediction can be traced back to the exact data and code that produced it); <strong>deployment automation</strong> (taking a trained model and exposing it as a reliable, scalable API endpoint, with the same CI/CD discipline you would apply to any production service); <strong>drift monitoring</strong> (detecting when a deployed model&rsquo;s performance degrades because the input data distribution has shifted, the world has changed, or a bug has been introduced upstream); and <strong>retraining cadences</strong> (the policies and pipelines that automatically detect when a model needs refreshing and execute the full train-evaluate-deploy cycle with appropriate safeguards).
   </p>
   <p class="body-text">
-    <strong>Data pipelines</strong> handle the ingestion, cleaning, transformation, and versioning of training data. <strong>Feature stores</strong> manage the reusable feature definitions and computations that feed into models, ensuring consistency between training and serving. <strong>Model registries</strong> track model versions, metadata, and lineage. <strong>Serving systems</strong> take a trained model and expose it as a reliable, scalable API endpoint. <strong>Monitoring</strong> detects when a deployed model&rsquo;s performance degrades &mdash; because the input data distribution has shifted, because the world has changed, or because a bug has been introduced somewhere in the pipeline.
-  </p>
-  <p class="body-text">
-    The gap between &ldquo;my model works in a notebook&rdquo; and &ldquo;my model works in production&rdquo; is the central concern of ML infrastructure engineering. This gap is not about the model itself; it is about everything else: reproducibility (can you retrain the model and get the same results?), reliability (does the serving system handle load spikes gracefully?), observability (do you know when the model is making bad predictions?), and iteration speed (can you deploy a new model version without a two-week manual process?). Most ML projects that fail in production fail not because the model is bad, but because the infrastructure is missing or inadequate.
+    The gap between &ldquo;my model works in a notebook&rdquo; and &ldquo;my model works in production&rdquo; is what MLOps closes. It is not about the model itself; it is about everything else: reproducibility (can you retrain and get the same results?), reliability (does the serving system handle load spikes gracefully?), observability (do you know when the model is making bad predictions before users do?), and iteration speed (can you deploy a new version without a two-week manual process?). Most ML projects that fail in production fail not because the model is bad but because this layer is missing or inadequate.
   </p>
 </div>
 
 <hr class="content-rule" />
 
-
-<!-- ============================================================ -->
-<!--  MAJOR SECTION: OPERATING                                     -->
-<!-- ============================================================ -->
-<div class="reveal" id="operating-section">
-  <div class="major-section-kicker">Part 3 &mdash; Sub-section 2 of 2</div>
-  <h2 class="major-section"><em>Operating</em></h2>
-  <p class="major-section-desc">Keeping ML systems reliable, reproducible, and improving in production. Building gets a model into production; Operating keeps it there.</p>
+<!-- LLMOps -->
+<div class="reveal" id="eng-llmops">
+  <div class="sub-discipline-kicker">Sub-discipline 2 of 2</div>
+  <h3 class="sub-discipline">LLMOps</h3>
+  <p class="sub-discipline-desc">The same closed-loop discipline specialised for LLM-based systems, where the operational surface is fundamentally different from classical ML.</p>
 </div>
 
-<div class="reveal" id="operating">
-  <h3 class="section-heading">Operating ML Systems</h3>
+<div class="reveal" id="eng-llmops-detail">
+  <h3 class="section-heading">What LLMOps Covers</h3>
   <p class="body-text">
-    Building gets a model into production. Operating keeps it there. The Operating sub-track is still developing in this roadmap, but its scope and importance are clear. ML systems in production face a unique category of challenges that traditional software does not: <strong>model drift</strong> (the model&rsquo;s performance degrades over time because the real-world data distribution changes), <strong>data quality degradation</strong> (upstream data sources change format, introduce noise, or go offline), and <strong>reproducibility failures</strong> (a model retrained on &ldquo;the same data&rdquo; produces different results because of non-determinism in training, data ordering, or library version changes).
+    LLMOps inherits MLOps&rsquo; lifecycle thinking but the components change. <strong>Prompt and configuration version management</strong> replaces &mdash; or sits alongside &mdash; model versioning: the prompt is now a first-class artefact whose changes need to be tracked, A/B-tested, and rolled back like code. <strong>Evaluation harnesses</strong> become central in a way they rarely were for classical ML &mdash; offline benchmarks, LLM-as-judge scoring, regression tests on golden datasets, and online quality measurement &mdash; because there is no single &ldquo;accuracy&rdquo; number that captures whether a generative system is working. <strong>Token-cost and latency monitoring</strong> are operational concerns specific to large models: a small change in prompt structure can multiply inference cost or push p99 latency past acceptable thresholds. <strong>Semantic caching</strong> short-circuits expensive inference for repeated or near-repeated queries, and <strong>prompt-injection defense</strong> becomes a continuous safety concern because user inputs flow directly into model context.
   </p>
   <p class="body-text">
-    Operating means monitoring deployed models continuously &mdash; not just checking if the server is up, but checking if the <em>predictions</em> are still good. It means managing retraining pipelines that automatically detect when a model needs to be refreshed and can execute the full train-evaluate-deploy cycle with appropriate safeguards. It means maintaining data lineage so you can trace any prediction back to the exact data and code that produced it. It means building the human-in-the-loop review processes that catch problems before they reach users.
-  </p>
-  <p class="body-text">
-    This area will cover MLOps practices, experiment tracking, A/B testing frameworks for model comparison, shadow deployment strategies (running a new model alongside the old one to compare outputs before switching), canary releases, rollback procedures, and the organisational processes that ensure ML systems are maintained with the same rigour as any other production software. The core insight is that ML systems are not &ldquo;deploy and forget&rdquo; &mdash; they are living systems that require ongoing attention, and the engineering practices for managing that ongoing attention are a discipline unto themselves.
+    The deeper shift is that LLM systems are probabilistic and prompt-driven in a way that classical ML pipelines are not. A traditional ML model is a fixed function applied to feature vectors; an LLM application is a moving conversation between prompts, retrieved context, tool calls, and model outputs. That makes the operational discipline qualitatively different &mdash; more like operating a distributed agent system than operating a deterministic batch job. The <a href="llm-engineering.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">LLM Engineering Landscape</a> goes deeper into this surface, organised as eight engineering disciplines that map directly onto the practical work.
   </p>
 </div>
 
@@ -1226,7 +1236,7 @@
 <div class="reveal" id="sota">
   <h3 class="section-heading">Tracking the Frontier</h3>
   <p class="body-text">
-    The first four parts of this discipline &mdash; the five-topic progression through Science and Engineering, plus the Operating layer &mdash; cover material that is relatively stable. The textbooks exist, the courses are well-established, the concepts are not going to change next month. But AI is a field where the frontier moves fast enough that any static curriculum becomes incomplete within a year. State of the Art is the section that acknowledges this explicitly.
+    The first four parts of this discipline &mdash; the five-topic progression through Science and Engineering, plus the merged Infrastructure Engineering &amp; Operating layer &mdash; cover material that is relatively stable. The textbooks exist, the courses are well-established, the concepts are not going to change next month. But AI is a field where the frontier moves fast enough that any static curriculum becomes incomplete within a year. State of the Art is the section that acknowledges this explicitly.
   </p>
   <p class="body-text">
     This is a tracking area, not a teaching area. It covers new architectures (mixture-of-experts, state space models like Mamba, alternative attention mechanisms), new capabilities (multimodal understanding, long-context processing, reasoning and planning), new training paradigms (RLHF, DPO, constitutional AI, self-play), and emerging techniques that are promising but not yet proven enough to be part of the stable curriculum. The resources here are not textbooks &mdash; they are research papers, blog posts, conference talks, and open-source repositories. The goal is not mastery but awareness: knowing what is happening at the frontier, understanding the claims being made, and being able to evaluate whether a new technique is a genuine advance or incremental noise.
