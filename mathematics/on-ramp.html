@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Data &amp; Intelligence On-Ramp &mdash; Towards Intelligence</title>
+  <title>Mathematics On-Ramp &mdash; Towards Intelligence</title>
   <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
-  <meta property="og:title" content="Data & Intelligence On-Ramp — Towards Intelligence"/>
-  <meta property="og:description" content="Practical starter courses for Data & Intelligence — the fastest path to becoming employable, mapped to the Science / Engineering grid with Software Engineering and a merged MLOps & LLMOps sub-track."/>
+  <meta property="og:title" content="Mathematics On-Ramp — Towards Intelligence"/>
+  <meta property="og:description" content="Practical starter courses for the mathematical foundations — five core topics, each with one course recommendation."/>
   <meta property="og:type" content="article"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
@@ -133,25 +133,6 @@
       font-size: 1.02rem; line-height: 1.75;
       color: var(--ink); max-width: 760px; font-weight: 400;
     }
-    .hero-meta {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; letter-spacing: 0.06em;
-      color: var(--ink-dim);
-      margin-top: 1.4rem;
-      text-transform: uppercase;
-    }
-    .article-link {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--accent);
-      text-decoration: none;
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      margin-top: 1.2rem;
-      border-bottom: 1px solid var(--accent-dim);
-      padding-bottom: 0.2rem;
-      transition: border-color 0.2s;
-    }
-    .article-link:hover { border-color: var(--accent); }
 
     /* On-ramp table styles */
     .onramp-table {
@@ -211,31 +192,9 @@
       margin-top: 0.2rem; line-height: 1.45;
     }
     .onramp-table .cell-empty { color: var(--ink-dim); opacity: 0.35; text-align: center; }
-    .onramp-table tr.track-divider td {
-      background: var(--surface);
-      border-left: none; border-right: none;
-      padding: 0.9rem 1rem;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.78rem; font-weight: 600;
-      letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--accent);
-    }
-    .onramp-table tr.track-divider td::before {
-      content: ''; display: inline-block;
-      width: 28px; height: 1px; background: var(--accent);
-      vertical-align: middle; margin-right: 0.8rem;
-    }
-    .onramp-table .cell-merged-note {
-      display: block;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.66rem; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--accent);
-      margin-bottom: 0.7rem; padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--accent-dim);
-    }
     .onramp-table thead th.col-h-cat    { width: 18%; }
-    .onramp-table thead th.col-h-topic  { width: 30%; }
-    .onramp-table thead th.col-h-course { width: 52%; }
+    .onramp-table thead th.col-h-topic  { width: 38%; }
+    .onramp-table thead th.col-h-course { width: 44%; }
 
     footer {
       border-top: 1px solid var(--rule);
@@ -245,6 +204,7 @@
     .footer-inner {
       max-width: 1100px; margin: 0 auto;
       display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
     }
     .footer-name {
       font-family: 'Cormorant Garamond', serif;
@@ -283,9 +243,9 @@
   <div class="nav-inner">
     <a href="../index.html" class="nav-logo">Towards Intelligence</a>
     <ul class="nav-links">
-      <li><a href="../index.html#mathematics">Mathematics</a></li>
+      <li><a href="index.html" class="active">Mathematics</a></li>
       <li><a href="../index.html#cse">CS &amp; Engineering</a></li>
-      <li><a href="index.html" class="active">Data &amp; Intelligence</a></li>
+      <li><a href="../index.html#data-intelligence">Data &amp; Intelligence</a></li>
     </ul>
     <button class="nav-hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -293,10 +253,10 @@
   </div>
 </nav>
 <div class="mobile-menu">
-  <a href="../index.html#mathematics" class="mobile-link">Mathematics</a>
+  <a href="index.html" class="mobile-link">Mathematics</a>
   <a href="../index.html#cse" class="mobile-link">CS &amp; Engineering</a>
-  <a href="index.html" class="mobile-link">Data &amp; Intelligence</a>
-  <a href="llm-engineering.html" class="mobile-link" target="_blank" rel="noopener">LLM Engineering</a>
+  <a href="../index.html#data-intelligence" class="mobile-link">Data &amp; Intelligence</a>
+  <a href="../data-intelligence/llm-engineering.html" class="mobile-link" target="_blank" rel="noopener">LLM Engineering</a>
 </div>
 
 <div class="page-wrap">
@@ -304,16 +264,16 @@
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="../index.html">Towards Intelligence</a>
     <span class="sep">/</span>
-    <a href="index.html">Data &amp; Intelligence</a>
+    <a href="index.html">Mathematics</a>
     <span class="sep">/</span>
     <span class="current">On-Ramp</span>
   </nav>
 
   <div class="hero reveal">
     <div class="hero-kicker">Getting Started</div>
-    <h1 class="hero-title">Data &amp; Intelligence <em>On-Ramp</em></h1>
+    <h1 class="hero-title">Mathematics <em>On-Ramp</em></h1>
     <p class="hero-subtitle">
-      The fastest path to becoming employable in Data &amp; Intelligence. Topics mirror the D&amp;I grid; the same five topics appear in both Science and Engineering tracks (this is "the mirror"). The Engineering category column splits into <strong>Software Engineering</strong> (building the model code and applications) and a merged <strong>MLOps &amp; LLMOps</strong> row covering the Infrastructure Engineering and Operating disciplines &mdash; treated as one because the same engineer ships, watches, and retrains the system. Most Science Track cells are empty because the on-ramp focuses on practical certifications &mdash; academic Science-track resources live on the Resources page.
+      The fastest path to a working mathematical foundation. Five core topics, each with one practical course recommendation. Discrete mathematics is covered under CS &amp; Engineering &mdash; the focus here is the math that calculus, linear algebra, probability, and statistics are built on, in roughly the order you should pick them up.
     </p>
   </div>
 
@@ -326,80 +286,49 @@
       </tr>
     </thead>
     <tbody>
-      <!-- SCIENCE TRACK -->
-      <tr class="track-divider"><td colspan="3">Science Track</td></tr>
       <tr>
-        <td class="col-category" rowspan="6">Science</td>
-        <td class="col-topic">Mathematics</td>
+        <td class="col-category" rowspan="5">Foundations</td>
+        <td class="col-topic">School Mathematics</td>
         <td>
           <span class="cell-item">
-            <a href="https://www.coursera.org/specializations/mathematics-for-machine-learning-and-data-science" target="_blank" rel="noopener">Mathematics for Data Science</a>
-            <span class="cell-desc">Calculus, linear algebra, and statistics in context &mdash; foundational for everything that follows</span>
+            <a href="https://www.khanacademy.org/math" target="_blank" rel="noopener">Khan Academy &mdash; High School Math</a>
+            <span class="cell-desc">Algebra, functions, trigonometry, pre-calculus &mdash; the foundation to revisit before anything else.</span>
           </span>
         </td>
       </tr>
-      <tr><td class="col-topic">Data Analysis</td><td class="cell-empty">&mdash;</td></tr>
-      <tr><td class="col-topic">Machine Learning</td><td class="cell-empty">&mdash;</td></tr>
-      <tr><td class="col-topic">Deep Learning</td><td class="cell-empty">&mdash;</td></tr>
-      <tr><td class="col-topic">NLP</td><td class="cell-empty">&mdash;</td></tr>
-      <tr><td class="col-topic">Transformers &amp; LLMs</td><td class="cell-empty">&mdash;</td></tr>
-
-      <!-- ENGINEERING TRACK -->
-      <tr class="track-divider"><td colspan="3">Engineering Track</td></tr>
-
-      <!-- Software Engineering -->
       <tr>
-        <td class="col-category" rowspan="5">Software Engineering</td>
-        <td class="col-topic">Data Analysis</td>
+        <td class="col-topic">Calculus &amp; Analysis</td>
         <td>
           <span class="cell-item">
-            <a href="https://www.coursera.org/professional-certificates/ibm-data-analyst" target="_blank" rel="noopener">Data Analyst</a>
-            <span class="cell-desc">Exploratory analysis, visualisation, and deriving insights from structured data</span>
+            <a href="https://ocw.mit.edu/courses/18-01-single-variable-calculus-fall-2006/" target="_blank" rel="noopener">Single Variable Calculus (18.01) &mdash; MIT OCW</a>
+            <span class="cell-desc">Single-variable calculus from MIT OpenCourseWare. Pair with 18.02 (Multivariable) when you are ready for the multivariable side.</span>
           </span>
         </td>
       </tr>
       <tr>
-        <td class="col-topic">Machine Learning</td>
-        <td rowspan="3">
-          <span class="cell-merged-note">Covers Machine Learning + Deep Learning + NLP</span>
-          <span class="cell-item">
-            <a href="https://www.coursera.org/professional-certificates/ai-engineer" target="_blank" rel="noopener">AI Engineer</a>
-            <span class="cell-desc">End-to-end AI application development &mdash; from model selection to deployment</span>
-          </span>
-        </td>
-      </tr>
-      <tr><td class="col-topic">Deep Learning</td></tr>
-      <tr><td class="col-topic">NLP</td></tr>
-      <tr>
-        <td class="col-topic">Transformers &amp; LLMs</td>
+        <td class="col-topic">Linear Algebra</td>
         <td>
           <span class="cell-item">
-            <a href="https://www.coursera.org/professional-certificates/ibm-rag-and-agentic-ai" target="_blank" rel="noopener">IBM RAG and Agentic AI</a>
-            <span class="cell-desc">Retrieval-augmented generation and building autonomous AI agents</span>
+            <a href="https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/" target="_blank" rel="noopener">Linear Algebra (18.06) &mdash; Gilbert Strang, MIT OCW</a>
+            <span class="cell-desc">Strang&rsquo;s classic course &mdash; the canonical free option. Watch alongside 3Blue1Brown&rsquo;s <em>Essence of Linear Algebra</em> for the geometric intuition.</span>
           </span>
         </td>
       </tr>
-
-      <!-- MLOps & LLMOps (merged Infrastructure Engineering + Operating) -->
       <tr>
-        <td class="col-category" rowspan="4">MLOps &amp; LLMOps</td>
-        <td class="col-topic">Machine Learning</td>
-        <td rowspan="3">
-          <span class="cell-merged-note">Covers Machine Learning + Deep Learning + NLP</span>
-          <span class="cell-item">
-            <a href="https://www.coursera.org/specializations/mlops-machine-learning-duke" target="_blank" rel="noopener">MLOps</a>
-            <span class="cell-desc">Operationalising machine learning &mdash; pipelines, monitoring, model lifecycle, retraining</span>
-          </span>
-        </td>
-      </tr>
-      <tr><td class="col-topic">Deep Learning</td></tr>
-      <tr><td class="col-topic">NLP</td></tr>
-      <tr>
-        <td class="col-topic">Transformers &amp; LLMs</td>
+        <td class="col-topic">Probability</td>
         <td>
           <span class="cell-item">
-            <a href="https://www.coursera.org/specializations/large-language-model-operations" target="_blank" rel="noopener">LLMOps</a>
-            <span class="cell-desc">The operational side of large language models &mdash; fine-tuning, serving, evaluation</span>
+            <a href="https://projects.iq.harvard.edu/stat110/youtube" target="_blank" rel="noopener">Harvard Stat 110 &mdash; Joe Blitzstein</a>
+            <span class="cell-desc">A full undergraduate probability course on YouTube &mdash; random variables, distributions, conditioning, and inference, taught with a story-problem instinct that makes it stick.</span>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-topic">Statistics</td>
+        <td>
+          <span class="cell-item">
+            <a href="https://www.khanacademy.org/math/ap-statistics" target="_blank" rel="noopener">Khan Academy &mdash; AP Statistics</a>
+            <span class="cell-desc">A practical, exam-style introduction to estimation, hypothesis testing, regression, and the habits of skepticism that statistical reasoning demands.</span>
           </span>
         </td>
       </tr>
@@ -410,7 +339,7 @@
 
 <footer>
   <div class="footer-inner">
-    <span class="footer-name">Data &amp; Intelligence On-Ramp</span>
+    <span class="footer-name">Mathematics On-Ramp</span>
     <span class="footer-copy">Last updated &mdash; April 2026 &nbsp;&middot;&nbsp; &copy; 2026</span>
   </div>
 </footer>
@@ -430,6 +359,7 @@
       document.body.style.overflow = '';
     });
   });
+  // Scroll reveal
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
   }, { threshold: 0.05 });

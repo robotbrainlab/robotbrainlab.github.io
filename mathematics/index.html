@@ -6,7 +6,7 @@
   <title>Mathematics &mdash; Towards Intelligence</title>
   <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
   <meta property="og:title" content="Mathematics — Towards Intelligence"/>
-  <meta property="og:description" content="The mathematical foundations of computer science and intelligence — from school algebra through calculus, linear algebra, probability, statistics, and discrete mathematics."/>
+  <meta property="og:description" content="The mathematical foundations of computer science and intelligence — from school algebra through calculus, linear algebra, and probability and statistics."/>
   <meta property="og:type" content="article"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
@@ -473,9 +473,6 @@
   <a href="#probability">Probability</a>
   <a href="#statistics">Statistics</a>
 
-  <a class="toc-part-label" href="#part5-intro">Part 5 &mdash; Discrete Math</a>
-  <a href="#discrete-math">Discrete Mathematics</a>
-
   <a class="toc-part-label" href="#connections">Closing</a>
 
   <a class="toc-part-label" href="#resources-section">Resources</a>
@@ -497,9 +494,8 @@
   <div class="hero-kicker">Long-form Reference</div>
   <h1 class="hero-title">Mathematical <em>Foundations</em></h1>
   <p class="hero-subtitle">
-    The mathematical layer that underpins computer science and intelligence &mdash; from the school-level refresh through calculus, linear algebra, probability, statistics, and discrete mathematics. Not a separate track to finish, but a foundation you keep revisiting.
+    The mathematical layer that underpins computer science and intelligence &mdash; from the school-level refresh through calculus, linear algebra, probability, and statistics. Not a separate track to finish, but a foundation you keep revisiting. Discrete mathematics &mdash; the formal language of computer science itself &mdash; lives in the CS &amp; Engineering pillar where it sits closer to the topics that depend on it.
   </p>
-  <div class="hero-meta">Last updated &mdash; April 2026</div>
 </div>
 
 
@@ -516,7 +512,7 @@
     Treating mathematics as a first-class pillar &mdash; equal to CS and to Data &amp; Intelligence &mdash; is not about rigor for its own sake. It is about the fact that every interesting problem you will eventually face reduces to a mathematical question. <em>Why did my gradient descent diverge?</em> is a calculus question. <em>Why is this A/B test not reaching significance?</em> is a statistics question. <em>Why does this graph algorithm take exponential time?</em> is a combinatorics question. <em>Why does this neural network fail on rotated inputs?</em> is a linear algebra question. You cannot avoid the math. You can only choose whether to meet it with understanding or with guesswork.
   </p>
   <p class="body-text">
-    This article walks through the mathematical foundations in roughly the order you would meet them if you were building from the ground up. It starts with a school-level refresh, moves into undergraduate continuous mathematics (calculus and analysis), then linear algebra, then probability and statistics, and finally discrete mathematics &mdash; the branch that is most specifically tied to computer science. The order is progressive: each section builds on the ones before it, and each is useful on its own even if you never go further.
+    This article walks through the mathematical foundations in roughly the order you would meet them if you were building from the ground up. It starts with a school-level refresh, moves into undergraduate continuous mathematics (calculus and analysis), then linear algebra, then probability and statistics. The order is progressive: each section builds on the ones before it, and each is useful on its own even if you never go further. Discrete mathematics is intentionally not part of this walkthrough &mdash; it lives under CS &amp; Engineering Fundamentals because the topics that consume it (algorithms, theory of computation, databases) live there too.
   </p>
   <p class="body-text">
     You do not need to master every section before moving on. Most practitioners revisit the same topics many times across their career, at deeper levels each time. What matters is knowing <strong>why</strong> each branch exists, <strong>what</strong> kinds of questions it answers, and <strong>when</strong> to reach for it. That is the goal of this article &mdash; not to teach you the math itself, but to map the landscape so you know where to go.
@@ -568,7 +564,7 @@
     Calculus is the mathematics of change. Single-variable calculus covers limits, derivatives, and integrals &mdash; the tools for reasoning about functions of one variable, how they change, and what their accumulated effect is. Multivariable calculus extends this to functions of many variables, which is the setting almost all of machine learning lives in. Gradient descent, the algorithm behind every neural network trained today, is a direct application of the multivariable derivative. You cannot truly understand why a model trains the way it does, or why training fails in certain ways, without understanding what a gradient is and what it is telling you.
   </p>
   <p class="body-text">
-    For CS students, calculus often gets less emphasis than linear algebra or discrete math. That is a mistake. Even if you never prove a theorem in analysis, you need enough calculus to read papers, to follow derivations of loss functions, and to reason about continuous optimization. The working knowledge you need is not the full pure-math treatment &mdash; it is the intuitive, geometric understanding of what derivatives and integrals <em>mean</em>.
+    For CS students, calculus often gets less emphasis than linear algebra. That is a mistake. Even if you never prove a theorem in analysis, you need enough calculus to read papers, to follow derivations of loss functions, and to reason about continuous optimization. The working knowledge you need is not the full pure-math treatment &mdash; it is the intuitive, geometric understanding of what derivatives and integrals <em>mean</em>.
   </p>
   <p class="body-text">
     The best free resource is <strong>Khan Academy&rsquo;s multivariable calculus and differential equations sequence</strong>, which covers the ground systematically. For more depth, <strong>MIT OpenCourseWare</strong> has the single-variable and multivariable calculus courses from 18.01 and 18.02 &mdash; legendary for a reason.
@@ -661,45 +657,19 @@
 
 
 <!-- ============================================================ -->
-<!--  PART 5 — DISCRETE MATHEMATICS                                 -->
-<!-- ============================================================ -->
-
-<div class="part-divider reveal" id="part5-intro">
-  <div class="part-num">Part 5</div>
-  <h2 class="part-title">Discrete <em>Mathematics</em></h2>
-  <p class="part-subtitle">The formal foundation of computer science itself.</p>
-</div>
-
-<div class="reveal" id="discrete-math">
-  <h3 class="section-heading"><span class="sh-num">7.</span> Discrete Mathematics</h3>
-  <p class="body-text">
-    Discrete mathematics is the mathematics of countable, distinct structures &mdash; logic, sets, relations, functions, combinatorics, graph theory, number theory, and proof techniques. It is the branch of math that is specifically <em>about</em> computers in a way that calculus or linear algebra are not. Computers are discrete machines: they operate on bits, states, and sequences of symbols. The structures that describe what they do are discrete structures. That is why every serious computer science curriculum has a discrete math course at the beginning &mdash; it is the formal language in which all of CS theory is written.
-  </p>
-  <p class="body-text">
-    If you plan to focus on the Computer Science &amp; Engineering pillar, discrete math is non-negotiable. Every later topic &mdash; algorithms, data structures, theory of computation, databases, compilers, cryptography, distributed systems &mdash; uses it as vocabulary. If your focus is more on Data &amp; Intelligence, you can get by with less discrete math up front, but you will still meet it the moment you touch graph algorithms, combinatorial optimization, or any kind of symbolic reasoning.
-  </p>
-  <p class="body-text">
-    The canonical starting point is <strong>MIT&rsquo;s 6.042J (Mathematics for Computer Science)</strong> on OpenCourseWare &mdash; a course designed exactly for this purpose. The standard textbook companion is <strong>Rosen&rsquo;s Discrete Mathematics and Its Applications</strong>. Between those two, you have everything you need.
-  </p>
-</div>
-
-<hr class="content-rule" />
-
-
-<!-- ============================================================ -->
 <!--  CLOSING                                                       -->
 <!-- ============================================================ -->
 
 <div class="reveal" id="connections">
   <h3 class="section-heading">How It All Connects</h3>
   <p class="body-text">
-    The seven topics in this article are not a checklist to grind through. They are a network of ideas that reinforce each other. Calculus and linear algebra meet in multivariable calculus and in optimization theory. Linear algebra and probability meet in the covariance matrix and in principal component analysis. Probability and statistics are two sides of the same coin. Discrete math and probability meet in combinatorial probability and in the analysis of randomized algorithms. The more of them you know, the more connections you see &mdash; and the more each individual piece makes sense.
+    The six topics in this article are not a checklist to grind through. They are a network of ideas that reinforce each other. Calculus and linear algebra meet in multivariable calculus and in optimization theory. Linear algebra and probability meet in the covariance matrix and in principal component analysis. Probability and statistics are two sides of the same coin. The more of them you know, the more connections you see &mdash; and the more each individual piece makes sense.
   </p>
   <p class="body-text">
-    For someone starting out, the right order is usually: school math first (fast, thorough), then a first pass at linear algebra and calculus in parallel (because they reinforce each other), then probability, then statistics, and finally discrete math if you are heading toward the CS pillar. You will not be &ldquo;done&rdquo; with any of these after the first pass. Plan to return to each one at least once, with more depth, when you need it for something specific.
+    For someone starting out, the right order is usually: school math first (fast, thorough), then a first pass at linear algebra and calculus in parallel (because they reinforce each other), then probability, then statistics. You will not be &ldquo;done&rdquo; with any of these after the first pass. Plan to return to each one at least once, with more depth, when you need it for something specific.
   </p>
   <p class="body-text">
-    If you are heading toward <a href="../index.html#cse" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Computer Science &amp; Engineering</a>, discrete math and linear algebra are the most important. If you are heading toward <a href="../index.html#data-intelligence" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Data &amp; Intelligence</a>, linear algebra, probability, and statistics are the most important. Everyone needs calculus. Everyone eventually benefits from analysis. Mathematics is not the first pillar because it is hardest &mdash; it is the first pillar because everything else grows out of it.
+    If you are heading toward <a href="../index.html#cse" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Computer Science &amp; Engineering</a>, linear algebra is the most important from this list, with discrete mathematics (which lives in the CS pillar) sitting alongside it. If you are heading toward <a href="../index.html#data-intelligence" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Data &amp; Intelligence</a>, linear algebra, probability, and statistics are the most important. Everyone needs calculus. Everyone eventually benefits from analysis. Mathematics is not the first pillar because it is hardest &mdash; it is the first pillar because everything else grows out of it.
   </p>
   <p class="body-text">
     Mathematics is not the first pillar because it is hardest &mdash; it is the first pillar because everything else grows out of it.
@@ -719,7 +689,7 @@
 
 <div class="reveal" id="resources-intro">
   <p class="body-text">
-    Every textbook, course, and video series used in this guide is collected on the dedicated Mathematics Resources page &mdash; organised by topic (School Math, Calculus, Linear Algebra, Probability, Statistics, Discrete Mathematics) with tables for Books, Courses, and Practical items. Use it as a quick-reference when you&rsquo;re ready to pick what to study next.
+    Every textbook, course, and video series used in this guide is collected on the dedicated Mathematics Resources page &mdash; organised by topic (School Math, Calculus, Linear Algebra, Probability, Statistics) with tables for Books, Courses, and Practical items. Use it as a quick-reference when you&rsquo;re ready to pick what to study next.
   </p>
   <p style="margin-top: 1.4rem;">
     <a href="resources.html" target="_blank" rel="noopener" class="resources-outro-link">Browse the full Mathematics Resources page &rarr;</a>
@@ -733,7 +703,7 @@
 <footer>
   <div class="footer-inner">
     <span class="footer-name">Mathematics</span>
-    <span class="footer-copy">&copy; 2026</span>
+    <span class="footer-copy">Last updated &mdash; April 2026 &nbsp;&middot;&nbsp; &copy; 2026</span>
   </div>
 </footer>
 
