@@ -6,7 +6,7 @@
   <title>The LLM Engineering Landscape</title>
   <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
   <meta property="og:title" content="The LLM Engineering Landscape — Towards Intelligence"/>
-  <meta property="og:description" content="A three-part map of what engineers actually build with large language models — disciplines, practical problems, and products."/>
+  <meta property="og:description" content="A four-part map of LLM engineering — the 8 disciplines, the practical problems, the products people ship, and a 7–8 month curriculum (13 domains, 7 projects) for actually learning it."/>
   <meta property="og:type" content="article"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
@@ -407,6 +407,51 @@
       width: 16px; height: 1px; background: var(--accent);
     }
 
+    /* -- LEVEL CHIP (Part 4 tags: core / advanced / sota) -- */
+    .tag-chip {
+      display: inline-block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 0.18rem 0.55rem;
+      border-radius: 2px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .tag-core { background: var(--accent-dim); color: var(--accent); }
+    .tag-advanced { background: rgba(168, 168, 168, 0.15); color: var(--ink-mid); }
+    .tag-sota {
+      background: transparent; color: var(--ink-dim);
+      border: 1px dashed var(--rule-lt);
+    }
+
+    /* -- META BLOCK for project headers (Phase / Domains / GPU / etc.) -- */
+    .project-meta {
+      display: flex; flex-wrap: wrap; gap: 1.4rem;
+      margin: 1rem 0 1.4rem;
+      padding: 0.8rem 1.1rem;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      background: rgba(21, 21, 22, 0.4);
+      font-family: 'Karla', sans-serif;
+      font-size: 0.86rem;
+    }
+    .project-meta dt {
+      display: inline;
+      color: var(--ink-dim);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 0.74rem;
+      margin-right: 0.4rem;
+    }
+    .project-meta dd {
+      display: inline;
+      color: var(--ink);
+      margin: 0;
+    }
+    .project-meta > div { white-space: nowrap; }
+
     /* -- HEADACHE / NOTE BLOCK -- */
     .note-block {
       background: var(--surface);
@@ -606,6 +651,23 @@
   <a href="#p3-mapping">Product-to-Engineering Map</a>
   <a href="#p3-focus">Where to Focus</a>
 
+  <div class="toc-part-label">Part 4 &mdash; The Plan</div>
+  <a href="#p4-intro">From Map to Plan</a>
+  <a href="#p4-tags">How to Read the Tags</a>
+  <a href="#p4-checklist">Checklist &mdash; 13 Domains</a>
+  <a href="#p4-summary">Checklist Summary</a>
+  <a href="#p4-projects">7 Projects &mdash; Overview</a>
+  <a href="#p4-project-1">P1. Foundations &amp; Output</a>
+  <a href="#p4-project-2">P2. Semantic Search</a>
+  <a href="#p4-project-3">P3. RAG Systems</a>
+  <a href="#p4-project-4">P4. Fine-tuning &amp; Inference</a>
+  <a href="#p4-project-5">P5. Agentic Systems</a>
+  <a href="#p4-project-6">P6. LLMOps &amp; Cloud</a>
+  <a href="#p4-project-7">P7. Multimodal Capstone</a>
+  <a href="#p4-deps">Dependency Chain</a>
+  <a href="#p4-refs">Reference Material</a>
+  <a href="#p4-timeline">Estimated Timeline</a>
+
 </aside>
 
 <!-- ===== MAIN CONTENT ===== -->
@@ -625,7 +687,7 @@
   <div class="hero-kicker">Long-form Reference</div>
   <h1 class="hero-title">The LLM Engineering <em>Landscape</em></h1>
   <p class="hero-subtitle">
-    A three-part map of what engineers actually build with large language models &mdash; as of April 2026.
+    A four-part map of LLM engineering. Parts 1&ndash;3 describe the territory: the eight engineering disciplines, the practical problems developers solve on real projects, and the ten product categories people ship. Part 4 turns the territory into a route &mdash; a 7&ndash;8 month curriculum across 13 study domains and 7 sequential projects, for readers who have decided to actually build.
   </p>
 </div>
 
@@ -1936,33 +1998,877 @@
 
 <hr class="content-rule" />
 
-<!-- ==================== Three-Doc Map ==================== -->
+
+<!-- ============================================================ -->
+<!--  PART 4 — THE PLAN                                            -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part4">
+  <div class="part-num">Part 4</div>
+  <h2 class="part-title">The <em>Plan</em></h2>
+  <p class="part-subtitle">Parts 1&ndash;3 describe the territory. This part is the route &mdash; a prescriptive curriculum across 13 study domains and 7 sequential projects, sized for roughly 7&ndash;8 months at 15&ndash;20 hours per week. Read this when you have decided to actually build, not just to understand.</p>
+</div>
+
+<div class="reveal" id="p4-intro">
+  <h3 class="section-heading">From Map to Plan</h3>
+  <p class="body-text">
+    The first three parts of this article are descriptive: they tell you what exists. Part 4 is prescriptive: it tells you what to do, in what order, with what artefacts to show for it at each stage. The 8 disciplines from Part 1 are reorganised here as 13 study <em>domains</em> &mdash; finer-grained, learning-ordered, and tagged by tier. The 7 problem areas from Part 2 and the 10 product categories from Part 3 are folded into 7 hands-on projects that hand artefacts to each other and force you to ship something real at every stage.
+  </p>
+  <p class="body-text">
+    Two intentional separations sit underneath this plan, both of which mirror the structure of the rest of this site:
+  </p>
+  <ul class="content-list">
+    <li><strong>Model Engineering vs. Application Engineering.</strong> Domains 6 and 7 (fine-tuning &amp; alignment, inference &amp; optimisation) and Project 4 modify or run models themselves. Everything else builds on top of existing models. Most engineers spend almost all their time on the application side; the model side is a deliberate one-month detour to demystify the layer beneath the API.</li>
+    <li><strong>Core / Advanced / SOTA.</strong> Every checklist item is tagged. Use the tier as a budget signal: aim to be solid on every <code>core</code> item before moving to the next domain, treat <code>advanced</code> items as required reading for production work, and keep <code>sota</code> items at exposure-level rather than mastery.</li>
+  </ul>
+  <p class="body-text">
+    The plan assumes you have already read Parts 1&ndash;3, or at minimum that you have a working mental model of what an LLM application looks like end-to-end. If you are still trying to figure out which discipline is which, go back to Part 1 first. The plan is an action document; it does not re-derive the map.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-tags">
+  <h3 class="section-heading">How to Read the Tags</h3>
+  <p class="body-text">Items within each domain are ordered by learning dependency &mdash; reading top-to-bottom inside a tier means encountering concepts in the order you need them. The tier itself tells you how much depth to invest:</p>
+  <div class="table-wrap"><table class="content-table">
+    <thead>
+      <tr>
+        <th>Tag</th>
+        <th>Meaning</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tag-chip tag-core">core</span></td>
+        <td>Fundamental. Must understand before moving on. The set of ideas that everything else in the curriculum is built on.</td>
+      </tr>
+      <tr>
+        <td><span class="tag-chip tag-advanced">advanced</span></td>
+        <td>Production-relevant. Required for real systems. You can build a demo without these; you cannot ship something reliable without them.</td>
+      </tr>
+      <tr>
+        <td><span class="tag-chip tag-sota">sota</span></td>
+        <td>Current research frontier. Worth exposure rather than mastery for now &mdash; read about, prototype if interesting, do not block on.</td>
+      </tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-checklist">
+  <h3 class="section-heading">Checklist &mdash; 13 Domains, 123 Items</h3>
+  <p class="body-text">The 13 domains are grouped to mirror the structure of an LLM-engineering career: foundations and prompting first, then retrieval, then the model-engineering detour (fine-tuning + inference), then agents, then everything that turns a working system into a production one (evaluation, LLMOps, safety, cloud), with multimodal and frontier work as the final layer.</p>
+
+  <h4 class="subsection-heading" id="p4-d1">Domain 1 &mdash; Foundations &amp; LLM internals</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>1.1</td><td>Transformer architecture &mdash; attention, residual streams, MLP layers</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>1.2</td><td>Tokenization &mdash; BPE, SentencePiece, vocabulary design, token count estimation</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>1.3</td><td>Pre-training objectives &mdash; next-token prediction, masked language modelling</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>1.4</td><td>Decoding strategies &mdash; greedy, beam search, sampling (temperature, top-p, top-k)</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>1.5</td><td>Instruction tuning and RLHF &mdash; how chat models are made from base models</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>1.6</td><td>Model families and release landscape &mdash; GPT, Claude, Gemini, Mistral, LLaMA, Qwen</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>1.7</td><td>Context window mechanics &mdash; RoPE, ALiBi, sliding window attention</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>1.8</td><td>Scaling laws &mdash; Chinchilla, compute-optimal training, emergent capabilities</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsection-heading" id="p4-d2">Domain 2 &mdash; Prompt engineering</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>2.1</td><td>Zero-shot, one-shot, few-shot prompting patterns</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>2.2</td><td>Chain-of-thought (CoT) and step-by-step reasoning</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>2.3</td><td>System prompt design &mdash; persona, constraints, output format specification</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>2.4</td><td>Structured output prompting &mdash; JSON schemas, XML, markdown tables</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>2.5</td><td>Prompt chaining &mdash; decomposing complex tasks into sequential prompts</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>2.6</td><td>Prompt versioning, management, and regression testing</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>2.7</td><td>Adversarial robustness &mdash; prompt injection, jailbreaks, defensive patterns</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>2.8</td><td>Meta-prompting and self-refinement loops</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>2.9</td><td>DSPy &mdash; programming (not prompting) language models; compiled prompts</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsection-heading" id="p4-d3">Domain 3 &mdash; Structured outputs &amp; validation</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>3.1</td><td>Output parsing strategies &mdash; regex, JSON mode, constrained decoding</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>3.2</td><td>Schema validation with Pydantic and instructor / outlines</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>3.3</td><td>Handling malformed outputs &mdash; retry logic, fallback strategies</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>3.4</td><td>Grammar-constrained generation (Outlines, llama.cpp grammars)</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>3.5</td><td>Token-level output control &mdash; logit biasing, forced tokens</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsection-heading" id="p4-d4">Domain 4 &mdash; Embeddings &amp; semantic search</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>4.1</td><td>Embedding model families &mdash; OpenAI, Cohere, sentence-transformers, BGE</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>4.2</td><td>Cosine similarity, dot product &mdash; understanding distance metrics</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>4.3</td><td>Vector stores &mdash; Chroma, Qdrant, Pinecone, Weaviate, pgvector</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>4.4</td><td>Sparse retrieval &mdash; BM25, TF-IDF, keyword indices (Elasticsearch)</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>4.5</td><td>ANN algorithms &mdash; HNSW, IVF, product quantisation</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>4.6</td><td>Hybrid search &mdash; combining dense and sparse signals, RRF fusion</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>4.7</td><td>Re-ranking &mdash; cross-encoders, Cohere Rerank, ColBERT</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>4.8</td><td>Embedding model fine-tuning for domain adaptation</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+      <tr><td>4.9</td><td>Multi-vector retrieval &mdash; ColPali, late interaction models</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsection-heading" id="p4-d5">Domain 5 &mdash; RAG systems</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>5.1</td><td>Chunking strategies &mdash; fixed, sentence, semantic, hierarchical</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>5.2</td><td>Document ingestion pipelines &mdash; loaders, parsers, metadata extraction</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>5.3</td><td>Naive RAG &mdash; basic retrieve-then-generate pipeline</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>5.4</td><td>RAG evaluation &mdash; RAGAS framework, faithfulness, relevance, groundedness</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>5.5</td><td>Advanced RAG &mdash; query rewriting, HyDE, step-back prompting</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>5.6</td><td>Modular RAG &mdash; routing, fusion, adaptive retrieval</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>5.7</td><td>Long-context RAG vs. retrieval &mdash; when to use which</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>5.8</td><td>Agentic RAG &mdash; iterative retrieval with reasoning loops</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>5.9</td><td>Graph RAG &mdash; knowledge graphs combined with vector retrieval</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="label">Model Engineering &mdash; Domains 6 &amp; 7</div>
+  <p class="body-text">The next two domains cover fine-tuning and inference &mdash; the two areas where you work with the model itself rather than building on top of it. They also map to the MLOps half of the merged Infrastructure Engineering &amp; Operating sub-section in the <a href="index.html#mlops-llmops" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">D&amp;I guide</a>.</p>
+
+  <h4 class="subsection-heading" id="p4-d6">Domain 6 &mdash; Fine-tuning &amp; alignment</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>6.1</td><td>When to fine-tune vs. prompt &mdash; decision framework</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>6.2</td><td>Dataset curation &mdash; instruction-response pairs, quality filters, deduplication</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>6.3</td><td>LoRA and QLoRA &mdash; parameter-efficient fine-tuning, rank selection</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>6.4</td><td>Experiment tracking with W&amp;B / MLflow</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>6.5</td><td>Full fine-tuning &mdash; when feasible and trade-offs</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>6.6</td><td>Training configuration &mdash; learning rate, batch size, gradient checkpointing</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>6.7</td><td>Quantisation for training &mdash; 4-bit, 8-bit with bitsandbytes</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>6.8</td><td>RLHF pipeline &mdash; reward modelling, PPO</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>6.9</td><td>Continual pre-training and domain adaptation on raw corpora</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>6.10</td><td>Catastrophic forgetting &mdash; mitigation strategies</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>6.11</td><td>DPO and variants (IPO, KTO, SimPO) &mdash; preference optimisation without RL</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+      <tr><td>6.12</td><td>Model merging &mdash; SLERP, TIES, DARE</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsection-heading" id="p4-d7">Domain 7 &mdash; Inference &amp; optimisation</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>7.1</td><td>Inference server options &mdash; vLLM, TGI, llama.cpp, Ollama</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>7.2</td><td>KV cache mechanics and optimisation</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>7.3</td><td>Continuous batching and PagedAttention (vLLM)</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>7.4</td><td>Quantisation for inference &mdash; GGUF, GPTQ, AWQ, EXL2</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>7.5</td><td>Prompt caching &mdash; Anthropic, OpenAI prefix caching</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>7.6</td><td>Semantic caching &mdash; deduplicating near-identical queries</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>7.7</td><td>GPU memory management &mdash; tensor parallelism, pipeline parallelism</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>7.8</td><td>Latency vs. throughput trade-offs &mdash; SLOs for production</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>7.9</td><td>Speculative decoding &mdash; draft models, medusa heads</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="label">Application Engineering &mdash; Domains 8 onward</div>
+  <p class="body-text">The remaining domains cover building, evaluating, and operating systems on top of existing models. This is where most engineers spend most of their time.</p>
+
+  <h4 class="subsection-heading" id="p4-d8">Domain 8 &mdash; Agents &amp; tool use</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>8.1</td><td>Function calling / tool use &mdash; schema design, model integration</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>8.2</td><td>ReAct pattern &mdash; interleaved reasoning and action</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>8.3</td><td>Agent frameworks &mdash; LangGraph, CrewAI, AutoGen, smolagents</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>8.4</td><td>Agent memory &mdash; scratchpad, episodic, semantic, procedural</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>8.5</td><td>Tool design patterns &mdash; idempotency, error messages for LLMs, retry hints</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>8.6</td><td>Plan-and-execute agents &mdash; upfront planning vs. reactive</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>8.7</td><td>Multi-agent systems &mdash; orchestrator / subagent, peer-to-peer</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>8.8</td><td>Sandboxed code execution &mdash; E2B, Docker, subprocess isolation</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>8.9</td><td>Long-horizon task reliability &mdash; loop detection, stuck detection, graceful failure</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>8.10</td><td>Human-in-the-loop &mdash; approval steps, interrupt/resume</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>8.11</td><td>Model Context Protocol (MCP) &mdash; emerging standard for tool ecosystems</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>8.12</td><td>Computer use / browser agents &mdash; Playwright, vision-enabled agents</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsection-heading" id="p4-d9">Domain 9 &mdash; Evaluation &amp; testing</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>9.1</td><td>Evaluation taxonomy &mdash; capability, safety, alignment, cost</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>9.2</td><td>Reference-based metrics &mdash; BLEU, ROUGE, BERTScore</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>9.3</td><td>Regression testing &mdash; catching quality drops across prompt/model changes</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>9.4</td><td>LLM-as-judge &mdash; design patterns, bias mitigation, self-evaluation pitfalls</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>9.5</td><td>RAG-specific evals &mdash; RAGAS, TruLens, DeepEval</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>9.6</td><td>Agent evaluation &mdash; task completion rate, efficiency, failure taxonomy</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>9.7</td><td>Human evaluation design &mdash; rubrics, inter-annotator agreement</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>9.8</td><td>Benchmark design &mdash; test set curation, contamination prevention</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>9.9</td><td>Red-teaming and adversarial evaluation</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>9.10</td><td>Evals-driven development &mdash; shipping only when evals pass</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsection-heading" id="p4-d10">Domain 10 &mdash; LLMOps &amp; production</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>10.1</td><td>Serving infrastructure &mdash; FastAPI, Docker, async handling</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>10.2</td><td>Observability &mdash; LLM-specific tracing with Langfuse, LangSmith, Helicone</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>10.3</td><td>Cost tracking &mdash; per-request token accounting, budget alerts</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>10.4</td><td>Rate limiting, retries, and fallback model chains</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>10.5</td><td>Streaming responses &mdash; SSE, WebSockets, chunked transfer</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>10.6</td><td>A/B testing LLM variants &mdash; traffic splitting, statistical significance</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>10.7</td><td>Feedback loops &mdash; collecting corrections, thumbs up/down, implicit signals</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>10.8</td><td>Model routing &mdash; cheap model for simple queries, expensive for complex</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>10.9</td><td>Output drift detection &mdash; monitoring quality over time in production</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>10.10</td><td>Deployment patterns &mdash; blue/green, canary, rollback strategies</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>10.11</td><td>CI/CD for LLM systems &mdash; automated eval gates, prompt regression pipelines</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>10.12</td><td>Data flywheel &mdash; using production outputs to improve future training</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsection-heading" id="p4-d11">Domain 11 &mdash; Safety &amp; governance</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>11.1</td><td>Input/output filtering and topic blockers</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>11.2</td><td>Responsible AI in production &mdash; bias, transparency, accountability</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>11.3</td><td>Prompt injection and jailbreaking &mdash; attack vectors and defences</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>11.4</td><td>Guardrails frameworks &mdash; NeMo Guardrails, Guardrails AI, custom filtering</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>11.5</td><td>PII detection and redaction pipelines</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>11.6</td><td>Content moderation &mdash; classifiers, human review workflows</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>11.7</td><td>Audit logging &mdash; recording every model call for traceability</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>11.8</td><td>Data privacy &mdash; residency requirements, GDPR/CCPA implications for LLM apps</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsection-heading" id="p4-d12">Domain 12 &mdash; Cloud infrastructure &amp; deployment</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>12.1</td><td>Cloud compute for AI &mdash; EC2 GPU instances, serverless (Lambda), containers (ECS/EKS)</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>12.2</td><td>Object storage for AI pipelines &mdash; S3 for datasets, model artefacts, corpora</td><td><span class="tag-chip tag-core">core</span></td></tr>
+      <tr><td>12.3</td><td>Managed vector search &mdash; Amazon OpenSearch k-NN, pgvector on Aurora</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>12.4</td><td>Amazon Bedrock &mdash; multi-model managed inference, Bedrock Agents, Knowledge Bases</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>12.5</td><td>Amazon SageMaker &mdash; managed training jobs, real-time endpoints, SageMaker Pipelines</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>12.6</td><td>Async pipeline patterns &mdash; SQS/SNS for decoupled agent workflows, Step Functions</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>12.7</td><td>Infrastructure as code &mdash; AWS CDK or Terraform for reproducible AI deployments</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>12.8</td><td>AWS-native observability &mdash; CloudWatch Logs, X-Ray tracing, Cost Explorer</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>12.9</td><td>Security in the cloud &mdash; IAM least-privilege for agents, VPC isolation, PrivateLink</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>12.10</td><td>CI/CD on AWS &mdash; CodePipeline, CodeBuild, GitHub Actions targeting cloud infra</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="subsection-heading" id="p4-d13">Domain 13 &mdash; Multimodal &amp; frontier topics</h4>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>#</th><th>Topic</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>13.1</td><td>Vision-language models &mdash; CLIP, LLaVA, GPT-4V, Claude vision</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>13.2</td><td>Document understanding &mdash; OCR integration, layout-aware models (Donut, Nougat)</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>13.3</td><td>Code LLMs &mdash; code generation, execution, test generation, self-debugging</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>13.4</td><td>Long-context techniques &mdash; needle-in-haystack eval, context compression</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>13.5</td><td>Small language models &mdash; Phi, Gemma, SmolLM &mdash; on-device and edge deployment</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>13.6</td><td>Retrieval with structured data &mdash; text-to-SQL, table QA</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>13.7</td><td>Speech / audio LLMs &mdash; Whisper integration, voice interfaces</td><td><span class="tag-chip tag-advanced">advanced</span></td></tr>
+      <tr><td>13.8</td><td>Reasoning models &mdash; o1/o3-style chain-of-thought, inference-time compute</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+      <tr><td>13.9</td><td>Test-time compute scaling &mdash; self-consistency, best-of-N, MCTS</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+      <tr><td>13.10</td><td>Mixture of Experts (MoE) &mdash; architecture and inference implications</td><td><span class="tag-chip tag-sota">sota</span></td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-summary">
+  <h3 class="section-heading">Checklist Summary</h3>
+  <p class="body-text">123 items across 13 domains, weighted toward <em>advanced</em> &mdash; the bulk of useful production knowledge sits between &ldquo;you can run a demo&rdquo; and &ldquo;research frontier.&rdquo;</p>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>Domain</th><th>Items</th><th>Core</th><th>Advanced</th><th>SOTA</th></tr></thead>
+    <tbody>
+      <tr><td>1. Foundations &amp; LLM internals</td><td>8</td><td>6</td><td>2</td><td>0</td></tr>
+      <tr><td>2. Prompt engineering</td><td>9</td><td>4</td><td>5</td><td>0</td></tr>
+      <tr><td>3. Structured outputs &amp; validation</td><td>5</td><td>3</td><td>2</td><td>0</td></tr>
+      <tr><td>4. Embeddings &amp; semantic search</td><td>9</td><td>4</td><td>3</td><td>2</td></tr>
+      <tr><td>5. RAG systems</td><td>9</td><td>4</td><td>4</td><td>1</td></tr>
+      <tr><td>6. Fine-tuning &amp; alignment</td><td>12</td><td>4</td><td>6</td><td>2</td></tr>
+      <tr><td>7. Inference &amp; optimisation</td><td>9</td><td>1</td><td>7</td><td>1</td></tr>
+      <tr><td>8. Agents &amp; tool use</td><td>12</td><td>3</td><td>8</td><td>1</td></tr>
+      <tr><td>9. Evaluation &amp; testing</td><td>10</td><td>3</td><td>6</td><td>1</td></tr>
+      <tr><td>10. LLMOps &amp; production</td><td>12</td><td>5</td><td>6</td><td>1</td></tr>
+      <tr><td>11. Safety &amp; governance</td><td>8</td><td>2</td><td>6</td><td>0</td></tr>
+      <tr><td>12. Cloud infrastructure</td><td>10</td><td>2</td><td>8</td><td>0</td></tr>
+      <tr><td>13. Multimodal &amp; frontier</td><td>10</td><td>0</td><td>7</td><td>3</td></tr>
+      <tr><td><strong>Total</strong></td><td><strong>123</strong></td><td><strong>41</strong></td><td><strong>70</strong></td><td><strong>12</strong></td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-projects">
+  <h3 class="section-heading">7 Projects &mdash; Overview</h3>
+  <p class="body-text">The checklist tells you <em>what</em>; the projects force you to actually do it. Each project is sized for several weeks of focused work, produces a real artefact (a service, a benchmark, a fine-tuned adapter, a deployment), and hands something concrete to the next one. The dependency chain at the end of Part 4 shows how they fit together.</p>
+  <p class="body-text">Two of the seven (P3 and P5) double as anchors for the production-engineering and frontier projects that follow. Project 4 is the only one that requires a GPU; the rest run on a developer laptop with API access.</p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-project-1">
+  <h3 class="section-heading">Project 1 &mdash; LLM foundations &amp; controlled output engineering</h3>
+  <dl class="project-meta">
+    <div><dt>Phase</dt><dd>Fundamentals</dd></div>
+    <div><dt>Domains</dt><dd>1, 2, 3</dd></div>
+    <div><dt>Items</dt><dd>22</dd></div>
+    <div><dt>GPU</dt><dd>No</dd></div>
+  </dl>
+
+  <div class="label">What you build</div>
+  <p class="body-text">A multi-source document intelligence API. It accepts URLs, PDFs, or raw text; extracts structured JSON using validated Pydantic schemas; tracks prompt versions; and scores them systematically across 50+ samples. The output is both a working service and an eval harness you carry into all future projects.</p>
+
+  <div class="label">Skills covered</div>
+  <ul class="content-list">
+    <li>Transformer internals &mdash; attention, MLP layers, residual streams</li>
+    <li>Tokenisation, decoding strategies, context window mechanics</li>
+    <li>Scaling laws and instruction tuning overview</li>
+    <li>Zero-shot, few-shot, CoT, and system prompt design</li>
+    <li>Prompt chaining and meta-prompting</li>
+    <li>DSPy &mdash; compiled prompt optimisation as an alternative to manual iteration</li>
+    <li>Structured output parsing with Pydantic + instructor</li>
+    <li>Grammar-constrained generation with Outlines</li>
+    <li>Prompt versioning, regression testing, eval harness design</li>
+    <li>Adversarial robustness and defensive prompting</li>
+  </ul>
+
+  <div class="label">Tech stack</div>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>OpenAI API</code> / <code>Anthropic API</code></td><td>LLM calls</td></tr>
+      <tr><td><code>Pydantic</code></td><td>Schema definition and validation</td></tr>
+      <tr><td><code>instructor</code></td><td>Structured output extraction</td></tr>
+      <tr><td><code>Outlines</code></td><td>Grammar-constrained generation</td></tr>
+      <tr><td><code>DSPy</code></td><td>Compiled prompt optimisation</td></tr>
+      <tr><td><code>LangSmith</code> or <code>PromptLayer</code></td><td>Prompt versioning and tracking</td></tr>
+      <tr><td><code>FastAPI</code></td><td>Service layer</td></tr>
+      <tr><td><code>pytest</code></td><td>Eval harness</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="label">Deliverables</div>
+  <ul class="content-list">
+    <li>CLI + FastAPI service: URL/text in &rarr; validated JSON out, multi-schema support (article, contract, job posting)</li>
+    <li>Prompt comparison notebook: &ge;3 strategies &times; 50+ samples with scoring rubric</li>
+    <li>Prompt version registry with diff-tracking and per-version quality scores</li>
+  </ul>
+
+  <div class="label">Extensions</div>
+  <ul class="content-list">
+    <li>Add a DSPy-compiled version of your best prompt and compare quality vs. hand-written</li>
+    <li>Add confidence scoring per extracted field</li>
+    <li>Auto-detect which schema to apply based on input content</li>
+  </ul>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-project-2">
+  <h3 class="section-heading">Project 2 &mdash; Semantic search &amp; retrieval systems</h3>
+  <dl class="project-meta">
+    <div><dt>Phase</dt><dd>Retrieval</dd></div>
+    <div><dt>Domains</dt><dd>4</dd></div>
+    <div><dt>Items</dt><dd>9</dd></div>
+    <div><dt>GPU</dt><dd>Optional</dd></div>
+  </dl>
+
+  <div class="label">What you build</div>
+  <p class="body-text">A retrieval benchmarking platform. You index a large corpus (Wikipedia subset or domain-specific documents), implement BM25, dense, and hybrid search, measure MRR and recall@k across all configurations, and visualise the embedding space. This project is intentionally scoped to retrieval only &mdash; before connecting it to generation &mdash; because retrieval quality is the single biggest lever in RAG systems.</p>
+
+  <div class="label">Skills covered</div>
+  <ul class="content-list">
+    <li>Embedding model families and selection criteria</li>
+    <li>Cosine similarity, dot product, and distance metrics</li>
+    <li>Vector store internals &mdash; HNSW, IVF, product quantisation</li>
+    <li>Sparse retrieval &mdash; BM25, TF-IDF, Elasticsearch</li>
+    <li>Hybrid search &mdash; RRF fusion of dense + sparse signals</li>
+    <li>Re-ranking with cross-encoders and Cohere Rerank</li>
+    <li>Embedding model fine-tuning for domain adaptation</li>
+    <li>Multi-vector retrieval &mdash; ColBERT late interaction</li>
+  </ul>
+
+  <div class="label">Tech stack</div>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>sentence-transformers</code></td><td>Dense embedding models</td></tr>
+      <tr><td><code>Qdrant</code> or <code>Chroma</code></td><td>Vector store</td></tr>
+      <tr><td><code>Elasticsearch</code></td><td>BM25 sparse retrieval</td></tr>
+      <tr><td><code>Cohere Rerank</code></td><td>Cross-encoder re-ranking</td></tr>
+      <tr><td><code>UMAP</code> / <code>t-SNE</code></td><td>Embedding space visualisation</td></tr>
+      <tr><td><code>FastAPI</code></td><td>Search API</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="label">Deliverables</div>
+  <ul class="content-list">
+    <li>Search API supporting BM25, dense, and hybrid modes with configurable fusion weights</li>
+    <li>Retrieval benchmark report: MRR, recall@5/10 across all retrieval modes on a labelled query set</li>
+    <li>Embedding space visualiser showing cluster quality (UMAP plot, coloured by document category)</li>
+  </ul>
+
+  <div class="label">Extensions</div>
+  <ul class="content-list">
+    <li>Fine-tune a sentence-transformer on domain-specific query-document pairs</li>
+    <li>Implement ColBERT-style late interaction re-ranking</li>
+    <li>Add pgvector as an alternative backend and compare query latency vs. Qdrant</li>
+  </ul>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-project-3">
+  <h3 class="section-heading">Project 3 &mdash; RAG systems &amp; knowledge pipelines</h3>
+  <dl class="project-meta">
+    <div><dt>Phase</dt><dd>Knowledge</dd></div>
+    <div><dt>Domains</dt><dd>5, 9 (RAG eval slice)</dd></div>
+    <div><dt>Items</dt><dd>14</dd></div>
+    <div><dt>GPU</dt><dd>No</dd></div>
+  </dl>
+
+  <div class="label">What you build</div>
+  <p class="body-text">A domain-specific Q&amp;A system over a large corpus (legal documents, research papers, or technical manuals), built on top of Project 2&rsquo;s retrieval layer. The focus is systematic evaluation: you compare &ge;4 chunking / retrieval / prompting configurations using RAGAS, producing a config leaderboard that shows quality, cost, and latency trade-offs.</p>
+
+  <div class="label">Skills covered</div>
+  <ul class="content-list">
+    <li>Document ingestion pipelines &mdash; loaders, parsers, metadata extraction</li>
+    <li>Chunking strategies &mdash; fixed, sentence, semantic, hierarchical</li>
+    <li>Naive RAG baseline &rarr; Advanced RAG (HyDE, query rewriting, step-back prompting)</li>
+    <li>Modular RAG &mdash; routing and adaptive retrieval</li>
+    <li>Agentic RAG &mdash; iterative retrieval with reasoning loops</li>
+    <li>Graph RAG &mdash; knowledge graph combined with vector retrieval</li>
+    <li>Long-context vs. retrieval trade-off decision framework</li>
+    <li>RAGAS evaluation &mdash; faithfulness, relevance, groundedness</li>
+    <li>LLM-as-judge for automated quality scoring</li>
+  </ul>
+
+  <div class="label">Tech stack</div>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>LlamaIndex</code> or <code>LangChain</code></td><td>RAG pipeline orchestration</td></tr>
+      <tr><td><code>Qdrant</code></td><td>Vector store (from Project 2)</td></tr>
+      <tr><td><code>RAGAS</code></td><td>RAG evaluation framework</td></tr>
+      <tr><td><code>Neo4j</code></td><td>Graph RAG extension</td></tr>
+      <tr><td><code>FastAPI</code></td><td>API layer</td></tr>
+      <tr><td><code>Streamlit</code></td><td>UI</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="label">Deliverables</div>
+  <ul class="content-list">
+    <li>RAG API + Streamlit UI serving a real domain corpus</li>
+    <li>RAGAS eval report comparing &ge;4 retrieval and chunking configurations</li>
+    <li>Config leaderboard (quality score / cost per query / latency) as a shareable HTML artefact</li>
+  </ul>
+
+  <div class="label">Extensions</div>
+  <ul class="content-list">
+    <li>Implement Graph RAG alongside vector RAG and compare on multi-hop questions</li>
+    <li>Add a query classifier that routes simple questions to BM25 and complex ones to dense + re-rank</li>
+    <li>Integrate Amazon Bedrock Knowledge Bases as a managed alternative backend</li>
+  </ul>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-project-4">
+  <h3 class="section-heading">Project 4 &mdash; Fine-tuning, alignment &amp; inference optimisation <em>(Model Engineering)</em></h3>
+  <dl class="project-meta">
+    <div><dt>Phase</dt><dd>Model ownership</dd></div>
+    <div><dt>Domains</dt><dd>6, 7</dd></div>
+    <div><dt>Items</dt><dd>21</dd></div>
+    <div><dt>GPU</dt><dd>Yes (RunPod, Lambda Labs, or Colab Pro+)</dd></div>
+  </dl>
+
+  <div class="label">What you build</div>
+  <p class="body-text">Fine-tune Mistral 7B or LLaMA 3.1 8B on a domain-specific task (legal clause classification, medical intent detection, or code review summarisation). Apply DPO for preference alignment. Quantise and serve the result with vLLM. Produce a rigorous cost/quality comparison against GPT-4o to answer the central question: <em>when does owning the model beat paying for the API?</em></p>
+
+  <div class="label">Skills covered</div>
+  <ul class="content-list">
+    <li>Dataset curation &mdash; instruction format, quality filters, deduplication</li>
+    <li>LoRA and QLoRA &mdash; rank selection, target module choice</li>
+    <li>4-bit / 8-bit quantisation for training with bitsandbytes</li>
+    <li>Training configuration &mdash; LR schedules, gradient checkpointing, SFTTrainer</li>
+    <li>DPO and preference optimisation (IPO, KTO variants)</li>
+    <li>Model merging &mdash; SLERP, TIES, DARE</li>
+    <li>Catastrophic forgetting &mdash; mitigation strategies</li>
+    <li>vLLM, TGI, and llama.cpp for inference serving</li>
+    <li>KV cache, continuous batching, PagedAttention</li>
+    <li>Quantisation for inference &mdash; GGUF, GPTQ, AWQ</li>
+    <li>Speculative decoding with draft models</li>
+    <li>Experiment tracking with Weights &amp; Biases</li>
+  </ul>
+
+  <div class="label">Tech stack</div>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>Hugging Face Transformers</code></td><td>Model loading and training</td></tr>
+      <tr><td><code>PEFT</code></td><td>LoRA / QLoRA adapters</td></tr>
+      <tr><td><code>TRL</code> (SFTTrainer + DPO)</td><td>Supervised fine-tuning and preference alignment</td></tr>
+      <tr><td><code>bitsandbytes</code></td><td>4-bit / 8-bit quantisation during training</td></tr>
+      <tr><td><code>vLLM</code></td><td>High-throughput inference server</td></tr>
+      <tr><td><code>llama.cpp</code></td><td>On-device / edge inference</td></tr>
+      <tr><td><code>Weights &amp; Biases</code></td><td>Experiment tracking and run comparison</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="label">Deliverables</div>
+  <ul class="content-list">
+    <li>Fine-tuned LoRA adapter pushed to Hugging Face Hub with a model card</li>
+    <li>W&amp;B report: training curves, eval metrics, benchmark vs. GPT-4o prompted baseline</li>
+    <li>Cost analysis: fine-tuned open model vs. API at 10k / 100k / 1M requests</li>
+    <li>Containerised vLLM inference server with latency and throughput benchmarks</li>
+  </ul>
+
+  <div class="label">Extensions</div>
+  <ul class="content-list">
+    <li>Apply DPO on top of your SFT checkpoint using preference pairs you label manually</li>
+    <li>Merge multiple LoRA adapters and measure whether quality is preserved</li>
+    <li>Export to GGUF and run locally via llama.cpp for on-device inference demo</li>
+  </ul>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-project-5">
+  <h3 class="section-heading">Project 5 &mdash; Agentic systems &amp; evaluation frameworks</h3>
+  <dl class="project-meta">
+    <div><dt>Phase</dt><dd>Autonomy</dd></div>
+    <div><dt>Domains</dt><dd>8, 9</dd></div>
+    <div><dt>Items</dt><dd>22</dd></div>
+    <div><dt>GPU</dt><dd>No</dd></div>
+  </dl>
+
+  <div class="label">What you build</div>
+  <p class="body-text">A multi-agent research assistant. A Planner agent decomposes incoming tasks. A Researcher agent searches the web and reads documents (using retrieval from Project 3). A Coder agent writes and executes Python in a sandbox. A Writer agent synthesises a structured report. The whole thing is wrapped in a full eval harness covering 30+ task scenarios with pass/fail/partial scoring and a labelled failure taxonomy.</p>
+
+  <div class="label">Skills covered</div>
+  <ul class="content-list">
+    <li>Function calling and tool schema design</li>
+    <li>ReAct and Plan-and-Execute agent patterns</li>
+    <li>Agent memory &mdash; scratchpad, episodic, semantic stores</li>
+    <li>Multi-agent orchestration with LangGraph</li>
+    <li>Sandboxed code execution with E2B</li>
+    <li>Tool design &mdash; idempotency, LLM-friendly error messages</li>
+    <li>Loop detection, stuck detection, graceful failure handling</li>
+    <li>Human-in-the-loop approval steps</li>
+    <li>Computer use / browser agents with Playwright</li>
+    <li>Model Context Protocol (MCP) &mdash; integrating external tool ecosystems</li>
+    <li>LLM-as-judge evaluation patterns and bias mitigation</li>
+    <li>Agent evaluation &mdash; task completion rate, step efficiency, failure taxonomy</li>
+    <li>Red-teaming and adversarial evaluation</li>
+    <li>Evals-driven development &mdash; regression gates on agent behaviour</li>
+  </ul>
+
+  <div class="label">Tech stack</div>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>LangGraph</code></td><td>Multi-agent orchestration</td></tr>
+      <tr><td><code>OpenAI function calling</code> / <code>Anthropic tool use</code></td><td>Tool use APIs</td></tr>
+      <tr><td><code>Tavily</code></td><td>Web search tool</td></tr>
+      <tr><td><code>E2B</code></td><td>Sandboxed Python execution</td></tr>
+      <tr><td><code>Playwright</code></td><td>Browser automation</td></tr>
+      <tr><td><code>LangSmith</code></td><td>Agent tracing and observability</td></tr>
+      <tr><td><code>Redis</code></td><td>Short-term agent memory</td></tr>
+      <tr><td><code>FastAPI</code></td><td>Service layer</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="label">Deliverables</div>
+  <ul class="content-list">
+    <li>Multi-agent system with &ge;6 tools, served via FastAPI with full LangSmith tracing</li>
+    <li>Eval suite: 30 task scenarios with pass/fail/partial scoring and labelled failure modes</li>
+    <li>Agent observability dashboard &mdash; token spend, tool call frequency, failure mode breakdown</li>
+    <li>MCP integration demo: agent connects to at least one external MCP-compatible tool server</li>
+  </ul>
+
+  <div class="label">Extensions</div>
+  <ul class="content-list">
+    <li>Add a critic / validator agent that reviews the Writer&rsquo;s output before delivery</li>
+    <li>Implement browser-use for agents that need to navigate web UIs rather than APIs</li>
+    <li>Build an automated regression gate: PRs to the agent config trigger the eval suite</li>
+  </ul>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-project-6">
+  <h3 class="section-heading">Project 6 &mdash; LLMOps, production deployment &amp; cloud infrastructure</h3>
+  <dl class="project-meta">
+    <div><dt>Phase</dt><dd>Production</dd></div>
+    <div><dt>Domains</dt><dd>10, 11, 12</dd></div>
+    <div><dt>Items</dt><dd>30</dd></div>
+    <div><dt>GPU</dt><dd>No</dd></div>
+  </dl>
+
+  <div class="label">What you build</div>
+  <p class="body-text">Take the RAG system (Project 3) or the agent system (Project 5) and harden it to production grade across two tracks. <em>Track A &mdash; application layer:</em> full observability, semantic caching, A/B testing, feedback loops, safety guardrails, and CI/CD with eval gates. <em>Track B &mdash; cloud layer:</em> containerised deployment on AWS ECS, S3 for artefact storage, CloudWatch for infrastructure monitoring, and IAM least-privilege for all agent actions.</p>
+
+  <div class="label">Skills covered &mdash; application layer</div>
+  <ul class="content-list">
+    <li>Dockerised FastAPI deployment and async request handling</li>
+    <li>LLM observability with Langfuse &mdash; traces, spans, scores</li>
+    <li>Per-request token cost tracking and budget alerts</li>
+    <li>A/B testing LLM variants with statistical significance</li>
+    <li>Semantic caching to reduce redundant API calls</li>
+    <li>Feedback collection &mdash; thumbs up/down, implicit signals</li>
+    <li>Output drift detection in production</li>
+    <li>Model routing &mdash; cheap model for easy queries</li>
+    <li>Guardrails &mdash; NeMo Guardrails or Guardrails AI for output filtering</li>
+    <li>PII detection and redaction pipelines</li>
+    <li>Audit logging for every model call</li>
+    <li>Canary deployment and rollback strategies</li>
+    <li>CI/CD pipeline with automated eval gates</li>
+  </ul>
+
+  <div class="label">Skills covered &mdash; cloud layer</div>
+  <ul class="content-list">
+    <li>AWS ECS for containerised deployment</li>
+    <li>S3 for model artefacts, document corpora, eval outputs</li>
+    <li>Amazon Bedrock as an alternative managed inference backend</li>
+    <li>CloudWatch Logs + X-Ray for distributed tracing</li>
+    <li>AWS IAM least-privilege roles for agents and pipelines</li>
+    <li>Infrastructure as code with AWS CDK or Terraform</li>
+    <li>SQS for async task queuing in agent pipelines</li>
+    <li>AWS Cost Explorer for AI spend monitoring</li>
+  </ul>
+
+  <div class="label">Tech stack</div>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>Docker</code> + <code>FastAPI</code></td><td>Containerised service</td></tr>
+      <tr><td><code>Langfuse</code></td><td>LLM observability</td></tr>
+      <tr><td><code>AWS ECS</code></td><td>Container deployment</td></tr>
+      <tr><td><code>AWS S3</code></td><td>Artefact and corpus storage</td></tr>
+      <tr><td><code>Amazon Bedrock</code></td><td>Alternative managed inference</td></tr>
+      <tr><td><code>AWS CDK</code> or <code>Terraform</code></td><td>Infrastructure as code</td></tr>
+      <tr><td><code>Guardrails AI</code></td><td>Output filtering</td></tr>
+      <tr><td><code>Presidio</code></td><td>PII redaction</td></tr>
+      <tr><td><code>GitHub Actions</code></td><td>CI/CD pipeline</td></tr>
+      <tr><td><code>PostgreSQL</code></td><td>Feedback and state storage</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="label">Deliverables</div>
+  <ul class="content-list">
+    <li>Deployed public service on AWS ECS with S3-backed artefact storage</li>
+    <li>Langfuse dashboard: cost, latency, quality scores, user feedback</li>
+    <li>A/B test report with statistical significance on two model/prompt variants</li>
+    <li>Guardrails demo: before/after showing PII redaction and output filtering in action</li>
+    <li>CI/CD pipeline: PRs trigger eval suite; merge blocked on quality regression</li>
+    <li>IaC scripts (CDK or Terraform) that reproduce the full deployment from scratch</li>
+  </ul>
+
+  <div class="label">Extensions</div>
+  <ul class="content-list">
+    <li>Swap the inference backend to Amazon Bedrock and compare cost/latency vs. direct API</li>
+    <li>Implement a data flywheel: corrections logged to S3, trigger a new LoRA training job when 500 accumulate</li>
+    <li>Add Amazon CloudTrail audit log for every agent action</li>
+  </ul>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-project-7">
+  <h3 class="section-heading">Project 7 &mdash; Multimodal, reasoning &amp; frontier capstone</h3>
+  <dl class="project-meta">
+    <div><dt>Phase</dt><dd>Frontier</dd></div>
+    <div><dt>Domains</dt><dd>13, plus SOTA items from all domains</dd></div>
+    <div><dt>Items</dt><dd>15</dd></div>
+    <div><dt>GPU</dt><dd>Optional</dd></div>
+  </dl>
+
+  <div class="label">What you build</div>
+  <p class="body-text">A multimodal document intelligence pipeline that brings together the full stack. It ingests mixed-format documents (PDFs with embedded tables and images, scanned pages, structured spreadsheets). Vision-language models handle layout-aware extraction. A reasoning model handles complex multi-hop questions. A text-to-SQL interface answers structured data questions. A compact quantised SLM handles low-latency, high-volume classification on-device.</p>
+
+  <div class="label">Skills covered</div>
+  <ul class="content-list">
+    <li>Vision-language models &mdash; GPT-4V, Claude vision, LLaVA for document understanding</li>
+    <li>OCR integration and layout-aware extraction (Donut, Nougat)</li>
+    <li>Reasoning models &mdash; o1/o3-style inference-time compute and when to use them</li>
+    <li>Test-time compute scaling &mdash; self-consistency, best-of-N sampling</li>
+    <li>Text-to-SQL and natural language interfaces over structured databases</li>
+    <li>Long-context techniques &mdash; needle-in-haystack evaluation, context compression</li>
+    <li>Mixture of Experts &mdash; architecture understanding and inference implications</li>
+    <li>Small language models &mdash; Phi-3, Gemma, SmolLM for edge deployment</li>
+    <li>Model routing: fast SLM vs. full model vs. reasoning model decision logic</li>
+    <li>Whisper integration for voice input to the pipeline</li>
+  </ul>
+
+  <div class="label">Tech stack</div>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>GPT-4V</code> / <code>Claude vision</code></td><td>Vision-language understanding</td></tr>
+      <tr><td><code>Nougat</code> / <code>Surya</code></td><td>OCR and layout extraction</td></tr>
+      <tr><td><code>OpenAI o3</code> / <code>Claude</code></td><td>Reasoning model for complex queries</td></tr>
+      <tr><td><code>SQLite</code> / <code>PostgreSQL</code> + text-to-SQL</td><td>Structured data interface</td></tr>
+      <tr><td><code>Ollama</code> / <code>llama.cpp</code></td><td>On-device SLM inference</td></tr>
+      <tr><td><code>Whisper</code></td><td>Voice input</td></tr>
+      <tr><td><code>FastAPI</code> + <code>Streamlit</code></td><td>API and UI</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="label">Deliverables</div>
+  <ul class="content-list">
+    <li>Multimodal pipeline: PDF/image in &rarr; structured extraction + Q&amp;A interface</li>
+    <li>Model routing benchmark: which query types benefit from reasoning models vs. fast models vs. SLMs</li>
+    <li>Text-to-SQL demo: natural language &rarr; SQL &rarr; results over a real structured dataset</li>
+    <li>On-device inference demo (Ollama) with latency benchmarks vs. API calls</li>
+    <li>A retrospective write-up: what you would do differently across all 7 projects</li>
+  </ul>
+
+  <div class="label">Extensions</div>
+  <ul class="content-list">
+    <li>Add a Whisper-powered voice interface to the Q&amp;A system</li>
+    <li>Implement a self-consistency ensemble: run the reasoning model 5&times; and majority-vote the answer</li>
+    <li>Deploy the SLM as an AWS Lambda function for serverless edge inference</li>
+  </ul>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-deps">
+  <h3 class="section-heading">Dependency Chain</h3>
+  <p class="body-text">Each project hands a concrete artefact to the next. Project 2&rsquo;s retrieval API becomes Project 3&rsquo;s retrieval layer; Project 3&rsquo;s RAG pipeline (or Project 5&rsquo;s agent) becomes the system Project 6 hardens for production; Project 7 extends the full stack with multimodal, reasoning, and edge components.</p>
+
+  <div class="code-block">P1 (Foundations + Prompting + Structured Outputs)
+  &rarr; P2 (Embeddings + Retrieval &mdash; standalone, scoped to retrieval only)
+    &rarr; P3 (RAG &mdash; built on P2&rsquo;s retrieval layer)
+      &rarr; P4 (Fine-tuning + Inference &mdash; modifying the model itself)
+        &rarr; P5 (Agents &mdash; draws on P1 structured outputs + P3 RAG)
+          &rarr; P6 (LLMOps + Cloud &mdash; hardens P3 or P5 to production)
+            &rarr; P7 (Frontier capstone &mdash; extends the full stack)</div>
+
+  <p class="body-text">Cross-references between domains and projects:</p>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>Domain</th><th>Primary project</th><th>Also covered in</th></tr></thead>
+    <tbody>
+      <tr><td>1. Foundations</td><td>P1</td><td>Background for all</td></tr>
+      <tr><td>2. Prompt engineering</td><td>P1</td><td>P3, P5</td></tr>
+      <tr><td>3. Structured outputs</td><td>P1</td><td>P5</td></tr>
+      <tr><td>4. Embeddings &amp; search</td><td>P2</td><td>P3</td></tr>
+      <tr><td>5. RAG systems</td><td>P3</td><td>P5, P6, P7</td></tr>
+      <tr><td>6. Fine-tuning &amp; alignment</td><td>P4</td><td>&mdash;</td></tr>
+      <tr><td>7. Inference &amp; optimisation</td><td>P4</td><td>P6</td></tr>
+      <tr><td>8. Agents &amp; tool use</td><td>P5</td><td>P6, P7</td></tr>
+      <tr><td>9. Evaluation &amp; testing</td><td>P3 + P5</td><td>All projects</td></tr>
+      <tr><td>10. LLMOps &amp; production</td><td>P6</td><td>P3, P5</td></tr>
+      <tr><td>11. Safety &amp; governance</td><td>P6</td><td>P5, P7</td></tr>
+      <tr><td>12. Cloud infrastructure</td><td>P6</td><td>P7</td></tr>
+      <tr><td>13. Multimodal &amp; frontier</td><td>P7</td><td>Extensions in P1&ndash;P5</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-refs">
+  <h3 class="section-heading">Reference Material</h3>
+  <p class="body-text">The chapter references below point to a separate companion volume that pairs with this curriculum. Read each chapter when you start the corresponding project, not before &mdash; reading reference material in advance of needing it tends to slide off; reading it just-in-time sticks. The companion volume is not yet published online; the references stay here as a roadmap so you know what to consult when each project starts.</p>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>Companion chapters</th><th>Read when starting</th></tr></thead>
+    <tbody>
+      <tr><td>Ch. 1&ndash;2: Landscape + How LLMs Work</td><td>P1</td></tr>
+      <tr><td>Ch. 3: Choosing Models</td><td>P1</td></tr>
+      <tr><td>Ch. 4: Prompt Engineering</td><td>P1</td></tr>
+      <tr><td>Ch. 16.1&ndash;16.2: DSPy + Instructor</td><td>P1 extensions</td></tr>
+      <tr><td>Ch. 6.2&ndash;6.6: Embeddings, Vector DBs, Hybrid Search</td><td>P2</td></tr>
+      <tr><td>Ch. 6.1, 6.6&ndash;6.9: Full RAG + Advanced RAG</td><td>P3</td></tr>
+      <tr><td>Ch. 7.2: Structured Data + LLMs</td><td>P1 &amp; P7</td></tr>
+      <tr><td>Ch. 8: Document Intelligence</td><td>P3 &amp; P7</td></tr>
+      <tr><td>Ch. 5: Fine-tuning</td><td>P4</td></tr>
+      <tr><td>Ch. 14.3&ndash;14.4: vLLM, TGI, self-hosted serving</td><td>P4</td></tr>
+      <tr><td>Ch. 15: Managed Platforms (SageMaker, Bedrock)</td><td>P4 &amp; P6</td></tr>
+      <tr><td>Ch. 9&ndash;12: Agents, Tools, Memory, Multi-Agent</td><td>P5</td></tr>
+      <tr><td>Ch. 10.5: Model Context Protocol (MCP)</td><td>P5</td></tr>
+      <tr><td>Ch. 13: Orchestration Frameworks</td><td>P3 &amp; P5</td></tr>
+      <tr><td>Ch. 17: Evaluation and Testing</td><td>P3 &amp; P5</td></tr>
+      <tr><td>Ch. 18&ndash;20: Observability, Deployment, Safety</td><td>P6</td></tr>
+      <tr><td>Ch. 22&ndash;25: AWS Fundamentals</td><td>P6</td></tr>
+      <tr><td>Ch. 26: Amazon Bedrock Deep Dive</td><td>P6 extension</td></tr>
+      <tr><td>Ch. 27: SageMaker Deep Dive</td><td>P4 &amp; P6</td></tr>
+      <tr><td>Ch. 28&ndash;30: AWS Pipelines, Observability, IaC</td><td>P6</td></tr>
+      <tr><td>Ch. 21: Applied Domains (esp. 21.1 Legal AI)</td><td>P7</td></tr>
+      <tr><td>Ch. 31: Reference Architectures</td><td>P6 &amp; P7</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="p4-timeline">
+  <h3 class="section-heading">Estimated Timeline</h3>
+  <p class="body-text">At roughly 15&ndash;20 hours of focused work per week, the seven projects span about seven to eight months. The split below is what an experienced engineer with API familiarity should expect; first-timers in any phase should add 30&ndash;50% to that phase&rsquo;s estimate. Treat the numbers as upper bounds for planning, not lower bounds for ambition.</p>
+  <div class="table-wrap"><table class="content-table">
+    <thead><tr><th>Project</th><th>Phase</th><th>Duration</th></tr></thead>
+    <tbody>
+      <tr><td>P1 &mdash; Foundations &amp; structured outputs</td><td>Fundamentals</td><td>3&ndash;4 weeks</td></tr>
+      <tr><td>P2 &mdash; Semantic search &amp; retrieval</td><td>Retrieval</td><td>3 weeks</td></tr>
+      <tr><td>P3 &mdash; RAG systems</td><td>Knowledge</td><td>4 weeks</td></tr>
+      <tr><td>P4 &mdash; Fine-tuning &amp; inference</td><td>Model ownership</td><td>5&ndash;6 weeks</td></tr>
+      <tr><td>P5 &mdash; Agents &amp; eval frameworks</td><td>Autonomy</td><td>5 weeks</td></tr>
+      <tr><td>P6 &mdash; LLMOps &amp; cloud</td><td>Production</td><td>5&ndash;6 weeks</td></tr>
+      <tr><td>P7 &mdash; Multimodal &amp; frontier</td><td>Capstone</td><td>4 weeks</td></tr>
+      <tr><td><strong>Total</strong></td><td></td><td><strong>~7&ndash;8 months</strong></td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ==================== Four-Part Map ==================== -->
 <div class="reveal">
-  <h3 class="section-heading">The Complete Three-Part Map</h3>
+  <h3 class="section-heading">The Complete Four-Part Map</h3>
 
   <div class="code-block">&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
-&#x2502;  Part 1: Engineering Landscape                           &#x2502;
-&#x2502;  The 8 engineering disciplines &#x2014; the skills and domains  &#x2502;
-&#x2502;  (what areas of expertise exist in this field)            &#x2502;
+&#x2502;  Part 1: Engineering Landscape                            &#x2502;
+&#x2502;  The 8 engineering disciplines &mdash; the skills and domains &#x2502;
+&#x2502;  (what areas of expertise exist in this field)             &#x2502;
 &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
                             &#x2193;
 &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
-&#x2502;  Part 2: What Developers Actually Do                     &#x2502;
-&#x2502;  The 7 problem areas developers solve on projects         &#x2502;
-&#x2502;  (what you're doing when you sit down to build)           &#x2502;
+&#x2502;  Part 2: What Developers Actually Do                      &#x2502;
+&#x2502;  The 7 problem areas developers solve on projects          &#x2502;
+&#x2502;  (what you&rsquo;re doing when you sit down to build)           &#x2502;
 &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
                             &#x2193;
 &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
-&#x2502;  Part 3: What People Actually Ship                       &#x2502;
-&#x2502;  The 10 product categories + the thinking behind each     &#x2502;
-&#x2502;  + where to focus as an AI engineer                       &#x2502;
+&#x2502;  Part 3: What People Actually Ship                        &#x2502;
+&#x2502;  The 10 product categories + the thinking behind each      &#x2502;
+&#x2502;  + where to focus as an AI engineer                        &#x2502;
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+                            &#x2193;
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502;  Part 4: The Plan                                          &#x2502;
+&#x2502;  13 study domains + 7 sequential projects, ~7&ndash;8 months &#x2502;
+&#x2502;  (how to actually become an LLM engineer, not just read   &#x2502;
+&#x2502;   about being one)                                         &#x2502;
 &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</div>
 
-  <p class="body-text">The three parts answer three different questions:</p>
+  <p class="body-text">The four parts answer four different questions:</p>
   <ul class="content-list">
     <li><strong>Part 1:</strong> What are the engineering disciplines in this field?</li>
     <li><strong>Part 2:</strong> What problems do I solve on a real project?</li>
     <li><strong>Part 3:</strong> What products exist, why do they exist, and where should I invest my learning?</li>
+    <li><strong>Part 4:</strong> What do I actually do this month, next month, the month after &mdash; in what order, with what artefacts to show for it?</li>
   </ul>
 </div>
 

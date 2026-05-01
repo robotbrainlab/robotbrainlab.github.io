@@ -787,6 +787,13 @@
 
   <a class="toc-part-label" href="#intro">Introduction</a>
 
+  <a class="toc-part-label" href="#field-context">Field Context</a>
+  <a href="#field-stack" class="toc-sub">The Industry as a Stack</a>
+  <a href="#field-questions" class="toc-sub">Four Questions to Classify Anything</a>
+  <a href="#field-misconceptions" class="toc-sub">Common Misconceptions</a>
+  <a href="#field-developer" class="toc-sub">What Compounds for a Developer</a>
+  <a href="#field-hype" class="toc-sub">Staying Calm Amid the Hype</a>
+
   <a class="toc-part-label" href="#part1">Part 1 &mdash; The Five Topics</a>
   <a href="#t-data-analysis" class="toc-sub">Data Analysis</a>
   <a href="#t-ml" class="toc-sub">Machine Learning</a>
@@ -816,6 +823,8 @@
   <a class="toc-part-label" href="#part4">Part 4 &mdash; State of the Art</a>
 
   <a class="toc-part-label" href="#mirror-section">Closing</a>
+
+  <a class="toc-part-label" href="#glossary">Glossary</a>
 
   <a class="toc-part-label" href="#resources-section">Resources</a>
 
@@ -862,6 +871,172 @@
   <p class="body-text">
     The premise is simple: <strong>theory without practice is academic</strong> &mdash; you understand the mathematics but cannot ship anything. <strong>Practice without theory is fragile</strong> &mdash; you can follow a tutorial, but the moment something behaves unexpectedly, you have no mental model to fall back on. Both tracks together produce someone who can reason about <em>and</em> build intelligent systems.
   </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  FIELD CONTEXT (preamble before Part 1)                       -->
+<!-- ============================================================ -->
+
+<div class="reveal" id="field-context">
+  <h3 class="section-heading">Field Context: Where This Sits in AI</h3>
+  <p class="body-text">
+    Before walking through the dual-track curriculum, it helps to set the wider scope. Most of what follows assumes you have a stable mental model of what the AI industry actually looks like &mdash; where the value sits, what kind of work is being done at each layer, and which announcements you should pay attention to versus the eighty percent that you can safely ignore. That mental model is not optional. It is what keeps you from chasing hype, mis-prioritising your learning, or over-indexing on whichever framework happens to be popular this quarter.
+  </p>
+  <p class="body-text">
+    AI in 2026 is broader than large language models, even though LLMs dominate the headlines. The field includes several distinct technical traditions, each with its own research communities and industrial applications: language models, vision models (and the increasingly fused vision-language models), speech (transcription and synthesis), image and video generation, robotics and embodied AI, scientific AI (protein structure, drug discovery, weather forecasting), and the classical machine learning that still runs most production systems &mdash; recommendation engines, fraud detection, credit scoring &mdash; on gradient-boosted trees rather than transformers. A developer who treats &ldquo;AI&rdquo; as synonymous with &ldquo;LLMs&rdquo; is building on narrower ground than they think. Most of this guide focuses on language and LLM systems because that is where the field&rsquo;s gravity sits today, but the rest of the discipline keeps mattering, and the centre of gravity has shifted before.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="field-stack">
+  <h3 class="section-heading">The AI Industry as a Stack</h3>
+  <p class="body-text">
+    The clearest mental model for the industry is a vertical stack, where each layer depends on the one below it. Value capture, technical skills, hiring patterns, and business dynamics differ substantially at each level. Knowing which layer you are looking at tells you what skills matter, what the economics look like, and who the competitors are.
+  </p>
+
+  <h4 class="subsection-heading">Layer 1 &mdash; Compute and hardware</h4>
+  <p class="body-text">
+    The physical substrate: chips, memory, networking, and data centres. NVIDIA dominates GPU training (H100, H200, B100/B200) with roughly 80&ndash;90% market share; AMD and Intel are distant. Hyperscalers build custom silicon as strategic hedges &mdash; Google&rsquo;s TPUs, Amazon Trainium and Inferentia, Microsoft Maia, Meta MTIA. A small group of inference-optimised startups (Groq, Cerebras, SambaNova, Tenstorrent) bet that running trained models has different optimal hardware than training them. Networking &mdash; InfiniBand, NVLink, optical interconnects &mdash; is often the actual bottleneck on a training run. This layer captures enormous economic value because everything above it depends on it; relatively few people work here directly, and those who do are highly specialised.
+  </p>
+
+  <h4 class="subsection-heading">Layer 2 &mdash; Cloud and infrastructure</h4>
+  <p class="body-text">
+    The layer that turns raw hardware into consumable compute. Hyperscalers (AWS, Azure, GCP) host most serious training and inference, each with at least one frontier-lab partnership. Neoclouds (CoreWeave, Lambda Labs, Crusoe) are GPU-first clouds built specifically for AI workloads, often cheaper than the hyperscalers. Inference providers (Together AI, Fireworks, Modal, Anyscale, Replicate, Baseten) host open-source models behind APIs so developers can use Llama, Qwen, or DeepSeek without managing infrastructure themselves. Orchestration tooling &mdash; Kubernetes, Ray, Slurm, MLOps platforms &mdash; sits on top.
+  </p>
+
+  <h4 class="subsection-heading">Layer 3 &mdash; Foundation model labs</h4>
+  <p class="body-text">
+    The companies that train frontier models from scratch. Frontier closed labs &mdash; OpenAI, Anthropic, Google DeepMind, xAI &mdash; spend hundreds of millions to billions on single training runs. A well-resourced second tier (Meta with Llama, Mistral, Cohere) ships a mix of open and closed models. Major non-US players matter increasingly: DeepSeek released highly capable open-weight models in 2025 that reshaped competitive dynamics; Alibaba&rsquo;s Qwen team, Moonshot (Kimi), and Zhipu have built a Chinese open-source ecosystem that is genuinely competitive at the frontier. The economics of this layer are brutal &mdash; only a handful of organisations can play, and the list does not change often.
+  </p>
+
+  <h4 class="subsection-heading">Layer 4 &mdash; Open-weight models</h4>
+  <p class="body-text">
+    A parallel ecosystem where model weights are released publicly. Llama (Meta), Mistral, Qwen (Alibaba), DeepSeek, Gemma (Google) are the headline families. Because weights are public, anyone can run them on their own hardware, fine-tune on proprietary data, and modify freely. This partially invalidates the widespread belief that &ldquo;only the labs can build serious AI products.&rdquo; The gap between best-closed and best-open has narrowed substantially &mdash; often to months rather than years.
+  </p>
+
+  <h4 class="subsection-heading">Layer 5 &mdash; Data and evaluation</h4>
+  <p class="body-text">
+    The layer that turns raw models into useful ones, and tells you whether your system actually works. Training-data providers (Scale AI, Surge, Mercor) produce human-labelled data for RLHF and supervised fine-tuning. Synthetic data &mdash; LLMs generating training data for other LLMs &mdash; is increasingly central. Evaluation tooling (Braintrust, Arize, LangSmith, Weights &amp; Biases; open frameworks like inspect-ai, promptfoo) is the rapidly growing discipline of actually measuring whether a system works for a given task. <strong>This layer is where the real engineering craft of applied AI lives</strong>, and it is under-taught relative to its importance.
+  </p>
+
+  <h4 class="subsection-heading">Layer 6 &mdash; Orchestration and frameworks</h4>
+  <p class="body-text">
+    Tools to compose LLM calls into larger systems: retrieval, tool use, agents, workflows. General-purpose frameworks (LangChain, LangGraph, LlamaIndex, Haystack), multi-agent frameworks (CrewAI, AutoGen, MetaGPT, Swarm), programmatic optimisation (DSPy), lightweight alternatives (Pydantic AI, Instructor, BAML), and the &ldquo;no framework&rdquo; option that many serious production teams quietly choose. <strong>Framework dominance in this layer shifts roughly every 12&ndash;18 months. What persists across shifts is the underlying patterns:</strong> retrieval-augmented generation, tool calling, structured output, agent loops, memory management, evaluation. Master the patterns, and any framework becomes learnable in a week.
+  </p>
+
+  <h4 class="subsection-heading">Layer 7 &mdash; Applications</h4>
+  <p class="body-text">
+    Where most of the industry sits by headcount. Three sub-types worth distinguishing. <em>Horizontal products</em> (ChatGPT, Claude.ai, Gemini, Perplexity, Cursor, Windsurf) compete on raw capability and distribution; defensibility is hardest here. <em>Vertical AI products</em> (Harvey/Hebbia/EvenUp in legal; Abridge/Ambience/OpenEvidence in medical; Hebbia and Rogo in finance; Decagon and Sierra in customer support; Cognition and Cursor in code) win through domain expertise, workflow integration, proprietary data, and regulatory relationships &mdash; not model capability. Many have reached multi-billion-dollar valuations without owning any foundation models. <em>AI features inside existing products</em> (Notion AI, Microsoft Copilot, Salesforce Einstein, Zoom AI Companion, thousands more) are the largest category by sheer volume; most applied AI work happens here.
+  </p>
+
+  <h4 class="subsection-heading">Layer 8 &mdash; Safety, alignment, and governance</h4>
+  <p class="body-text">
+    Work aimed at making models behave well and understanding their internals. Alignment research (RLHF, Constitutional AI, deliberative alignment), interpretability (Anthropic&rsquo;s interpretability team, EleutherAI, independent researchers), red-teaming and harm evaluation, policy and governance, and AI security (prompt injection defence, model supply chain, jailbreak resistance). A legitimate career track with its own research agenda, conferences, and funding &mdash; both inside frontier labs and at independent organisations (METR, Apollo Research, Redwood Research).
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="field-questions">
+  <h3 class="section-heading">Four Questions to Classify Anything</h3>
+  <p class="body-text">
+    Instead of asking &ldquo;is this a model owner or an API user?&rdquo;, ask these four questions about any company, product, tool, or job posting you encounter. They give you a much richer picture than a simple binary.
+  </p>
+
+  <h4 class="subsection-heading">1. Where in the stack does it operate?</h4>
+  <p class="body-text">Compute, cloud, model training, data/evaluation, orchestration, application (horizontal/vertical/embedded), or safety. A job at NVIDIA is a completely different animal from a job at a legal-AI startup, even though both are &ldquo;in AI.&rdquo;</p>
+
+  <h4 class="subsection-heading">2. What is the moat?</h4>
+  <p class="body-text">Model capability is only one possible moat, and often not the most durable. Others include <strong>proprietary data</strong> (Abridge has medical recordings; Bloomberg has decades of financial data), <strong>workflow integration</strong> (Cursor lives inside your IDE; Harvey lives inside law-firm document workflows), <strong>distribution</strong> (Microsoft puts Copilot in front of a billion Office users), <strong>domain expertise</strong>, <strong>regulatory approval</strong>, and <strong>brand and trust</strong>. Most successful application-layer companies do not have a model moat &mdash; they have a data, workflow, or distribution moat, with the model as a component.</p>
+
+  <h4 class="subsection-heading">3. Closed or open?</h4>
+  <p class="body-text">A company that builds on GPT via API has a very different risk profile from one that hosts open-weight Llama or Qwen models it controls. Closed models give a higher capability ceiling and zero infrastructure burden but make you a tenant on someone else&rsquo;s platform. Open models give full control, data privacy, predictable costs, and deep fine-tuning ability &mdash; but you own operations and often trail the frontier in some capabilities. Many serious companies use both: closed frontier models for the hardest tasks, open models for routine ones, chosen per-query.</p>
+
+  <h4 class="subsection-heading">4. Horizontal or vertical?</h4>
+  <p class="body-text">Horizontal players compete on general capability, distribution, and UX across many use cases. Vertical players compete on domain depth, workflow fit, and defensibility within a specific industry. Ceiling per company is lower than horizontal winners, but there are more of them and the competition is less brutal per vertical.</p>
+
+  <h4 class="subsection-heading">Using the framework</h4>
+  <p class="body-text">Run any AI entity through these four axes and you get a coherent picture: <em>&ldquo;This is a vertical application in legal, using closed APIs, whose moat is proprietary contract data and deep integration with law firm workflows.&rdquo;</em> Compare to: <em>&ldquo;This is a horizontal application for coding, using a mix of closed and open models, whose moat is UX and distribution to developers.&rdquo;</em> Very different businesses, very different skills required.</p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="field-misconceptions">
+  <h3 class="section-heading">Common Misconceptions Worth Correcting</h3>
+
+  <h4 class="subsection-heading">&ldquo;Only model owners can build powerful things.&rdquo;</h4>
+  <p class="body-text">The single biggest distortion in how developers think about AI careers. The most valuable application-layer companies &mdash; Cursor, Harvey, Perplexity, Abridge, Hebbia &mdash; do not train their own foundation models. They win on proprietary data, deep workflow integration, domain expertise, and UX. For most real-world AI products, the hard problems are getting the right data in front of the model at the right moment, structuring outputs reliably, measuring whether the system works, integrating with existing tools, handling edge cases and adversarial inputs, and managing latency, cost, and reliability at scale. None of these require owning a foundation model.</p>
+
+  <h4 class="subsection-heading">&ldquo;The API layer is where 90% of the industry is, so the other layers don&rsquo;t matter.&rdquo;</h4>
+  <p class="body-text">Roughly true by headcount; misleading as a career signal. Infrastructure, data, evaluation, research, and safety layers employ fewer people but are disproportionately influential, pay well, hire steadily, and tend to have better job security because they are further from the commodity end of the value chain.</p>
+
+  <h4 class="subsection-heading">&ldquo;LangChain, LangGraph, CrewAI are what you need to learn.&rdquo;</h4>
+  <p class="body-text">A 2024-shaped framing. Not wrong, but it over-weights tools that are rapidly evolving. What persists across framework cycles is RAG, tool use / function calling, structured output, agent loops, memory and state management, evaluation harnesses, and observability. If you want to invest deeply in one thing right now, invest in <strong>evaluation and observability</strong> rather than any particular agent framework. Evaluation is the skill gap in the industry, and it is durable.</p>
+
+  <h4 class="subsection-heading">&ldquo;Bigger model = better product.&rdquo;</h4>
+  <p class="body-text">Model scale matters, but product quality depends on many things that have nothing to do with raw capability: latency, cost, reliability, consistency, personality, integration, fit to the specific task. A product built on a smaller, cheaper model that runs in 200ms and never fails can beat a product built on the largest frontier model that takes 8 seconds and occasionally hallucinates catastrophically.</p>
+
+  <h4 class="subsection-heading">&ldquo;AI will replace software engineers.&rdquo;</h4>
+  <p class="body-text">A more honest framing: AI is changing what software engineering looks like. The mechanical parts of the job &mdash; writing boilerplate, translating specifications to code, looking up syntax &mdash; are being automated. The harder parts &mdash; deciding what to build, understanding user needs, managing complexity, evaluating tradeoffs, debugging subtle system behaviour, coordinating with other humans &mdash; are not. Engineers who embrace AI tooling and focus on the hard parts become more productive and more valuable, not less.</p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="field-developer">
+  <h3 class="section-heading">What Compounds for a Developer</h3>
+  <p class="body-text">
+    Four categories of skill compound over time. Each has a distinct reason for being durable.
+  </p>
+
+  <h4 class="subsection-heading">Foundations</h4>
+  <p class="body-text">
+    Understand how transformers work at a conceptual level &mdash; tokenisation, attention, training vs. inference, pre-training and fine-tuning and RLHF, context windows, sampling parameters. Also the main applied techniques: RAG (chunking, embeddings, vector databases, hybrid search, re-ranking), fine-tuning variants (LoRA, QLoRA, instruction tuning, preference tuning), quantisation, tool use, prompt engineering as an empirical discipline. And the economics: what inference actually costs, how latency trades off with quality, why caching matters. This knowledge decays slowly &mdash; a developer who understood attention in 2023 still understands it in 2026; the specifics of frameworks have turned over several times in the same period.
+  </p>
+
+  <h4 class="subsection-heading">Evaluation</h4>
+  <p class="body-text">
+    The skill gap in the industry right now. Most developers can get an LLM to do something that looks right in a demo. Far fewer can tell you, with statistical confidence, whether their system works on the distribution of inputs it will see in production. Building evaluation sets, writing judge prompts, measuring inter-rater agreement, tracking regressions, evaluating multi-turn agents (which is much harder than single-turn evaluation), sampling production traffic intelligently. Teams who can do this ship real products. Teams who cannot ship demos. The gap is enormous and under-advertised.
+  </p>
+
+  <h4 class="subsection-heading">Domain depth</h4>
+  <p class="body-text">
+    Generalist &ldquo;LLM engineers&rdquo; are becoming a commodity. Domain experts who can build LLM systems are scarce and expensive, and will remain so. Pick a domain you understand &mdash; legal, medical, finance, scientific, compliance, operations, education, customer support &mdash; and go deep enough to know what a good output actually looks like. That judgement is irreplaceable: it is what allows you to build evaluation sets, spot failure modes, and design the right workflows. Most people building AI for a particular industry do not understand how the work in that industry actually gets done; combining technical skill with genuine domain understanding is a rare and defensible position.
+  </p>
+
+  <h4 class="subsection-heading">Shipping end-to-end</h4>
+  <p class="body-text">
+    Build complete systems, not just notebook demos. Data ingestion, storage and retrieval, model calls, validation, eval harness, observability, deployment, feedback loops. Shipping the full loop once teaches you more than a year of tutorials, because the pieces that turn out to be hard are almost never the pieces you expected to be hard, and you only discover this by building. The seven-project plan in <a href="llm-engineering.html#part4" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Part 4 of the LLM Engineering Landscape</a> is a structured way to force yourself through that loop seven times in seven different domains.
+  </p>
+
+  <h4 class="subsection-heading">A meta-skill: reading papers</h4>
+  <p class="body-text">
+    Being able to skim an arXiv paper in 15 minutes and extract its core idea is a superpower. It keeps you oriented when hype cycles hit, lets you evaluate claims rather than react to headlines, and gives you a year or two of warning about what is coming into production. You do not need to read every paper &mdash; follow a handful of good curators and dig into one or two papers per week that seem directly relevant.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="field-hype">
+  <h3 class="section-heading">Staying Calm Amid the Hype</h3>
+  <p class="body-text">Three mental moves help enormously.</p>
+
+  <h4 class="subsection-heading">Separate the timelines</h4>
+  <p class="body-text">Three streams of information arrive on the same feed and get flattened into one blur of urgency. <strong>Product announcements</strong> matter this quarter &mdash; they affect what you can build today. <strong>Research papers</strong> matter in one to three years &mdash; they affect what becomes possible later. <strong>Speculation about AGI timelines, superintelligence, and civilisational trajectories</strong> mostly does not matter for what you should do tomorrow. Keep these streams separate in your head and the noise drops by perhaps 70%.</p>
+
+  <h4 class="subsection-heading">Distinguish capability from deployment</h4>
+  <p class="body-text">Labs announce capabilities constantly. The gap between &ldquo;a model can do X in a demo&rdquo; and &ldquo;a reliable product that does X in production&rdquo; is often 12 to 24 months. Most of the real work &mdash; the work developers actually get paid for &mdash; lives in that gap. A new capability announcement is rarely a reason to panic or pivot; it is a signal that, two years from now, a certain kind of product will become buildable by many people.</p>
+
+  <h4 class="subsection-heading">Match your learning horizon to your goal</h4>
+  <p class="body-text">If your horizon is <em>six months</em> (e.g., getting a specific job), learn whatever stack the target role uses. Frameworks matter. Specific tools matter. Brand names on your resume matter. If your horizon is <em>five years</em> (building a durable career), learn fundamentals, evaluation, and a domain. Frameworks will turn over; fundamentals will not. Both are valid strategies. Confusing them &mdash; trying to chase every new framework while also claiming to build deep foundations &mdash; produces unnecessary anxiety and shallow expertise in both directions.</p>
+
+  <h4 class="subsection-heading">Notice what is not changing</h4>
+  <p class="body-text">Amid constant announcement, it is worth pausing to notice what has stayed stable for years: the value of clean data; the importance of understanding your users; the fundamentals of software engineering (testing, observability, version control, code review); the patterns of good system design; the human skills of communication, project management, and collaboration. These are not disrupted by new models. If anything, they become more valuable as the technical baseline rises &mdash; because they are the differentiators.</p>
+
+  <p class="body-text"><strong>You do not need to keep up with everything.</strong> You need to stay grounded in fundamentals, deep in one domain, practiced at shipping, and patient with yourself. The people who win long careers in this field are not the ones who read every announcement. They are the ones who build a framework for thinking, keep refining it, and let the noise pass them by. The rest of this guide is the framework.</p>
 </div>
 
 <hr class="content-rule" />
@@ -1314,6 +1489,44 @@
   <p class="body-text">
     This is the core design principle of the Data &amp; Intelligence discipline. Not &ldquo;learn the theory, then learn the practice&rdquo; sequentially, but &ldquo;study them in parallel, topic by topic, so that each illuminates the other.&rdquo; The mirror is not a structural convenience. It is the learning strategy itself.
   </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ============================================================ -->
+<!--  GLOSSARY                                                     -->
+<!-- ============================================================ -->
+<div class="reveal" id="glossary">
+  <h3 class="section-heading">Glossary</h3>
+  <p class="body-text">Short definitions for the terms used throughout this guide and the rest of the AI literature you are likely to read. Useful as a quick reference when something in a paper or a job posting trips you up.</p>
+
+  <p class="body-text"><strong>Agent.</strong> An LLM-powered system that takes actions in a loop: it reasons, calls tools, observes results, and iterates until a goal is met.</p>
+
+  <p class="body-text"><strong>Embedding.</strong> A vector representation of text (or images, audio) used for semantic search and retrieval.</p>
+
+  <p class="body-text"><strong>Fine-tuning.</strong> Continued training of a pre-trained model on a smaller, task-specific dataset. Variants include LoRA (parameter-efficient), instruction tuning, and preference tuning (RLHF, DPO).</p>
+
+  <p class="body-text"><strong>Foundation model.</strong> A large model trained on broad data, intended to be adapted to many downstream tasks.</p>
+
+  <p class="body-text"><strong>Frontier model.</strong> A foundation model at or near the current state of the art.</p>
+
+  <p class="body-text"><strong>Inference.</strong> Running a trained model to produce outputs. Distinct from training.</p>
+
+  <p class="body-text"><strong>LoRA (Low-Rank Adaptation).</strong> A parameter-efficient fine-tuning technique that trains small adapter matrices instead of the full model.</p>
+
+  <p class="body-text"><strong>MoE (Mixture of Experts).</strong> An architecture where only a subset of the model&rsquo;s parameters are activated for any given input, enabling larger models at lower inference cost.</p>
+
+  <p class="body-text"><strong>Open-weight model.</strong> A model whose parameters are publicly released, allowing self-hosting, fine-tuning, and modification.</p>
+
+  <p class="body-text"><strong>RAG (Retrieval-Augmented Generation).</strong> Putting relevant external information into the model&rsquo;s context at query time, instead of relying on what the model memorised during training.</p>
+
+  <p class="body-text"><strong>RLHF (Reinforcement Learning from Human Feedback).</strong> A training technique that uses human preferences to shape model behaviour. Variants include DPO, Constitutional AI, and RLAIF.</p>
+
+  <p class="body-text"><strong>Tool use / function calling.</strong> Structured interaction where the model requests execution of external functions and receives their results.</p>
+
+  <p class="body-text"><strong>Quantisation.</strong> Reducing the numerical precision of model weights (e.g., from 16-bit to 4-bit) to make the model smaller and faster, at some cost to quality.</p>
+
+  <p class="body-text"><strong>Vector database.</strong> A database optimised for similarity search over embeddings. Examples: Pinecone, Weaviate, Qdrant, pgvector.</p>
 </div>
 
 <hr class="content-rule" />
