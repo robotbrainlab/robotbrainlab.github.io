@@ -486,7 +486,7 @@
   <!-- ENGINEERING TRACK: BUILDING -->
   <div class="track-header">Engineering</div>
   <div class="track-title">Building</div>
-  <div class="track-desc">Getting a model from a notebook into production &mdash; the model-code half of the Engineering track. Builds on <strong>Software Engineering</strong> (writing the model code, choosing frameworks, structuring experiments). The infrastructure underneath and the operational practices that keep models alive live in the merged <strong>Infrastructure Engineering &amp; Operating</strong> sub-track that follows, labelled <strong>MLOps &amp; LLMOps</strong>.</div>
+  <div class="track-desc">Getting a model from a notebook into production. Building covers <strong>Software Engineering</strong> (writing the model code, choosing frameworks, structuring experiments) and <strong>Infrastructure Engineering</strong> (pipelines, registries, serving stack). The <strong>Operating</strong> sub-track below covers the four general engineering disciplines &mdash; Reliability, Performance, Security, Observability &mdash; that apply to any production system. Both Infrastructure Engineering and the four Operating disciplines are covered in practice by the <strong>MLOps</strong> and <strong>LLMOps</strong> spanning practices listed in the final sub-track.</div>
 
   <div class="sub-label">Software Engineering</div>
   <div class="sub-label-desc">Mirrors the Science track topic-for-topic, but with implementation-focused books and code repositories instead of theory.</div>
@@ -546,12 +546,8 @@
     Related: <a href="llm-engineering.html" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">The LLM Engineering Landscape</a> &mdash; a three-part deep dive into what engineers actually build with LLMs.
   </p>
 
-  <!-- ENGINEERING TRACK: INFRASTRUCTURE & OPERATING (merged: MLOps & LLMOps) -->
-  <div class="track-title">Infrastructure Engineering &amp; Operating</div>
-  <div class="track-desc">The build/operate loop for ML and LLM-based systems &mdash; pipelines, registries, deployment, drift monitoring, retraining, evaluation, cost and latency. Infrastructure Engineering and Operating are merged into a single sub-track because in D&amp;I the same engineer designs the infrastructure, ships it, watches it, and fixes it; the build/operate boundary is structural, not functional. The two anchors below &mdash; <strong>MLOps</strong> and <strong>LLMOps</strong> &mdash; cover both halves of that loop.</div>
-
-  <div class="sub-label">MLOps</div>
-  <div class="sub-label-desc">The closed-loop discipline for ML systems: training and feature pipelines, model registries, deployment automation, drift monitoring, retraining cadences, data lineage. Foundational reference is Chip Huyen&rsquo;s <em>Designing Machine Learning Systems</em>.</div>
+  <div class="sub-label">Infrastructure Engineering</div>
+  <div class="sub-label-desc">Pipelines, model registries, deployment automation, and the serving stack underneath the model code. In D&amp;I this is covered end-to-end by the <strong>MLOps</strong> and <strong>LLMOps</strong> resources in the final sub-track below, so this row stays empty here.</div>
 
   <table class="resource-table reveal">
     <thead>
@@ -563,7 +559,67 @@
     </thead>
     <tbody>
       <tr>
-        <td class="col-topic">ML Systems Design</td>
+        <td class="col-topic">Infrastructure Engineering</td>
+        <td data-label="Books" class="cell-empty">&mdash;</td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ENGINEERING TRACK: OPERATING -->
+  <div class="track-title">Operating</div>
+  <div class="track-desc">Keeping a running ML or LLM system alive &mdash; the four general engineering disciplines that apply to any production system. <strong>Reliability Engineering (SRE)</strong>, <strong>Performance Engineering</strong>, <strong>Security Engineering</strong>, and <strong>Observability Engineering</strong> are field-agnostic; the D&amp;I-specific treatment of all four is covered by the <strong>MLOps</strong> and <strong>LLMOps</strong> resources in the next sub-track.</div>
+
+  <table class="resource-table reveal">
+    <thead>
+      <tr>
+        <th class="col-topic">Topic</th>
+        <th class="col-books">Books</th>
+        <th class="col-courses">Courses</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-topic">Reliability Engineering (SRE)</td>
+        <td data-label="Books" class="cell-empty">&mdash;</td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+      <tr>
+        <td class="col-topic">Performance Engineering</td>
+        <td data-label="Books" class="cell-empty">&mdash;</td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+      <tr>
+        <td class="col-topic">Security Engineering</td>
+        <td data-label="Books" class="cell-empty">&mdash;</td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+      <tr>
+        <td class="col-topic">Observability Engineering</td>
+        <td data-label="Books" class="cell-empty">&mdash;</td>
+        <td data-label="Courses" class="cell-empty">&mdash;</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ENGINEERING TRACK: MLOPS & LLMOPS (spanning practices) -->
+  <div class="track-title">MLOps &amp; LLMOps</div>
+  <div class="track-desc">The two spanning practices that cover Infrastructure Engineering plus all four Operating disciplines, giving them their ML- and LLM-specific treatment. <strong>MLOps</strong> closes the model lifecycle loop &mdash; pipelines, registries, deployment, drift monitoring, retraining. <strong>LLMOps</strong> specialises the same loop for LLM-based systems &mdash; prompt and config versioning, evaluation harnesses, token-cost and latency monitoring, semantic caching, prompt-injection defense.</div>
+
+  <div class="sub-label">MLOps</div>
+  <div class="sub-label-desc">The closed-loop discipline for ML systems. Foundational reference is Chip Huyen&rsquo;s <em>Designing Machine Learning Systems</em>.</div>
+
+  <table class="resource-table reveal">
+    <thead>
+      <tr>
+        <th class="col-topic">Topic</th>
+        <th class="col-books">Books</th>
+        <th class="col-courses">Courses</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-topic">MLOps</td>
         <td data-label="Books">
           <span class="cell-item"><a href="https://huyenchip.com/books/" target="_blank" rel="noopener">Designing Machine Learning Systems &ndash; Chip Huyen</a> <span class="cell-type">Book</span></span>
         </td>
@@ -575,7 +631,7 @@
   </table>
 
   <div class="sub-label">LLMOps</div>
-  <div class="sub-label-desc">The same closed-loop discipline specialised for LLM-based systems: prompt and configuration version management, evaluation harnesses, token-cost and latency monitoring, semantic caching, prompt-injection defense. See also the <a href="llm-engineering.html" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">LLM Engineering Landscape</a> for the full eight-discipline view.</div>
+  <div class="sub-label-desc">The same closed-loop discipline specialised for LLM-based systems. See also the <a href="llm-engineering.html" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">LLM Engineering Landscape</a> for the full eight-discipline view.</div>
 
   <table class="resource-table reveal">
     <thead>
@@ -587,7 +643,7 @@
     </thead>
     <tbody>
       <tr>
-        <td class="col-topic">LLM Operations</td>
+        <td class="col-topic">LLMOps</td>
         <td data-label="Books">
           <span class="cell-item"><a href="https://huyenchip.com/books/" target="_blank" rel="noopener">AI Engineering &ndash; Chip Huyen</a> <span class="cell-type">Book</span></span>
         </td>

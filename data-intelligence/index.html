@@ -858,7 +858,13 @@
   <a href="#eng-dl" class="toc-sub-sub">Deep Learning</a>
   <a href="#eng-nlp" class="toc-sub-sub">NLP</a>
   <a href="#eng-transformers" class="toc-sub-sub">Transformers &amp; LLMs</a>
-  <a href="#mlops-llmops" class="toc-sub">Infrastructure Engineering &amp; Operating</a>
+  <a href="#eng-infra" class="toc-sub-sub">Infrastructure Engineering</a>
+  <a href="#operating" class="toc-sub">Operating</a>
+  <a href="#eng-sre" class="toc-sub-sub">Reliability Engineering (SRE)</a>
+  <a href="#eng-perf" class="toc-sub-sub">Performance Engineering</a>
+  <a href="#eng-sec" class="toc-sub-sub">Security Engineering</a>
+  <a href="#eng-obs" class="toc-sub-sub">Observability Engineering</a>
+  <a href="#mlops-llmops" class="toc-sub">MLOps &amp; LLMOps (spanning practices)</a>
   <a href="#eng-mlops" class="toc-sub-sub">MLOps</a>
   <a href="#eng-llmops" class="toc-sub-sub">LLMOps</a>
 
@@ -1043,8 +1049,8 @@
     Engineering splits into two sub-branches that map cleanly onto the rest of this site:
   </p>
   <ul class="content-list">
-    <li><strong>Model Engineering</strong> &mdash; the work of modifying or running the models themselves. Dataset curation, supervised fine-tuning, preference alignment (LoRA, DPO, RLHF), inference servers and their optimisation (vLLM, KV-cache eviction, continuous batching, PagedAttention), quantisation for deployment, model merging, GPU memory management. The tools are PyTorch, Hugging Face, vLLM, bitsandbytes, Weights &amp; Biases. This is the <strong>MLOps</strong> half of the merged Infrastructure Engineering &amp; Operating sub-section later in this guide, and it is exactly Domains 6&ndash;7 and Project 4 of <a href="llm-engineering.html#part4" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Part 4 of the LLM Engineering Landscape</a>. Outside of frontier labs, most organisations need only a small handful of Model Engineers &mdash; this is a specialised role, not a default career path.</li>
-    <li><strong>Application Engineering</strong> &mdash; the work of building systems and products on top of existing models. Prompting and prompt versioning, structured output and validation, retrieval-augmented generation, agents and tool use, evaluation harnesses (RAGAS, LLM-as-judge, regression suites), observability and tracing (Langfuse, LangSmith), cost and latency engineering, safety guardrails, cloud deployment, the data flywheels that turn user feedback into better systems. The tools are FastAPI, Pydantic, vector databases, LangGraph or no framework at all, AWS or its peers, and an evaluation harness duct-taped to all of it. This is the <strong>LLMOps</strong> half of the merged sub-section below, and it is the bulk of Part 4&rsquo;s curriculum &mdash; Domains 1&ndash;5 and 8&ndash;13, and Projects 1, 2, 3, 5, 6, and 7. It is where the overwhelming majority of AI engineers actually work, and where the overwhelming majority of defensible AI products actually get built.</li>
+    <li><strong>Model Engineering</strong> &mdash; the work of modifying or running the models themselves. Dataset curation, supervised fine-tuning, preference alignment (LoRA, DPO, RLHF), inference servers and their optimisation (vLLM, KV-cache eviction, continuous batching, PagedAttention), quantisation for deployment, model merging, GPU memory management. The tools are PyTorch, Hugging Face, vLLM, bitsandbytes, Weights &amp; Biases. This is the <strong>MLOps</strong> half of the MLOps &amp; LLMOps spanning practices later in this guide, and it is exactly Domains 6&ndash;7 and Project 4 of <a href="llm-engineering.html#part4" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Part 4 of the LLM Engineering Landscape</a>. Outside of frontier labs, most organisations need only a small handful of Model Engineers &mdash; this is a specialised role, not a default career path.</li>
+    <li><strong>Application Engineering</strong> &mdash; the work of building systems and products on top of existing models. Prompting and prompt versioning, structured output and validation, retrieval-augmented generation, agents and tool use, evaluation harnesses (RAGAS, LLM-as-judge, regression suites), observability and tracing (Langfuse, LangSmith), cost and latency engineering, safety guardrails, cloud deployment, the data flywheels that turn user feedback into better systems. The tools are FastAPI, Pydantic, vector databases, LangGraph or no framework at all, AWS or its peers, and an evaluation harness duct-taped to all of it. This is the <strong>LLMOps</strong> half of the MLOps &amp; LLMOps spanning practices below, and it is the bulk of Part 4&rsquo;s curriculum &mdash; Domains 1&ndash;5 and 8&ndash;13, and Projects 1, 2, 3, 5, 6, and 7. It is where the overwhelming majority of AI engineers actually work, and where the overwhelming majority of defensible AI products actually get built.</li>
   </ul>
   <p class="body-text">
     The Model / Application split is not a hierarchy. It is a tooling boundary. A Model Engineer&rsquo;s mental model is dominated by the inside of the model: gradients, learning rates, parameter counts, KV-cache layouts, quantisation error. An Application Engineer&rsquo;s mental model is dominated by the outside of the model: prompts, retrieved context, tool schemas, evaluation rubrics, the user&rsquo;s actual task. Both are doing real engineering. Both pay well. Both ship products. The difference is which side of the model API they spend their time on, and that one decision &mdash; inside the box or outside the box &mdash; pulls the entire rest of the job description with it.
@@ -1423,7 +1429,7 @@
 <div class="part-divider reveal" id="part3">
   <div class="part-num">Part 3</div>
   <h2 class="part-title">The Engineering <em>Track</em></h2>
-  <p class="part-subtitle">Implementation-focused, practical, hands-on &mdash; from building the model to keeping it alive in production. The Engineering track has two major sub-sections: <strong>Building</strong> (writing the model code itself) and a unified <strong>Infrastructure Engineering &amp; Operating</strong> layer covering <strong>MLOps</strong> and <strong>LLMOps</strong>.</p>
+  <p class="part-subtitle">Implementation-focused, practical, hands-on &mdash; from building the model to keeping it alive in production. The Engineering track has the same two Categories as CS&amp;E: <strong>Building</strong> (Software Engineering, Infrastructure Engineering) and <strong>Operating</strong> (Reliability, Performance, Security, Observability). Two spanning practices &mdash; <strong>MLOps</strong> and <strong>LLMOps</strong> &mdash; cover Infrastructure Engineering plus all four Operating disciplines, giving them their ML- and LLM-specific treatment.</p>
 </div>
 
 <div class="reveal" id="eng-overview">
@@ -1432,7 +1438,7 @@
     The Engineering track mirrors the Science track topic-for-topic, but the resources and the mindset are entirely different. Where the Science track assigns Goodfellow&rsquo;s <em>Deep Learning</em> to explain the theory behind backpropagation, the Engineering track assigns Chollet&rsquo;s <em>Deep Learning with Python</em> to show you how to actually implement, train, and evaluate a neural network in Keras. Where the Science track asks &ldquo;why does this algorithm converge?&rdquo;, the Engineering track asks &ldquo;how do I get this model to converge on my data, with my GPU, in a reasonable amount of time?&rdquo;
   </p>
   <p class="body-text">
-    The Engineering track is organised into two major sub-sections: <strong>Building</strong> and a merged <strong>Infrastructure Engineering &amp; Operating</strong> layer. Building is the model-code half &mdash; writing the training code, choosing the right libraries, structuring experiments. The merged Infrastructure &amp; Operating layer is the build/operate loop: pipelines, registries, deployment automation, drift monitoring, retraining, and the operational toolchain that keeps systems alive once they are shipped. Unlike CS&amp;E, where Building and Operating map to genuinely different jobs, in D&amp;I the same engineer designs the infrastructure, ships it, watches it, and fixes it &mdash; so the Infrastructure Engineering and Operating anchors share a single content surface labelled <strong>MLOps</strong> (the closed loop for ML systems) and <strong>LLMOps</strong> (the same loop specialised for LLM-based systems).
+    The Engineering track is organised into two Categories that mirror CS&amp;E exactly: <strong>Building</strong> and <strong>Operating</strong>. Building contains <strong>Software Engineering</strong> (writing the training code, choosing the right libraries, structuring experiments) and <strong>Infrastructure Engineering</strong> (pipelines, model registries, deployment automation, serving stack). Operating contains the four general engineering disciplines that apply to any production system: <strong>Reliability Engineering (SRE)</strong>, <strong>Performance Engineering</strong>, <strong>Security Engineering</strong>, and <strong>Observability Engineering</strong>. What&rsquo;s special in D&amp;I is that two practices &mdash; <strong>MLOps</strong> (the closed loop for ML systems) and <strong>LLMOps</strong> (the same loop specialised for LLM-based systems) &mdash; span Infrastructure Engineering plus all four Operating disciplines, giving those disciplines their ML- and LLM-specific treatment. The same engineer typically designs the infrastructure, ships it, watches it, and fixes it &mdash; so the same two specialisations cover the entire spanning surface.
   </p>
 </div>
 
@@ -1442,9 +1448,9 @@
 <!--  MAJOR SECTION: BUILDING                                      -->
 <!-- ============================================================ -->
 <div class="reveal" id="building">
-  <div class="major-section-kicker">Part 3 &mdash; Sub-section 1 of 2</div>
+  <div class="major-section-kicker">Part 3 &mdash; Sub-section 1 of 3</div>
   <h2 class="major-section"><em>Building</em></h2>
-  <p class="major-section-desc">Getting a model from a notebook into production &mdash; writing the model code itself. The infrastructure underneath, and the operational practices that keep models alive, live in the merged <strong>Infrastructure Engineering &amp; Operating</strong> sub-section that follows.</p>
+  <p class="major-section-desc">Getting a model from a notebook into production. Building covers two sub-disciplines: <strong>Software Engineering</strong> (writing the model code itself, choosing frameworks, structuring experiments) and <strong>Infrastructure Engineering</strong> (the pipelines, registries, and serving stack underneath). The <strong>Operating</strong> sub-section follows; both Infrastructure Engineering and the four Operating disciplines are covered in practice by the spanning <strong>MLOps</strong> and <strong>LLMOps</strong> practices.</p>
 </div>
 
 <!-- Building → Software Engineering -->
@@ -1533,13 +1539,56 @@
 
 <hr class="content-rule" />
 
+<!-- Building → Infrastructure Engineering -->
+<div class="reveal" id="eng-infra">
+  <h3 class="sub-discipline">Infrastructure Engineering</h3>
+  <p class="sub-discipline-desc">The pipelines, model registries, deployment automation, and serving stack underneath the model code &mdash; the half of Building that&rsquo;s not the model itself. In practice in D&amp;I this is covered end-to-end by the <strong>MLOps</strong> and <strong>LLMOps</strong> spanning practices below, which is why this sub-discipline doesn&rsquo;t get its own course list separate from those: the same two specialisations teach the infrastructure half and the operating half together.</p>
+</div>
+
+<hr class="content-rule" />
+
 <!-- ============================================================ -->
-<!--  MAJOR SECTION: INFRASTRUCTURE ENGINEERING & OPERATING (merged) -->
+<!--  MAJOR SECTION: OPERATING                                     -->
+<!-- ============================================================ -->
+<div class="reveal" id="operating">
+  <div class="major-section-kicker">Part 3 &mdash; Sub-section 2 of 3</div>
+  <h2 class="major-section"><em>Operating</em></h2>
+  <p class="major-section-desc">Keeping a running ML or LLM system alive &mdash; the four general engineering disciplines that apply to any production system, here viewed through the D&amp;I lens. Like CS&amp;E, Operating covers <strong>Reliability Engineering (SRE)</strong>, <strong>Performance Engineering</strong>, <strong>Security Engineering</strong>, and <strong>Observability Engineering</strong>. The D&amp;I-specific content for all four (plus Infrastructure Engineering) is delivered through the <strong>MLOps</strong> and <strong>LLMOps</strong> spanning practices in the next sub-section.</p>
+</div>
+
+<!-- Operating → SRE -->
+<div class="reveal" id="eng-sre">
+  <h3 class="sub-discipline">Reliability Engineering (SRE)</h3>
+  <p class="sub-discipline-desc">Uptime, error budgets, incident response, and on-call discipline for ML and LLM systems. The general SRE practice is field-agnostic; the D&amp;I treatment of it &mdash; pipeline reliability, retraining failure handling, model-rollback strategy &mdash; sits inside MLOps/LLMOps below.</p>
+</div>
+
+<!-- Operating → Performance Engineering -->
+<div class="reveal" id="eng-perf">
+  <h3 class="sub-discipline">Performance Engineering</h3>
+  <p class="sub-discipline-desc">Inference latency, throughput, batching, hardware utilisation, and the cost/latency tradeoffs specific to model serving. The D&amp;I treatment &mdash; quantisation, KV-cache management, token latency budgets, semantic caching &mdash; is covered inside MLOps/LLMOps below.</p>
+</div>
+
+<!-- Operating → Security Engineering -->
+<div class="reveal" id="eng-sec">
+  <h3 class="sub-discipline">Security Engineering</h3>
+  <p class="sub-discipline-desc">Model and data security, supply-chain integrity for model artefacts, and the LLM-specific surface: prompt-injection defense, data-leakage guards, jailbreak hardening. The D&amp;I treatment is covered inside MLOps/LLMOps below.</p>
+</div>
+
+<!-- Operating → Observability Engineering -->
+<div class="reveal" id="eng-obs">
+  <h3 class="sub-discipline">Observability Engineering</h3>
+  <p class="sub-discipline-desc">Model monitoring, drift detection, evaluation harnesses, token-cost tracking, hallucination signals. The D&amp;I treatment is the most distinctive of the four &mdash; classical metrics aren&rsquo;t enough &mdash; and is covered inside MLOps/LLMOps below.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ============================================================ -->
+<!--  MAJOR SECTION: MLOPS & LLMOPS (spanning practices)            -->
 <!-- ============================================================ -->
 <div class="reveal" id="mlops-llmops">
-  <div class="major-section-kicker">Part 3 &mdash; Sub-section 2 of 2</div>
-  <h2 class="major-section">Infrastructure Engineering &amp; <em>Operating</em></h2>
-  <p class="major-section-desc">The build/operate loop for ML and LLM-based systems &mdash; pipelines, registries, deployment, drift monitoring, retraining, evaluation, cost and latency. This sub-section deliberately merges what would otherwise be a Building/Operating split because in D&amp;I the same engineer designs the infrastructure, ships it, watches it, and fixes it &mdash; the build/operate boundary is structural, not functional. The two anchors below &mdash; <strong>MLOps</strong> and <strong>LLMOps</strong> &mdash; cover both halves of that loop.</p>
+  <div class="major-section-kicker">Part 3 &mdash; Sub-section 3 of 3</div>
+  <h2 class="major-section">MLOps &amp; <em>LLMOps</em></h2>
+  <p class="major-section-desc">The two practices that span Infrastructure Engineering and all four Operating disciplines (SRE, Performance, Security, Observability), giving them their ML- and LLM-specific treatment. In D&amp;I the same engineer typically designs the pipeline, ships it, watches it drift, and retrains it &mdash; so a single pair of specialisations covers what would otherwise be five separate engineering surfaces.</p>
 </div>
 
 <!-- MLOps -->
@@ -1594,7 +1643,7 @@
 <div class="reveal" id="sota">
   <h3 class="section-heading">Tracking the <em>Frontier</em></h3>
   <p class="body-text">
-    The first four parts of this discipline &mdash; the five-topic progression through Science and Engineering, plus the merged Infrastructure Engineering &amp; Operating layer &mdash; cover material that is relatively stable. The textbooks exist, the courses are well-established, the concepts are not going to change next month. But AI is a field where the frontier moves fast enough that any static curriculum becomes incomplete within a year. State of the Art is the section that acknowledges this explicitly.
+    The first four parts of this discipline &mdash; the five-topic progression through Science and Engineering, plus the Operating disciplines and the MLOps/LLMOps spanning practices &mdash; cover material that is relatively stable. The textbooks exist, the courses are well-established, the concepts are not going to change next month. But AI is a field where the frontier moves fast enough that any static curriculum becomes incomplete within a year. State of the Art is the section that acknowledges this explicitly.
   </p>
   <p class="body-text">
     This is a tracking area, not a teaching area. It covers new architectures (mixture-of-experts, state space models like Mamba, alternative attention mechanisms), new capabilities (multimodal understanding, long-context processing, reasoning and planning), new training paradigms (RLHF, DPO, constitutional AI, self-play), and emerging techniques that are promising but not yet proven enough to be part of the stable curriculum. The resources here are not textbooks &mdash; they are research papers, blog posts, conference talks, and open-source repositories. The goal is not mastery but awareness: knowing what is happening at the frontier, understanding the claims being made, and being able to evaluate whether a new technique is a genuine advance or incremental noise.

@@ -233,6 +233,27 @@
       margin-bottom: 0.7rem; padding-bottom: 0.5rem;
       border-bottom: 1px solid var(--accent-dim);
     }
+    .onramp-table .cell-explainer {
+      display: block;
+      margin-top: 0.6rem; padding-top: 0.5rem;
+      border-top: 1px dashed var(--rule-lt);
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; color: var(--ink-mid);
+      line-height: 1.55; font-style: normal;
+    }
+    .onramp-table .cell-explainer strong { color: var(--accent); font-weight: 600; }
+    .onramp-table .resource-tag {
+      display: inline-block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.6rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink-dim);
+      background: var(--surface2);
+      padding: 0.12rem 0.45rem;
+      border-radius: 2px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
     .onramp-table .topic-sub {
       display: block;
       font-family: 'Karla', sans-serif;
@@ -343,7 +364,7 @@
       <tr>
         <th class="col-h-cat">Category</th>
         <th class="col-h-topic">Topic</th>
-        <th class="col-h-course">Course</th>
+        <th class="col-h-course">Course / Book</th>
       </tr>
     </thead>
     <tbody>
@@ -354,8 +375,11 @@
         <td class="col-topic">Mathematics</td>
         <td>
           <span class="cell-item">
-            <a href="https://www.coursera.org/specializations/mathematics-for-machine-learning-and-data-science" target="_blank" rel="noopener">Mathematics for Data Science</a>
-            <span class="cell-desc">Calculus, linear algebra, and statistics in context &mdash; foundational for everything that follows</span>
+            <a href="https://www.oreilly.com/library/view/essential-math-for/9781098102920/" target="_blank" rel="noopener">Essential Math for Data Science</a><span class="resource-tag">Book</span>
+            <span class="cell-desc">Calculus, linear algebra, probability, and statistics in context &mdash; the foundational layer underneath everything that follows.</span>
+            <span class="cell-explainer">
+              The first four chapters &mdash; basic math &amp; calculus, probability, descriptive &amp; inferential statistics, linear algebra &mdash; are enough for the on-ramp. The remaining chapters cover regression and neural networks at an introductory level, and are not necessary here because those topics are covered in depth by the dedicated Machine Learning and Deep Learning resources later in the roadmap.
+            </span>
           </span>
         </td>
       </tr>

@@ -861,17 +861,17 @@
       practical fluency &mdash; understanding <em>how</em> to actually train, evaluate, ship,
       and iterate on real models.
       <br><br>
-      The Engineering track has two halves: <strong>Software Engineering</strong>
-      (writing the model code, building the application, choosing the right framework),
-      and the build/operate loop &mdash; <strong>Infrastructure Engineering</strong>
-      and <strong>Operating</strong> &mdash; which collapses into a single shared
-      surface labelled <strong>MLOps and LLMOps</strong>. Unlike CS&amp;E, where Building
-      and Operating map to genuinely different jobs (DevOps versus
-      SRE/Performance/Security/Observability), in D&amp;I the same engineer designs the
-      pipeline, ships it, watches it drift, and retrains it &mdash; so the structural
-      anchors stay (Infrastructure Engineering, Operating) but the content sits in one
-      shared cell. MLOps covers the closed-loop discipline for ML systems; LLMOps is
-      the same loop specialised for LLM-based systems.
+      The Engineering track has the same two Categories as CS&amp;E: <strong>Building</strong>
+      (Software Engineering &mdash; writing the model code; Infrastructure Engineering &mdash;
+      the pipelines and serving stack underneath) and <strong>Operating</strong>
+      (Reliability, Performance, Security, Observability &mdash; the four disciplines
+      that keep a running system alive). What&rsquo;s different in D&amp;I is that two
+      practices &mdash; <strong>MLOps</strong> and <strong>LLMOps</strong> &mdash; span
+      Infrastructure Engineering and all four Operating disciplines, giving them their
+      ML- and LLM-specific treatment. MLOps covers the closed-loop discipline for ML
+      systems; LLMOps is the same loop specialised for LLM-based systems. The same engineer
+      typically designs the pipeline, ships it, watches it drift, and retrains it &mdash;
+      so the same two specialisations cover all five rows.
       <br><br>
       The deliberate mirroring between Science and Engineering is the point. Theory without
       practice is academic &mdash; you understand the math but cannot ship anything.
@@ -896,23 +896,26 @@
         <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Engineering</div>
 
         <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Building</div>
-        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem;">
+        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem; margin-bottom: 0.9rem;">
           <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.2rem;">Software Engineering</span>
           <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Data Analysis</span>
           <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Machine Learning</span>
           <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Deep Learning</span>
           <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Natural Language Processing</span>
           <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Transformers &amp; LLMs</span>
+          <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.6rem;">Infrastructure Engineering</span>
         </div>
 
-        <div class="anchor-pair">
-          <div class="anchor-label">Infrastructure Engineering</div>
+        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Operating</div>
+        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.9rem;">
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Reliability Engineering (SRE)</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Performance Engineering</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Security Engineering</span>
+          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Observability Engineering</span>
         </div>
-
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-top: 0.5rem; margin-bottom: 0.4rem;">Operating</div>
 
         <div class="merged-content">
-          <div class="merge-caption">Spans Infrastructure Engineering + Operating</div>
+          <div class="merge-caption">MLOps &amp; LLMOps &mdash; span Infrastructure Engineering + all four Operating disciplines</div>
           <div class="ops-item">
             <span class="ops-item-name">MLOps</span>
             <div class="ops-note">
