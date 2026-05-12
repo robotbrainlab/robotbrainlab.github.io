@@ -6,7 +6,7 @@
   <title>Data &amp; Intelligence On-Ramp &mdash; Towards Intelligence</title>
   <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
   <meta property="og:title" content="Data & Intelligence On-Ramp — Towards Intelligence"/>
-  <meta property="og:description" content="Practical starter courses for Data & Intelligence — the fastest path to becoming employable, mapped to the Science / Engineering grid with Software Engineering and a merged MLOps & LLMOps sub-track."/>
+  <meta property="og:description" content="Practical starter courses for Data & Intelligence — the fastest path to becoming employable, mapped to the Science / Engineering grid with Building (Software Engineering, Infrastructure Engineering) and Operating (MLOps, LLMOps) sub-tracks."/>
   <meta property="og:type" content="article"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
@@ -47,7 +47,13 @@
       font-family: 'Cormorant Garamond', serif;
       font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em;
       color: var(--white); text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      transition: color 0.2s;
     }
+    .nav-logo:hover { color: var(--accent); }
+    .nav-home-icon { flex-shrink: 0; color: inherit; }
     .nav-links { display: flex; gap: 2.2rem; list-style: none; }
     .nav-links a {
       font-family: 'Karla', sans-serif;
@@ -233,6 +239,29 @@
       margin-bottom: 0.7rem; padding-bottom: 0.5rem;
       border-bottom: 1px solid var(--accent-dim);
     }
+    .onramp-table .topic-sub {
+      display: block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.86rem; font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--ink-mid);
+      margin-top: 0.4rem;
+      padding-left: 0.6rem;
+      white-space: normal;
+    }
+    .onramp-table .topic-sub:first-of-type { margin-top: 0.6rem; }
+    .onramp-table .course-target {
+      display: inline-block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.62rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink-dim);
+      background: var(--surface2);
+      padding: 0.15rem 0.5rem;
+      border-radius: 2px;
+      margin-bottom: 0.4rem;
+      vertical-align: middle;
+    }
     .onramp-table thead th.col-h-cat    { width: 18%; }
     .onramp-table thead th.col-h-topic  { width: 30%; }
     .onramp-table thead th.col-h-course { width: 52%; }
@@ -281,7 +310,7 @@
 
 <nav>
   <div class="nav-inner">
-    <a href="../index.html" class="nav-logo">Towards Intelligence</a>
+    <a href="../index.html" class="nav-logo" aria-label="Home"><svg class="nav-home-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Towards Intelligence</span></a>
     <ul class="nav-links">
       <li><a href="../index.html#mathematics">Mathematics</a></li>
       <li><a href="../index.html#cse">CS &amp; Engineering</a></li>
@@ -311,7 +340,7 @@
     <div class="hero-kicker">Getting Started</div>
     <h1 class="hero-title">Data &amp; Intelligence <em>On-Ramp</em></h1>
     <p class="hero-subtitle">
-      The fastest path to becoming employable in Data &amp; Intelligence. Topics mirror the D&amp;I grid; the same five topics appear in both Science and Engineering tracks (this is "the mirror"). The Engineering category column splits into <strong>Software Engineering</strong> (building the model code and applications) and a merged <strong>MLOps &amp; LLMOps</strong> row covering the Infrastructure Engineering and Operating disciplines &mdash; treated as one because the same engineer ships, watches, and retrains the system. Most Science Track cells are empty because the on-ramp focuses on practical certifications &mdash; academic Science-track resources live on the Resources page.
+      The fastest path to becoming employable in Data &amp; Intelligence. Topics mirror the D&amp;I grid; the same five topics appear in both Science and Engineering tracks (this is "the mirror"). The Engineering track splits into <strong>Building</strong> (Software Engineering, Infrastructure Engineering) and <strong>Operating</strong> (MLOps, LLMOps) &mdash; the same two-category structure used in CS &amp; Engineering. Most Science Track cells are empty because the on-ramp focuses on practical certifications &mdash; academic Science-track resources live on the Resources page.
     </p>
   </div>
 
@@ -345,58 +374,67 @@
       <!-- ENGINEERING TRACK -->
       <tr class="track-divider"><td colspan="3">Engineering Track</td></tr>
 
-      <!-- Software Engineering -->
+      <!-- Building -->
       <tr>
-        <td class="col-category" rowspan="5">Software Engineering</td>
-        <td class="col-topic">Data Analysis</td>
+        <td class="col-category" rowspan="2">Building</td>
+        <td class="col-topic">
+          Software Engineering
+          <span class="topic-sub">&mdash; Data Analysis</span>
+          <span class="topic-sub">&mdash; Machine Learning</span>
+          <span class="topic-sub">&mdash; Deep Learning</span>
+          <span class="topic-sub">&mdash; Natural Language Processing</span>
+          <span class="topic-sub">&mdash; Transformers &amp; LLMs</span>
+        </td>
         <td>
           <span class="cell-item">
+            <span class="course-target">Data Analysis</span><br>
             <a href="https://www.coursera.org/professional-certificates/ibm-data-analyst" target="_blank" rel="noopener">Data Analyst</a>
             <span class="cell-desc">Exploratory analysis, visualisation, and deriving insights from structured data</span>
           </span>
-        </td>
-      </tr>
-      <tr>
-        <td class="col-topic">Machine Learning</td>
-        <td rowspan="3">
-          <span class="cell-merged-note">Covers Machine Learning + Deep Learning + NLP</span>
           <span class="cell-item">
+            <span class="course-target">Machine Learning + Deep Learning + NLP</span><br>
             <a href="https://www.coursera.org/professional-certificates/ai-engineer" target="_blank" rel="noopener">AI Engineer</a>
             <span class="cell-desc">End-to-end AI application development &mdash; from model selection to deployment</span>
           </span>
-        </td>
-      </tr>
-      <tr><td class="col-topic">Deep Learning</td></tr>
-      <tr><td class="col-topic">NLP</td></tr>
-      <tr>
-        <td class="col-topic">Transformers &amp; LLMs</td>
-        <td>
           <span class="cell-item">
+            <span class="course-target">Transformers &amp; LLMs</span><br>
             <a href="https://www.coursera.org/professional-certificates/ibm-rag-and-agentic-ai" target="_blank" rel="noopener">IBM RAG and Agentic AI</a>
             <span class="cell-desc">Retrieval-augmented generation and building autonomous AI agents</span>
           </span>
         </td>
       </tr>
-
-      <!-- MLOps & LLMOps (merged Infrastructure Engineering + Operating) -->
       <tr>
-        <td class="col-category" rowspan="4">MLOps &amp; LLMOps</td>
-        <td class="col-topic">Machine Learning</td>
-        <td rowspan="3">
-          <span class="cell-merged-note">Covers Machine Learning + Deep Learning + NLP</span>
+        <td class="col-topic">
+          Infrastructure Engineering
+          <span class="topic-sub">&mdash; ML Systems Design</span>
+        </td>
+        <td class="cell-empty">&mdash;</td>
+      </tr>
+
+      <!-- Operating -->
+      <tr>
+        <td class="col-category" rowspan="2">Operating</td>
+        <td class="col-topic">
+          MLOps
+          <span class="topic-sub">&mdash; Machine Learning</span>
+          <span class="topic-sub">&mdash; Deep Learning</span>
+          <span class="topic-sub">&mdash; Natural Language Processing</span>
+        </td>
+        <td>
           <span class="cell-item">
-            <a href="https://www.coursera.org/specializations/mlops-machine-learning-duke" target="_blank" rel="noopener">MLOps</a>
+            <a href="https://www.coursera.org/specializations/mlops-machine-learning-duke" target="_blank" rel="noopener">MLOps Specialization</a>
             <span class="cell-desc">Operationalising machine learning &mdash; pipelines, monitoring, model lifecycle, retraining</span>
           </span>
         </td>
       </tr>
-      <tr><td class="col-topic">Deep Learning</td></tr>
-      <tr><td class="col-topic">NLP</td></tr>
       <tr>
-        <td class="col-topic">Transformers &amp; LLMs</td>
+        <td class="col-topic">
+          LLMOps
+          <span class="topic-sub">&mdash; Transformers &amp; LLMs</span>
+        </td>
         <td>
           <span class="cell-item">
-            <a href="https://www.coursera.org/specializations/large-language-model-operations" target="_blank" rel="noopener">LLMOps</a>
+            <a href="https://www.coursera.org/specializations/large-language-model-operations" target="_blank" rel="noopener">LLMOps Specialization</a>
             <span class="cell-desc">The operational side of large language models &mdash; fine-tuning, serving, evaluation</span>
           </span>
         </td>
