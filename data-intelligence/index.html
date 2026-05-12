@@ -1450,11 +1450,12 @@
 <div class="reveal" id="building">
   <div class="major-section-kicker">Part 3 &mdash; Sub-section 1 of 3</div>
   <h2 class="major-section"><em>Building</em></h2>
-  <p class="major-section-desc">Getting a model from a notebook into production. Building covers two sub-disciplines: <strong>Software Engineering</strong> (writing the model code itself, choosing frameworks, structuring experiments) and <strong>Infrastructure Engineering</strong> (the pipelines, registries, and serving stack underneath). The <strong>Operating</strong> sub-section follows; both Infrastructure Engineering and the four Operating disciplines are covered in practice by the spanning <strong>MLOps</strong> and <strong>LLMOps</strong> practices.</p>
+  <p class="major-section-desc">Getting a model from a notebook into production. Building has two sub-disciplines: <strong>Software Engineering</strong> &mdash; writing the model code itself, choosing frameworks, structuring experiments &mdash; and <strong>Infrastructure Engineering</strong> &mdash; the pipelines, registries, and serving stack underneath. Both are covered in detail below.</p>
 </div>
 
 <!-- Building → Software Engineering -->
 <div class="reveal" id="eng-se">
+  <div class="sub-discipline-kicker">Building &mdash; Sub-discipline 1 of 2</div>
   <h3 class="sub-discipline">Software Engineering</h3>
   <p class="sub-discipline-desc">Building the models and applications themselves &mdash; writing the training code, choosing the right libraries and frameworks, structuring experiments, and going from a research idea to working software. This sub-discipline mirrors the Science track topic-for-topic across the same five areas below.</p>
 </div>
@@ -1541,8 +1542,9 @@
 
 <!-- Building → Infrastructure Engineering -->
 <div class="reveal" id="eng-infra">
+  <div class="sub-discipline-kicker">Building &mdash; Sub-discipline 2 of 2</div>
   <h3 class="sub-discipline">Infrastructure Engineering</h3>
-  <p class="sub-discipline-desc">The pipelines, model registries, deployment automation, and serving stack underneath the model code &mdash; the half of Building that&rsquo;s not the model itself. In practice in D&amp;I this is covered end-to-end by the <strong>MLOps</strong> and <strong>LLMOps</strong> spanning practices below, which is why this sub-discipline doesn&rsquo;t get its own course list separate from those: the same two specialisations teach the infrastructure half and the operating half together.</p>
+  <p class="sub-discipline-desc">The pipelines, model registries, deployment automation, and serving stack underneath the model code &mdash; the half of Building that&rsquo;s not the model itself. Includes training and feature pipelines, model registries and lineage, deployment automation, and the API/serving layer that exposes a trained model as a reliable production service. This is its own sub-discipline within Building, distinct from Software Engineering (the model code) and distinct from Operating (the next major sub-section).</p>
 </div>
 
 <hr class="content-rule" />
@@ -1553,31 +1555,35 @@
 <div class="reveal" id="operating">
   <div class="major-section-kicker">Part 3 &mdash; Sub-section 2 of 3</div>
   <h2 class="major-section"><em>Operating</em></h2>
-  <p class="major-section-desc">Keeping a running ML or LLM system alive &mdash; the four general engineering disciplines that apply to any production system, here viewed through the D&amp;I lens. Like CS&amp;E, Operating covers <strong>Reliability Engineering (SRE)</strong>, <strong>Performance Engineering</strong>, <strong>Security Engineering</strong>, and <strong>Observability Engineering</strong>. The D&amp;I-specific content for all four (plus Infrastructure Engineering) is delivered through the <strong>MLOps</strong> and <strong>LLMOps</strong> spanning practices in the next sub-section.</p>
+  <p class="major-section-desc">Keeping a running ML or LLM system alive once it has been shipped &mdash; the four general engineering disciplines that apply to any production system. Like CS&amp;E, Operating covers <strong>Reliability Engineering (SRE)</strong>, <strong>Performance Engineering</strong>, <strong>Security Engineering</strong>, and <strong>Observability Engineering</strong>. This is its own major sub-section, distinct from Building above; the four disciplines below describe what each one means in the D&amp;I context.</p>
 </div>
 
 <!-- Operating → SRE -->
 <div class="reveal" id="eng-sre">
+  <div class="sub-discipline-kicker">Operating &mdash; Sub-discipline 1 of 4</div>
   <h3 class="sub-discipline">Reliability Engineering (SRE)</h3>
-  <p class="sub-discipline-desc">Uptime, error budgets, incident response, and on-call discipline for ML and LLM systems. The general SRE practice is field-agnostic; the D&amp;I treatment of it &mdash; pipeline reliability, retraining failure handling, model-rollback strategy &mdash; sits inside MLOps/LLMOps below.</p>
+  <p class="sub-discipline-desc">Uptime, error budgets, incident response, and on-call discipline for ML and LLM systems. In D&amp;I this becomes pipeline reliability, retraining failure handling, model-rollback strategy, and graceful degradation when an upstream model or vector store is unavailable.</p>
 </div>
 
 <!-- Operating → Performance Engineering -->
 <div class="reveal" id="eng-perf">
+  <div class="sub-discipline-kicker">Operating &mdash; Sub-discipline 2 of 4</div>
   <h3 class="sub-discipline">Performance Engineering</h3>
-  <p class="sub-discipline-desc">Inference latency, throughput, batching, hardware utilisation, and the cost/latency tradeoffs specific to model serving. The D&amp;I treatment &mdash; quantisation, KV-cache management, token latency budgets, semantic caching &mdash; is covered inside MLOps/LLMOps below.</p>
+  <p class="sub-discipline-desc">Inference latency, throughput, batching, hardware utilisation, and the cost/latency tradeoffs specific to model serving. In D&amp;I this covers quantisation, KV-cache management, token latency budgets, semantic caching, and the economics of serving large models at scale.</p>
 </div>
 
 <!-- Operating → Security Engineering -->
 <div class="reveal" id="eng-sec">
+  <div class="sub-discipline-kicker">Operating &mdash; Sub-discipline 3 of 4</div>
   <h3 class="sub-discipline">Security Engineering</h3>
-  <p class="sub-discipline-desc">Model and data security, supply-chain integrity for model artefacts, and the LLM-specific surface: prompt-injection defense, data-leakage guards, jailbreak hardening. The D&amp;I treatment is covered inside MLOps/LLMOps below.</p>
+  <p class="sub-discipline-desc">Model and data security, supply-chain integrity for model artefacts, and the LLM-specific surface: prompt-injection defense, data-leakage guards, jailbreak hardening, and tool-use authorisation for agentic systems.</p>
 </div>
 
 <!-- Operating → Observability Engineering -->
 <div class="reveal" id="eng-obs">
+  <div class="sub-discipline-kicker">Operating &mdash; Sub-discipline 4 of 4</div>
   <h3 class="sub-discipline">Observability Engineering</h3>
-  <p class="sub-discipline-desc">Model monitoring, drift detection, evaluation harnesses, token-cost tracking, hallucination signals. The D&amp;I treatment is the most distinctive of the four &mdash; classical metrics aren&rsquo;t enough &mdash; and is covered inside MLOps/LLMOps below.</p>
+  <p class="sub-discipline-desc">Model monitoring, drift detection, evaluation harnesses, token-cost tracking, hallucination signals. The most distinctive of the four operating disciplines in D&amp;I &mdash; classical metrics aren&rsquo;t enough, and a whole sub-genre of tooling (offline benchmarks, LLM-as-judge, regression suites, semantic eval) has emerged to fill the gap.</p>
 </div>
 
 <hr class="content-rule" />
