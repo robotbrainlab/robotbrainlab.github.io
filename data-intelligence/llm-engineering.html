@@ -6,7 +6,7 @@
   <title>The LLM Engineering Landscape</title>
   <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
   <meta property="og:title" content="The LLM Engineering Landscape — Towards Intelligence"/>
-  <meta property="og:description" content="A four-part map of LLM engineering — the 8 disciplines, the practical problems, the products people ship, and a 7–8 month curriculum (13 domains, 7 projects) for actually learning it."/>
+  <meta property="og:description" content="A five-part map of LLM engineering — the 8 disciplines, the practical problems, the products people ship, the ~150 tools you'd actually use, and a 7–8 month curriculum (13 domains, 7 projects) for actually learning it."/>
   <meta property="og:type" content="article"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
@@ -596,6 +596,301 @@
       text-align: justify;
       hyphens: auto;
     }
+
+    /* ========================================================== */
+    /* Part 4 Tools — scoped under #part4-tools-block              */
+    /* All classes prefixed with tools- to avoid collisions        */
+    /* ========================================================== */
+    #part4-tools-block {
+      --tools-tag-oss-fg:        #9bb89a;
+      --tools-tag-oss-bg:        rgba(155, 184, 154, 0.08);
+      --tools-tag-oss-border:    rgba(155, 184, 154, 0.25);
+      --tools-tag-prop-fg:       #b39bc2;
+      --tools-tag-prop-bg:       rgba(179, 155, 194, 0.08);
+      --tools-tag-prop-border:   rgba(179, 155, 194, 0.25);
+      --tools-tag-deep-fg:       var(--accent);
+      --tools-tag-deep-bg:       rgba(200, 169, 110, 0.1);
+      --tools-tag-deep-border:   rgba(200, 169, 110, 0.35);
+      --tools-tag-rising-fg:     #d4b78a;
+      --tools-tag-rising-bg:     rgba(212, 183, 138, 0.08);
+      --tools-tag-rising-border: rgba(212, 183, 138, 0.3);
+      --tools-tag-over-fg:       #c98a8a;
+      --tools-tag-over-bg:       rgba(201, 138, 138, 0.08);
+      --tools-tag-over-border:   rgba(201, 138, 138, 0.28);
+      --tools-tag-surf-fg:       var(--ink-dim);
+      --tools-tag-surf-bg:       rgba(168, 168, 168, 0.06);
+      --tools-tag-surf-border:   rgba(168, 168, 168, 0.2);
+    }
+    .tools-refresh-badge {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      margin: 1rem 0 1.6rem;
+      padding: 0.4rem 0.85rem;
+      background: rgba(155, 184, 154, 0.08);
+      border: 1px solid rgba(155, 184, 154, 0.3);
+      border-radius: 2px;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.74rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink-mid);
+    }
+    .tools-refresh-badge .tools-pulse {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #9bb89a;
+      box-shadow: 0 0 0 0 rgba(155, 184, 154, 0.6);
+      animation: tools-refresh-pulse 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .tools-refresh-badge .tools-label-dim { color: var(--ink-dim); margin-right: 0.2rem; }
+    .tools-refresh-badge .tools-cadence {
+      color: var(--ink-dim);
+      letter-spacing: 0.1em;
+      margin-left: 0.45rem;
+      padding-left: 0.6rem;
+      border-left: 1px solid var(--rule-lt);
+    }
+    @keyframes tools-refresh-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(155, 184, 154, 0.5); }
+      70%  { box-shadow: 0 0 0 8px rgba(155, 184, 154, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(155, 184, 154, 0); }
+    }
+    .tools-meta-pills {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .tools-meta-pill {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 500;
+      letter-spacing: 0.06em;
+      background: var(--surface); color: var(--ink-mid);
+      border: 1px solid var(--rule);
+      padding: 0.5rem 0.9rem;
+      cursor: pointer; user-select: none;
+      transition: all 0.2s;
+    }
+    .tools-meta-pill:hover { border-color: var(--accent-dim); color: var(--ink); }
+    .tools-meta-pill.tools-active {
+      background: var(--accent-dim); color: var(--accent);
+      border-color: var(--accent);
+    }
+    .tools-meta-pill .tools-roman {
+      color: var(--accent);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem; font-style: italic;
+      margin-right: 0.4rem;
+    }
+    .tools-controls {
+      display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: stretch;
+      margin-bottom: 1.5rem;
+      padding: 1.2rem;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+    }
+    .tools-control-group {
+      display: flex; flex-direction: column; gap: 0.4rem;
+      flex: 1; min-width: 220px;
+    }
+    .tools-control-label {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--accent);
+    }
+    .tools-select, .tools-search {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.92rem;
+      background: var(--bg); color: var(--ink);
+      border: 1px solid var(--rule);
+      padding: 0.55rem 0.7rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .tools-select:hover, .tools-search:hover { border-color: var(--rule-lt); }
+    .tools-select:focus, .tools-search:focus { border-color: var(--accent); }
+    .tools-filter-chips {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      margin-top: 0.3rem;
+    }
+    .tools-chip {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.08em;
+      background: var(--bg); color: var(--ink-dim);
+      border: 1px solid var(--rule);
+      padding: 0.3rem 0.7rem;
+      cursor: pointer; user-select: none;
+      transition: all 0.2s;
+    }
+    .tools-chip:hover { border-color: var(--rule-lt); color: var(--ink-mid); }
+    .tools-chip.tools-active {
+      background: var(--accent-dim); color: var(--accent);
+      border-color: var(--accent);
+    }
+    .tools-meta-section { margin-bottom: 2.4rem; }
+    .tools-meta-section.tools-hidden { display: none; }
+    .tools-meta-header {
+      margin-bottom: 1rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid var(--accent);
+    }
+    .tools-meta-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; font-weight: 500;
+      color: var(--white);
+      margin: 0 0 0.3rem;
+      letter-spacing: -0.01em;
+    }
+    .tools-meta-roman {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--accent); font-weight: 500;
+      font-size: 1.05rem; font-style: italic;
+      margin-right: 0.5rem;
+    }
+    .tools-meta-desc {
+      font-family: 'Karla', sans-serif;
+      color: var(--ink-dim);
+      font-size: 0.88rem;
+      margin: 0; line-height: 1.6;
+    }
+    .tools-layer-section {
+      margin-bottom: 1rem;
+      padding: 1.4rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+    }
+    .tools-layer-section.tools-hidden { display: none; }
+    .tools-layer-header {
+      display: flex; align-items: baseline;
+      gap: 0.8rem; flex-wrap: wrap;
+      margin-bottom: 0.3rem;
+    }
+    .tools-layer-number {
+      font-family: 'Karla', sans-serif;
+      color: var(--accent); font-weight: 600;
+      font-size: 0.74rem; letter-spacing: 0.14em;
+    }
+    .tools-layer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; font-weight: 500;
+      color: var(--white);
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .tools-layer-subtitle {
+      font-family: 'Karla', sans-serif;
+      color: var(--ink-dim);
+      font-size: 0.82rem; font-style: italic;
+      margin: 0 0 0.9rem;
+    }
+    .tools-tool {
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.45rem;
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      transition: border-color 0.2s;
+    }
+    .tools-tool:hover { border-color: var(--accent-dim); }
+    .tools-tool.tools-hidden { display: none; }
+    .tools-tool-header {
+      display: flex; align-items: center;
+      gap: 0.7rem; flex-wrap: wrap;
+      margin-bottom: 0.3rem;
+    }
+    .tools-tool-name {
+      font-family: 'Source Serif 4', serif;
+      font-weight: 600;
+      color: var(--ink);
+      font-size: 0.98rem;
+    }
+    .tools-tool-desc {
+      font-family: 'Source Serif 4', serif;
+      color: var(--ink-mid);
+      font-size: 0.9rem;
+      line-height: 1.65;
+      margin: 0;
+      text-align: justify;
+      hyphens: auto;
+    }
+    .tools-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .tools-tag {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.6rem;
+      padding: 0.15rem 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 2px;
+    }
+    .tools-tag-oss         { color: var(--tools-tag-oss-fg);   background: var(--tools-tag-oss-bg);   border: 1px solid var(--tools-tag-oss-border); }
+    .tools-tag-proprietary { color: var(--tools-tag-prop-fg);  background: var(--tools-tag-prop-bg);  border: 1px solid var(--tools-tag-prop-border); }
+    .tools-tag-deep        { color: var(--tools-tag-deep-fg);  background: var(--tools-tag-deep-bg);  border: 1px solid var(--tools-tag-deep-border); }
+    .tools-tag-surface     { color: var(--tools-tag-surf-fg);  background: var(--tools-tag-surf-bg);  border: 1px solid var(--tools-tag-surf-border); }
+    .tools-tag-overhyped   { color: var(--tools-tag-over-fg);  background: var(--tools-tag-over-bg);  border: 1px solid var(--tools-tag-over-border); }
+    .tools-tag-rising      { color: var(--tools-tag-rising-fg);background: var(--tools-tag-rising-bg);border: 1px solid var(--tools-tag-rising-border); }
+    .tools-take {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      background: rgba(200, 169, 110, 0.06);
+      border-left: 2px solid var(--accent);
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem;
+      color: var(--ink-mid);
+      line-height: 1.7;
+      text-align: justify;
+    }
+    .tools-take-label {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.18em;
+      color: var(--accent);
+      margin-right: 0.5rem;
+    }
+    .tools-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      font-family: 'Karla', sans-serif;
+      color: var(--ink-dim);
+      font-size: 0.92rem;
+    }
+    .tools-opinions {
+      margin-top: 2.5rem;
+      padding: 1.8rem 2rem;
+      background: var(--surface);
+      border: 1px solid var(--accent-dim);
+    }
+    .tools-opinions h4 {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.74rem; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      margin: 0 0 0.7rem;
+      color: var(--accent);
+    }
+    .tools-opinions-block { margin-bottom: 1.5rem; }
+    .tools-opinions-block:last-child { margin-bottom: 0; }
+    .tools-opinions ul {
+      margin: 0; padding-left: 1.3rem;
+      color: var(--ink-mid);
+      font-size: 0.94rem;
+      line-height: 1.75;
+    }
+    .tools-opinions li { margin-bottom: 0.4rem; text-align: justify; }
+    .tools-opinions li strong { color: var(--white); font-weight: 600; }
+    .tools-stack-recipe {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.92rem;
+      color: var(--ink);
+      background: var(--bg);
+      padding: 1rem 1.15rem;
+      border: 1px solid var(--rule);
+      line-height: 1.9;
+    }
+    .tools-stack-recipe .tools-plus {
+      color: var(--accent); font-weight: 700;
+      margin: 0 0.3rem;
+    }
+    .tools-stack-recipe .tools-closing {
+      color: var(--ink-dim); font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -618,7 +913,8 @@
   <a href="#part1" class="mobile-link">Engineering Disciplines</a>
   <a href="#part2" class="mobile-link">Practical Problems</a>
   <a href="#part3" class="mobile-link">Products &amp; Focus</a>
-  <a href="#part4" class="mobile-link">The Plan</a>
+  <a href="#part4" class="mobile-link">Tools</a>
+  <a href="#part5" class="mobile-link">The Plan</a>
 </div>
 
 <!-- BACK TO TOP -->
@@ -669,7 +965,12 @@
   <a href="#p3-mapping">Product-to-Engineering Map</a>
   <a href="#p3-focus">Where to Focus</a>
 
-  <a class="toc-part-label" href="#part4">Part 4 &mdash; The Plan</a>
+  <a class="toc-part-label" href="#part4">Part 4 &mdash; Tools</a>
+  <a href="#p4-tools-intro">What This Part Is</a>
+  <a href="#p4-tools-grid">The Tools Grid</a>
+  <a href="#p4-tools-opinions">Cross-Cutting Opinions</a>
+
+  <a class="toc-part-label" href="#part5">Part 5 &mdash; The Plan</a>
   <a href="#p4-intro">From Map to Plan</a>
   <a href="#p4-tags">How to Read the Tags</a>
   <a href="#p4-checklist">Checklist &mdash; 13 Domains</a>
@@ -697,9 +998,7 @@
   <span class="sep">/</span>
   <a href="../index.html#data-intelligence">Data &amp; Intelligence</a>
   <span class="sep">/</span>
-  <a href="state-of-the-art.html">State of the Art</a>
-  <span class="sep">/</span>
-  <span class="current">LLM Engineering Landscape</span>
+  <span class="current">LLM Engineering</span>
 </nav>
 
 <!-- HERO -->
@@ -707,7 +1006,7 @@
   <div class="hero-kicker">Long-form Reference</div>
   <h1 class="hero-title">The LLM Engineering <em>Landscape</em></h1>
   <p class="hero-subtitle">
-    A four-part map of LLM engineering. Parts 1&ndash;3 describe the territory: the eight engineering disciplines, the practical problems developers solve on real projects, and the ten product categories people ship. Part 4 turns the territory into a route &mdash; a 7&ndash;8 month curriculum across 13 study domains and 7 sequential projects, for readers who have decided to actually build. For the live tool layer that sits on top of this framework &mdash; specific vendors, what&rsquo;s rising, what&rsquo;s overhyped &mdash; see the companion <a href="ai-ecosystem-map.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">AI Ecosystem Map</a>.
+    A five-part map of LLM engineering. Parts 1&ndash;3 describe the territory: the eight engineering disciplines, the practical problems developers solve on real projects, and the ten product categories people ship. Part 4 is an opinionated, regularly-refreshed catalog of the tools you&rsquo;d actually reach for &mdash; ~150 vendors across 22 layers, with cross-cutting picks on what&rsquo;s worth deep investment and what&rsquo;s overhyped. Part 5 turns the whole thing into a route &mdash; a 7&ndash;8 month curriculum across 13 study domains and 7 sequential projects, for readers who have decided to actually build.
   </p>
 </div>
 
@@ -2020,19 +2319,123 @@
 
 
 <!-- ============================================================ -->
-<!--  PART 4 — THE PLAN                                            -->
+<!--  PART 4 — TOOLS                                               -->
 <!-- ============================================================ -->
 
 <div class="part-divider reveal" id="part4">
   <div class="part-num">Part 4</div>
+  <h2 class="part-title"><em>Tools</em></h2>
+  <p class="part-subtitle">An opinionated catalog of the AI/LLM tools you&rsquo;d actually reach for in 2026 &mdash; ~150 vendors across 22 layers, six meta-categories. Each tool tagged for <em>deep investment</em>, <em>surface awareness</em>, <em>rising</em>, or <em>overhyped</em>. This is the fast-moving part of the article: the cross-cutting opinions block at the end is the honest answer to &ldquo;what would you actually run in production right now.&rdquo;</p>
+</div>
+
+<div class="reveal" id="p4-tools-intro">
+  <h3 class="section-heading">What This Part <em>Is</em></h3>
+  <p class="body-text">Parts 1&ndash;3 are stable: the disciplines, problems, and product categories don&rsquo;t change every quarter. Part 4 is the opposite &mdash; it&rsquo;s a snapshot of which vendors and products currently matter, and it&rsquo;s the section that needs the most frequent refresh. Use the meta-pills, layer dropdown, search box, and tag chips below to narrow to whatever cut you want. The cross-cutting opinions at the very end are the single most useful summary on the page.</p>
+
+  <div class="tools-refresh-badge" title="This section is actively maintained">
+    <span class="tools-pulse" aria-hidden="true"></span>
+    <span><span class="tools-label-dim">Last refreshed</span>May 24, 2026<span class="tools-cadence">Cadence &middot; weekly</span></span>
+  </div>
+</div>
+
+<div id="part4-tools-block">
+
+  <div class="tools-meta-pills" id="toolsMetaPills"></div>
+
+  <div class="tools-controls" id="p4-tools-grid">
+    <div class="tools-control-group">
+      <label class="tools-control-label" for="toolsLayerSelect">Jump to a layer</label>
+      <select class="tools-select" id="toolsLayerSelect">
+        <option value="all">All layers</option>
+      </select>
+    </div>
+    <div class="tools-control-group">
+      <label class="tools-control-label" for="toolsSearchBox">Search tools</label>
+      <input type="text" class="tools-search" id="toolsSearchBox" placeholder="e.g. vLLM, Qdrant, MCP, Modal&hellip;">
+    </div>
+    <div class="tools-control-group" style="min-width: 100%;">
+      <label class="tools-control-label">Filter by tag (combine to narrow)</label>
+      <div class="tools-filter-chips" id="toolsTagFilters">
+        <span class="tools-chip" data-tag="deep">Deep invest</span>
+        <span class="tools-chip" data-tag="surface">Surface awareness</span>
+        <span class="tools-chip" data-tag="oss">Open source</span>
+        <span class="tools-chip" data-tag="proprietary">Proprietary</span>
+        <span class="tools-chip" data-tag="overhyped">Overhyped</span>
+        <span class="tools-chip" data-tag="rising">Rising</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="toolsContent"></div>
+
+  <div class="tools-opinions reveal" id="p4-tools-opinions">
+    <h3 class="section-heading">Cross-Cutting <em>Opinions</em></h3>
+
+    <div class="tools-opinions-block">
+      <h4>Worth Deep Investment (10+ hours)</h4>
+      <ul>
+        <li>Claude / GPT / Gemini APIs, MCP, vLLM, pgvector or Qdrant</li>
+        <li>Pydantic AI or LangGraph, Braintrust or Langfuse</li>
+        <li>Modal, Claude Code, LiteLLM, structured outputs, prompt caching</li>
+      </ul>
+    </div>
+
+    <div class="tools-opinions-block">
+      <h4>What&rsquo;s Overhyped</h4>
+      <ul>
+        <li><strong>Autonomous agent frameworks</strong> as a category &mdash; most are demoware. Write your own loop.</li>
+        <li><strong>Fine-tuning</strong> for product use cases &mdash; solve with prompting + RAG + structured output first.</li>
+        <li><strong>&ldquo;Memory&rdquo; frameworks</strong> &mdash; still unsolved; current offerings are hopeful, not robust.</li>
+        <li><strong>Generic AI orchestration platforms</strong> that abstract everything &mdash; the abstractions break.</li>
+        <li><strong>Devin and &ldquo;AI software engineer&rdquo; products</strong> &mdash; real and useful, not worth what they charge.</li>
+        <li><strong>Vector DB differentiation</strong> &mdash; for 90% of teams, the retrieval pipeline matters more than the DB.</li>
+        <li><strong>Guardrail vendors</strong> for non-regulated use &mdash; structured outputs + evals get you most of the way.</li>
+      </ul>
+    </div>
+
+    <div class="tools-opinions-block">
+      <h4>What&rsquo;s Underhyped</h4>
+      <ul>
+        <li><strong>MCP</strong> &mdash; already big, still underweighted in most roadmaps.</li>
+        <li><strong>Rerankers</strong> &mdash; biggest quality lever in retrieval.</li>
+        <li><strong>Document parsing quality</strong> &mdash; RAG lives and dies here.</li>
+        <li><strong>Evals as a discipline</strong> &mdash; most teams have none.</li>
+        <li><strong>Prompt caching</strong> &mdash; massive cost savings, low awareness.</li>
+        <li><strong>Inngest / durable workflows</strong> for production agents.</li>
+        <li><strong>Structured outputs</strong> as the alternative to most &ldquo;agent framework&rdquo; gymnastics.</li>
+        <li><strong>On-device AI</strong> &mdash; small models closed the gap; the on-device stack matters strategically now.</li>
+      </ul>
+    </div>
+
+    <div class="tools-opinions-block">
+      <h4>The Honest 2026 Production Stack</h4>
+      <div class="tools-stack-recipe">
+        Claude or GPT <span class="tools-plus">+</span> LiteLLM <span class="tools-plus">+</span> Pydantic <span class="tools-plus">+</span> pgvector <span class="tools-plus">+</span> Voyage/Cohere reranker <span class="tools-plus">+</span> Braintrust or Langfuse <span class="tools-plus">+</span> Modal or Bedrock <span class="tools-plus">+</span> MCP <span class="tools-plus">+</span> your own thin agent loop in plain Python or TypeScript.
+        <br><br>
+        <span class="tools-closing">That&rsquo;s it. Everything else is optional.</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#part4-tools-block -->
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 5 — THE PLAN                                            -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part5">
+  <div class="part-num">Part 5</div>
   <h2 class="part-title">The <em>Plan</em></h2>
-  <p class="part-subtitle">Parts 1&ndash;3 describe the territory. This part is the route &mdash; a prescriptive curriculum across 13 study domains and 7 sequential projects, sized for roughly 7&ndash;8 months at 15&ndash;20 hours per week. Read this when you have decided to actually build, not just to understand.</p>
+  <p class="part-subtitle">Parts 1&ndash;4 describe the territory. This part is the route &mdash; a prescriptive curriculum across 13 study domains and 7 sequential projects, sized for roughly 7&ndash;8 months at 15&ndash;20 hours per week. Read this when you have decided to actually build, not just to understand.</p>
 </div>
 
 <div class="reveal" id="p4-intro">
   <h3 class="section-heading">From <em>Map</em> to <em>Plan</em></h3>
   <p class="body-text">
-    The first three parts of this article are descriptive: they tell you what exists. Part 4 is prescriptive: it tells you what to do, in what order, with what artefacts to show for it at each stage. The 8 disciplines from Part 1 are reorganised here as 13 study <em>domains</em> &mdash; finer-grained, learning-ordered, and tagged by tier. The 7 problem areas from Part 2 and the 10 product categories from Part 3 are folded into 7 hands-on projects that hand artefacts to each other and force you to ship something real at every stage.
+    The first four parts of this article are descriptive: they tell you what exists and what to use. Part 5 is prescriptive: it tells you what to do, in what order, with what artefacts to show for it at each stage. The 8 disciplines from Part 1 are reorganised here as 13 study <em>domains</em> &mdash; finer-grained, learning-ordered, and tagged by tier. The 7 problem areas from Part 2 and the 10 product categories from Part 3 are folded into 7 hands-on projects that hand artefacts to each other and force you to ship something real at every stage.
   </p>
   <p class="body-text">
     Two intentional separations sit underneath this plan, both of which mirror the structure of the rest of this site:
@@ -2042,7 +2445,7 @@
     <li><strong>Core / Advanced / SOTA.</strong> Every checklist item is tagged. Use the tier as a budget signal: aim to be solid on every <code>core</code> item before moving to the next domain, treat <code>advanced</code> items as required reading for production work, and keep <code>sota</code> items at exposure-level rather than mastery.</li>
   </ul>
   <p class="body-text">
-    The plan assumes you have already read Parts 1&ndash;3, or at minimum that you have a working mental model of what an LLM application looks like end-to-end. If you are still trying to figure out which discipline is which, go back to Part 1 first. The plan is an action document; it does not re-derive the map.
+    The plan assumes you have already read Parts 1&ndash;4, or at minimum that you have a working mental model of what an LLM application looks like end-to-end. If you are still trying to figure out which discipline is which, go back to Part 1 first. The plan is an action document; it does not re-derive the map.
   </p>
 </div>
 
@@ -2332,7 +2735,7 @@
 
 <div class="reveal" id="p4-projects">
   <h3 class="section-heading"><em>7 Projects</em> &mdash; Overview</h3>
-  <p class="body-text">The checklist tells you <em>what</em>; the projects force you to actually do it. Each project is sized for several weeks of focused work, produces a real artefact (a service, a benchmark, a fine-tuned adapter, a deployment), and hands something concrete to the next one. The dependency chain at the end of Part 4 shows how they fit together.</p>
+  <p class="body-text">The checklist tells you <em>what</em>; the projects force you to actually do it. Each project is sized for several weeks of focused work, produces a real artefact (a service, a benchmark, a fine-tuned adapter, a deployment), and hands something concrete to the next one. The dependency chain at the end of Part 5 shows how they fit together.</p>
   <p class="body-text">Two of the seven (P3 and P5) double as anchors for the production-engineering and frontier projects that follow. Project 4 is the only one that requires a GPU; the rest run on a developer laptop with API access.</p>
 </div>
 
@@ -2854,9 +3257,9 @@
 
 <hr class="content-rule" />
 
-<!-- ==================== Four-Part Map ==================== -->
+<!-- ==================== Five-Part Map ==================== -->
 <div class="reveal">
-  <h3 class="section-heading">The Complete <em>Four-Part Map</em></h3>
+  <h3 class="section-heading">The Complete <em>Five-Part Map</em></h3>
 
   <div class="code-block">&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
 &#x2502;  Part 1: Engineering Landscape                            &#x2502;
@@ -2877,18 +3280,25 @@
 &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
                             &#x2193;
 &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
-&#x2502;  Part 4: The Plan                                          &#x2502;
+&#x2502;  Part 4: Tools                                             &#x2502;
+&#x2502;  ~150 vendors across 22 layers &mdash; opinionated picks      &#x2502;
+&#x2502;  (what to use, what's overhyped, what's rising)            &#x2502;
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+                            &#x2193;
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502;  Part 5: The Plan                                          &#x2502;
 &#x2502;  13 study domains + 7 sequential projects, ~7&ndash;8 months &#x2502;
 &#x2502;  (how to actually become an LLM engineer, not just read   &#x2502;
 &#x2502;   about being one)                                         &#x2502;
 &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</div>
 
-  <p class="body-text">The four parts answer four different questions:</p>
+  <p class="body-text">The five parts answer five different questions:</p>
   <ul class="content-list">
     <li><strong>Part 1:</strong> What are the engineering disciplines in this field?</li>
     <li><strong>Part 2:</strong> What problems do I solve on a real project?</li>
     <li><strong>Part 3:</strong> What products exist, why do they exist, and where should I invest my learning?</li>
-    <li><strong>Part 4:</strong> What do I actually do this month, next month, the month after &mdash; in what order, with what artefacts to show for it?</li>
+    <li><strong>Part 4:</strong> What tools do people actually reach for &mdash; and which ones are worth my time?</li>
+    <li><strong>Part 5:</strong> What do I actually do this month, next month, the month after &mdash; in what order, with what artefacts to show for it?</li>
   </ul>
 </div>
 
@@ -2954,6 +3364,573 @@
   window.addEventListener('scroll', () => {
     backBtn.classList.toggle('visible', window.scrollY > 600);
   });
+</script>
+
+<!-- ========================================================== -->
+<!-- Part 4 Tools — data + interactive logic (scoped in IIFE)   -->
+<!-- ========================================================== -->
+<script>
+(function() {
+const META_CATEGORIES = [
+  {
+    id: "models", roman: "I", name: "The Models",
+    description: "What you actually call — the brain of the system.",
+    layers: [
+      {
+        id: 1, name: "Frontier Foundation Models",
+        subtitle: "Proprietary closed-weight APIs you build on top of",
+        take: "Pick two and dual-route. Single-vendor lock-in is the rookie mistake of 2025.",
+        tools: [
+          { name: "Claude (Anthropic)", desc: "Leads on long-horizon reasoning, coding, and agentic tool use. The model most senior engineers actually deploy when correctness matters. Best default for agents.", tags: ["proprietary", "deep"] },
+          { name: "GPT (OpenAI)", desc: "Strongest distribution and multimodal breadth. The 'o' reasoning line reshaped chain-of-thought-as-product. Safest enterprise default in many shops.", tags: ["proprietary", "deep"] },
+          { name: "Gemini (Google)", desc: "Massive context windows, aggressive pricing, native multimodal (video/audio in). Underrated for cost-sensitive RAG and document workloads.", tags: ["proprietary", "deep"] },
+          { name: "Grok (xAI)", desc: "Real-time data via X, strong frontier capability, but operationally less mature. Watch, don't bet.", tags: ["proprietary", "surface"] }
+        ]
+      },
+      {
+        id: 2, name: "Open-Weight Models",
+        subtitle: "The serious open families, ranked by relevance",
+        take: "Deep investment: Llama, DeepSeek, Qwen. Surface awareness: the rest.",
+        tools: [
+          { name: "Llama (Meta)", desc: "The default open base. Llama 3/4 lines anchor most fine-tunes and OSS deployments.", tags: ["oss", "deep"] },
+          { name: "DeepSeek (V3, R1)", desc: "R1 reset the open reasoning frontier and forced the whole industry to ship cheaper. Genuinely important.", tags: ["oss", "deep"] },
+          { name: "Qwen (Alibaba)", desc: "Quietly excellent across sizes; strongest non-Western open family. Multilingual edge.", tags: ["oss", "deep"] },
+          { name: "Mistral / Mixtral", desc: "Solid mid-size and MoE options; reputation has slipped vs DeepSeek/Qwen.", tags: ["oss", "surface"] },
+          { name: "Gemma (Google)", desc: "Smaller, well-engineered, good for on-device.", tags: ["oss", "surface"] },
+          { name: "Cohere Command", desc: "Enterprise RAG-tuned; weights available but less community traction.", tags: ["oss", "surface"] },
+          { name: "Phi (Microsoft)", desc: "Small-model specialist; useful for edge deployment.", tags: ["oss", "surface"] }
+        ]
+      },
+      {
+        id: 3, name: "Multimodal & Generation Models",
+        subtitle: "Image, video, voice — what's actually shipping",
+        tools: [
+          { name: "Flux (Black Forest Labs)", desc: "Open-weight image generation leader.", tags: ["oss", "deep"] },
+          { name: "Midjourney", desc: "Best aesthetic out-of-the-box; still defining image generation taste.", tags: ["proprietary", "surface"] },
+          { name: "Imagen / DALL-E / Ideogram", desc: "Proprietary image generation set; each has niches.", tags: ["proprietary", "surface"] },
+          { name: "Stable Diffusion lineage", desc: "Now legacy except for fine-tunes and specialized workflows.", tags: ["oss", "surface"] },
+          { name: "Sora (OpenAI), Veo (Google)", desc: "Frontier video generation; pre-product for most engineering use cases.", tags: ["proprietary", "surface"] },
+          { name: "Runway, Pika, Kling", desc: "Video generation; Kling (Chinese) is especially strong.", tags: ["proprietary", "surface"] },
+          { name: "ElevenLabs", desc: "TTS incumbent. Most realistic voices, broadest language support.", tags: ["proprietary", "deep"] },
+          { name: "Cartesia", desc: "Fast TTS challenger — lower latency, good for realtime voice agents.", tags: ["proprietary", "rising"] },
+          { name: "Deepgram, AssemblyAI", desc: "Speech-to-text leaders for production workloads.", tags: ["proprietary", "deep"] },
+          { name: "Whisper (OpenAI)", desc: "The OSS speech-to-text workhorse. Run it anywhere.", tags: ["oss", "deep"] },
+          { name: "LiveKit Agents, Pipecat, Vapi, Retell", desc: "Realtime voice agent infrastructure stack — matured fast in 2025.", tags: ["rising"] }
+        ]
+      }
+    ]
+  },
+  {
+    id: "infra", roman: "II", name: "Infra & Delivery",
+    description: "How models run, how you reach them, where they execute.",
+    layers: [
+      {
+        id: 4, name: "Inference & Serving",
+        subtitle: "Where most teams overpay or get latency wrong",
+        take: "Deep investment: vLLM, SGLang, one fast-inference provider (Groq or Fireworks). Skip TGI unless you're already on it.",
+        tools: [
+          { name: "AWS Bedrock", desc: "Multi-vendor, IAM-native, slow to ship new models. Enterprise default.", tags: ["proprietary", "deep"] },
+          { name: "Azure OpenAI", desc: "OpenAI behind Microsoft's compliance wrapper.", tags: ["proprietary", "surface"] },
+          { name: "GCP Vertex AI", desc: "Cleanest for Gemini and TPU workloads.", tags: ["proprietary", "surface"] },
+          { name: "Groq", desc: "Custom LPUs, extreme tokens/sec on supported models. Best for latency-bound apps.", tags: ["proprietary", "deep"] },
+          { name: "Cerebras", desc: "Wafer-scale inference, often faster than Groq on supported workloads.", tags: ["proprietary", "rising"] },
+          { name: "Together AI, Fireworks", desc: "Multi-model OSS hosting with serious price-perf. Real production options.", tags: ["proprietary", "deep"] },
+          { name: "Replicate", desc: "Pay-per-second model marketplace; great for prototyping non-LLM models.", tags: ["proprietary", "surface"] },
+          { name: "SambaNova", desc: "Enterprise fast inference; less developer mindshare.", tags: ["proprietary", "surface"] },
+          { name: "vLLM", desc: "The OSS production serving standard. Learn this.", tags: ["oss", "deep"] },
+          { name: "SGLang", desc: "Newer than vLLM, often faster for structured workloads. Watch closely.", tags: ["oss", "rising"] },
+          { name: "TensorRT-LLM (Nvidia)", desc: "Best perf if you're on Nvidia stack and willing to suffer for it.", tags: ["oss", "surface"] },
+          { name: "TGI (HuggingFace)", desc: "Losing ground to vLLM. Inherited deployments only.", tags: ["oss", "surface"] },
+          { name: "Ollama", desc: "Local dev convenience layer over llama.cpp. Not production.", tags: ["oss", "surface"] },
+          { name: "llama.cpp", desc: "The CPU/GGUF substrate; underlies almost all local tooling.", tags: ["oss", "deep"] },
+          { name: "LM Studio", desc: "Desktop GUI for local models. Consumer/prosumer.", tags: ["proprietary", "surface"] }
+        ]
+      },
+      {
+        id: 5, name: "AI Gateways & Routing",
+        subtitle: "The layer between your app and providers — highest-ROI category",
+        take: "Use LiteLLM or Portkey from day one. Routing flexibility is the cheapest insurance you can buy.",
+        tools: [
+          { name: "LiteLLM", desc: "OSS unified API across 100+ providers. Default in many production stacks.", tags: ["oss", "deep"] },
+          { name: "OpenRouter", desc: "Hosted multi-model gateway with pay-as-you-go billing. Great for experimentation and consumer apps.", tags: ["proprietary", "deep"] },
+          { name: "Portkey", desc: "Gateway + observability + guardrails; production-oriented.", tags: ["proprietary", "deep"] },
+          { name: "Cloudflare AI Gateway", desc: "Free-ish caching/logging layer in front of any provider. Underrated.", tags: ["proprietary", "surface"] },
+          { name: "Helicone", desc: "More observability than gateway, but overlaps the space.", tags: ["proprietary", "surface"] },
+          { name: "Kong AI Gateway", desc: "Enterprise API gateway extending into AI routing.", tags: ["proprietary", "surface"] }
+        ]
+      },
+      {
+        id: 6, name: "Compute & GPU Infra",
+        subtitle: "Where your dollars actually go",
+        take: "Modal is the highest-ROI tool in this category for most teams. CoreWeave-class providers for big training. Hyperscalers if procurement demands.",
+        tools: [
+          { name: "AWS / GCP / Azure", desc: "Most enterprise GPU still lives here. Painful to get H100/B200 capacity without commitments.", tags: ["proprietary", "deep"] },
+          { name: "CoreWeave, Crusoe, Lambda Labs", desc: "GPU-native clouds. Cheaper, more available, less polished.", tags: ["proprietary", "deep"] },
+          { name: "RunPod, Vast.ai", desc: "Spot/serverless GPU. Great for experimentation.", tags: ["proprietary", "deep"] },
+          { name: "Modal", desc: "Serverless Python with GPUs; excellent DX. Worth learning.", tags: ["proprietary", "deep"] },
+          { name: "Baseten, Beam, Replicate", desc: "Hosted model deployment with autoscaling.", tags: ["proprietary", "surface"] },
+          { name: "Banana", desc: "Was a serverless GPU darling; declined.", tags: ["proprietary", "surface"] }
+        ]
+      },
+      {
+        id: 7, name: "Edge / On-Device AI",
+        subtitle: "Where small models actually ship — phones, laptops, embedded",
+        take: "Small models closed the gap faster than anyone predicted. For privacy-sensitive, offline, or latency-critical workloads, this stack went from optional to strategic in 2025.",
+        tools: [
+          { name: "Apple Intelligence / Foundation Models framework", desc: "Apple's on-device ~3B model + Private Cloud Compute fallback. The most polished consumer on-device stack.", tags: ["proprietary", "deep"] },
+          { name: "Core ML", desc: "Apple's on-device ML runtime. Required if you ship to iOS/macOS with custom models.", tags: ["proprietary", "deep"] },
+          { name: "ONNX Runtime", desc: "Cross-platform ML inference. The portable option for mixed deployments.", tags: ["oss", "deep"] },
+          { name: "TensorFlow Lite / LiteRT", desc: "Google's on-device runtime. Mature, broad device support.", tags: ["oss", "deep"] },
+          { name: "Qualcomm AI Hub / Hexagon NPU", desc: "Android/Snapdragon on-device acceleration.", tags: ["proprietary", "surface"] },
+          { name: "MediaTek NeuroPilot", desc: "Same role for MediaTek SoCs in mid-tier Android.", tags: ["proprietary", "surface"] },
+          { name: "llamafile (Mozilla)", desc: "Single-file portable LLM executable. Genuinely clever distribution.", tags: ["oss", "surface"] },
+          { name: "MLX (Apple)", desc: "Mac-native ML framework. Strong choice for Apple Silicon experimentation.", tags: ["oss", "deep"] },
+          { name: "PyTorch ExecuTorch", desc: "Meta's on-device PyTorch runtime. Still maturing.", tags: ["oss", "rising"] },
+          { name: "WebLLM / WebGPU", desc: "LLMs running directly in the browser via WebGPU. Serverless inference for the web.", tags: ["oss", "rising"] },
+          { name: "Cactus", desc: "Cross-platform LLM-on-device SDK for React Native and Flutter. New entrant worth watching.", tags: ["oss", "rising"] }
+        ]
+      }
+    ]
+  },
+  {
+    id: "knowledge", roman: "III", name: "Knowledge & Retrieval",
+    description: "Feeding the model your data — the RAG stack.",
+    layers: [
+      {
+        id: 8, name: "Vector Databases & Retrieval",
+        subtitle: "The category where the choice matters less than the pipeline",
+        take: "pgvector → Qdrant or Turbopuffer when you outgrow it. Pinecone if procurement says so. Skip the rest unless inherited.",
+        tools: [
+          { name: "pgvector (Postgres extension)", desc: "Won the 'good enough' war for most teams. Start here unless you have a reason not to.", tags: ["oss", "deep"] },
+          { name: "Pinecone", desc: "The hosted incumbent. Reliable, expensive, easy. Safe enterprise choice; losing share.", tags: ["proprietary", "surface"] },
+          { name: "Qdrant", desc: "OSS, Rust-based, excellent filtering. The senior engineer's pick.", tags: ["oss", "deep"] },
+          { name: "Weaviate", desc: "Capable, GraphQL-flavored, declining mindshare.", tags: ["oss", "surface"] },
+          { name: "Milvus / Zilliz", desc: "Scale-out workhorse; complex; used by larger shops.", tags: ["oss", "surface"] },
+          { name: "Chroma", desc: "Local prototyping. Not production.", tags: ["oss", "surface"] },
+          { name: "LanceDB", desc: "Embedded vector DB on Lance format; nice for local/edge.", tags: ["oss", "surface"] },
+          { name: "Turbopuffer", desc: "Object-storage-backed vectors, very cheap at scale. The hot new option for cost-bound workloads.", tags: ["proprietary", "rising"] },
+          { name: "Vespa", desc: "Mature hybrid search engine; underused; serious teams use it for hybrid retrieval.", tags: ["oss", "surface"] },
+          { name: "MongoDB Atlas / Elastic / Redis vector", desc: "'We already pay for this' options. Fine if true.", tags: ["proprietary", "surface"] }
+        ]
+      },
+      {
+        id: 9, name: "Embeddings & Rerankers",
+        subtitle: "Embeddings are commodity; rerankers are the actual quality lever",
+        take: "Rerankers are underused. Cohere Rerank or Voyage Rerank earn their cost.",
+        tools: [
+          { name: "Voyage AI", desc: "Anthropic-owned. Best-in-class proprietary embeddings, especially for retrieval. Pair with their rerankers.", tags: ["proprietary", "deep"] },
+          { name: "OpenAI text-embedding-3", desc: "Commodity-good default.", tags: ["proprietary", "deep"] },
+          { name: "Cohere Embed + Rerank", desc: "Strong embeddings, especially the reranker.", tags: ["proprietary", "deep"] },
+          { name: "BGE (BAAI)", desc: "Best OSS embedding family.", tags: ["oss", "deep"] },
+          { name: "Nomic Embed", desc: "OSS, good, training-data-transparent.", tags: ["oss", "surface"] },
+          { name: "Jina Embeddings", desc: "OSS, multilingual strengths.", tags: ["oss", "surface"] },
+          { name: "mxbai (mixedbread)", desc: "OSS, competitive across benchmarks.", tags: ["oss", "surface"] }
+        ]
+      },
+      {
+        id: 10, name: "Document Processing & Ingestion",
+        subtitle: "The unsexy layer where RAG quality is actually made or lost",
+        take: "Document parsing is the dirty secret of bad RAG. Invest more here than in your vector DB choice.",
+        tools: [
+          { name: "Unstructured", desc: "OSS workhorse for parsing arbitrary docs. Inconsistent quality but ubiquitous.", tags: ["oss", "deep"] },
+          { name: "LlamaParse (LlamaIndex)", desc: "Strong on PDFs and tables.", tags: ["proprietary", "deep"] },
+          { name: "Reducto", desc: "High-quality PDF/table extraction. Pricey but best for complex layouts.", tags: ["proprietary", "rising"] },
+          { name: "Mathpix", desc: "Specialist for math/scientific documents.", tags: ["proprietary", "surface"] },
+          { name: "Docling (IBM)", desc: "Open-source, increasingly capable.", tags: ["oss", "rising"] },
+          { name: "Apache Tika", desc: "The old enterprise standard; still relevant.", tags: ["oss", "surface"] }
+        ]
+      }
+    ]
+  },
+  {
+    id: "application", roman: "IV", name: "Application & Agents",
+    description: "Building things on top — frameworks, orchestration, agents, dev tools.",
+    layers: [
+      {
+        id: 11, name: "Application / Orchestration Frameworks",
+        subtitle: "Where senior engineers reach for less framework, not more",
+        take: "'Just call the API directly with retries and Pydantic for structure' remains the most-shipped architecture. Use a framework only when state, persistence, or branching gets ugly.",
+        tools: [
+          { name: "LangChain", desc: "The famous one. Over-abstracted, leaky, breaking-change-happy. Most senior teams have moved off it or only touch it via LangGraph.", tags: ["oss", "overhyped"] },
+          { name: "LangGraph", desc: "The actually-good LangChain spinoff. State-machine-based agent orchestration. Worth learning for stateful agents.", tags: ["oss", "deep"] },
+          { name: "LlamaIndex", desc: "Originally indexing-focused, now broader. Cleaner than LangChain for RAG.", tags: ["oss", "surface"] },
+          { name: "DSPy (Stanford)", desc: "Programmatic prompt optimization; treats prompts as compilable artifacts. Beautiful idea, niche in practice.", tags: ["oss", "surface"] },
+          { name: "Pydantic AI", desc: "Type-safe, minimal, Python-native. Rising fast among senior engineers. Worth a deep look.", tags: ["oss", "rising", "deep"] },
+          { name: "Mastra", desc: "TypeScript-native agent framework. Best-in-class for the JS world.", tags: ["oss", "rising"] },
+          { name: "Vercel AI SDK", desc: "The de facto JS/TS standard for streaming UIs and tool use. Frontend-adjacent? Learn this.", tags: ["oss", "deep"] },
+          { name: "Haystack (Deepset)", desc: "Solid but enterprise-flavored RAG framework; declining mindshare.", tags: ["oss", "surface"] },
+          { name: "Semantic Kernel (Microsoft)", desc: ".NET/C#-friendly orchestration; mostly for Microsoft shops.", tags: ["oss", "surface"] },
+          { name: "Inngest / Trigger.dev", desc: "Durable workflow engines (not AI-specific) increasingly used to run agent steps reliably. Underused.", tags: ["proprietary", "rising"] }
+        ]
+      },
+      {
+        id: 12, name: "Agent Frameworks",
+        subtitle: "Highest hype-to-utility ratio in the ecosystem",
+        take: "Most 'agent frameworks' exist to be demoed, not deployed. For production: write your own loop, use MCP for tools, persist state in Postgres, reach for LangGraph only when control flow demands it.",
+        tools: [
+          { name: "LangGraph", desc: "The most defensible framework choice when you need one. State-machine model fits real agents.", tags: ["oss", "deep"] },
+          { name: "OpenAI Agents SDK (Swarm)", desc: "Lightweight handoff-based multi-agent. Decent but vendor-shaped.", tags: ["oss", "surface"] },
+          { name: "CrewAI", desc: "Role-playing multi-agent demos. Great DX, fragile in production.", tags: ["oss", "overhyped"] },
+          { name: "AutoGen (Microsoft)", desc: "Research-flavored multi-agent framework. More demo than product.", tags: ["oss", "overhyped"] },
+          { name: "smolagents (HuggingFace)", desc: "Minimalist code-writing agents. Worth reading for the design.", tags: ["oss", "surface"] },
+          { name: "Letta (formerly MemGPT)", desc: "Memory-focused agent runtime. Memory is still unsolved; treat as research.", tags: ["oss", "overhyped"] },
+          { name: "Browser Use, Stagehand, Skyvern", desc: "Browser-automation-via-LLM. This space is real and shipping in 2025.", tags: ["oss", "rising"] },
+          { name: "Manus, Devin, Replit Agent", desc: "General-purpose autonomous agents. Demo-impressive, production-spotty.", tags: ["proprietary", "overhyped"] }
+        ]
+      },
+      {
+        id: 13, name: "MCP & Tool Standards",
+        subtitle: "The most consequential standardization event in the ecosystem",
+        take: "MCP is genuinely a big deal. If you're shipping anything agentic, you should be able to write an MCP server from memory.",
+        tools: [
+          { name: "MCP (Model Context Protocol, Anthropic)", desc: "Open standard for connecting models to tools/data. Adopted by OpenAI, Google, and most major IDEs in 2025. Single most important standardization event in the ecosystem. Learn it deeply.", tags: ["oss", "deep", "rising"] },
+          { name: "OpenAI function calling / tool use", desc: "The original schema everyone copied.", tags: ["proprietary", "deep"] },
+          { name: "Anthropic tool use", desc: "Equivalent; converged with MCP for external tools.", tags: ["proprietary", "deep"] }
+        ]
+      },
+      {
+        id: 14, name: "Coding Agents & AI Dev Tools",
+        subtitle: "Where AI engineering meets daily work",
+        take: "Use Claude Code or Cursor as your daily driver. Try one OSS option (Aider or Cline) so you understand the substrate. Anyone selling 'AI software engineer that replaces your team' is overselling in 2026.",
+        tools: [
+          { name: "Claude Code (Anthropic)", desc: "Terminal-native agentic coder. Currently the senior engineer's pick for serious work.", tags: ["proprietary", "deep"] },
+          { name: "Cursor", desc: "The IDE most engineers actually use. Excellent ergonomics, model-agnostic.", tags: ["proprietary", "deep"] },
+          { name: "Windsurf (Codeium)", desc: "Cursor competitor; strong agent mode.", tags: ["proprietary", "deep"] },
+          { name: "GitHub Copilot", desc: "Now agentic, integrated with GitHub deeply. Enterprise default.", tags: ["proprietary", "deep"] },
+          { name: "Cline", desc: "OSS agent in VS Code. Capable and free.", tags: ["oss", "deep"] },
+          { name: "Aider", desc: "OSS terminal coding agent. Beloved by power users.", tags: ["oss", "deep"] },
+          { name: "Continue.dev", desc: "OSS Copilot alternative; configurable.", tags: ["oss", "surface"] },
+          { name: "Replit Agent", desc: "Browser-based; good for prototyping and learners.", tags: ["proprietary", "surface"] },
+          { name: "v0 (Vercel)", desc: "UI generation from prompts. Best in its niche.", tags: ["proprietary", "surface"] },
+          { name: "Bolt.new (StackBlitz)", desc: "Full-stack prototyping in browser.", tags: ["proprietary", "surface"] },
+          { name: "Devin (Cognition)", desc: "Autonomous SWE agent. Impressive demos; questionable cost/value in real workflows.", tags: ["proprietary", "overhyped"] },
+          { name: "Sweep, Tabnine", desc: "Older or narrower; surface awareness.", tags: ["proprietary", "surface"] }
+        ]
+      },
+      {
+        id: 15, name: "No-code / Low-code AI Builders",
+        subtitle: "Visual builders for prototypes, hybrid teams, and non-engineers",
+        take: "You probably won't ship production on these, but should know the landscape. Marketing, ops, and PMs in your org are already building AI workflows on these whether you sanction it or not.",
+        tools: [
+          { name: "n8n", desc: "OSS workflow automation with strong AI nodes. The credible self-hostable option. Senior engineers actually use this for internal automation.", tags: ["oss", "deep"] },
+          { name: "Langflow", desc: "Visual builder over LangChain. Great for demos, fragile for production.", tags: ["oss", "surface"] },
+          { name: "Flowise", desc: "OSS visual builder, similar in spirit to Langflow.", tags: ["oss", "surface"] },
+          { name: "Dify", desc: "OSS LLM app development platform. Huge in China, growing globally. Worth a serious look.", tags: ["oss", "rising"] },
+          { name: "Vellum", desc: "Hosted AI app builder with strong eval features. Production-oriented.", tags: ["proprietary", "rising"] },
+          { name: "Stack AI", desc: "Hosted enterprise AI builder.", tags: ["proprietary", "surface"] },
+          { name: "Make.com", desc: "General automation with growing AI capabilities.", tags: ["proprietary", "surface"] },
+          { name: "Zapier AI Actions / Agents", desc: "Mass-market automation with AI bolted on.", tags: ["proprietary", "surface"] },
+          { name: "Voiceflow", desc: "Conversational and voice agent visual builder.", tags: ["proprietary", "surface"] },
+          { name: "Retool AI", desc: "Internal-tools builder extended with AI features.", tags: ["proprietary", "surface"] },
+          { name: "Gumloop", desc: "AI workflow builder, designed-for-AI from the start.", tags: ["proprietary", "rising"] },
+          { name: "Lindy", desc: "Agent builder aimed at business users.", tags: ["proprietary", "surface"] }
+        ]
+      }
+    ]
+  },
+  {
+    id: "operations", roman: "V", name: "Operations & Customization",
+    description: "Making it reliable, measurable, yours.",
+    layers: [
+      {
+        id: 16, name: "Evals & Observability",
+        subtitle: "The discipline serious teams underinvest in and regret",
+        take: "Pick Braintrust or Langfuse, instrument from day one, write evals before you write the prompt. Most teams ship prompts they can't measure and then can't improve them.",
+        tools: [
+          { name: "Braintrust", desc: "Senior engineer favorite. Clean SDK, prompt playground, eval-first design.", tags: ["proprietary", "deep"] },
+          { name: "Langfuse", desc: "Best OSS option. Self-hostable, full tracing, evals. Learn this if cost or sovereignty matter.", tags: ["oss", "deep"] },
+          { name: "LangSmith", desc: "LangChain's offering. Fine inside that ecosystem.", tags: ["proprietary", "surface"] },
+          { name: "Arize Phoenix", desc: "Strong OSS observability, good for production traces.", tags: ["oss", "deep"] },
+          { name: "Helicone", desc: "Proxy-based logging + cost analytics. Easy on-ramp.", tags: ["proprietary", "surface"] },
+          { name: "W&B Weave", desc: "Solid if you're already on Weights & Biases.", tags: ["proprietary", "surface"] },
+          { name: "Galileo, Patronus, TruLens", desc: "Eval-specialist plays with mixed traction.", tags: ["proprietary", "surface"] },
+          { name: "Promptfoo", desc: "OSS prompt testing in CI. Underrated; everyone should run this.", tags: ["oss", "deep"] },
+          { name: "DeepEval", desc: "pytest-flavored LLM evals.", tags: ["oss", "surface"] },
+          { name: "Ragas", desc: "RAG-specific eval metrics. Useful baseline.", tags: ["oss", "surface"] },
+          { name: "Inspect AI (UK AISI)", desc: "Serious eval framework from the safety institute. Worth knowing for rigorous work.", tags: ["oss", "surface"] },
+          { name: "OpenAI Evals", desc: "Reference implementation; mostly a starting point.", tags: ["oss", "surface"] }
+        ]
+      },
+      {
+        id: 17, name: "Prompt Management",
+        subtitle: "Mostly a feature of eval platforms now",
+        take: "Don't buy a prompt-management tool standalone in 2025. Use whichever eval platform you chose.",
+        tools: [
+          { name: "PromptLayer, Humanloop, Mirascope", desc: "Standalone prompt-management tools. Useful but absorbed by broader platforms.", tags: ["proprietary", "surface"] },
+          { name: "Braintrust / Langfuse / LangSmith prompt versioning", desc: "All have built-in prompt management. Use what you already have.", tags: ["deep"] }
+        ]
+      },
+      {
+        id: 18, name: "Guardrails & Safety",
+        subtitle: "Mostly regex with confidence",
+        take: "Real safety is structured outputs (Pydantic, JSON schema), good evals, and not giving agents tools that can hurt you. Treat the vendor category as surface awareness unless you're regulated.",
+        tools: [
+          { name: "Guardrails AI", desc: "OSS validation/structuring; useful, niche.", tags: ["oss", "surface"] },
+          { name: "NeMo Guardrails (Nvidia)", desc: "Rule-based dialog safety; enterprise-flavored.", tags: ["oss", "surface"] },
+          { name: "Lakera, Protect AI, Robust Intelligence", desc: "Prompt injection and adversarial defense vendors.", tags: ["proprietary", "surface"] },
+          { name: "LLM Guard", desc: "OSS scanner for inputs and outputs.", tags: ["oss", "surface"] },
+          { name: "Llama Guard, ShieldGemma, Granite Guardian", desc: "Open guardrail models from Meta/Google/IBM.", tags: ["oss", "surface"] }
+        ]
+      },
+      {
+        id: 19, name: "Fine-Tuning & Training",
+        subtitle: "Overrated for most product teams in 2025",
+        take: "Try prompting → structured outputs → RAG → distillation, in that order, before LoRA. When you do need to fine-tune, Unsloth + Axolotl on Modal or RunPod is the modern stack.",
+        tools: [
+          { name: "Axolotl", desc: "OSS standard for serious open-model fine-tuning. Learn this if you fine-tune.", tags: ["oss", "deep"] },
+          { name: "Unsloth", desc: "The fast path. 2-5x faster training, lower VRAM. Excellent.", tags: ["oss", "deep"] },
+          { name: "HuggingFace TRL + PEFT", desc: "Reference libraries; everything else builds on them.", tags: ["oss", "deep"] },
+          { name: "LLaMA Factory", desc: "Friendlier UI over fine-tuning.", tags: ["oss", "surface"] },
+          { name: "Together / Fireworks / OpenAI / Anthropic fine-tuning APIs", desc: "Hosted, easy, locked to vendor.", tags: ["proprietary", "surface"] },
+          { name: "Mosaic (Databricks)", desc: "Enterprise fine-tuning platform.", tags: ["proprietary", "surface"] }
+        ]
+      },
+      {
+        id: 20, name: "Data, Annotation & Synthetic Data",
+        subtitle: "Synthetic data + evals is the modern data flywheel",
+        take: "Synthetic data generated by frontier models, curated with evals, is the modern data flywheel. Learn Distilabel or write your own.",
+        tools: [
+          { name: "Scale AI, Surge AI", desc: "Human-labeling at frontier-lab scale.", tags: ["proprietary", "surface"] },
+          { name: "Labelbox", desc: "Enterprise annotation platform.", tags: ["proprietary", "surface"] },
+          { name: "Argilla (HuggingFace)", desc: "OSS annotation. Very good.", tags: ["oss", "deep"] },
+          { name: "Lilac", desc: "Dataset exploration. Underused.", tags: ["oss", "surface"] },
+          { name: "Snorkel", desc: "Programmatic labeling pioneer; still relevant.", tags: ["oss", "surface"] },
+          { name: "Distilabel (Argilla)", desc: "Synthetic data generation pipelines.", tags: ["oss", "deep"] },
+          { name: "Gretel, Bespoke Labs, Mostly AI", desc: "Synthetic data vendors.", tags: ["proprietary", "surface"] }
+        ]
+      }
+    ]
+  },
+  {
+    id: "signal", roman: "VI", name: "Signal & Research",
+    description: "The upstream — where things become tools 6-12 months later. What you watch, not what you build with.",
+    layers: [
+      {
+        id: 21, name: "Benchmarks & Leaderboards",
+        subtitle: "How the field measures itself — and how adoption decisions get made",
+        take: "Don't take any single benchmark too seriously. Track 3-4, watch for divergence, and remember most benchmarks get contaminated within months of becoming popular. Real signal comes from triangulating.",
+        tools: [
+          { name: "Chatbot Arena (lmsys)", desc: "Crowdsourced head-to-head model comparison. The closest thing to a 'vibes test' that actually means something.", tags: ["oss", "deep"] },
+          { name: "Artificial Analysis", desc: "Independent benchmarks + price/speed tracking. The pragmatic engineer's reference.", tags: ["proprietary", "deep"] },
+          { name: "LiveBench", desc: "Continuously updated to fight contamination. Solid methodology.", tags: ["oss", "deep"] },
+          { name: "SWE-Bench / SWE-Bench Verified", desc: "Real GitHub issues, real fixes. The coding benchmark that matters in 2025.", tags: ["oss", "deep"] },
+          { name: "Aider Polyglot Leaderboard", desc: "Practical multi-language coding test. Useful signal.", tags: ["oss", "deep"] },
+          { name: "GPQA", desc: "Hard graduate-level reasoning. Still discriminative across frontier models.", tags: ["oss", "deep"] },
+          { name: "MMLU / MMLU-Pro", desc: "General knowledge. Saturated; MMLU-Pro extends the headroom.", tags: ["oss", "surface"] },
+          { name: "HumanEval / HumanEval+", desc: "Classic coding benchmark. Saturated; treat as floor not ceiling.", tags: ["oss", "surface"] },
+          { name: "SimpleBench", desc: "Common-sense reasoning trap questions. Diagnostic and funny.", tags: ["oss", "surface"] },
+          { name: "ARC-AGI / ARC-AGI-2", desc: "Abstract reasoning challenge from François Chollet. Diagnostic, not product-relevant.", tags: ["oss", "surface"] },
+          { name: "MTEB Leaderboard", desc: "Massive Text Embedding Benchmark. Reference for embedding choice.", tags: ["oss", "deep"] },
+          { name: "HuggingFace Open LLM Leaderboard", desc: "Aggregate open-model leaderboard. Useful starting point.", tags: ["oss", "deep"] },
+          { name: "HELM (Stanford)", desc: "Holistic eval framework. Academic-flavored, comprehensive.", tags: ["oss", "surface"] }
+        ]
+      },
+      {
+        id: 22, name: "Papers, Labs & Community Signal",
+        subtitle: "The upstream — where things become tools 6-12 months later",
+        take: "You can't read everything. Pick 4-5 newsletters, follow 20-30 well-curated voices, check the labs' research blogs monthly. That's enough to never be surprised.",
+        tools: [
+          { name: "arXiv (cs.CL, cs.AI, cs.LG)", desc: "Primary source. Use alphaXiv or HF Daily Papers as filters.", tags: ["deep"] },
+          { name: "Hugging Face Daily Papers", desc: "Community-curated daily paper feed. Underrated entry point.", tags: ["deep"] },
+          { name: "alphaXiv", desc: "Better reading experience for arXiv with discussion.", tags: ["surface"] },
+          { name: "Papers with Code", desc: "Papers + their implementations. Aging but useful.", tags: ["surface"] },
+          { name: "Latent Space (Swyx)", desc: "Senior-engineer AI newsletter and podcast. High signal.", tags: ["deep"] },
+          { name: "The Batch (deeplearning.ai)", desc: "Weekly news roundup from Andrew Ng's team. Balanced.", tags: ["deep"] },
+          { name: "Import AI (Jack Clark)", desc: "Long-running policy + research newsletter. Excellent.", tags: ["deep"] },
+          { name: "Interconnects (Nathan Lambert)", desc: "Post-training and open models. Best in its niche.", tags: ["deep"] },
+          { name: "AI News (Smol AI / Swyx)", desc: "Daily aggregated digest of everything. Comprehensive.", tags: ["rising"] },
+          { name: "Last Week in AI", desc: "Solid weekly news podcast and newsletter.", tags: ["surface"] },
+          { name: "Anthropic / OpenAI / Google DeepMind research blogs", desc: "Source-of-truth for frontier lab announcements. Check monthly.", tags: ["deep"] },
+          { name: "Eleuther AI, Allen AI (AI2), HuggingFace Research", desc: "Top open research labs to track.", tags: ["deep"] },
+          { name: "NeurIPS, ICLR, ICML, ACL, EMNLP", desc: "Top conferences. Skim best papers each year.", tags: ["surface"] },
+          { name: "AI Twitter/X + curated lists", desc: "Where breaking news still hits first; build a focused list of 20-30 voices.", tags: ["deep"] }
+        ]
+      }
+    ]
+  }
+];
+
+const TAG_LABELS = {
+  oss: 'OSS', proprietary: 'Proprietary',
+  deep: 'Deep invest', surface: 'Surface',
+  overhyped: 'Overhyped', underhyped: 'Underhyped', rising: 'Rising'
+};
+
+const layerSelect = document.getElementById('toolsLayerSelect');
+const searchBox   = document.getElementById('toolsSearchBox');
+const content     = document.getElementById('toolsContent');
+const tagFilters  = document.getElementById('toolsTagFilters');
+const metaPills   = document.getElementById('toolsMetaPills');
+if (!metaPills) return; // Defensive: if section not present, skip
+
+let currentMeta = 'all';
+let currentLayer = 'all';
+const activeTags = new Set();
+
+const allPill = document.createElement('span');
+allPill.className = 'tools-meta-pill tools-active';
+allPill.dataset.meta = 'all';
+allPill.textContent = 'All';
+metaPills.appendChild(allPill);
+
+META_CATEGORIES.forEach(meta => {
+  const pill = document.createElement('span');
+  pill.className = 'tools-meta-pill';
+  pill.dataset.meta = meta.id;
+  pill.innerHTML = `<span class="tools-roman">${meta.roman}.</span>${meta.name}`;
+  metaPills.appendChild(pill);
+});
+
+META_CATEGORIES.forEach(meta => {
+  const group = document.createElement('optgroup');
+  group.label = `${meta.roman}. ${meta.name}`;
+  meta.layers.forEach(layer => {
+    const opt = document.createElement('option');
+    opt.value = String(layer.id);
+    opt.textContent = `L${String(layer.id).padStart(2, '0')} · ${layer.name}`;
+    group.appendChild(opt);
+  });
+  layerSelect.appendChild(group);
+});
+
+function renderContent() {
+  content.innerHTML = '';
+  META_CATEGORIES.forEach(meta => {
+    const metaSection = document.createElement('div');
+    metaSection.className = 'tools-meta-section';
+    metaSection.dataset.metaId = meta.id;
+
+    const layersHtml = meta.layers.map(layer => {
+      const toolHtml = layer.tools.map(t => {
+        const tagsHtml = t.tags.map(tag => `<span class="tools-tag tools-tag-${tag}">${TAG_LABELS[tag] || tag}</span>`).join('');
+        return `
+          <div class="tools-tool" data-tags="${t.tags.join(' ')}" data-name="${t.name.toLowerCase()}">
+            <div class="tools-tool-header">
+              <span class="tools-tool-name">${t.name}</span>
+              <span class="tools-tags">${tagsHtml}</span>
+            </div>
+            <p class="tools-tool-desc">${t.desc}</p>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="tools-layer-section" data-layer-id="${layer.id}">
+          <div class="tools-layer-header">
+            <span class="tools-layer-number">L${String(layer.id).padStart(2, '0')}</span>
+            <h3 class="tools-layer-name">${layer.name}</h3>
+          </div>
+          <p class="tools-layer-subtitle">${layer.subtitle}</p>
+          <div>${toolHtml}</div>
+          ${layer.take ? `<div class="tools-take"><span class="tools-take-label">Take</span>${layer.take}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    metaSection.innerHTML = `
+      <div class="tools-meta-header">
+        <h2 class="tools-meta-name"><span class="tools-meta-roman">${meta.roman}.</span>${meta.name}</h2>
+        <p class="tools-meta-desc">${meta.description}</p>
+      </div>
+      ${layersHtml}
+    `;
+    content.appendChild(metaSection);
+  });
+}
+
+function applyFilters() {
+  const query = searchBox.value.trim().toLowerCase();
+  const metaSections = content.querySelectorAll('.tools-meta-section');
+
+  metaSections.forEach(metaSection => {
+    const metaId = metaSection.dataset.metaId;
+    const metaMatches = currentMeta === 'all' || currentMeta === metaId;
+
+    if (!metaMatches) { metaSection.classList.add('tools-hidden'); return; }
+
+    const layerSections = metaSection.querySelectorAll('.tools-layer-section');
+    let visibleLayers = 0;
+
+    layerSections.forEach(layerSection => {
+      const layerId = layerSection.dataset.layerId;
+      const layerMatches = currentLayer === 'all' || currentLayer === layerId;
+
+      if (!layerMatches) { layerSection.classList.add('tools-hidden'); return; }
+
+      const tools = layerSection.querySelectorAll('.tools-tool');
+      let visibleTools = 0;
+
+      tools.forEach(tool => {
+        const toolTags = (tool.dataset.tags || '').split(' ');
+        const toolName = tool.dataset.name || '';
+        const toolDesc = tool.querySelector('.tools-tool-desc').textContent.toLowerCase();
+        const tagMatch = activeTags.size === 0 || [...activeTags].every(t => toolTags.includes(t));
+        const queryMatch = !query || toolName.includes(query) || toolDesc.includes(query);
+        if (tagMatch && queryMatch) { tool.classList.remove('tools-hidden'); visibleTools++; }
+        else { tool.classList.add('tools-hidden'); }
+      });
+
+      if (visibleTools === 0 && (query || activeTags.size > 0)) {
+        layerSection.classList.add('tools-hidden');
+      } else {
+        layerSection.classList.remove('tools-hidden');
+        visibleLayers++;
+      }
+    });
+
+    if (visibleLayers === 0) metaSection.classList.add('tools-hidden');
+    else metaSection.classList.remove('tools-hidden');
+  });
+
+  const visibleSections = [...content.querySelectorAll('.tools-meta-section')].filter(s => !s.classList.contains('tools-hidden'));
+  let existingEmpty = content.querySelector('.tools-empty');
+  if (visibleSections.length === 0) {
+    if (!existingEmpty) {
+      const empty = document.createElement('div');
+      empty.className = 'tools-empty';
+      empty.innerHTML = 'No tools match these filters. Try clearing them.';
+      content.appendChild(empty);
+    }
+  } else { if (existingEmpty) existingEmpty.remove(); }
+}
+
+metaPills.addEventListener('click', (e) => {
+  const pill = e.target.closest('.tools-meta-pill');
+  if (!pill) return;
+  metaPills.querySelectorAll('.tools-meta-pill').forEach(p => p.classList.remove('tools-active'));
+  pill.classList.add('tools-active');
+  currentMeta = pill.dataset.meta;
+  applyFilters();
+});
+
+layerSelect.addEventListener('change', () => {
+  currentLayer = layerSelect.value;
+  if (currentLayer !== 'all') {
+    const layerId = parseInt(currentLayer, 10);
+    const owningMeta = META_CATEGORIES.find(m => m.layers.some(l => l.id === layerId));
+    if (owningMeta) {
+      currentMeta = owningMeta.id;
+      metaPills.querySelectorAll('.tools-meta-pill').forEach(p => {
+        p.classList.toggle('tools-active', p.dataset.meta === owningMeta.id);
+      });
+    }
+  }
+  applyFilters();
+});
+
+searchBox.addEventListener('input', applyFilters);
+
+tagFilters.addEventListener('click', (e) => {
+  if (!e.target.classList.contains('tools-chip')) return;
+  const tag = e.target.dataset.tag;
+  if (activeTags.has(tag)) { activeTags.delete(tag); e.target.classList.remove('tools-active'); }
+  else { activeTags.add(tag); e.target.classList.add('tools-active'); }
+  applyFilters();
+});
+
+renderContent();
+applyFilters();
+})();
 </script>
 
 </body>
