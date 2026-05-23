@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>State of the Art &mdash; Towards Intelligence</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
+  <meta property="og:title" content="State of the Art — Towards Intelligence"/>
+  <meta property="og:description" content="Two views of where Data & Intelligence engineering actually is right now — the LLM Engineering Landscape (slow-moving framework) and the AI Ecosystem Map (fast-moving tool layer)."/>
+  <meta property="og:type" content="article"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:         #0e0e0f;
+      --surface:    #151516;
+      --surface2:   #1c1c1e;
+      --rule:       #2a2a2e;
+      --rule-lt:    #333338;
+      --ink:        #e8e8e8;
+      --ink-mid:    #d4d4d4;
+      --ink-dim:    #a8a8a8;
+      --white:      #f8f8f8;
+      --accent:     #c8a96e;
+      --accent-dim: #3a2e1a;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--bg); color: var(--ink);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+    }
+    body > nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(14, 14, 15, 0.94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em;
+      color: var(--white); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.92rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-hamburger {
+      display: none;
+      flex-direction: column; justify-content: center; align-items: center;
+      gap: 5px; width: 44px; height: 44px;
+      cursor: pointer; background: none; border: none; padding: 0;
+    }
+    .nav-hamburger span {
+      display: block; width: 24px; height: 2px;
+      background: var(--ink); border-radius: 1px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .mobile-menu {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 99;
+      background: rgba(14, 14, 15, 0.97);
+      backdrop-filter: blur(12px);
+      flex-direction: column; justify-content: center; align-items: center;
+      gap: 2rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-family: 'Karla', sans-serif;
+      font-size: 1.1rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .mobile-menu a:hover { color: var(--accent); }
+
+    .page-wrap {
+      max-width: 900px; margin: 0 auto;
+      padding: 0 2rem 6rem;
+    }
+    .breadcrumb {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; letter-spacing: 0.04em;
+      color: var(--ink-dim);
+      padding-top: 6rem;
+    }
+    .breadcrumb a { color: var(--ink-dim); text-decoration: none; transition: color 0.2s; }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb .sep { margin: 0 0.5rem; color: var(--rule-lt); }
+    .breadcrumb .current { color: var(--ink-mid); }
+
+    .hero {
+      padding: 3rem 0;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 3.5rem;
+    }
+    .hero-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      display: flex; align-items: center; gap: 0.8rem;
+      margin-bottom: 1.4rem;
+    }
+    .hero-kicker::before {
+      content: ''; display: block;
+      width: 32px; height: 1px; background: var(--accent);
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+      font-weight: 600; line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      margin-bottom: 1rem;
+    }
+    .hero-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .hero-subtitle {
+      font-size: 1.02rem; line-height: 1.75;
+      color: var(--ink); max-width: 720px; font-weight: 400;
+    }
+    .hero-subtitle strong { color: var(--white); font-weight: 600; }
+    .hero-subtitle em { color: var(--accent); font-style: italic; }
+
+    /* Card-style entries */
+    .resource-card {
+      display: block;
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--rule);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.2s;
+    }
+    .resource-card:hover { background: rgba(200, 169, 110, 0.04); }
+    .resource-card:last-of-type { border-bottom: none; }
+    .resource-card-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+    .resource-card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem; font-weight: 500;
+      color: var(--white); line-height: 1.2;
+      margin-bottom: 0.8rem;
+      display: flex; align-items: baseline; gap: 0.9rem;
+    }
+    .resource-card-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .resource-card-title::after {
+      content: '\2192';
+      color: var(--accent);
+      font-size: 1.2rem;
+      transition: transform 0.2s;
+    }
+    .resource-card:hover .resource-card-title::after { transform: translateX(6px); }
+    .resource-card-desc {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem; color: var(--ink-mid);
+      line-height: 1.7;
+      max-width: 720px;
+      text-align: justify;
+    }
+    .resource-card-meta {
+      display: flex; gap: 1.4rem; flex-wrap: wrap;
+      margin-top: 1.1rem;
+    }
+    .resource-card-meta-item {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; letter-spacing: 0.08em;
+      color: var(--ink-dim);
+    }
+    .resource-card-meta-item strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .closing-note {
+      margin-top: 4rem;
+      padding: 1.4rem 1.6rem;
+      background: var(--surface);
+      border-left: 2px solid var(--accent);
+      border-radius: 2px;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.92rem; color: var(--ink-mid);
+      line-height: 1.7;
+      text-align: justify;
+    }
+    .closing-note strong { color: var(--accent); font-weight: 600; }
+
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 2rem;
+      margin-top: 5rem;
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.96rem; color: var(--ink-dim);
+    }
+    .footer-copy {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.05em;
+    }
+
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.65s ease, transform 0.65s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .page-wrap { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .resource-card-title { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">Towards Intelligence</a>
+    <ul class="nav-links">
+      <li><a href="../index.html#mathematics">Mathematics</a></li>
+      <li><a href="../index.html#cse">CS &amp; Engineering</a></li>
+      <li><a href="index.html" class="active">Data &amp; Intelligence</a></li>
+    </ul>
+    <button class="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="#engineering-landscape" class="mobile-link">LLM Engineering Landscape</a>
+  <a href="#ecosystem-map" class="mobile-link">AI Ecosystem Map</a>
+  <a href="index.html" class="mobile-link">Back to D&amp;I Guide</a>
+  <a href="../index.html" class="mobile-link">Home</a>
+</div>
+
+<div class="page-wrap">
+
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../index.html">Towards Intelligence</a>
+    <span class="sep">/</span>
+    <a href="../index.html#data-intelligence">Data &amp; Intelligence</a>
+    <span class="sep">/</span>
+    <span class="current">State of the Art</span>
+  </nav>
+
+  <header class="hero reveal">
+    <div class="hero-kicker">Tracking the Frontier</div>
+    <h1 class="hero-title">State of the <em>Art</em></h1>
+    <p class="hero-subtitle">
+      Two views of where Data &amp; Intelligence engineering actually <em>is</em> right now &mdash; one slow, one fast. The <strong>LLM Engineering Landscape</strong> is the conceptual framework: the eight disciplines and seven-project plan that explain what the work is. The <strong>AI Ecosystem Map</strong> is the live tool layer on top of that framework &mdash; which vendors, which products, what&rsquo;s rising, what&rsquo;s overhyped. Read the Landscape once and refresh occasionally; check the Map weekly.
+    </p>
+  </header>
+
+  <a href="llm-engineering.html" class="resource-card reveal" id="engineering-landscape">
+    <div class="resource-card-kicker">The Framework</div>
+    <div class="resource-card-title">LLM Engineering <em>Landscape</em></div>
+    <p class="resource-card-desc">
+      A four-part essay on the LLM engineering field: the engineering landscape (eight disciplines), what developers actually build (problem-organised), what people actually ship (products + maturity), and the plan (13 study domains, 7 sequential projects, dependency chain, 7&ndash;8 month timeline). The slow-moving structural map.
+    </p>
+    <div class="resource-card-meta">
+      <span class="resource-card-meta-item"><strong>Type</strong> Long-form essay</span>
+      <span class="resource-card-meta-item"><strong>Cadence</strong> Refreshed quarterly</span>
+      <span class="resource-card-meta-item"><strong>Read time</strong> 45&ndash;60 min</span>
+    </div>
+  </a>
+
+  <a href="ai-ecosystem-map.html" class="resource-card reveal" id="ecosystem-map">
+    <div class="resource-card-kicker">The Live Tool Layer</div>
+    <div class="resource-card-title">AI Ecosystem <em>Map</em></div>
+    <p class="resource-card-desc">
+      An opinionated map of the current AI engineering ecosystem &mdash; ~150 vendors across 22 layers, organised into six meta-categories (Models, Infra &amp; Delivery, Knowledge &amp; Retrieval, Application &amp; Agents, Operations &amp; Customization, Signal &amp; Research). Each tool tagged for deep-investment / surface awareness / overhyped / rising, with cross-cutting opinions on what&rsquo;s worth your time. The fast-moving snapshot.
+    </p>
+    <div class="resource-card-meta">
+      <span class="resource-card-meta-item"><strong>Type</strong> Interactive map</span>
+      <span class="resource-card-meta-item"><strong>Cadence</strong> Refreshed weekly</span>
+      <span class="resource-card-meta-item"><strong>Filter by</strong> Tag, layer, search</span>
+    </div>
+  </a>
+
+  <div class="closing-note reveal">
+    <strong>How to use them together:</strong> the Landscape tells you <em>what category</em> a tool belongs to and <em>why the category exists</em>; the Ecosystem Map tells you <em>which specific tools in that category</em> are worth picking up right now. A reader who only reads the Map sees tools without context; a reader who only reads the Landscape sees categories without product names. The pair covers both halves.
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-name">State of the Art</span>
+    <span class="footer-copy">Last updated &mdash; May 2026 &nbsp;&middot;&nbsp; &copy; 2026</span>
+  </div>
+</footer>
+
+<script>
+  const hamburger = document.querySelector('.nav-hamburger');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+  });
+  document.querySelectorAll('.mobile-link').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.05 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
