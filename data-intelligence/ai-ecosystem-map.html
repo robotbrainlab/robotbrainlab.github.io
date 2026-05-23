@@ -159,6 +159,41 @@
     .hero-subtitle strong { color: var(--white); font-weight: 600; }
     .hero-subtitle em { color: var(--accent); font-style: italic; }
 
+    /* Refresh badge — signals the page is actively maintained */
+    .refresh-badge {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      margin-top: 1.6rem;
+      padding: 0.4rem 0.85rem;
+      background: rgba(155, 184, 154, 0.08);
+      border: 1px solid rgba(155, 184, 154, 0.3);
+      border-radius: 2px;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.74rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink-mid);
+    }
+    .refresh-badge .pulse {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #9bb89a;
+      box-shadow: 0 0 0 0 rgba(155, 184, 154, 0.6);
+      animation: refresh-pulse 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .refresh-badge .label-dim { color: var(--ink-dim); margin-right: 0.2rem; }
+    .refresh-badge .cadence {
+      color: var(--ink-dim);
+      letter-spacing: 0.1em;
+      margin-left: 0.45rem;
+      padding-left: 0.6rem;
+      border-left: 1px solid var(--rule-lt);
+    }
+    @keyframes refresh-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(155, 184, 154, 0.5); }
+      70%  { box-shadow: 0 0 0 8px rgba(155, 184, 154, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(155, 184, 154, 0); }
+    }
+
     /* Controls */
     .meta-pills {
       display: flex;
@@ -496,6 +531,10 @@
     <p class="hero-subtitle">
       An opinionated map of the current AI/LLM engineering ecosystem for senior engineers &mdash; <strong>22 layers</strong>, <strong>6 meta-categories</strong>, ~150 tools. Each entry tagged for <em>deep investment</em>, <em>surface awareness</em>, <em>rising</em>, or <em>overhyped</em>. The cross-cutting opinions block at the end is the honest answer to &ldquo;what would you actually run in production right now.&rdquo;
     </p>
+    <div class="refresh-badge" title="This page is actively maintained">
+      <span class="pulse" aria-hidden="true"></span>
+      <span><span class="label-dim">Last refreshed</span>May 24, 2026<span class="cadence">Cadence &middot; weekly</span></span>
+    </div>
   </header>
 
   <div class="meta-pills" id="metaPills"></div>
@@ -580,7 +619,7 @@
 <footer>
   <div class="footer-inner">
     <span class="footer-name">AI Ecosystem Map</span>
-    <span class="footer-copy">Last refreshed &mdash; May 2026 &nbsp;&middot;&nbsp; &copy; 2026</span>
+    <span class="footer-copy">Last refreshed &mdash; May 24, 2026 &nbsp;&middot;&nbsp; &copy; 2026</span>
   </div>
 </footer>
 
