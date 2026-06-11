@@ -153,12 +153,40 @@
     }
     .article-link:hover { border-color: var(--accent); }
 
+    /* Track header above each on-ramp table */
+    .onramp-track-header {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent);
+      margin: 2.6rem 0 0.4rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .onramp-track-header::before {
+      content: ''; display: block;
+      width: 28px; height: 1px; background: var(--accent);
+    }
+    .onramp-track-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem; font-weight: 500;
+      color: var(--white);
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.01em;
+    }
+    .onramp-track-title em { font-style: italic; color: var(--accent); font-weight: 400; }
+    .onramp-track-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; color: var(--ink-dim);
+      line-height: 1.7; max-width: 720px;
+      margin-bottom: 1rem;
+    }
+
     /* On-ramp table styles */
     .onramp-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 0.6rem;
-      margin-bottom: 3rem;
+      margin-bottom: 1.5rem;
       border: 1px solid var(--rule);
     }
     .onramp-table thead th {
@@ -366,9 +394,14 @@
     <div class="hero-kicker">Getting Started</div>
     <h1 class="hero-title">Data &amp; Intelligence <em>On-Ramp</em></h1>
     <p class="hero-subtitle">
-      The fastest path to becoming employable in Data &amp; Intelligence. D&amp;I is organised as three tracks: <strong>Math</strong> (the foundational layer), <strong>Science</strong> (theoretical depth), and <strong>Engineering</strong> (practical fluency). Math sits on its own because every Science topic and most Engineering work assumes it. Science and Engineering then mirror each other topic-for-topic across the same five areas: Data Analysis, Machine Learning, Deep Learning, NLP, and Transformers/LLMs. The Engineering track splits into <strong>Building</strong> (Software Engineering, Infrastructure Engineering) and <strong>Operating</strong> (Reliability, Performance, Security, Observability) &mdash; the same two-category structure used in CS &amp; Engineering &mdash; with MLOps and LLMOps spanning Infrastructure Engineering and all four Operating disciplines (the course cell is merged across those rows). Most Science Track cells are empty because the on-ramp focuses on practical certifications &mdash; academic Science-track resources live on the Resources page.
+      The fastest path to becoming employable in Data &amp; Intelligence. Three tracks below: <strong>Math</strong> (foundation), <strong>Science</strong> (theoretical depth), <strong>Engineering</strong> (practical fluency). Each track is its own table with its own framing.
     </p>
   </div>
+
+  <!-- ===================== MATH TRACK ===================== -->
+  <div class="onramp-track-header">Math</div>
+  <div class="onramp-track-title">The <em>Foundation</em></div>
+  <div class="onramp-track-desc">Calculus, linear algebra, probability, and statistics &mdash; the foundational layer beneath both Science and Engineering. The dedicated <a href="../mathematics/index.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Mathematics discipline</a> covers it in depth; the entry below is the D&amp;I-specific starting point.</div>
 
   <table class="onramp-table reveal">
     <thead>
@@ -379,8 +412,6 @@
       </tr>
     </thead>
     <tbody>
-      <!-- MATH TRACK -->
-      <tr class="track-divider"><td colspan="3">Math Track</td></tr>
       <tr>
         <td class="col-category">Math</td>
         <td class="col-topic">Mathematics</td>
@@ -397,9 +428,23 @@
           </span>
         </td>
       </tr>
+    </tbody>
+  </table>
 
-      <!-- SCIENCE TRACK -->
-      <tr class="track-divider"><td colspan="3">Science Track</td></tr>
+  <!-- ===================== SCIENCE TRACK ===================== -->
+  <div class="onramp-track-header">Science</div>
+  <div class="onramp-track-title">Theoretical <em>Depth</em></div>
+  <div class="onramp-track-desc">The five topics that mirror the Engineering track, studied from the theoretical angle. Most cells are empty here because the on-ramp focuses on practical certifications &mdash; academic Science-track resources live on the <a href="resources.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Resources page</a>.</div>
+
+  <table class="onramp-table reveal">
+    <thead>
+      <tr>
+        <th class="col-h-cat">Category</th>
+        <th class="col-h-topic">Topic</th>
+        <th class="col-h-course">Course / Book</th>
+      </tr>
+    </thead>
+    <tbody>
       <tr>
         <td class="col-category" rowspan="5">Science</td>
         <td class="col-topic">Data Analysis</td>
@@ -409,10 +454,23 @@
       <tr><td class="col-topic">Deep Learning</td><td class="cell-empty">&mdash;</td></tr>
       <tr><td class="col-topic">NLP</td><td class="cell-empty">&mdash;</td></tr>
       <tr><td class="col-topic">Transformers &amp; LLMs</td><td class="cell-empty">&mdash;</td></tr>
+    </tbody>
+  </table>
 
-      <!-- ENGINEERING TRACK -->
-      <tr class="track-divider"><td colspan="3">Engineering Track</td></tr>
+  <!-- ===================== ENGINEERING TRACK ===================== -->
+  <div class="onramp-track-header">Engineering</div>
+  <div class="onramp-track-title">Practical <em>Fluency</em></div>
+  <div class="onramp-track-desc">The same five mirror topics from the practical angle, split into <strong>Building</strong> (Software Engineering, Infrastructure Engineering) and <strong>Operating</strong> (Reliability, Performance, Security, Observability) &mdash; mirroring CS &amp; Engineering. MLOps and LLMOps span Infrastructure Engineering and all four Operating disciplines, so the course cell is merged across those rows.</div>
 
+  <table class="onramp-table reveal">
+    <thead>
+      <tr>
+        <th class="col-h-cat">Category</th>
+        <th class="col-h-topic">Topic</th>
+        <th class="col-h-course">Course / Book</th>
+      </tr>
+    </thead>
+    <tbody>
       <!-- Building -->
       <tr>
         <td class="col-category" rowspan="2">Building</td>
