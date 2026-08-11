@@ -6,240 +6,88 @@
   <title>Mathematics On-Ramp &mdash; Towards Intelligence</title>
   <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
   <meta property="og:title" content="Mathematics On-Ramp — Towards Intelligence"/>
-  <meta property="og:description" content="Practical starter courses for the mathematical foundations — five core topics, each with one course recommendation."/>
+  <meta property="og:description" content="The Mathematics On-Ramp is being rebuilt — coming soon."/>
   <meta property="og:type" content="article"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg:         #0e0e0f;
-      --surface:    #151516;
-      --surface2:   #1c1c1e;
-      --rule:       #2a2a2e;
-      --rule-lt:    #333338;
-      --ink:        #e8e8e8;
-      --ink-mid:    #d4d4d4;
-      --ink-dim:    #a8a8a8;
-      --white:      #f8f8f8;
-      --accent:     #c8a96e;
-      --accent-dim: #3a2e1a;
+      --bg: #0e0e0f; --surface: #151516; --rule: #2a2a2e; --rule-lt: #333338;
+      --ink: #e8e8e8; --ink-mid: #d4d4d4; --ink-dim: #a8a8a8; --white: #f8f8f8;
+      --accent: #c8a96e;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+    html { scroll-behavior: smooth; }
     body {
       font-family: 'Source Serif 4', Georgia, serif;
-      background: var(--bg); color: var(--ink);
-      line-height: 1.7;
+      background: var(--bg); color: var(--ink); line-height: 1.7;
       -webkit-font-smoothing: antialiased;
-      overflow-x: clip;
+      min-height: 100vh; display: flex; flex-direction: column;
     }
-    body > nav {
+
+    /* NAV */
+    nav.site-nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(14, 14, 15, 0.94);
-      backdrop-filter: blur(8px);
+      background: rgba(14,14,15,0.94); backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--rule);
     }
-    .nav-inner {
-      max-width: 1100px; margin: 0 auto;
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 1rem 2rem;
-    }
-    .nav-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em;
-      color: var(--white); text-decoration: none;
-    }
+    .nav-inner { max-width: 1100px; margin: 0 auto; display: flex;
+      justify-content: space-between; align-items: center; padding: 1rem 2rem; }
+    .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem;
+      font-weight: 600; letter-spacing: 0.04em; color: var(--white); text-decoration: none; }
     .nav-links { display: flex; gap: 2.2rem; list-style: none; }
-    .nav-links a {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.92rem; font-weight: 500; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--ink-mid);
-      text-decoration: none; transition: color 0.2s;
-    }
-    .nav-links a:hover { color: var(--accent); }
-    .nav-links a.active { color: var(--accent); }
-    .nav-hamburger {
-      display: none;
-      flex-direction: column; justify-content: center; align-items: center;
-      gap: 5px; width: 44px; height: 44px;
-      cursor: pointer; background: none; border: none; padding: 0;
-    }
-    .nav-hamburger span {
-      display: block; width: 24px; height: 2px;
-      background: var(--ink); border-radius: 1px;
-      transition: transform 0.3s, opacity 0.3s;
-    }
+    .nav-links a { font-family: 'Karla', sans-serif; font-size: 0.92rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+    .nav-hamburger { display: none; flex-direction: column; justify-content: center;
+      align-items: center; gap: 5px; width: 44px; height: 44px; cursor: pointer;
+      background: none; border: none; padding: 0; }
+    .nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--ink);
+      border-radius: 1px; transition: transform 0.3s, opacity 0.3s; }
     .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .nav-hamburger.open span:nth-child(2) { opacity: 0; }
     .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-    .mobile-menu {
-      display: none;
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      z-index: 99;
-      background: rgba(14, 14, 15, 0.97);
-      backdrop-filter: blur(12px);
-      flex-direction: column; justify-content: center; align-items: center;
-      gap: 2rem;
-    }
+    .mobile-menu { display: none; position: fixed; inset: 0; z-index: 99;
+      background: rgba(14,14,15,0.97); backdrop-filter: blur(12px);
+      flex-direction: column; justify-content: center; align-items: center; gap: 2rem; }
     .mobile-menu.open { display: flex; }
-    .mobile-menu a {
-      font-family: 'Karla', sans-serif;
-      font-size: 1.1rem; font-weight: 500; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--ink-mid);
-      text-decoration: none; transition: color 0.2s;
-    }
+    .mobile-menu a { font-family: 'Karla', sans-serif; font-size: 1.1rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mid); text-decoration: none; }
     .mobile-menu a:hover { color: var(--accent); }
 
-    .page-wrap {
-      max-width: 1100px; margin: 0 auto;
-      padding: 0 2rem 6rem;
-    }
-    .breadcrumb {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.84rem; letter-spacing: 0.04em;
-      color: var(--ink-dim);
-      padding-top: 6rem;
-    }
-    .breadcrumb a { color: var(--ink-dim); text-decoration: none; transition: color 0.2s; }
-    .breadcrumb a:hover { color: var(--accent); }
-    .breadcrumb .sep { margin: 0 0.5rem; color: var(--rule-lt); }
-    .breadcrumb .current { color: var(--ink-mid); }
+    /* COMING SOON */
+    .coming { flex: 1; display: flex; flex-direction: column; justify-content: center;
+      align-items: center; text-align: center; padding: 8rem 2rem 4rem; }
+    .cs-kicker { font-family: 'Karla', sans-serif; font-size: 0.88rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+      display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.6rem; }
+    .cs-kicker::before, .cs-kicker::after { content: ''; width: 28px; height: 1px; background: var(--accent); }
+    .cs-title { font-family: 'Cormorant Garamond', serif; font-weight: 600; line-height: 1.05;
+      letter-spacing: -0.01em; color: var(--white); font-size: clamp(3rem, 9vw, 5.5rem); margin-bottom: 1.6rem; }
+    .cs-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .cs-text { font-size: 1.05rem; color: var(--ink-mid); max-width: 560px; line-height: 1.85; margin-bottom: 2.4rem; }
+    .cs-back { font-family: 'Karla', sans-serif; font-size: 0.88rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); text-decoration: none;
+      border-bottom: 1px solid var(--accent-dim, #3a2e1a); padding-bottom: 0.2rem; transition: border-color 0.2s; }
+    .cs-back:hover { border-color: var(--accent); }
 
-    .hero {
-      padding: 3rem 0 3rem;
-      border-bottom: 1px solid var(--rule);
-      margin-bottom: 3rem;
-    }
-    .hero-kicker {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--accent);
-      display: flex; align-items: center; gap: 0.8rem;
-      margin-bottom: 1.4rem;
-    }
-    .hero-kicker::before {
-      content: ''; display: block;
-      width: 32px; height: 1px; background: var(--accent);
-    }
-    .hero-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.2rem, 4.5vw, 3.6rem);
-      font-weight: 600; line-height: 1.1;
-      letter-spacing: -0.01em;
-      color: var(--white);
-      margin-bottom: 1rem;
-    }
-    .hero-title em { font-style: italic; font-weight: 400; color: var(--accent); }
-    .hero-subtitle {
-      font-size: 1.02rem; line-height: 1.75;
-      color: var(--ink); max-width: 760px; font-weight: 400;
-    }
-
-    /* On-ramp table styles */
-    .onramp-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 0.6rem;
-      margin-bottom: 3rem;
-      border: 1px solid var(--rule);
-    }
-    .onramp-table thead th {
-      text-align: left;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.74rem; font-weight: 600;
-      letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--ink-dim);
-      border: 1px solid var(--rule); background: var(--surface);
-      padding: 0.9rem 1rem; vertical-align: middle;
-    }
-    .onramp-table tbody td {
-      padding: 1rem 1rem;
-      border: 1px solid var(--rule);
-      vertical-align: top;
-      font-family: 'Source Serif 4', serif;
-      font-size: 0.96rem;
-      line-height: 1.55;
-      color: var(--ink);
-    }
-    .onramp-table td.col-category,
-    .onramp-table td.col-topic {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 500;
-      color: var(--white);
-      background: rgba(21, 21, 22, 0.4);
-    }
-    .onramp-table td.col-category { font-size: 1.1rem; vertical-align: middle; }
-    .onramp-table td.col-topic { font-size: 1.05rem; }
-    .onramp-table .cell-item {
-      display: block;
-      margin-bottom: 0.6rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px dashed var(--rule);
-    }
-    .onramp-table .cell-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-    .onramp-table .cell-item a {
-      color: var(--ink); text-decoration: none;
-      border-bottom: 1px solid var(--rule-lt);
-      transition: color 0.2s, border-color 0.2s;
-      font-weight: 500;
-    }
-    .onramp-table .cell-item a:hover {
-      color: var(--accent); border-bottom-color: var(--accent);
-    }
-    .onramp-table .cell-desc {
-      display: block;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.8rem; color: var(--ink-dim);
-      margin-top: 0.2rem; line-height: 1.45;
-    }
-    .onramp-table .cell-empty { color: var(--ink-dim); opacity: 0.35; text-align: center; }
-    .onramp-table thead th.col-h-cat    { width: 18%; }
-    .onramp-table thead th.col-h-topic  { width: 38%; }
-    .onramp-table thead th.col-h-course { width: 44%; }
-
-    footer {
-      border-top: 1px solid var(--rule);
-      padding: 1.6rem 2rem;
-      background: var(--surface);
-    }
-    .footer-inner {
-      max-width: 1100px; margin: 0 auto;
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 1rem; flex-wrap: wrap;
-    }
-    .footer-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.96rem; color: var(--ink-dim);
-    }
-    .footer-copy {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.05em;
-    }
-
-    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.65s ease, transform 0.65s ease; }
-    .reveal.visible { opacity: 1; transform: none; }
+    /* FOOTER */
+    footer { border-top: 1px solid var(--rule); padding: 1.6rem 2rem; background: var(--surface); }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem 1rem; }
+    .footer-name { font-family: 'Cormorant Garamond', serif; font-size: 0.96rem; color: var(--ink-dim); }
+    .footer-copy { font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.05em; }
 
     @media (max-width: 600px) {
       .nav-links { display: none; }
       .nav-hamburger { display: flex; }
       .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
-      .page-wrap { padding-left: 1.2rem; padding-right: 1.2rem; }
-    }
-    /* Justify prose: hero/section intros, body classes, tables, and grid cells (site-wide consistency) */
-    .hero-subtitle, .part-subtitle, .major-section-desc, .sub-discipline-desc,
-    .cell-desc, .cell-explainer, .cell-merged-note,
-    .tree-desc, .ops-note, .note-desc,
-    .sub-label-desc, .track-desc,
-    .mirror-table tbody td:not(:first-child),
-    .content-table tbody td:not(:first-child),
-    .resource-table tbody td:not(:first-child) {
-      text-align: justify;
-      hyphens: auto;
     }
   </style>
 </head>
 <body>
 
-<nav>
+<nav class="site-nav">
   <div class="nav-inner">
     <a href="../index.html" class="nav-logo">Towards Intelligence</a>
     <ul class="nav-links">
@@ -247,98 +95,26 @@
       <li><a href="../index.html#cse">CS &amp; Engineering</a></li>
       <li><a href="../index.html#data-intelligence">Data &amp; Intelligence</a></li>
     </ul>
-    <button class="nav-hamburger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 <div class="mobile-menu">
-  <a href="index.html" class="mobile-link">&larr; Mathematics Guide</a>
-  <a href="../index.html" class="mobile-link">Home</a>
+  <a href="index.html" class="mobile-link">Mathematics</a>
+  <a href="../index.html#cse" class="mobile-link">CS &amp; Engineering</a>
+  <a href="../index.html#data-intelligence" class="mobile-link">Data &amp; Intelligence</a>
 </div>
 
-<div class="page-wrap">
-
-  <nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../index.html">Towards Intelligence</a>
-    <span class="sep">/</span>
-    <a href="index.html">Mathematics</a>
-    <span class="sep">/</span>
-    <span class="current">On-Ramp</span>
-  </nav>
-
-  <div class="hero reveal">
-    <div class="hero-kicker">Getting Started</div>
-    <h1 class="hero-title">Mathematics <em>On-Ramp</em></h1>
-    <p class="hero-subtitle">
-      The fastest path to a working mathematical foundation. Five core topics, each with one practical course recommendation. Discrete mathematics is covered under CS &amp; Engineering &mdash; the focus here is the math that calculus, linear algebra, probability, and statistics are built on, in roughly the order you should pick them up.
-    </p>
-  </div>
-
-  <table class="onramp-table reveal">
-    <thead>
-      <tr>
-        <th class="col-h-cat">Category</th>
-        <th class="col-h-topic">Topic</th>
-        <th class="col-h-course">Course</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="col-category" rowspan="5">Foundations</td>
-        <td class="col-topic">School Mathematics</td>
-        <td>
-          <span class="cell-item">
-            <a href="https://www.khanacademy.org/math">Khan Academy &mdash; High School Math</a>
-            <span class="cell-desc">Algebra, functions, trigonometry, pre-calculus &mdash; the foundation to revisit before anything else.</span>
-          </span>
-        </td>
-      </tr>
-      <tr>
-        <td class="col-topic">Calculus &amp; Analysis</td>
-        <td>
-          <span class="cell-item">
-            <a href="https://ocw.mit.edu/courses/18-01-single-variable-calculus-fall-2006/">Single Variable Calculus (18.01) &mdash; MIT OCW</a>
-            <span class="cell-desc">Single-variable calculus from MIT OpenCourseWare. Pair with 18.02 (Multivariable) when you are ready for the multivariable side.</span>
-          </span>
-        </td>
-      </tr>
-      <tr>
-        <td class="col-topic">Linear Algebra</td>
-        <td>
-          <span class="cell-item">
-            <a href="https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/">Linear Algebra (18.06) &mdash; Gilbert Strang, MIT OCW</a>
-            <span class="cell-desc">Strang&rsquo;s classic course &mdash; the canonical free option. Watch alongside 3Blue1Brown&rsquo;s <em>Essence of Linear Algebra</em> for the geometric intuition.</span>
-          </span>
-        </td>
-      </tr>
-      <tr>
-        <td class="col-topic">Probability</td>
-        <td>
-          <span class="cell-item">
-            <a href="https://projects.iq.harvard.edu/stat110/youtube">Harvard Stat 110 &mdash; Joe Blitzstein</a>
-            <span class="cell-desc">A full undergraduate probability course on YouTube &mdash; random variables, distributions, conditioning, and inference, taught with a story-problem instinct that makes it stick.</span>
-          </span>
-        </td>
-      </tr>
-      <tr>
-        <td class="col-topic">Statistics</td>
-        <td>
-          <span class="cell-item">
-            <a href="https://www.khanacademy.org/math/ap-statistics">Khan Academy &mdash; AP Statistics</a>
-            <span class="cell-desc">A practical, exam-style introduction to estimation, hypothesis testing, regression, and the habits of skepticism that statistical reasoning demands.</span>
-          </span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
+<main class="coming">
+  <div class="cs-kicker">Mathematics &middot; On-Ramp</div>
+  <h1 class="cs-title">Coming <em>Soon</em></h1>
+  <p class="cs-text">This section is being rebuilt from the ground up. The Mathematics guide, on-ramp, and curated resources will be published here soon.</p>
+  <a href="../index.html" class="cs-back">&larr; Towards Intelligence</a>
+</main>
 
 <footer>
   <div class="footer-inner">
-    <span class="footer-name">Mathematics On-Ramp</span>
-    <span class="footer-copy">Last updated &mdash; April 2026 &nbsp;&middot;&nbsp; &copy; 2026</span>
+    <span class="footer-name">Towards Intelligence</span>
+    <span class="footer-copy">&copy; 2026</span>
   </div>
 </footer>
 
@@ -357,12 +133,6 @@
       document.body.style.overflow = '';
     });
   });
-  // Scroll reveal
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
-  }, { threshold: 0.05 });
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 </script>
-
 </body>
 </html>
