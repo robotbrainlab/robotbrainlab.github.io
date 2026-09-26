@@ -10,13 +10,26 @@ first ("Restyle work" has the rules and the design reference); this file is the 
    `python3 _tools/text-check.py <pages> --rev main` before it is committed. `main` is the untouched
    baseline for the whole run.
 2. **Work only on the `restyle` branch. One page (or one page group) per commit.** Never commit to
-   `main`, never merge, never push anything, never force, never rewrite history. The user
+   `main`, never merge, never force, never rewrite history. Never push, except `restyle` in the cloud
+   (see below). The user
    can then `git revert` or drop any single page.
 3. **Never modify `_sources/`.** The D&I guide is restyled only through `_tools/build-di-guide.py`.
 4. **Never ask the user anything during the run. They're away.** If a page can't be made to pass,
    restore it (`git restore <page>`), note why in the log, and move on. Never leave a failing page
    committed.
 5. Don't delete files and don't touch `cse/books/`, `favicon/`, `_backup/`, or `.gitignore`.
+
+## Running in the cloud (claude.ai/code)
+
+If this session runs on a cloud machine rather than the user's Mac, two rules change. **Everything else
+stays the same.**
+
+- **Push the `restyle` branch after every commit** (`git push -u origin restyle`). The cloud machine is
+  discarded when the session ends, so unpushed commits would be lost. Still **never push `main`**:
+  GitHub Pages only deploys `main`, so pushing `restyle` changes nothing on the live site.
+- **Visual checks:** if no browser or preview tools are available, still run the text, ID, link and
+  regression checks. Write "visual check not done (cloud)" for that page in the log, so the user
+  knows to look at it themselves.
 
 ## Setup (once)
 
