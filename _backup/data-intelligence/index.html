@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data &amp; Intelligence</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg"/>
+  <meta property="og:title" content="Data & Intelligence — Towards Intelligence"/>
+  <meta property="og:description" content="A three-track approach to AI and data — Mathematics (foundational layer), Science (theoretical depth), and Engineering (hands-on building) — from data analysis to large language models."/>
+  <meta property="og:type" content="article"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:         #0e0e0f;
+      --surface:    #151516;
+      --surface2:   #1c1c1e;
+      --rule:       #2a2a2e;
+      --rule-lt:    #333338;
+      --ink:        #e8e8e8;
+      --ink-mid:    #d4d4d4;
+      --ink-dim:    #a8a8a8;
+      --white:      #f8f8f8;
+      --accent:     #c8a96e;
+      --accent-dim: #3a2e1a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+    }
+
+    /* -- NAV -- */
+    body > nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(14, 14, 15, 0.94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em;
+      color: var(--white); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.92rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.active { color: var(--accent); }
+
+    /* -- HAMBURGER -- */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      width: 44px; height: 44px;
+      cursor: pointer;
+      background: none; border: none; padding: 0;
+    }
+    .nav-hamburger span {
+      display: block; width: 24px; height: 2px;
+      background: var(--ink); border-radius: 1px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 99;
+      background: rgba(14, 14, 15, 0.97);
+      backdrop-filter: blur(12px);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-family: 'Karla', sans-serif;
+      font-size: 1.1rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mid);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .mobile-menu a:hover { color: var(--accent); }
+
+    /* -- LAYOUT -- */
+    .page-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* -- SIDEBAR TOC -- */
+    .toc {
+      position: sticky;
+      top: 5rem;
+      height: calc(100vh - 6rem);
+      overflow-y: auto;
+      padding: 2rem 0 2rem 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--rule) transparent;
+    }
+    .toc::-webkit-scrollbar { width: 4px; }
+    .toc::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
+    .toc::-webkit-scrollbar-track { background: transparent; }
+
+    .toc a.toc-part-label,
+    .toc-part-label {
+      display: block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-top: 1.6rem; margin-bottom: 0.5rem;
+      padding: 0.3rem 0.8rem;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      line-height: 1.5;
+    }
+    .toc a.toc-part-label:first-child,
+    .toc-part-label:first-child { margin-top: 0; }
+    .toc a.toc-part-label:hover {
+      color: var(--white);
+    }
+    .toc a.toc-part-label.active {
+      border-left-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .toc a {
+      display: block;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 400;
+      color: var(--ink-mid);
+      text-decoration: none;
+      padding: 0.3rem 0.8rem;
+      border-left: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      line-height: 1.5;
+    }
+    .toc a:hover { color: var(--ink); }
+    .toc a.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+    .toc a.toc-sub {
+      padding-left: 1.4rem;
+      font-size: 0.84rem;
+    }
+    .toc a.toc-sub-sub {
+      padding-left: 2.4rem;
+      font-size: 0.82rem;
+      color: var(--ink-dim);
+    }
+    .toc a.toc-sub-sub:hover { color: var(--ink); }
+
+    /* -- MAIN CONTENT -- */
+    .main-content {
+      min-width: 0;
+      padding-bottom: 6rem;
+    }
+
+    /* -- BREADCRUMB -- */
+    .breadcrumb {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; letter-spacing: 0.04em;
+      color: var(--ink-dim);
+      padding-top: 6rem;
+      margin-bottom: 2rem;
+    }
+    .breadcrumb a {
+      color: var(--ink-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb .sep { margin: 0 0.5rem; color: var(--rule-lt); }
+    .breadcrumb .current { color: var(--ink-mid); }
+
+    /* -- HERO -- */
+    .hero {
+      padding: 1rem 0 4rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 4rem;
+    }
+    .hero-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      display: flex; align-items: center; gap: 0.8rem;
+      margin-bottom: 1.6rem;
+    }
+    .hero-kicker::before {
+      content: ''; display: block;
+      width: 32px; height: 1px; background: var(--accent);
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.6rem, 5vw, 4.2rem);
+      font-weight: 600; line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+    }
+    .hero-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .hero-subtitle {
+      font-size: 1.05rem; line-height: 1.8;
+      color: var(--ink); max-width: 720px;
+      font-weight: 400; text-align: justify;
+    }
+    .hero-meta {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.82rem; letter-spacing: 0.06em;
+      color: var(--ink-dim);
+      margin-top: 1.6rem;
+      text-transform: uppercase;
+    }
+
+    /* -- PART DIVIDER -- */
+    .part-divider {
+      padding: 4rem 0 2.5rem;
+      border-top: 1px solid var(--rule);
+      margin-top: 3rem;
+      position: relative;
+    }
+    .part-divider:first-of-type { margin-top: 0; border-top: none; }
+    .part-num {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .part-num::before {
+      content: ''; display: block;
+      width: 24px; height: 1px; background: var(--accent);
+    }
+    .part-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 600; line-height: 1.15;
+      color: var(--white); letter-spacing: -0.01em;
+    }
+    .part-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .part-subtitle {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.94rem; color: var(--ink-mid); line-height: 1.7;
+      margin-top: 0.6rem; max-width: 720px;
+    }
+
+    /* -- SECTION HEADINGS -- */
+    .section-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+      font-weight: 600; line-height: 1.2;
+      color: var(--white);
+      margin: 3rem 0 1rem;
+      padding-top: 1.5rem;
+    }
+    .section-heading .sh-num {
+      color: var(--accent);
+      font-style: italic;
+      font-weight: 400;
+      margin-right: 0.3rem;
+    }
+
+    /* -- SUBSECTION HEADINGS -- */
+    .subsection-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 600; line-height: 1.3;
+      color: var(--white);
+      margin: 2rem 0 0.6rem;
+    }
+    .section-heading em,
+    .subsection-heading em {
+      color: var(--accent);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    /* -- BODY TEXT -- */
+    .body-text {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem; color: var(--ink); line-height: 1.8;
+      font-weight: 400; text-align: justify;
+      margin-bottom: 1rem;
+    }
+    .body-text strong { font-weight: 600; color: var(--white); }
+    .body-text em { color: var(--white); }
+
+    /* -- EXPLANATION / BLOCKQUOTE -- */
+    .explanation {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem; color: var(--ink); line-height: 1.8;
+      font-weight: 400;
+      padding: 1.2rem 0 1.2rem 1.4rem;
+      border-left: 2px solid var(--accent-dim);
+      margin-bottom: 1.5rem;
+      text-align: justify;
+    }
+    .explanation strong { font-weight: 600; color: var(--white); }
+
+    /* -- CHIPS / TAGS -- */
+    .chip-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 1.5rem; }
+    .chip {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink-dim);
+      padding: 0.35rem 0.8rem;
+      border: 1px solid var(--rule-lt); border-radius: 1px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* -- BULLET LIST -- */
+    .content-list {
+      list-style: none;
+      margin: 0.5rem 0 1.2rem;
+    }
+    .content-list li {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1.02rem; color: var(--ink-mid);
+      font-weight: 400; line-height: 1.75;
+      padding: 0.25rem 0 0.25rem 1.4rem;
+      position: relative;
+      text-align: justify;
+    }
+    .content-list li::before {
+      content: '\2014';
+      position: absolute; left: 0;
+      color: var(--ink-dim); font-size: 0.92rem;
+    }
+    .content-list li strong { font-weight: 600; color: var(--ink); }
+
+    /* -- LABEL -- */
+    .label {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .label::before {
+      content: ''; display: block;
+      width: 16px; height: 1px; background: var(--accent);
+    }
+
+    /* -- MAJOR SECTION (e.g. "Building" / "Operating" as sub-sections of a Part) -- */
+    .major-section-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      margin-top: 4rem;
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .major-section-kicker::before {
+      content: ''; display: block;
+      width: 36px; height: 1px; background: var(--accent);
+    }
+    .major-section {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 2.8vw, 2.3rem);
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid var(--accent-dim);
+    }
+    .major-section em { font-style: italic; font-weight: 400; color: var(--accent); }
+    .major-section-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.98rem; color: var(--ink-mid);
+      line-height: 1.7; max-width: 720px;
+      margin-bottom: 1.5rem;
+    }
+
+    /* -- SUB-DISCIPLINE HEADING (e.g. "Software Engineering" / "Infrastructure Engineering" as sub-parts of Building) -- */
+    .sub-discipline-kicker {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--ink-dim);
+      margin-top: 3rem;
+      margin-bottom: 0.4rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .sub-discipline-kicker::before {
+      content: ''; display: block;
+      width: 20px; height: 1px; background: var(--ink-dim);
+    }
+    .sub-discipline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.65rem; font-weight: 600;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .sub-discipline-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.94rem; color: var(--ink-mid);
+      line-height: 1.7; max-width: 720px;
+      margin-bottom: 1rem;
+    }
+
+    /* -- NOTE BLOCK -- */
+    .note-block {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      padding: 1.4rem 1.6rem;
+      margin: 1.2rem 0 1.8rem;
+    }
+    .note-block .note-label {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.84rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .note-block p {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem; color: var(--ink-mid); line-height: 1.7;
+      font-weight: 400; text-align: justify;
+    }
+    .note-block p strong { font-weight: 600; color: var(--ink); }
+
+    /* -- HORIZONTAL RULE -- */
+    .content-rule {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--rule-lt) 20%, var(--rule-lt) 80%, transparent);
+      margin: 2.5rem 0;
+    }
+
+    /* -- CODE BLOCK (ASCII diagrams etc.) -- */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      padding: 1.4rem 1.6rem;
+      margin: 1.5rem 0 2rem;
+      overflow-x: auto;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--ink-mid);
+      white-space: pre;
+      border-radius: 2px;
+    }
+
+    /* -- TREE SVG (AI taxonomy diagram) -- */
+    .tree-svg-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 1.8rem 0 2.4rem;
+      padding: 1.8rem 1.2rem;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+    }
+    .tree-svg {
+      display: block;
+      min-width: 720px;
+      max-width: 900px;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    /* -- MIRROR TABLE -- */
+    .table-wrap {
+      overflow-x: auto;
+      max-width: 100%;
+      margin: 2rem 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--rule-lt) transparent;
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(to right, var(--bg) 30%, rgba(14, 14, 15, 0)),
+        linear-gradient(to right, rgba(14, 14, 15, 0), var(--bg) 70%),
+        radial-gradient(farthest-side at 0 50%, rgba(200, 169, 110, 0.25), rgba(200, 169, 110, 0)),
+        radial-gradient(farthest-side at 100% 50%, rgba(200, 169, 110, 0.25), rgba(200, 169, 110, 0));
+      background-position: 0 0, 100% 0, 0 0, 100% 0;
+      background-size: 30px 100%, 30px 100%, 14px 100%, 14px 100%;
+      background-repeat: no-repeat;
+      background-attachment: local, local, scroll, scroll;
+    }
+    .table-wrap::-webkit-scrollbar { height: 6px; }
+    .table-wrap::-webkit-scrollbar-track { background: transparent; }
+    .table-wrap::-webkit-scrollbar-thumb { background: var(--rule-lt); border-radius: 3px; }
+    .table-wrap .mirror-table { margin: 0; }
+    .mirror-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0 2rem;
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.92rem;
+    }
+    .mirror-table thead th {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent);
+      text-align: left;
+      padding: 0.8rem 1rem;
+      border-bottom: 2px solid var(--rule);
+    }
+    .mirror-table tbody td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--rule);
+      color: var(--ink-mid);
+      font-weight: 400;
+      line-height: 1.6;
+      vertical-align: top;
+    }
+    .mirror-table tbody td strong { font-weight: 600; color: var(--ink); }
+    .mirror-table tbody tr:hover td { color: var(--ink); }
+
+    /* -- RESOURCE TABLES (end-of-guide Resources section) -- */
+    .track-header {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.9rem; font-weight: 600; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--accent);
+      margin: 3rem 0 0.3rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .track-header::before {
+      content: ''; display: block;
+      width: 28px; height: 1px; background: var(--accent);
+    }
+    .track-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.7rem; font-weight: 600;
+      color: var(--white);
+      margin-bottom: 0.4rem;
+    }
+    .track-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.94rem; color: var(--ink-mid);
+      line-height: 1.7; max-width: 720px;
+      margin-bottom: 1.6rem;
+    }
+    .sub-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; font-weight: 500;
+      color: var(--white);
+      margin-top: 2.4rem;
+      margin-bottom: 0.4rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .sub-label-desc {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; color: var(--ink-dim);
+      line-height: 1.6; max-width: 720px;
+      margin-bottom: 0.4rem;
+    }
+    .resource-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.6rem;
+      margin-bottom: 3rem;
+    }
+    .resource-table thead th {
+      text-align: left;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.74rem; font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      border-bottom: 1px solid var(--rule);
+      padding: 0.9rem 1rem 0.9rem 0;
+      vertical-align: bottom;
+    }
+    .resource-table thead th.col-topic { width: 22%; }
+    .resource-table tbody td {
+      padding: 1.1rem 1rem 1.1rem 0;
+      border-bottom: 1px solid var(--rule-lt);
+      vertical-align: top;
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.96rem;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+    .resource-table tbody tr:last-child td { border-bottom: none; }
+    .resource-table td.col-topic {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-weight: 500;
+      color: var(--white);
+      padding-right: 1rem;
+    }
+    .resource-table .cell-item {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .resource-table .cell-item:last-child { margin-bottom: 0; }
+    .resource-table .cell-item a {
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule-lt);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .resource-table .cell-item a:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .resource-table .cell-type {
+      display: inline-block;
+      margin-left: 0.4rem;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.66rem; font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      background: var(--surface2);
+      padding: 0.1rem 0.4rem;
+      border-radius: 2px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .resource-table .cell-empty {
+      color: var(--ink-dim);
+      opacity: 0.35;
+    }
+    .resources-outro-link {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--accent); text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      margin-top: 1.4rem;
+      border-bottom: 1px solid var(--accent-dim);
+      padding-bottom: 0.2rem;
+      transition: border-color 0.2s;
+    }
+    .resources-outro-link:hover { border-color: var(--accent); }
+    @media (max-width: 720px) {
+      .resource-table,
+      .resource-table thead,
+      .resource-table tbody,
+      .resource-table tr,
+      .resource-table th,
+      .resource-table td { display: block; width: 100%; }
+      .resource-table thead { display: none; }
+      .resource-table tr {
+        border-bottom: 1px solid var(--rule);
+        padding: 1.2rem 0;
+      }
+      .resource-table tbody tr:last-child { border-bottom: none; }
+      .resource-table td {
+        padding: 0.4rem 0;
+        border: none;
+      }
+      .resource-table td.col-topic {
+        padding-right: 0;
+        font-size: 1.35rem;
+        margin-bottom: 0.5rem;
+      }
+      .resource-table td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-family: 'Karla', sans-serif;
+        font-size: 0.66rem; font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        margin-bottom: 0.3rem;
+        margin-top: 0.4rem;
+      }
+    }
+
+    /* -- SCROLL REVEAL -- */
+    .reveal {
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* -- BACK TO TOP -- */
+    .back-to-top {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      width: 40px; height: 40px;
+      background: var(--surface2);
+      border: 1px solid var(--rule);
+      color: var(--ink-dim);
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 99;
+      border-radius: 2px;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .back-to-top:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* -- FOOTER -- */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 1.6rem 2rem;
+      background: var(--surface);
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.96rem; color: var(--ink-dim);
+    }
+    .footer-copy {
+      font-family: 'Karla', sans-serif;
+      font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.05em;
+    }
+
+    /* -- RESPONSIVE -- */
+    @media (max-width: 960px) {
+      .page-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .toc {
+        position: static;
+        height: auto;
+        max-height: 50vh;
+        overflow-y: auto;
+        margin: 5.5rem 0 2rem;
+        padding: 1.4rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+      }
+      .toc::before {
+        content: "On This Page";
+        display: block;
+        font-family: 'Karla', sans-serif;
+        font-size: 0.88rem; font-weight: 600;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 0.8rem 0.8rem;
+      }
+      .main-content { padding: 0; }
+      .breadcrumb { padding-top: 2rem; margin-bottom: 1rem; }
+    }
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .page-layout { padding-left: 1.2rem; padding-right: 1.2rem; }
+    }
+    /* Justify prose: hero/section intros, body classes, tables, and grid cells (site-wide consistency) */
+    .hero-subtitle, .part-subtitle, .major-section-desc, .sub-discipline-desc,
+    .cell-desc, .cell-explainer, .cell-merged-note,
+    .tree-desc, .ops-note, .note-desc,
+    .sub-label-desc, .track-desc,
+    .mirror-table tbody td:not(:first-child),
+    .content-table tbody td:not(:first-child),
+    .resource-table tbody td:not(:first-child) {
+      text-align: justify;
+      hyphens: auto;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">Towards Intelligence</a>
+    <ul class="nav-links">
+      <li><a href="../index.html#mathematics">Mathematics</a></li>
+      <li><a href="../index.html#cse">CS &amp; Engineering</a></li>
+      <li><a href="index.html" class="active">Data &amp; Intelligence</a></li>
+    </ul>
+    <button class="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="#intro" class="mobile-link">Introduction</a>
+  <a href="#field-context" class="mobile-link">Field Context</a>
+  <a href="#part1" class="mobile-link">Five Topics</a>
+  <a href="#part2" class="mobile-link">Science Track</a>
+  <a href="#part3" class="mobile-link">Engineering Track</a>
+  <a href="#part4" class="mobile-link">State of the Art</a>
+</div>
+
+<!-- BACK TO TOP -->
+<a href="#top" class="back-to-top" id="backToTop" aria-label="Back to top">&uarr;</a>
+
+<div class="page-layout" id="top">
+
+<!-- ===== SIDEBAR TOC ===== -->
+<aside class="toc" id="toc">
+
+  <a class="toc-part-label" href="#intro">Introduction</a>
+
+  <a class="toc-part-label" href="#field-context">Field Context</a>
+  <a href="#field-tree" class="toc-sub">Where This Guide Sits</a>
+  <a href="#field-stack" class="toc-sub">The Industry as a Stack</a>
+  <a href="#field-questions" class="toc-sub">Four Questions to Classify Anything</a>
+  <a href="#field-misconceptions" class="toc-sub">Common Misconceptions</a>
+  <a href="#field-developer" class="toc-sub">What Compounds for a Developer</a>
+  <a href="#field-hype" class="toc-sub">Staying Calm Amid the Hype</a>
+
+  <a class="toc-part-label" href="#part1">Part 1 &mdash; The Five Topics</a>
+  <a href="#t-data-analysis" class="toc-sub">Data Analysis</a>
+  <a href="#t-ml" class="toc-sub">Machine Learning</a>
+  <a href="#t-dl" class="toc-sub">Deep Learning</a>
+  <a href="#t-nlp" class="toc-sub">NLP</a>
+  <a href="#t-transformers" class="toc-sub">Transformers &amp; LLMs</a>
+
+  <a class="toc-part-label" href="#part2">Part 2 &mdash; The Science Track</a>
+  <a href="#sci-data-analysis" class="toc-sub">Data Analysis</a>
+  <a href="#sci-ml" class="toc-sub">Machine Learning</a>
+  <a href="#sci-dl" class="toc-sub">Deep Learning</a>
+  <a href="#sci-nlp" class="toc-sub">NLP</a>
+  <a href="#sci-transformers" class="toc-sub">Transformers &amp; LLMs</a>
+
+  <a class="toc-part-label" href="#part3">Part 3 &mdash; The Engineering Track</a>
+  <a href="#building" class="toc-sub">Building</a>
+  <a href="#eng-se" class="toc-sub-sub">Software Engineering</a>
+  <a href="#eng-data-analysis" class="toc-sub-sub">Data Analysis</a>
+  <a href="#eng-ml" class="toc-sub-sub">Machine Learning</a>
+  <a href="#eng-dl" class="toc-sub-sub">Deep Learning</a>
+  <a href="#eng-nlp" class="toc-sub-sub">NLP</a>
+  <a href="#eng-transformers" class="toc-sub-sub">Transformers &amp; LLMs</a>
+  <a href="#eng-infra" class="toc-sub-sub">Infrastructure Engineering</a>
+  <a href="#operating" class="toc-sub">Operating</a>
+  <a href="#eng-sre" class="toc-sub-sub">Reliability Engineering (SRE)</a>
+  <a href="#eng-perf" class="toc-sub-sub">Performance Engineering</a>
+  <a href="#eng-sec" class="toc-sub-sub">Security Engineering</a>
+  <a href="#eng-obs" class="toc-sub-sub">Observability Engineering</a>
+  <a href="#mlops-llmops" class="toc-sub">MLOps &amp; LLMOps (spanning practices)</a>
+  <a href="#eng-mlops" class="toc-sub-sub">MLOps</a>
+  <a href="#eng-llmops" class="toc-sub-sub">LLMOps</a>
+
+  <a class="toc-part-label" href="#part4">Part 4 &mdash; State of the Art</a>
+
+  <a class="toc-part-label" href="#mirror-section">Closing</a>
+
+  <a class="toc-part-label" href="#glossary">Glossary</a>
+
+  <a class="toc-part-label" href="#resources-section">Resources</a>
+
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main-content">
+
+<!-- BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="../index.html">Towards Intelligence</a>
+  <span class="sep">/</span>
+  <span class="current">Data &amp; Intelligence</span>
+</nav>
+
+<!-- HERO -->
+<div class="hero reveal" id="hero-section">
+  <div class="hero-kicker">Long-form Reference</div>
+  <h1 class="hero-title">Data &amp; <em>Intelligence</em></h1>
+  <p class="hero-subtitle">
+    A three-track approach to AI and data &mdash; <strong>Mathematics</strong> as the foundational layer, <strong>Science</strong> for theoretical depth, and <strong>Engineering</strong> for hands-on building &mdash; from data analysis to large language models.
+  </p>
+</div>
+
+
+<!-- ============================================================ -->
+<!--  INTRODUCTION                                                 -->
+<!-- ============================================================ -->
+
+<div class="reveal" id="intro">
+  <h3 class="section-heading">The <em>Three-Track</em> Structure</h3>
+  <p class="body-text">
+    Data &amp; Intelligence is built around a single structural idea: every applied topic is studied twice, once through the lens of <strong>Science</strong> and once through the lens of <strong>Engineering</strong>, both built on top of a shared <strong>Mathematics</strong> foundation. This is not a stylistic choice. It is a direct response to a problem that plagues most self-directed AI learning paths: they either emphasise theory to the point where you can derive a loss function on a whiteboard but have never trained a model on real data, or they emphasise tutorials and frameworks to the point where you can get a model running but have no idea why it is misbehaving, what assumptions it is making, or how to reason about its failures.
+  </p>
+  <p class="body-text">
+    The Mathematics track is the <strong>foundational layer</strong>. Calculus, linear algebra, probability, and statistics &mdash; the maths every Science topic and most Engineering work in this roadmap assumes. Mathematics sits on its own track, not embedded inside Science, because it underlies both: you need linear algebra to read Goodfellow&rsquo;s Deep Learning <em>and</em> to debug a training run whose gradients are exploding. The dedicated <a href="../mathematics/index.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Mathematics discipline</a> covers this material exhaustively; the D&amp;I-specific entry-point is a curated subset of what&rsquo;s genuinely required to start.
+  </p>
+  <p class="body-text">
+    The Science track builds <strong>mathematical intuition</strong> on top of that foundation. Its materials are canonical textbooks and university lecture series &mdash; the kind of resources that the field is actually built on. The goal is not to memorise proofs. It is to develop the ability to read a research paper, understand a loss function, reason about why a model is failing, and know what guarantees an algorithm does and does not provide. This is the <em>why</em> track.
+  </p>
+  <p class="body-text">
+    The Engineering track builds <strong>practical fluency</strong>. Its materials are implementation-focused books, framework documentation, and code repositories. The goal is to actually build things &mdash; train models, clean data, deploy systems, debug the myriad ways training can silently go wrong. The Engineering track is further split into <strong>Building</strong> (writing the code, choosing the framework, structuring the experiment) and <strong>Operating</strong> (running models in production, monitoring drift, managing retraining). This is the <em>how</em> track.
+  </p>
+  <p class="body-text">
+    Science and Engineering cover the same five topics in the same order: Data Analysis, Machine Learning, Deep Learning, Natural Language Processing, and Transformers &amp; Large Language Models. This deliberate mirroring is the core design principle on top of the Mathematics foundation. When you study Machine Learning in the Science track, you learn the bias-variance tradeoff, regularisation theory, and generalisation bounds. When you study Machine Learning in the Engineering track, you learn Scikit-Learn, feature engineering, and how to build reproducible pipelines. Same topic, different angle, complementary understanding. The Engineering track also picks up a sixth area that has no Science counterpart &mdash; <strong>Programming</strong>, the practical coding foundation. The Science track can be read without Python proficiency; no Engineering work in D&amp;I happens without it, which is why it sits inside Software Engineering as the first thing to learn.
+  </p>
+  <p class="body-text">
+    The premise is simple: <strong>theory without practice is academic</strong> &mdash; you understand the mathematics but cannot ship anything. <strong>Practice without theory is fragile</strong> &mdash; you can follow a tutorial, but the moment something behaves unexpectedly, you have no mental model to fall back on. Both tracks together produce someone who can reason about <em>and</em> build intelligent systems.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  FIELD CONTEXT (preamble before Part 1)                       -->
+<!-- ============================================================ -->
+
+<div class="reveal" id="field-context">
+  <h3 class="section-heading"><em>Field Context</em>: Where This Sits in AI</h3>
+  <p class="body-text">
+    Before walking through the dual-track curriculum, it helps to set the wider scope. Most of what follows assumes you have a stable mental model of what the AI industry actually looks like &mdash; where the value sits, what kind of work is being done at each layer, and which announcements you should pay attention to versus the eighty percent that you can safely ignore. That mental model is not optional. It is what keeps you from chasing hype, mis-prioritising your learning, or over-indexing on whichever framework happens to be popular this quarter.
+  </p>
+  <p class="body-text">
+    AI in 2026 is broader than large language models, even though LLMs dominate the headlines. The field includes several distinct technical traditions, each with its own research communities and industrial applications: language models, vision models (and the increasingly fused vision-language models), speech (transcription and synthesis), image and video generation, robotics and embodied AI, scientific AI (protein structure, drug discovery, weather forecasting), and the classical machine learning that still runs most production systems &mdash; recommendation engines, fraud detection, credit scoring &mdash; on gradient-boosted trees rather than transformers. A developer who treats &ldquo;AI&rdquo; as synonymous with &ldquo;LLMs&rdquo; is building on narrower ground than they think. Most of this guide focuses on language and LLM systems because that is where the field&rsquo;s gravity sits today, but the rest of the discipline keeps mattering, and the centre of gravity has shifted before.
+  </p>
+  <figure class="reveal" style="margin:2rem 0 2.4rem;">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--rule);border-radius:8px;padding:1.4rem 1.2rem;background:var(--surface);">
+<svg width="100%" viewBox="0 0 680 656" role="img" style="display:block;min-width:460px;max-width:600px;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">
+<title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">AI field progression from foundations to current frontier</title>
+<desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Vertical diagram showing mathematical foundations and data analysis feeding into classical machine learning and deep learning, which branches into computer vision, language, speech, and reinforcement learning, then converges into foundation models and agentic systems.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+
+<g style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<rect x="230" y="30" width="220" height="56" rx="8" stroke-width="0.5" style="fill:rgb(68, 68, 65);stroke:rgb(180, 178, 169);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="340" y="52" text-anchor="middle" dominant-baseline="central" style="fill:rgb(211, 209, 199);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:14px;font-weight:500;text-anchor:middle;dominant-baseline:central">Mathematical foundations</text>
+<text x="340" y="70" text-anchor="middle" dominant-baseline="central" style="fill:rgb(180, 178, 169);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:central">Linear algebra, probability</text>
+</g>
+<line x1="340" y1="86" x2="340" y2="110" marker-end="url(#arrow)" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<g style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<rect x="230" y="110" width="220" height="56" rx="8" stroke-width="0.5" style="fill:rgb(68, 68, 65);stroke:rgb(180, 178, 169);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="340" y="132" text-anchor="middle" dominant-baseline="central" style="fill:rgb(211, 209, 199);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:14px;font-weight:500;text-anchor:middle;dominant-baseline:central">Data analysis</text>
+<text x="340" y="150" text-anchor="middle" dominant-baseline="central" style="fill:rgb(180, 178, 169);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:central">Statistics, visualization, EDA</text>
+</g>
+<line x1="340" y1="166" x2="340" y2="190" marker-end="url(#arrow)" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<g style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<rect x="230" y="190" width="220" height="56" rx="8" stroke-width="0.5" style="fill:rgb(8, 80, 65);stroke:rgb(93, 202, 165);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="340" y="212" text-anchor="middle" dominant-baseline="central" style="fill:rgb(159, 225, 203);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:14px;font-weight:500;text-anchor:middle;dominant-baseline:central">Classical machine learning</text>
+<text x="340" y="230" text-anchor="middle" dominant-baseline="central" style="fill:rgb(93, 202, 165);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:central">Regression, trees, ensembles</text>
+</g>
+<line x1="340" y1="246" x2="340" y2="270" marker-end="url(#arrow)" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<g style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<rect x="230" y="270" width="220" height="56" rx="8" stroke-width="0.5" style="fill:rgb(8, 80, 65);stroke:rgb(93, 202, 165);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="340" y="292" text-anchor="middle" dominant-baseline="central" style="fill:rgb(159, 225, 203);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:14px;font-weight:500;text-anchor:middle;dominant-baseline:central">Deep learning</text>
+<text x="340" y="310" text-anchor="middle" dominant-baseline="central" style="fill:rgb(93, 202, 165);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:central">Neural networks, backprop</text>
+</g>
+
+<line x1="340" y1="326" x2="340" y2="358" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<line x1="110" y1="358" x2="578" y2="358" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<line x1="110" y1="358" x2="110" y2="380" marker-end="url(#arrow)" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<line x1="266" y1="358" x2="266" y2="380" marker-end="url(#arrow)" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<line x1="422" y1="358" x2="422" y2="380" marker-end="url(#arrow)" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<line x1="578" y1="358" x2="578" y2="380" marker-end="url(#arrow)" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<g style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<rect x="40" y="380" width="140" height="56" rx="8" stroke-width="0.5" style="fill:rgb(8, 80, 65);stroke:rgb(93, 202, 165);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="110" y="402" text-anchor="middle" dominant-baseline="central" style="fill:rgb(159, 225, 203);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:14px;font-weight:500;text-anchor:middle;dominant-baseline:central">Computer vision</text>
+<text x="110" y="420" text-anchor="middle" dominant-baseline="central" style="fill:rgb(93, 202, 165);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:central">CNNs, detection</text>
+</g>
+<g style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<rect x="196" y="380" width="140" height="56" rx="8" stroke-width="0.5" style="fill:rgb(8, 80, 65);stroke:rgb(93, 202, 165);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="266" y="402" text-anchor="middle" dominant-baseline="central" style="fill:rgb(159, 225, 203);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:14px;font-weight:500;text-anchor:middle;dominant-baseline:central">Language &amp; NLP</text>
+<text x="266" y="420" text-anchor="middle" dominant-baseline="central" style="fill:rgb(93, 202, 165);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:central">Transformers</text>
+</g>
+<g style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<rect x="352" y="380" width="140" height="56" rx="8" stroke-width="0.5" style="fill:rgb(8, 80, 65);stroke:rgb(93, 202, 165);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="422" y="402" text-anchor="middle" dominant-baseline="central" style="fill:rgb(159, 225, 203);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:14px;font-weight:500;text-anchor:middle;dominant-baseline:central">Speech &amp; audio</text>
+<text x="422" y="420" text-anchor="middle" dominant-baseline="central" style="fill:rgb(93, 202, 165);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:central">ASR, TTS</text>
+</g>
+<g style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<rect x="508" y="380" width="140" height="56" rx="8" stroke-width="0.5" style="fill:rgb(8, 80, 65);stroke:rgb(93, 202, 165);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="578" y="402" text-anchor="middle" dominant-baseline="central" style="fill:rgb(159, 225, 203);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:14px;font-weight:500;text-anchor:middle;dominant-baseline:central">Reinforcement</text>
+<text x="578" y="420" text-anchor="middle" dominant-baseline="central" style="fill:rgb(93, 202, 165);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:central">Q-learning, RLHF</text>
+</g>
+
+<line x1="110" y1="436" x2="110" y2="470" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<line x1="266" y1="436" x2="266" y2="470" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<line x1="422" y1="436" x2="422" y2="470" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<line x1="578" y1="436" x2="578" y2="470" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<line x1="110" y1="470" x2="578" y2="470" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<line x1="340" y1="470" x2="340" y2="500" marker-end="url(#arrow)" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<g style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<rect x="190" y="500" width="300" height="56" rx="8" stroke-width="0.5" style="fill:rgb(113, 43, 19);stroke:rgb(240, 153, 123);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="340" y="522" text-anchor="middle" dominant-baseline="central" style="fill:rgb(245, 196, 179);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:14px;font-weight:500;text-anchor:middle;dominant-baseline:central">Foundation models</text>
+<text x="340" y="540" text-anchor="middle" dominant-baseline="central" style="fill:rgb(240, 153, 123);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:central">Multimodal, generative, LLMs</text>
+</g>
+<line x1="340" y1="556" x2="340" y2="580" marker-end="url(#arrow)" style="fill:none;stroke:rgb(156, 154, 146);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<g style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+<rect x="190" y="580" width="300" height="56" rx="8" stroke-width="0.5" style="fill:rgb(113, 43, 19);stroke:rgb(240, 153, 123);color:rgb(255, 255, 255);stroke-width:0.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="340" y="602" text-anchor="middle" dominant-baseline="central" style="fill:rgb(245, 196, 179);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:14px;font-weight:500;text-anchor:middle;dominant-baseline:central">Agents &amp; reasoning systems</text>
+<text x="340" y="620" text-anchor="middle" dominant-baseline="central" style="fill:rgb(240, 153, 123);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:central">Tool use, planning, orchestration</text>
+</g>
+</svg>
+    </div>
+    <figcaption style="font-family:'Karla',sans-serif;font-size:0.9rem;color:var(--ink-dim);margin-top:0.9rem;line-height:1.65;max-width:680px;"><strong style="color:var(--ink-mid);">The shape of the field.</strong> Mathematical foundations and data analysis feed classical machine learning and deep learning, which branch into computer vision, language, speech, and reinforcement learning &mdash; converging on today&rsquo;s foundation models and agentic systems.</figcaption>
+  </figure>
+
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="field-tree">
+  <h3 class="section-heading">Where This Guide Sits in the <em>AI Tree</em></h3>
+  <p class="body-text">
+    Most people use the word &ldquo;AI&rdquo; to mean &ldquo;whatever I happen to be working on inside AI&rdquo;, and most career anxiety in this field comes from that ambiguity. Before deciding what to learn, what to apply to, or how to feel about the latest announcement, it helps to put yourself somewhere concrete on the map below. Three letters &mdash; S, R, or E &mdash; will sort every person calling themselves an AI worker into one of three branches with genuinely different daily work, different skills, different career economics, and different timescales of useful effort.
+  </p>
+
+  <div class="tree-svg-wrap">
+    <svg class="tree-svg" viewBox="0 0 900 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="tree-title tree-desc">
+      <title id="tree-title">The AI tree</title>
+      <desc id="tree-desc">A taxonomy of AI work: Science (established theory), Research (active discovery), and Engineering (applying science and research to build real systems). Engineering further splits into Model Engineering and Application Engineering, with LLMs sitting under Application Engineering as the current frontier topic.</desc>
+
+      <!-- CONNECTORS -->
+      <g fill="none" stroke="#c8a96e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55">
+        <!-- AI -> Science / Research / Engineering -->
+        <path d="M 70 64 V 342 H 130"/>
+        <path d="M 70 132 H 130"/>
+        <path d="M 70 232 H 130"/>
+        <!-- Engineering -> Model Eng / Application Eng -->
+        <path d="M 220 364 V 542 H 280"/>
+        <path d="M 220 442 H 280"/>
+        <!-- Application Engineering -> LLMs -->
+        <path d="M 410 564 V 642 H 460"/>
+      </g>
+
+      <!-- BOXES -->
+      <!-- AI (root, accented) -->
+      <rect x="30" y="20" width="80" height="44" rx="4" fill="#3a2e1a" stroke="#c8a96e" stroke-width="1.5"/>
+      <text x="70" y="49" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="18" fill="#c8a96e">AI</text>
+
+      <!-- Science -->
+      <rect x="130" y="110" width="140" height="44" rx="4" fill="#1c1c1e" stroke="#333338" stroke-width="1.2"/>
+      <text x="200" y="139" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#f8f8f8">Science</text>
+
+      <!-- Research -->
+      <rect x="130" y="210" width="140" height="44" rx="4" fill="#1c1c1e" stroke="#333338" stroke-width="1.2"/>
+      <text x="200" y="239" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#f8f8f8">Research</text>
+
+      <!-- Engineering (accented; the focus of the guide) -->
+      <rect x="130" y="320" width="180" height="44" rx="4" fill="#3a2e1a" stroke="#c8a96e" stroke-width="1.5"/>
+      <text x="220" y="349" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#c8a96e">Engineering</text>
+
+      <!-- Model Engineering -->
+      <rect x="280" y="420" width="220" height="44" rx="4" fill="#1c1c1e" stroke="#333338" stroke-width="1.2"/>
+      <text x="390" y="449" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#f8f8f8">Model Engineering</text>
+
+      <!-- Application Engineering -->
+      <rect x="280" y="520" width="260" height="44" rx="4" fill="#1c1c1e" stroke="#333338" stroke-width="1.2"/>
+      <text x="410" y="549" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#f8f8f8">Application Engineering</text>
+
+      <!-- LLMs (accented; current frontier topic) -->
+      <rect x="460" y="620" width="120" height="44" rx="4" fill="#3a2e1a" stroke="#c8a96e" stroke-width="1.5"/>
+      <text x="520" y="649" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-weight="600" font-size="17" fill="#c8a96e">LLMs</text>
+
+      <!-- ANNOTATIONS (right of each box) -->
+      <g font-family="'Karla', sans-serif" font-weight="400" font-size="12.5" fill="#a8a8a8">
+        <!-- Science -->
+        <text x="290" y="125">established theory: mathematics, statistics,</text>
+        <text x="290" y="143">neural-network fundamentals. The stable bedrock.</text>
+
+        <!-- Research -->
+        <text x="290" y="225">active discovery: new architectures, training,</text>
+        <text x="290" y="243">alignment. Frontier labs &amp; academic groups.</text>
+
+        <!-- Engineering -->
+        <text x="330" y="335">applying science and research to build real</text>
+        <text x="330" y="353" fill="#d4d4d4">systems. The focus of this guide.</text>
+
+        <!-- Model Engineering -->
+        <text x="520" y="437">modifies and runs the models themselves</text>
+        <text x="520" y="455">(fine-tuning, inference; MLOps in this site).</text>
+
+        <!-- Application Engineering -->
+        <text x="560" y="537">builds systems and products on top of</text>
+        <text x="560" y="555">existing models (RAG, agents; LLMOps).</text>
+
+        <!-- LLMs -->
+        <text x="600" y="637">current frontier topic.</text>
+      </g>
+    </svg>
+  </div>
+
+  <p class="body-text">
+    The taxonomy is more useful than the one you usually see in headlines &mdash; the one that splits AI by <em>subfield</em> (LLMs vs. vision vs. robotics vs. classical ML). The subfield split tells you which technical specialty someone is in; the Science / Research / Engineering split tells you what kind of work they actually do all day. For career decisions, the second is far more decisive. A vision-engineering job in 2026 has more in common with an LLM-engineering job than either has with vision <em>research</em>. The work is the work; the data type is the wrapper.
+  </p>
+
+  <h4 class="subsection-heading"><em>Science</em> &mdash; the bedrock that doesn&rsquo;t move</h4>
+  <p class="body-text">
+    The <strong>Science</strong> branch is the layer of established theory that the rest of AI rests on: linear algebra, multivariable calculus, probability and statistics, the foundations of optimisation, the statistical learning theory that says when a model can generalise, the architecture-agnostic mathematics of why backpropagation works. These ideas were true in 1990, they were true in 2015 when deep learning broke open, and they will be true in 2035. Whoever extends this layer is doing very long-cycle work &mdash; they are pure mathematicians, theoretical statisticians, and the small subset of computer scientists working on problems like generalisation bounds, expressivity proofs, or the information-theoretic foundations of learning. Their day involves whiteboards and proofs more than GPUs and training runs.
+  </p>
+  <p class="body-text">
+    Almost no one reading a roadmap site is on this branch as their primary work. But everyone benefits from <em>consuming</em> it: you read enough Science to understand the papers Research produces, to know what guarantees an algorithm does and does not provide, to feel the difference between &ldquo;the model usually works&rdquo; and &ldquo;the model has bounded error under these conditions.&rdquo; That is what the <a href="../index.html#mathematics" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Mathematics pillar</a> and the <strong>Science track</strong> within this guide are for &mdash; not so you can extend Science yourself, but so the Engineering work you actually do is grounded rather than cargo-culted. Spend the time once. The investment compounds for the rest of your career, because Science is the part that does not need to be re-learned every time the toolchain changes.
+  </p>
+
+  <h4 class="subsection-heading"><em>Research</em> &mdash; the part that moves every quarter</h4>
+  <p class="body-text">
+    The <strong>Research</strong> branch is what produces the new ideas: novel architectures (attention, mixture-of-experts, state-space models, diffusion variants), new training regimes (RLHF, DPO, RLAIF, constitutional AI), better evaluation methods, alignment techniques, scaling-law refinements, and the steady stream of arXiv papers that the rest of the field reads. The work is published &mdash; the currency of Research is the paper, not the product. The institutions are frontier labs (OpenAI, Anthropic, Google DeepMind, Meta FAIR), well-funded research arms (Mistral, DeepSeek, Inflection-style labs), and a long tail of academic groups. The pipeline runs on PhDs, post-docs, residencies, and the patience to spend six months on a single experiment that may or may not work.
+  </p>
+  <p class="body-text">
+    Most developers will not produce Research, even very good developers, and that is fine. But every developer should <em>consume</em> Research, because Research is what predicts the shape of Engineering work twelve to twenty-four months out. A capability that is in a paper today will be in your toolchain in a year and in your job description in two. The skill is reading: being able to skim an arXiv paper in fifteen minutes, extract the core idea, decide whether it actually changes anything for you, and move on. The <a href="#field-developer" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">&ldquo;What Compounds for a Developer&rdquo;</a> section later in this preamble treats paper-reading exactly that way: as a meta-skill on the Engineering branch, not a separate career.
+  </p>
+
+  <h4 class="subsection-heading"><em>Engineering</em> &mdash; what almost everyone reading this is doing</h4>
+  <p class="body-text">
+    The <strong>Engineering</strong> branch is the largest by headcount and the most consequential for products: it is where Science and Research turn into things people use. It is also the branch this entire guide is about. If you write code that calls an LLM, that fine-tunes a model, that ingests data and serves predictions, that wires retrieval to generation, that monitors a deployed system &mdash; you are doing Engineering. The work runs on training runs and pull requests, not on whiteboards or papers. The currency is shipped systems, not citations. And the timescale is weeks-to-quarters, not years.
+  </p>
+  <p class="body-text">
+    Engineering splits into two sub-branches that map cleanly onto the rest of this site:
+  </p>
+  <ul class="content-list">
+    <li><strong>Model Engineering</strong> &mdash; the work of modifying or running the models themselves. Dataset curation, supervised fine-tuning, preference alignment (LoRA, DPO, RLHF), inference servers and their optimisation (vLLM, KV-cache eviction, continuous batching, PagedAttention), quantisation for deployment, model merging, GPU memory management. The tools are PyTorch, Hugging Face, vLLM, bitsandbytes, Weights &amp; Biases. This is the <strong>MLOps</strong> half of the MLOps &amp; LLMOps spanning practices later in this guide, and it is exactly Domains 6&ndash;7 and Project 4 of <a href="llm-engineering.html#part5" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Part 5 of the LLM Engineering Landscape</a>. Outside of frontier labs, most organisations need only a small handful of Model Engineers &mdash; this is a specialised role, not a default career path.</li>
+    <li><strong>Application Engineering</strong> &mdash; the work of building systems and products on top of existing models. Prompting and prompt versioning, structured output and validation, retrieval-augmented generation, agents and tool use, evaluation harnesses (RAGAS, LLM-as-judge, regression suites), observability and tracing (Langfuse, LangSmith), cost and latency engineering, safety guardrails, cloud deployment, the data flywheels that turn user feedback into better systems. The tools are FastAPI, Pydantic, vector databases, LangGraph or no framework at all, AWS or its peers, and an evaluation harness duct-taped to all of it. This is the <strong>LLMOps</strong> half of the MLOps &amp; LLMOps spanning practices below, and it is the bulk of Part 4&rsquo;s curriculum &mdash; Domains 1&ndash;5 and 8&ndash;13, and Projects 1, 2, 3, 5, 6, and 7. It is where the overwhelming majority of AI engineers actually work, and where the overwhelming majority of defensible AI products actually get built.</li>
+  </ul>
+  <p class="body-text">
+    The Model / Application split is not a hierarchy. It is a tooling boundary. A Model Engineer&rsquo;s mental model is dominated by the inside of the model: gradients, learning rates, parameter counts, KV-cache layouts, quantisation error. An Application Engineer&rsquo;s mental model is dominated by the outside of the model: prompts, retrieved context, tool schemas, evaluation rubrics, the user&rsquo;s actual task. Both are doing real engineering. Both pay well. Both ship products. The difference is which side of the model API they spend their time on, and that one decision &mdash; inside the box or outside the box &mdash; pulls the entire rest of the job description with it.
+  </p>
+
+  <h4 class="subsection-heading">Why <em>LLMs</em> sit at the bottom of the tree</h4>
+  <p class="body-text">
+    The diagram puts <strong>LLMs</strong> as a single child of Application Engineering, but that single line is hiding a lot. As of 2026, LLMs are not <em>one</em> of the things Application Engineering does &mdash; they are <em>most</em> of what it does, by headcount, by funding, and by attention. Image generation, video generation, classical ML (gradient-boosted trees still run more production systems than transformers do), robotics, scientific AI &mdash; these are all real branches and they all employ application engineers, but the centre of gravity for new hiring, new venture investment, and new product surface area is firmly on language models, multimodal LLMs, and the agent systems built on top of them. That is the empirical shape of the field today, and it is why this guide&rsquo;s long-form companion is the <a href="llm-engineering.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">LLM Engineering Landscape</a> rather than, say, a vision-engineering landscape: the discipline has enough internal structure right now to fill four parts of an article on its own.
+  </p>
+  <p class="body-text">
+    That dominance will not last forever. A 2030 version of this diagram might give equal weight to a robotics-foundation-model branch under Application Engineering, or to a scientific-AI branch, or to something we cannot name yet. The leaves under Engineering are an empirical claim about the present, not a structural one about the field. What does <em>not</em> change is the taxonomy above LLMs &mdash; the Science / Research / Engineering split, and the Model / Application split inside Engineering. Whatever new technology arrives, someone will derive its theory (Science), someone will discover its next variant (Research), and someone will turn it into products that actually work (Engineering, with a Model side and an Application side). The branches stay the same; only the leaves rotate.
+  </p>
+
+  <h4 class="subsection-heading">The <em>honest</em> career picture</h4>
+  <p class="body-text">
+    Three things are worth saying plainly, because they sit underneath most of the &ldquo;what should I learn&rdquo; confusion this section is meant to clear up.
+  </p>
+  <p class="body-text">
+    <strong>Most people who call themselves AI engineers are doing Application Engineering.</strong> They are building systems on top of an API or an open-weight model, instrumenting them, evaluating them, and shipping them. This is good news. It is the largest branch, the fastest-hiring branch, and the branch where the most defensible products are being built. The cultural marketing of the field &mdash; the news cycle dominated by frontier-lab announcements &mdash; makes Research feel like the &ldquo;real&rdquo; AI work and makes Application Engineering feel like glue code. That is a category error. Glue code that ships and stays up under load is the product; the frontier model is the supplier.
+  </p>
+  <p class="body-text">
+    <strong>Model Engineering is a deliberate detour, not a permanent home, for almost everyone.</strong> Spending a month or two fine-tuning a model, optimising inference for it, and deploying the result &mdash; the scope of Project 4 in the LLM Engineering Landscape &mdash; is enormously valuable for an Application Engineer because it demystifies the layer underneath the API. It is much less valuable as a career identity. The number of jobs that require deep Model Engineering specialisation, outside of the dozen or so frontier labs and a handful of open-source-first companies, is small and not growing in proportion to the rest of the field. Visit the branch. Take what is useful. Come back.
+  </p>
+  <p class="body-text">
+    <strong>The fractal pattern repeats inside Engineering.</strong> Even if your job sits squarely on the Engineering branch, your week contains internal Science moments (when you read a textbook chapter to understand attention well enough to debug a prompt), internal Research moments (when you read a paper, prototype a new technique, see whether it changes your evals), and internal Engineering moments (when you ship the change). Knowing which mode you are in at any given moment &mdash; long-cycle understanding, medium-cycle prototyping, or short-cycle shipping &mdash; is what keeps you from spending Engineering hours on Science problems or Science hours on Engineering problems. The tree above is not just a static taxonomy of who works on what. It is also, internally, a description of the rhythm a single engineer cycles through during a normal week.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="field-stack">
+  <h3 class="section-heading">The AI Industry as a <em>Stack</em></h3>
+  <p class="body-text">
+    The clearest mental model for the industry is a vertical stack, where each layer depends on the one below it. Value capture, technical skills, hiring patterns, and business dynamics differ substantially at each level. Knowing which layer you are looking at tells you what skills matter, what the economics look like, and who the competitors are.
+  </p>
+
+  <h4 class="subsection-heading"><em>Layer 1</em> &mdash; Compute and hardware</h4>
+  <p class="body-text">
+    The physical substrate: chips, memory, networking, and data centres. NVIDIA dominates GPU training (H100, H200, B100/B200) with roughly 80&ndash;90% market share; AMD and Intel are distant. Hyperscalers build custom silicon as strategic hedges &mdash; Google&rsquo;s TPUs, Amazon Trainium and Inferentia, Microsoft Maia, Meta MTIA. A small group of inference-optimised startups (Groq, Cerebras, SambaNova, Tenstorrent) bet that running trained models has different optimal hardware than training them. Networking &mdash; InfiniBand, NVLink, optical interconnects &mdash; is often the actual bottleneck on a training run. This layer captures enormous economic value because everything above it depends on it; relatively few people work here directly, and those who do are highly specialised.
+  </p>
+
+  <h4 class="subsection-heading"><em>Layer 2</em> &mdash; Cloud and infrastructure</h4>
+  <p class="body-text">
+    The layer that turns raw hardware into consumable compute. Hyperscalers (AWS, Azure, GCP) host most serious training and inference, each with at least one frontier-lab partnership. Neoclouds (CoreWeave, Lambda Labs, Crusoe) are GPU-first clouds built specifically for AI workloads, often cheaper than the hyperscalers. Inference providers (Together AI, Fireworks, Modal, Anyscale, Replicate, Baseten) host open-source models behind APIs so developers can use Llama, Qwen, or DeepSeek without managing infrastructure themselves. Orchestration tooling &mdash; Kubernetes, Ray, Slurm, MLOps platforms &mdash; sits on top.
+  </p>
+
+  <h4 class="subsection-heading"><em>Layer 3</em> &mdash; Foundation model labs</h4>
+  <p class="body-text">
+    The companies that train frontier models from scratch. Frontier closed labs &mdash; OpenAI, Anthropic, Google DeepMind, xAI &mdash; spend hundreds of millions to billions on single training runs. A well-resourced second tier (Meta with Llama, Mistral, Cohere) ships a mix of open and closed models. Major non-US players matter increasingly: DeepSeek released highly capable open-weight models in 2025 that reshaped competitive dynamics; Alibaba&rsquo;s Qwen team, Moonshot (Kimi), and Zhipu have built a Chinese open-source ecosystem that is genuinely competitive at the frontier. The economics of this layer are brutal &mdash; only a handful of organisations can play, and the list does not change often.
+  </p>
+
+  <h4 class="subsection-heading"><em>Layer 4</em> &mdash; Open-weight models</h4>
+  <p class="body-text">
+    A parallel ecosystem where model weights are released publicly. Llama (Meta), Mistral, Qwen (Alibaba), DeepSeek, Gemma (Google) are the headline families. Because weights are public, anyone can run them on their own hardware, fine-tune on proprietary data, and modify freely. This partially invalidates the widespread belief that &ldquo;only the labs can build serious AI products.&rdquo; The gap between best-closed and best-open has narrowed substantially &mdash; often to months rather than years.
+  </p>
+
+  <h4 class="subsection-heading"><em>Layer 5</em> &mdash; Data and evaluation</h4>
+  <p class="body-text">
+    The layer that turns raw models into useful ones, and tells you whether your system actually works. Training-data providers (Scale AI, Surge, Mercor) produce human-labelled data for RLHF and supervised fine-tuning. Synthetic data &mdash; LLMs generating training data for other LLMs &mdash; is increasingly central. Evaluation tooling (Braintrust, Arize, LangSmith, Weights &amp; Biases; open frameworks like inspect-ai, promptfoo) is the rapidly growing discipline of actually measuring whether a system works for a given task. <strong>This layer is where the real engineering craft of applied AI lives</strong>, and it is under-taught relative to its importance.
+  </p>
+
+  <h4 class="subsection-heading"><em>Layer 6</em> &mdash; Orchestration and frameworks</h4>
+  <p class="body-text">
+    Tools to compose LLM calls into larger systems: retrieval, tool use, agents, workflows. General-purpose frameworks (LangChain, LangGraph, LlamaIndex, Haystack), multi-agent frameworks (CrewAI, AutoGen, MetaGPT, Swarm), programmatic optimisation (DSPy), lightweight alternatives (Pydantic AI, Instructor, BAML), and the &ldquo;no framework&rdquo; option that many serious production teams quietly choose. <strong>Framework dominance in this layer shifts roughly every 12&ndash;18 months. What persists across shifts is the underlying patterns:</strong> retrieval-augmented generation, tool calling, structured output, agent loops, memory management, evaluation. Master the patterns, and any framework becomes learnable in a week.
+  </p>
+
+  <h4 class="subsection-heading"><em>Layer 7</em> &mdash; Applications</h4>
+  <p class="body-text">
+    Where most of the industry sits by headcount. Three sub-types worth distinguishing. <em>Horizontal products</em> (ChatGPT, Claude.ai, Gemini, Perplexity, Cursor, Windsurf) compete on raw capability and distribution; defensibility is hardest here. <em>Vertical AI products</em> (Harvey/Hebbia/EvenUp in legal; Abridge/Ambience/OpenEvidence in medical; Hebbia and Rogo in finance; Decagon and Sierra in customer support; Cognition and Cursor in code) win through domain expertise, workflow integration, proprietary data, and regulatory relationships &mdash; not model capability. Many have reached multi-billion-dollar valuations without owning any foundation models. <em>AI features inside existing products</em> (Notion AI, Microsoft Copilot, Salesforce Einstein, Zoom AI Companion, thousands more) are the largest category by sheer volume; most applied AI work happens here.
+  </p>
+
+  <h4 class="subsection-heading"><em>Layer 8</em> &mdash; Safety, alignment, and governance</h4>
+  <p class="body-text">
+    Work aimed at making models behave well and understanding their internals. Alignment research (RLHF, Constitutional AI, deliberative alignment), interpretability (Anthropic&rsquo;s interpretability team, EleutherAI, independent researchers), red-teaming and harm evaluation, policy and governance, and AI security (prompt injection defence, model supply chain, jailbreak resistance). A legitimate career track with its own research agenda, conferences, and funding &mdash; both inside frontier labs and at independent organisations (METR, Apollo Research, Redwood Research).
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="field-questions">
+  <h3 class="section-heading"><em>Four Questions</em> to Classify Anything</h3>
+  <p class="body-text">
+    Instead of asking &ldquo;is this a model owner or an API user?&rdquo;, ask these four questions about any company, product, tool, or job posting you encounter. They give you a much richer picture than a simple binary.
+  </p>
+
+  <h4 class="subsection-heading"><em>1.</em> Where in the stack does it operate?</h4>
+  <p class="body-text">Compute, cloud, model training, data/evaluation, orchestration, application (horizontal/vertical/embedded), or safety. A job at NVIDIA is a completely different animal from a job at a legal-AI startup, even though both are &ldquo;in AI.&rdquo;</p>
+
+  <h4 class="subsection-heading"><em>2.</em> What is the moat?</h4>
+  <p class="body-text">Model capability is only one possible moat, and often not the most durable. Others include <strong>proprietary data</strong> (Abridge has medical recordings; Bloomberg has decades of financial data), <strong>workflow integration</strong> (Cursor lives inside your IDE; Harvey lives inside law-firm document workflows), <strong>distribution</strong> (Microsoft puts Copilot in front of a billion Office users), <strong>domain expertise</strong>, <strong>regulatory approval</strong>, and <strong>brand and trust</strong>. Most successful application-layer companies do not have a model moat &mdash; they have a data, workflow, or distribution moat, with the model as a component.</p>
+
+  <h4 class="subsection-heading"><em>3.</em> Closed or open?</h4>
+  <p class="body-text">A company that builds on GPT via API has a very different risk profile from one that hosts open-weight Llama or Qwen models it controls. Closed models give a higher capability ceiling and zero infrastructure burden but make you a tenant on someone else&rsquo;s platform. Open models give full control, data privacy, predictable costs, and deep fine-tuning ability &mdash; but you own operations and often trail the frontier in some capabilities. Many serious companies use both: closed frontier models for the hardest tasks, open models for routine ones, chosen per-query.</p>
+
+  <h4 class="subsection-heading"><em>4.</em> Horizontal or vertical?</h4>
+  <p class="body-text">Horizontal players compete on general capability, distribution, and UX across many use cases. Vertical players compete on domain depth, workflow fit, and defensibility within a specific industry. Ceiling per company is lower than horizontal winners, but there are more of them and the competition is less brutal per vertical.</p>
+
+  <h4 class="subsection-heading">Using the <em>framework</em></h4>
+  <p class="body-text">Run any AI entity through these four axes and you get a coherent picture: <em>&ldquo;This is a vertical application in legal, using closed APIs, whose moat is proprietary contract data and deep integration with law firm workflows.&rdquo;</em> Compare to: <em>&ldquo;This is a horizontal application for coding, using a mix of closed and open models, whose moat is UX and distribution to developers.&rdquo;</em> Very different businesses, very different skills required.</p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="field-misconceptions">
+  <h3 class="section-heading">Common <em>Misconceptions</em> Worth Correcting</h3>
+
+  <h4 class="subsection-heading">&ldquo;Only <em>model owners</em> can build powerful things.&rdquo;</h4>
+  <p class="body-text">The single biggest distortion in how developers think about AI careers. The most valuable application-layer companies &mdash; Cursor, Harvey, Perplexity, Abridge, Hebbia &mdash; do not train their own foundation models. They win on proprietary data, deep workflow integration, domain expertise, and UX. For most real-world AI products, the hard problems are getting the right data in front of the model at the right moment, structuring outputs reliably, measuring whether the system works, integrating with existing tools, handling edge cases and adversarial inputs, and managing latency, cost, and reliability at scale. None of these require owning a foundation model.</p>
+
+  <h4 class="subsection-heading">&ldquo;The <em>API layer</em> is where 90% of the industry is, so the other layers don&rsquo;t matter.&rdquo;</h4>
+  <p class="body-text">Roughly true by headcount; misleading as a career signal. Infrastructure, data, evaluation, research, and safety layers employ fewer people but are disproportionately influential, pay well, hire steadily, and tend to have better job security because they are further from the commodity end of the value chain.</p>
+
+  <h4 class="subsection-heading">&ldquo;<em>LangChain, LangGraph, CrewAI</em> are what you need to learn.&rdquo;</h4>
+  <p class="body-text">A 2024-shaped framing. Not wrong, but it over-weights tools that are rapidly evolving. What persists across framework cycles is RAG, tool use / function calling, structured output, agent loops, memory and state management, evaluation harnesses, and observability. If you want to invest deeply in one thing right now, invest in <strong>evaluation and observability</strong> rather than any particular agent framework. Evaluation is the skill gap in the industry, and it is durable.</p>
+
+  <h4 class="subsection-heading">&ldquo;<em>Bigger model = better product</em>.&rdquo;</h4>
+  <p class="body-text">Model scale matters, but product quality depends on many things that have nothing to do with raw capability: latency, cost, reliability, consistency, personality, integration, fit to the specific task. A product built on a smaller, cheaper model that runs in 200ms and never fails can beat a product built on the largest frontier model that takes 8 seconds and occasionally hallucinates catastrophically.</p>
+
+  <h4 class="subsection-heading">&ldquo;AI will replace <em>software engineers</em>.&rdquo;</h4>
+  <p class="body-text">A more honest framing: AI is changing what software engineering looks like. The mechanical parts of the job &mdash; writing boilerplate, translating specifications to code, looking up syntax &mdash; are being automated. The harder parts &mdash; deciding what to build, understanding user needs, managing complexity, evaluating tradeoffs, debugging subtle system behaviour, coordinating with other humans &mdash; are not. Engineers who embrace AI tooling and focus on the hard parts become more productive and more valuable, not less.</p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="field-developer">
+  <h3 class="section-heading">What <em>Compounds</em> for a Developer</h3>
+  <p class="body-text">
+    Four categories of skill compound over time. Each has a distinct reason for being durable.
+  </p>
+
+  <h4 class="subsection-heading"><em>Foundations</em></h4>
+  <p class="body-text">
+    Understand how transformers work at a conceptual level &mdash; tokenisation, attention, training vs. inference, pre-training and fine-tuning and RLHF, context windows, sampling parameters. Also the main applied techniques: RAG (chunking, embeddings, vector databases, hybrid search, re-ranking), fine-tuning variants (LoRA, QLoRA, instruction tuning, preference tuning), quantisation, tool use, prompt engineering as an empirical discipline. And the economics: what inference actually costs, how latency trades off with quality, why caching matters. This knowledge decays slowly &mdash; a developer who understood attention in 2023 still understands it in 2026; the specifics of frameworks have turned over several times in the same period.
+  </p>
+
+  <h4 class="subsection-heading"><em>Evaluation</em></h4>
+  <p class="body-text">
+    The skill gap in the industry right now. Most developers can get an LLM to do something that looks right in a demo. Far fewer can tell you, with statistical confidence, whether their system works on the distribution of inputs it will see in production. Building evaluation sets, writing judge prompts, measuring inter-rater agreement, tracking regressions, evaluating multi-turn agents (which is much harder than single-turn evaluation), sampling production traffic intelligently. Teams who can do this ship real products. Teams who cannot ship demos. The gap is enormous and under-advertised.
+  </p>
+
+  <h4 class="subsection-heading"><em>Domain depth</em></h4>
+  <p class="body-text">
+    Generalist &ldquo;LLM engineers&rdquo; are becoming a commodity. Domain experts who can build LLM systems are scarce and expensive, and will remain so. Pick a domain you understand &mdash; legal, medical, finance, scientific, compliance, operations, education, customer support &mdash; and go deep enough to know what a good output actually looks like. That judgement is irreplaceable: it is what allows you to build evaluation sets, spot failure modes, and design the right workflows. Most people building AI for a particular industry do not understand how the work in that industry actually gets done; combining technical skill with genuine domain understanding is a rare and defensible position.
+  </p>
+
+  <h4 class="subsection-heading"><em>Shipping end-to-end</em></h4>
+  <p class="body-text">
+    Build complete systems, not just notebook demos. Data ingestion, storage and retrieval, model calls, validation, eval harness, observability, deployment, feedback loops. Shipping the full loop once teaches you more than a year of tutorials, because the pieces that turn out to be hard are almost never the pieces you expected to be hard, and you only discover this by building. The seven-project plan in <a href="llm-engineering.html#part5" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Part 5 of the LLM Engineering Landscape</a> is a structured way to force yourself through that loop seven times in seven different domains.
+  </p>
+
+  <h4 class="subsection-heading">A <em>meta-skill</em>: reading papers</h4>
+  <p class="body-text">
+    Being able to skim an arXiv paper in 15 minutes and extract its core idea is a superpower. It keeps you oriented when hype cycles hit, lets you evaluate claims rather than react to headlines, and gives you a year or two of warning about what is coming into production. You do not need to read every paper &mdash; follow a handful of good curators and dig into one or two papers per week that seem directly relevant.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<div class="reveal" id="field-hype">
+  <h3 class="section-heading">Staying Calm Amid the <em>Hype</em></h3>
+  <p class="body-text">Three mental moves help enormously.</p>
+
+  <h4 class="subsection-heading">Separate the <em>timelines</em></h4>
+  <p class="body-text">Three streams of information arrive on the same feed and get flattened into one blur of urgency. <strong>Product announcements</strong> matter this quarter &mdash; they affect what you can build today. <strong>Research papers</strong> matter in one to three years &mdash; they affect what becomes possible later. <strong>Speculation about AGI timelines, superintelligence, and civilisational trajectories</strong> mostly does not matter for what you should do tomorrow. Keep these streams separate in your head and the noise drops by perhaps 70%.</p>
+
+  <h4 class="subsection-heading">Distinguish <em>capability</em> from <em>deployment</em></h4>
+  <p class="body-text">Labs announce capabilities constantly. The gap between &ldquo;a model can do X in a demo&rdquo; and &ldquo;a reliable product that does X in production&rdquo; is often 12 to 24 months. Most of the real work &mdash; the work developers actually get paid for &mdash; lives in that gap. A new capability announcement is rarely a reason to panic or pivot; it is a signal that, two years from now, a certain kind of product will become buildable by many people.</p>
+
+  <h4 class="subsection-heading">Match your <em>learning horizon</em> to your goal</h4>
+  <p class="body-text">If your horizon is <em>six months</em> (e.g., getting a specific job), learn whatever stack the target role uses. Frameworks matter. Specific tools matter. Brand names on your resume matter. If your horizon is <em>five years</em> (building a durable career), learn fundamentals, evaluation, and a domain. Frameworks will turn over; fundamentals will not. Both are valid strategies. Confusing them &mdash; trying to chase every new framework while also claiming to build deep foundations &mdash; produces unnecessary anxiety and shallow expertise in both directions.</p>
+
+  <h4 class="subsection-heading">Notice what is <em>not changing</em></h4>
+  <p class="body-text">Amid constant announcement, it is worth pausing to notice what has stayed stable for years: the value of clean data; the importance of understanding your users; the fundamentals of software engineering (testing, observability, version control, code review); the patterns of good system design; the human skills of communication, project management, and collaboration. These are not disrupted by new models. If anything, they become more valuable as the technical baseline rises &mdash; because they are the differentiators.</p>
+
+  <p class="body-text"><strong>You do not need to keep up with everything.</strong> You need to stay grounded in fundamentals, deep in one domain, practiced at shipping, and patient with yourself. The people who win long careers in this field are not the ones who read every announcement. They are the ones who build a framework for thinking, keep refining it, and let the noise pass them by. The rest of this guide is the framework.</p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 1 — THE FIVE TOPICS                                    -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part1">
+  <div class="part-num">Part 1</div>
+  <h2 class="part-title">The Five <em>Topics</em></h2>
+  <p class="part-subtitle">The five-topic progression that both the Science and Engineering tracks follow on top of the Mathematics foundation &mdash; and why the order matters.</p>
+</div>
+
+<div class="reveal" id="five-topics">
+  <h3 class="section-heading">Why This <em>Progression</em></h3>
+  <p class="body-text">
+    The five topics are not an arbitrary curriculum. They trace the historical and conceptual arc of how the field of artificial intelligence actually developed, and each one provides the foundation that makes the next one possible. Skip a step and you will carry blind spots that become increasingly expensive the further you go. The order matters because understanding is cumulative &mdash; not just factually, but in the way you learn to think about problems.
+  </p>
+  <p class="body-text">
+    The progression starts at the ground level: working with raw data. It then moves through increasingly powerful methods for learning from that data, applies those methods to the most complex natural data we encounter &mdash; human language &mdash; and culminates in the architecture that has redefined the entire field. Here are the five stages and why each one precedes the next.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Topic 1 -->
+<div class="reveal" id="t-data-analysis">
+  <h3 class="section-heading"><span class="sh-num">1.</span> Data Analysis</h3>
+  <p class="body-text">
+    <strong>The foundation.</strong> Before you can build any model, you need to understand the data it will be trained on. Data analysis is the discipline of asking questions of data and drawing valid conclusions &mdash; understanding distributions, detecting patterns, identifying anomalies, and knowing when a result is statistically meaningful versus the product of noise or bias. This is where you develop the intuition for what data actually looks like in the wild: messy, incomplete, biased, surprising.
+  </p>
+  <p class="body-text">
+    Every subsequent topic in this progression assumes you can work fluently with data. Machine learning algorithms ingest data; if you do not understand the data, you cannot understand what the algorithm is actually learning. Starting here is not optional &mdash; it is the single most important investment in the entire path, because mistakes made at the data level propagate through everything built on top of it.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Topic 2 -->
+<div class="reveal" id="t-ml">
+  <h3 class="section-heading"><span class="sh-num">2.</span> Machine Learning</h3>
+  <p class="body-text">
+    <strong>Learning from data.</strong> Machine learning introduces the idea that a computer can learn patterns and make predictions from data without being explicitly programmed for every case. This covers the classical algorithms &mdash; linear models, decision trees, support vector machines, ensemble methods, clustering &mdash; and the theoretical framework that explains when and why they work: the bias-variance tradeoff, cross-validation, regularisation, generalisation theory.
+  </p>
+  <p class="body-text">
+    This comes after data analysis because ML algorithms are only as good as the data and features they receive. Understanding data well enough to clean it, transform it, and select the right features is what separates ML that works from ML that looks impressive in a notebook but fails in production. The classical ML toolkit also establishes the vocabulary and mental models &mdash; loss functions, optimisation, overfitting, evaluation metrics &mdash; that every subsequent topic builds on.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Topic 3 -->
+<div class="reveal" id="t-dl">
+  <h3 class="section-heading"><span class="sh-num">3.</span> Deep Learning</h3>
+  <p class="body-text">
+    <strong>The leap to representation learning.</strong> Deep learning is what happens when you stop manually engineering features and instead let neural networks learn their own representations directly from raw data. This is the conceptual leap: instead of telling the model what to look for (edges, frequencies, word counts), you give it the raw input and enough capacity to figure it out. Convolutional networks learn to see; recurrent networks learn to process sequences; the principles of backpropagation and gradient-based optimisation make it all possible.
+  </p>
+  <p class="body-text">
+    Deep learning comes after classical ML because you need to understand what manual feature engineering looks like before you can appreciate what it means to replace it. You also need the foundations of optimisation, loss functions, and overfitting from the ML stage to make sense of what happens during neural network training. Without that grounding, deep learning is a black box that sometimes works and sometimes does not, and you have no framework for understanding which or why.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Topic 4 -->
+<div class="reveal" id="t-nlp">
+  <h3 class="section-heading"><span class="sh-num">4.</span> Natural Language Processing</h3>
+  <p class="body-text">
+    <strong>Applying intelligence to language.</strong> Natural language processing takes everything from the ML and deep learning stages and applies it to the most complex, ambiguous, and context-dependent data humans produce: language. Text is not a matrix of pixel values or a table of measurements. It is sequential, nested, culturally embedded, and deeply ambiguous. NLP is where you confront these challenges &mdash; learning how to represent words and sentences computationally, how to model the structure of language, and how to build systems that can classify, translate, summarise, and generate text.
+  </p>
+  <p class="body-text">
+    NLP comes after deep learning because modern NLP is built on deep learning. Word embeddings, sequence-to-sequence models, attention mechanisms &mdash; these are all deep learning concepts applied to the language domain. Studying NLP before you understand neural networks means you would be learning the applications before understanding the machinery. The progression ensures you arrive at NLP already fluent in the tools it depends on.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Topic 5 -->
+<div class="reveal" id="t-transformers">
+  <h3 class="section-heading"><span class="sh-num">5.</span> Transformers &amp; Large Language Models</h3>
+  <p class="body-text">
+    <strong>The architecture that changed everything.</strong> The transformer, introduced in the 2017 paper &ldquo;Attention Is All You Need,&rdquo; replaced recurrence with self-attention and enabled a new paradigm: models that scale massively with data and compute, that can be pre-trained on vast corpora and then adapted to virtually any task. Large language models &mdash; GPT, Claude, Gemini, Llama &mdash; are the products of this architecture scaled to billions of parameters and trillions of tokens. They represent the current frontier of AI capability.
+  </p>
+  <p class="body-text">
+    This is the culmination of the entire progression. Transformers are deep learning architectures (you need deep learning). They are applied primarily to language (you need NLP). They are evaluated using ML principles like generalisation and evaluation metrics (you need classical ML). And their training data, biases, and failure modes can only be understood if you know how to analyse data (you need data analysis). Every preceding topic is load-bearing. Arriving at transformers without the foundations means you can use an API but you cannot reason about what the model is doing, why it fails, or how to improve it.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 2 — THE SCIENCE TRACK                                  -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part2">
+  <div class="part-num">Part 2</div>
+  <h2 class="part-title">The Science <em>Track</em></h2>
+  <p class="part-subtitle">Building mathematical intuition through canonical textbooks and university lecture series.</p>
+</div>
+
+<div class="reveal" id="science-overview">
+  <h3 class="section-heading">What the <em>Science Track</em> Is About</h3>
+  <p class="body-text">
+    The Science track is about developing the theoretical depth that lets you understand not just <em>what</em> works, but <em>why</em> it works and &mdash; critically &mdash; <em>when it will stop working</em>. The materials here are deliberately chosen: canonical textbooks that the field is built on (Wasserman, Hastie, Goodfellow, Jurafsky) and Stanford lecture series (CS229, CS230, CS231N, CS224N) that represent the gold standard of university-level instruction.
+  </p>
+  <p class="body-text">
+    The goal is not to become a mathematician. It is to build the kind of intuition that lets you read a paper and follow the argument, look at a loss curve and diagnose the problem, or hear a claim about a model&rsquo;s capabilities and know what assumptions are being made. This is the track that gives you the mental models to reason about AI systems at a level deeper than &ldquo;I fed it data and something came out.&rdquo;
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Science: Data Analysis -->
+<div class="reveal" id="sci-data-analysis">
+  <h3 class="section-heading"><span class="sh-num">1.</span> Data Analysis</h3>
+  <p class="body-text">
+    The Science track begins with statistical foundations. This means probability theory, distributions, estimation, hypothesis testing, confidence intervals, and the machinery of statistical inference. The canonical resource here is Larry Wasserman&rsquo;s <em>All of Statistics</em> &mdash; a textbook that compresses an entire statistics curriculum into a single volume with mathematical rigour but without the bloat. The title is only a slight exaggeration.
+  </p>
+  <p class="body-text">
+    What you are building at this stage is the ability to think precisely about data. Not &ldquo;this column has some missing values&rdquo; but &ldquo;the missingness pattern is non-random and correlated with the outcome variable, which means any imputation strategy will introduce bias into downstream estimates.&rdquo; Not &ldquo;this result looks significant&rdquo; but &ldquo;the p-value is low, but the effect size is tiny and the sample was not randomised, so this is likely a confound.&rdquo; Statistical literacy is the bedrock of everything that follows.
+  </p>
+  <p class="body-text">
+    Exploratory data analysis &mdash; the practice of looking at data before modelling it &mdash; is also grounded in theory here. Understanding what a distribution tells you, why the mean can mislead, when a correlation is meaningful versus spurious, and how to reason about the data-generating process that produced the numbers in front of you. This is not glamorous work, but it is the work that prevents you from building models on foundations of sand.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Science: ML -->
+<div class="reveal" id="sci-ml">
+  <h3 class="section-heading"><span class="sh-num">2.</span> Machine Learning</h3>
+  <p class="body-text">
+    The Science track&rsquo;s treatment of machine learning is mathematical. The core texts are <em>An Introduction to Statistical Learning</em> (ISLR) for accessible foundations and <em>The Elements of Statistical Learning</em> (ESL) for the full mathematical treatment, paired with Stanford&rsquo;s CS229 lectures. The focus is on understanding the theoretical framework: what does it mean for a model to generalise? What is the bias-variance tradeoff, precisely? What are the assumptions behind linear regression, logistic regression, SVMs, and tree-based methods? What happens when those assumptions are violated?
+  </p>
+  <p class="body-text">
+    Regularisation is studied not as a hyperparameter to tune, but as a principle: why adding a penalty term to the loss function reduces overfitting, how L1 and L2 regularisation produce different solutions, and what the Bayesian interpretation of regularisation reveals about the relationship between prior knowledge and data. Kernel methods are studied not as an algorithm to memorise, but as a conceptual framework for understanding how linear methods can be extended to non-linear problems by implicitly mapping data into higher-dimensional spaces.
+  </p>
+  <p class="body-text">
+    The payoff of this depth becomes clear when things go wrong in practice. When a model overfits, you do not just &ldquo;add more regularisation&rdquo; by trial and error &mdash; you understand why the model has too much capacity for the amount of data, and you reason about which intervention (more data, simpler model, regularisation, early stopping) is most appropriate. When a model underperforms, you can reason about whether the problem is bias (the model class cannot represent the true function) or variance (the model is too sensitive to the specific training set), and you know these are fundamentally different problems with different solutions.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Science: DL -->
+<div class="reveal" id="sci-dl">
+  <h3 class="section-heading"><span class="sh-num">3.</span> Deep Learning</h3>
+  <p class="body-text">
+    The canonical text here is Goodfellow, Bengio, and Courville&rsquo;s <em>Deep Learning</em>, paired with Stanford&rsquo;s CS230 and CS231N. The Science track treats deep learning as a mathematical discipline: backpropagation is derived as an application of the chain rule, gradient descent is analysed as an optimisation algorithm with known convergence properties and failure modes, and architectural choices are understood through the lens of the computational problems they solve.
+  </p>
+  <p class="body-text">
+    Why do gradients vanish in deep networks? Because repeated multiplication of values less than one in the chain rule produces exponentially small numbers. What does batch normalisation actually do? It normalises the input to each layer, reducing internal covariate shift and smoothing the optimisation landscape. Why do skip connections work? They provide a gradient highway that bypasses the vanishing gradient problem, allowing information (and gradients) to flow more easily through very deep networks. Why does the choice of activation function matter? Because it determines the gradient flow, the representation capacity, and whether the network can learn at all.
+  </p>
+  <p class="body-text">
+    The Science track also covers the optimisation landscape &mdash; the idea that training a neural network means navigating a high-dimensional, non-convex loss surface. Understanding saddle points, local minima, the role of learning rate schedules, and why SGD with momentum or Adam works better than vanilla gradient descent in practice. This mathematical grounding is what allows you to diagnose training problems: if your loss plateaus, you can reason about whether you are stuck in a saddle point, whether your learning rate is too low, or whether your model has insufficient capacity. Without the theory, you are guessing.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Science: NLP -->
+<div class="reveal" id="sci-nlp">
+  <h3 class="section-heading"><span class="sh-num">4.</span> Natural Language Processing</h3>
+  <p class="body-text">
+    The Science track for NLP is anchored by Jurafsky and Martin&rsquo;s <em>Speech and Language Processing</em> and Stanford&rsquo;s CS224N. The treatment begins with linguistic foundations &mdash; morphology, syntax, semantics, pragmatics &mdash; because understanding the structure of language is prerequisite to understanding how machines can process it. Language is not just a sequence of tokens; it has hierarchical structure, long-range dependencies, ambiguity at every level, and meaning that depends on context, speaker intent, and world knowledge.
+  </p>
+  <p class="body-text">
+    The theoretical progression traces the field&rsquo;s evolution: from hand-crafted rules and grammars (which worked for narrow tasks but could not scale), to statistical language models (n-grams, which captured local patterns but could not model long-range structure), to distributed representations (word2vec, GloVe, which embedded words in continuous vector spaces and captured semantic relationships), to neural sequence models (RNNs, LSTMs, which could process variable-length sequences but struggled with long dependencies), and finally to the attention mechanism that resolved the bottleneck.
+  </p>
+  <p class="body-text">
+    The Science track asks: why did each transition happen? What problem did each approach solve, and what new problem did it introduce? Why do rule-based systems fail to scale? Because language is too ambiguous and variable to capture with handwritten rules. Why do n-gram models fail at long-range dependencies? Because they only look at fixed-size local windows. Why do RNNs struggle with long sequences? Because of the vanishing gradient problem applied to sequential computation. Understanding this history is not academic nostalgia &mdash; it is the conceptual scaffold that makes the transformer architecture comprehensible as a solution to specific, well-understood problems.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Science: Transformers -->
+<div class="reveal" id="sci-transformers">
+  <h3 class="section-heading"><span class="sh-num">5.</span> Transformers &amp; Large Language Models</h3>
+  <p class="body-text">
+    The Science track culminates with the transformer architecture and the theoretical foundations of large language models. The essential starting point is the 2017 paper &ldquo;Attention Is All You Need&rdquo; by Vaswani et al. &mdash; not as a historical document to skim, but as a technical paper to understand deeply. The self-attention mechanism computes a weighted sum of value vectors, where the weights are determined by the compatibility (dot product) between query and key vectors. This simple operation, applied in parallel across all positions and stacked across layers, turns out to be extraordinarily powerful.
+  </p>
+  <p class="body-text">
+    Positional encodings are studied for what they reveal about the architecture&rsquo;s limitations: the transformer has no inherent notion of sequence order (unlike an RNN), so position must be injected explicitly. The original sinusoidal encodings, learned position embeddings, and more recent innovations like RoPE (Rotary Position Embeddings) and ALiBi all address the same fundamental problem in different ways. The encoder-decoder structure, the decoder-only architecture used by most modern LLMs, and the relationship between autoregressive generation and the training objective (next-token prediction) are all understood at the mathematical level.
+  </p>
+  <p class="body-text">
+    At the LLM scale, the Science track grapples with the questions that the field itself is still debating: what do these models actually learn? Is next-token prediction sufficient for understanding, or is it a sophisticated form of pattern matching? What do scaling laws tell us about the relationship between model size, data, and performance? What are the theoretical limits of in-context learning? The Science track does not need to answer these questions definitively &mdash; the field has not. But it equips you to engage with them seriously, to read the papers, follow the arguments, and form your own informed perspective rather than relying on hype or headline summaries.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 3 — THE ENGINEERING TRACK: BUILDING                    -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part3">
+  <div class="part-num">Part 3</div>
+  <h2 class="part-title">The Engineering <em>Track</em></h2>
+  <p class="part-subtitle">Implementation-focused, practical, hands-on &mdash; from building the model to keeping it alive in production. The Engineering track has the same two Categories as CS&amp;E: <strong>Building</strong> (Software Engineering, Infrastructure Engineering) and <strong>Operating</strong> (Reliability, Performance, Security, Observability). Two spanning practices &mdash; <strong>MLOps</strong> and <strong>LLMOps</strong> &mdash; cover Infrastructure Engineering plus all four Operating disciplines, giving them their ML- and LLM-specific treatment.</p>
+</div>
+
+<div class="reveal" id="eng-overview">
+  <h3 class="section-heading">What the <em>Engineering Track</em> Covers</h3>
+  <p class="body-text">
+    The Engineering track mirrors the Science track topic-for-topic, but the resources and the mindset are entirely different. Where the Science track assigns Goodfellow&rsquo;s <em>Deep Learning</em> to explain the theory behind backpropagation, the Engineering track assigns Chollet&rsquo;s <em>Deep Learning with Python</em> to show you how to actually implement, train, and evaluate a neural network in Keras. Where the Science track asks &ldquo;why does this algorithm converge?&rdquo;, the Engineering track asks &ldquo;how do I get this model to converge on my data, with my GPU, in a reasonable amount of time?&rdquo;
+  </p>
+  <p class="body-text">
+    The Engineering track is organised into two Categories that mirror CS&amp;E exactly: <strong>Building</strong> and <strong>Operating</strong>. Building contains <strong>Software Engineering</strong> (writing the training code, choosing the right libraries, structuring experiments) and <strong>Infrastructure Engineering</strong> (pipelines, model registries, deployment automation, serving stack). Operating contains the four general engineering disciplines that apply to any production system: <strong>Reliability Engineering (SRE)</strong>, <strong>Performance Engineering</strong>, <strong>Security Engineering</strong>, and <strong>Observability Engineering</strong>. What&rsquo;s special in D&amp;I is that two practices &mdash; <strong>MLOps</strong> (the closed loop for ML systems) and <strong>LLMOps</strong> (the same loop specialised for LLM-based systems) &mdash; span Infrastructure Engineering plus all four Operating disciplines, giving those disciplines their ML- and LLM-specific treatment. The same engineer typically designs the infrastructure, ships it, watches it, and fixes it &mdash; so the same two specialisations cover the entire spanning surface.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ============================================================ -->
+<!--  MAJOR SECTION: BUILDING                                      -->
+<!-- ============================================================ -->
+<div class="reveal" id="building">
+  <div class="major-section-kicker">Part 3 &mdash; Sub-section 1 of 3</div>
+  <h2 class="major-section"><em>Building</em></h2>
+  <p class="major-section-desc">Getting a model from a notebook into production. Building has two sub-disciplines: <strong>Software Engineering</strong> &mdash; writing the model code itself, choosing frameworks, structuring experiments &mdash; and <strong>Infrastructure Engineering</strong> &mdash; the pipelines, registries, and serving stack underneath. Both are covered in detail below.</p>
+</div>
+
+<!-- Building → Software Engineering -->
+<div class="reveal" id="eng-se">
+  <div class="sub-discipline-kicker">Building &mdash; Sub-discipline 1 of 2</div>
+  <h3 class="sub-discipline">Software Engineering</h3>
+  <p class="sub-discipline-desc">Building the models and applications themselves &mdash; writing the training code, choosing the right libraries and frameworks, structuring experiments, and going from a research idea to working software. <strong>Programming</strong> is the prerequisite layer underneath all of this (Python proficiency, the standard library, project structure, git, the basics of testing); the five areas below mirror the Science track topic-for-topic on top of that foundation.</p>
+</div>
+
+<!-- Engineering: Data Analysis -->
+<div class="reveal" id="eng-data-analysis">
+  <h3 class="section-heading"><span class="sh-num">1.</span> Data Analysis</h3>
+  <p class="body-text">
+    The Engineering track for data analysis is about <strong>Pandas, NumPy, and the practical workflows of exploratory data analysis</strong>. The canonical resource is Wes McKinney&rsquo;s <em>Python for Data Analysis</em>. Where the Science track asks &ldquo;what statistical conclusions can I draw from this data?&rdquo;, the Engineering track asks &ldquo;how do I load this CSV, clean the missing values, join it with another dataset, and produce a chart that actually answers the question?&rdquo;
+  </p>
+  <p class="body-text">
+    Practical data analysis means working with real-world data in all its imperfection: mixed data types, inconsistent encoding, duplicate records, implicit missing values, date formats that vary across rows, and datasets too large to fit in memory. The Engineering track teaches you to handle these problems fluently &mdash; using Pandas for data manipulation, NumPy for numerical computation, Matplotlib and Seaborn for visualisation, and Jupyter notebooks for the iterative exploration workflow that characterises real data analysis.
+  </p>
+  <p class="body-text">
+    The complementarity with the Science track is immediate. The Science track tells you that a bimodal distribution might indicate two distinct subpopulations in your data. The Engineering track shows you how to load the data, plot the distribution, identify the modes, split the data, and verify the hypothesis. One without the other is incomplete: statistical knowledge without the tools to apply it is inert, and tool proficiency without statistical reasoning produces attractive but potentially misleading charts.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Engineering: ML -->
+<div class="reveal" id="eng-ml">
+  <h3 class="section-heading"><span class="sh-num">2.</span> Machine Learning</h3>
+  <p class="body-text">
+    The practical side of ML centres on <strong>Scikit-Learn and the workflows of building, evaluating, and deploying models</strong>. The canonical resource is Aur&eacute;lien G&eacute;ron&rsquo;s <em>Hands-On Machine Learning with Scikit-Learn, Keras &amp; TensorFlow</em>. The Engineering track covers feature engineering (creating useful inputs from raw data), model selection (choosing the right algorithm for the problem), hyperparameter tuning (systematically searching the configuration space), cross-validation (reliably estimating model performance), and the Scikit-Learn pipeline abstraction that chains these steps into reproducible workflows.
+  </p>
+  <p class="body-text">
+    The gap between a Jupyter notebook experiment and a production ML system is enormous, and the Engineering track begins to address it here. This means learning to think about data splits correctly (never leaking information from test to train), handling class imbalance, encoding categorical variables properly, and building pipelines that can be serialised, version-controlled, and re-run on new data without manual intervention. It means understanding that a model with 99% accuracy on an imbalanced dataset might be useless, and knowing how to evaluate with the right metrics for the actual problem.
+  </p>
+  <p class="body-text">
+    The Science track says &ldquo;random forests reduce variance by averaging many high-variance, low-bias decision trees.&rdquo; The Engineering track says &ldquo;here is how you instantiate a RandomForestClassifier, set the hyperparameters, fit it to your training data, evaluate on a held-out set, and interpret the feature importance scores to explain the results to a stakeholder.&rdquo; Both are necessary. The theory tells you why the method works and when it will not; the practice tells you how to actually use it.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Engineering: DL -->
+<div class="reveal" id="eng-dl">
+  <h3 class="section-heading"><span class="sh-num">3.</span> Deep Learning</h3>
+  <p class="body-text">
+    Deep learning engineering means <strong>Keras, PyTorch, and the practice of building, training, and debugging neural networks</strong>. The canonical resource is Fran&ccedil;ois Chollet&rsquo;s <em>Deep Learning with Python</em>. The Engineering track covers what the theory does not: how to set up a training loop, how to manage GPU memory, how to implement custom layers and loss functions, how to handle data loading and augmentation at scale, and how to debug the many ways training can silently go wrong (NaN losses, mode collapse, gradient explosion, models that train but do not learn).
+  </p>
+  <p class="body-text">
+    GPU management is a practical concern that theory never mentions: understanding CUDA, managing VRAM, choosing batch sizes that fit in memory, using mixed-precision training to reduce memory footprint, and knowing when to use gradient accumulation as a workaround for limited hardware. The Engineering track teaches you that the difference between a model that trains in 2 hours and one that trains in 20 hours is often not the architecture but the engineering: data loading bottlenecks, suboptimal batch sizes, unnecessary data copies between CPU and GPU.
+  </p>
+  <p class="body-text">
+    The Science track explains why backpropagation mathematically computes the gradient of the loss with respect to every parameter. The Engineering track shows you what happens when you call <code>loss.backward()</code> in PyTorch, how to inspect gradients, how to use gradient clipping to prevent explosion, and how to use a learning rate finder to choose a reasonable starting point. The Science track derives the equations; the Engineering track makes them run on actual hardware and produce actual results.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Engineering: NLP -->
+<div class="reveal" id="eng-nlp">
+  <h3 class="section-heading"><span class="sh-num">4.</span> Natural Language Processing</h3>
+  <p class="body-text">
+    NLP engineering means <strong>building systems that work on real text</strong>: tokenisation, text preprocessing, training sequence models, implementing attention mechanisms, and confronting the practical challenges of language data. The resources here are the hands-on assignments from Stanford&rsquo;s CS224N and implementation-focused books like <em>Natural Language Processing in Action</em>. The emphasis is on getting your hands dirty with actual implementations, not just reading about architectures.
+  </p>
+  <p class="body-text">
+    The practical challenges of NLP are substantial and qualitatively different from working with numerical data. Text requires tokenisation (splitting raw strings into model-consumable units), which is itself a non-trivial engineering decision: character-level, word-level, subword (BPE, WordPiece, SentencePiece), each with different tradeoffs for vocabulary size, out-of-vocabulary handling, and computational efficiency. Text data is multilingual, noisy, domain-specific, and riddled with ambiguity. A system trained on news articles may fail completely on social media text, medical records, or legal documents. The Engineering track forces you to confront these realities.
+  </p>
+  <p class="body-text">
+    Implementing attention from scratch &mdash; writing the matrix multiplications, the masking, the softmax normalisation &mdash; is one of the most instructive exercises in the entire Engineering track. It bridges the Science track&rsquo;s mathematical description of attention with the reality of how it is computed in practice, and it reveals details that the equations hide: the importance of scaling the dot products (to prevent softmax saturation), the role of masking in decoder models (to enforce autoregressive generation), and the computational cost of the quadratic attention operation on long sequences.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Engineering: Transformers & LLMs -->
+<div class="reveal" id="eng-transformers">
+  <h3 class="section-heading"><span class="sh-num">5.</span> Transformers &amp; Large Language Models</h3>
+  <p class="body-text">
+    This is the largest and fastest-moving area in the Engineering track, and it covers the full spectrum from low-level model building to high-level application development. On one end, Sebastian Raschka&rsquo;s <em>Build a Large Language Model From Scratch</em> walks you through implementing a transformer from the ground up. On the other end, Chip Huyen&rsquo;s <em>AI Engineering</em> and the <em>LLM Engineer&rsquo;s Handbook</em> cover the full stack of building production-grade LLM applications: fine-tuning, prompt engineering, retrieval-augmented generation (RAG), API-based development, evaluation, and deployment.
+  </p>
+  <p class="body-text">
+    <strong>Fine-tuning</strong> is the practice of adapting a pre-trained model to a specific task or domain, and it comes with its own engineering challenges: dataset preparation, choosing between full fine-tuning and parameter-efficient methods (LoRA, QLoRA), managing training compute, and evaluating whether the fine-tuned model actually improves on the base model for your specific use case. <strong>Prompt engineering</strong> is the art and science of designing inputs that elicit useful outputs from a model without changing its weights. <strong>RAG</strong> is the pattern of augmenting a model&rsquo;s knowledge by retrieving relevant information at inference time and injecting it into the prompt. Together, these techniques form the core toolkit of modern LLM application engineering.
+  </p>
+  <p class="body-text">
+    The Engineering track here explicitly connects to the <a href="llm-engineering.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">LLM Engineering Landscape</a> article, which maps the full breadth of what engineers actually build with large language models. The progression from data analysis through ML, deep learning, and NLP to this point is what gives you the foundation to work at the LLM application layer with real understanding rather than surface-level API familiarity. You understand what the model is doing because you have studied the theory; you can build with it because you have studied the practice.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- Building → Infrastructure Engineering -->
+<div class="reveal" id="eng-infra">
+  <div class="sub-discipline-kicker">Building &mdash; Sub-discipline 2 of 2</div>
+  <h3 class="sub-discipline">Infrastructure Engineering</h3>
+  <p class="sub-discipline-desc">The pipelines, model registries, deployment automation, and serving stack underneath the model code &mdash; the half of Building that&rsquo;s not the model itself. Includes training and feature pipelines, model registries and lineage, deployment automation, and the API/serving layer that exposes a trained model as a reliable production service. This is its own sub-discipline within Building, distinct from Software Engineering (the model code) and distinct from Operating (the next major sub-section).</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ============================================================ -->
+<!--  MAJOR SECTION: OPERATING                                     -->
+<!-- ============================================================ -->
+<div class="reveal" id="operating">
+  <div class="major-section-kicker">Part 3 &mdash; Sub-section 2 of 3</div>
+  <h2 class="major-section"><em>Operating</em></h2>
+  <p class="major-section-desc">Keeping a running ML or LLM system alive once it has been shipped &mdash; the four general engineering disciplines that apply to any production system. Like CS&amp;E, Operating covers <strong>Reliability Engineering (SRE)</strong>, <strong>Performance Engineering</strong>, <strong>Security Engineering</strong>, and <strong>Observability Engineering</strong>. This is its own major sub-section, distinct from Building above; the four disciplines below describe what each one means in the D&amp;I context.</p>
+</div>
+
+<!-- Operating → SRE -->
+<div class="reveal" id="eng-sre">
+  <div class="sub-discipline-kicker">Operating &mdash; Sub-discipline 1 of 4</div>
+  <h3 class="sub-discipline">Reliability Engineering (SRE)</h3>
+  <p class="sub-discipline-desc">Uptime, error budgets, incident response, and on-call discipline for ML and LLM systems. In D&amp;I this becomes pipeline reliability, retraining failure handling, model-rollback strategy, and graceful degradation when an upstream model or vector store is unavailable.</p>
+</div>
+
+<!-- Operating → Performance Engineering -->
+<div class="reveal" id="eng-perf">
+  <div class="sub-discipline-kicker">Operating &mdash; Sub-discipline 2 of 4</div>
+  <h3 class="sub-discipline">Performance Engineering</h3>
+  <p class="sub-discipline-desc">Inference latency, throughput, batching, hardware utilisation, and the cost/latency tradeoffs specific to model serving. In D&amp;I this covers quantisation, KV-cache management, token latency budgets, semantic caching, and the economics of serving large models at scale.</p>
+</div>
+
+<!-- Operating → Security Engineering -->
+<div class="reveal" id="eng-sec">
+  <div class="sub-discipline-kicker">Operating &mdash; Sub-discipline 3 of 4</div>
+  <h3 class="sub-discipline">Security Engineering</h3>
+  <p class="sub-discipline-desc">Model and data security, supply-chain integrity for model artefacts, and the LLM-specific surface: prompt-injection defense, data-leakage guards, jailbreak hardening, and tool-use authorisation for agentic systems.</p>
+</div>
+
+<!-- Operating → Observability Engineering -->
+<div class="reveal" id="eng-obs">
+  <div class="sub-discipline-kicker">Operating &mdash; Sub-discipline 4 of 4</div>
+  <h3 class="sub-discipline">Observability Engineering</h3>
+  <p class="sub-discipline-desc">Model monitoring, drift detection, evaluation harnesses, token-cost tracking, hallucination signals. The most distinctive of the four operating disciplines in D&amp;I &mdash; classical metrics aren&rsquo;t enough, and a whole sub-genre of tooling (offline benchmarks, LLM-as-judge, regression suites, semantic eval) has emerged to fill the gap.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ============================================================ -->
+<!--  MAJOR SECTION: MLOPS & LLMOPS (spanning practices)            -->
+<!-- ============================================================ -->
+<div class="reveal" id="mlops-llmops">
+  <div class="major-section-kicker">Part 3 &mdash; Sub-section 3 of 3</div>
+  <h2 class="major-section">MLOps &amp; <em>LLMOps</em></h2>
+  <p class="major-section-desc">The two practices that span Infrastructure Engineering and all four Operating disciplines (SRE, Performance, Security, Observability), giving them their ML- and LLM-specific treatment. In D&amp;I the same engineer typically designs the pipeline, ships it, watches it drift, and retrains it &mdash; so a single pair of specialisations covers what would otherwise be five separate engineering surfaces.</p>
+</div>
+
+<!-- MLOps -->
+<div class="reveal" id="eng-mlops">
+  <div class="sub-discipline-kicker">Sub-discipline 1 of 2</div>
+  <h3 class="sub-discipline">MLOps</h3>
+  <p class="sub-discipline-desc">The closed-loop discipline for ML systems &mdash; treats the model lifecycle (train, evaluate, ship, monitor, retrain) as a continuous process rather than a one-shot ship.</p>
+</div>
+
+<div class="reveal" id="eng-mlops-detail">
+  <h3 class="section-heading">What <em>MLOps</em> Covers</h3>
+  <p class="body-text">
+    MLOps is what the data-science-meets-production seam actually looks like in practice. It covers the toolchain and the practices: <strong>training and feature pipelines</strong> (the ingestion, cleaning, transformation, and versioning of training data; the reusable feature definitions that ensure consistency between training and serving); <strong>model registries</strong> (tracking model versions, metadata, and lineage so any prediction can be traced back to the exact data and code that produced it); <strong>deployment automation</strong> (taking a trained model and exposing it as a reliable, scalable API endpoint, with the same CI/CD discipline you would apply to any production service); <strong>drift monitoring</strong> (detecting when a deployed model&rsquo;s performance degrades because the input data distribution has shifted, the world has changed, or a bug has been introduced upstream); and <strong>retraining cadences</strong> (the policies and pipelines that automatically detect when a model needs refreshing and execute the full train-evaluate-deploy cycle with appropriate safeguards).
+  </p>
+  <p class="body-text">
+    The gap between &ldquo;my model works in a notebook&rdquo; and &ldquo;my model works in production&rdquo; is what MLOps closes. It is not about the model itself; it is about everything else: reproducibility (can you retrain and get the same results?), reliability (does the serving system handle load spikes gracefully?), observability (do you know when the model is making bad predictions before users do?), and iteration speed (can you deploy a new version without a two-week manual process?). Most ML projects that fail in production fail not because the model is bad but because this layer is missing or inadequate.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- LLMOps -->
+<div class="reveal" id="eng-llmops">
+  <div class="sub-discipline-kicker">Sub-discipline 2 of 2</div>
+  <h3 class="sub-discipline">LLMOps</h3>
+  <p class="sub-discipline-desc">The same closed-loop discipline specialised for LLM-based systems, where the operational surface is fundamentally different from classical ML.</p>
+</div>
+
+<div class="reveal" id="eng-llmops-detail">
+  <h3 class="section-heading">What <em>LLMOps</em> Covers</h3>
+  <p class="body-text">
+    LLMOps inherits MLOps&rsquo; lifecycle thinking but the components change. <strong>Prompt and configuration version management</strong> replaces &mdash; or sits alongside &mdash; model versioning: the prompt is now a first-class artefact whose changes need to be tracked, A/B-tested, and rolled back like code. <strong>Evaluation harnesses</strong> become central in a way they rarely were for classical ML &mdash; offline benchmarks, LLM-as-judge scoring, regression tests on golden datasets, and online quality measurement &mdash; because there is no single &ldquo;accuracy&rdquo; number that captures whether a generative system is working. <strong>Token-cost and latency monitoring</strong> are operational concerns specific to large models: a small change in prompt structure can multiply inference cost or push p99 latency past acceptable thresholds. <strong>Semantic caching</strong> short-circuits expensive inference for repeated or near-repeated queries, and <strong>prompt-injection defense</strong> becomes a continuous safety concern because user inputs flow directly into model context.
+  </p>
+  <p class="body-text">
+    The deeper shift is that LLM systems are probabilistic and prompt-driven in a way that classical ML pipelines are not. A traditional ML model is a fixed function applied to feature vectors; an LLM application is a moving conversation between prompts, retrieved context, tool calls, and model outputs. That makes the operational discipline qualitatively different &mdash; more like operating a distributed agent system than operating a deterministic batch job. The <a href="llm-engineering.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">LLM Engineering Landscape</a> goes deeper into this surface, organised as eight engineering disciplines that map directly onto the practical work.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  PART 4 — STATE OF THE ART                                   -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="part4">
+  <div class="part-num">Part 4</div>
+  <h2 class="part-title">State of the <em>Art</em></h2>
+  <p class="part-subtitle">The deliberately open-ended frontier &mdash; what has not settled into textbooks yet.</p>
+</div>
+
+<div class="reveal" id="sota">
+  <h3 class="section-heading">Tracking the <em>Frontier</em></h3>
+  <p class="body-text">
+    The first four parts of this discipline &mdash; the five-topic progression through Science and Engineering, plus the Operating disciplines and the MLOps/LLMOps spanning practices &mdash; cover material that is relatively stable. The textbooks exist, the courses are well-established, the concepts are not going to change next month. But AI is a field where the frontier moves fast enough that any static curriculum becomes incomplete within a year. State of the Art is the section that acknowledges this explicitly.
+  </p>
+  <p class="body-text">
+    This is a tracking area, not a teaching area. It covers new architectures (mixture-of-experts, state space models like Mamba, alternative attention mechanisms), new capabilities (multimodal understanding, long-context processing, reasoning and planning), new training paradigms (RLHF, DPO, constitutional AI, self-play), and emerging techniques that are promising but not yet proven enough to be part of the stable curriculum. The resources here are not textbooks &mdash; they are research papers, blog posts, conference talks, and open-source repositories. The goal is not mastery but awareness: knowing what is happening at the frontier, understanding the claims being made, and being able to evaluate whether a new technique is a genuine advance or incremental noise.
+  </p>
+  <p class="body-text">
+    The reason this section exists as part of the roadmap, rather than being treated as external reading, is that the boundary between &ldquo;state of the art&rdquo; and &ldquo;established practice&rdquo; is constantly shifting. Transformers themselves were state of the art in 2017; by 2020 they were standard; by 2024 they were the foundation of a trillion-dollar industry. Some of what is in the State of the Art section today will migrate into the stable curriculum as the field matures. Having a designated place to track these developments &mdash; rather than trying to force them into the existing structure prematurely &mdash; is itself a design decision that keeps the rest of the roadmap clean and reliable.
+  </p>
+  <p class="body-text">
+    The companion document for this section is the <a href="llm-engineering.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">LLM Engineering Landscape</a> &mdash; a long-form survey of the eight engineering disciplines that have crystallised around modern LLMs (model infrastructure, application engineering, agentic systems, evaluation, LLMOps, safety and alignment, enterprise integration, and human&ndash;AI interaction), together with what developers actually build and what teams actually ship. Treat it as the working snapshot of the frontier this roadmap deliberately leaves open-ended.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+
+<!-- ============================================================ -->
+<!--  THE MIRROR                                                   -->
+<!-- ============================================================ -->
+
+<div class="part-divider reveal" id="mirror-section">
+  <div class="part-num">Closing</div>
+  <h2 class="part-title">The <em>Mirror</em></h2>
+  <p class="part-subtitle">The core design principle: two tracks, five topics, one integrated understanding.</p>
+</div>
+
+<div class="reveal" id="mirror">
+  <h3 class="section-heading">Why the <em>Mirroring</em> Matters</h3>
+  <p class="body-text">
+    The entire structure of Data &amp; Intelligence is built around one idea: the Science track and the Engineering track are mirrors. They cover the same five topics, in the same order, but from opposite perspectives. This is not redundancy. It is the mechanism by which shallow knowledge becomes deep understanding.
+  </p>
+
+  <div class="table-wrap"><table class="mirror-table">
+    <thead>
+      <tr>
+        <th>Topic</th>
+        <th>Science (the Why)</th>
+        <th>Engineering (the How)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Data Analysis</strong></td>
+        <td>Distributions, inference, statistical reasoning</td>
+        <td>Pandas, NumPy, EDA, data cleaning</td>
+      </tr>
+      <tr>
+        <td><strong>Machine Learning</strong></td>
+        <td>Bias-variance, regularisation, generalisation theory</td>
+        <td>Scikit-Learn, pipelines, feature engineering</td>
+      </tr>
+      <tr>
+        <td><strong>Deep Learning</strong></td>
+        <td>Backpropagation, optimisation, architectural principles</td>
+        <td>Keras, PyTorch, training loops, GPU management</td>
+      </tr>
+      <tr>
+        <td><strong>NLP</strong></td>
+        <td>Linguistic foundations, statistical language models</td>
+        <td>Tokenisation, preprocessing, implementing attention</td>
+      </tr>
+      <tr>
+        <td><strong>Transformers &amp; LLMs</strong></td>
+        <td>Self-attention, positional encodings, scaling laws</td>
+        <td>Fine-tuning, RAG, prompt engineering, LLM apps</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <p class="body-text">
+    For every topic, the Science track gives you the mental model and the Engineering track gives you the practical skill. The Science track for Machine Learning teaches you that random forests reduce variance by averaging many high-variance, low-bias trees. The Engineering track teaches you how to instantiate the classifier, tune the hyperparameters, and interpret the feature importance scores. Separately, each gives you half an understanding. Together, they produce someone who can both reason about a problem and solve it.
+  </p>
+  <p class="body-text">
+    The mirroring also serves a diagnostic function. If you find the Engineering track easy but the Science track confusing, you have a tool proficiency gap &mdash; you can use the software but do not understand the underlying mathematics. If you find the Science track easy but the Engineering track frustrating, you have a practice gap &mdash; you understand the theory but struggle to translate it into working code. The dual-track structure makes these gaps visible so you can address them deliberately, rather than discovering them at the worst possible time &mdash; typically when a model fails in production and you cannot explain why.
+  </p>
+  <p class="body-text">
+    This is the core design principle of the Data &amp; Intelligence discipline. Not &ldquo;learn the theory, then learn the practice&rdquo; sequentially, but &ldquo;study them in parallel, topic by topic, so that each illuminates the other.&rdquo; The mirror is not a structural convenience. It is the learning strategy itself.
+  </p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ============================================================ -->
+<!--  GLOSSARY                                                     -->
+<!-- ============================================================ -->
+<div class="reveal" id="glossary">
+  <h3 class="section-heading"><em>Glossary</em></h3>
+  <p class="body-text">Short definitions for the terms used throughout this guide and the rest of the AI literature you are likely to read. Useful as a quick reference when something in a paper or a job posting trips you up.</p>
+
+  <p class="body-text"><strong>Agent.</strong> An LLM-powered system that takes actions in a loop: it reasons, calls tools, observes results, and iterates until a goal is met.</p>
+
+  <p class="body-text"><strong>Embedding.</strong> A vector representation of text (or images, audio) used for semantic search and retrieval.</p>
+
+  <p class="body-text"><strong>Fine-tuning.</strong> Continued training of a pre-trained model on a smaller, task-specific dataset. Variants include LoRA (parameter-efficient), instruction tuning, and preference tuning (RLHF, DPO).</p>
+
+  <p class="body-text"><strong>Foundation model.</strong> A large model trained on broad data, intended to be adapted to many downstream tasks.</p>
+
+  <p class="body-text"><strong>Frontier model.</strong> A foundation model at or near the current state of the art.</p>
+
+  <p class="body-text"><strong>Inference.</strong> Running a trained model to produce outputs. Distinct from training.</p>
+
+  <p class="body-text"><strong>LoRA (Low-Rank Adaptation).</strong> A parameter-efficient fine-tuning technique that trains small adapter matrices instead of the full model.</p>
+
+  <p class="body-text"><strong>MoE (Mixture of Experts).</strong> An architecture where only a subset of the model&rsquo;s parameters are activated for any given input, enabling larger models at lower inference cost.</p>
+
+  <p class="body-text"><strong>Open-weight model.</strong> A model whose parameters are publicly released, allowing self-hosting, fine-tuning, and modification.</p>
+
+  <p class="body-text"><strong>RAG (Retrieval-Augmented Generation).</strong> Putting relevant external information into the model&rsquo;s context at query time, instead of relying on what the model memorised during training.</p>
+
+  <p class="body-text"><strong>RLHF (Reinforcement Learning from Human Feedback).</strong> A training technique that uses human preferences to shape model behaviour. Variants include DPO, Constitutional AI, and RLAIF.</p>
+
+  <p class="body-text"><strong>Tool use / function calling.</strong> Structured interaction where the model requests execution of external functions and receives their results.</p>
+
+  <p class="body-text"><strong>Quantisation.</strong> Reducing the numerical precision of model weights (e.g., from 16-bit to 4-bit) to make the model smaller and faster, at some cost to quality.</p>
+
+  <p class="body-text"><strong>Vector database.</strong> A database optimised for similarity search over embeddings. Examples: Pinecone, Weaviate, Qdrant, pgvector.</p>
+</div>
+
+<hr class="content-rule" />
+
+<!-- ============================================================ -->
+<!--  RESOURCES                                                    -->
+<!-- ============================================================ -->
+<div class="part-divider reveal" id="resources-section">
+  <div class="part-num">Resources</div>
+  <h2 class="part-title"><em>Resources</em></h2>
+  <p class="part-subtitle">Every book, course, and practical resource referenced in this guide &mdash; curated and organised by track.</p>
+</div>
+
+<div class="reveal" id="resources-intro">
+  <p class="body-text">
+    Every textbook, course, and code repository referenced throughout this guide is collected on the dedicated Data &amp; Intelligence Resources page &mdash; organised in the same Science / Engineering structure you just read, with tables for Books, Courses, and Practical items. Use it as a quick-reference when you&rsquo;re ready to pick what to study next.
+  </p>
+  <p style="margin-top: 1.4rem;">
+    <a href="resources.html" class="resources-outro-link">Browse the full Data &amp; Intelligence Resources page &rarr;</a>
+  </p>
+</div>
+
+</main>
+
+</div><!-- end page-layout -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-name">Data &amp; Intelligence</span>
+    <span class="footer-copy">Last updated &mdash; April 2026 &nbsp;&middot;&nbsp; &copy; 2026</span>
+  </div>
+</footer>
+
+<script>
+  // Mobile menu toggle
+  const hamburger = document.querySelector('.nav-hamburger');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+  });
+  document.querySelectorAll('.mobile-link').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // TOC active section tracking
+  const tocLinks = document.querySelectorAll('.toc a');
+  const sections = [];
+  tocLinks.forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      const el = document.getElementById(href.slice(1));
+      if (el) sections.push({ el, link });
+    }
+  });
+
+  const tocObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const match = sections.find(s => s.el === entry.target);
+        if (match) match.link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => tocObserver.observe(s.el));
+
+  // Back to top button
+  const backBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    backBtn.classList.toggle('visible', window.scrollY > 600);
+  });
+</script>
+
+</body>
+</html>
