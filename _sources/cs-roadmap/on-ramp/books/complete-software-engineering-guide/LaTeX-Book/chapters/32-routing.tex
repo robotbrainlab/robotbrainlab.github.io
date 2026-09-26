@@ -1,0 +1,978 @@
+\setcounter{chapter}{31}
+\chapter{Routing}\label{ch:32-routing}
+
+\chapterrule
+
+\hyperref[ch:31-input-handling]{Chapter 31} validated the incoming request. Before validation can even begin, however, Flask must determine \emph{which handler function} the request belongs to. That determination is \textbf{routing}: the process of matching a URL and HTTP method to a Python function.
+
+Flask's routing system is provided by \textbf{Werkzeug}, the library that Flask is built on top of. Werkzeug's routing is sophisticated~--- it handles URL patterns with variables, HTTP method constraints, custom type converters, and detailed error responses~--- but it is also fully transparent once you know where to look.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  How \texttt{@app.route()} registers a route at import time
+\item
+  What the Werkzeug \texttt{Map} and \texttt{Rule} objects are and what they contain
+\item
+  How URL matching works: the algorithm, the priority rules, the edge cases
+\item
+  What URL variable converters are and how to define custom ones
+\item
+  How 404 (Not Found) and 405 (Method Not Allowed) responses are generated
+\item
+  How Blueprint routes integrate into the application URL map
+\item
+  How to inspect the registered routes in a running application
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{\texorpdfstring{Registration: What \texttt{@app.route()} Does}{Registration: What @app.route() Does}}\label{32-routing:321-registration-what-approute-does}
+
+When you write:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}this is Python decorator syntax. It is exactly equivalent to:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ list\_notes():}
+\NormalTok{    ...}
+
+\NormalTok{app.route(}\StringTok{"/notes/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])(list\_notes)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Which is exactly equivalent to:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ list\_notes():}
+\NormalTok{    ...}
+
+\NormalTok{app.add\_url\_rule(}\StringTok{"/notes/"}\NormalTok{, endpoint}\OperatorTok{=}\StringTok{"list\_notes"}\NormalTok{, view\_func}\OperatorTok{=}\NormalTok{list\_notes, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{add\_url\_rule} is the actual method that does the work. The decorator is syntactic sugar.
+
+\subsection*{When does registration happen?}\phantomsection\label{32-routing:when-does-registration-happen}
+
+Route registration happens at \textbf{import time}~--- when the module containing the \texttt{@app.route()} decorator is imported by Python. It does \emph{not} happen when a request arrives.
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Timeline (production: gunicorn "app:create_app()"; in development,
+python run.py does the same through run.py):
+
+  Gunicorn worker imports the app package (app/__init__.py)
+      ↓
+  Gunicorn calls create_app()
+      ↓
+  create_app() imports and registers the notes Blueprint
+      ↓
+  Python imports app/routes/notes.py
+      ↓
+  @notes_bp.route("/") decorator executes → Rule added to Blueprint
+  @notes_bp.route("/<int:note_id>") decorator executes → Rule added
+      ↓
+  create_app() calls app.register_blueprint(notes_bp)
+      ↓
+  Blueprint's rules are copied into app.url_map
+      ↓
+  URL map is complete. Ready to match requests.
+
+  -----------------------------------------------
+
+  First request arrives → the URL map is matched → handler found quickly
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The URL map is built once at startup and then used for every subsequent request. This is intentional~--- routing lookup must be fast, and building the map only once makes it fast.
+
+\subsection*{\texorpdfstring{What \texttt{add\_url\_rule} does internally}{What add\_url\_rule does internally}}\phantomsection\label{32-routing:what-add-url-rule-does-internally}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Flask\textquotesingle{}s add\_url\_rule (simplified to show the concepts)}
+\KeywordTok{def}\NormalTok{ add\_url\_rule(}\VariableTok{self}\NormalTok{, rule, endpoint}\OperatorTok{=}\VariableTok{None}\NormalTok{, view\_func}\OperatorTok{=}\VariableTok{None}\NormalTok{, methods}\OperatorTok{=}\VariableTok{None}\NormalTok{, }\OperatorTok{**}\NormalTok{options):}
+    \CommentTok{\# 1. Determine the endpoint name}
+    \ControlFlowTok{if}\NormalTok{ endpoint }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{        endpoint }\OperatorTok{=}\NormalTok{ view\_func.}\VariableTok{\_\_name\_\_}  \CommentTok{\# "list\_notes"}
+
+    \CommentTok{\# 2. Determine which HTTP methods this rule handles}
+    \ControlFlowTok{if}\NormalTok{ methods }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{        methods }\OperatorTok{=} \BuiltInTok{getattr}\NormalTok{(view\_func, }\StringTok{"methods"}\NormalTok{, }\VariableTok{None}\NormalTok{) }\KeywordTok{or}\NormalTok{ (}\StringTok{"GET"}\NormalTok{,)}
+\NormalTok{    methods }\OperatorTok{=}\NormalTok{ \{m.upper() }\ControlFlowTok{for}\NormalTok{ m }\KeywordTok{in}\NormalTok{ methods\}  }\CommentTok{\# Normalize to uppercase}
+
+    \CommentTok{\# 3. Add HEAD wherever GET is allowed (Werkzeug\textquotesingle{}s Rule does this:}
+    \CommentTok{\#    a HEAD request is a GET without the body)}
+    \ControlFlowTok{if} \StringTok{"GET"} \KeywordTok{in}\NormalTok{ methods:}
+\NormalTok{        methods.add(}\StringTok{"HEAD"}\NormalTok{)}
+
+    \CommentTok{\# 4. Add OPTIONS (Flask answers it automatically, unless the view}
+    \CommentTok{\#    sets provide\_automatic\_options = False)}
+\NormalTok{    methods.add(}\StringTok{"OPTIONS"}\NormalTok{)}
+
+    \CommentTok{\# 5. Create a Werkzeug Rule object}
+\NormalTok{    rule\_obj }\OperatorTok{=} \VariableTok{self}\NormalTok{.url\_rule\_class(}
+\NormalTok{        rule,            }\CommentTok{\# The URL pattern: "/notes/"}
+\NormalTok{        methods}\OperatorTok{=}\NormalTok{methods, }\CommentTok{\# \{"GET", "HEAD", "OPTIONS"\}}
+\NormalTok{        endpoint}\OperatorTok{=}\NormalTok{endpoint,}
+\NormalTok{    )}
+
+    \CommentTok{\# 6. Add the Rule to the URL Map}
+    \VariableTok{self}\NormalTok{.url\_map.add(rule\_obj)}
+
+    \CommentTok{\# 7. Register the view function for this endpoint}
+    \VariableTok{self}\NormalTok{.view\_functions[endpoint] }\OperatorTok{=}\NormalTok{ view\_func}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}After registration, Flask has:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  A \texttt{url\_map} containing \texttt{Rule} objects (URL patterns)
+\item
+  A \texttt{view\_functions} dict mapping endpoint names to callable functions
+\end{enumerate}
+
+\noindent{}When a request arrives, Flask uses \texttt{url\_map} to find the endpoint name, then uses \texttt{view\_functions} to find the callable.
+
+\setcounter{section}{1}
+\section{The URL Map and Rule Objects}\label{32-routing:322-the-url-map-and-rule-objects}
+
+\subsection*{\texorpdfstring{Werkzeug's \texttt{Map}}{Werkzeug's Map}}\phantomsection\label{32-routing:werkzeugs-map}
+
+The \texttt{Map} is a collection of \texttt{Rule} objects. You can inspect it directly:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Run this in a Flask shell: flask shell}
+\ImportTok{from}\NormalTok{ app }\ImportTok{import}\NormalTok{ create\_app}
+\NormalTok{app }\OperatorTok{=}\NormalTok{ create\_app()}
+
+\CommentTok{\# Print all registered rules}
+\ControlFlowTok{for}\NormalTok{ rule }\KeywordTok{in}\NormalTok{ app.url\_map.iter\_rules():}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{rule}\SpecialCharTok{.}\NormalTok{endpoint}\SpecialCharTok{:30s\}}\SpecialStringTok{  }\SpecialCharTok{\{}\StringTok{\textquotesingle{},\textquotesingle{}}\SpecialCharTok{.}\NormalTok{join(}\BuiltInTok{sorted}\NormalTok{(rule.methods))}\SpecialCharTok{:30s\}}\SpecialStringTok{  }\SpecialCharTok{\{}\NormalTok{rule}\SpecialCharTok{.}\NormalTok{rule}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}For the Notes API as it stands after \hyperref[ch:16-logging-error-handling]{Chapter 16}, this produces (with the column widths narrowed to fit the page):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+static                  GET,HEAD,OPTIONS        /static/<path:filename>
+health.health           GET,HEAD,OPTIONS        /health
+notes.list_notes        GET,HEAD,OPTIONS        /notes/
+notes.create_note       OPTIONS,POST            /notes/
+notes.get_note          GET,HEAD,OPTIONS        /notes/<int:note_id>
+notes.delete_note       DELETE,OPTIONS          /notes/<int:note_id>
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Several things are apparent:
+
+\begin{itemize}
+\tightlist
+\item
+  Each route has an \textbf{endpoint} name (e.g., \texttt{notes.list\_notes}~--- the Blueprint name prefixed)
+\item
+  Methods are automatically extended with \texttt{OPTIONS}, and with \texttt{HEAD} wherever \texttt{GET} is allowed
+\item
+  Flask registers a \texttt{static} route automatically for serving static files
+\item
+  Multiple rules can share the same URL pattern but differ by HTTP method
+\end{itemize}
+
+\subsection*{\texorpdfstring{Werkzeug's \texttt{Rule}}{Werkzeug's Rule}}\phantomsection\label{32-routing:werkzeugs-rule}
+
+A \texttt{Rule} is the unit of URL matching. Each \texttt{Rule} contains:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rule.rule      }\CommentTok{\# The URL pattern string: "/notes/\textless{}int:note\_id\textgreater{}"}
+\NormalTok{rule.methods   }\CommentTok{\# The set of HTTP methods: \{"GET", "HEAD", "OPTIONS"\}}
+\NormalTok{rule.endpoint  }\CommentTok{\# The endpoint name: "notes.get\_note"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Conceptually, each \texttt{Rule} is a pattern that a path either matches or not, and the \texttt{\textless{}int:note\_id\textgreater{}} part is a \textbf{converter}~--- it specifies both the pattern for that segment (the regular expression \texttt{\textbackslash{}d+}) and the Python type to convert the matched string to (\texttt{int}):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+"/notes/<int:note_id>"
+         ↓ conceptually
+^/notes/(?P<note_id>\d+)$
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}(Older Werkzeug versions compiled each rule to one regular expression like this and tried the rules in turn. Since Werkzeug 2.2, the \texttt{Map} compiles all rules together into a \textbf{state machine} that walks the path one segment at a time~--- \texttt{notes}, then \texttt{42}~--- so matching stays fast however many routes there are. The outcome is the same; the trace below shows the conceptual version.)
+
+\setcounter{section}{2}
+\section{URL Matching: How a Request Finds Its Handler}\label{32-routing:323-url-matching-how-a-request-finds-its-handler}
+
+When a request arrives, Flask calls:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adapter }\OperatorTok{=}\NormalTok{ app.url\_map.bind\_to\_environ(environ)}
+\NormalTok{endpoint, values }\OperatorTok{=}\NormalTok{ adapter.match()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Let's trace this for \texttt{GET\ /notes/42}:
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Step 1: bind_to_environ
+   Creates a MapAdapter bound to the current request's host and scheme.
+   The adapter knows: host="api.notes.example.com", scheme="https"
+
+Step 2: adapter.match()  (conceptually)
+   Checking Rule: "/notes/"
+       "/notes/42" has a second segment "42" → no match
+
+   Checking Rule: "/notes/<int:note_id>"  (segment pattern: \d+)
+       "/notes/42" → MATCH
+       Captured: {"note_id": "42"}
+
+Step 3: Method check
+   The matched Rule handles: {"GET", "HEAD", "OPTIONS"}
+   The request method is: "GET"
+   → GET is in the allowed set → proceed
+
+Step 4: Type conversion
+   "42" is passed to the int converter → 42 (Python int)
+
+Step 5: Return
+   endpoint = "notes.get_note"
+   values   = {"note_id": 42}
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Flask then looks up \texttt{view\_}\allowbreak{}\texttt{functions{[}"notes.}\allowbreak{}\texttt{get\_}\allowbreak{}\texttt{note"{]}} and calls it with \texttt{note\_id=42}.
+
+\subsection*{What happens when there is no match}\phantomsection\label{32-routing:what-happens-when-there-is-no-match}
+
+\textbf{Path not found}~--- no Rule matches the URL path at all:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# GET /nonexistent/}
+
+\CommentTok{\# adapter.match() raises: werkzeug.exceptions.NotFound}
+\CommentTok{\# Flask catches this and calls: app.handle\_http\_exception(NotFound())}
+\CommentTok{\# Which calls the registered 404 error handler}
+\CommentTok{\# Result: HTTP 404 response}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Method not allowed}~--- a Rule matches the path, but not for this HTTP method:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# DELETE /notes/  (there is a GET rule for /notes/ but not DELETE)}
+
+\CommentTok{\# adapter.match() raises:}
+\CommentTok{\#   werkzeug.exceptions.MethodNotAllowed(valid\_methods=["GET", "HEAD", "OPTIONS", "POST"])}
+\CommentTok{\# (both rules for /notes/ count: list\_notes and create\_note)}
+\CommentTok{\# Flask calls the 405 error handler, which returns HTTP 405 with the header}
+\CommentTok{\#   Allow: GET, HEAD, OPTIONS, POST}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The distinction between 404 and 405 matters:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{404}: The URL doesn't exist. The client should not retry with a different method.
+\item
+  \textbf{405}: The URL exists but the method is wrong. The \texttt{Allow} header tells the client what methods work.
+\end{itemize}
+
+\noindent{}This distinction is why methods belong in the route declaration (\texttt{methods={[}...{]}}) rather than in \texttt{if\ request.}\allowbreak{}\texttt{method\ =}\allowbreak{}\texttt{=}\allowbreak{}\texttt{\ .}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.} branches inside a view: only declared methods let Flask answer 405 with a correct \texttt{Allow} header.
+
+\setcounter{section}{3}
+\section{URL Variable Converters}\label{32-routing:324-url-variable-converters}
+
+Converters are the \texttt{\textless{}type:name\textgreater{}} syntax in URL patterns. They perform two jobs:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Pattern}: control what part of the URL matches (via regex)
+\item
+  \textbf{Conversion}: transform the matched string into a Python value
+\end{enumerate}
+
+\Needspace{19\baselineskip}
+
+\subsection*{Built-in converters}\phantomsection\label{32-routing:built-in-converters}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1481}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2251}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1709}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.4558}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Converter
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Pattern
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Python type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Example
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{string} & \texttt{{[}\^{}/{]}+} & \texttt{str} & \texttt{\textless{}string:name\textgreater{}} matches \texttt{foo} \\
+\texttt{int} & \texttt{{[}0-9{]}+} & \texttt{int} & \texttt{\textless{}int:id\textgreater{}} matches \texttt{42} \\
+\texttt{float} & \texttt{{[}0-9{]}+\textbackslash{}.{[}0-9{]}+} & \texttt{float} & \texttt{\textless{}float:ratio\textgreater{}} matches \texttt{3.14} \\
+\texttt{path} & \texttt{.+} & \texttt{str} & \texttt{\textless{}path:filename\textgreater{}} matches \texttt{dir/file.txt} \\
+\texttt{uuid} & UUID pattern & \texttt{uuid.UUID} & \texttt{\textless{}uuid:id\textgreater{}} matches \texttt{550e8400-...} \\
+\end{longtable}
+}
+
+The default converter (used when you write just \texttt{\textless{}name\textgreater{}}) is \texttt{string}.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# These are equivalent:}
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/users/\textless{}name\textgreater{}"}\NormalTok{)}
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/users/\textless{}string:name\textgreater{}"}\NormalTok{)}
+
+\CommentTok{\# int converter: only matches digits, converts to int}
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{)}
+\CommentTok{\# /notes/42  → note\_id=42 (int)}
+\CommentTok{\# /notes/abc → 404 Not Found (no match)}
+
+\CommentTok{\# path converter: matches slashes}
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/files/\textless{}path:filename\textgreater{}"}\NormalTok{)}
+\CommentTok{\# /files/images/photo.jpg → filename="images/photo.jpg"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{\texorpdfstring{Why \texttt{\textless{}int:note\_id\textgreater{}} is better than
+\texttt{\textless{}note\_id\textgreater{}}}{Why \textless int:note\_id\textgreater{} is better than \textless note\_id\textgreater{}}}\phantomsection\label{32-routing:why-intnote-id-is-better-than-note-id}
+
+Consider what happens with each approach when someone requests \texttt{/notes/abc}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# With string converter (default):}
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}note\_id\textgreater{}"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+    \CommentTok{\# note\_id = "abc" (a string)}
+    \CommentTok{\# You must validate and convert it yourself}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        note\_id }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(note\_id)}
+    \ControlFlowTok{except} \PreprocessorTok{ValueError}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"note\_id must be an integer"}\NormalTok{\}, }\DecValTok{400}
+\NormalTok{    ...}
+
+\CommentTok{\# With int converter:}
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+    \CommentTok{\# note\_id = 42 (already an int, guaranteed)}
+    \CommentTok{\# /notes/abc never reaches here — 404 before the function is called}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \texttt{int} converter means \texttt{/notes/abc} returns 404 automatically~--- ``no such route''~--- which is correct. There is no note at \texttt{/notes/abc}; that URL doesn't exist.
+
+\subsection*{Defining a custom converter}\phantomsection\label{32-routing:defining-a-custom-converter}
+
+If the built-in converters don't cover your case, you can write your own:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/converters.py}
+\ImportTok{from}\NormalTok{ werkzeug.routing }\ImportTok{import}\NormalTok{ BaseConverter}
+
+\KeywordTok{class}\NormalTok{ SlugConverter(BaseConverter):}
+    \CommentTok{"""}
+\CommentTok{    Matches URL{-}safe slugs: lowercase letters, digits, hyphens.}
+\CommentTok{    Example: /articles/my{-}first{-}post}
+\CommentTok{    """}
+    \CommentTok{\# This regex is what the converter matches in the URL}
+    \CommentTok{\# (a single character, or several that do not start or end with "{-}")}
+\NormalTok{    regex }\OperatorTok{=} \VerbatimStringTok{r"}\PreprocessorTok{[a{-}z0{-}9]}\NormalTok{(?:}\PreprocessorTok{[a{-}z0{-}9}\CharTok{\textbackslash{}{-}}\PreprocessorTok{]}\OperatorTok{*}\PreprocessorTok{[a{-}z0{-}9]}\NormalTok{)}\OperatorTok{?}\VerbatimStringTok{"}
+
+    \KeywordTok{def}\NormalTok{ to\_python(}\VariableTok{self}\NormalTok{, value: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+        \CommentTok{"""Called when matching: convert the URL string to a Python value."""}
+        \ControlFlowTok{return}\NormalTok{ value  }\CommentTok{\# Already the right type}
+
+    \KeywordTok{def}\NormalTok{ to\_url(}\VariableTok{self}\NormalTok{, value: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+        \CommentTok{"""Called when building URLs: convert a Python value to a URL string."""}
+        \ControlFlowTok{return}\NormalTok{ value  }\CommentTok{\# Build URLs from slugs exactly as they are}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Register the converter in \texttt{create\_app()}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/\_\_init\_\_.py}
+\ImportTok{from}\NormalTok{ app.converters }\ImportTok{import}\NormalTok{ SlugConverter}
+
+\KeywordTok{def}\NormalTok{ create\_app():}
+\NormalTok{    app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+    \CommentTok{\# Register the converter BEFORE any blueprint that uses \textless{}slug:...\textgreater{}:}
+    \CommentTok{\# the rules are built when the blueprint is registered, and an}
+    \CommentTok{\# unknown converter name is an error at that moment}
+\NormalTok{    app.url\_map.converters[}\StringTok{"slug"}\NormalTok{] }\OperatorTok{=}\NormalTok{ SlugConverter}
+    \CommentTok{\# ... rest of create\_app (register\_blueprint calls come after)}
+    \ControlFlowTok{return}\NormalTok{ app}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Use it in routes:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@bp.route}\NormalTok{(}\StringTok{"/articles/\textless{}slug:article\_slug\textgreater{}"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ get\_article(article\_slug: }\BuiltInTok{str}\NormalTok{):}
+    \CommentTok{\# /articles/my{-}first{-}post → article\_slug="my{-}first{-}post"}
+    \CommentTok{\# /articles/CAPS → 404 (doesn\textquotesingle{}t match regex)}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{4}
+\section{Routing Priority and Ambiguity}\label{32-routing:325-routing-priority-and-ambiguity}
+
+When multiple Rules could match the same URL, Werkzeug uses \textbf{specificity ordering} to pick the winner.
+
+\subsection*{Specificity rules}\phantomsection\label{32-routing:specificity-rules}
+
+More specific rules take priority over less specific ones:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Rule 1: Specific static segment}
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/new"}\NormalTok{)}
+
+\CommentTok{\# Rule 2: Variable segment that accepts any text}
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}name\textgreater{}"}\NormalTok{)          }\CommentTok{\# \textless{}name\textgreater{} = \textless{}string:name\textgreater{}}
+
+\CommentTok{\# GET /notes/new:}
+\CommentTok{\#   Rule 1 matches: endpoint="new\_note\_form"}
+\CommentTok{\#   Rule 2 ALSO matches (name="new") — both rules fit}
+\CommentTok{\#   Rule 1 wins because static segments are more specific than variable segments}
+
+\CommentTok{\# GET /notes/groceries:}
+\CommentTok{\#   Rule 1 doesn\textquotesingle{}t match ("groceries" ≠ "new")}
+\CommentTok{\#   Rule 2 matches: name="groceries"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Static path segments always beat variable segments. \texttt{/notes/new} is more specific than \texttt{/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\textless{}int:note\_id\textgreater{}}.
+
+\subsection*{Trailing slash handling}\phantomsection\label{32-routing:trailing-slash-handling}
+
+Flask and Werkzeug have a specific rule about trailing slashes that catches many developers off guard.
+
+\textbf{Rule with trailing slash}: \texttt{@app.route("/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{")}
+
+\begin{itemize}
+\tightlist
+\item
+  GET \texttt{/notes/} → matches (200 OK)
+\item
+  GET \texttt{/notes} → redirect to \texttt{/notes/} (\textbf{308} Permanent Redirect; older Werkzeug versions used 301)
+\end{itemize}
+
+\noindent{}\textbf{Rule without trailing slash}: \texttt{@app.route("/}\allowbreak{}\texttt{notes")}
+
+\begin{itemize}
+\tightlist
+\item
+  GET \texttt{/notes} → matches (200 OK)
+\item
+  GET \texttt{/notes/} → 404 Not Found
+\end{itemize}
+
+\noindent{}The behavior with a trailing slash mimics how web servers handle directory URLs. The 308 status matters for an API: unlike 301, it tells the client to repeat the \emph{same} method with the \emph{same} body, so a \texttt{POST\ /notes} is re-sent as \texttt{POST\ /notes/}. But the client must follow redirects at all~--- \texttt{curl} does only with \texttt{-L}, and some HTTP libraries do not re-send request bodies~--- so for API clients a redirect is a trap, not a convenience. The Notes API uses a trailing slash for its collection endpoint (\texttt{/notes/}) and none for item endpoints (\texttt{/notes/42}), the convention Flask's documentation suggests, and documents the exact URLs so clients never depend on the redirect. (Many JSON-API style guides choose the opposite, no trailing slashes anywhere; either works if it is consistent.)
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Collection endpoints: trailing slash (so /notes redirects to /notes/)}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])        }\CommentTok{\# GET /notes/}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])       }\CommentTok{\# POST /notes/}
+
+\CommentTok{\# Item endpoints: no trailing slash}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])     }\CommentTok{\# GET /notes/42}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"PUT"}\NormalTok{])     }\CommentTok{\# PUT /notes/42 (Chapter 33)}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])  }\CommentTok{\# DELETE /notes/42}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{5}
+\section{Blueprints and the URL Map}\label{32-routing:326-blueprints-and-the-url-map}
+
+A \textbf{Blueprint} is a collection of routes that can be registered on an app. Blueprints have their own route registry, separate from the app's \texttt{url\_map}. When you call \texttt{app.}\allowbreak{}\texttt{register\_}\allowbreak{}\texttt{blueprint(bp)}, the Blueprint's rules are copied into the app's \texttt{url\_map}.
+
+\subsection*{The url\_prefix}\phantomsection\label{32-routing:the-url-prefix}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In app/routes/notes.py:}
+\NormalTok{notes\_bp }\OperatorTok{=}\NormalTok{ Blueprint(}\StringTok{"notes"}\NormalTok{, }\VariableTok{\_\_name\_\_}\NormalTok{, url\_prefix}\OperatorTok{=}\StringTok{"/notes"}\NormalTok{)}
+
+\CommentTok{\# In app/\_\_init\_\_.py:}
+\NormalTok{app.register\_blueprint(notes\_bp)}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{)              }\CommentTok{\# The Blueprint{-}relative path}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+\NormalTok{    ...}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{)  }\CommentTok{\# Blueprint{-}relative}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}After registration, the actual URL patterns in the app's \texttt{url\_map} are:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{/notes} + \texttt{/} = \texttt{/notes/}
+\item
+  \texttt{/notes} + \texttt{/\textless{}int:note\_id\textgreater{}} = \texttt{/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\textless{}int:note\_id\textgreater{}}
+\end{itemize}
+
+\noindent{}The \texttt{url\_prefix} acts as a namespace for all routes in the Blueprint. (It can also be passed to \texttt{register\_}\allowbreak{}\texttt{blueprint(notes\_}\allowbreak{}\texttt{bp,}\allowbreak{}\texttt{\ url\_}\allowbreak{}\texttt{prefix=}\allowbreak{}\texttt{"/}\allowbreak{}\texttt{notes")} instead, which overrides the Blueprint's own; the Notes API sets it on the Blueprint, next to its routes.)
+
+\subsection*{Blueprint endpoint names}\phantomsection\label{32-routing:blueprint-endpoint-names}
+
+Blueprint route endpoint names are automatically prefixed with the Blueprint name:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Blueprint name: "notes"}
+\CommentTok{\# Route function: list\_notes}
+
+\CommentTok{\# Resulting endpoint name: "notes.list\_notes"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This matters when building URLs with \texttt{url\_for()}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ url\_for}
+
+\CommentTok{\# Inside a request context:}
+\NormalTok{url\_for(}\StringTok{"notes.list\_notes"}\NormalTok{)           }\CommentTok{\# "/notes/"}
+\NormalTok{url\_for(}\StringTok{"notes.get\_note"}\NormalTok{, note\_id}\OperatorTok{=}\DecValTok{42}\NormalTok{) }\CommentTok{\# "/notes/42"}
+
+\CommentTok{\# Without the Blueprint prefix, this raises BuildError:}
+\NormalTok{url\_for(}\StringTok{"list\_notes"}\NormalTok{)  }\CommentTok{\# ERROR: no endpoint named "list\_notes"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The Blueprint prefix prevents endpoint name collisions between Blueprints. If two Blueprints both have a \texttt{list} function, their endpoints are \texttt{users.list} and \texttt{notes.list}~--- no conflict.
+
+\setcounter{section}{6}
+\section{\texorpdfstring{URL Building with \texttt{url\_for()}}{URL Building with url\_for()}}\label{32-routing:327-url-building-with-url-for}
+
+\texttt{url\_for()} is the reverse of URL matching: given an endpoint name (and any required variables), it produces the URL string.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ url\_for}
+
+\CommentTok{\# Basic usage}
+\NormalTok{url\_for(}\StringTok{"notes.list\_notes"}\NormalTok{)              }\CommentTok{\# "/notes/"}
+\NormalTok{url\_for(}\StringTok{"notes.get\_note"}\NormalTok{, note\_id}\OperatorTok{=}\DecValTok{42}\NormalTok{)    }\CommentTok{\# "/notes/42"}
+\NormalTok{url\_for(}\StringTok{"notes.delete\_note"}\NormalTok{, note\_id}\OperatorTok{=}\DecValTok{7}\NormalTok{)  }\CommentTok{\# "/notes/7"}
+
+\CommentTok{\# Extra keyword arguments become query string parameters}
+\NormalTok{url\_for(}\StringTok{"notes.list\_notes"}\NormalTok{, page}\OperatorTok{=}\DecValTok{2}\NormalTok{, limit}\OperatorTok{=}\DecValTok{10}\NormalTok{)  }\CommentTok{\# "/notes/?page=2\&limit=10"}
+
+\CommentTok{\# \_external=True builds an absolute URL}
+\NormalTok{url\_for(}\StringTok{"notes.get\_note"}\NormalTok{, note\_id}\OperatorTok{=}\DecValTok{42}\NormalTok{, \_external}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\CommentTok{\# "http://localhost:5000/notes/42" (in dev)}
+\CommentTok{\# "https://api.notes.example.com/notes/42" (in production — the host comes from}
+\CommentTok{\#   the request\textquotesingle{}s Host header, and the scheme from X{-}Forwarded{-}Proto via ProxyFix)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{\texorpdfstring{Why use \texttt{url\_for()} instead of hardcoding URLs?}{Why use url\_for() instead of hardcoding URLs?}}\phantomsection\label{32-routing:why-use-url-for-instead-of-hardcoding-urls}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Fragile: hardcoded URL}
+\ControlFlowTok{return}\NormalTok{ redirect(}\StringTok{"/notes/"} \OperatorTok{+} \BuiltInTok{str}\NormalTok{(note\_id))}
+
+\CommentTok{\# Correct: use url\_for}
+\ControlFlowTok{return}\NormalTok{ redirect(url\_for(}\StringTok{"notes.get\_note"}\NormalTok{, note\_id}\OperatorTok{=}\NormalTok{note\_id))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}If you change the URL pattern in \texttt{@notes\_}\allowbreak{}\texttt{bp.}\allowbreak{}\texttt{route("/}\allowbreak{}\texttt{\textless{}int:}\allowbreak{}\texttt{note\_}\allowbreak{}\texttt{id\textgreater{}")} to something else, every hardcoded URL breaks. \texttt{url\_for()} recomputes the URL from the current rule, so it always stays in sync.
+
+\subsection*{\texorpdfstring{\texttt{url\_for()} requires a request context}{url\_for() requires a request context}}\phantomsection\label{32-routing:url-for-requires-a-request-context}
+
+\texttt{url\_for()} normally requires an active request context (or an application context with \texttt{SERVER\_NAME} configured~--- a setting best left unset behind a proxy, because it also makes Flask reject requests for any other host name). In test code that is not itself handling a request, push one:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{with}\NormalTok{ app.test\_request\_context():}
+\NormalTok{    url }\OperatorTok{=}\NormalTok{ url\_for(}\StringTok{"notes.get\_note"}\NormalTok{, note\_id}\OperatorTok{=}\DecValTok{42}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(During a request made with the test client, the request context is pushed automatically~--- but only for the code that runs inside that request.)
+
+\setcounter{section}{7}
+\section{Inspecting Routes}\label{32-routing:328-inspecting-routes}
+
+Several tools let you see all registered routes at runtime.
+
+\subsection*{Flask CLI command}\phantomsection\label{32-routing:flask-cli-command}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{flask} \AttributeTok{{-}{-}app}\NormalTok{ run routes}
+
+\CommentTok{\# Output:}
+\ExtensionTok{Endpoint}\NormalTok{           Methods  Rule}
+\ExtensionTok{{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}}  \AttributeTok{{-}{-}{-}{-}{-}{-}{-}}  \AttributeTok{{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}}
+\ExtensionTok{health.health}\NormalTok{      GET      /health}
+\ExtensionTok{notes.create\_note}\NormalTok{  POST     /notes/}
+\ExtensionTok{notes.delete\_note}\NormalTok{  DELETE   /notes/}\OperatorTok{\textless{}}\NormalTok{int:note\_id}\OperatorTok{\textgreater{}}
+\ExtensionTok{notes.get\_note}\NormalTok{     GET      /notes/}\OperatorTok{\textless{}}\NormalTok{int:note\_id}\OperatorTok{\textgreater{}}
+\ExtensionTok{notes.list\_notes}\NormalTok{   GET      /notes/}
+\ExtensionTok{static}\NormalTok{             GET      /static/}\OperatorTok{\textless{}}\NormalTok{path:filename}\OperatorTok{\textgreater{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(\texttt{HEAD} and \texttt{OPTIONS} are hidden unless you add \texttt{-\/-all-methods}.)
+
+\subsection*{Programmatic inspection}\phantomsection\label{32-routing:programmatic-inspection}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In a Flask shell or test:}
+\ImportTok{from}\NormalTok{ app }\ImportTok{import}\NormalTok{ create\_app}
+\NormalTok{app }\OperatorTok{=}\NormalTok{ create\_app()}
+
+\CommentTok{\# Sorted by URL pattern for readability}
+\NormalTok{rules }\OperatorTok{=} \BuiltInTok{sorted}\NormalTok{(app.url\_map.iter\_rules(), key}\OperatorTok{=}\KeywordTok{lambda}\NormalTok{ r: r.rule)}
+\ControlFlowTok{for}\NormalTok{ rule }\KeywordTok{in}\NormalTok{ rules:}
+\NormalTok{    methods }\OperatorTok{=} \StringTok{","}\NormalTok{.join(}\BuiltInTok{sorted}\NormalTok{(m }\ControlFlowTok{for}\NormalTok{ m }\KeywordTok{in}\NormalTok{ rule.methods }\ControlFlowTok{if}\NormalTok{ m }\KeywordTok{not} \KeywordTok{in}\NormalTok{ (}\StringTok{"HEAD"}\NormalTok{, }\StringTok{"OPTIONS"}\NormalTok{)))}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"  }\SpecialCharTok{\{}\NormalTok{methods}\SpecialCharTok{:10s\}}\SpecialStringTok{  }\SpecialCharTok{\{}\NormalTok{rule}\SpecialCharTok{.}\NormalTok{rule}\SpecialCharTok{:30s\}}\SpecialStringTok{  }\SpecialCharTok{\{}\NormalTok{rule}\SpecialCharTok{.}\NormalTok{endpoint}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Building a route documentation endpoint}\phantomsection\label{32-routing:building-a-route-documentation-endpoint}
+
+Some APIs expose their own route list for client developers:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In a Blueprint for administrative/meta endpoints:}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ current\_app}
+
+\AttributeTok{@admin\_bp.route}\NormalTok{(}\StringTok{"/routes"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ list\_routes():}
+    \CommentTok{"""Return all registered routes as JSON. Development only."""}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ current\_app.debug:}
+        \CommentTok{\# 404, not 403: in production, do not even confirm the endpoint exists}
+        \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"Not found"}\NormalTok{\}, }\DecValTok{404}
+
+\NormalTok{    routes }\OperatorTok{=}\NormalTok{ []}
+    \ControlFlowTok{for}\NormalTok{ rule }\KeywordTok{in} \BuiltInTok{sorted}\NormalTok{(current\_app.url\_map.iter\_rules(), key}\OperatorTok{=}\KeywordTok{lambda}\NormalTok{ r: r.rule):}
+\NormalTok{        routes.append(\{}
+            \StringTok{"endpoint"}\NormalTok{: rule.endpoint,}
+            \StringTok{"methods"}\NormalTok{: }\BuiltInTok{sorted}\NormalTok{(m }\ControlFlowTok{for}\NormalTok{ m }\KeywordTok{in}\NormalTok{ rule.methods }\ControlFlowTok{if}\NormalTok{ m }\KeywordTok{not} \KeywordTok{in}\NormalTok{ (}\StringTok{"HEAD"}\NormalTok{, }\StringTok{"OPTIONS"}\NormalTok{)),}
+            \StringTok{"rule"}\NormalTok{: rule.rule,}
+\NormalTok{        \})}
+    \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"routes"}\NormalTok{: routes\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{8}
+\section{How Flask Calls the Handler}\label{32-routing:329-how-flask-calls-the-handler}
+
+Once routing identifies the endpoint and values, Flask calls the handler function. The full call sequence inside Flask is:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Simplified from Flask\textquotesingle{}s full\_dispatch\_request method:}
+\KeywordTok{def}\NormalTok{ full\_dispatch\_request(}\VariableTok{self}\NormalTok{):}
+    \ControlFlowTok{try}\NormalTok{:}
+        \CommentTok{\# 1. Run before\_request hooks}
+\NormalTok{        rv }\OperatorTok{=} \VariableTok{self}\NormalTok{.preprocess\_request()}
+        \ControlFlowTok{if}\NormalTok{ rv }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+            \CommentTok{\# 2. Dispatch to the handler}
+\NormalTok{            rv }\OperatorTok{=} \VariableTok{self}\NormalTok{.dispatch\_request()}
+    \ControlFlowTok{except} \PreprocessorTok{Exception} \ImportTok{as}\NormalTok{ e:}
+        \CommentTok{\# 3. Handle exceptions: the matching error handler produces rv}
+\NormalTok{        rv }\OperatorTok{=} \VariableTok{self}\NormalTok{.handle\_user\_exception(e)}
+    \CommentTok{\# 4. Make a response from the return value (and run after\_request hooks)}
+    \ControlFlowTok{return} \VariableTok{self}\NormalTok{.finalize\_request(rv)}
+
+\KeywordTok{def}\NormalTok{ dispatch\_request(}\VariableTok{self}\NormalTok{):}
+    \CommentTok{\# Get the routing result from the request context}
+\NormalTok{    rule }\OperatorTok{=}\NormalTok{ request.url\_rule       }\CommentTok{\# The matched Rule object}
+\NormalTok{    view\_args }\OperatorTok{=}\NormalTok{ request.view\_args }\CommentTok{\# The extracted URL variables}
+
+    \CommentTok{\# Look up the handler function}
+    \ControlFlowTok{return} \VariableTok{self}\NormalTok{.ensure\_sync(}\VariableTok{self}\NormalTok{.view\_functions[rule.endpoint])(}\OperatorTok{**}\NormalTok{view\_args)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{view\_args} contains the extracted URL variables. For \texttt{GET\ /notes/42}, \texttt{view\_}\allowbreak{}\texttt{args\ =}\allowbreak{}\texttt{\ \{"note\_}\allowbreak{}\texttt{id":}\allowbreak{}\texttt{\ 42\}}, and Flask calls \texttt{get\_note(note\_id=}\allowbreak{}\texttt{42)}.
+
+The \texttt{ensure\_sync()} call is Flask's support for async view functions (Python \texttt{async\ def}). For regular synchronous functions, it's a no-op passthrough.
+
+\setcounter{section}{9}
+\section{Routing in the Notes API}\label{32-routing:3210-routing-in-the-notes-api}
+
+Let's examine the complete routing structure of the Notes API~--- as it will look once \hyperref[ch:33-logic-execution]{Chapter 33} adds the \texttt{PUT} route for updating a note:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/notes.py}
+
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Blueprint}
+
+\NormalTok{notes\_bp }\OperatorTok{=}\NormalTok{ Blueprint(}\StringTok{"notes"}\NormalTok{, }\VariableTok{\_\_name\_\_}\NormalTok{, url\_prefix}\OperatorTok{=}\StringTok{"/notes"}\NormalTok{)}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \CommentTok{"""List all notes, newest first."""}
+\NormalTok{    ...}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+    \CommentTok{"""Create a new note. Body: \{"content": "..."\}"""}
+\NormalTok{    ...}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""Get a specific note by ID."""}
+\NormalTok{    ...}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"PUT"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ update\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""Update a note\textquotesingle{}s content. Body: \{"content": "..."\}"""}
+\NormalTok{    ...}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ delete\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""Delete a note."""}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/\_\_init\_\_.py}
+\KeywordTok{def}\NormalTok{ create\_app():}
+\NormalTok{    app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+    \CommentTok{\# ...}
+    \ImportTok{from}\NormalTok{ app.routes.notes }\ImportTok{import}\NormalTok{ notes\_bp}
+\NormalTok{    app.register\_blueprint(notes\_bp)}
+    \ControlFlowTok{return}\NormalTok{ app}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The resulting URL map:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Method    URL                    Handler
+GET       /notes/                notes.list_notes
+POST      /notes/                notes.create_note
+GET       /notes/<int:note_id>   notes.get_note
+PUT       /notes/<int:note_id>   notes.update_note
+DELETE    /notes/<int:note_id>   notes.delete_note
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This design is \textbf{resource-oriented}: URLs identify resources (\texttt{/notes/}, \texttt{/notes/42}), and HTTP methods identify actions (\texttt{GET} = read, \texttt{POST} = create, \texttt{PUT} = replace, \texttt{DELETE} = remove). A note has only one field a client can set, so \texttt{PUT} (replace the note) and \texttt{PATCH} (change some fields) would do the same thing here; with more fields, the difference matters. This is RESTful API design, and it maps cleanly onto Flask's routing primitives.
+
+\phantomsection\label{32-routing:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\texttt{@app.route()}} is a decorator that calls \texttt{add\_url\_rule()}, which creates a Werkzeug \texttt{Rule} and adds it to the app's \texttt{url\_map}. Registration happens at import time.
+\item
+  \textbf{The \texttt{url\_map}} is a collection of \texttt{Rule} objects. Each \texttt{Rule} contains the URL pattern, the allowed HTTP methods, and the endpoint name; Werkzeug compiles them all into one state machine for matching.
+\item
+  \textbf{URL matching} finds the most specific rule that fits the path. If no Rule matches the path, 404 is raised. If a Rule matches the path but not the method, 405 is raised.
+\item
+  \textbf{Converters} (\texttt{\textless{}int:note\_id\textgreater{}}) both constrain what the URL segment must look like and convert the matched string to the appropriate Python type. \texttt{/notes/abc} returns 404 when the route uses \texttt{\textless{}int:note\_id\textgreater{}}.
+\item
+  \textbf{Trailing slash rules}: routes with a trailing slash redirect requests without one (308); routes without a trailing slash return 404 for requests with one. API clients should use the exact URLs.
+\item
+  \textbf{Blueprints} collect routes separately and are merged into the app's \texttt{url\_map} at \texttt{register\_blueprint()} time. Endpoint names are prefixed with the Blueprint name.
+\item
+  \textbf{\texttt{url\_for()}} builds URLs from endpoint names. Always use \texttt{url\_for()} instead of hardcoding paths so that URL changes propagate automatically.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{32-routing:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Request \texttt{/notes} (no trailing slash) with \texttt{curl\ -i}. What status and header come back, and why is that a problem for a \texttt{POST}?
+\item
+  \textbf{Break and fix.} Add \texttt{@notes\_}\allowbreak{}\texttt{bp.}\allowbreak{}\texttt{route("/}\allowbreak{}\texttt{\textless{}note\_}\allowbreak{}\texttt{id\textgreater{}")} (no converter) next to the \texttt{int} route. Which one handles \texttt{/notes/5}? Remove the ambiguity.
+\item
+  \textbf{Extend.} Print the application's URL map (\texttt{flask\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{app\ \textquotesingle{}app:}\allowbreak{}\texttt{create\_}\allowbreak{}\texttt{app()\textquotesingle{}\ routes}) and compare it with the endpoints listed in section 32.10. Is there a rule you did not expect?
+\item
+  \textbf{Explain.} Why should code build URLs with \texttt{url\_for()} instead of writing paths as strings?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-32.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{32-routing:whats-next}
+
+The routing layer has identified the handler function and passed in the extracted URL variables. The handler now executes its logic: fetching data from the database, applying business rules, computing results. That execution is the subject of the next chapter.
+
+\noindent{}→ \hyperref[ch:33-logic-execution]{Chapter 33}~--- Logic Execution

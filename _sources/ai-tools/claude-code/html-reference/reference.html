@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Breach Case Discovery &mdash; Problem Statement &amp; Goals</title>
+<script>
+  /* Apply the saved (or system) theme before first paint to avoid a flash. */
+  (function () {
+    var t;
+    try { t = localStorage.getItem('dbcd-theme'); } catch (e) {}
+    if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.classList.add('js');
+  })();
+</script>
+<style>
+  /* ===================== TOKENS ===================== */
+  :root {
+    --bg:          #ffffff;
+    --bg-alt:      #f5f5f7;
+    --card:        #ffffff;
+    --card-alt:    #f5f5f7;
+    --text:        #1d1d1f;
+    --text-soft:   #424245;
+    --muted:       #6e6e73;
+    --faint:       #86868b;
+    --head:        #1d1d1f;
+    --blue:        #0071e3;
+    --link:        #0066cc;
+    --green:       #248a3d;
+    --orange:      #c93400;
+    --rule:        #d2d2d7;
+    --rule-soft:   #e8e8ed;
+    --nav-bg:      rgba(255, 255, 255, 0.72);
+    --nav-rule:    rgba(0, 0, 0, 0.12);
+    --shadow:      0 4px 24px rgba(0, 0, 0, 0.06);
+    --shadow-hover:0 12px 40px rgba(0, 0, 0, 0.10);
+    --grad:        linear-gradient(90deg, #0090f7 0%, #ba62fc 50%, #f2416b 100%);
+    --switch-off:  #e9e9eb;
+    --switch-on:   #0071e3;
+    color-scheme: light;
+  }
+
+  html[data-theme="dark"] {
+    --bg:          #000000;
+    --bg-alt:      #101012;
+    --card:        #1c1c1e;
+    --card-alt:    #161618;
+    --text:        #f5f5f7;
+    --text-soft:   #d2d2d7;
+    --muted:       #a1a1a6;
+    --faint:       #86868b;
+    --head:        #f5f5f7;
+    --blue:        #0a84ff;
+    --link:        #2997ff;
+    --green:       #30d158;
+    --orange:      #ff9f0a;
+    --rule:        #424245;
+    --rule-soft:   #2c2c2e;
+    --nav-bg:      rgba(22, 22, 23, 0.72);
+    --nav-rule:    rgba(255, 255, 255, 0.10);
+    --shadow:      0 4px 24px rgba(0, 0, 0, 0.5);
+    --shadow-hover:0 12px 40px rgba(0, 0, 0, 0.7);
+    --switch-off:  #39393d;
+    --switch-on:   #0a84ff;
+    color-scheme: dark;
+  }
+
+  /* No-JS fallback: follow the system theme */
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) {
+      --bg: #000; --bg-alt: #101012; --card: #1c1c1e; --card-alt: #161618;
+      --text: #f5f5f7; --text-soft: #d2d2d7; --muted: #a1a1a6; --head: #f5f5f7;
+      --link: #2997ff; --rule: #424245; --rule-soft: #2c2c2e; --nav-bg: rgba(22,22,23,.72);
+    }
+  }
+
+  /* ===================== BASE ===================== */
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+                 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.47059;
+    letter-spacing: -0.022em;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color .4s ease, color .4s ease;
+  }
+  h1, h2, h3, h4 {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue",
+                 Helvetica, Arial, sans-serif;
+    color: var(--head);
+  }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p { margin: 0 0 1em 0; }
+  p, li, td { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+  em { font-style: italic; }
+  strong { font-weight: 600; color: var(--head); }
+  ::selection { background: rgba(0, 113, 227, 0.22); }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 22px; }
+  .wrap-narrow { max-width: 692px; margin: 0 auto; padding: 0 22px; }
+
+  /* ===================== NAV ===================== */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--nav-bg);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--nav-rule);
+    transition: background-color .4s ease;
+  }
+  .nav .wrap {
+    height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  }
+  .nav .brand {
+    font-size: 21px; font-weight: 600; letter-spacing: .011em; color: var(--head);
+    white-space: nowrap;
+  }
+  .nav .brand:hover { text-decoration: none; }
+  .nav .right { display: flex; align-items: center; gap: 26px; }
+  .nav .links { display: flex; gap: 22px; margin: 0; padding: 0; list-style: none; }
+  .nav .links a {
+    font-size: 12px; letter-spacing: -0.01em; color: var(--text); opacity: .8;
+    transition: opacity .2s, color .2s;
+  }
+  .nav .links a:hover { opacity: 1; text-decoration: none; }
+  .nav .links a.active { color: var(--blue); opacity: 1; }
+
+  /* ---------- iOS-style theme switch ---------- */
+  .switch {
+    position: relative; flex: none;
+    width: 51px; height: 31px; padding: 0; border: 0; border-radius: 999px;
+    background: var(--switch-off); cursor: pointer;
+    transition: background-color .3s ease;
+  }
+  .switch:focus-visible { outline: 3px solid rgba(0, 113, 227, .5); outline-offset: 2px; }
+  .switch[aria-checked="true"] { background: var(--switch-on); }
+  .switch .knob {
+    position: absolute; top: 2px; left: 2px;
+    width: 27px; height: 27px; border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 3px 1px rgba(0,0,0,.06);
+    display: grid; place-items: center;
+    transition: transform .3s cubic-bezier(.3, 1.4, .5, 1);
+  }
+  .switch[aria-checked="true"] .knob { transform: translateX(20px); }
+  .switch svg { width: 15px; height: 15px; position: absolute; transition: opacity .25s, transform .35s; }
+  .switch .sun  { color: #ff9f0a; }
+  .switch .moon { color: #3a3a3c; opacity: 0; transform: rotate(-60deg); }
+  .switch[aria-checked="true"] .sun  { opacity: 0; transform: rotate(60deg); }
+  .switch[aria-checked="true"] .moon { opacity: 1; transform: none; }
+
+  /* ===================== HERO ===================== */
+  .hero { text-align: center; padding: 96px 0 88px; background: var(--bg); }
+  .hero .eyebrow {
+    font-size: 17px; font-weight: 600; color: var(--muted); letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+  .hero h1 {
+    font-size: clamp(44px, 7.5vw, 80px); line-height: 1.05; font-weight: 700;
+    letter-spacing: -0.015em; margin: 0 auto 6px; max-width: 900px;
+  }
+  .hero .sub {
+    font-size: clamp(28px, 4.4vw, 48px); line-height: 1.1; font-weight: 600;
+    letter-spacing: -0.003em; margin: 0 0 34px;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .hero .purpose {
+    max-width: 720px; margin: 0 auto 36px; font-size: 21px; line-height: 1.381;
+    letter-spacing: .011em; color: var(--muted);
+    text-align: justify; text-align-last: center;
+  }
+  .hero .purpose strong { color: var(--head); }
+  .hero .ctas { display: flex; justify-content: center; align-items: center; gap: 28px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-block; background: var(--blue); color: #fff;
+    font-size: 17px; padding: 11px 22px; border-radius: 980px;
+    transition: filter .2s, transform .2s;
+  }
+  .btn:hover { text-decoration: none; filter: brightness(1.1); }
+  .btn:active { transform: scale(.98); }
+  .more { font-size: 17px; color: var(--link); }
+  .more::after { content: " \203A"; font-size: 1.15em; }
+
+  /* ===================== SECTIONS ===================== */
+  .band { padding: 96px 0; background: var(--bg); transition: background-color .4s ease; }
+  .band.alt { background: var(--bg-alt); }
+  section[id] { scroll-margin-top: 52px; }
+
+  .sec-head { margin-bottom: 44px; }
+  .sec-head .num {
+    display: block; font-size: 17px; font-weight: 600; color: var(--blue);
+    letter-spacing: -0.01em; margin-bottom: 6px;
+  }
+  .sec-head h2 {
+    font-size: clamp(32px, 5vw, 48px); line-height: 1.08; font-weight: 700;
+    letter-spacing: -0.003em; margin: 0;
+  }
+  .lede { font-size: 21px; line-height: 1.381; letter-spacing: .011em; color: var(--text-soft); }
+
+  h3 {
+    font-size: 24px; line-height: 1.17; font-weight: 600; letter-spacing: .009em;
+    margin: 56px 0 18px;
+  }
+  h3 .n { color: var(--faint); font-weight: 500; margin-right: 8px; }
+  .sec-head + h3, .sec-head + * h3:first-child { margin-top: 0; }
+  h4 {
+    font-size: 14px; font-weight: 600; letter-spacing: -0.01em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 14px;
+  }
+
+  ul, ol { margin: 0 0 1em; padding-left: 22px; }
+  li { margin-bottom: 8px; }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: var(--card); border-radius: 18px; padding: 30px 32px;
+    box-shadow: var(--shadow);
+    transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s, background-color .4s;
+  }
+  .band:not(.alt) .card { background: var(--card-alt); box-shadow: none; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  /* ---------- Contents tiles ---------- */
+  .toc { list-style: none; padding: 0; margin: 0; }
+  .toc li { margin: 0; }
+  .toc a {
+    display: flex; flex-direction: column; justify-content: space-between; height: 100%;
+    min-height: 150px; color: var(--head);
+  }
+  .toc a:hover { text-decoration: none; transform: translateY(-4px) scale(1.01); box-shadow: var(--shadow-hover); }
+  .toc .n { font-size: 14px; font-weight: 600; color: var(--blue); }
+  .toc .t { font-size: 21px; font-weight: 600; line-height: 1.2; letter-spacing: .011em; margin: 8px 0 18px; }
+  .toc .go {
+    align-self: flex-end; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bg-alt); color: var(--muted);
+    display: grid; place-items: center; font-size: 20px; line-height: 1;
+    transition: background .2s, color .2s;
+  }
+  .band:not(.alt) .toc .go { background: var(--bg); }
+  .toc a:hover .go { background: var(--blue); color: #fff; }
+
+  /* ---------- Steps (inset grouped list) ---------- */
+  ol.steps {
+    counter-reset: step; list-style: none; padding: 6px 0; margin: 0 0 8px;
+    background: var(--card); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .band:not(.alt) ol.steps { background: var(--card-alt); box-shadow: none; }
+  ol.steps li {
+    counter-increment: step; position: relative; margin: 0;
+    padding: 16px 28px 16px 76px;
+  }
+  ol.steps li + li::after {
+    content: ""; position: absolute; top: 0; left: 76px; right: 0;
+    height: 1px; background: var(--rule-soft);
+  }
+  ol.steps li::before {
+    content: counter(step);
+    position: absolute; left: 28px; top: 15px;
+    width: 30px; height: 30px; line-height: 30px; border-radius: 50%;
+    text-align: center; font-size: 14px; font-weight: 600;
+    background: var(--blue); color: #fff;
+  }
+  .intro { margin: -4px 0 18px; color: var(--text-soft); }
+
+  .mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 56px; }
+  .mini-grid h3 { margin: 0 0 10px; font-size: 21px; }
+  .mini-grid p { margin: 0; color: var(--text-soft); }
+
+  /* ---------- Callout ---------- */
+  .callout {
+    margin-top: 40px; padding: 44px 48px; border-radius: 28px;
+    background: var(--card); box-shadow: var(--shadow); position: relative; overflow: hidden;
+  }
+  .callout::before {
+    content: ""; position: absolute; inset: 0 auto 0 0; width: 6px; background: var(--grad);
+  }
+  .callout .label { font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 12px; }
+  .callout p {
+    margin: 0; font-size: clamp(21px, 2.6vw, 28px); line-height: 1.3; font-weight: 600;
+    letter-spacing: .007em; color: var(--head);
+  }
+
+  /* ---------- Compare cards ---------- */
+  .compare .card h4 { display: flex; align-items: center; gap: 10px; font-size: 15px; text-transform: none; color: var(--head); }
+  .compare .icon {
+    width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+    color: #fff; font-size: 15px; font-weight: 700; flex: none;
+  }
+  .compare .easy .icon { background: var(--green); }
+  .compare .hard .icon { background: var(--orange); }
+  .compare ul { list-style: none; padding: 0; margin: 0; }
+  .compare li { position: relative; padding-left: 20px; color: var(--text-soft); }
+  .compare li::before {
+    content: ""; position: absolute; left: 2px; top: .62em;
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .compare .easy li::before { background: var(--green); }
+  .compare .hard li::before { background: var(--orange); }
+
+  /* ---------- Goals ---------- */
+  .goal { display: flex; flex-direction: column; }
+  .goal .big {
+    font-size: 56px; line-height: 1; font-weight: 700; letter-spacing: -0.02em;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 18px; align-self: flex-start;
+  }
+  .goal .kicker { font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  .goal .title { font-size: 24px; line-height: 1.17; font-weight: 600; color: var(--head); margin-bottom: 12px; letter-spacing: .009em; }
+  .goal .crit { color: var(--text-soft); margin: 0; }
+  .goal:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+
+  /* ---------- Scope ---------- */
+  .scope-card { display: flex; gap: 22px; align-items: flex-start; }
+  .scope-card .badge {
+    flex: none; width: 48px; height: 48px; border-radius: 14px;
+    background: var(--orange); color: #fff; display: grid; place-items: center;
+    font-size: 24px; font-weight: 700;
+  }
+  .scope-card p { margin: 0; font-size: 19px; line-height: 1.42; color: var(--text-soft); }
+
+  /* ---------- People ---------- */
+  .person .avatar {
+    width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+    color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 20px;
+  }
+  .person:nth-child(1) .avatar { background: linear-gradient(135deg, #0090f7, #5e5ce6); }
+  .person:nth-child(2) .avatar { background: linear-gradient(135deg, #ba62fc, #f2416b); }
+  .person:nth-child(3) .avatar { background: linear-gradient(135deg, #30d158, #0090f7); }
+  .person h3 { margin: 0 0 10px; font-size: 21px; }
+  .person p { margin: 0; color: var(--text-soft); }
+
+  /* ---------- Constraints / assumptions ---------- */
+  .ca ul { list-style: none; padding: 0; margin: 0; }
+  .ca li { position: relative; padding: 12px 0 12px 32px; margin: 0; border-top: 1px solid var(--rule-soft); color: var(--text-soft); }
+  .ca li:first-child { border-top: 0; padding-top: 4px; }
+  .ca li::before {
+    position: absolute; left: 0; top: 12px; width: 20px; height: 20px; border-radius: 50%;
+    font-size: 12px; font-weight: 700; line-height: 20px; text-align: center; color: #fff;
+  }
+  .ca li:first-child::before { top: 4px; }
+  .ca .cons li::before { content: "!"; background: var(--orange); }
+  .ca .assm li::before { content: "\2713"; background: var(--blue); }
+
+  /* ---------- Table ---------- */
+  .table-card { padding: 8px 0; overflow-x: auto; }
+  table.grid { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.47; min-width: 620px; }
+  table.grid th {
+    font-size: 12px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase;
+    color: var(--muted); text-align: left; padding: 18px 20px 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  table.grid td { vertical-align: top; padding: 18px 20px; border-bottom: 1px solid var(--rule-soft); color: var(--text-soft); }
+  table.grid tr:last-child td { border-bottom: 0; }
+  table.grid th:first-child, table.grid td:first-child { padding-left: 32px; }
+  table.grid th:last-child, table.grid td:last-child { padding-right: 32px; }
+  table.grid td.role { font-weight: 600; color: var(--head); text-align: left; hyphens: none; }
+
+  .open-items { margin-top: 56px; }
+  .open-items ul { list-style: none; padding: 0; margin: 0; }
+  .open-items li { margin: 0; padding: 18px 0; border-top: 1px solid var(--rule); color: var(--text-soft); }
+  .open-items li:last-child { border-bottom: 1px solid var(--rule); }
+
+  /* ---------- Back link ---------- */
+  .back { margin: 40px 0 0; text-align: right; font-size: 14px; }
+  .back a::after { content: " \2191"; }
+
+  /* ===================== FOOTER ===================== */
+  footer {
+    background: var(--bg-alt); color: var(--faint); font-size: 12px; line-height: 1.33;
+    letter-spacing: -0.01em; padding: 18px 0 22px;
+  }
+  footer .wrap { border-top: 1px solid var(--rule); padding-top: 16px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  /* ===================== REVEAL ===================== */
+  html.js .reveal { opacity: 0; transform: translateY(28px); }
+  html.js .reveal.in {
+    opacity: 1; transform: none;
+    transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1);
+  }
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 1068px) {
+    .nav .links { display: none; }
+  }
+  @media (max-width: 834px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .band { padding: 72px 0; }
+  }
+  @media (max-width: 640px) {
+    .wrap, .wrap-narrow { padding: 0 16px; }
+    .nav .brand { font-size: 19px; }
+    .grid-2, .grid-3, .mini-grid { grid-template-columns: 1fr; }
+    .hero { padding: 64px 0 60px; }
+    .hero .purpose { font-size: 19px; }
+    .card { padding: 24px; }
+    .callout { padding: 32px 26px; }
+    ol.steps li { padding: 14px 20px 14px 64px; }
+    ol.steps li::before { left: 20px; top: 13px; }
+    ol.steps li + li::after { left: 64px; }
+    .toc a { min-height: 0; }
+    table.grid th:first-child, table.grid td:first-child { padding-left: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition: none !important; }
+    html.js .reveal { opacity: 1; transform: none; }
+  }
+
+  /* ===================== PRINT ===================== */
+  @media print {
+    @page { size: A4; margin: 20mm 18mm; }
+    .nav, .back, .hero .ctas, footer { display: none; }
+    html.js .reveal { opacity: 1; transform: none; }
+    body { background: #fff; color: #1d1d1f; font-size: 11pt; }
+    .band, .band.alt, .hero { background: #fff !important; padding: 18pt 0; }
+    .card, ol.steps, .callout { box-shadow: none !important; border: 1px solid #d2d2d7; background: #fff !important; }
+    .hero { page-break-after: always; padding-top: 60mm; }
+    .sec-head h2 { font-size: 22pt; }
+    .card, .callout, table.grid { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<nav class="nav" aria-label="Sections">
+  <div class="wrap">
+    <a class="brand" href="#top">Case Discovery</a>
+    <div class="right">
+      <ul class="links">
+        <li><a href="#s11">Background</a></li>
+        <li><a href="#s12">Workflow</a></li>
+        <li><a href="#s13">Problem</a></li>
+        <li><a href="#s14">Challenges</a></li>
+        <li><a href="#s15">Goals</a></li>
+        <li><a href="#s17">Stakeholders</a></li>
+      </ul>
+      <button class="switch" id="themeToggle" type="button" role="switch"
+              aria-checked="false" aria-label="Dark mode" title="Toggle dark mode">
+        <span class="knob">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2" fill="currentColor"/>
+            <path d="M12 2v2.5M12 19.5V22M4.2 4.2 6 6M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8 6 18M18 6l1.8-1.8"/>
+          </svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1Z"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow reveal">Internal Documentation</div>
+    <h1 class="reveal">Data Breach Case Discovery</h1>
+    <div class="sub reveal">Problem Statement &amp; Goals</div>
+    <p class="purpose reveal">
+      <strong>Purpose:</strong> The &ldquo;why&rdquo; document. It defines the problem the discovery
+      workflow and automation initiative solves and what success looks like &mdash; independent of how
+      the system is built. Implementation choices (search strategies, document handling, classification
+      logic, storage structure, or delivery mechanisms) live in the engineering documentation, not here.
+    </p>
+    <div class="ctas reveal">
+      <a class="btn" href="#s15">See the goals</a>
+      <a class="more" href="#contents">View contents</a>
+    </div>
+  </div>
+</header>
+
+<!-- ================= CONTENTS ================= -->
+<section class="band alt" id="contents">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <h2>Contents</h2>
+    </div>
+    <ul class="toc grid-3">
+      <li class="reveal"><a class="card" href="#s11"><div><span class="n">1.1</span><div class="t">Background &amp; Context</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#s12"><div><span class="n">1.2</span><div class="t">Current Workflow</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#s13"><div><span class="n">1.3</span><div class="t">Core Problem</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#s14"><div><span class="n">1.4</span><div class="t">Challenges &amp; Limitations</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#s15"><div><span class="n">1.5</span><div class="t">Goals &amp; Success Criteria</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#s16"><div><span class="n">1.6</span><div class="t">Out of Scope</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#s17"><div><span class="n">1.7</span><div class="t">Stakeholders &amp; Users</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#s18"><div><span class="n">1.8</span><div class="t">Constraints &amp; Assumptions</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#sa"><div><span class="n">Appendix A</span><div class="t">Source Notes &amp; Open Terms</div></div><span class="go">&rsaquo;</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 1.1 ================= -->
+<section class="band" id="s11">
+  <div class="wrap-narrow">
+    <div class="sec-head reveal">
+      <span class="num">1.1</span>
+      <h2>Background &amp; Context</h2>
+    </div>
+
+    <p class="lede reveal">Case discovery work is currently performed manually through the Lexis legal research platform.
+    Team members execute keyword searches against defendant names, open each matching case, download the
+    complaint document, verify whether the case concerns a data breach, and then enter the case into the
+    firm&rsquo;s case management system (RCS).</p>
+
+    <p class="reveal">The workflow is repeated campaign by campaign. Each defendant name being tracked requires its own
+    search, and each case returned by that search requires the same sequence of manual verification steps.
+    As described in the walkthrough, going through campaign after campaign and searching each one
+    individually &ldquo;takes a lot of time.&rdquo;</p>
+
+    <p class="reveal">The session documented here had two purposes: to record the existing manual workflow step by step
+    so it can be understood by others, and to identify which parts of it could be automated. The
+    conclusion reached was that the majority of cases can be located easily by searching the defendant
+    name, while a smaller number &mdash; those with multiple defendants, or those filed in state court
+    &mdash; will continue to require manual work.</p>
+
+    <p class="back"><a href="#contents">Back to Contents</a></p>
+  </div>
+</section>
+
+<!-- ================= 1.2 ================= -->
+<section class="band alt" id="s12">
+  <div class="wrap-narrow">
+    <div class="sec-head reveal">
+      <span class="num">1.2</span>
+      <h2>Current Workflow</h2>
+    </div>
+
+    <h3 class="reveal"><span class="n">1.2.1</span>Lexis Keyword Search</h3>
+    <ol class="steps reveal">
+      <li>Open Lexis and go to keyword search.</li>
+      <li>Enter the search with the required punctuation &mdash; an apostrophe and a colon.</li>
+      <li>Remove the <em>plaintiff</em> party segment, since the name being searched is the
+          <em>defendant</em>.</li>
+      <li>Run the search.</li>
+      <li>Change the sort order from <em>relevance</em> to <em>newest to oldest</em>, so the most recent
+          filings appear first.</li>
+      <li>Review the returned cases &mdash; these are the cases carrying the searched name, with the
+          plaintiff shown alongside.</li>
+    </ol>
+
+    <h3 class="reveal"><span class="n">1.2.2</span>Opening and Screening a Case</h3>
+    <ol class="steps reveal">
+      <li>Open the case from the results list.</li>
+      <li>Check the complaint detail &mdash; the name and the party.</li>
+      <li>Review the basic information shown on the case record.</li>
+      <li>Determine whether the case is data breach, privacy, or another category.</li>
+    </ol>
+
+    <h3 class="reveal"><span class="n">1.2.3</span>Retrieving and Verifying the Complaint</h3>
+    <p class="intro reveal">Confirming whether a case is a data breach requires opening the complaint document itself; the case
+    record alone is not sufficient.</p>
+    <ol class="steps reveal">
+      <li>Go to the document section of the case.</li>
+      <li>Click on the complaint.</li>
+      <li>The complaint is shown either as already available or as retrievable online &mdash; click the
+          hyperlink.</li>
+      <li>Select <em>get the document</em> and wait until the download completes.</li>
+      <li>When the view option appears, open the complaint.</li>
+      <li>Confirm the case is a class action and check the named party defendant.</li>
+      <li>Read the basic information and the nature of suit.</li>
+      <li>Confirm the nature of suit states this is a data breach, and that the complaint refers to
+          personal identifying information and sensitive private information.</li>
+    </ol>
+
+    <div class="mini-grid">
+      <div class="card reveal">
+        <h3><span class="n">1.2.4</span>Entry into RCS</h3>
+        <p>Once a case is confirmed as a data breach, it is inserted into RCS.</p>
+      </div>
+      <div class="card reveal">
+        <h3><span class="n">1.2.5</span>Repetition Across Campaigns</h3>
+        <p>The full sequence above is repeated for each campaign. The team works through campaign after
+        campaign, searching each individually, which is the primary source of time spent in the current
+        process.</p>
+      </div>
+    </div>
+
+    <p class="back"><a href="#contents">Back to Contents</a></p>
+  </div>
+</section>
+
+<!-- ================= 1.3 ================= -->
+<section class="band" id="s13">
+  <div class="wrap-narrow">
+    <div class="sec-head reveal">
+      <span class="num">1.3</span>
+      <h2>Core Problem</h2>
+    </div>
+
+    <p class="lede reveal">There is no single place where newly filed data breach cases can be seen. Because discovery is
+    driven campaign by campaign, the same search-and-verify sequence is repeated once per tracked name,
+    and cases are only ever found one search at a time. Locating them individually in this way takes a lot
+    of time.</p>
+
+    <p class="reveal">The verification steps compound the problem: every case returned by a search has to be opened, its
+    complaint downloaded, and its nature of suit read before the case can be classified &mdash; and those
+    steps are identical every time.</p>
+
+    <div class="callout reveal">
+      <div class="label">The team&rsquo;s assessment</div>
+      <p>The team&rsquo;s own assessment is that a majority of cases could be pulled automatically
+      &mdash; directly from the defendant name &mdash; and that a single daily data breach search would
+      surface all data breach class actions in one place. Only a limited set of cases would still need
+      manual searching.</p>
+    </div>
+
+    <p class="back"><a href="#contents">Back to Contents</a></p>
+  </div>
+</section>
+
+<!-- ================= 1.4 ================= -->
+<section class="band alt" id="s14">
+  <div class="wrap">
+    <div class="wrap-narrow" style="padding:0">
+      <div class="sec-head reveal">
+        <span class="num">1.4</span>
+        <h2>Challenges &amp; Limitations</h2>
+      </div>
+
+      <h3 class="reveal"><span class="n">1.4.1</span>Cases That Search Easily vs. Cases That Do Not</h3>
+      <p class="reveal">Some cases are very easy to search; others are not. The distinction turns on how many defendants
+      the case has and on which court system the case was filed in.</p>
+    </div>
+
+    <div class="grid-2 compare" style="margin-top:28px">
+      <div class="card easy reveal">
+        <h4><span class="icon">&#10003;</span>Searches easily</h4>
+        <ul>
+          <li>There is only one defendant.</li>
+          <li>The correct name of the defendant is known.</li>
+          <li>The name can simply be entered, along with data breach, and the case is returned.</li>
+          <li>The result can be reviewed quickly.</li>
+        </ul>
+      </div>
+      <div class="card hard reveal">
+        <h4><span class="icon">!</span>Requires manual work</h4>
+        <ul>
+          <li>There are multiple defendants.</li>
+          <li>The case was filed in state court.</li>
+          <li>The case has to be searched manually using a different search string.</li>
+          <li>The defendant names themselves are difficult to search.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="wrap-narrow" style="padding:0">
+      <h3 class="reveal"><span class="n">1.4.2</span>Name Changes Producing Inconsistent Results</h3>
+      <p class="reveal">A change of name on a matter causes the same case to surface differently depending on where it is
+      looked at. In the example reviewed, four entries were visible in one view &mdash; two dated
+      24 August, one 25 August and one 31 August &mdash; while in another view only two options appeared,
+      24 August and 31 August. The cause was identified as the name change.</p>
+
+      <h3 class="reveal"><span class="n">1.4.3</span>Volume of Manual Work</h3>
+      <p class="reveal">The majority of cases can be located easily; only a few rare cases present difficulty. Because that
+      difficult number is small and the straightforward number is large, automating the straightforward
+      cases and handling the remainder manually was judged to make the job easier.</p>
+
+      <p class="back"><a href="#contents">Back to Contents</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 1.5 ================= -->
+<section class="band" id="s15">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="num">1.5</span>
+      <h2>Goals &amp; Success Criteria</h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card goal reveal">
+        <div class="big">01</div>
+        <div class="kicker">Goal 1</div>
+        <div class="title">A single daily data breach search</div>
+        <p class="crit">Success when one data breach search is conducted every day, rather than
+        searching each campaign separately.</p>
+      </div>
+      <div class="card goal reveal">
+        <div class="big">02</div>
+        <div class="kicker">Goal 2</div>
+        <div class="title">All data breach class actions in one place</div>
+        <p class="crit">Success when all data breach class actions fall under a single result set, so all
+        the latest data breach cases filed are available at one place.</p>
+      </div>
+      <div class="card goal reveal">
+        <div class="big">03</div>
+        <div class="kicker">Goal 3</div>
+        <div class="title">Cases pulled directly from the defendant name</div>
+        <p class="crit">Success when cases are pulled automatically and directly from the defendant name,
+        without the search being run by hand.</p>
+      </div>
+      <div class="card goal reveal">
+        <div class="big">04</div>
+        <div class="kicker">Goal 4</div>
+        <div class="title">No campaign-by-campaign searching</div>
+        <p class="crit">Success when cases no longer have to be searched individually, campaign through
+        campaign.</p>
+      </div>
+      <div class="card goal reveal">
+        <div class="big">05</div>
+        <div class="kicker">Goal 5</div>
+        <div class="title">Easier location and insertion into RCS</div>
+        <p class="crit">Success when cases are easy to locate and insert into RCS once they have been
+        surfaced in one place.</p>
+      </div>
+      <div class="card goal reveal">
+        <div class="big">06</div>
+        <div class="kicker">Goal 6</div>
+        <div class="title">Manual effort reserved for the difficult cases</div>
+        <p class="crit">Success when manual searching is needed only where there are multiple defendants
+        or the case was filed in state court, and the majority of cases &mdash; those locatable by
+        searching the defendant name &mdash; are handled automatically.</p>
+      </div>
+    </div>
+
+    <p class="back"><a href="#contents">Back to Contents</a></p>
+  </div>
+</section>
+
+<!-- ================= 1.6 ================= -->
+<section class="band alt" id="s16">
+  <div class="wrap-narrow">
+    <div class="sec-head reveal">
+      <span class="num">1.6</span>
+      <h2>Out of Scope</h2>
+    </div>
+    <div class="card scope-card reveal">
+      <div class="badge">&#8856;</div>
+      <p>Cases with multiple defendants and cases filed in state court are not expected to be handled
+      automatically; these will continue to be searched manually using alternative search strings. The
+      discussion did not settle whether any solution exists for automating this category &mdash; it was
+      raised as an open question to be put to the team who would build the automation.</p>
+    </div>
+
+    <p class="back"><a href="#contents">Back to Contents</a></p>
+  </div>
+</section>
+
+<!-- ================= 1.7 ================= -->
+<section class="band" id="s17">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="num">1.7</span>
+      <h2>Stakeholders &amp; Users</h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="card person reveal">
+        <div class="avatar">CD</div>
+        <h3>Case discovery staff</h3>
+        <p>Run the Lexis search, screen results, download and read complaints, confirm the nature of
+        suit, and insert confirmed cases into RCS. Handle manually the cases that cannot be searched
+        directly.</p>
+      </div>
+      <div class="card person reveal">
+        <div class="avatar">WP</div>
+        <h3>Walkthrough participants</h3>
+        <p>Documented the workflow across six worked examples so that the process and its difficulties
+        can be understood by the team receiving it.</p>
+      </div>
+      <div class="card person reveal">
+        <div class="avatar">AT</div>
+        <h3>Automation team</h3>
+        <p>Recipients of this walkthrough. To advise whether a solution exists for the difficult cases
+        and to build the automated daily search. Outstanding questions are to be raised with them
+        directly.</p>
+      </div>
+    </div>
+
+    <p class="back"><a href="#contents">Back to Contents</a></p>
+  </div>
+</section>
+
+<!-- ================= 1.8 ================= -->
+<section class="band alt" id="s18">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="num">1.8</span>
+      <h2>Constraints &amp; Assumptions</h2>
+    </div>
+
+    <div class="grid-2 ca">
+      <div class="card cons reveal">
+        <h4>Constraints</h4>
+        <ul>
+          <li>Discovery is performed through Lexis; the search syntax, party segments, sort order and document
+          retrieval steps described above are those the platform requires.</li>
+          <li>Confirming a data breach requires the complaint document itself &mdash; the nature of suit and
+          the references to personal identifying information and sensitive private information are found
+          there, not on the case record.</li>
+          <li>Complaint documents must be retrieved before they can be viewed, and the retrieval has to
+          complete before the view option appears.</li>
+        </ul>
+      </div>
+      <div class="card assm reveal">
+        <h4>Assumptions</h4>
+        <ul>
+          <li>Cases with a single, correctly named defendant can be found by searching that name together
+          with data breach.</li>
+          <li>The number of cases that can be located easily is larger than the number that cannot.</li>
+          <li>A daily data breach search would capture all data breach class actions.</li>
+          <li>Handling the difficult cases manually is acceptable, given how few of them there are.</li>
+          <li>Six worked examples were judged sufficient to convey the process and its edge cases.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="back"><a href="#contents">Back to Contents</a></p>
+  </div>
+</section>
+
+<!-- ================= APPENDIX A ================= -->
+<section class="band" id="sa">
+  <div class="wrap">
+    <div class="wrap-narrow" style="padding:0; margin-left:0">
+      <div class="sec-head reveal">
+        <span class="num">Appendix A</span>
+        <h2>Source Notes &amp; Open Terms</h2>
+      </div>
+
+      <p class="reveal">This document was written from an auto-generated meeting transcript that carries its own accuracy
+      warning. Several terms were clearly mis-transcribed and have been corrected to their intended
+      meaning. The corrections are listed here so they can be checked against what was actually said.</p>
+    </div>
+
+    <div class="card table-card reveal" style="margin-top:28px">
+      <table class="grid">
+        <tr>
+          <th style="width: 26%">As transcribed</th>
+          <th style="width: 30%">Used in this document</th>
+          <th style="width: 44%">Reasoning</th>
+        </tr>
+        <tr>
+          <td class="role">&ldquo;remove plentive&rdquo;</td>
+          <td>Remove the <em>plaintiff</em> party segment</td>
+          <td>The following clause is &ldquo;because this is defended&rdquo; &mdash; i.e. defendant. The
+          step is choosing which party segment the name applies to.</td>
+        </tr>
+        <tr>
+          <td class="role">&ldquo;this is defended&rdquo;</td>
+          <td>the name searched is the <em>defendant</em></td>
+          <td>The firm tracks breached companies, which are the defendants, not the plaintiffs.</td>
+        </tr>
+        <tr>
+          <td class="role">&ldquo;different end&rdquo;</td>
+          <td>defendant</td>
+          <td>Used four times in contexts such as &ldquo;only one different end&rdquo; and &ldquo;the
+          correct name of the different end&rdquo;.</td>
+        </tr>
+        <tr>
+          <td class="role">&ldquo;state codes&rdquo;</td>
+          <td>state courts</td>
+          <td>Paired throughout with multiple defendants as the two categories that resist searching.
+          State court dockets are the recognised coverage gap; &ldquo;state codes&rdquo; has no meaning in
+          docket search.</td>
+        </tr>
+        <tr>
+          <td class="role">&ldquo;go retry the document section&rdquo;</td>
+          <td>go to the document section</td>
+          <td>Fits the surrounding sequence: open case, then documents, then complaint.</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="open-items wrap-narrow" style="padding:0; margin-left:0">
+      <h3 class="reveal">Open items to confirm</h3>
+      <ul class="reveal">
+        <li><strong>RCS.</strong> Retained as transcribed. If the system referred to is the CRM, the name
+        should be corrected throughout this document.</li>
+        <li><strong>The apostrophe and colon.</strong> The transcript records these as literal characters
+        added to the query, but not what they delimit. The exact search string should be captured from
+        someone running the search before it is automated.</li>
+        <li><strong>Automating state court and multi-defendant cases.</strong> Raised in the session as an
+        open question for the automation team; no answer was reached.</li>
+      </ul>
+    </div>
+
+    <p class="back"><a href="#contents">Back to Contents</a></p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Data Breach Case Discovery &middot; Problem Statement &amp; Goals</span>
+    <span>Internal Documentation</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement, btn = document.getElementById('themeToggle');
+
+  /* ---------- Theme switch ---------- */
+  function sync() {
+    btn.setAttribute('aria-checked', root.getAttribute('data-theme') === 'dark' ? 'true' : 'false');
+  }
+  sync();
+  btn.addEventListener('click', function () {
+    var n = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', n);
+    try { localStorage.setItem('dbcd-theme', n); } catch (e) {}
+    sync();
+  });
+  /* Follow system changes until the user picks a theme explicitly */
+  if (window.matchMedia) {
+    var mq = matchMedia('(prefers-color-scheme: dark)');
+    var onChange = function (e) {
+      var saved; try { saved = localStorage.getItem('dbcd-theme'); } catch (err) {}
+      if (!saved) { root.setAttribute('data-theme', e.matches ? 'dark' : 'light'); sync(); }
+    };
+    mq.addEventListener ? mq.addEventListener('change', onChange) : mq.addListener(onChange);
+  }
+
+  /* ---------- Scroll reveal ---------- */
+  var items = document.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) {
+    items.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    items.forEach(function (el) { io.observe(el); });
+
+    /* ---------- Active nav link ---------- */
+    var links = {};
+    document.querySelectorAll('.nav .links a').forEach(function (a) { links[a.getAttribute('href').slice(1)] = a; });
+    var spy = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && links[e.target.id]) {
+          Object.keys(links).forEach(function (k) { links[k].classList.remove('active'); });
+          links[e.target.id].classList.add('active');
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    document.querySelectorAll('section[id]').forEach(function (s) { spy.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

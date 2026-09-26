@@ -1,0 +1,20 @@
+% ================================================================
+%  titlepage.tex — right-aligned title, rule, subtitle, edition.
+% ================================================================
+\thispagestyle{empty}
+\begingroup
+\raggedleft
+\vspace*{70pt}
+\providecommand{\BookTitleLines}{\BookTitle}  % where a long title breaks; set in book-meta.tex
+{\sffamily\bfseries\fontsize{26}{31}\selectfont \BookTitleLines\par}
+\vspace{15pt}
+{\color{ink}\rule{\linewidth}{1.2pt}\par}
+\vspace{18pt}
+{\itshape\fontsize{12.5}{16}\selectfont \BookLongSubtitle\par}
+\ifx\BookAuthor\empty\else
+  \vspace{14pt}{\fontsize{11}{14}\selectfont \BookAuthor\par}
+\fi
+\vspace{26pt}
+{\sffamily\bfseries\fontsize{6.5}{8}\selectfont\addfontfeature{LetterSpace=18}\MakeUppercase{\BookEdition}\par}
+\endgroup
+\clearpage

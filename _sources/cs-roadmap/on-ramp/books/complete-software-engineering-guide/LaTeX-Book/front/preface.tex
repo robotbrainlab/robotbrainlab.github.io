@@ -1,0 +1,129 @@
+% ---------------------------------------------------------------- Preface
+\unnumberedchapter{Preface}
+\chaptersubtitle{How this book is organized, and how to read it}
+\chapterrule
+
+Building software is a lifecycle, and each part of it is easiest to understand when it sits in its
+proper place. This book follows that lifecycle from end to end: from the moment an idea appears in
+someone's head to the moment it runs in production. It concentrates on \emph{the craft of building
+software}. It shows where teams, roles and their rituals fit into the process, but how to run a
+team, and how to navigate a career, are left to other books.
+
+\section*{The shape of the book}
+
+The book opens with a map and closes by returning to it. \textbf{How Software Gets Built}, the
+opening chapter, lays out the whole process before any of its parts: the loop every piece of
+software goes around, the pieces a running application is made of, and the people who do each part.
+Between the map and the closing chapter are four parts, one for each phase of the lifecycle. Each
+part stands on its own, and they are ordered the way software actually comes into being.
+
+\begin{description}[leftmargin=0pt, itemsep=4pt, font=\sffamily\bfseries\color{brand}]
+  \item[Part I \textperiodcentered{} Product Discovery.] Deciding \emph{what} is worth building,
+    before any code. It is the most commonly skipped phase, and the one that stops you building the wrong
+    thing well.
+  \item[Part II \textperiodcentered{} Project Planning.] Turning a chosen problem into a plan and a
+    set of living documents: problem statement, architecture, developer and operational guides.
+  \item[Part III \textperiodcentered{} Writing Good Code.] Two chapters: the craft of code that is
+    correct, clear, and changeable, and the engineering practices a whole codebase needs, sequenced
+    as a maturity model so you know the order in which to adopt them.
+  \item[Part IV \textperiodcentered{} Building Real Applications.] A 43-chapter narrative, followed by a project, that takes
+    a single Notes API from a command in a terminal to a containerized, HTTPS-served, monitored
+    production service, and then on to the distributed systems beyond it. It is divided into eleven
+    \emph{stages}, from Stage 1, a program running on one laptop, to Stage 11, systems beyond a single service.
+\end{description}
+
+\noindent The closing chapter, \textbf{The Same Process in a Real Team}, replays the whole journey as a
+team makes it (who does each step, and what they hand to each other) and lays the same map over
+other kinds of software. Every part, and every stage of Part IV, opens by marking where you are on
+the map.
+
+\section*{Two ways to read it}
+
+\textbf{To learn,} read the opening chapter first, then Part IV straight through; it builds the
+mental model of how a real system works. Then read Part III for the craft, and keep Part II for when you start something of
+your own. \textbf{To build something now,} work through Parts I and II to decide what to build and to
+frame it, use Part III as your checklist while you write it, and use Part IV as the reference for
+taking it all the way to production.
+
+\section*{Exercises, a project, and a companion repository}
+
+Every chapter of Part IV ends with four exercises: \emph{predict} what will happen, \emph{break and
+fix} something on purpose, \emph{extend} the code, and \emph{explain} an idea in your own words.
+Part IV then closes with a project, \emph{Notes for Many Users}, in five milestones, which you plan
+and build yourself. The companion repository holds the Notes API's code, a solution to every
+exercise (one file per chapter, in \texttt{exercises/}), and a complete, tested reference solution to
+the project, with one Git tag per milestone, so that you can compare your work at each step.
+Try each exercise, and each milestone, before you look.
+
+\section*{Conventions used in this book}
+
+Source code appears in shaded listings with a colored rule on the left. Numbered listings carry
+a caption:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 0.1}\enspace A minimal Python program}
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ greet(name: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \ControlFlowTok{return} \SpecialStringTok{f"Hello, }\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{!"}
+\end{Highlighting}
+\end{Shaded}
+\end{codeboxcap}
+
+Commands you type and the output they produce appear in plain framed blocks:
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize]
+$ python app.py
+ * Running on http://127.0.0.1:5000
+\end{Verbatim}
+\end{outputbox}
+
+Diagrams are drawn in text, so they stay exact and diff-able in the source:
+
+\begin{diagrambox}{250pt}
+\begin{Verbatim}[fontsize=\fontsize{9}{8.55}\selectfont]
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│  Client  │────▶│  Nginx   │────▶│   App    │
+└──────────┘     └──────────┘     └──────────┘
+\end{Verbatim}
+\end{diagrambox}
+
+\begin{notebox}
+\textbf{Note:} asides, warnings and version-specific details appear in callouts like this one.
+\end{notebox}
+
+Each chapter of Part IV opens with what it will teach you and closes with its key takeaways.
+
+\section*{Versions, tools, and a book that will age}
+
+Software tooling changes faster than books do. The principles here (how a process binds a port,
+why a transaction must commit before a response is sent, why a deployment needs a rollback) will
+hold for decades. The specifics will not: version numbers, command-line flags, package names,
+configuration syntax, default settings, cloud providers' products and prices, and even what counts
+as current best practice. Everything version-specific in this book was written and checked against
+the versions listed below. When you follow along later, expect some details to differ, and treat
+the official documentation of each tool, not this book, as the authority for version-specific
+facts. When a command or setting fails, check the tool's current documentation before assuming the
+concept is wrong. Prices, free-tier limits, and product names quoted from vendors were correct at
+the time of writing and are the details most likely to have changed.
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{\quad}ll@{}}
+\toprule
+Python & 3.11 & Ubuntu Server & 22.04 LTS \\
+Flask / Werkzeug & 3.0.2 / 3.0.1 & Docker Engine & 25 \\
+Gunicorn & 22.0 & Docker Compose & v2 \\
+psycopg2-binary & 2.9.9 & Nginx & 1.18 (Ubuntu 22.04 package) \\
+PostgreSQL & 15–16 & Certbot & 1.21 (apt) or current (snap) \\
+pytest & 8.1 & GitHub Actions & checkout v4, setup-python v5 \\
+bcrypt / requests & 4.1.2 / 2.31.0 & Mailpit & current image \\
+prometheus-flask-exporter & 0.23 & openapi-spec-validator & 0.7 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Pinned versions in the listings are the ones the examples were written against, not a
+recommendation to stay on them. Updating dependencies, and checking them with a vulnerability
+scanner as Chapter 17 shows, is part of the job. The companion repository does exactly that: when
+the scanner reports a known vulnerability in a version this book pins, the repository moves to a
+fixed release, so its versions may be newer than the ones in the listings.

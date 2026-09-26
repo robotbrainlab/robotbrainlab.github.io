@@ -1,0 +1,1581 @@
+\setcounter{chapter}{36}
+\chapter{Reliability}\label{ch:37-reliability}
+
+\chapterrule
+
+A system that works perfectly when everything is fine is not a production system~--- it is a demo. Production systems run for months and years, through hardware failures, network outages, bad deployments, and unexpected traffic patterns. \textbf{Reliability} is the property of a system that continues to work correctly in the face of these adversities.
+
+This chapter covers the failure modes that affect web applications, the patterns and practices that make systems more reliable, and the operational habits that minimize the impact when failures do occur (because they always do).
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What availability means quantitatively (the ``nines'')
+\item
+  The failure modes specific to each layer of the Notes API stack
+\item
+  How to design for graceful degradation rather than total failure
+\item
+  What database backups are, why they matter, and how to verify them
+\item
+  How to manage data across its lifetime: classification, \textbf{retention policy}, archival, safe cleanup, and \textbf{PII-aware deletion} (the right to be forgotten)
+\item
+  How to call another service safely: timeouts, what a timeout does and does not mean, safe retries with idempotency keys, and a clear error for each kind of failure
+\item
+  How to implement retries with exponential backoff and circuit breakers
+\item
+  What a runbook is and why you should write one
+\item
+  How to conduct a postmortem after an outage
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Availability and the ``Nines''}\label{37-reliability:371-availability-and-the-nines}
+
+\textbf{Availability} is the percentage of time a system is operational and accessible. It is commonly expressed as ``nines'':
+
+\Needspace{11\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Availability & Annual Downtime & Weekly Downtime \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+90\% (one 9) & 36.5 days & 16.8 hours \\
+99\% (two 9s) & 3.65 days & 1.68 hours \\
+99.9\% (three 9s) & 8.76 hours & 10.1 minutes \\
+99.99\% (four 9s) & 52.6 minutes & 1.01 minutes \\
+99.999\% (five 9s) & 5.26 minutes & 6.05 seconds \\
+\end{longtable}
+}
+
+For a notes API used by individuals, 99.9\% availability (8.76 hours of downtime per year) is often acceptable. Achieving four 9s requires significant infrastructure investment~--- redundant servers, automatic failover, rigorous on-call practices.
+
+The Notes API, running on a single DigitalOcean Droplet, realistically achieves somewhere between 99\% and 99.9\%, depending on:
+
+\begin{itemize}
+\tightlist
+\item
+  How often the server reboots (kernel updates, hardware failures)
+\item
+  How quickly failures are detected and recovered
+\item
+  How often deployments cause brief downtime
+\end{itemize}
+
+\setcounter{section}{1}
+\section{Failure Modes by Layer}\label{37-reliability:372-failure-modes-by-layer}
+
+Every layer of the stack can fail. Understanding the failure modes helps you design recovery procedures.
+
+\subsection*{The server (Droplet) itself}\phantomsection\label{37-reliability:the-server-droplet-itself}
+
+\textbf{Hardware failure}: DigitalOcean's physical machines fail occasionally. Virtualization means your Droplet may be live-migrated or restarted on another machine.
+
+\begin{itemize}
+\tightlist
+\item
+  Recovery: when the Droplet boots again, systemd starts Docker and Docker restarts the container (its restart policy)
+\item
+  Time to recover: typically a minute or two after the Droplet is back~--- if the Droplet's disk survived. A Droplet lost for good is rebuilt from the setup chapters (21--23), which is why they are scripted and why the data lives in a managed database
+\end{itemize}
+
+\noindent{}\textbf{Kernel crash / out-of-memory (OOM)}: if the server runs out of memory, the Linux OOM killer terminates processes to free memory.
+
+\begin{itemize}
+\tightlist
+\item
+  Which process? The one with the highest ``OOM score''~--- often the largest memory user.
+\item
+  Recovery: if a Gunicorn \emph{worker} is killed, the Gunicorn master starts a replacement; if the whole container dies, Docker's restart policy restarts it
+\item
+  Prevention: monitor memory usage; set \texttt{-\/-memory} limits on Docker containers to prevent one container from consuming all RAM
+\end{itemize}
+
+\noindent{}\textbf{Disk full}: if the disk fills up, application writes fail, logs stop recording, and the database may crash.
+
+\begin{itemize}
+\tightlist
+\item
+  Cause: unbounded log growth, large database, uploaded files
+\item
+  Prevention: rotation of container logs (\texttt{daemon.json}, \hyperref[ch:21-system-setup]{Chapter 21}) and of Nginx logs (logrotate), \texttt{client\_max\_body\_size} in Nginx (\hyperref[ch:28-traffic-routing]{Chapter 28}), disk usage alerts
+\end{itemize}
+
+\subsection*{Nginx}\phantomsection\label{37-reliability:nginx}
+
+\textbf{Certificate expiry}: TLS certificates expire. If Certbot fails to renew, HTTPS stops working.
+
+\begin{itemize}
+\tightlist
+\item
+  Prevention: Certbot's systemd timer (\texttt{certbot.timer}) tries renewal twice daily. Monitor the certificate's expiry date anyway.
+\item
+  Detection: UptimeRobot will alert if HTTPS fails. You can also check with:
+\end{itemize}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Check certificate expiry}
+\BuiltInTok{echo} \KeywordTok{|} \ExtensionTok{openssl}\NormalTok{ s\_client }\AttributeTok{{-}connect}\NormalTok{ api.notes.example.com:443 }\DecValTok{2}\OperatorTok{\textgreater{}}\NormalTok{/dev/null }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
+    \ExtensionTok{openssl}\NormalTok{ x509 }\AttributeTok{{-}noout} \AttributeTok{{-}dates}
+\CommentTok{\# notBefore=Dec 16 00:00:00 2023 GMT}
+\CommentTok{\# notAfter=Mar 15 00:00:00 2024 GMT}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Nginx misconfiguration}: a bad \texttt{nginx.conf} prevents Nginx from restarting.
+
+\begin{itemize}
+\tightlist
+\item
+  Prevention: always \texttt{nginx\ -t} (test config) before \texttt{systemctl\ reload\ nginx}
+\item
+  Detection: the reload fails; Nginx continues serving with the old config (which is the correct behavior~--- Nginx only applies a new config if it's valid)
+\end{itemize}
+
+\subsection*{The Docker container}\phantomsection\label{37-reliability:the-docker-container}
+
+\textbf{Container crash loop}: if the application crashes repeatedly, Docker restarts it but keeps seeing the same failure.
+
+\begin{itemize}
+\tightlist
+\item
+  Detection: \texttt{docker\ ps} shows the container status as ``Restarting''; \texttt{docker\ logs\ notes-api} shows the error
+\item
+  Recovery: fix the root cause~--- usually a new image or a corrected environment file~--- then redeploy (\texttt{deploy.sh}, which also rolls back if the new version fails). Restarting the same broken container only repeats the loop
+\end{itemize}
+
+\noindent{}\textbf{Container runs but application is unhealthy}: the container is ``Up'' but the application inside isn't serving requests.
+
+\begin{itemize}
+\tightlist
+\item
+  Detection: health checks fail; \texttt{/health} returns non-200
+\item
+  Recovery: \texttt{docker\ restart\ notes-}\allowbreak{}\texttt{api} (or investigate the log)
+\end{itemize}
+
+\noindent{}\textbf{The Docker daemon itself crashes}: rare, but possible.
+
+\begin{itemize}
+\tightlist
+\item
+  Prevention: \texttt{live-restore:\ true} in \texttt{daemon.json} (\hyperref[ch:21-system-setup]{Chapter 21}) keeps containers running if dockerd crashes
+\item
+  Recovery: \texttt{systemctl\ restart\ docker}
+\end{itemize}
+
+\subsection*{Gunicorn}\phantomsection\label{37-reliability:gunicorn}
+
+\textbf{All workers are busy}: if all Gunicorn workers are handling requests, new requests wait in the accept queue. If the queue fills, Linux silently drops new connection attempts, and clients see timeouts.
+
+\begin{itemize}
+\tightlist
+\item
+  Detection: high response latency; Nginx 504 errors (its \texttt{proxy\_read\_timeout} expires while requests wait); a growing Recv-Q in the container's accept queue (\hyperref[ch:36-scaling-load]{Chapter 36})
+\item
+  Recovery: add more workers; identify the slow endpoint causing queuing. (Lowering the worker timeout does not add capacity~--- it sheds load by turning slow requests into errors, which can be the right emergency measure)
+\item
+  Prevention: set appropriate \texttt{timeout} in \texttt{gunicorn.conf.py}; don't do slow operations in handlers
+\end{itemize}
+
+\noindent{}\textbf{Worker timeout}: Gunicorn kills workers that take longer than \texttt{timeout} seconds to respond.
+
+\begin{itemize}
+\tightlist
+\item
+  Effect: the request fails: Gunicorn closes the connection, so Nginx returns 502 (or 504, if Nginx's own \texttt{proxy\_read\_timeout} is shorter and expires first)
+\item
+  Detection: \texttt{{[}CRITICAL{]}\ WORKER\ TIMEOUT} in Gunicorn logs
+\item
+  Cause: slow database query, external API call, infinite loop
+\item
+  Recovery: fix the slow operation; consider setting a shorter timeout with a 503 response
+\end{itemize}
+
+\subsection*{The database}\phantomsection\label{37-reliability:the-database}
+
+\textbf{Connection refused}: PostgreSQL is down or unreachable.
+
+\begin{itemize}
+\tightlist
+\item
+  Effect: all requests that need the database fail with 500
+\item
+  Detection: health check fails; application log shows \texttt{OperationalError:}\allowbreak{}\texttt{\ could\ not\ connect}
+\item
+  Recovery: with a managed database, check the provider's status page and control panel (you cannot restart the server yourself); check network connectivity and trusted sources between app and database. On a self-hosted server: check and restart PostgreSQL
+\end{itemize}
+
+\noindent{}\textbf{Database is up but queries are slow}: perhaps a missing index was added to a large table; perhaps a long-running query is locking rows.
+
+\begin{itemize}
+\tightlist
+\item
+  Detection: p99 latency spikes; database slow query log shows long-running queries
+\item
+  Investigation:
+\end{itemize}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} Find long{-}running queries (PostgreSQL)}
+\KeywordTok{SELECT}\NormalTok{ pid, now() }\OperatorTok{{-}}\NormalTok{ pg\_stat\_activity.query\_start }\KeywordTok{AS}\NormalTok{ duration, }\KeywordTok{query}\NormalTok{, state}
+\KeywordTok{FROM}\NormalTok{ pg\_stat\_activity}
+\KeywordTok{WHERE}\NormalTok{ state }\OperatorTok{!=} \StringTok{\textquotesingle{}idle\textquotesingle{}} \KeywordTok{AND}\NormalTok{ now() }\OperatorTok{{-}}\NormalTok{ pg\_stat\_activity.query\_start }\OperatorTok{\textgreater{}} \DataTypeTok{interval} \StringTok{\textquotesingle{}5 seconds\textquotesingle{}}\NormalTok{;}
+
+\CommentTok{{-}{-} Cancel the running query (gentle: the session survives)}
+\KeywordTok{SELECT}\NormalTok{ pg\_cancel\_backend(pid);}
+
+\CommentTok{{-}{-} If that does not work: end the whole session (its open transaction rolls back)}
+\KeywordTok{SELECT}\NormalTok{ pg\_terminate\_backend(pid);}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Database disk full}: PostgreSQL writes WAL files and data; if disk fills, writes fail.
+
+\begin{itemize}
+\tightlist
+\item
+  Prevention: monitor disk usage on the database server; set up alerts
+\item
+  Recovery: increase the disk size (on a managed database, a plan or storage change in the control panel). Then find what grew~--- bloated tables, forgotten data~--- and deal with it deliberately, not by dropping things under pressure
+\end{itemize}
+
+\setcounter{section}{2}
+\section{Graceful Degradation}\label{37-reliability:373-graceful-degradation}
+
+\textbf{Graceful degradation} means returning a partial or degraded response rather than failing completely when a dependency is unavailable.
+
+For the Notes API, the database is the essential dependency. (If you added the Redis cache and rate limiter from \hyperref[ch:36-scaling-load]{Chapter 36}, Redis is a second one~--- which is why that cache code ``fails open'', falling back to the database when Redis is down.) When the database is down:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Without graceful degradation:}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()  }\CommentTok{\# Raises OperationalError if DB is down}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(}\StringTok{"SELECT ..."}\NormalTok{)  }\CommentTok{\# Fails}
+    \CommentTok{\# Flask catches the exception and returns 500}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# With graceful degradation:}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{        cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{        cursor.execute(}\StringTok{"SELECT id, content, created\_at FROM notes ORDER BY id DESC"}\NormalTok{)}
+\NormalTok{        rows }\OperatorTok{=}\NormalTok{ cursor.fetchall()}
+    \ControlFlowTok{except}\NormalTok{ psycopg2.OperationalError }\ImportTok{as}\NormalTok{ e:}
+\NormalTok{        logger.error(}\StringTok{"Database unavailable for list\_notes: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, e)}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Service temporarily unavailable"}\NormalTok{\}), }\DecValTok{503}\NormalTok{, \{}\StringTok{"Retry{-}After"}\NormalTok{: }\StringTok{"10"}\NormalTok{\}}
+
+    \CommentTok{\# ... return notes ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The 503 response (instead of 500) tells the client the problem is temporary; the \texttt{Retry-After} header says when to try again.
+
+\subsection*{What can be degraded vs what cannot}\phantomsection\label{37-reliability:what-can-be-degraded-vs-what-cannot}
+
+Not all functionality can gracefully degrade. For the Notes API:
+
+\textbf{Can degrade} (return a cached response):
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{GET\ /notes/} → return a cached note list, if there is one~--- otherwise 503. Never a fake \emph{empty} list: a client that syncs could take ``no notes'' literally and delete its local copies
+\item
+  \texttt{GET\ /health} → return 503 with specific subsystem status
+\end{itemize}
+
+\noindent{}\textbf{Cannot degrade} (must fail explicitly):
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{POST\ /notes/} → creating a note without the database is impossible; return 503
+\item
+  \texttt{DELETE\ /notes/42} → cannot delete without the database; return 503
+\end{itemize}
+
+\setcounter{section}{3}
+\section{Database Backups}\label{37-reliability:374-database-backups}
+
+The database is the single source of truth for all application data. If the database is lost and there is no backup, all data is gone permanently.
+
+\textbf{Backup first, deploy second} is the rule. Before any major deployment or infrastructure change, take a backup.
+
+\subsection*{PostgreSQL backup with pg\_dump}\phantomsection\label{37-reliability:postgresql-backup-with-pg-dump}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create a full backup of the database. The connection string is the app\textquotesingle{}s}
+\CommentTok{\# own DATABASE\_URL (with sslmode=require); {-}{-}format=custom is compressed}
+\CommentTok{\# and allows selective restores.}
+\ExtensionTok{pg\_dump} \StringTok{"}\VariableTok{$DATABASE\_URL}\StringTok{"} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}format}\OperatorTok{=}\NormalTok{custom }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}file}\OperatorTok{=}\NormalTok{notesdb\_backup\_}\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%Y\%m\%d\_\%H\%M\%S}\VariableTok{)}\NormalTok{.dump}
+
+\CommentTok{\# Verify the backup is readable}
+\ExtensionTok{pg\_restore} \AttributeTok{{-}{-}list}\NormalTok{ notesdb\_backup\_20240115\_140000.dump }\KeywordTok{|} \FunctionTok{head} \AttributeTok{{-}20}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Two practical traps. \texttt{pg\_dump} must be at least as new as the server: Ubuntu 22.04's \texttt{postgresql-client} package is version 14, while managed databases usually run 15 or 16, and an older \texttt{pg\_dump} refuses to run (``server version mismatch'')~--- install a matching client from the PostgreSQL project's apt repository. And keep the password out of the command line and shell history: it is inside \texttt{DATABASE\_URL}, read from the environment file, or in a \texttt{\textasciitilde{}/.pgpass} file with mode 600.
+
+\subsection*{Managed database backups (DigitalOcean)}\phantomsection\label{37-reliability:managed-database-backups-digitalocean}
+
+DigitalOcean Managed Databases provide:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Automatic daily backups}: retained for 7 days
+\item
+  \textbf{Point-in-time recovery (PITR)}: restore to any moment in the retention window
+\item
+  \textbf{No additional cost} for basic backup retention
+\end{itemize}
+
+\noindent{}This is the primary reason to use a managed database for production: backups are handled automatically.
+
+Still, periodically create manual backups before significant changes:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#!/bin/bash}
+\CommentTok{\# backup.sh — run manually before major deployments}
+\BuiltInTok{set} \AttributeTok{{-}euo}\NormalTok{ pipefail}
+
+\CommentTok{\# DATABASE\_URL comes from the same environment file the container uses}
+\BuiltInTok{set} \AttributeTok{{-}a}\KeywordTok{;} \BuiltInTok{source}\NormalTok{ /opt/notes{-}api/config/notes{-}api.env}\KeywordTok{;} \BuiltInTok{set}\NormalTok{ +a}
+
+\VariableTok{TIMESTAMP}\OperatorTok{=}\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%Y\%m\%d\_\%H\%M\%S}\VariableTok{)}
+\VariableTok{BACKUP\_FILE}\OperatorTok{=}\StringTok{"notesdb\_}\VariableTok{$\{TIMESTAMP\}}\StringTok{.dump"}
+\VariableTok{BACKUP\_DIR}\OperatorTok{=}\StringTok{"/opt/notes{-}api/backups"}
+\VariableTok{BUCKET}\OperatorTok{=}\StringTok{"s3://notes{-}api{-}backups"}      \CommentTok{\# a Spaces (or S3) bucket, private}
+
+\FunctionTok{mkdir} \AttributeTok{{-}p} \StringTok{"}\VariableTok{$BACKUP\_DIR}\StringTok{"}
+
+\ExtensionTok{pg\_dump} \StringTok{"}\VariableTok{$DATABASE\_URL}\StringTok{"} \AttributeTok{{-}{-}format}\OperatorTok{=}\NormalTok{custom }\AttributeTok{{-}{-}file}\OperatorTok{=}\StringTok{"}\VariableTok{$BACKUP\_DIR}\StringTok{/}\VariableTok{$BACKUP\_FILE}\StringTok{"}
+
+\CommentTok{\# Copy it off the server: a backup on the same Droplet dies with the Droplet}
+\ExtensionTok{s3cmd}\NormalTok{ put }\StringTok{"}\VariableTok{$BACKUP\_DIR}\StringTok{/}\VariableTok{$BACKUP\_FILE}\StringTok{"} \StringTok{"}\VariableTok{$BUCKET}\StringTok{/"}
+
+\CommentTok{\# Keep only the last 7 local copies (the bucket\textquotesingle{}s own lifecycle rule}
+\CommentTok{\# expires old objects there)}
+\FunctionTok{ls} \AttributeTok{{-}1t} \StringTok{"}\VariableTok{$BACKUP\_DIR}\StringTok{"}\NormalTok{/notesdb\_}\PreprocessorTok{*}\NormalTok{.dump }\KeywordTok{|} \FunctionTok{tail} \AttributeTok{{-}n}\NormalTok{ +8 }\KeywordTok{|} \FunctionTok{xargs} \AttributeTok{{-}r}\NormalTok{ rm }\AttributeTok{{-}{-}}
+
+\BuiltInTok{echo} \StringTok{"Backup created: }\VariableTok{$BACKUP\_FILE}\StringTok{ (}\VariableTok{$(}\FunctionTok{du} \AttributeTok{{-}h} \StringTok{"}\VariableTok{$BACKUP\_DIR}\StringTok{/}\VariableTok{$BACKUP\_FILE}\StringTok{"} \KeywordTok{|} \FunctionTok{cut} \AttributeTok{{-}f1}\VariableTok{)}\StringTok{)"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{The crucial rule: test your restores}\phantomsection\label{37-reliability:the-crucial-rule-test-your-restores}
+
+A backup that has never been tested is not a backup~--- it is a hope. Regularly verify that backups can actually be restored:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Test restore procedure (do this on a separate test environment, never production)}
+
+\CommentTok{\# 1. Create a test database}
+\ExtensionTok{createdb}\NormalTok{ notesdb\_test}
+
+\CommentTok{\# 2. Restore the backup}
+\ExtensionTok{pg\_restore} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}host}\OperatorTok{=}\NormalTok{localhost }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}username}\OperatorTok{=}\NormalTok{notes\_user }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}dbname}\OperatorTok{=}\NormalTok{notesdb\_test }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}no{-}owner} \DataTypeTok{\textbackslash{}}
+\NormalTok{    notesdb\_backup\_20240115\_140000.dump}
+
+\CommentTok{\# 3. Verify the data looks correct}
+\ExtensionTok{psql} \AttributeTok{{-}{-}host}\OperatorTok{=}\NormalTok{localhost }\AttributeTok{{-}{-}username}\OperatorTok{=}\NormalTok{notes\_user }\AttributeTok{{-}{-}dbname}\OperatorTok{=}\NormalTok{notesdb\_test }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}command}\OperatorTok{=}\StringTok{"SELECT COUNT(*) FROM notes;"}
+
+\CommentTok{\# 4. Check for a specific note to verify data integrity}
+\ExtensionTok{psql} \AttributeTok{{-}{-}host}\OperatorTok{=}\NormalTok{localhost }\AttributeTok{{-}{-}username}\OperatorTok{=}\NormalTok{notes\_user }\AttributeTok{{-}{-}dbname}\OperatorTok{=}\NormalTok{notesdb\_test }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}command}\OperatorTok{=}\StringTok{"SELECT id, content, created\_at FROM notes LIMIT 5;"}
+
+\CommentTok{\# 5. Drop the test database}
+\ExtensionTok{dropdb}\NormalTok{ notesdb\_test}
+
+\BuiltInTok{echo} \StringTok{"Restore test successful!"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Schedule monthly restore tests. Document the procedure so anyone on the team can perform it.
+
+\subsection*{From backups to data management: the whole data lifecycle}\phantomsection\label{37-reliability:from-backups-to-data-management-the-whole-data-lifecycle}
+
+Backups answer one question~--- \emph{how do we not lose the data we are keeping?} But a system that only ever \emph{accumulates} data has two slow-motion problems: it grows more expensive and slower over time, and it becomes a mounting legal and security liability. Every record you hold is a record that can be subpoenaed, breached, or demanded for deletion. ``Store everything forever'' is not a policy; it is the absence of one. Managing data across its lifetime~--- deciding what to keep, for how long, where, and how to delete the rest~--- is its own discipline, and it is increasingly governed by law (GDPR, CCPA, HIPAA).
+
+\subsection*{Classify the data first}\phantomsection\label{37-reliability:classify-the-data-first}
+
+You cannot write one rule for all data, because not all data is equal. Before deciding anything, classify it: \textbf{PII} (personally identifiable information~--- names, emails, and the \emph{content} of a user's notes), \textbf{sensitive} (hashed passwords, payment details, health data), \textbf{operational} (logs, metrics), and \textbf{public}. The class determines how long you may keep a thing, how it must be protected, and what you must do when a user asks you to erase it. For the Notes API, a note's \texttt{content} is user-generated PII; its \texttt{id} and \texttt{created\_at} are operational metadata. They sit in the same row, but they are not the same kind of data~--- and the difference matters as soon as you design deletion or analytics: metadata can often be kept, anonymized, long after the content must go.
+
+\subsection*{Retention policy: how long should data live?}\phantomsection\label{37-reliability:retention-policy-how-long-should-data-live}
+
+A \textbf{retention policy} assigns each class of data a lifespan, by criteria you choose~--- age, account status, legal requirement. Soft-deleted notes purged after 30 days; request logs kept 90 days then deleted; database backups kept 30 days; audit logs kept seven years. The policy is simply a table~--- \emph{data category × how long × why}~--- but writing it down matters, because ``how long do we keep X?'' is a question auditors, lawyers, and engineers all eventually ask. Two forces pull in opposite directions: keep data \emph{longer} for analytics, debugging, and compliance; keep it \emph{shorter} for cost and to shrink the blast radius of a breach. The retention policy is where you resolve that tension on purpose instead of by neglect.
+
+\subsection*{Storage tiers and archival}\phantomsection\label{37-reliability:storage-tiers-and-archival}
+
+Not all retained data needs to be instantly queryable. \textbf{Hot} storage (your PostgreSQL) is fast and expensive~--- for data in active use. \textbf{Warm} and \textbf{cold} storage (cheaper databases; object storage like S3 or Glacier) is slow and cheap~--- for data you must keep but rarely touch. \textbf{Archival} is moving old-but-required data from hot to cold without losing it: a year-old note nobody reads should not sit in your primary database competing for cache and slowing every query against the active set. Archive it to object storage and drop it from the hot path. The skill is matching each category's access pattern to the cheapest tier that still meets it.
+
+\subsection*{Cleanup jobs, done safely}\phantomsection\label{37-reliability:cleanup-jobs-done-safely}
+
+Retention is \emph{enforced} by \textbf{cleanup jobs}~--- exactly the scheduled work from \hyperref[ch:25-process-management]{Chapter 25}~--- that delete or archive data past its window. Deletion is dangerous (one wrong \texttt{WHERE} clause erases data you needed), so cleanup jobs follow safety rituals:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Dry-run first.} Log precisely what \emph{would} be deleted, review it, and only then delete for real. A cleanup job with no dry-run mode is a loaded gun.
+\item
+  \textbf{Delete in small, committed batches}, so a crash leaves the job partly done and safely resumable rather than rolling back one enormous transaction (or worse).
+\item
+  \textbf{Soft-delete before hard-delete} where reversibility matters: mark the rows, wait out a grace period, then purge.
+\item
+  \textbf{Write an audit log} of what was deleted, when, and why.
+\end{itemize}
+
+\subsection*{Deletion that actually deletes}\phantomsection\label{37-reliability:deletion-that-actually-deletes}
+
+``Delete'' is not one operation. \textbf{Soft delete} (the \texttt{deleted\_at} pattern discussed in \hyperref[ch:06-local-dependencies]{Chapter 6}; the Notes API itself uses hard deletes) hides a row, but the data is still physically present and recoverable. \textbf{Hard delete} (\texttt{DELETE\ FROM}) removes it from the table~--- yet copies persist in \textbf{backups} for the length of the backup retention window. That last point is the trap most teams miss: a user's ``deleted'' data lives on in last night's backup for another 30 days, and your privacy commitments must account for it. \textbf{Cryptographic deletion} (encrypt the data, then destroy the key) is how you render data unrecoverable when physically erasing every copy is impractical~--- without the key, the ciphertext is junk. Know which of the three your obligations actually require.
+
+\subsection*{PII and the right to be forgotten}\phantomsection\label{37-reliability:pii-and-the-right-to-be-forgotten}
+
+Privacy law (GDPR Article 17, CCPA) gives users the right to demand deletion of their personal data, and you must be able to honor it~--- which means you must know \emph{everywhere a user's PII lives}: the primary table, search indexes, caches, logs (did you log note content? you should not have~--- \hyperref[ch:16-logging-error-handling]{Chapter 16}), analytics pipelines, and backups. Two habits make this tractable. \textbf{Data minimization}: do not collect or copy PII you do not need~--- the cheapest PII to protect is the PII you never stored. \textbf{Pseudonymization}: replace identifying fields with tokens so most of your systems operate on data that is not directly identifying. Designing for deletion from day one is dramatically easier than retrofitting it onto a system that has scattered PII into a dozen places.
+
+\subsection*{Audit logs and legal holds: the exceptions}\phantomsection\label{37-reliability:audit-logs-and-legal-holds-the-exceptions}
+
+Two categories cut against normal retention. \textbf{Audit logs}~--- the record of who did what~--- frequently \emph{must} be retained for security and compliance, and specifically must \emph{not} be deletable on user request; their integrity is the entire point, so they are append-only by design. And a \textbf{legal hold} can override your retention policy outright: when data is relevant to litigation or investigation, you are legally required to \emph{stop} deleting it, even data that would normally have aged out. A retention system therefore needs an off switch~--- the ability to suspend deletion for specified data on demand.
+
+\subsection*{A data-management matrix for the Notes API}\phantomsection\label{37-reliability:a-data-management-matrix-for-the-notes-api}
+
+Bring it together as the artifact every system should have but few do~--- a table of \emph{data category × retention × deletion behavior}. The version below is written for the Notes API as it would be once it has \textbf{user accounts} and an audit log (today it has neither), because that is when the questions become real:
+
+\Needspace{21\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1806}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1806}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2306}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1954}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2128}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Data
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Class
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Retention
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+On account deletion
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+In backups
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Note content & PII & While account active & Hard-deleted & Gone when the last backup holding it expires \\
+Note metadata (\texttt{id}, timestamps) & Operational & While account active & Anonymized, kept for stats & As backups \\
+Request logs & Operational (no PII) & Container logs: rotated by size; Nginx logs: 14 days & n/a (no PII logged) & n/a \\
+Audit log & Compliance & 7 years & Retained (cannot be deleted) & 7 years \\
+Backups & Mixed & 7 days (managed-database backups) + 30 days off-site & (governed per category above) & --- \\
+\end{longtable}
+}
+
+The exact numbers are yours to choose; \emph{having the table} is the point. When someone asks ``what happens to a user's notes when they delete their account, and how long until they are truly gone?'', you can answer in a sentence~--- which, increasingly, you are legally required to be able to do.
+
+\setcounter{section}{4}
+\section{Calling Another Service}\label{37-reliability:375-calling-another-service}
+
+So far the Notes API has depended on one other system, its database. Real applications depend on many: a payment provider, an email service, a maps API, another team's service. Each one is reached over the network, and each one can be slow, down, overloaded, or simply wrong, at any moment. How an application calls other services decides whether \emph{their} bad day becomes \emph{yours}.
+
+This section adds the Notes API's first outside dependency: an \textbf{email service}. A new endpoint emails a note to an address: \texttt{POST\ /}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{42/}\allowbreak{}\texttt{email} with \texttt{\{"to":}\allowbreak{}\texttt{\ "ana@example.}\allowbreak{}\texttt{com"\}}. The feature is small, but getting it right covers everything that matters about calling another service. The remaining sections of this chapter, retries and circuit breakers, then have a real dependency to protect.
+
+\subsection*{The email service, locally and in production}\phantomsection\label{37-reliability:the-email-service-locally-and-in-production}
+
+In production, the email service is a company whose job is delivering email: Amazon SES, Postmark, SendGrid, Mailgun and others. They all work the same way. You send an HTTP request with the message, and they deliver it. On your laptop you want the same shape of API without sending real email to real people. \textbf{Mailpit} is a small email catcher, run in Docker, that accepts messages exactly like a provider would, delivers none of them, and shows every message it caught in a web page:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name}\NormalTok{ mailpit }\AttributeTok{{-}p}\NormalTok{ 127.0.0.1:8025:8025 axllent/mailpit}
+\CommentTok{\# Send API:   http://localhost:8025/api/v1/send}
+\CommentTok{\# Web inbox:  http://localhost:8025}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The application reads the service's address from configuration, like everything else (\hyperref[ch:13-configuration-externalization]{Chapter 13}):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/config.py (added)}
+\CommentTok{\# The email service (Chapter 37). Locally: Mailpit\textquotesingle{}s send API, which}
+\CommentTok{\# catches every message instead of delivering it.}
+\NormalTok{EMAIL\_API\_URL: }\BuiltInTok{str} \OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"EMAIL\_API\_URL"}\NormalTok{, }\StringTok{"http://localhost:8025/api/v1/send"}\NormalTok{)}
+\NormalTok{EMAIL\_API\_KEY: }\BuiltInTok{str} \OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"EMAIL\_API\_KEY"}\NormalTok{, }\StringTok{""}\NormalTok{)  }\CommentTok{\# Mailpit needs none}
+\NormalTok{EMAIL\_FROM: }\BuiltInTok{str} \OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"EMAIL\_FROM"}\NormalTok{, }\StringTok{"notes@example.com"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}In production, \texttt{EMAIL\_API\_URL} and \texttt{EMAIL\_API\_KEY} come from the provider. The key is a secret, and lives in the server's \texttt{.env} file with the others (\hyperref[ch:38-security]{Chapter 38}, section 38.5). Every provider's JSON looks slightly different, which is the first design point below.
+
+\subsection*{One module owns the conversation}\phantomsection\label{37-reliability:one-module-owns-the-conversation}
+
+The most important decision is where the calling code lives. The answer: in \textbf{one module}, which is the only place in the application that knows the provider exists:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/email.py}
+\CommentTok{"""}
+\CommentTok{The one module that talks to the email service.}
+
+\CommentTok{The rest of the application knows only send\_email() and the exceptions}
+\CommentTok{below. Switching to another provider means rewriting this file, nothing else.}
+\CommentTok{"""}
+
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{import}\NormalTok{ random}
+\ImportTok{import}\NormalTok{ time}
+\ImportTok{import}\NormalTok{ uuid}
+\ImportTok{from}\NormalTok{ typing }\ImportTok{import}\NormalTok{ Any}
+
+\ImportTok{import}\NormalTok{ requests}
+
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ EMAIL\_API\_KEY, EMAIL\_API\_URL, EMAIL\_FROM}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\NormalTok{CONNECT\_TIMEOUT }\OperatorTok{=} \FloatTok{2.0}  \CommentTok{\# seconds to open the connection}
+\NormalTok{READ\_TIMEOUT }\OperatorTok{=} \FloatTok{5.0}  \CommentTok{\# seconds to wait for the answer, once the request is sent}
+\NormalTok{MAX\_ATTEMPTS }\OperatorTok{=} \DecValTok{2}
+\NormalTok{MAX\_WAIT }\OperatorTok{=} \FloatTok{2.0}  \CommentTok{\# never sleep longer than this between attempts}
+
+
+\KeywordTok{class}\NormalTok{ EmailError(}\PreprocessorTok{Exception}\NormalTok{):}
+    \CommentTok{"""Sending failed. The subclass says what the failure means."""}
+
+
+\KeywordTok{class}\NormalTok{ EmailUnavailableError(EmailError):}
+    \CommentTok{"""Not sent: the service was unreachable or overloaded. Try again later."""}
+
+
+\KeywordTok{class}\NormalTok{ EmailOutcomeUnknownError(EmailError):}
+    \CommentTok{"""The request went out but no answer came back: it may have been sent."""}
+
+
+\KeywordTok{class}\NormalTok{ EmailRejectedError(EmailError):}
+    \CommentTok{"""The service refused the request itself: a bug on our side. Do not retry."""}
+
+
+\KeywordTok{def}\NormalTok{ send\_email(to: }\BuiltInTok{str}\NormalTok{, subject: }\BuiltInTok{str}\NormalTok{, text: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""Send one email and return the service\textquotesingle{}s message id."""}
+\NormalTok{    payload: }\BuiltInTok{dict}\NormalTok{[}\BuiltInTok{str}\NormalTok{, Any] }\OperatorTok{=}\NormalTok{ \{}
+        \StringTok{"From"}\NormalTok{: \{}\StringTok{"Email"}\NormalTok{: EMAIL\_FROM\},}
+        \StringTok{"To"}\NormalTok{: [\{}\StringTok{"Email"}\NormalTok{: to\}],}
+        \StringTok{"Subject"}\NormalTok{: subject,}
+        \StringTok{"Text"}\NormalTok{: text,}
+\NormalTok{    \}}
+    \CommentTok{\# The same key on every attempt: a service that supports idempotency}
+    \CommentTok{\# keys sends the email once, however many times we ask}
+\NormalTok{    headers }\OperatorTok{=}\NormalTok{ \{}\StringTok{"Idempotency{-}Key"}\NormalTok{: }\BuiltInTok{str}\NormalTok{(uuid.uuid4())\}}
+    \ControlFlowTok{if}\NormalTok{ EMAIL\_API\_KEY:}
+\NormalTok{        headers[}\StringTok{"Authorization"}\NormalTok{] }\OperatorTok{=} \SpecialStringTok{f"Bearer }\SpecialCharTok{\{}\NormalTok{EMAIL\_API\_KEY}\SpecialCharTok{\}}\SpecialStringTok{"}
+
+    \ControlFlowTok{for}\NormalTok{ attempt }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{1}\NormalTok{, MAX\_ATTEMPTS }\OperatorTok{+} \DecValTok{1}\NormalTok{):}
+\NormalTok{        started }\OperatorTok{=}\NormalTok{ time.perf\_counter()}
+\NormalTok{        wait }\OperatorTok{=}\NormalTok{ random.uniform(}\FloatTok{0.25}\NormalTok{, }\FloatTok{0.75}\NormalTok{) }\OperatorTok{*}\NormalTok{ attempt  }\CommentTok{\# backoff with jitter}
+        \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{            response }\OperatorTok{=}\NormalTok{ requests.post(}
+\NormalTok{                EMAIL\_API\_URL,}
+\NormalTok{                json}\OperatorTok{=}\NormalTok{payload,}
+\NormalTok{                headers}\OperatorTok{=}\NormalTok{headers,}
+\NormalTok{                timeout}\OperatorTok{=}\NormalTok{(CONNECT\_TIMEOUT, READ\_TIMEOUT),}
+\NormalTok{            )}
+        \ControlFlowTok{except}\NormalTok{ requests.ReadTimeout:}
+            \CommentTok{\# The request reached the service; only the answer is missing.}
+            \CommentTok{\# Retrying could send the email twice, so we do not.}
+\NormalTok{            \_log(attempt, started, }\StringTok{"no answer"}\NormalTok{)}
+            \ControlFlowTok{raise}\NormalTok{ EmailOutcomeUnknownError(}
+                \SpecialStringTok{f"no answer within }\SpecialCharTok{\{}\NormalTok{READ\_TIMEOUT}\SpecialCharTok{\}}\SpecialStringTok{ s"}
+\NormalTok{            ) }\ImportTok{from} \VariableTok{None}
+        \ControlFlowTok{except}\NormalTok{ requests.}\PreprocessorTok{ConnectionError} \ImportTok{as}\NormalTok{ error:  }\CommentTok{\# includes ConnectTimeout}
+\NormalTok{            \_log(attempt, started, }\SpecialStringTok{f"connection failed (}\SpecialCharTok{\{}\BuiltInTok{type}\NormalTok{(error)}\SpecialCharTok{.}\VariableTok{\_\_name\_\_}\SpecialCharTok{\}}\SpecialStringTok{)"}\NormalTok{)}
+\NormalTok{            failure }\OperatorTok{=}\NormalTok{ EmailUnavailableError(}\StringTok{"could not reach the email service"}\NormalTok{)}
+        \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{            \_log(attempt, started, }\SpecialStringTok{f"HTTP }\SpecialCharTok{\{}\NormalTok{response}\SpecialCharTok{.}\NormalTok{status\_code}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+            \ControlFlowTok{if}\NormalTok{ response.ok:}
+                \ControlFlowTok{return}\NormalTok{ response.json()[}\StringTok{"ID"}\NormalTok{]}
+            \ControlFlowTok{if}\NormalTok{ response.status\_code }\OperatorTok{!=} \DecValTok{429} \KeywordTok{and}\NormalTok{ response.status\_code }\OperatorTok{\textless{}} \DecValTok{500}\NormalTok{:}
+                \ControlFlowTok{raise}\NormalTok{ EmailRejectedError(}
+                    \SpecialStringTok{f"HTTP }\SpecialCharTok{\{}\NormalTok{response}\SpecialCharTok{.}\NormalTok{status\_code}\SpecialCharTok{\}}\SpecialStringTok{: }\SpecialCharTok{\{}\NormalTok{response}\SpecialCharTok{.}\NormalTok{text[:}\DecValTok{200}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{"}
+\NormalTok{                )}
+            \CommentTok{\# 429 Too Many Requests, or a 5xx: the service\textquotesingle{}s problem, maybe}
+            \CommentTok{\# temporary. Wait as long as it asks (Retry{-}After), within reason.}
+\NormalTok{            retry\_after }\OperatorTok{=}\NormalTok{ response.headers.get(}\StringTok{"Retry{-}After"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+            \ControlFlowTok{if}\NormalTok{ retry\_after.isdigit():}
+\NormalTok{                wait }\OperatorTok{=} \BuiltInTok{float}\NormalTok{(retry\_after)}
+\NormalTok{            failure }\OperatorTok{=}\NormalTok{ EmailUnavailableError(}\SpecialStringTok{f"HTTP }\SpecialCharTok{\{}\NormalTok{response}\SpecialCharTok{.}\NormalTok{status\_code}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{if}\NormalTok{ attempt }\OperatorTok{\textless{}}\NormalTok{ MAX\_ATTEMPTS }\KeywordTok{and}\NormalTok{ wait }\OperatorTok{\textless{}=}\NormalTok{ MAX\_WAIT:}
+\NormalTok{            time.sleep(wait)}
+        \ControlFlowTok{else}\NormalTok{:}
+            \ControlFlowTok{break}
+    \ControlFlowTok{raise}\NormalTok{ failure}
+
+
+\KeywordTok{def}\NormalTok{ \_log(attempt: }\BuiltInTok{int}\NormalTok{, started: }\BuiltInTok{float}\NormalTok{, outcome: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{\# Never the recipient or the text: both are the user\textquotesingle{}s private data}
+\NormalTok{    elapsed\_ms }\OperatorTok{=}\NormalTok{ (time.perf\_counter() }\OperatorTok{{-}}\NormalTok{ started) }\OperatorTok{*} \DecValTok{1000}
+\NormalTok{    logger.info(}\StringTok{"Email API attempt }\SpecialCharTok{\%d}\StringTok{: }\SpecialCharTok{\%s}\StringTok{ in \%.0f ms"}\NormalTok{, attempt, outcome, elapsed\_ms)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The rest of the application sees one function, \texttt{send\_email()}, and three exceptions. Nothing else knows about URLs, JSON shapes or HTTP status codes. Switching providers later means rewriting this one file. It also gives the tests a clean seam: they replace \emph{our} \texttt{send\_email()}, not the \texttt{requests} library (Part III's ``never mock what you don't own'').
+
+Add the HTTP library to \texttt{requirements.txt}, pinned as always: \texttt{requests==2.31.0}.
+
+\subsection*{Rule 1: every call has a timeout}\phantomsection\label{37-reliability:rule-1-every-call-has-a-timeout}
+
+\texttt{requests} waits \textbf{forever} by default. A provider that accepts the connection and never answers would hold that Gunicorn worker until the process is restarted. A few such requests, and every worker is stuck waiting, and the whole API is down because another company's API is slow. So \emph{every} network call gets a timeout, and here it gets two:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{The connect timeout} (2 seconds) limits how long it may take to \emph{open} the connection. If it expires, the request never left: nothing happened on the other side.
+\item
+  \textbf{The read timeout} (5 seconds) limits how long to wait for the \emph{answer} once the request has been sent. If it expires, the request did arrive. Whether the email was sent is unknown.
+\end{itemize}
+
+\noindent{}That difference matters so much that it gets a rule of its own.
+
+\subsection*{Rule 2: a timeout does not mean it failed}\phantomsection\label{37-reliability:rule-2-a-timeout-does-not-mean-it-failed}
+
+When a call to another service times out while waiting for the answer, there are three possibilities. The service never received it, or it received it and failed, or it received it, \textbf{sent the email}, and the answer got lost or delayed. From the caller's side these look identical. A system that treats ``timeout'' as ``failed'' and simply tries again will, sooner or later, send the same email twice, charge the same card twice, or create the same order twice.
+
+That is why the module has \emph{three} failure types, each meaning something different: \texttt{EmailUnavailableError}, \texttt{EmailOutcomeUnknownError} and \texttt{EmailRejectedError}.
+
+\Needspace{18\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1806}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3065}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2063}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3065}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Failure
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What happened
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Safe to retry?
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+The API's answer
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Unavailable & never got through (connection failed), or the service said ``not now'' (429, 5xx) & yes & \texttt{503\ Service\ Unavailable}, \texttt{Retry-After:\ 60} \\
+Outcome unknown & sent, but no answer in time & not without an idempotency key & \texttt{504\ Gateway\ Timeout}: ``the email may have been sent'' \\
+Rejected & the service refused our request (400, 401, 422\ldots) & no: the request itself is wrong & \texttt{502\ Bad\ Gateway}, and an error in the log \\
+\end{longtable}
+}
+
+The status codes are the standard ones for a server that depends on another server. \texttt{502} and \texttt{504} say ``the problem is behind me'', and \texttt{503} says ``come back later''. The client learns what actually happened, including, honestly, that nobody knows.
+
+\subsection*{Rule 3: retry only what is safe, and only briefly}\phantomsection\label{37-reliability:rule-3-retry-only-what-is-safe-and-only-briefly}
+
+The module retries a failed attempt once, and only when the failure is \texttt{EmailUnavailableError}, with a short, randomized pause (the jitter of section 37.6). For a \texttt{429\ Too\ Many\ Requests} or \texttt{503}, the service may say how long to wait in a \texttt{Retry-After} header. The module honours it, but only up to two seconds, because it is waiting inside someone's HTTP request. A service that asks for a minute gets a \texttt{503} passed back to our own client, with our own \texttt{Retry-After}.
+
+It never retries \texttt{EmailOutcomeUnknownError}, because a second attempt could deliver a second email. The way to make even that retry safe is an \textbf{idempotency key} (the idea of section 34.10). Each email gets a unique key, and every attempt sends the \emph{same} key in an \texttt{Idempotency-Key} header. A provider that supports idempotency keys (many payment and some email APIs do; Mailpit ignores the header) recognizes the repeat and does the work only once. With such a provider, the read timeout could be retried as well.
+
+(Strictly, a connection that breaks \emph{after} the request was sent is as uncertain as a read timeout, but \texttt{requests} reports it as a \texttt{ConnectionError}, exactly like a connection that never opened, so the module cannot tell the two apart. The retry is one attempt, sent with the same idempotency key. That is an acceptable risk for a note sent by email, and would not be acceptable for a payment.)
+
+\subsection*{Rule 4: log every call, but not its contents}\phantomsection\label{37-reliability:rule-4-log-every-call-but-not-its-contents}
+
+Each attempt writes one log line: the attempt number, the outcome, and how long it took.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+INFO     app.email          | Email API attempt 1: HTTP 503 in 12 ms
+INFO     app.email          | Email API attempt 2: HTTP 200 in 9 ms
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}When a user reports that ``the email never arrived'', these lines, joined to the request by its request ID (\hyperref[ch:35-observability]{Chapter 35}), tell you whether it was ever sent. The same numbers make good metrics: the calls, their failures, and their latency, per outside service. The lines deliberately leave out the recipient and the text. Those are the user's data, and logs are read by far more people than the database is.
+
+\subsection*{The endpoint}\phantomsection\label{37-reliability:the-endpoint}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/validation.py (added)}
+\CommentTok{\# Deliberately loose: the only real test of an address is sending it mail}
+\NormalTok{EMAIL }\OperatorTok{=}\NormalTok{ re.}\BuiltInTok{compile}\NormalTok{(}\VerbatimStringTok{r"}\PreprocessorTok{[\^{}@}\DecValTok{\textbackslash{}s}\PreprocessorTok{]}\OperatorTok{+}\VerbatimStringTok{@}\PreprocessorTok{[\^{}@}\DecValTok{\textbackslash{}s}\PreprocessorTok{]}\OperatorTok{+}\CharTok{\textbackslash{}.}\PreprocessorTok{[\^{}@}\DecValTok{\textbackslash{}s}\PreprocessorTok{]}\OperatorTok{+}\VerbatimStringTok{"}\NormalTok{)}
+
+
+\CommentTok{\# (a method of the Validator class)}
+    \KeywordTok{def}\NormalTok{ require\_email(}\VariableTok{self}\NormalTok{, field: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str} \OperatorTok{|} \VariableTok{None}\NormalTok{:}
+        \CommentTok{"""A required email address, lower{-}cased."""}
+\NormalTok{        value }\OperatorTok{=} \VariableTok{self}\NormalTok{.require\_string(field, max\_length}\OperatorTok{=}\DecValTok{254}\NormalTok{)}
+        \ControlFlowTok{if}\NormalTok{ value }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+            \ControlFlowTok{return} \VariableTok{None}
+        \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ EMAIL.fullmatch(value):}
+            \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} is not a valid email address"}\NormalTok{)}
+            \ControlFlowTok{return} \VariableTok{None}
+        \ControlFlowTok{return}\NormalTok{ value.lower()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/notes.py (added)}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}/email"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ email\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""Email a note: POST \{"to": "someone@example.com"\} → 202 Accepted."""}
+\NormalTok{    validator }\OperatorTok{=}\NormalTok{ Validator(request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{))}
+\NormalTok{    to }\OperatorTok{=}\NormalTok{ validator.require\_email(}\StringTok{"to"}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ to }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ validator.error\_response()}
+
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"SELECT content FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+    \CommentTok{\# End the (read{-}only) transaction BEFORE the slow network call: never}
+    \CommentTok{\# hold a transaction open while waiting on another service (33.13)}
+\NormalTok{    db.rollback()}
+
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        message\_id }\OperatorTok{=}\NormalTok{ send\_email(}
+\NormalTok{            to}\OperatorTok{=}\NormalTok{to, subject}\OperatorTok{=}\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, text}\OperatorTok{=}\NormalTok{row[}\StringTok{"content"}\NormalTok{]}
+\NormalTok{        )}
+    \ControlFlowTok{except}\NormalTok{ EmailUnavailableError:}
+        \ControlFlowTok{return}\NormalTok{ (}
+\NormalTok{            jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"The email service is unavailable; try again later"}\NormalTok{\}),}
+            \DecValTok{503}\NormalTok{,}
+\NormalTok{            \{}\StringTok{"Retry{-}After"}\NormalTok{: }\StringTok{"60"}\NormalTok{\},}
+\NormalTok{        )}
+    \ControlFlowTok{except}\NormalTok{ EmailOutcomeUnknownError:}
+\NormalTok{        message }\OperatorTok{=}\NormalTok{ (}
+            \StringTok{"The email service did not answer in time; the email may have been sent"}
+\NormalTok{        )}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: message\}), }\DecValTok{504}
+    \ControlFlowTok{except}\NormalTok{ EmailRejectedError:}
+\NormalTok{        logger.exception(}
+            \StringTok{"The email service rejected a request for note id=}\SpecialCharTok{\%d}\StringTok{."}\NormalTok{, note\_id}
+\NormalTok{        )}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"The email could not be sent"}\NormalTok{\}), }\DecValTok{502}
+
+\NormalTok{    logger.info(}\StringTok{"Emailed note id=}\SpecialCharTok{\%d}\StringTok{ (message }\SpecialCharTok{\%s}\StringTok{)."}\NormalTok{, note\_id, message\_id)}
+    \CommentTok{\# 202 Accepted: the service has taken the email; delivery happens later}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"status"}\NormalTok{: }\StringTok{"accepted"}\NormalTok{\}), }\DecValTok{202}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Four details deserve a note:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{The transaction ends before the network call.} Reading the note opened a transaction (psycopg2 always does). \texttt{db.rollback()} ends it \emph{before} waiting on the email service, following the rule from section 33.13: never hold a transaction open while waiting on something slow. A connection ``idle in transaction'' for seconds holds back the database's clean-up work, and with locks involved it blocks other requests.
+\item
+  \textbf{\texttt{202\ Accepted}, not \texttt{200\ OK}.} The email service has \emph{accepted} the message; delivery happens later, and can still fail (a full mailbox, a typo in the address). \texttt{202} says exactly that. It also means the contract does not change when \hyperref[ch:41-event-driven-architecture]{Chapter 41} moves the sending into a background job: the answer will still be ``accepted''.
+\item
+  \textbf{The contract grows.} The new endpoint, its \texttt{202} and its three error statuses go into \texttt{openapi.yaml} in the same change (section 34.10), and the contract test checks them.
+\item
+  \textbf{The request waits for the provider.} In the worst case, two attempts with their timeouts keep one Gunicorn worker busy for more than ten seconds. That is acceptable for a rarely used feature, and it is exactly the problem that Chapter 41 solves.
+\end{itemize}
+
+\begin{warnbox}
+
+\textbf{Warning:} an endpoint that sends email to \emph{any address} is a gift to spammers. They send one request per victim, and your domain's reputation (and the provider's patience) pays for it. Before this goes live, it needs accounts (\hyperref[ch:38-security]{Chapter 38}), which ensure only logged-in users can send, and a per-user limit on how many emails an hour. Many products go further and send only to the user's own, verified address.
+
+\end{warnbox}
+
+\subsection*{Testing it without sending email}\phantomsection\label{37-reliability:testing-it-without-sending-email}
+
+Two kinds of test cover the feature. The endpoint's tests replace \texttt{send\_email()} with a \textbf{fake}: a small class that records what would have been sent, or raises the failure the test asks for.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_email\_note.py (excerpt)}
+\KeywordTok{class}\NormalTok{ FakeEmail:}
+    \CommentTok{"""Stands in for app.email.send\_email: records messages, or fails on request."""}
+
+    \KeywordTok{def} \FunctionTok{\_\_init\_\_}\NormalTok{(}\VariableTok{self}\NormalTok{):}
+        \VariableTok{self}\NormalTok{.sent }\OperatorTok{=}\NormalTok{ []}
+        \VariableTok{self}\NormalTok{.fail\_with }\OperatorTok{=} \VariableTok{None}
+
+    \KeywordTok{def} \FunctionTok{\_\_call\_\_}\NormalTok{(}\VariableTok{self}\NormalTok{, to, subject, text):}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.fail\_with:}
+            \ControlFlowTok{raise} \VariableTok{self}\NormalTok{.fail\_with}
+        \VariableTok{self}\NormalTok{.sent.append(\{}\StringTok{"to"}\NormalTok{: to, }\StringTok{"subject"}\NormalTok{: subject, }\StringTok{"text"}\NormalTok{: text\})}
+        \ControlFlowTok{return} \StringTok{"fake{-}message{-}id"}
+
+
+\AttributeTok{@pytest.fixture}
+\KeywordTok{def}\NormalTok{ fake\_email(monkeypatch):}
+\NormalTok{    fake }\OperatorTok{=}\NormalTok{ FakeEmail()}
+    \CommentTok{\# Replace OUR function where the route looks it up, not the requests library}
+\NormalTok{    monkeypatch.}\BuiltInTok{setattr}\NormalTok{(}\StringTok{"app.routes.notes.send\_email"}\NormalTok{, fake)}
+    \ControlFlowTok{return}\NormalTok{ fake}
+
+
+\KeywordTok{def}\NormalTok{ test\_emailing\_a\_note\_sends\_its\_content(client, create\_note, fake\_email):}
+\NormalTok{    note }\OperatorTok{=}\NormalTok{ create\_note(}\StringTok{"Buy milk"}\NormalTok{)}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ client.post(}
+        \SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note[}\StringTok{\textquotesingle{}id\textquotesingle{}}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{/email"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"to"}\NormalTok{: }\StringTok{"Ana@Example.com"}\NormalTok{\}}
+\NormalTok{    )}
+    \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{202}
+    \ControlFlowTok{assert}\NormalTok{ fake\_email.sent }\OperatorTok{==}\NormalTok{ [}
+\NormalTok{        \{}
+            \StringTok{"to"}\NormalTok{: }\StringTok{"ana@example.com"}\NormalTok{,}
+            \StringTok{"subject"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note[}\StringTok{\textquotesingle{}id\textquotesingle{}}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{,}
+            \StringTok{"text"}\NormalTok{: }\StringTok{"Buy milk"}\NormalTok{,}
+\NormalTok{        \}}
+\NormalTok{    ]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}A parametrized test (section 17.8) then checks that each of the three failures produces its own status code.
+
+The email module itself is tested against a \textbf{real HTTP server}: a tiny one from Python's standard library, started in a background thread for each test and scripted to misbehave. It answers \texttt{503} and then \texttt{200}; it refuses with \texttt{422}; or it answers only after the read timeout. There is no mock anywhere: real sockets, real timeouts, real retries.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_email\_client.py (excerpt)}
+\KeywordTok{def}\NormalTok{ test\_a\_temporary\_failure\_is\_retried\_with\_the\_same\_key(email\_service):}
+\NormalTok{    email\_service.script }\OperatorTok{=}\NormalTok{ [(}\DecValTok{503}\NormalTok{, \{}\StringTok{"Retry{-}After"}\NormalTok{: }\StringTok{"0"}\NormalTok{\}, }\DecValTok{0}\NormalTok{), (}\DecValTok{200}\NormalTok{, \{\}, }\DecValTok{0}\NormalTok{)]}
+    \ControlFlowTok{assert}\NormalTok{ email.send\_email(}\StringTok{"ana@example.com"}\NormalTok{, }\StringTok{"Hi"}\NormalTok{, }\StringTok{"Hello"}\NormalTok{) }\OperatorTok{==} \StringTok{"msg{-}1"}
+\NormalTok{    keys }\OperatorTok{=}\NormalTok{ [r[}\StringTok{"headers"}\NormalTok{][}\StringTok{"Idempotency{-}Key"}\NormalTok{] }\ControlFlowTok{for}\NormalTok{ r }\KeywordTok{in}\NormalTok{ email\_service.requests]}
+    \ControlFlowTok{assert} \BuiltInTok{len}\NormalTok{(keys) }\OperatorTok{==} \DecValTok{2} \KeywordTok{and}\NormalTok{ keys[}\DecValTok{0}\NormalTok{] }\OperatorTok{==}\NormalTok{ keys[}\DecValTok{1}\NormalTok{]}
+
+
+\KeywordTok{def}\NormalTok{ test\_a\_slow\_answer\_means\_the\_outcome\_is\_unknown(email\_service):}
+\NormalTok{    email\_service.script }\OperatorTok{=}\NormalTok{ [(}\DecValTok{200}\NormalTok{, \{\}, }\FloatTok{1.0}\NormalTok{)]  }\CommentTok{\# answers after the read timeout}
+    \ControlFlowTok{with}\NormalTok{ pytest.raises(email.EmailOutcomeUnknownError):}
+\NormalTok{        email.send\_email(}\StringTok{"ana@example.com"}\NormalTok{, }\StringTok{"Hi"}\NormalTok{, }\StringTok{"Hello"}\NormalTok{)}
+    \ControlFlowTok{assert} \BuiltInTok{len}\NormalTok{(email\_service.requests) }\OperatorTok{==} \DecValTok{1}  \CommentTok{\# sent once, never retried}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(The \texttt{email\_service} fixture is about thirty lines: an \texttt{http.}\allowbreak{}\texttt{server.}\allowbreak{}\texttt{ThreadingHTTPServer} on a free port, whose handler records each request and replays the scripted answers. It also shortens \texttt{READ\_TIMEOUT} to 0.3 seconds with \texttt{monkeypatch}, so that the one-second answer above counts as too late, and the test does not have to wait five. Its clean-up stops the server \emph{and} closes its socket. Forgetting the second step leaves a socket open, and with \texttt{filterwarnings\ =}\allowbreak{}\texttt{\ {[}"error"{]}} in \texttt{pyproject.toml} (\hyperref[ch:17-build-process]{Chapter 17}), the resulting \texttt{ResourceWarning} fails a \emph{different} test, later in the run. That is a genuinely confusing failure, and a good example of the ``shared state'' cause of flaky tests in section 17.8.)
+
+Finally, an end-to-end check by hand, against Mailpit:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{$}\NormalTok{ curl }\AttributeTok{{-}s} \AttributeTok{{-}X}\NormalTok{ POST http://localhost:5000/notes/1/email }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"to": "ana@example.com"\}\textquotesingle{}}
+\ExtensionTok{\{}\StringTok{"status"}\ExtensionTok{:}\StringTok{"accepted"}\ExtensionTok{\}}
+\CommentTok{\# The message appears in Mailpit\textquotesingle{}s inbox at http://localhost:8025}
+
+\ExtensionTok{$}\NormalTok{ docker stop mailpit}
+\ExtensionTok{$}\NormalTok{ curl }\AttributeTok{{-}s} \AttributeTok{{-}X}\NormalTok{ POST http://localhost:5000/notes/1/email }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"to": "ana@example.com"\}\textquotesingle{}}
+\ExtensionTok{\{}\StringTok{"error"}\ExtensionTok{:}\StringTok{"The email service is unavailable; try again later"}\ExtensionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The second call comes back in under a second, as a clean \texttt{503} with \texttt{Retry-After}. It is not a \texttt{500}, and it is not a hang. When another service fails, this is what your service should look like.
+
+\setcounter{section}{5}
+\section{Retry Logic and Exponential Backoff}\label{37-reliability:376-retry-logic-and-exponential-backoff}
+
+Transient failures~--- temporary network blips, brief database overload~--- often resolve themselves if the operation is retried after a short wait. \textbf{Retry logic} handles these transient failures automatically.
+
+\subsection*{Naive retry (wrong)}\phantomsection\label{37-reliability:naive-retry-wrong}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{for}\NormalTok{ attempt }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{3}\NormalTok{):}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        result }\OperatorTok{=}\NormalTok{ call\_external\_service()}
+        \ControlFlowTok{break}
+    \ControlFlowTok{except} \PreprocessorTok{Exception}\NormalTok{:}
+        \ControlFlowTok{continue}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Problems:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Retry storm}: if the external service is down, 1000 clients all retry at the same time, creating 3000 requests that overwhelm the recovering service.
+\item
+  \textbf{No backoff}: retries happen immediately, not giving the service time to recover.
+\item
+  \textbf{No distinction}: retries transient errors (correct) and permanent errors (wrong~--- no point retrying a 404).
+\end{enumerate}
+
+\subsection*{Exponential backoff with jitter (correct)}\phantomsection\label{37-reliability:exponential-backoff-with-jitter-correct}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ time}
+\ImportTok{import}\NormalTok{ random}
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{from}\NormalTok{ typing }\ImportTok{import}\NormalTok{ TypeVar, Callable, Optional}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\NormalTok{T }\OperatorTok{=}\NormalTok{ TypeVar(}\StringTok{"T"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ retry\_with\_backoff(}
+\NormalTok{    func: Callable[[], T],}
+\NormalTok{    max\_attempts: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{3}\NormalTok{,}
+\NormalTok{    base\_delay: }\BuiltInTok{float} \OperatorTok{=} \FloatTok{0.5}\NormalTok{,   }\CommentTok{\# Initial delay in seconds}
+\NormalTok{    max\_delay: }\BuiltInTok{float} \OperatorTok{=} \FloatTok{10.0}\NormalTok{,   }\CommentTok{\# Maximum delay in seconds}
+\NormalTok{    backoff\_factor: }\BuiltInTok{float} \OperatorTok{=} \FloatTok{2.0}\NormalTok{,}
+\NormalTok{    retryable\_exceptions: }\BuiltInTok{tuple} \OperatorTok{=}\NormalTok{ (}\PreprocessorTok{ConnectionError}\NormalTok{, }\PreprocessorTok{TimeoutError}\NormalTok{),}
+\NormalTok{) }\OperatorTok{{-}\textgreater{}}\NormalTok{ T:}
+    \CommentTok{"""}
+\CommentTok{    Call func with exponential backoff on failure.}
+
+\CommentTok{    Delay schedule (base\_delay=0.5, backoff\_factor=2):}
+\CommentTok{    {-} Attempt 1 fails: wait 0.5 * (0.5 to 1.5) seconds (jitter)}
+\CommentTok{    {-} Attempt 2 fails: wait 1.0 * (0.5 to 1.5) seconds}
+\CommentTok{    {-} Attempt 3 fails: raise the exception}
+
+\CommentTok{    The jitter (random multiplier) prevents all retrying clients}
+\CommentTok{    from hitting the service at the same instant.}
+
+\CommentTok{    Only the exceptions in retryable\_exceptions are retried — pass the}
+\CommentTok{    transient ones for your case. Anything else (a bug, a 404, bad}
+\CommentTok{    input) is raised at once: retrying cannot fix it.}
+\CommentTok{    """}
+\NormalTok{    delay }\OperatorTok{=}\NormalTok{ base\_delay}
+\NormalTok{    last\_exception }\OperatorTok{=} \VariableTok{None}
+
+    \ControlFlowTok{for}\NormalTok{ attempt }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{1}\NormalTok{, max\_attempts }\OperatorTok{+} \DecValTok{1}\NormalTok{):}
+        \ControlFlowTok{try}\NormalTok{:}
+            \ControlFlowTok{return}\NormalTok{ func()}
+        \ControlFlowTok{except}\NormalTok{ retryable\_exceptions }\ImportTok{as}\NormalTok{ e:}
+\NormalTok{            last\_exception }\OperatorTok{=}\NormalTok{ e}
+            \ControlFlowTok{if}\NormalTok{ attempt }\OperatorTok{==}\NormalTok{ max\_attempts:}
+                \ControlFlowTok{break}
+            \CommentTok{\# Exponential backoff with ±50\% jitter}
+            \CommentTok{\# (jitter spreads retries across a time window instead of synchronizing them)}
+\NormalTok{            jittered\_delay }\OperatorTok{=}\NormalTok{ random.uniform(delay }\OperatorTok{*} \FloatTok{0.5}\NormalTok{, delay }\OperatorTok{*} \FloatTok{1.5}\NormalTok{)}
+\NormalTok{            actual\_delay }\OperatorTok{=} \BuiltInTok{min}\NormalTok{(jittered\_delay, max\_delay)}
+\NormalTok{            logger.warning(}
+                \StringTok{"Attempt }\SpecialCharTok{\%d}\StringTok{/}\SpecialCharTok{\%d}\StringTok{ failed: }\SpecialCharTok{\%s}\StringTok{. Retrying in }\SpecialCharTok{\%.2f}\StringTok{ seconds."}\NormalTok{,}
+\NormalTok{                attempt, max\_attempts, e, actual\_delay,}
+\NormalTok{            )}
+\NormalTok{            time.sleep(actual\_delay)}
+\NormalTok{            delay }\OperatorTok{=} \BuiltInTok{min}\NormalTok{(delay }\OperatorTok{*}\NormalTok{ backoff\_factor, max\_delay)}
+
+    \ControlFlowTok{raise}\NormalTok{ last\_exception}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Using it for database operations:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ psycopg2}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ g}
+
+\KeywordTok{def}\NormalTok{ get\_note\_with\_retry(note\_id: }\BuiltInTok{int}\NormalTok{) }\OperatorTok{{-}\textgreater{}}\NormalTok{ Optional[}\BuiltInTok{dict}\NormalTok{]:}
+    \KeywordTok{def}\NormalTok{ attempt():}
+        \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{            cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{            cursor.execute(sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+            \ControlFlowTok{return}\NormalTok{ cursor.fetchone()}
+        \ControlFlowTok{except}\NormalTok{ psycopg2.OperationalError:}
+            \CommentTok{\# get\_db() keeps the connection in g.db. After a connection error}
+            \CommentTok{\# it is dead: throw it away, so the next attempt opens a new one}
+            \CommentTok{\# instead of failing on the same broken connection}
+\NormalTok{            db }\OperatorTok{=}\NormalTok{ g.pop(}\StringTok{"db"}\NormalTok{, }\VariableTok{None}\NormalTok{)}
+            \ControlFlowTok{if}\NormalTok{ db }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+\NormalTok{                db.close()}
+            \ControlFlowTok{raise}
+
+    \ControlFlowTok{return}\NormalTok{ retry\_with\_backoff(}
+\NormalTok{        attempt,}
+\NormalTok{        max\_attempts}\OperatorTok{=}\DecValTok{3}\NormalTok{,}
+\NormalTok{        base\_delay}\OperatorTok{=}\FloatTok{0.1}\NormalTok{,}
+\NormalTok{        retryable\_exceptions}\OperatorTok{=}\NormalTok{(psycopg2.OperationalError,),  }\CommentTok{\# Only retry connection errors}
+        \CommentTok{\# Don\textquotesingle{}t retry ProgrammingError (bad SQL) — that\textquotesingle{}s a code bug}
+\NormalTok{    )}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}One caution: a retry inside a request handler holds a Gunicorn worker while it sleeps. Keep the delays short (here, a few hundred milliseconds in total). With two or three sync workers, long retries during an outage would tie up every worker and turn a database blip into a full outage of the API.
+
+\subsection*{\texorpdfstring{The \texttt{tenacity} library}{The tenacity library}}\phantomsection\label{37-reliability:the-tenacity-library}
+
+The \texttt{tenacity} library provides a more complete retry implementation:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install tenacity}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ logging}
+
+\ImportTok{import}\NormalTok{ psycopg2}
+\ImportTok{from}\NormalTok{ tenacity }\ImportTok{import}\NormalTok{ (}
+\NormalTok{    retry,}
+\NormalTok{    stop\_after\_attempt,}
+\NormalTok{    wait\_random\_exponential,}
+\NormalTok{    retry\_if\_exception\_type,}
+\NormalTok{    before\_sleep\_log,}
+\NormalTok{)}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\AttributeTok{@retry}\NormalTok{(}
+\NormalTok{    stop}\OperatorTok{=}\NormalTok{stop\_after\_attempt(}\DecValTok{3}\NormalTok{),}
+\NormalTok{    wait}\OperatorTok{=}\NormalTok{wait\_random\_exponential(multiplier}\OperatorTok{=}\FloatTok{0.5}\NormalTok{, }\BuiltInTok{max}\OperatorTok{=}\DecValTok{10}\NormalTok{),}
+\NormalTok{    retry}\OperatorTok{=}\NormalTok{retry\_if\_exception\_type(psycopg2.OperationalError),}
+\NormalTok{    before\_sleep}\OperatorTok{=}\NormalTok{before\_sleep\_log(logger, logging.WARNING),}
+\NormalTok{)}
+\KeywordTok{def}\NormalTok{ fetch\_all(query, params}\OperatorTok{=}\NormalTok{()):}
+    \CommentTok{\# Opens (or reuses) the connection inside the retried function, so}
+    \CommentTok{\# the same connection{-}discarding rule as above applies}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(query, params)}
+    \ControlFlowTok{return}\NormalTok{ cursor.fetchall()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{6}
+\section{Circuit Breaker Pattern}\label{37-reliability:377-circuit-breaker-pattern}
+
+The \textbf{circuit breaker} prevents an application from repeatedly calling a failing service, giving the service time to recover and preventing the failure from cascading.
+
+\begin{diagrambox}[short]{284.9pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+States:
+┌──────────┐  failures ≥ threshold  ┌──────────┐
+│  CLOSED  │ ─────────────────────► │   OPEN   │
+│ (normal) │                        │ (reject) │
+└──────────┘                        └──────────┘
+     ▲                                    │
+     │ success                            │ timeout expires
+     │                              ┌─────▼─────┐
+     └───────────────────────────── │ HALF-OPEN │
+                                    │  (probe)  │
+                                    └───────────┘
+       (a failed probe in HALF-OPEN goes back to OPEN)
+\end{Verbatim}
+\end{diagrambox}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{CLOSED} (normal): requests pass through. If failures exceed a threshold, open the circuit.
+\item
+  \textbf{OPEN} (failing): immediately reject requests (return error without calling the service). After a timeout, try again.
+\item
+  \textbf{HALF-OPEN} (recovering): let a trial request through. If it succeeds, close the circuit. If it fails, open again.
+\end{itemize}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Simplified circuit breaker}
+\ImportTok{import}\NormalTok{ time}
+\ImportTok{from}\NormalTok{ enum }\ImportTok{import}\NormalTok{ Enum}
+\ImportTok{from}\NormalTok{ typing }\ImportTok{import}\NormalTok{ Optional}
+
+\KeywordTok{class}\NormalTok{ CircuitOpenError(}\PreprocessorTok{Exception}\NormalTok{):}
+    \CommentTok{"""Raised instead of calling the dependency while the circuit is open."""}
+
+\KeywordTok{class}\NormalTok{ CircuitState(Enum):}
+\NormalTok{    CLOSED }\OperatorTok{=} \StringTok{"closed"}
+\NormalTok{    OPEN }\OperatorTok{=} \StringTok{"open"}
+\NormalTok{    HALF\_OPEN }\OperatorTok{=} \StringTok{"half\_open"}
+
+\KeywordTok{class}\NormalTok{ CircuitBreaker:}
+    \KeywordTok{def} \FunctionTok{\_\_init\_\_}\NormalTok{(}\VariableTok{self}\NormalTok{, failure\_threshold: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{5}\NormalTok{, recovery\_timeout: }\BuiltInTok{float} \OperatorTok{=} \FloatTok{30.0}\NormalTok{,}
+\NormalTok{                 failure\_exceptions: }\BuiltInTok{tuple} \OperatorTok{=}\NormalTok{ (}\PreprocessorTok{ConnectionError}\NormalTok{,)):}
+        \VariableTok{self}\NormalTok{.failure\_threshold }\OperatorTok{=}\NormalTok{ failure\_threshold}
+        \CommentTok{\# Only these count as the dependency failing. A bad{-}input error or}
+        \CommentTok{\# a "not found" is the caller\textquotesingle{}s problem, and must not open the}
+        \CommentTok{\# circuit for everyone.}
+        \VariableTok{self}\NormalTok{.failure\_exceptions }\OperatorTok{=}\NormalTok{ failure\_exceptions}
+        \VariableTok{self}\NormalTok{.recovery\_timeout }\OperatorTok{=}\NormalTok{ recovery\_timeout}
+        \VariableTok{self}\NormalTok{.state }\OperatorTok{=}\NormalTok{ CircuitState.CLOSED}
+        \VariableTok{self}\NormalTok{.failure\_count }\OperatorTok{=} \DecValTok{0}
+        \VariableTok{self}\NormalTok{.last\_failure\_time: Optional[}\BuiltInTok{float}\NormalTok{] }\OperatorTok{=} \VariableTok{None}
+
+    \KeywordTok{def}\NormalTok{ call(}\VariableTok{self}\NormalTok{, func):}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.state }\OperatorTok{==}\NormalTok{ CircuitState.OPEN:}
+            \ControlFlowTok{if}\NormalTok{ time.time() }\OperatorTok{{-}} \VariableTok{self}\NormalTok{.last\_failure\_time }\OperatorTok{\textgreater{}} \VariableTok{self}\NormalTok{.recovery\_timeout:}
+                \VariableTok{self}\NormalTok{.state }\OperatorTok{=}\NormalTok{ CircuitState.HALF\_OPEN}
+            \ControlFlowTok{else}\NormalTok{:}
+                \ControlFlowTok{raise}\NormalTok{ CircuitOpenError(}\StringTok{"Circuit is OPEN — request rejected"}\NormalTok{)}
+
+        \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{            result }\OperatorTok{=}\NormalTok{ func()}
+        \ControlFlowTok{except} \VariableTok{self}\NormalTok{.failure\_exceptions:}
+            \VariableTok{self}\NormalTok{.\_on\_failure()}
+            \ControlFlowTok{raise}
+        \VariableTok{self}\NormalTok{.\_on\_success()}
+        \ControlFlowTok{return}\NormalTok{ result}
+
+    \KeywordTok{def}\NormalTok{ \_on\_success(}\VariableTok{self}\NormalTok{):}
+        \VariableTok{self}\NormalTok{.failure\_count }\OperatorTok{=} \DecValTok{0}
+        \VariableTok{self}\NormalTok{.state }\OperatorTok{=}\NormalTok{ CircuitState.CLOSED}
+
+    \KeywordTok{def}\NormalTok{ \_on\_failure(}\VariableTok{self}\NormalTok{):}
+        \VariableTok{self}\NormalTok{.failure\_count }\OperatorTok{+=} \DecValTok{1}
+        \VariableTok{self}\NormalTok{.last\_failure\_time }\OperatorTok{=}\NormalTok{ time.time()}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.failure\_count }\OperatorTok{\textgreater{}=} \VariableTok{self}\NormalTok{.failure\_threshold:}
+            \VariableTok{self}\NormalTok{.state }\OperatorTok{=}\NormalTok{ CircuitState.OPEN}
+
+\CommentTok{\# Usage: count only connection{-}level database errors as failures}
+\NormalTok{db\_circuit }\OperatorTok{=}\NormalTok{ CircuitBreaker(}
+\NormalTok{    failure\_threshold}\OperatorTok{=}\DecValTok{5}\NormalTok{,}
+\NormalTok{    recovery\_timeout}\OperatorTok{=}\FloatTok{30.0}\NormalTok{,}
+\NormalTok{    failure\_exceptions}\OperatorTok{=}\NormalTok{(psycopg2.OperationalError,),}
+\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ fetch\_note(note\_id):}
+    \KeywordTok{def}\NormalTok{ query():}
+\NormalTok{        cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{        cursor.execute(sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+        \ControlFlowTok{return}\NormalTok{ cursor.fetchone()}
+
+    \ControlFlowTok{return}\NormalTok{ db\_circuit.call(query)}
+
+\CommentTok{\# And turn an open circuit into a fast, honest 503 — not a 500:}
+\AttributeTok{@app.errorhandler}\NormalTok{(CircuitOpenError)}
+\KeywordTok{def}\NormalTok{ circuit\_open(error):}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Service temporarily unavailable"}\NormalTok{\}), }\DecValTok{503}\NormalTok{, \{}\StringTok{"Retry{-}After"}\NormalTok{: }\StringTok{"30"}\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Two limits of this simple version. Its state lives in one process: with three Gunicorn workers there are three independent breakers, each learning about an outage on its own. And in HALF-OPEN it does not limit the trial to one request~--- several concurrent requests (threads, greenlets) may all get through. For a real outside dependency, such as the email service of section 37.5, a maintained library is the better choice.
+
+For production use, consider the \texttt{pybreaker} library:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install pybreaker}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{7}
+\section{Graceful Shutdown}\label{37-reliability:378-graceful-shutdown}
+
+When Gunicorn receives SIGTERM (from \texttt{docker\ stop} or systemd), it should:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Stop accepting new requests
+\item
+  Allow in-progress requests to complete
+\item
+  Close database connections cleanly
+\item
+  Exit
+\end{enumerate}
+
+\noindent{}\hyperref[ch:24-process-startup]{Chapter 24} configured this via:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{graceful\_timeout\ =}\allowbreak{}\texttt{\ 30} in \texttt{gunicorn.conf.py} (30 seconds to finish in-progress requests)
+\item
+  JSON array CMD in the Dockerfile (so Gunicorn is PID 1 and receives SIGTERM directly)
+\end{itemize}
+
+\noindent{}What happens during a \texttt{docker\ stop\ notes-api}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+T+0s   docker stop sends SIGTERM to PID 1 (Gunicorn master)
+T+0s   Gunicorn master receives SIGTERM
+T+0s   Gunicorn stops calling accept() — no new requests accepted
+T+0s   Nginx starts receiving connection errors → 502 briefly
+       (this is why a single-container deploy has a short gap, and why
+       blue-green deployment, Chapter 23, drains before stopping)
+T+0s   In-progress requests continue to completion
+T+3s   Last in-progress request finishes
+T+3s   Gunicorn workers exit gracefully
+T+3s   Gunicorn master exits
+
+If requests don't finish by T+30s:
+T+30s  Gunicorn sends SIGKILL to remaining workers
+T+30s  Workers terminate immediately (requests aborted)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}For the graceful shutdown to protect in-progress requests:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{docker\ stop} waits 10 seconds by default before sending SIGKILL
+\item
+  This must be longer than \texttt{graceful\_timeout}
+\end{itemize}
+
+\noindent{}The deploy scripts (\hyperref[ch:23-code-transfer]{Chapter 23}) therefore create the container with a longer stop timeout, which every later \texttt{docker\ stop} then uses:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 35 seconds = graceful\_timeout + 5 seconds margin}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}{-}stop{-}timeout}\NormalTok{ 35 ...}
+
+\CommentTok{\# (or, for a single stop: docker stop {-}{-}time 35 notes{-}api)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Or in \texttt{docker-compose.yml}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{services}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{notes{-}api}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{stop\_grace\_period}\KeywordTok{:}\AttributeTok{ 35s}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{8}
+\section{Runbooks}\label{37-reliability:379-runbooks}
+
+A \textbf{runbook} (or playbook) is a step-by-step guide for responding to a specific operational situation. When it is 3 AM and the service is down, you do not want to be thinking clearly from scratch~--- you want to follow a checklist.
+
+\subsection*{Example runbook: service is down}\phantomsection\label{37-reliability:example-runbook-service-is-down}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\# Runbook: Notes API is Down}
+
+\FunctionTok{\#\# Symptoms}
+
+\SpecialStringTok{{-} }\NormalTok{UptimeRobot alert: "notes{-}api is DOWN"}
+\SpecialStringTok{{-} }\NormalTok{/health returns 5xx or times out}
+\SpecialStringTok{{-} }\NormalTok{Users report they cannot access the API}
+
+\FunctionTok{\#\# Diagnostic steps (in order)}
+
+\SpecialStringTok{1. }\NormalTok{SSH to the server:}
+\NormalTok{   ssh deploy@203.0.113.42}
+
+\SpecialStringTok{2. }\NormalTok{Is the container running?}
+\NormalTok{   docker ps | grep notes{-}api}
+\NormalTok{   → If NOT running: go to step 5 (restart procedure)}
+\NormalTok{   → If running: go to step 3}
+
+\SpecialStringTok{3. }\NormalTok{Is the application healthy? (curl runs on the host: the image has none)}
+\NormalTok{   curl {-}s {-}o /dev/null {-}w "\%\{http\_code\}\textbackslash{}n" http://127.0.0.1:5000/health}
+\NormalTok{   → If 200: the application is fine; the problem is in front of it —}
+\NormalTok{     Nginx (step 7), TLS certificate, DNS, or the cloud firewall}
+\NormalTok{   → If 503: a dependency is down (the body says which) — go to step 6}
+\NormalTok{   → If 5xx or no answer: the application is unhealthy — go to step 4}
+
+\SpecialStringTok{4. }\NormalTok{View recent application logs:}
+\NormalTok{   docker logs {-}{-}tail 50 notes{-}api}
+\NormalTok{   → Look for ERROR or CRITICAL messages}
+\NormalTok{   → Common causes: database connection error, OOM killed, misconfiguration}
+
+\SpecialStringTok{5. }\NormalTok{Restart the container (or, if it is missing, redeploy the last good}
+\NormalTok{   version: /opt/notes{-}api/deploy.sh sha{-}}\DataTypeTok{\textless{}}\KeywordTok{last}\OtherTok{ good tag}\DataTypeTok{\textgreater{}}\NormalTok{):}
+\NormalTok{   docker restart notes{-}api}
+\NormalTok{   Wait 10 seconds, then repeat step 3}
+\NormalTok{   → If 200: service restored. Monitor for recurrence.}
+\NormalTok{   → If still failing: go to step 6}
+
+\SpecialStringTok{6. }\NormalTok{Check database connectivity from inside the container:}
+\NormalTok{   docker exec notes{-}api python {-}c \textquotesingle{}import os, psycopg2; psycopg2.connect(os.environ}\CommentTok{[}\OtherTok{"DATABASE\_URL"}\CommentTok{]}\NormalTok{); print("DB OK")\textquotesingle{}}
+\NormalTok{   → If it fails: the database is the problem. Check the managed}
+\NormalTok{     database\textquotesingle{}s status in the DigitalOcean control panel.}
+
+\SpecialStringTok{7. }\NormalTok{Check Nginx:}
+\NormalTok{   systemctl status nginx}
+\NormalTok{   sudo nginx {-}t}
+\NormalTok{   → If Nginx is stopped: sudo systemctl start nginx}
+\NormalTok{   → If config error: fix the config, then sudo systemctl reload nginx}
+
+\FunctionTok{\#\# Escalation}
+
+\NormalTok{If service is not restored within 15 minutes: contact }\CommentTok{[}\OtherTok{senior engineer name/contact}\CommentTok{]}\NormalTok{.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Write runbooks for each class of failure: service down, slow responses, database issues, certificate expiry, disk full.
+
+\setcounter{section}{9}
+\section{Postmortems}\label{37-reliability:3710-postmortems}
+
+A \textbf{postmortem} (also called incident review) is a written analysis of what went wrong, why, and how to prevent it in the future. It is conducted after an incident is resolved.
+
+A good postmortem is blameless. The goal is to improve the system, not to assign fault to individuals. Any reasonably skilled engineer, in the same circumstances, would have made the same choices.
+
+\subsection*{Postmortem template}\phantomsection\label{37-reliability:postmortem-template}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\# Postmortem: [Incident Title]}
+
+\NormalTok{**Date**: 2024{-}01{-}15}
+\NormalTok{**Duration**: 47 minutes (14:03 – 14:50 UTC)}
+\NormalTok{**Severity**: P1 (service completely unavailable)}
+\NormalTok{**Author**: }\CommentTok{[}\OtherTok{Name}\CommentTok{]}
+
+\FunctionTok{\#\# Summary}
+
+\NormalTok{The Notes API was unavailable for 47 minutes due to a certificate expiry.}
+\NormalTok{The certificate expired at 14:03 UTC. Every automatic renewal attempt since}
+\NormalTok{December 15 had failed, because DNS still pointed to the old server after a}
+\NormalTok{migration, and no alert existed for renewal failures or certificate expiry.}
+
+\FunctionTok{\#\# Timeline}
+
+\PreprocessorTok{|}\NormalTok{ Time  }\PreprocessorTok{|}\NormalTok{ Event }\PreprocessorTok{|}
+\PreprocessorTok{|{-}{-}{-}{-}{-}{-}{-}|{-}{-}{-}{-}{-}{-}{-}|}
+\PreprocessorTok{|}\NormalTok{ 14:00 }\PreprocessorTok{|}\NormalTok{ Certificate expires in 3 minutes (not detected) }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ 14:03 }\PreprocessorTok{|}\NormalTok{ Certificate expires. Clients reject Nginx\textquotesingle{}s expired certificate; every HTTPS request fails. }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ 14:15 }\PreprocessorTok{|}\NormalTok{ First user reports "cannot access notes" via support email }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ 14:22 }\PreprocessorTok{|}\NormalTok{ On{-}call engineer receives forwarded support email }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ 14:29 }\PreprocessorTok{|}\NormalTok{ Engineer identifies certificate expiry from browser error }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ 14:31 }\PreprocessorTok{|}\NormalTok{ certbot renew runs manually, succeeds }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ 14:50 }\PreprocessorTok{|}\NormalTok{ Certificate deployed, Nginx reloaded, service restored }\PreprocessorTok{|}
+
+\FunctionTok{\#\# Root Cause}
+
+\NormalTok{The server was migrated on December 15, but the DNS record for}
+\NormalTok{api.notes.example.com was left pointing to the old server\textquotesingle{}s IP. Certbot}
+\NormalTok{tried to renew twice a day for the whole final month of the certificate\textquotesingle{}s}
+\NormalTok{life; every ACME HTTP{-}01 challenge went to the old server and failed.}
+\NormalTok{Each failure was logged to /var/log/letsencrypt/letsencrypt.log, but no}
+\NormalTok{alert was configured for Certbot failures.}
+
+\FunctionTok{\#\# Contributing Factors}
+
+\SpecialStringTok{1. }\NormalTok{No monitoring of certificate expiry date}
+\SpecialStringTok{2. }\NormalTok{No alerting on Certbot renewal failures}
+\SpecialStringTok{3. }\NormalTok{Certbot runs from a systemd timer; its failures are not surfaced to the team}
+\SpecialStringTok{4. }\NormalTok{No runbook for certificate issues}
+
+\FunctionTok{\#\# Impact}
+
+\SpecialStringTok{{-} }\NormalTok{47 minutes of complete service unavailability}
+\SpecialStringTok{{-} }\NormalTok{All HTTPS requests failed}
+\SpecialStringTok{{-} }\NormalTok{Estimated N requests failed (N = requests per minute × 47)}
+
+\FunctionTok{\#\# Action Items}
+
+\PreprocessorTok{|}\NormalTok{ Action }\PreprocessorTok{|}\NormalTok{ Owner }\PreprocessorTok{|}\NormalTok{ Due Date }\PreprocessorTok{|}
+\PreprocessorTok{|{-}{-}{-}{-}{-}{-}{-}{-}|{-}{-}{-}{-}{-}{-}{-}|{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}|}
+\PreprocessorTok{|}\NormalTok{ Add a certificate{-}expiry monitor (alert 14 days before expiry; a paid feature of some uptime services) }\PreprocessorTok{|}\NormalTok{ Alice }\PreprocessorTok{|}\NormalTok{ 2024{-}01{-}22 }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ Configure alerting on Certbot log errors }\PreprocessorTok{|}\NormalTok{ Bob }\PreprocessorTok{|}\NormalTok{ 2024{-}01{-}22 }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ Write certificate renewal runbook }\PreprocessorTok{|}\NormalTok{ Alice }\PreprocessorTok{|}\NormalTok{ 2024{-}01{-}29 }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ Test certificate renewal in staging }\PreprocessorTok{|}\NormalTok{ Bob }\PreprocessorTok{|}\NormalTok{ 2024{-}02{-}01 }\PreprocessorTok{|}
+
+\FunctionTok{\#\# What Went Well}
+
+\SpecialStringTok{{-} }\NormalTok{Once the cause was identified, the fix was straightforward}
+\SpecialStringTok{{-} }\NormalTok{The service{-}down runbook\textquotesingle{}s diagnostic steps pointed quickly at the TLS layer}
+
+\FunctionTok{\#\# What Did Not Go Well}
+
+\SpecialStringTok{{-} }\NormalTok{12{-}minute gap between certificate expiry and first user report}
+\SpecialStringTok{{-} }\NormalTok{7{-}minute gap between user report and engineer awareness}
+\SpecialStringTok{{-} }\NormalTok{No established runbook for certificate issues}
+
+\FunctionTok{\#\# Lessons Learned}
+
+\NormalTok{Monitoring certificate expiry is a basic reliability requirement. The absence}
+\NormalTok{of expiry monitoring was a gap that should have been caught during initial}
+\NormalTok{production setup.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Postmortems improve systems. Every incident, properly analyzed, results in improvements that prevent recurrence or reduce impact. Teams that write postmortems after every significant incident continuously improve their systems.
+
+\phantomsection\label{37-reliability:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Availability} is the percentage of time the system is operational. 99.9\% means 8.76 hours of downtime per year. Achieving more requires redundancy and fast detection/recovery.
+\item
+  \textbf{Every layer can fail}: hardware, Nginx, Docker, Gunicorn, and the database each have specific failure modes with specific recoveries.
+\item
+  \textbf{Graceful degradation} returns a degraded response (503 with Retry-After) rather than a confusing 500 when a dependency is unavailable.
+\item
+  \textbf{Database backups} are mandatory. Test restores regularly~--- an untested backup is an untested assumption.
+\item
+  \textbf{Calling another service}: keep the conversation in one module; give every call a connect \emph{and} a read timeout; remember that a read timeout means ``unknown'', not ``failed''; retry only what is safe (never a possibly-completed action without an \textbf{idempotency key}); map each kind of failure to an honest status (503, 504, 502); log every call without its private contents; and never hold a transaction open while you wait.
+\item
+  \textbf{Exponential backoff with jitter} retries transient failures while spreading retry load across time to prevent retry storms.
+\item
+  \textbf{Circuit breakers} stop retrying a failing service, giving it time to recover while returning immediate errors to clients.
+\item
+  \textbf{Graceful shutdown} allows in-progress requests to complete before the process exits. Requires PID 1 to receive SIGTERM directly (JSON array CMD) and a container stop timeout (\texttt{-\/-stop-timeout\ 35}, or \texttt{stop\_grace\_period} in Compose) longer than \texttt{graceful\_timeout}.
+\item
+  \textbf{Runbooks} are step-by-step guides for common failure scenarios. Write them when calm so you can follow them when stressed.
+\item
+  \textbf{Postmortems} analyze what went wrong and produce action items to prevent recurrence. They are blameless~--- the goal is to improve the system, not assign fault.
+\item
+  A backup answers ``don't lose what we keep''; \textbf{data management} answers what to keep, for how long, and how to delete the rest. ``Store everything forever'' is a liability, not a policy.
+\item
+  \textbf{Classify data} (PII / sensitive / operational / public), set a written \textbf{retention policy} per class, and use storage \textbf{tiers} (hot/warm/cold) with \textbf{archival} to control cost and query speed.
+\item
+  Enforce retention with \textbf{cleanup jobs} that dry-run, batch, soft-delete-before-hard-delete, and audit. Remember deleted data lingers in \textbf{backups}; honor the \textbf{right to be forgotten} via minimization, pseudonymization, and knowing everywhere PII lives~--- while \textbf{audit logs} and \textbf{legal holds} are deliberate exceptions to deletion.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{37-reliability:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} With the email service stopped, how long does \texttt{POST\ /}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{1/}\allowbreak{}\texttt{email} take to answer in the synchronous version of section 37.5, and what status does it return?
+\item
+  \textbf{Break and fix.} Remove the \texttt{timeout=} argument from the \texttt{requests.post} call, and point \texttt{EMAIL\_API\_URL} at a server that accepts connections but never answers (\texttt{nc\ -l\ 9999}). What happens to the worker? Restore the timeout.
+\item
+  \textbf{Extend.} Wrap \texttt{send\_email} in the circuit breaker of section 37.7, so that after five failures in a row it answers \texttt{503} immediately for 30 seconds.
+\item
+  \textbf{Explain.} Why is a read timeout ``unknown'', not ``failed'', and what makes a retry after one safe?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-37.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{37-reliability:whats-next}
+
+The system is reliable. Now consider security~--- who can access it, how to protect it from malicious actors, and what defenses need to be in place.
+
+\noindent{}→ \hyperref[ch:38-security]{Chapter 38}~--- Security

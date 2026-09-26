@@ -1,0 +1,366 @@
+\setcounter{chapter}{43}
+\chapter{Notes for Many Users}\label{ch:44-project-notes-for-many-users}
+
+\chaptersubtitle{A Project for Part IV}
+
+\chapterrule
+
+Reading about a system and building one are different skills. Reading gives you the map: you know what a migration runner is for, why a worker needs a lease, why a query must say \texttt{AND\ user\_id\ =\ ?}. Building gives you what the map cannot: the fifteen small decisions nobody wrote down, the error that makes no sense until it suddenly does, and the confidence that comes from having shipped something yourself.
+
+This chapter is a project. It turns the Notes API into a small real product, \textbf{Notes for Many Users}, in five milestones. Each one takes a trip around the whole loop from the opening chapter: decide, plan, build, ship, run, learn. Every milestone uses techniques from the book, and none needs a technique the book has not taught. What is new is that \emph{you} make the decisions, and that the pieces have to work together.
+
+By the end of this project, you will have:
+
+\begin{itemize}
+\tightlist
+\item
+  Designed, built, tested and shipped five features into a live system, each through a pull request and CI
+\item
+  Extended a database schema safely with migrations, and an authorization model beyond ``owner only''
+\item
+  Put background work, scheduled work and an outside service behind a queue, with retries you can trust
+\item
+  Kept a written API contract true, with a test suite you would stake a release on
+\item
+  Run the result in production: deployed, monitored, alerted on, load-tested, deliberately broken, and written up
+\end{itemize}
+
+\setcounter{section}{0}
+\section{How to Work Through This Project}\label{44-project-notes-for-many-users:441-how-to-work-through-this-project}
+
+\textbf{Start from where the book ends.} The starting point is the Notes API as Chapter 43 leaves it: running on PostgreSQL, with migrations, tags, accounts, cursor pagination, the email endpoint, the background worker, CI, and a deployment to a real server. If you have built along with the book, that is your code. If not, the companion repository's \texttt{start} tag has it.
+
+\textbf{Go around the loop for every milestone.} Each milestone below gives you requirements and a ``done when'' list. It does not give you a design. That part is yours, and it is the point:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Discover and plan.} Write a short problem statement and a design note (Parts I and II). A page is plenty: what changes in the schema, which endpoints, who may call them, what could go wrong. Record any decision someone might later question as an ADR (\hyperref[ch:39-local-vs-production]{Chapter 39}).
+\item
+  \textbf{Code.} Work on a branch (\hyperref[ch:17-build-process]{Chapter 17}, section 17.9), in small commits. Write the tests alongside the code, and for anything that is a rule (``a viewer cannot edit''), write the test first.
+\item
+  \textbf{Ship.} Add a migration for every schema change (\hyperref[ch:33-logic-execution]{Chapter 33}). Update \texttt{openapi.yaml} for every API change (section 34.10). Open a pull request, let CI pass, merge, and let the pipeline deploy.
+\item
+  \textbf{Run and learn.} Watch the dashboards after the deploy. Note anything that surprised you. It belongs in the next milestone's plan.
+\end{enumerate}
+
+\noindent{}\textbf{Use the reference solution the right way.} The companion repository contains a complete, tested solution, tagged at the end of each milestone (\texttt{project-m1} to \texttt{project-m5}). Resist opening it until you have finished a milestone yourself. Then compare (section 44.8 explains how). There is always more than one good solution. The reference is \emph{a} good one, with its reasons written down, not \emph{the} answer.
+
+\textbf{Estimate honestly.} Working evenings and weekends, most people need one to two weeks per milestone. Milestone 5 takes the longest, because production always does.
+
+\setcounter{section}{1}
+\section{Milestone 1: Accounts and Ownership}\label{44-project-notes-for-many-users:442-milestone-1-accounts-and-ownership}
+
+If you built \hyperref[ch:38-security]{Chapter 38} as you read it, this milestone is mostly \emph{verification}: proving that what you built really holds. If you did not, build it now. Everything else rests on it.
+
+\textbf{Requirements}
+
+\begin{itemize}
+\tightlist
+\item
+  People register with an email address and a password, log in to receive a token, and log out.
+\item
+  Every note belongs to the user who created it. Nobody else can read, change, delete, tag or email it.
+\item
+  Passwords are stored only as bcrypt hashes; tokens only as SHA-256 hashes. Tokens expire after 30 days.
+\item
+  Login attempts are rate-limited per IP address in Nginx.
+\end{itemize}
+
+\noindent{}\textbf{Done when}
+
+\begin{itemize}
+\item[$\square$]
+  For \emph{every} endpoint that takes a note id, a test logs in as a second user and gets \texttt{404}.
+\item[$\square$]
+  Removing any single \texttt{AND\ user\_id\ =\ ?} from the code makes at least one test fail. Try it for each one; this is \textbf{mutation testing} done by hand, and it is how you know the tests guard the rule.
+\item[$\square$]
+  A wrong password and an unknown email produce the same response, in the same time.
+\item[$\square$]
+  \texttt{curl} without a token gets \texttt{401} with \texttt{WWW-}\allowbreak{}\texttt{Authenticate:}\allowbreak{}\texttt{\ Bearer}, from the live server.
+\item[$\square$]
+  Seven quick login attempts from one address: the first six reach the application (and get \texttt{401} for a wrong password), and the seventh gets \texttt{429} from Nginx.
+\end{itemize}
+
+\setcounter{section}{2}
+\section{Milestone 2: Sharing, Search, and the Trash}\label{44-project-notes-for-many-users:443-milestone-2-sharing-search-and-the-trash}
+
+Three features that users ask for as soon as a product has more than one user.
+
+\textbf{Requirements: sharing}
+
+\begin{itemize}
+\tightlist
+\item
+  The owner of a note can share it with another registered user, either read-only or with permission to edit, and can change or remove that access.
+\item
+  A user sees the notes shared with them in a list of their own, apart from their own notes.
+\item
+  Access is decided like this:
+\end{itemize}
+
+\Needspace{13\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3388}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0914}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2233}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2310}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1155}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Action
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Owner
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Editor (shared, can edit)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Viewer (shared, read-only)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Anyone else
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+read the note and its tags & yes & yes & yes & \texttt{404} \\
+change its content & yes & yes & \texttt{403} & \texttt{404} \\
+delete, share, tag, email, set reminders & yes & \texttt{404} & \texttt{404} & \texttt{404} \\
+\end{longtable}
+}
+
+(Why \texttt{403} for a viewer who tries to edit, when everyone else gets \texttt{404}? Because the viewer already knows the note exists: it was shared with them. Hiding its existence protects nothing, and a clear ``read-only'' message helps. Section 38.4 drew exactly this line.)
+
+\textbf{Requirements: search}
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{GET\ /}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{?}\allowbreak{}\texttt{search=}\allowbreak{}\texttt{words} finds the user's own notes containing those words, as \emph{words}: \texttt{drafts} finds ``draft'', while \texttt{budg} finds nothing. The results use the same cursor pagination as the plain list.
+\item
+  Search stays fast with a million notes.
+\end{itemize}
+
+\noindent{}\textbf{Requirements: the trash}
+
+\begin{itemize}
+\tightlist
+\item
+  Deleting a note moves it to a trash, where it stays restorable for 30 days. Deleted notes vanish from every other endpoint.
+\item
+  Notes in the trash for more than 30 days are deleted for good, by a background job that runs daily.
+\end{itemize}
+
+\noindent{}\textbf{Hints}
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{One place decides access.} Write a single function that answers ``what is this user's role for this note?'' (owner, editor, viewer, or none), and have every handler use it. Scattered checks are how authorization bugs are born.
+\item
+  \emph{Search.} A \textbf{generated column} keeps itself up to date: a \texttt{tsvector} column computed from \texttt{to\_}\allowbreak{}\texttt{tsvector(\textquotesingle{}english\textquotesingle{},}\allowbreak{}\texttt{\ content)}, declared \texttt{GENERATED\ ALWAYS\ AS\ (…)\ STORED}. Give it a GIN index, and query it with \texttt{websearch\_to\_tsquery}, which understands what people type into search boxes. Then \emph{look} at the plans with \texttt{EXPLAIN\ ANALYZE} (section 36.2), and expect a surprise. With \texttt{ORDER\ BY\ id\ DESC\ LIMIT\ 21} and a common word, PostgreSQL often ignores the GIN index and walks the primary key or the per-user index instead, because finding 21 matches that way is cheaper. It uses the GIN index for rare words. That is the planner working correctly, and it only shows up with realistic data.
+\item
+  \emph{The trash} is the ``soft delete'' of \hyperref[ch:06-local-dependencies]{Chapter 6}. Remember that \emph{every} query must now exclude deleted notes, including the ones in the worker's tasks. The purge job is a queue job (\hyperref[ch:41-event-driven-architecture]{Chapter 41}), queued daily by a systemd timer (\hyperref[ch:25-process-management]{Chapter 25}).
+\item
+  \emph{Migrations.} All of this is additive. The new table and the new columns are safe for the running code, so the migration can run before the deploy as usual.
+\end{itemize}
+
+\noindent{}\textbf{Done when}
+
+\begin{itemize}
+\item[$\square$]
+  The access table above is a parametrized test, with every cell tested.
+\item[$\square$]
+  With 100,000 generated notes spread over 1,000 users (one of them owning 20,000), searches for a common and a rare word, as a light and as a heavy user, all stay under 20 ms. For each of the four, you can say which index PostgreSQL chose, and why. (In the reference setup: about 0.2 ms for a light user, 2 ms for a rare word, and 7 to 9 ms for a common word for the heavy user.)
+\item[$\square$]
+  A note deleted, then restored, is exactly as it was: its tags, its shares and its content.
+\item[$\square$]
+  A test proves that the worker does not email a note that is in the trash.
+\item[$\square$]
+  \texttt{openapi.yaml} describes every new endpoint, and the contract tests check them.
+\end{itemize}
+
+\setcounter{section}{3}
+\section{Milestone 3: Reminders}\label{44-project-notes-for-many-users:444-milestone-3-reminders}
+
+\textbf{Requirements}
+
+\begin{itemize}
+\tightlist
+\item
+  The owner of a note can ask to be emailed about it at a chosen time: \texttt{PUT\ /}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\{id\}/}\allowbreak{}\texttt{reminder} with a date and time. It must include a time zone, lie in the future, and be within a year.
+\item
+  Setting a new time replaces the old one. The reminder can be cancelled.
+\item
+  The email goes to the owner's own address, at the chosen time (give or take the worker's polling interval), exactly once.
+\end{itemize}
+
+\noindent{}\textbf{Hints}
+
+\begin{itemize}
+\tightlist
+\item
+  A reminder is a queue job with \texttt{run\_at} set to the chosen time (section 41.5). The hard part is \emph{changing your mind}: the old job is already in the queue. You can delete it, or you can let it run and have it check whether it is still wanted (store the reminder time on the note, and let the task compare). The second design needs no bookkeeping, and it survives races, such as a cancellation arriving while the job is running. The reference solution uses it.
+\item
+  Choose the idempotency key when the reminder is \emph{set}, not when it is sent. A worker that crashes after sending, and a job that is retried after a timeout, must not send a second email.
+\item
+  Time zones: store and compare in UTC (\texttt{TIMESTAMPTZ}), and reject a time without a time zone. \texttt{"2030-01-01T09:00"}, with no zone, means something different on every server.
+\end{itemize}
+
+\noindent{}\textbf{Done when}
+
+\begin{itemize}
+\item[$\square$]
+  Tests cover: a reminder is not ready before its time; at its time the owner is emailed; a cancelled or replaced reminder sends nothing; bad times are rejected.
+\item[$\square$]
+  Against Mailpit, a reminder set two minutes ahead arrives within about a minute of its time.
+\item[$\square$]
+  Killing the worker (\texttt{docker\ kill}, not \texttt{docker\ stop}) while it sends a reminder leads to exactly one email once the lease has expired. That depends on an email service that honours idempotency keys. Mailpit does not, so check the \emph{requests} instead: both carry the same key.
+\end{itemize}
+
+\setcounter{section}{4}
+\section{Milestone 4: A Suite and a Contract You Can Trust}\label{44-project-notes-for-many-users:445-milestone-4-a-suite-and-a-contract-you-can-trust}
+
+By now the test suite has grown chapter by chapter. This milestone makes it something you would stake a release on.
+
+\textbf{Requirements}
+
+\begin{itemize}
+\tightlist
+\item
+  Every endpoint has tests for its normal case, bad input, missing or foreign notes, and its design decisions (section 17.8).
+\item
+  \texttt{openapi.yaml} describes the whole API, including the login requirement (the \texttt{bearerAuth} security scheme), and passes \texttt{openapi-spec-validator}.
+\item
+  Contract tests check the response of every endpoint against its schema.
+\item
+  The suite runs in CI against PostgreSQL (\hyperref[ch:39-local-vs-production]{Chapter 39}), in under a minute, with no flaky tests.
+\end{itemize}
+
+\noindent{}\textbf{Done when}
+
+\begin{itemize}
+\item[$\square$]
+  Coverage is above 90\% for \texttt{app/}, and every uncovered line is one you have looked at and decided about.
+\item[$\square$]
+  Ten runs in a row in random order (\texttt{pytest\ -p\ randomly}, from the \texttt{pytest-randomly} plugin) all pass.
+\item[$\square$]
+  Renaming any response field makes a contract test fail.
+\item[$\square$]
+  A new team member could learn the API from the rendered \texttt{openapi.yaml} alone. Test this with a friend if you can.
+\end{itemize}
+
+\setcounter{section}{5}
+\section{Milestone 5: Production}\label{44-project-notes-for-many-users:446-milestone-5-production}
+
+Everything so far could pass on a laptop. This milestone is about the system in the world.
+
+\textbf{Requirements}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Deploy both processes.} A merge to \texttt{main} deploys both the API and the worker, runs migrations first, and rolls the API back automatically if its health check fails (Chapters 23 and 41).
+\item
+  \textbf{Measure.} Prometheus collects the API's metrics (Chapter 35) and the worker's (section 41.5).
+\item
+  \textbf{Alert.} Alerts fire for: an error rate above 1\% for five minutes; p95 latency above 500 ms; the oldest queued job waiting more than five minutes; any job that failed permanently; the certificate expiring within 14 days.
+\item
+  \textbf{Write a runbook} (\hyperref[ch:37-reliability]{Chapter 37}) for each alert.
+\item
+  \textbf{Load-test} with Locust (section 36.1), against a staging copy: a realistic mix of listing, reading, creating, searching and sharing, by logged-in users.
+\item
+  \textbf{Hold a game day.} Break the system on purpose, in staging, while watching the dashboards: stop the worker, then start it again; stop the database for a minute; point the worker at an email address that does not exist; fill the queue with 10,000 jobs.
+\item
+  \textbf{Write a postmortem} for the most interesting failure, using the template of section 37.10.
+\end{itemize}
+
+\noindent{}\textbf{Done when}
+
+\begin{itemize}
+\item[$\square$]
+  A one-line change goes from pull request to production with no manual step except the review.
+\item[$\square$]
+  Every alert has fired at least once during the game day, and its runbook led to the fix.
+\item[$\square$]
+  The load test states its result as a number with conditions: ``sustains \emph{N} requests a second at p95 under \emph{M} ms on one 2 GB droplet''. It also names the bottleneck, found with the method of section 36.2.
+\item[$\square$]
+  The postmortem has a timeline, a root cause, and action items with owners, and at least one of those action items has been done.
+\end{itemize}
+
+\setcounter{section}{6}
+\section{Stretch Goals}\label{44-project-notes-for-many-users:447-stretch-goals}
+
+For when the five milestones are done and you want more. Each one exercises a different part of the map:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Limit emails per user} (say, 20 an hour), in the application, with a counter per user and time window. This closes the spam hole that section 37.5 warned about.
+\item
+  \textbf{Password reset}, exactly as section 38.3 outlines it: single-use, hashed, short-lived tokens, sent by the worker, and all sessions revoked afterwards.
+\item
+  \textbf{API keys} for scripts, created and revoked by a logged-in user and shown only once. They are stored and checked like login tokens, but never expire.
+\item
+  \textbf{An export}: \texttt{POST\ /exports} queues a job that writes all of a user's notes to a JSON file and emails a link. It raises the question of where large files belong (object storage, not the database).
+\item
+  \textbf{An admin role}, with an endpoint that shows the queue and lets a person re-queue failed jobs, all behind \texttt{require\_role("admin")}.
+\end{itemize}
+
+\setcounter{section}{7}
+\section{Comparing Your Solution with the Reference}\label{44-project-notes-for-many-users:448-comparing-your-solution-with-the-reference}
+
+When a milestone is done, check out its tag in the companion repository and compare. Do not compare line by line. Compare by \emph{decisions}, with these questions:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Where does each rule live?} In the reference, access is decided in one function, \texttt{\_access()}, that returns a role; ownership of tags, shares, email and reminders is \texttt{role\ ==\ "owner"}. If your rules are spread across handlers, count the places a future change would have to touch.
+\item
+  \textbf{What does each failure say?} For every error your API can return, is the status code the most honest one available? Check \texttt{403} against \texttt{404} for viewers, \texttt{409} for a duplicate email, and \texttt{202} for queued work.
+\item
+  \textbf{What happens twice?} List every operation that could run twice: a retried request, a redelivered job, a double-clicked button. For each one, what makes the second run harmless?
+\item
+  \textbf{What happens halfway?} For every handler that makes more than one change, what does the database look like if the process dies between them?
+\item
+  \textbf{What would you see at 3 a.m.?} For each feature, which metric or log line would tell you it had broken, before a user did?
+\end{itemize}
+
+\noindent{}The reference solution also records a few choices that are easy to miss:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{The reminder checks itself.} The task compares the note's \texttt{remind\_at} with the time in its own payload, and does nothing if they differ. Cancelling or rescheduling therefore needs no access to the queue at all.
+\item
+  \textbf{Search is a generated column.} PostgreSQL keeps \texttt{search} up to date on every insert and update, so no application code can forget to.
+\item
+  \textbf{Restoring from the trash takes an empty JSON body, \texttt{\{\}}.} The middleware from \hyperref[ch:16-logging-error-handling]{Chapter 16} requires every \texttt{POST} to declare a JSON body (\texttt{Content-}\allowbreak{}\texttt{Type:}\allowbreak{}\texttt{\ application/}\allowbreak{}\texttt{json}), and a request that declares JSON should carry some. The reference keeps that rule simple and asks clients for \texttt{\{\}}, rather than adding exceptions to it. (Logout avoided the question by being a \texttt{DELETE}.) Both are defensible; this one is written in \texttt{openapi.yaml}, so no client has to guess.
+\item
+  \textbf{A deleted note keeps its tags and shares until it is purged.} That is what makes restoring exact.
+\end{itemize}
+
+\phantomsection\label{44-project-notes-for-many-users:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A project turns the map into skill: the decisions the book could only describe, you now make, and see the consequences of.
+\item
+  Go around the whole loop for every feature: a short plan, a branch, tests (first, for rules), a migration, a contract update, CI, a deploy, and a look at the dashboards.
+\item
+  Put each rule in one place, and prove it with tests that fail when it is broken. Mutation testing by hand, ``does removing this line fail a test?'', is a cheap way to know.
+\item
+  Design for twice and for halfway: every retry, redelivery and crash is a question your code must already have answered.
+\item
+  Production is a milestone of its own. Deploys, alerts, runbooks, load tests and game days are what turn working code into a working system.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{What's Next}\label{44-project-notes-for-many-users:whats-next}
+
+The project is the last step of Part IV. The closing chapter steps back from the code, and replays the whole journey of this book as a team would take it. After that come the reference appendices.

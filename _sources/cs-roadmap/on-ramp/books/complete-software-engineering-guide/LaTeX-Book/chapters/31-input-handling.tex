@@ -1,0 +1,835 @@
+\setcounter{chapter}{30}
+\chapter{Input Handling}\label{ch:31-input-handling}
+
+\chapterrule
+
+Every piece of data that enters an application from the outside world is potentially malicious, malformed, or unexpected. A well-designed application treats all external input as untrusted until explicitly validated.
+
+\textbf{Input handling} is the discipline of receiving, parsing, validating, and sanitizing data that arrives via HTTP requests before it touches any business logic or database. Done well, it catches errors early (returning clear error messages to the client), prevents security vulnerabilities (injection attacks, resource exhaustion), and makes the rest of the code simpler (because downstream code can trust the data it receives).
+
+The Notes API already has basic input handling in the route handlers (checking that \texttt{content} exists, is a string, is not empty, is not too long). This chapter examines input handling in depth: what categories of validation exist, how to structure validation code, how to test it, and what happens when validation fails.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  Why all external input must be treated as untrusted
+\item
+  The four categories of input validation: presence, type, format, and business rules
+\item
+  How to structure validation to return all errors at once (not just the first)
+\item
+  How to safely parse JSON, URL parameters, query strings, and headers
+\item
+  What SQL injection is and why parameterized queries prevent it
+\item
+  What cross-site scripting (XSS) is and why it does not directly apply to a JSON API
+\item
+  How to write comprehensive validation tests
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Why Input Is Untrusted}\label{31-input-handling:311-why-input-is-untrusted}
+
+Every HTTP request comes from somewhere outside your application. The client might be:
+
+\begin{itemize}
+\tightlist
+\item
+  A well-behaved user using your frontend
+\item
+  A developer testing with curl
+\item
+  A bug in a client application that sends wrong data
+\item
+  An attacker probing for vulnerabilities
+\end{itemize}
+
+\noindent{}Your application cannot know which. It must handle all of them correctly.
+
+\subsection*{The threat model}\phantomsection\label{31-input-handling:the-threat-model}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Your application receives:}
+\NormalTok{data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+
+\CommentTok{\# What could \textquotesingle{}data\textquotesingle{} be?}
+\VariableTok{None}                            \CommentTok{\# No body, or invalid JSON}
+\NormalTok{[}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{]                       }\CommentTok{\# Valid JSON — but not an object}
+\CommentTok{"hello content"}                 \CommentTok{\# Valid JSON — a bare string}
+\NormalTok{\{\}                              }\CommentTok{\# Empty object}
+\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{""}\NormalTok{\}                 }\CommentTok{\# Empty content}
+\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\VariableTok{None}\NormalTok{\}               }\CommentTok{\# Wrong type}
+\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\DecValTok{42}\NormalTok{\}                 }\CommentTok{\# Wrong type}
+\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"A"} \OperatorTok{*} \DecValTok{100\_000}\NormalTok{\}     }\CommentTok{\# Extremely long (DoS attempt)}
+\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"\textquotesingle{}; DROP TABLE notes; {-}{-}"}\NormalTok{\}  }\CommentTok{\# SQL injection attempt}
+\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"\textless{}script\textgreater{}alert(1)\textless{}/script\textgreater{}"}\NormalTok{\}  }\CommentTok{\# XSS attempt}
+\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"}\CharTok{\textbackslash{}x00\textbackslash{}x01\textbackslash{}x02}\StringTok{"}\NormalTok{\}    }\CommentTok{\# Binary data / null bytes}
+\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"}\CharTok{\textbackslash{}ud800}\StringTok{"}\NormalTok{\}          }\CommentTok{\# A lone surrogate: valid JSON, but not}
+                                \CommentTok{\# encodable as UTF{-}8 (no driver can send it)}
+\NormalTok{\{}\StringTok{"extra\_key"}\NormalTok{: }\StringTok{"value"}\NormalTok{\}          }\CommentTok{\# Unexpected fields}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}An application that does not validate input will fail or be exploited by one of these inputs.
+
+\setcounter{section}{1}
+\section{The Four Categories of Validation}\label{31-input-handling:312-the-four-categories-of-validation}
+
+\subsection*{Category 1: Presence}\phantomsection\label{31-input-handling:category-1-presence}
+
+Is the required data there at all?
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Check: is the JSON body present — and is it an object?}
+\NormalTok{data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(data, }\BuiltInTok{dict}\NormalTok{):}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Request body must be a JSON object"}\NormalTok{\}), }\DecValTok{400}
+
+\CommentTok{\# Check: is the required field present?}
+\ControlFlowTok{if} \StringTok{"content"} \KeywordTok{not} \KeywordTok{in}\NormalTok{ data:}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} is required"}\NormalTok{\}), }\DecValTok{400}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \texttt{isinstance(data,}\allowbreak{}\texttt{\ dict)} check matters more than it looks. \texttt{null}, \texttt{{[}1,\ 2{]}}, and \texttt{"hello\ content"} are all valid JSON. Without the check, \texttt{"content"\ not\ in\ data} would do a \emph{substring} test on the string \texttt{"hello\ content"}~--- and pass~--- and the next line, \texttt{data.get(...)}, would crash with an \texttt{AttributeError}, which the handling boundary turns into a 500.
+
+\subsection*{Category 2: Type}\phantomsection\label{31-input-handling:category-2-type}
+
+Is the data the expected Python type?
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{content }\OperatorTok{=}\NormalTok{ data.get(}\StringTok{"content"}\NormalTok{)}
+
+\CommentTok{\# Is content a string?}
+\ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(content, }\BuiltInTok{str}\NormalTok{):}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} must be a string"}\NormalTok{\}), }\DecValTok{400}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Category 3: Format}\phantomsection\label{31-input-handling:category-3-format}
+
+Is the data in the expected format (within the string type)?
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{content }\OperatorTok{=}\NormalTok{ content.strip()}
+
+\CommentTok{\# Is it non{-}empty after stripping whitespace?}
+\ControlFlowTok{if} \KeywordTok{not}\NormalTok{ content:}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} cannot be empty"}\NormalTok{\}), }\DecValTok{400}
+
+\CommentTok{\# Is it within the length limit?}
+\ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(content) }\OperatorTok{\textgreater{}} \DecValTok{10\_000}\NormalTok{:}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} cannot exceed 10,000 characters"}\NormalTok{\}), }\DecValTok{400}
+
+\CommentTok{\# Is it encodable as UTF{-}8? Python strings are Unicode, but JSON can carry}
+\CommentTok{\# lone surrogates ("\textbackslash{}ud800"), which cannot be encoded as UTF{-}8 for any database.}
+\ControlFlowTok{try}\NormalTok{:}
+\NormalTok{    content.encode(}\StringTok{"utf{-}8"}\NormalTok{)}
+\ControlFlowTok{except} \PreprocessorTok{UnicodeEncodeError}\NormalTok{:}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} contains invalid characters"}\NormalTok{\}), }\DecValTok{400}
+
+\CommentTok{\# Does it contain control characters (other than newline, tab, return)?}
+\ImportTok{import}\NormalTok{ unicodedata}
+\ControlFlowTok{if} \BuiltInTok{any}\NormalTok{(unicodedata.category(c) }\OperatorTok{==} \StringTok{"Cc"} \KeywordTok{and}\NormalTok{ c }\KeywordTok{not} \KeywordTok{in} \StringTok{"}\CharTok{\textbackslash{}n\textbackslash{}t\textbackslash{}r}\StringTok{"}
+       \ControlFlowTok{for}\NormalTok{ c }\KeywordTok{in}\NormalTok{ content):}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} contains invalid control characters"}\NormalTok{\}), }\DecValTok{400}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Category 4: Business rules}\phantomsection\label{31-input-handling:category-4-business-rules}
+
+Does the data satisfy application-specific rules that cannot be expressed as simple type or format checks?
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Business rule: a note with identical content to a recent note might}
+\CommentTok{\# indicate an accidental double{-}submit.}
+\CommentTok{\# (This is a hypothetical example — not in the current Notes API.}
+\CommentTok{\#  PostgreSQL syntax.)}
+
+\KeywordTok{def}\NormalTok{ check\_duplicate(content: }\BuiltInTok{str}\NormalTok{, db) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{bool}\NormalTok{:}
+    \CommentTok{"""Check if an identical note was created in the last 5 seconds."""}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(}\StringTok{"""}
+\StringTok{        SELECT COUNT(*) FROM notes}
+\StringTok{        WHERE content = }\SpecialCharTok{\%s}
+\StringTok{        AND created\_at \textgreater{} NOW() {-} INTERVAL \textquotesingle{}5 seconds\textquotesingle{}}
+\StringTok{    """}\NormalTok{, (content,))}
+\NormalTok{    count }\OperatorTok{=}\NormalTok{ cursor.fetchone()[}\DecValTok{0}\NormalTok{]}
+\NormalTok{    cursor.close()}
+    \ControlFlowTok{return}\NormalTok{ count }\OperatorTok{\textgreater{}} \DecValTok{0}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{2}
+\section{A Reusable Validation Framework}\label{31-input-handling:313-a-reusable-validation-framework}
+
+As the API grows, repeating the same validation logic in every handler becomes error-prone. A validation class collects errors and reports them all at once:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 31.1}\enspace app/validation.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Input validation utilities for the Notes API.}
+
+\CommentTok{Usage:}
+\CommentTok{    v = Validator(request.get\_json(silent=True))}
+\CommentTok{    content = v.require\_string("content", min\_length=1, max\_length=10\_000)}
+\CommentTok{    if v.has\_errors():}
+\CommentTok{        return v.error\_response()}
+
+\CommentTok{Error responses keep the API\textquotesingle{}s one error shape (Chapter 16):}
+\CommentTok{    one problem:      \{"error": "\textquotesingle{}content\textquotesingle{} is required"\}}
+\CommentTok{    several problems: \{"error": "Invalid request",}
+\CommentTok{                       "details": ["\textquotesingle{}content\textquotesingle{} is required", "..."]\}}
+\CommentTok{"""}
+\ImportTok{from}\NormalTok{ typing }\ImportTok{import}\NormalTok{ Any, Optional}
+
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ jsonify}
+
+\KeywordTok{class}\NormalTok{ Validator:}
+    \CommentTok{"""}
+\CommentTok{    Accumulates validation errors, returning all at once.}
+
+\CommentTok{    This is better than raising on the first error — the client can see}
+\CommentTok{    all problems and fix them in one request instead of submitting,}
+\CommentTok{    failing, fixing one thing, submitting, failing, etc.}
+\CommentTok{    """}
+
+    \KeywordTok{def} \FunctionTok{\_\_init\_\_}\NormalTok{(}\VariableTok{self}\NormalTok{, data: Any):}
+        \VariableTok{self}\NormalTok{.data }\OperatorTok{=}\NormalTok{ data}
+        \VariableTok{self}\NormalTok{.errors: }\BuiltInTok{list}\NormalTok{[}\BuiltInTok{str}\NormalTok{] }\OperatorTok{=}\NormalTok{ []}
+        \VariableTok{self}\NormalTok{.\_body\_checked }\OperatorTok{=} \VariableTok{False}
+
+    \KeywordTok{def}\NormalTok{ has\_errors(}\VariableTok{self}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{bool}\NormalTok{:}
+        \CommentTok{"""Return True if any validation errors have been accumulated."""}
+        \ControlFlowTok{return} \BuiltInTok{len}\NormalTok{(}\VariableTok{self}\NormalTok{.errors) }\OperatorTok{\textgreater{}} \DecValTok{0}
+
+    \KeywordTok{def}\NormalTok{ error\_response(}\VariableTok{self}\NormalTok{):}
+        \CommentTok{"""The 400 response for the accumulated errors, in the API\textquotesingle{}s error shape."""}
+        \ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(}\VariableTok{self}\NormalTok{.errors) }\OperatorTok{==} \DecValTok{1}\NormalTok{:}
+            \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\VariableTok{self}\NormalTok{.errors[}\DecValTok{0}\NormalTok{]\}), }\DecValTok{400}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Invalid request"}\NormalTok{, }\StringTok{"details"}\NormalTok{: }\VariableTok{self}\NormalTok{.errors\}), }\DecValTok{400}
+
+    \KeywordTok{def}\NormalTok{ \_add\_error(}\VariableTok{self}\NormalTok{, message: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+        \VariableTok{self}\NormalTok{.errors.append(message)}
+
+    \KeywordTok{def}\NormalTok{ require\_dict(}\VariableTok{self}\NormalTok{) }\OperatorTok{{-}\textgreater{}}\NormalTok{ Optional[}\BuiltInTok{dict}\NormalTok{]:}
+        \CommentTok{"""}
+\CommentTok{        Verify that the input data is a dictionary (JSON object).}
+\CommentTok{        Returns the dict if valid, None if not. Reports the problem only}
+\CommentTok{        once, however many field checks call it.}
+\CommentTok{        """}
+        \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(}\VariableTok{self}\NormalTok{.data, }\BuiltInTok{dict}\NormalTok{):}
+            \ControlFlowTok{if} \KeywordTok{not} \VariableTok{self}\NormalTok{.\_body\_checked:}
+                \VariableTok{self}\NormalTok{.\_add\_error(}\StringTok{"Request body must be a JSON object"}\NormalTok{)}
+            \VariableTok{self}\NormalTok{.\_body\_checked }\OperatorTok{=} \VariableTok{True}
+            \ControlFlowTok{return} \VariableTok{None}
+        \VariableTok{self}\NormalTok{.\_body\_checked }\OperatorTok{=} \VariableTok{True}
+        \ControlFlowTok{return} \VariableTok{self}\NormalTok{.data}
+
+    \KeywordTok{def}\NormalTok{ require\_string(}
+        \VariableTok{self}\NormalTok{,}
+\NormalTok{        field: }\BuiltInTok{str}\NormalTok{,}
+        \OperatorTok{*}\NormalTok{,}
+\NormalTok{        min\_length: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{1}\NormalTok{,}
+\NormalTok{        max\_length: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{10\_000}\NormalTok{,}
+\NormalTok{        strip: }\BuiltInTok{bool} \OperatorTok{=} \VariableTok{True}\NormalTok{,}
+\NormalTok{    ) }\OperatorTok{{-}\textgreater{}}\NormalTok{ Optional[}\BuiltInTok{str}\NormalTok{]:}
+        \CommentTok{"""}
+\CommentTok{        Extract and validate a required string field.}
+
+\CommentTok{        Arguments:}
+\CommentTok{            field:      The field name to look up in self.data}
+\CommentTok{            min\_length: Minimum acceptable length (after stripping, if strip=True)}
+\CommentTok{            max\_length: Maximum acceptable length}
+\CommentTok{            strip:      If True, strip leading/trailing whitespace before validation}
+
+\CommentTok{        Returns the validated string, or None if validation failed.}
+\CommentTok{        """}
+        \CommentTok{\# A field check on a body that is not an object is an error too —}
+        \CommentTok{\# never a silent "no value"}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.require\_dict() }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+            \ControlFlowTok{return} \VariableTok{None}
+
+        \ControlFlowTok{if}\NormalTok{ field }\KeywordTok{not} \KeywordTok{in} \VariableTok{self}\NormalTok{.data:}
+            \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} is required"}\NormalTok{)}
+            \ControlFlowTok{return} \VariableTok{None}
+
+\NormalTok{        value }\OperatorTok{=} \VariableTok{self}\NormalTok{.data[field]}
+
+        \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(value, }\BuiltInTok{str}\NormalTok{):}
+            \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} must be a string"}\NormalTok{)}
+            \ControlFlowTok{return} \VariableTok{None}
+
+        \ControlFlowTok{if}\NormalTok{ strip:}
+\NormalTok{            value }\OperatorTok{=}\NormalTok{ value.strip()}
+
+        \ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(value) }\OperatorTok{\textless{}}\NormalTok{ min\_length:}
+            \ControlFlowTok{if}\NormalTok{ min\_length }\OperatorTok{==} \DecValTok{1}\NormalTok{:}
+                \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} cannot be empty"}\NormalTok{)}
+            \ControlFlowTok{else}\NormalTok{:}
+                \VariableTok{self}\NormalTok{.\_add\_error(}
+                    \SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} must be at least }\SpecialCharTok{\{}\NormalTok{min\_length}\SpecialCharTok{:,\}}\SpecialStringTok{ characters long"}
+\NormalTok{                )}
+            \ControlFlowTok{return} \VariableTok{None}
+
+        \ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(value) }\OperatorTok{\textgreater{}}\NormalTok{ max\_length:}
+            \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} cannot exceed }\SpecialCharTok{\{}\NormalTok{max\_length}\SpecialCharTok{:,\}}\SpecialStringTok{ characters"}\NormalTok{)}
+            \ControlFlowTok{return} \VariableTok{None}
+
+        \CommentTok{\# Characters that cannot be stored: NUL, which PostgreSQL rejects}
+        \CommentTok{\# (Chapter 17, section 17.8), and lone surrogates such as "\textbackslash{}ud800",}
+        \CommentTok{\# which JSON can carry but UTF{-}8 cannot encode, for any database}
+        \ControlFlowTok{if} \StringTok{"}\CharTok{\textbackslash{}x00}\StringTok{"} \KeywordTok{in}\NormalTok{ value:}
+            \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} contains invalid characters"}\NormalTok{)}
+            \ControlFlowTok{return} \VariableTok{None}
+        \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{            value.encode(}\StringTok{"utf{-}8"}\NormalTok{)}
+        \ControlFlowTok{except} \PreprocessorTok{UnicodeEncodeError}\NormalTok{:}
+            \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} contains invalid characters"}\NormalTok{)}
+            \ControlFlowTok{return} \VariableTok{None}
+
+        \ControlFlowTok{return}\NormalTok{ value}
+
+    \KeywordTok{def}\NormalTok{ require\_int(}
+        \VariableTok{self}\NormalTok{,}
+\NormalTok{        field: }\BuiltInTok{str}\NormalTok{,}
+        \OperatorTok{*}\NormalTok{,}
+\NormalTok{        min\_value: Optional[}\BuiltInTok{int}\NormalTok{] }\OperatorTok{=} \VariableTok{None}\NormalTok{,}
+\NormalTok{        max\_value: Optional[}\BuiltInTok{int}\NormalTok{] }\OperatorTok{=} \VariableTok{None}\NormalTok{,}
+\NormalTok{    ) }\OperatorTok{{-}\textgreater{}}\NormalTok{ Optional[}\BuiltInTok{int}\NormalTok{]:}
+        \CommentTok{"""}
+\CommentTok{        Extract and validate a required integer field.}
+\CommentTok{        """}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.require\_dict() }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+            \ControlFlowTok{return} \VariableTok{None}
+
+        \ControlFlowTok{if}\NormalTok{ field }\KeywordTok{not} \KeywordTok{in} \VariableTok{self}\NormalTok{.data:}
+            \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} is required"}\NormalTok{)}
+            \ControlFlowTok{return} \VariableTok{None}
+
+\NormalTok{        value }\OperatorTok{=} \VariableTok{self}\NormalTok{.data[field]}
+
+        \CommentTok{\# bool is a subclass of int in Python: reject True/False explicitly}
+        \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(value, }\BuiltInTok{int}\NormalTok{) }\KeywordTok{or} \BuiltInTok{isinstance}\NormalTok{(value, }\BuiltInTok{bool}\NormalTok{):}
+            \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} must be an integer"}\NormalTok{)}
+            \ControlFlowTok{return} \VariableTok{None}
+
+        \ControlFlowTok{if}\NormalTok{ min\_value }\KeywordTok{is} \KeywordTok{not} \VariableTok{None} \KeywordTok{and}\NormalTok{ value }\OperatorTok{\textless{}}\NormalTok{ min\_value:}
+            \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} must be at least }\SpecialCharTok{\{}\NormalTok{min\_value}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+            \ControlFlowTok{return} \VariableTok{None}
+
+        \ControlFlowTok{if}\NormalTok{ max\_value }\KeywordTok{is} \KeywordTok{not} \VariableTok{None} \KeywordTok{and}\NormalTok{ value }\OperatorTok{\textgreater{}}\NormalTok{ max\_value:}
+            \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} must be at most }\SpecialCharTok{\{}\NormalTok{max\_value}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+            \ControlFlowTok{return} \VariableTok{None}
+
+        \ControlFlowTok{return}\NormalTok{ value}
+
+    \KeywordTok{def}\NormalTok{ optional\_string(}
+        \VariableTok{self}\NormalTok{,}
+\NormalTok{        field: }\BuiltInTok{str}\NormalTok{,}
+        \OperatorTok{*}\NormalTok{,}
+\NormalTok{        max\_length: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{1000}\NormalTok{,}
+\NormalTok{        default: Optional[}\BuiltInTok{str}\NormalTok{] }\OperatorTok{=} \VariableTok{None}\NormalTok{,}
+\NormalTok{    ) }\OperatorTok{{-}\textgreater{}}\NormalTok{ Optional[}\BuiltInTok{str}\NormalTok{]:}
+        \CommentTok{"""}
+\CommentTok{        Extract and validate an optional string field.}
+\CommentTok{        Returns the value if present and valid, default if not present,}
+\CommentTok{        or None if present but invalid (with error added).}
+\CommentTok{        """}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.require\_dict() }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+            \ControlFlowTok{return}\NormalTok{ default}
+
+        \ControlFlowTok{if}\NormalTok{ field }\KeywordTok{not} \KeywordTok{in} \VariableTok{self}\NormalTok{.data:}
+            \ControlFlowTok{return}\NormalTok{ default}
+
+        \ControlFlowTok{return} \VariableTok{self}\NormalTok{.require\_string(field, min\_length}\OperatorTok{=}\DecValTok{0}\NormalTok{, max\_length}\OperatorTok{=}\NormalTok{max\_length)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The Validator is less strict than the format checks shown earlier. It rejects only the characters that cannot be stored at all, and accepts other control characters such as \texttt{\textbackslash{}x01}. A note is free text, and rejecting everything unusual turns away real input. Where a field must never contain control characters (a tag, an email address), its own pattern rules them out.
+
+\subsection*{Using the Validator in route handlers}\phantomsection\label{31-input-handling:using-the-validator-in-route-handlers}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 31.2}\enspace Updated create\_note with Validator}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ app.validation }\ImportTok{import}\NormalTok{ Validator}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+\NormalTok{    v }\OperatorTok{=}\NormalTok{ Validator(request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{))}
+
+    \CommentTok{\# Validate the body (it must be a JSON object) and the content field}
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ v.require\_string(}\StringTok{"content"}\NormalTok{, min\_length}\OperatorTok{=}\DecValTok{1}\NormalTok{, max\_length}\OperatorTok{=}\DecValTok{10\_000}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ v.has\_errors():}
+\NormalTok{        logger.warning(}\StringTok{"POST /notes/ rejected: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, }\StringTok{"; "}\NormalTok{.join(v.errors))}
+        \ControlFlowTok{return}\NormalTok{ v.error\_response()}
+
+    \CommentTok{\# content is now a clean, validated string — proceed with database}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+    \CommentTok{\# ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The error messages are the same ones the handler produced before, so clients see no change:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Sending the wrong data type:}
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ POST http://localhost:5000/notes/ }\AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"content": 42\}\textquotesingle{}}
+\CommentTok{\# \{"error":"\textquotesingle{}content\textquotesingle{} must be a string"\}}
+
+\CommentTok{\# Sending an empty object:}
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ POST http://localhost:5000/notes/ }\AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{\}\textquotesingle{}}
+\CommentTok{\# \{"error":"\textquotesingle{}content\textquotesingle{} is required"\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With a single field, a request has at most one problem. The accumulation pays off as soon as an endpoint validates several fields: a hypothetical endpoint that also required an integer \texttt{priority} would answer \texttt{\{\}} with every problem at once:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+{"error": "Invalid request",
+ "details": ["'content' is required", "'priority' is required"]}
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{3}
+\section{URL Parameters and Query Strings}\label{31-input-handling:314-url-parameters-and-query-strings}
+
+\subsection*{URL path parameters}\phantomsection\label{31-input-handling:url-path-parameters}
+
+Flask's type converters handle basic URL parameter parsing:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+    \CommentTok{\# note\_id is already an int — Flask\textquotesingle{}s \textless{}int:\textgreater{} converter}
+    \CommentTok{\# returned 404 if the URL contained a non{-}integer.}
+    \CommentTok{\# No additional type check needed.}
+    \ControlFlowTok{pass}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}But the converter only verifies that the value is an integer. Application-level validation (e.g., note\_id must be positive) is still the application's responsibility:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+    \ControlFlowTok{if}\NormalTok{ note\_id }\OperatorTok{\textless{}=} \DecValTok{0}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Note ID must be a positive integer"}\NormalTok{\}), }\DecValTok{400}
+    \CommentTok{\# ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(Flask's \texttt{int} converter never matches a negative number~--- \texttt{/notes/-1} is already a 404~--- so the only value this check can catch is \texttt{0}.)
+
+\subsection*{Query string parameters}\phantomsection\label{31-input-handling:query-string-parameters}
+
+Query string parameters come from the URL after \texttt{?}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+GET /notes/?limit=10&offset=20&sort=created_at
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Flask provides these via \texttt{request.args}:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \CommentTok{\# request.args is an ImmutableMultiDict (like a dict but allows multiple values)}
+
+    \CommentTok{\# Parse \textquotesingle{}limit\textquotesingle{} with a default of 50}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        limit }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(request.args.get(}\StringTok{"limit"}\NormalTok{, }\StringTok{"50"}\NormalTok{))}
+    \ControlFlowTok{except} \PreprocessorTok{ValueError}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}limit\textquotesingle{} must be an integer"}\NormalTok{\}), }\DecValTok{400}
+
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ (}\DecValTok{1} \OperatorTok{\textless{}=}\NormalTok{ limit }\OperatorTok{\textless{}=} \DecValTok{100}\NormalTok{):}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}limit\textquotesingle{} must be between 1 and 100"}\NormalTok{\}), }\DecValTok{400}
+
+    \CommentTok{\# Parse \textquotesingle{}offset\textquotesingle{} with a default of 0}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        offset }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(request.args.get(}\StringTok{"offset"}\NormalTok{, }\StringTok{"0"}\NormalTok{))}
+    \ControlFlowTok{except} \PreprocessorTok{ValueError}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}offset\textquotesingle{} must be an integer"}\NormalTok{\}), }\DecValTok{400}
+
+    \ControlFlowTok{if}\NormalTok{ offset }\OperatorTok{\textless{}} \DecValTok{0}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}offset\textquotesingle{} cannot be negative"}\NormalTok{\}), }\DecValTok{400}
+
+    \CommentTok{\# Sort field (whitelist approach — only allow known field names)}
+\NormalTok{    sort\_field }\OperatorTok{=}\NormalTok{ request.args.get(}\StringTok{"sort"}\NormalTok{, }\StringTok{"id"}\NormalTok{)}
+\NormalTok{    ALLOWED\_SORT\_FIELDS }\OperatorTok{=}\NormalTok{ \{}\StringTok{"id"}\NormalTok{, }\StringTok{"created\_at"}\NormalTok{\}}
+    \ControlFlowTok{if}\NormalTok{ sort\_field }\KeywordTok{not} \KeywordTok{in}\NormalTok{ ALLOWED\_SORT\_FIELDS:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}
+            \StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"\textquotesingle{}sort\textquotesingle{} must be one of: }\SpecialCharTok{\{}\StringTok{\textquotesingle{}, \textquotesingle{}}\SpecialCharTok{.}\NormalTok{join(}\BuiltInTok{sorted}\NormalTok{(ALLOWED\_SORT\_FIELDS))}\SpecialCharTok{\}}\SpecialStringTok{"}
+\NormalTok{        \}), }\DecValTok{400}
+
+    \CommentTok{\# Now safe to use limit, offset, sort\_field in a query}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+
+    \CommentTok{\# Using a whitelist for the sort field prevents SQL injection}
+    \CommentTok{\# (we cannot use a parameterized placeholder for field names)}
+\NormalTok{    query }\OperatorTok{=} \SpecialStringTok{f"""}
+\SpecialStringTok{        SELECT id, content, created\_at}
+\SpecialStringTok{        FROM notes}
+\SpecialStringTok{        ORDER BY }\SpecialCharTok{\{}\NormalTok{sort\_field}\SpecialCharTok{\}}\SpecialStringTok{ DESC}
+\SpecialStringTok{        LIMIT ? OFFSET ?}
+\SpecialStringTok{    """}
+\NormalTok{    cursor.execute(sql(query), (limit, offset))}
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [row\_to\_note(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+    \CommentTok{\# ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(An \texttt{int()} of user input can fail, which is why each one sits in a \texttt{try}. Flask also offers \texttt{request.}\allowbreak{}\texttt{args.}\allowbreak{}\texttt{get("limit",}\allowbreak{}\texttt{\ 50,}\allowbreak{}\texttt{\ type=}\allowbreak{}\texttt{int)}, but that silently falls back to the default on bad input instead of telling the client~--- for an API, the explicit 400 is kinder.)
+
+\setcounter{section}{4}
+\section{SQL Injection and Parameterized Queries}\label{31-input-handling:315-sql-injection-and-parameterized-queries}
+
+\textbf{SQL injection} is one of the most common and dangerous web vulnerabilities. It occurs when user-supplied input becomes part of the SQL \emph{text} of a query, where the database parses it as code.
+
+\subsection*{The attack}\phantomsection\label{31-input-handling:the-attack}
+
+Suppose the code builds a SQL query by string concatenation:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# DANGEROUS — DO NOT DO THIS}
+\NormalTok{note\_id }\OperatorTok{=}\NormalTok{ request.args.get(}\StringTok{"id"}\NormalTok{)}
+\NormalTok{query }\OperatorTok{=} \SpecialStringTok{f"SELECT * FROM notes WHERE id = }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}
+\NormalTok{cursor.execute(query)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}An attacker sends: \texttt{GET\ /}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{?}\allowbreak{}\texttt{id=}\allowbreak{}\texttt{1\ OR\ 1=}\allowbreak{}\texttt{1}
+
+The query becomes:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{SELECT} \OperatorTok{*} \KeywordTok{FROM}\NormalTok{ notes }\KeywordTok{WHERE} \KeywordTok{id} \OperatorTok{=} \DecValTok{1} \KeywordTok{OR} \DecValTok{1}\OperatorTok{=}\DecValTok{1}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This returns ALL notes, not just note 1. Worse, the attacker can read data from \emph{other} tables:
+
+Attacker sends: \texttt{GET\ /}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{?}\allowbreak{}\texttt{id=}\allowbreak{}\texttt{0\ UNION\ SELECT\ id,}\allowbreak{}\texttt{\ email,}\allowbreak{}\texttt{\ password\_}\allowbreak{}\texttt{hash\ FROM\ users}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{SELECT} \OperatorTok{*} \KeywordTok{FROM}\NormalTok{ notes }\KeywordTok{WHERE} \KeywordTok{id} \OperatorTok{=} \DecValTok{0} \KeywordTok{UNION} \KeywordTok{SELECT} \KeywordTok{id}\NormalTok{, email, password\_hash }\KeywordTok{FROM}\NormalTok{ users}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The response now lists user accounts instead of notes. With a driver that runs several statements in one \texttt{execute()} call~--- psycopg2 does; Python's \texttt{sqlite3} refuses~--- the attacker can even append a second statement: \texttt{1;\ DROP\ TABLE\ notes;\ -\/-}.
+
+\subsection*{The prevention: parameterized queries}\phantomsection\label{31-input-handling:the-prevention-parameterized-queries}
+
+Always use parameterized queries (also called prepared statements). The database driver separates the SQL structure from the data:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# SAFE — the database driver handles escaping}
+\NormalTok{note\_id }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(request.args.get(}\StringTok{"id"}\NormalTok{, }\DecValTok{0}\NormalTok{))}
+\NormalTok{cursor.execute(}
+    \StringTok{"SELECT * FROM notes WHERE id = }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{,}
+\NormalTok{    (note\_id,)  }\CommentTok{\# The value is passed separately from the SQL}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With parameterized queries:
+
+\begin{itemize}
+\tightlist
+\item
+  The value travels separately from the SQL text. (\texttt{sqlite3} really does prepare the statement first and bind the value; psycopg2 inserts the value into the query itself on the client side, but always as a correctly quoted literal.)
+\item
+  Either way, the value is never parsed as SQL
+\item
+  \texttt{\textquotesingle{};\ DROP\ TABLE\ notes;\ -\/-} is treated as a literal string value, not SQL
+\end{itemize}
+
+\noindent{}The Notes API already uses parameterized queries (written with \texttt{?}; \texttt{sql()} converts them to psycopg2's \texttt{\%s}). This is non-negotiable~--- never build SQL strings by concatenation with user input. The one thing parameters cannot carry is an \emph{identifier}, such as a column name in \texttt{ORDER\ BY}; for those, use an allow-list, as the sort field in section 31.4 does.
+
+\setcounter{section}{5}
+\section{Input Handling for Headers}\label{31-input-handling:316-input-handling-for-headers}
+
+Request headers can also contain malicious content. Be careful when using header values:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Reading a custom header}
+\NormalTok{api\_key }\OperatorTok{=}\NormalTok{ request.headers.get(}\StringTok{"X{-}API{-}Key"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+
+\CommentTok{\# Never use a header value directly in SQL}
+\CommentTok{\# This would be SQL injection:}
+\CommentTok{\# cursor.execute(f"SELECT user FROM api\_keys WHERE key = \textquotesingle{}\{api\_key\}\textquotesingle{}")}
+
+\CommentTok{\# Correct (a hypothetical api\_keys table; PostgreSQL placeholder):}
+\NormalTok{cursor.execute(}\StringTok{"SELECT user FROM api\_keys WHERE key = }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, (api\_key,))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Headers used in logging need care too:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# A User{-}Agent header containing log injection attempts:}
+\CommentTok{\# User{-}Agent: normal browser\textbackslash{}nERROR: database compromised}
+
+\CommentTok{\# Sanitize for logging:}
+\NormalTok{user\_agent }\OperatorTok{=}\NormalTok{ request.headers.get(}\StringTok{"User{-}Agent"}\NormalTok{, }\StringTok{""}\NormalTok{)[:}\DecValTok{200}\NormalTok{]  }\CommentTok{\# Limit length}
+\NormalTok{user\_agent }\OperatorTok{=}\NormalTok{ user\_agent.replace(}\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{, }\StringTok{" "}\NormalTok{).replace(}\StringTok{"}\CharTok{\textbackslash{}r}\StringTok{"}\NormalTok{, }\StringTok{" "}\NormalTok{)  }\CommentTok{\# Remove newlines}
+\NormalTok{logger.info(}\StringTok{"Request from: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, user\_agent)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The JSON log format from \hyperref[ch:16-logging-error-handling]{Chapter 16} is already safe here~--- \texttt{json.dumps} escapes a newline as \texttt{\textbackslash{}n}, so it cannot start a fake log line. The human-readable format is the vulnerable one.
+
+\setcounter{section}{6}
+\section{Testing Input Validation}\label{31-input-handling:317-testing-input-validation}
+
+Input validation must be thoroughly tested. \hyperref[ch:17-build-process]{Chapter 17} wrote tests for the happy path (valid input). Tests must also cover all invalid input cases.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 31.3}\enspace Additional validation tests for tests/test\_notes.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\KeywordTok{class}\NormalTok{ TestCreateNoteValidation:}
+    \CommentTok{"""Comprehensive validation tests for POST /notes/"""}
+
+    \CommentTok{\# Presence checks}
+    \KeywordTok{def}\NormalTok{ test\_no\_body\_returns\_415(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{\# No Content{-}Type, no body: rejected by the middleware (Chapter 16)}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{415}
+
+    \KeywordTok{def}\NormalTok{ test\_empty\_body\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}
+            \StringTok{"/notes/"}\NormalTok{, data}\OperatorTok{=}\StringTok{""}\NormalTok{, content\_type}\OperatorTok{=}\StringTok{"application/json"}
+\NormalTok{        )}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+
+    \KeywordTok{def}\NormalTok{ test\_plain\_text\_body\_returns\_415(}\VariableTok{self}\NormalTok{, client):}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, data}\OperatorTok{=}\StringTok{"hello"}\NormalTok{, content\_type}\OperatorTok{=}\StringTok{"text/plain"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{415}
+
+    \KeywordTok{def}\NormalTok{ test\_array\_body\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""JSON arrays are not accepted — must be an object."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{[}\StringTok{"content"}\NormalTok{])}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+
+    \CommentTok{\# Type checks}
+    \KeywordTok{def}\NormalTok{ test\_content\_as\_int\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\DecValTok{42}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+        \ControlFlowTok{assert}\NormalTok{ response.get\_json() }\OperatorTok{==}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} must be a string"}\NormalTok{\}}
+
+    \KeywordTok{def}\NormalTok{ test\_content\_as\_bool\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\VariableTok{True}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+
+    \KeywordTok{def}\NormalTok{ test\_content\_as\_null\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\VariableTok{None}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+
+    \KeywordTok{def}\NormalTok{ test\_content\_as\_list\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: [}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{]\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+
+    \CommentTok{\# Format checks}
+    \KeywordTok{def}\NormalTok{ test\_empty\_string\_content\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{""}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+
+    \KeywordTok{def}\NormalTok{ test\_whitespace\_only\_content\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+        \ControlFlowTok{for}\NormalTok{ whitespace }\KeywordTok{in}\NormalTok{ [}\StringTok{"   "}\NormalTok{, }\StringTok{"}\CharTok{\textbackslash{}t}\StringTok{"}\NormalTok{, }\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{"}\NormalTok{, }\StringTok{"  }\CharTok{\textbackslash{}n}\StringTok{  "}\NormalTok{]:}
+\NormalTok{            response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: whitespace\})}
+            \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}\NormalTok{, }\OperatorTok{\textbackslash{}}
+                \SpecialStringTok{f"Expected 400 for content=}\SpecialCharTok{\{}\BuiltInTok{repr}\NormalTok{(whitespace)}\SpecialCharTok{\}}\SpecialStringTok{"}
+
+    \KeywordTok{def}\NormalTok{ test\_exactly\_10000\_chars\_is\_accepted(}\VariableTok{self}\NormalTok{, client):}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"x"} \OperatorTok{*} \DecValTok{10\_000}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{201}
+
+    \KeywordTok{def}\NormalTok{ test\_10001\_chars\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"x"} \OperatorTok{*} \DecValTok{10\_001}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+
+    \KeywordTok{def}\NormalTok{ test\_characters\_that\_cannot\_be\_stored\_return\_400(}\VariableTok{self}\NormalTok{, client):}
+        \ControlFlowTok{for}\NormalTok{ bad }\KeywordTok{in}\NormalTok{ [}\StringTok{"a}\CharTok{\textbackslash{}x00}\StringTok{b"}\NormalTok{, }\StringTok{"a}\CharTok{\textbackslash{}ud800}\StringTok{b"}\NormalTok{]:   }\CommentTok{\# NUL; a lone surrogate}
+\NormalTok{            response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: bad\})}
+            \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}\NormalTok{, }\SpecialStringTok{f"Expected 400 for }\SpecialCharTok{\{}\NormalTok{bad}\SpecialCharTok{!r\}}\SpecialStringTok{"}
+            \ControlFlowTok{assert}\NormalTok{ response.get\_json() }\OperatorTok{==}\NormalTok{ \{}
+                \StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} contains invalid characters"}
+\NormalTok{            \}}
+
+    \CommentTok{\# Valid content}
+    \KeywordTok{def}\NormalTok{ test\_unicode\_content\_is\_accepted(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""Unicode characters (emoji, non{-}ASCII) are valid."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Hello 你好 🎉"}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{201}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+        \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"content"}\NormalTok{] }\OperatorTok{==} \StringTok{"Hello 你好 🎉"}
+
+    \KeywordTok{def}\NormalTok{ test\_multiline\_content\_is\_accepted(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""Content can span multiple lines."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Line 1}\CharTok{\textbackslash{}n}\StringTok{Line 2}\CharTok{\textbackslash{}n}\StringTok{Line 3"}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{201}
+
+    \KeywordTok{def}\NormalTok{ test\_special\_characters\_in\_content(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""Special characters that might confuse SQL or HTML are handled safely."""}
+\NormalTok{        content }\OperatorTok{=} \StringTok{"It\textquotesingle{}s a \textquotesingle{}test\textquotesingle{} with }\CharTok{\textbackslash{}"}\StringTok{quotes}\CharTok{\textbackslash{}"}\StringTok{ \& \textless{}special\textgreater{} chars"}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: content\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{201}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+        \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"content"}\NormalTok{] }\OperatorTok{==}\NormalTok{ content.strip()}
+
+    \CommentTok{\# Error response format}
+    \KeywordTok{def}\NormalTok{ test\_error\_response\_is\_json(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""Error responses must be JSON."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+        \ControlFlowTok{assert}\NormalTok{ data }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}
+        \CommentTok{\# The API\textquotesingle{}s one error shape (Chapter 16)}
+        \ControlFlowTok{assert} \StringTok{"error"} \KeywordTok{in}\NormalTok{ data}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\phantomsection\label{31-input-handling:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{All external input is untrusted.} Validate every field: presence, type, format, and business rules. Do not assume the client sends what you expect.
+\item
+  \textbf{The four categories of validation}: presence (is it there?), type (is it the right Python type?), format (does it match the expected pattern?), business rules (does it satisfy application-specific constraints?).
+\item
+  \textbf{Return all errors at once}, not just the first. The \texttt{Validator} class accumulates errors and reports them together~--- in the API's one error shape, \texttt{\{"error":\ …\}} plus a \texttt{details} list when there are several.
+\item
+  \textbf{Parameterized queries} are the only safe way to put user-supplied \emph{values} into SQL. Never build SQL strings with string concatenation or f-strings containing user data; for identifiers (such as a sort column), use an allow-list.
+\item
+  \textbf{Whitelist, don't blacklist.} For sort fields, allowed values, and other finite sets, accept only known-good values. Reject anything not on the list.
+\item
+  \textbf{Sanitize inputs used in logging.} Remove or escape newlines to prevent log injection attacks.
+\item
+  \textbf{Test all invalid input cases}, not just valid input. A good validation test suite covers every error path.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{31-input-handling:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Send \texttt{\{"content":}\allowbreak{}\texttt{\ "x",}\allowbreak{}\texttt{\ "content":}\allowbreak{}\texttt{\ "y"\}} (a duplicated key) to \texttt{POST\ /notes/}. Which value is stored, and is that a validation problem?
+\item
+  \textbf{Break and fix.} Write a query with an f-string, \texttt{f"SELECT\ *\ FROM\ notes\ WHERE\ id\ =}\allowbreak{}\texttt{\ \{note\_}\allowbreak{}\texttt{id\}"}, in a test-only route, and exploit it with \texttt{curl\ -}\allowbreak{}\texttt{G\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{data-}\allowbreak{}\texttt{urlencode\ \textquotesingle{}id=}\allowbreak{}\texttt{0\ OR\ 1=}\allowbreak{}\texttt{1\textquotesingle{}\ http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{localhost:}\allowbreak{}\texttt{5000/}\allowbreak{}\texttt{…}. Then fix it with a parameter.
+\item
+  \textbf{Extend.} Replace section 31.4's \texttt{sort} parameter with one that accepts only \texttt{newest} or \texttt{oldest}, validated against an allow-list, with a \texttt{400} for anything else.
+\item
+  \textbf{Explain.} Why does the \texttt{Validator} return all errors at once, and when would returning only the first be acceptable?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-31.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{31-input-handling:whats-next}
+
+Input has been received, parsed, and validated. The next step is routing: how Flask matches the incoming URL and HTTP method to the correct handler function.
+
+\noindent{}→ \hyperref[ch:32-routing]{Chapter 32}~--- Routing

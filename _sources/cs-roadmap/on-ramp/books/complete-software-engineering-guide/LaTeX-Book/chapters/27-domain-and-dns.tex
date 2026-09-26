@@ -1,0 +1,607 @@
+\setcounter{chapter}{26}
+\chapter{Domain Names and DNS}\label{ch:27-domain-and-dns}
+
+\chapterrule
+
+\hyperref[ch:10-networking-limitations]{Chapter 10} explained why \texttt{localhost} is meaningless outside your machine. \hyperref[ch:22-network-configuration]{Chapter 22} showed that the server has a public IP address. But users do not connect to IP addresses~--- they connect to names like \texttt{api.notes.example.com}.
+
+\textbf{DNS (Domain Name System)} is the global infrastructure that translates names to IP addresses. It is one of the oldest and most critical pieces of internet infrastructure. Without DNS, every user would need to know the IP address of every service they use~--- and every time a server's IP changed, every user would need to update their knowledge.
+
+This chapter covers how DNS works, how to register a domain, how to create DNS records, and how propagation works. It also covers the operational details that trip up developers new to production: TTLs, record types, and the difference between \texttt{example.com} and \texttt{api.example.com}.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  How DNS translates domain names to IP addresses (the full resolution chain)
+\item
+  What DNS record types are (A, AAAA, CNAME, MX, TXT) and what each is used for
+\item
+  How to register a domain and configure a DNS zone
+\item
+  What TTL (Time to Live) is and how it affects deployment speed
+\item
+  How to set up a subdomain for the Notes API
+\item
+  How to verify DNS propagation
+\item
+  What DNSSEC is (briefly) and why it exists
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{How DNS Works: The Resolution Chain}\label{27-domain-and-dns:271-how-dns-works-the-resolution-chain}
+
+When your browser navigates to \texttt{api.notes.example.com}, before any TCP connection is opened, the operating system must discover the IP address. This discovery involves a hierarchy of DNS servers.
+
+\subsection*{The DNS hierarchy}\phantomsection\label{27-domain-and-dns:the-dns-hierarchy}
+
+DNS is organized as a tree:
+
+\begin{diagrambox}[short]{372.4pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+.                        (root — the "dot" at the end of every domain name)
+│
+├── com.                 (top-level domain — TLD)
+│     └── example.com.   (second-level domain — SLD — you own this)
+│           └── notes.example.com.       (subdomain)
+│                 └── api.notes.example.com.  (subdomain — you configure this)
+│
+├── org.
+│     └── wikipedia.org.
+│
+└── io.
+      └── github.io.
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Each level of the hierarchy is managed by different servers:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Root servers}: 13 logical root server identities, run by 12 organizations (ICANN and Verisign among them) as well over a thousand anycast instances worldwide, that know which servers handle each TLD
+\item
+  \textbf{TLD servers}: servers that know which servers handle each SLD (e.g., Verisign runs the \texttt{.com} TLD servers)
+\item
+  \textbf{Authoritative nameservers}: servers that know the actual records for your domain (run by your domain registrar or DNS provider like Cloudflare, Route53)
+\item
+  \textbf{Recursive resolvers}: servers that do the work of traversal (typically your ISP or a public resolver like \texttt{8.8.8.8})
+\end{itemize}
+
+\subsection*{The full resolution sequence}\phantomsection\label{27-domain-and-dns:the-full-resolution-sequence}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# What happens when resolving api.notes.example.com:}
+
+\NormalTok{1. Client checks local cache:}
+\NormalTok{   Has api.notes.example.com been resolved recently? No → proceed}
+
+\NormalTok{2. Client asks its configured resolver (e.g., 8.8.8.8 — Google\textquotesingle{}s DNS):}
+\NormalTok{   "What is api.notes.example.com?"}
+
+\NormalTok{3. Resolver checks its cache: No}
+
+\NormalTok{4. Resolver asks a root server:}
+\NormalTok{   "Who handles .com?"}
+\NormalTok{   Root server: "Ask 192.5.6.30 (Verisign\textquotesingle{}s .com TLD server)"}
+
+\NormalTok{5. Resolver asks the .com TLD server:}
+\NormalTok{   "Who handles example.com?"}
+\NormalTok{   TLD server: "Ask ns1.dns{-}provider.example (example.com\textquotesingle{}s authoritative}
+\NormalTok{               nameserver)"}
+
+\NormalTok{6. Resolver asks example.com\textquotesingle{}s authoritative nameserver:}
+\NormalTok{   "What is api.notes.example.com?"}
+\NormalTok{   Authoritative nameserver: "203.0.113.42 (TTL: 300 seconds)"}
+
+\NormalTok{7. Resolver returns 203.0.113.42 to the client}
+\NormalTok{   Resolver caches this result for 300 seconds}
+
+\NormalTok{8. Client connects to 203.0.113.42}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}A completely cold lookup like this takes somewhere between 10 and 100 milliseconds. In practice it is rarely that cold: resolvers keep the root and \texttt{.com} referrals cached for a day or more, so usually only step 6 goes out over the network. Lookups answered from a cache take a millisecond or less.
+
+\subsection*{The recursive resolver}\phantomsection\label{27-domain-and-dns:the-recursive-resolver}
+
+The \textbf{recursive resolver} (also called a \textbf{recursive DNS server}) is the server that does the traversal on behalf of the client. Common resolvers:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{8.8.8.8}, \texttt{8.8.4.4}~--- Google Public DNS
+\item
+  \texttt{1.1.1.1}, \texttt{1.0.0.1}~--- Cloudflare DNS (privacy-focused)
+\item
+  Your ISP's resolver (configured automatically via DHCP)
+\item
+  Your router (which forwards to one of the above)
+\end{itemize}
+
+\noindent{}Most clients use their configured resolver without knowing which root or TLD servers exist.
+
+\setcounter{section}{1}
+\section{DNS Record Types}\label{27-domain-and-dns:272-dns-record-types}
+
+A \textbf{DNS zone} is the set of DNS records for a domain. Each record maps a name to a value, with a specific record type.
+
+\subsection*{A record --- IPv4 address}\phantomsection\label{27-domain-and-dns:a-record--ipv4-address}
+
+The most common record. Maps a hostname to an IPv4 address.
+
+\begin{diagrambox}[short]{344.8pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+api.notes.example.com.    300    IN    A    203.0.113.42
+│                         │      │     │    │
+│                         │      │     │    └─ IPv4 address
+│                         │      │     └─ Record type (A = IPv4 address)
+│                         │      └─ Record class (IN = Internet)
+│                         └─ TTL in seconds
+└─ Fully qualified domain name (note the trailing dot)
+\end{Verbatim}
+\end{diagrambox}
+
+\subsection*{AAAA record --- IPv6 address}\phantomsection\label{27-domain-and-dns:aaaa-record--ipv6-address}
+
+Maps a hostname to an IPv6 address. The modern equivalent of the A record.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+api.notes.example.com.    300    IN    AAAA    2001:db8::1
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{CNAME record --- Canonical name (alias)}\phantomsection\label{27-domain-and-dns:cname-record--canonical-name-alias}
+
+Maps a hostname to another hostname. The resolver follows the CNAME to find the ultimate A/AAAA record.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# www.example.com is an alias for example.com
+www.example.com.    300    IN    CNAME    example.com.
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\textbf{Important CNAME restriction}: A CNAME record cannot coexist with other records for the same name. The domain apex (\texttt{example.com.}, without a subdomain) cannot be a CNAME~--- this is why cloud providers have ``ALIAS'' or ``ANAME'' records as workarounds.
+
+\subsection*{MX record --- Mail exchange}\phantomsection\label{27-domain-and-dns:mx-record--mail-exchange}
+
+Specifies which servers handle email for the domain. Not needed for the Notes API, but ubiquitous.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+example.com.    3600    IN    MX    10    mail1.example.com.
+example.com.    3600    IN    MX    20    mail2.example.com.
+# Priority: 10 is tried before 20
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{TXT record --- Text}\phantomsection\label{27-domain-and-dns:txt-record--text}
+
+Arbitrary text associated with a name. Used for:
+
+\begin{itemize}
+\tightlist
+\item
+  Domain ownership verification (e.g., Google Search Console)
+\item
+  SPF records (email authentication)
+\item
+  DKIM records (email signing)
+\item
+  ACME challenges (Let's Encrypt certificate issuance)
+\end{itemize}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+example.com.    300    IN    TXT    "v=spf1 include:_spf.google.com ~all"
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{NS record --- Nameserver}\phantomsection\label{27-domain-and-dns:ns-record--nameserver}
+
+Specifies which servers are authoritative for a domain or subdomain.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+example.com.    86400    IN    NS    ns1.digitalocean.com.
+example.com.    86400    IN    NS    ns2.digitalocean.com.
+example.com.    86400    IN    NS    ns3.digitalocean.com.
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{2}
+\section{Registering a Domain}\label{27-domain-and-dns:273-registering-a-domain}
+
+To create DNS records for \texttt{example.com}, you must first own \texttt{example.com}. Domains are registered through \textbf{domain registrars}~--- accredited organizations that manage domain registration.
+
+Popular registrars:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Namecheap}: affordable, developer-friendly
+\item
+  \textbf{Squarespace Domains} (which took over Google Domains in 2023): clean interface
+\item
+  \textbf{Cloudflare Registrar}: at-cost pricing (no markup), excellent DNS management
+\item
+  \textbf{GoDaddy}: large but has upsell practices
+\end{itemize}
+
+\noindent{}\textbf{For a long-lived project, Cloudflare is a strong choice} for both registration and DNS management: its DNS is among the fastest globally, it has a clean API for automation, it supports DNSSEC, and it offers free DDoS protection. This chapter's examples use \textbf{DigitalOcean's DNS} instead, for one practical reason: it lives in the same account as the server, so there is one control panel and one API token to learn. Everything shown carries over to Cloudflare.
+
+\subsection*{The registration process}\phantomsection\label{27-domain-and-dns:the-registration-process}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Search for availability, on the registrar's site or with \texttt{whois\ notesapi.com} (WHOIS knows registered domains such as \texttt{notesapi.com}, not subdomains of them)
+\item
+  Purchase a domain (1--3 years, renewable)
+\item
+  Provide contact information (WHOIS data)
+\item
+  Configure the nameservers to point to your DNS provider
+\end{enumerate}
+
+\subsection*{Delegating to a DNS provider}\phantomsection\label{27-domain-and-dns:delegating-to-a-dns-provider}
+
+If you register at Namecheap but want to use Cloudflare's DNS:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Add the domain to Cloudflare (free account)
+\item
+  Cloudflare assigns your account a pair of nameservers, with names like \texttt{ada.ns.cloudflare.com} and \texttt{bob.ns.cloudflare.com}
+\item
+  In Namecheap's control panel, update the domain's nameservers to Cloudflare's
+\item
+  Wait for the change to take effect everywhere~--- up to a day or two. The registry itself updates within minutes; the wait is for resolvers whose caches still hold the old NS records (\texttt{.com} NS records are cached for up to 48 hours).
+\end{enumerate}
+
+\setcounter{section}{3}
+\section{Creating DNS Records for the Notes API}\label{27-domain-and-dns:274-creating-dns-records-for-the-notes-api}
+
+With the domain registered and DNS delegated to a provider, create the records:
+
+\subsection*{The zone configuration}\phantomsection\label{27-domain-and-dns:the-zone-configuration}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# DNS Zone for example.com
+# Managed through Cloudflare/DigitalOcean/Route53/etc.
+
+# Root domain → server IP (203.0.113.42 is the Reserved IP from
+# Chapter 22, so the records survive a server replacement)
+example.com.            300    IN    A       203.0.113.42
+
+# www → root domain (alias)
+www.example.com.        300    IN    CNAME   example.com.
+
+# API subdomain → server IP
+api.notes.example.com.  300    IN    A       203.0.113.42
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{Using DigitalOcean's DNS}\phantomsection\label{27-domain-and-dns:using-digitaloceans-dns}
+
+DigitalOcean provides free DNS management for domains hosting resources on DigitalOcean:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Networking → Domains → Add Domain
+\item
+  Enter \texttt{example.com}
+\item
+  Update your registrar's nameservers to:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{ns1.digitalocean.com}
+  \item
+    \texttt{ns2.digitalocean.com}
+  \item
+    \texttt{ns3.digitalocean.com}
+  \end{itemize}
+\item
+  Create DNS records in the DigitalOcean control panel
+\end{enumerate}
+
+\subsection*{Using the DigitalOcean API to create DNS records}\phantomsection\label{27-domain-and-dns:using-the-digitalocean-api-to-create-dns-records}
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 27.1}\enspace Creating DNS records via API}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Create DNS records using DigitalOcean\textquotesingle{}s API.}
+
+\CommentTok{In practice, you would do this via the web UI or CLI tool.}
+\CommentTok{This script shows the API approach, which enables automation.}
+
+\CommentTok{Requires the requests library (pip install requests).}
+\CommentTok{Not idempotent: the API creates a new record on every call, so running}
+\CommentTok{the script twice creates duplicate A records. A production version would}
+\CommentTok{first list the existing records and update or skip instead.}
+\CommentTok{"""}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ requests}
+
+\NormalTok{DO\_TOKEN }\OperatorTok{=}\NormalTok{ os.environ[}\StringTok{"DO\_API\_TOKEN"}\NormalTok{]}
+\NormalTok{DOMAIN }\OperatorTok{=} \StringTok{"example.com"}
+\NormalTok{SERVER\_IP }\OperatorTok{=} \StringTok{"203.0.113.42"}
+
+\NormalTok{headers }\OperatorTok{=}\NormalTok{ \{}
+    \StringTok{"Authorization"}\NormalTok{: }\SpecialStringTok{f"Bearer }\SpecialCharTok{\{}\NormalTok{DO\_TOKEN}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{,}
+    \StringTok{"Content{-}Type"}\NormalTok{: }\StringTok{"application/json"}\NormalTok{,}
+\NormalTok{\}}
+
+\KeywordTok{def}\NormalTok{ create\_record(record\_type: }\BuiltInTok{str}\NormalTok{, name: }\BuiltInTok{str}\NormalTok{, data: }\BuiltInTok{str}\NormalTok{, ttl: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{300}\NormalTok{):}
+    \CommentTok{"""Create a DNS record in the DigitalOcean domain."""}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ requests.post(}
+        \SpecialStringTok{f"https://api.digitalocean.com/v2/domains/}\SpecialCharTok{\{}\NormalTok{DOMAIN}\SpecialCharTok{\}}\SpecialStringTok{/records"}\NormalTok{,}
+\NormalTok{        headers}\OperatorTok{=}\NormalTok{headers,}
+\NormalTok{        json}\OperatorTok{=}\NormalTok{\{}
+            \StringTok{"type"}\NormalTok{: record\_type,}
+            \StringTok{"name"}\NormalTok{: name,}
+            \StringTok{"data"}\NormalTok{: data,}
+            \StringTok{"ttl"}\NormalTok{: ttl,}
+\NormalTok{        \},}
+\NormalTok{        timeout}\OperatorTok{=}\DecValTok{10}\NormalTok{,  }\CommentTok{\# requests waits forever by default}
+\NormalTok{    )}
+\NormalTok{    response.raise\_for\_status()}
+\NormalTok{    record }\OperatorTok{=}\NormalTok{ response.json()[}\StringTok{"domain\_record"}\NormalTok{]}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Created: }\SpecialCharTok{\{}\NormalTok{record[}\StringTok{\textquotesingle{}type\textquotesingle{}}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{ }\SpecialCharTok{\{}\NormalTok{record[}\StringTok{\textquotesingle{}name\textquotesingle{}}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{ → }\SpecialCharTok{\{}\NormalTok{record[}\StringTok{\textquotesingle{}data\textquotesingle{}}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ record}
+
+\CommentTok{\# Root domain A record}
+\NormalTok{create\_record(}\StringTok{"A"}\NormalTok{, }\StringTok{"@"}\NormalTok{, SERVER\_IP)}
+
+\CommentTok{\# API subdomain A record}
+\CommentTok{\# DigitalOcean uses "@" for the apex and the name for subdomains}
+\CommentTok{\# "api.notes" → api.notes.example.com}
+\NormalTok{create\_record(}\StringTok{"A"}\NormalTok{, }\StringTok{"api.notes"}\NormalTok{, SERVER\_IP)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\setcounter{section}{4}
+\section{TTL: Time to Live}\label{27-domain-and-dns:275-ttl-time-to-live}
+
+Every DNS record has a \textbf{TTL} (Time to Live)~--- the number of seconds that resolvers and clients may cache the answer before re-querying.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+api.notes.example.com.  300    IN    A    203.0.113.42
+                         ↑
+                    300 seconds = 5 minutes
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{The TTL tradeoff}\phantomsection\label{27-domain-and-dns:the-ttl-tradeoff}
+
+\textbf{Low TTL (60--300 seconds)}:
+
+\begin{itemize}
+\tightlist
+\item
+  DNS changes propagate quickly (within TTL seconds of updating the record)
+\item
+  More DNS queries (higher load on DNS servers)
+\item
+  More latency (DNS queries must be made more frequently)
+\end{itemize}
+
+\noindent{}\textbf{High TTL (3600--86400 seconds)}:
+
+\begin{itemize}
+\tightlist
+\item
+  DNS changes take longer to propagate (old IP cached for up to TTL seconds)
+\item
+  Fewer DNS queries (cached longer)
+\item
+  Lower latency for users (fewer DNS lookups)
+\end{itemize}
+
+\subsection*{TTL strategy for the Notes API}\phantomsection\label{27-domain-and-dns:ttl-strategy-for-the-notes-api}
+
+\textbf{Normal operation}: TTL = 3600 seconds (1 hour). Clients cache the IP for an hour; DNS servers have low load. (The records above use 300 seconds because the server is new and its setup may still change; raise them to 3600 once things are stable.)
+
+\textbf{Before a planned IP change}: reduce TTL to 60--300 seconds at least one old-TTL period in advance (an hour ahead, for a 3600-second TTL). Wait for old records to expire. Then change the IP. Within 60--300 seconds, the new IP is live everywhere.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Before changing the server IP:}
+\CommentTok{\# 1. Reduce TTL to 300 seconds (do this 1 hour in advance)}
+\CommentTok{\# 2. Wait 1 hour (for the old 3600s TTL to expire everywhere)}
+\CommentTok{\# 3. Update the A record to the new IP}
+\CommentTok{\# 4. Within 300 seconds, all resolvers have the new IP}
+\CommentTok{\# 5. Increase TTL back to 3600 seconds}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is the standard procedure for zero-impact IP migrations.
+
+\setcounter{section}{5}
+\section{Verifying DNS Configuration}\label{27-domain-and-dns:276-verifying-dns-configuration}
+
+After creating DNS records, verify they are correct before proceeding with TLS certificate issuance (\hyperref[ch:28-traffic-routing]{Chapter 28}).
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Query the DNS record for the Notes API subdomain}
+\ExtensionTok{dig}\NormalTok{ api.notes.example.com A}
+
+\CommentTok{\# Output:}
+\CommentTok{\# ;; QUESTION SECTION:}
+\CommentTok{\# ;api.notes.example.com.     IN  A}
+\CommentTok{\#}
+\CommentTok{\# ;; ANSWER SECTION:}
+\CommentTok{\# api.notes.example.com. 300 IN  A  203.0.113.42}
+\CommentTok{\#}
+\CommentTok{\# ;; Query time: 22 msec}
+
+\CommentTok{\# Query a specific DNS server (bypass local cache)}
+\ExtensionTok{dig}\NormalTok{ @8.8.8.8 api.notes.example.com A}
+
+\CommentTok{\# Short output (just the IP)}
+\ExtensionTok{dig}\NormalTok{ +short api.notes.example.com A}
+\CommentTok{\# 203.0.113.42}
+
+\CommentTok{\# Query the authoritative nameserver directly}
+\ExtensionTok{dig}\NormalTok{ +short example.com NS              }\CommentTok{\# Find the authoritative nameservers}
+\ExtensionTok{dig}\NormalTok{ @ns1.digitalocean.com api.notes.example.com A  }\CommentTok{\# Query it directly}
+
+\CommentTok{\# Check propagation from multiple global locations}
+\CommentTok{\# Use a web tool: https://dnschecker.org}
+\CommentTok{\# Enter: api.notes.example.com, Type: A}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Checking TTL countdown}\phantomsection\label{27-domain-and-dns:checking-ttl-countdown}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# The TTL in a cached answer shows how long it may still be cached}
+\ExtensionTok{dig}\NormalTok{ @8.8.8.8 api.notes.example.com A}
+
+\CommentTok{\# First query:  api.notes.example.com. 300 IN A 203.0.113.42  (TTL = 300)}
+\CommentTok{\# Query again 10 seconds later:}
+\CommentTok{\# Second query: api.notes.example.com. 290 IN A 203.0.113.42  (TTL = 290, counting down)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{6}
+\section{DNS Propagation}\label{27-domain-and-dns:277-dns-propagation}
+
+After creating or changing a DNS record, the change does not take effect everywhere simultaneously. This is called \textbf{DNS propagation}, but the name misleads: nothing is pushed or spread. The authoritative nameserver has the new record at once; every resolver that cached the \emph{old} answer keeps using it until its TTL expires, and only then asks again.
+
+How long propagation takes:
+
+\begin{itemize}
+\tightlist
+\item
+  If the old TTL was 3600 seconds: up to 3600 seconds (1 hour) for all resolvers to refresh
+\item
+  If the TTL was 300 seconds: up to 5 minutes
+\item
+  Your local machine's cache: may hold the old record until TTL expires (flush it~--- on macOS: \texttt{sudo\ dscacheutil\ -}\allowbreak{}\texttt{flushcache;\ sudo\ killall\ -}\allowbreak{}\texttt{HUP\ mDNSResponder}; on Ubuntu: \texttt{sudo\ resolvectl\ flush-}\allowbreak{}\texttt{caches})
+\end{itemize}
+
+\noindent{}``DNS propagation is complete'' means all the old cached answers have expired. Check at \url{https://dnschecker.org} for a global view.
+
+\subsection*{Why ``it worked for me but not for others''}\phantomsection\label{27-domain-and-dns:why-it-worked-for-me-but-not-for-others}
+
+Different users may be using different resolvers. User A's resolver has refreshed; User B's resolver still has the old cached record. This is normal during propagation. It resolves itself as TTLs expire everywhere.
+
+\setcounter{section}{7}
+\section{DNSSEC: DNS Security Extensions}\label{27-domain-and-dns:278-dnssec-dns-security-extensions}
+
+\textbf{DNSSEC} adds cryptographic signatures to DNS records, allowing resolvers to verify that DNS responses are authentic and have not been tampered with.
+
+Without DNSSEC, a malicious actor can attempt \textbf{DNS spoofing}~--- for example \textbf{cache poisoning}, injecting false DNS responses into a resolver's cache~--- directing users to a malicious server.
+
+With DNSSEC:
+
+\begin{itemize}
+\tightlist
+\item
+  The DNS zone is signed with a private key
+\item
+  Resolvers verify responses using the corresponding public key
+\item
+  Tampered responses are detected and rejected
+\end{itemize}
+
+\noindent{}DNSSEC is supported by most major DNS providers (Cloudflare, Route53)~--- but not by DigitalOcean's DNS, used in this chapter; to use DNSSEC, host the zone at a provider that supports it. Enabling it is straightforward:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Enable DNSSEC in your DNS provider's control panel
+\item
+  Copy the \textbf{DS record} they provide
+\item
+  Add the DS record at your registrar (links the TLD's trust anchor to your zone)
+\end{enumerate}
+
+\noindent{}For the Notes API in a learning context, DNSSEC is optional but worth understanding.
+
+\phantomsection\label{27-domain-and-dns:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{DNS} translates domain names to IP addresses via a hierarchy: a recursive resolver walks root servers → TLD servers → authoritative nameservers, then returns (and caches) the answer for the client.
+\item
+  \textbf{DNS record types}: A (IPv4), AAAA (IPv6), CNAME (alias), MX (email), TXT (arbitrary text), NS (nameservers).
+\item
+  \textbf{A records} map hostnames to IP addresses. \texttt{api.}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{example.}\allowbreak{}\texttt{com.}\allowbreak{}\texttt{\ 300\ IN\ A\ 203.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{113.}\allowbreak{}\texttt{42} means ``resolve to this IP, cache for 300 seconds.''
+\item
+  \textbf{TTL} (Time to Live) controls how long resolvers cache DNS answers. Low TTL = fast propagation but more queries. High TTL = slow propagation but fewer queries.
+\item
+  \textbf{Before changing a server's IP}: reduce TTL → wait for old TTL to expire everywhere → change IP → increase TTL again.
+\item
+  \textbf{Verify DNS} with \texttt{dig\ api.}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{example.}\allowbreak{}\texttt{com\ A}. Check global propagation at dnschecker.org.
+\item
+  \textbf{DNSSEC} prevents DNS spoofing by signing records cryptographically. Enable it at your DNS provider and registrar.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{27-domain-and-dns:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Run \texttt{dig\ +trace\ api.}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{example.}\allowbreak{}\texttt{com} (with your own domain). Identify the root server, the top-level domain server, and the authoritative server in the output.
+\item
+  \textbf{Break and fix.} Point a test subdomain at a wrong IP with a TTL of 3600, fix it five minutes later, and check with \texttt{dig\ @1.1.1.1} and \texttt{dig\ @8.8.8.8}. Why do the answers differ, and for how long?
+\item
+  \textbf{Extend.} Add an AAAA record if your server has an IPv6 address, and check that Nginx listens on IPv6 (\texttt{listen\ {[}::{]}:443\ ssl;}).
+\item
+  \textbf{Explain.} Describe the TTL-lowering procedure for moving the API to a new server with no one seeing the old address.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-27.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{27-domain-and-dns:whats-next}
+
+DNS is configured. Clients can resolve \texttt{api.notes.example.com} to the server's IP. But traffic arriving at port 443 currently goes nowhere~--- Nginx is not yet installed and configured. The traffic routing layer needs to be built.
+
+\noindent{}→ \hyperref[ch:28-traffic-routing]{Chapter 28}~--- Traffic Routing Layer

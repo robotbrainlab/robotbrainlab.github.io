@@ -1,0 +1,637 @@
+\setcounter{chapter}{8}
+\chapter{Configuration Coupling}\label{ch:09-configuration-coupling}
+
+\chapterrule
+
+Configuration coupling is the practice of embedding configuration values directly inside source code~--- and it is one of the most consequential mistakes a developer can make when preparing software for production.
+
+It does not feel like a mistake at first. In early development, hardcoding values is fast. You know what the database URL is. You know what debug mode should be. You know what the API key is. Typing the values directly into the code is simpler than setting up environment variables. The application works. You move on.
+
+The problem emerges later, when you realize that those values~--- embedded in source code~--- need to be different in every environment the application runs in. Different database in production. Debug mode off in production. A real API key in production, not a test one. And because the values are in the source code, changing them means changing the code~--- which means you are shipping different source code to different environments, which means the code you tested locally is not the code that runs in production.
+
+That last point is fundamental. \textbf{The code you tested should be the code you deploy.} Configuration coupling breaks this principle. It forces you to choose: either run the same code everywhere (with the same hardcoded values, which means your local debug key runs in production), or change the code for each environment (which means you are deploying untested variations).
+
+Neither option is acceptable.
+
+This chapter examines the four most common forms of configuration coupling: hardcoded secrets, local database references, debug configurations, and environment-specific behavior in code. Each one is examined in the form it typically appears, explained with concrete risks, and contrasted with the externalized version. The full externalization solution is built in → \hyperref[ch:13-configuration-externalization]{Chapter 13}~--- Configuration Externalization.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  Why hardcoded secrets are a security and operational disaster
+\item
+  What happens when local database paths are embedded in code
+\item
+  Why debug configurations left enabled in production are dangerous
+\item
+  How environment-specific behavior in code creates silent differences between environments
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Hardcoded Secrets}\label{09-configuration-coupling:91-hardcoded-secrets}
+
+A \textbf{secret} is any value that grants access to a resource: a password, an API key, a signing token, a cryptographic key. Secrets must remain private. If a secret is exposed, the resource it protects is no longer protected.
+
+Hardcoding secrets means writing them as string literals in source code:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.1}\enspace Hardcoded secrets (NEVER do this)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\CommentTok{\# Secret key for signing session cookies}
+\NormalTok{app.config[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=} \StringTok{"my{-}super{-}secret{-}key{-}12345"}
+
+\CommentTok{\# Database password}
+\NormalTok{DATABASE\_URL }\OperatorTok{=} \StringTok{"postgresql://admin:password123@localhost/notesdb"}
+
+\CommentTok{\# Third{-}party API key}
+\NormalTok{STRIPE\_API\_KEY }\OperatorTok{=} \StringTok{"sk\_live\_abc123xyz789..."}
+
+\CommentTok{\# Email service credentials}
+\NormalTok{SMTP\_PASSWORD }\OperatorTok{=} \StringTok{"email\_password\_here"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This is a complete example of what not to do. Every value in this listing is a secret, and every secret is exposed to anyone who can read the source code.
+
+\subsection*{Why hardcoded secrets are dangerous}\phantomsection\label{09-configuration-coupling:why-hardcoded-secrets-are-dangerous}
+
+\textbf{Version control exposure}: Modern software development uses version control systems like Git. When you commit \texttt{app.py} with hardcoded secrets, those secrets become part of the repository history. Even if you later remove them from the code and commit the change, the secrets remain visible in the git history. Anyone with access to the repository~--- including all current and future team members, anyone who receives a copy of the repository, and potentially the hosting service (GitHub, GitLab, Bitbucket)~--- can see them.
+
+This is not theoretical. Organizations regularly discover that API keys, database credentials, and private keys were committed to repositories~--- sometimes years ago. The remediation is painful: change every exposed credential, audit what was accessed with the exposed credentials, notify affected parties if user data was compromised.
+
+\textbf{Repository leaks}: Public repositories on GitHub are indexed by search engines and security scanning tools. There are automated tools that continuously scan public repositories for patterns that look like secrets. Within minutes of pushing a secret to a public repository, it may be found and used by malicious actors.
+
+\textbf{Deployment coupling}: If the production database password is in the source code, you need to change the source code to deploy to production with a different password. This means the code running in production differs from the code running in development. If the code is different, the code was not tested in the same state it runs.
+
+\subsection*{What a leaked secret can do}\phantomsection\label{09-configuration-coupling:what-a-leaked-secret-can-do}
+
+Consider what happens if the \texttt{STRIPE\_API\_KEY} above is exposed:
+
+\begin{itemize}
+\tightlist
+\item
+  An attacker can charge any amount to any credit card on file in your Stripe account
+\item
+  An attacker can issue refunds, draining your account balance
+\item
+  An attacker can read all your payment records
+\item
+  Stripe will suspend your account when they detect the fraud
+\item
+  You will need to invalidate the key, generate a new one, update all deployments, and explain to your customers why their payments failed
+\end{itemize}
+
+\noindent{}A leaked database password can be worse: complete read and write access to all user data.
+
+\subsection*{The correct approach}\phantomsection\label{09-configuration-coupling:the-correct-approach}
+
+Secrets belong in environment variables or a secrets management service, never in source code. The application reads them at runtime:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.2}\enspace Secrets from environment variables}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\CommentTok{\# Read from environment — never from the source file}
+\NormalTok{app.config[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=}\NormalTok{ os.environ[}\StringTok{"SECRET\_KEY"}\NormalTok{]  }\CommentTok{\# Raises KeyError if missing}
+\NormalTok{DATABASE\_URL }\OperatorTok{=}\NormalTok{ os.environ[}\StringTok{"DATABASE\_URL"}\NormalTok{]             }\CommentTok{\# Raises KeyError if missing}
+\NormalTok{STRIPE\_API\_KEY }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"STRIPE\_API\_KEY"}\NormalTok{)          }\CommentTok{\# Returns None if missing}
+
+\ControlFlowTok{if} \KeywordTok{not}\NormalTok{ STRIPE\_API\_KEY:}
+    \ControlFlowTok{raise} \PreprocessorTok{RuntimeError}\NormalTok{(}\StringTok{"STRIPE\_API\_KEY environment variable is required"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The production server has these environment variables set (through the server's configuration, through a secrets manager like AWS Secrets Manager or HashiCorp Vault, or through a platform like Heroku). The development machine has them set in a \texttt{.env} file (which is in \texttt{.gitignore}). The source code contains no secrets~--- it only contains the code that reads them.
+
+\subsection*{What to do if you accidentally commit a secret}\phantomsection\label{09-configuration-coupling:what-to-do-if-you-accidentally-commit-a-secret}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Immediately} invalidate the exposed credential. Generate a new API key, change the password. Do this before anything else.
+\item
+  Remove the secret from the code and commit the fix.
+\item
+  \textbf{Do not} assume that deleting the file from the latest commit is sufficient. The secret is in the git history. Use \texttt{git\ filter-repo} or \texttt{BFG\ Repo-Cleaner} to rewrite history, then force-push (coordinate with your team first).
+\item
+  If the repository was ever public, assume the secret was captured. Treat it as fully compromised.
+\item
+  Audit access logs to determine if the credential was used maliciously.
+\end{enumerate}
+
+\setcounter{section}{1}
+\section{Local Database References}\label{09-configuration-coupling:92-local-database-references}
+
+The second form of configuration coupling is embedding database connection details in code~--- particularly details that are specific to the local development machine.
+
+\subsection*{The hardcoded local database}\phantomsection\label{09-configuration-coupling:the-hardcoded-local-database}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.3}\enspace Hardcoded database reference (problematic)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ sqlite3}
+
+\CommentTok{\# Path that only exists on the developer\textquotesingle{}s machine}
+\NormalTok{DATABASE\_PATH }\OperatorTok{=} \StringTok{"/Users/alice/projects/notes{-}api/notes.db"}
+
+\KeywordTok{def}\NormalTok{ get\_db():}
+    \ControlFlowTok{return}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_PATH)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{/}\allowbreak{}\texttt{Users/}\allowbreak{}\texttt{alice/}\allowbreak{}\texttt{projects/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api/}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{db} does not exist on any other machine. On Bob's laptop, the path would be \texttt{/}\allowbreak{}\texttt{Users/}\allowbreak{}\texttt{bob/}\allowbreak{}\texttt{projects/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api/}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{db}. On a Linux server, home directories are under \texttt{/home/}, not \texttt{/Users/}. On a Docker container, there is no \texttt{/Users/} at all.
+
+This code fails the moment anyone other than Alice runs it.
+
+\subsection*{The relative path trap}\phantomsection\label{09-configuration-coupling:the-relative-path-trap}
+
+A slightly better but still problematic approach:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.4}\enspace Relative path --- better, but still fragile}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{DATABASE\_PATH }\OperatorTok{=} \StringTok{"notes.db"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{"notes.db"} is a relative path~--- it refers to a file in the current working directory. If you start the server from \texttt{\textasciitilde{}/notes-api/}, the database is at \texttt{\textasciitilde{}/}\allowbreak{}\texttt{notes-api/}\allowbreak{}\texttt{notes.db}. If a process manager like systemd starts the server with a working directory of \texttt{/opt/notes-api/}, the database is at \texttt{/}\allowbreak{}\texttt{opt/}\allowbreak{}\texttt{notes-api/}\allowbreak{}\texttt{notes.db}.
+
+The behavior depends on where you start the server, which is an implicit environment assumption.
+
+\subsection*{The production database URL problem}\phantomsection\label{09-configuration-coupling:the-production-database-url-problem}
+
+The more serious version of this problem occurs when the application switches from SQLite to a production database like PostgreSQL. PostgreSQL requires:
+
+\begin{itemize}
+\tightlist
+\item
+  A hostname (where the database server is running)
+\item
+  A port (default 5432)
+\item
+  A database name
+\item
+  A username and password
+\end{itemize}
+
+\noindent{}All of these are environment-specific. In development: \texttt{localhost:5432}. In staging: \texttt{staging-}\allowbreak{}\texttt{db.}\allowbreak{}\texttt{internal:}\allowbreak{}\texttt{5432}. In production: a managed database URL provided by AWS, Google Cloud, or another provider~--- something like \texttt{postgresql:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{user:}\allowbreak{}\texttt{password@mydb.}\allowbreak{}\texttt{cluster.}\allowbreak{}\texttt{region.}\allowbreak{}\texttt{rds.}\allowbreak{}\texttt{amazonaws.}\allowbreak{}\texttt{com:}\allowbreak{}\texttt{5432/}\allowbreak{}\texttt{notesdb}.
+
+If any part of this URL is hardcoded, the application is locked to one specific database. Moving it to staging or production requires changing the code~--- which means re-testing and re-deploying code that differs from what was previously tested.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.5}\enspace Hardcoded production database URL (NEVER do this)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{DATABASE\_URL }\OperatorTok{=} \StringTok{"postgresql://admin:p4ssw0rd@mydb.prod.rds.amazonaws.com/notesdb"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This is doubly bad: it is a secret (password), and it is a location (specific to the production environment). The code cannot run against a local database for development.
+
+\subsection*{The correct approach}\phantomsection\label{09-configuration-coupling:the-correct-approach-1}
+
+The database URL belongs in an environment variable. Every environment sets its own:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.6}\enspace Database URL from environment variable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+
+\NormalTok{DATABASE\_URL }\OperatorTok{=}\NormalTok{ os.environ[}\StringTok{"DATABASE\_URL"}\NormalTok{]}
+\CommentTok{\# Development .env: DATABASE\_URL=sqlite:///notes.db}
+\CommentTok{\# Staging .env:     DATABASE\_URL=postgresql://user:pass@staging{-}db:5432/notesdb}
+\CommentTok{\# Production env:   DATABASE\_URL=postgresql://user:pass@prod{-}db:5432/notesdb}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The same code runs in all three environments. Only the environment variable value changes. The code you tested in development is the code that runs in production.
+
+\setcounter{section}{2}
+\section{Debug Configurations}\label{09-configuration-coupling:93-debug-configurations}
+
+Debug mode is a set of development-time features that help you understand errors and iterate quickly. In Flask, \texttt{debug=True} enables:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{The interactive debugger}: shows a full Python traceback in the browser when an exception occurs, with an interactive console that can execute arbitrary Python code
+\item
+  \textbf{The automatic reloader}: restarts the server when source files change
+\end{itemize}
+
+\noindent{}Both features are invaluable in development. Both are catastrophic in production.
+
+\subsection*{Why the interactive debugger is a critical vulnerability}\phantomsection\label{09-configuration-coupling:why-the-interactive-debugger-is-a-critical-vulnerability}
+
+When Flask's debug mode is on and an exception occurs, the browser receives a response that looks like this:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Traceback (most recent call last):
+  File "/path/to/venv/lib/flask/app.py", line 1489, in full_dispatch_request
+    rv = self.dispatch_request()
+  ...
+  File "app.py", line 47, in create_note
+    conn = sqlite3.connect(DATABASE_PATH)
+
+sqlite3.OperationalError: unable to open database file
+
+Interactive console available. Click to open.
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The ``Interactive console available'' link is not a display feature~--- it is a live Python interpreter running in the context of the application, accessible through the browser. Anyone who can reach the application can:
+
+\begin{itemize}
+\tightlist
+\item
+  Read any file on the filesystem
+\item
+  Execute arbitrary system commands
+\item
+  Access any environment variable (including secrets)
+\item
+  Modify data in memory
+\item
+  Crash the server
+\end{itemize}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# What an attacker could do via the interactive debugger console:}
+\ImportTok{import}\NormalTok{ os}\OperatorTok{;}\NormalTok{ os.environ.get(}\StringTok{"SECRET\_KEY"}\NormalTok{)  }\CommentTok{\# Read your secret key}
+\ImportTok{import}\NormalTok{ subprocess}\OperatorTok{;}\NormalTok{ subprocess.getoutput(}\StringTok{"cat /etc/passwd"}\NormalTok{)  }\CommentTok{\# Read system files}
+\ImportTok{import}\NormalTok{ subprocess}\OperatorTok{;}\NormalTok{ subprocess.getoutput(}\StringTok{"rm {-}rf /"}\NormalTok{)  }\CommentTok{\# Destroy the server}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is not a theoretical attack. An exposed Werkzeug debugger is one of the most commonly exploited misconfigurations in Python web applications. Since 2015 the console is protected by a PIN that is printed in the server's log, but that is a thin defence: the PIN is derived from details of the machine that an attacker who can read a few files (through another bug) can recompute, and it was never meant to protect a public server. The only safe setting in production is debug mode off.
+
+In 2015, Patreon suffered a breach that exposed source code and data for about 2.3 million accounts. The entry point was a publicly reachable development server, holding a copy of production data, with the Werkzeug debugger enabled.
+
+\subsection*{Hardcoded debug mode}\phantomsection\label{09-configuration-coupling:hardcoded-debug-mode}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.7}\enspace Debug mode hardcoded to True (never do this in production)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{app.run(debug}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This is the single most dangerous configuration coupling. If this code is deployed to production, the application is compromised the moment it receives a request that raises an exception.
+
+\subsection*{Other debug configurations}\phantomsection\label{09-configuration-coupling:other-debug-configurations}
+
+Debug mode is not the only dangerous debug configuration:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.8}\enspace Other dangerous debug configurations}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Showing detailed error messages to users}
+\NormalTok{app.config[}\StringTok{"PROPAGATE\_EXCEPTIONS"}\NormalTok{] }\OperatorTok{=} \VariableTok{True}  \CommentTok{\# Bypass error handlers; raw errors reach the server}
+
+\CommentTok{\# Turning off CSRF protection for easier testing}
+\CommentTok{\# (using Flask{-}WTF or similar)}
+\NormalTok{app.config[}\StringTok{"WTF\_CSRF\_ENABLED"}\NormalTok{] }\OperatorTok{=} \VariableTok{False}
+
+\CommentTok{\# Using a weak, predictable secret key}
+\NormalTok{app.config[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=} \StringTok{"dev"}
+
+\CommentTok{\# Logging everything at DEBUG level (libraries may log request bodies,}
+\CommentTok{\# headers, or — with an ORM such as SQLAlchemy — every SQL query and its data)}
+\NormalTok{logging.basicConfig(level}\OperatorTok{=}\NormalTok{logging.DEBUG)}
+
+\CommentTok{\# Allowing all CORS origins (no restriction on who can call the API)}
+\CommentTok{\# (using Flask{-}CORS)}
+\NormalTok{CORS(app, origins}\OperatorTok{=}\StringTok{"*"}\NormalTok{)  }\CommentTok{\# Fine for development, dangerous in production}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Each of these is acceptable in a local development environment. Each is dangerous in production. The problem is when they are hardcoded into the source code rather than controlled by environment-specific configuration.
+
+\subsection*{The correct approach}\phantomsection\label{09-configuration-coupling:the-correct-approach-2}
+
+Debug mode and all debug-related settings should be controlled by environment variables:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.9}\enspace Environment-controlled debug mode}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+
+\NormalTok{DEBUG }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"FLASK\_DEBUG"}\NormalTok{, }\StringTok{"false"}\NormalTok{).lower() }\OperatorTok{==} \StringTok{"true"}
+
+\NormalTok{app.config[}\StringTok{"DEBUG"}\NormalTok{] }\OperatorTok{=}\NormalTok{ DEBUG}
+\NormalTok{app.config[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=}\NormalTok{ os.environ[}\StringTok{"SECRET\_KEY"}\NormalTok{]}
+\NormalTok{app.config[}\StringTok{"WTF\_CSRF\_ENABLED"}\NormalTok{] }\OperatorTok{=} \KeywordTok{not}\NormalTok{ DEBUG  }\CommentTok{\# CSRF on in production, optionally off in dev}
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    app.run(debug}\OperatorTok{=}\NormalTok{DEBUG, host}\OperatorTok{=}\StringTok{"localhost"}\NormalTok{, port}\OperatorTok{=}\BuiltInTok{int}\NormalTok{(os.getenv(}\StringTok{"PORT"}\NormalTok{, }\StringTok{"5000"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}In the development \texttt{.env}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+FLASK_DEBUG=true
+SECRET_KEY=dev-only-secret-key-change-in-production
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}In the production environment (set by the server administrator, not in a file that could be committed):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+FLASK_DEBUG=false
+SECRET_KEY=a-long-random-cryptographically-secure-string
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The source code is identical in both environments. The behavior differs only because the environment variables differ.
+
+\setcounter{section}{3}
+\section{Environment-Specific Behavior Buried in Code}\label{09-configuration-coupling:94-environment-specific-behavior-buried-in-code}
+
+The fourth form of configuration coupling is the most subtle: logic in the code that branches based on which environment it is running in.
+
+\subsection*{The if-else environment check}\phantomsection\label{09-configuration-coupling:the-if-else-environment-check}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.10}\enspace Environment-specific logic in code}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+
+\NormalTok{ENVIRONMENT }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"ENVIRONMENT"}\NormalTok{, }\StringTok{"development"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ send\_email(to: }\BuiltInTok{str}\NormalTok{, subject: }\BuiltInTok{str}\NormalTok{, body: }\BuiltInTok{str}\NormalTok{):}
+    \ControlFlowTok{if}\NormalTok{ ENVIRONMENT }\OperatorTok{==} \StringTok{"production"}\NormalTok{:}
+        \CommentTok{\# Send a real email via SMTP}
+\NormalTok{        send\_via\_smtp(to, subject, body)}
+    \ControlFlowTok{elif}\NormalTok{ ENVIRONMENT }\OperatorTok{==} \StringTok{"staging"}\NormalTok{:}
+        \CommentTok{\# Send to the staging test mailbox}
+\NormalTok{        send\_via\_smtp(}\StringTok{"staging{-}test@example.com"}\NormalTok{, }\SpecialStringTok{f"[STAGING] }\SpecialCharTok{\{}\NormalTok{subject}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, body)}
+    \ControlFlowTok{elif}\NormalTok{ ENVIRONMENT }\OperatorTok{==} \StringTok{"development"}\NormalTok{:}
+        \CommentTok{\# Just print to console}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"[DEV EMAIL] To: }\SpecialCharTok{\{}\NormalTok{to}\SpecialCharTok{\}}\SpecialStringTok{, Subject: }\SpecialCharTok{\{}\NormalTok{subject}\SpecialCharTok{\}}\CharTok{\textbackslash{}n}\SpecialCharTok{\{}\NormalTok{body}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+    \ControlFlowTok{else}\NormalTok{:}
+        \ControlFlowTok{raise} \PreprocessorTok{ValueError}\NormalTok{(}\SpecialStringTok{f"Unknown environment: }\SpecialCharTok{\{}\NormalTok{ENVIRONMENT}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This code contains explicit knowledge of every environment it might run in. The number of environments may grow (adding \texttt{testing}, \texttt{ci}, \texttt{demo}). The code must be updated every time. The development behavior and production behavior are tangled in the same function.
+
+This approach has a deeper problem: the behavior of the code depends on a string value (\texttt{"production"}, \texttt{"staging"}, \texttt{"development"}). If someone runs the staging environment with \texttt{ENVIRONMENT=}\allowbreak{}\texttt{production} (accidentally or intentionally), real emails are sent. If someone runs production with \texttt{ENVIRONMENT=}\allowbreak{}\texttt{development}, no emails are sent and nobody knows.
+
+\subsection*{\texorpdfstring{The correct approach: behavior through configuration, not environment
+name}{The correct approach: behavior through configuration, not environment name}}\phantomsection\label{09-configuration-coupling:the-correct-approach-behavior-through-configuration-not-environment-name}
+
+Instead of branching on environment name, configure the behavior directly:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.11}\enspace Behavior through configuration, not environment name}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+
+\CommentTok{\# Each environment configures these variables independently:}
+\NormalTok{SMTP\_HOST }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"SMTP\_HOST"}\NormalTok{, }\StringTok{"localhost"}\NormalTok{)}
+\NormalTok{SMTP\_PORT }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(os.getenv(}\StringTok{"SMTP\_PORT"}\NormalTok{, }\StringTok{"1025"}\NormalTok{))  }\CommentTok{\# 1025 = Mailpit, a local fake SMTP server}
+\NormalTok{EMAIL\_OVERRIDE }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"EMAIL\_OVERRIDE"}\NormalTok{)  }\CommentTok{\# If set, send all emails here}
+
+\KeywordTok{def}\NormalTok{ send\_email(to: }\BuiltInTok{str}\NormalTok{, subject: }\BuiltInTok{str}\NormalTok{, body: }\BuiltInTok{str}\NormalTok{):}
+    \CommentTok{\# No if{-}else on environment name}
+    \CommentTok{\# Just use the configured values}
+\NormalTok{    actual\_to }\OperatorTok{=}\NormalTok{ EMAIL\_OVERRIDE }\KeywordTok{or}\NormalTok{ to}
+\NormalTok{    actual\_subject }\OperatorTok{=} \SpecialStringTok{f"[OVERRIDE] }\SpecialCharTok{\{}\NormalTok{subject}\SpecialCharTok{\}}\SpecialStringTok{"} \ControlFlowTok{if}\NormalTok{ EMAIL\_OVERRIDE }\ControlFlowTok{else}\NormalTok{ subject}
+\NormalTok{    send\_via\_smtp(actual\_to, actual\_subject, body, host}\OperatorTok{=}\NormalTok{SMTP\_HOST, port}\OperatorTok{=}\NormalTok{SMTP\_PORT)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Development \texttt{.env}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+SMTP_HOST=localhost
+# Mailpit, a local fake SMTP server that catches every message
+SMTP_PORT=1025
+# Empty: no override
+EMAIL_OVERRIDE=
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Staging \texttt{.env}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+# All emails go to this one inbox
+EMAIL_OVERRIDE=staging-test@example.com
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Production environment:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+# Empty: real emails go to real recipients
+EMAIL_OVERRIDE=
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}(Comments go on their own lines: some tools that read environment files~--- including the \texttt{EnvironmentFile=} setting of systemd used later in this book~--- do not support comments at the end of a line.)
+
+The code now has no knowledge of what environment it is in. It simply reads configuration and acts accordingly. This approach scales correctly as environments are added or changed~--- no code changes required, only configuration changes.
+
+\subsection*{Configuration files per environment}\phantomsection\label{09-configuration-coupling:configuration-files-per-environment}
+
+A related anti-pattern is multiple configuration files, one per environment:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 9.12}\enspace Multiple config files (anti-pattern)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# config/development.py}
+\NormalTok{DEBUG }\OperatorTok{=} \VariableTok{True}
+\NormalTok{DATABASE\_URL }\OperatorTok{=} \StringTok{"sqlite:///dev.db"}
+\NormalTok{SECRET\_KEY }\OperatorTok{=} \StringTok{"dev{-}key"}
+
+\CommentTok{\# config/production.py}
+\NormalTok{DEBUG }\OperatorTok{=} \VariableTok{False}
+\NormalTok{DATABASE\_URL }\OperatorTok{=} \StringTok{"postgresql://prod{-}server/notesdb"}
+\NormalTok{SECRET\_KEY }\OperatorTok{=} \StringTok{"prod{-}key{-}123abc"}
+
+\CommentTok{\# app.py}
+\ImportTok{import}\NormalTok{ os}
+\NormalTok{env }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"ENVIRONMENT"}\NormalTok{, }\StringTok{"development"}\NormalTok{)}
+\ControlFlowTok{if}\NormalTok{ env }\OperatorTok{==} \StringTok{"production"}\NormalTok{:}
+    \ImportTok{from}\NormalTok{ config.production }\ImportTok{import} \OperatorTok{*}
+\ControlFlowTok{elif}\NormalTok{ env }\OperatorTok{==} \StringTok{"development"}\NormalTok{:}
+    \ImportTok{from}\NormalTok{ config.development }\ImportTok{import} \OperatorTok{*}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This pattern has two problems. First, \texttt{config/}\allowbreak{}\texttt{production.py} contains production secrets. It will be committed to version control, exposing those secrets. Second, the code branches on environment name, recreating the if-else problem at the configuration level.
+
+The correct pattern is a single configuration that reads its values~--- above all its secrets~--- from environment variables, with no secrets in any committed file. (Some mature projects keep per-environment configuration \emph{classes} for non-secret defaults; that is workable as long as secrets still come from the environment and the code does not branch on the environment's name.)
+
+\unnumberedsection{false}{Configuration Coupling Checklist}\label{09-configuration-coupling:configuration-coupling-checklist}
+
+Before deploying, audit the codebase for these patterns:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 9.13}\enspace Patterns to search for and eliminate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\CommentTok{\# BAD: Any string that looks like a secret}
+\NormalTok{app.config[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=} \StringTok{"..."}                  \CommentTok{\# REMOVE}
+\NormalTok{API\_KEY }\OperatorTok{=} \StringTok{"sk\_live\_..."}                           \CommentTok{\# REMOVE}
+\NormalTok{PASSWORD }\OperatorTok{=} \StringTok{"..."}                                  \CommentTok{\# REMOVE}
+
+\CommentTok{\# BAD: Hardcoded database paths or URLs}
+\NormalTok{DATABASE\_PATH }\OperatorTok{=} \StringTok{"/Users/yourname/..."}             \CommentTok{\# REMOVE}
+\NormalTok{DATABASE\_URL }\OperatorTok{=} \StringTok{"postgresql://user:pass@host/db"}   \CommentTok{\# REMOVE}
+
+\CommentTok{\# BAD: Hardcoded IP addresses or hostnames}
+\NormalTok{REDIS\_HOST }\OperatorTok{=} \StringTok{"192.168.1.100"}                      \CommentTok{\# REMOVE}
+\NormalTok{SMTP\_SERVER }\OperatorTok{=} \StringTok{"mail.internal.company"}             \CommentTok{\# REMOVE}
+
+\CommentTok{\# BAD: Hardcoded debug flags}
+\NormalTok{app.run(debug}\OperatorTok{=}\VariableTok{True}\NormalTok{)                               }\CommentTok{\# REMOVE (or control via env var)}
+\NormalTok{app.config[}\StringTok{"DEBUG"}\NormalTok{] }\OperatorTok{=} \VariableTok{True}                        \CommentTok{\# REMOVE}
+
+\CommentTok{\# BAD: Environment{-}name branching}
+\ControlFlowTok{if}\NormalTok{ ENVIRONMENT }\OperatorTok{==} \StringTok{"production"}\NormalTok{:                   }\CommentTok{\# REMOVE this pattern}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}You can search for these patterns automatically:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Search for common secret patterns in source code}
+\FunctionTok{grep} \AttributeTok{{-}r} \StringTok{"secret"}\NormalTok{ . }\AttributeTok{{-}{-}include}\OperatorTok{=}\StringTok{"*.py"} \AttributeTok{{-}i}
+\FunctionTok{grep} \AttributeTok{{-}r} \StringTok{"password"}\NormalTok{ . }\AttributeTok{{-}{-}include}\OperatorTok{=}\StringTok{"*.py"} \AttributeTok{{-}i}
+\FunctionTok{grep} \AttributeTok{{-}r} \StringTok{"api\_key\textbackslash{}|apikey"}\NormalTok{ . }\AttributeTok{{-}{-}include}\OperatorTok{=}\StringTok{"*.py"} \AttributeTok{{-}i}
+\FunctionTok{grep} \AttributeTok{{-}r} \StringTok{"debug=True"}\NormalTok{ . }\AttributeTok{{-}{-}include}\OperatorTok{=}\StringTok{"*.py"}
+\FunctionTok{grep} \AttributeTok{{-}r} \StringTok{"/Users/"}\NormalTok{ . }\AttributeTok{{-}{-}include}\OperatorTok{=}\StringTok{"*.py"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}There are also automated tools that scan code and git history for secrets:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{git-secrets}: prevents secrets from being committed
+\item
+  \textbf{detect-secrets}: scans a repository for potential secrets
+\item
+  \textbf{truffleHog}: searches git history for high-entropy strings
+\end{itemize}
+
+\phantomsection\label{09-configuration-coupling:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Configuration coupling} is embedding configuration values~--- especially secrets~--- directly in source code. It breaks the principle that the code you test should be the code you deploy.
+\item
+  \textbf{Hardcoded secrets} (passwords, API keys, signing tokens) in source code are a critical security risk. They enter version control history, are visible to all team members, and can be accidentally exposed. Move all secrets to environment variables.
+\item
+  \textbf{Local database references} (file paths, connection URLs) hardcoded in source code prevent the same codebase from running against different databases in different environments. Database URLs belong in environment variables.
+\item
+  \textbf{Debug configurations} (\texttt{debug=True}, weak secret keys, CSRF disabled) must never be hardcoded. The Flask interactive debugger is a live remote code execution vulnerability when enabled in production.
+\item
+  \textbf{Environment-specific behavior in code} (if-else on environment name) creates a maintenance burden and introduces the risk of wrong behavior running in the wrong environment. Prefer behavior-controlling configuration variables over environment-name branching.
+\item
+  Use automated tools (\texttt{git-secrets}, \texttt{detect-secrets}) to prevent secrets from entering version control. Treat any accidentally committed secret as fully compromised.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{09-configuration-coupling:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Search your project for secrets, in the current files and in all of history: \texttt{git\ grep\ -n\ -i\ secret}, then the same for \texttt{password} and \texttt{key}, and \texttt{git\ log\ -}\allowbreak{}\texttt{p\ \textbar{}\ grep\ -}\allowbreak{}\texttt{i\ secret}. What do you find, and would it matter if the repository became public?
+\item
+  \textbf{Break and fix.} Commit a fake secret on a throwaway branch, then remove it in a new commit. Is it gone? Show where it can still be found, and describe the only real fix.
+\item
+  \textbf{Extend.} Install \texttt{detect-secrets} (or \texttt{gitleaks}) as a pre-commit hook and prove that it blocks a commit containing an obvious key.
+\item
+  \textbf{Explain.} Why is \texttt{if\ ENV\ =}\allowbreak{}\texttt{=}\allowbreak{}\texttt{\ "production":}\allowbreak{}\texttt{\ .}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.} in application code worse than a configuration variable that controls the behaviour directly?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-09.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{09-configuration-coupling:whats-next}
+
+You have now seen how configuration written into the code ties a program to one environment. The next chapter examines the networking constraints that make your local server invisible to the outside world~--- and explains why those constraints exist and what must change before others can reach your API.
+
+\noindent{}→ \hyperref[ch:10-networking-limitations]{Chapter 10}~--- Networking Limitations

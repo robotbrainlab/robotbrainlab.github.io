@@ -1,0 +1,27 @@
+% ---------------------------------------------------------------- Back cover
+% The back cover must fall on an even (verso) page: add at most one blank page.
+\clearpage
+\ifodd\value{page}\thispagestyle{empty}\null\clearpage\fi
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay]
+  \fill[brand] (current page.south west) rectangle (current page.north east);
+  \fill[accent] ([yshift=-0.55in, xshift=-0.22in]current page.north east) rectangle (current page.south east);
+  \node[anchor=north west, text=white, text width=5.3in, align=left, font=\large]
+    at ([xshift=0.9in, yshift=-1.2in]current page.north west) {%
+    {\sffamily\bfseries\LARGE Code that works is the floor, not the goal.\par}
+    \vspace{14pt}
+    Most developers learn to write code on their own machine, and then discover that nobody ever
+    showed them the rest: how to decide what is worth building, how to plan it, how to write it so
+    it can change safely, and how to take it all the way to a running, reliable production system.
+    \par\vspace{10pt}
+    This book is that missing map. It covers the whole lifecycle in one place, and it follows a real
+    system through every layer, from the command that starts a process to the packet that reaches
+    it from across the internet.};
+  \node[anchor=north west, text=white!85, text width=5.3in, align=left, font=\sffamily\small]
+    at ([xshift=0.9in, yshift=-5.0in]current page.north west) {%
+    \makebox[2.2em][l]{\textcolor{accent}{\textbf{I}}} Product Discovery\par\vspace{3pt}
+    \makebox[2.2em][l]{\textcolor{accent}{\textbf{II}}} Project Planning\par\vspace{3pt}
+    \makebox[2.2em][l]{\textcolor{accent}{\textbf{III}}} Writing Good Code\par\vspace{3pt}
+    \makebox[2.2em][l]{\textcolor{accent}{\textbf{IV}}} Building Real Applications};
+\end{tikzpicture}
+\null

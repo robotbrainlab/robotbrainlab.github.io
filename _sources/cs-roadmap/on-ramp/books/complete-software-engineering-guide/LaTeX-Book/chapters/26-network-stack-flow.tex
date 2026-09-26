@@ -1,0 +1,588 @@
+\setcounter{chapter}{25}
+\chapter{Network Stack Flow}\label{ch:26-network-stack-flow}
+
+\chapterrule
+
+When a user sends a request to the Notes API~--- \texttt{curl\ https:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{api.}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{example.}\allowbreak{}\texttt{com/}\allowbreak{}\texttt{notes/}~--- a complex sequence of events occurs across multiple layers of software, hardware, and network infrastructure. Most developers have a vague sense that ``the request goes to the server somehow,'' but the specifics matter enormously for diagnosing problems, understanding latency, and knowing where failures can occur.
+
+This chapter traces the complete path of a packet from a client machine through the internet to the Notes API server, and back. Not hand-wavily, but precisely: which software runs, which kernel calls are made, which buffers are involved, and where in this path problems can emerge.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  How the Linux kernel's network stack processes incoming TCP packets
+\item
+  What each layer of the network stack does (Ethernet, IP, TCP, HTTP)
+\item
+  How the kernel's socket buffer system works and why buffer sizes matter
+\item
+  What the TCP handshake looks like from the server's perspective
+\item
+  How packets flow from the NIC through the kernel to Nginx to Gunicorn
+\item
+  Where in this path common network failures occur
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{The Layered Network Model}\label{26-network-stack-flow:261-the-layered-network-model}
+
+Network protocols are organized in \textbf{layers}, where each layer provides services to the layer above it and relies on services from the layer below it. The formal reference is the seven-layer \textbf{OSI model} (Open Systems Interconnection); the practical one is the \textbf{TCP/IP model}. The diagram below is a simplified five-layer version that matches how the Notes API's traffic actually travels.
+
+\begin{diagrambox}[short]{298.7pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+APPLICATION LAYER    HTTP/HTTPS
+                         │ uses
+TRANSPORT LAYER      TCP (reliable, ordered, connection-based)
+                         │ uses
+INTERNET LAYER       IP (addressing and routing)
+                         │ uses
+LINK LAYER           Ethernet / Wi-Fi (physical transmission)
+                         │ uses
+PHYSICAL LAYER       Electrical signals / radio waves
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Each layer adds its own \textbf{header} to the data, wrapping the payload from the layer above:
+
+\begin{diagrambox}[short]{349.4pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+HTTP data: "GET /notes/ HTTP/1.1\r\nHost: api.notes.example.com\r\n\r\n"
+             │
+TCP wraps it: [TCP header | HTTP data]
+             │
+IP wraps it:  [IP header | TCP header | HTTP data]
+             │
+Ethernet wraps it: [Ethernet header | IP header | TCP header | HTTP data]
+             │
+Physical transmission as electrical signals
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}When this arrives at the server, each layer strips its header and hands the payload up to the layer above.
+
+\setcounter{section}{1}
+\section{The Journey of a Single Packet}\label{26-network-stack-flow:262-the-journey-of-a-single-packet}
+
+\subsection*{On the client side}\phantomsection\label{26-network-stack-flow:on-the-client-side}
+
+A \texttt{curl} command starts the journey:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ https://api.notes.example.com/notes/}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Step 1: DNS resolution}
+
+Before any packet is sent, the OS must resolve \texttt{api.notes.example.com} to an IP address. The resolver checks:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Local cache (if recently resolved, use cached result)
+\item
+  \texttt{/etc/hosts} file
+\item
+  DNS resolver (typically the router at \texttt{192.168.1.1}, which queries upstream DNS servers)
+\end{enumerate}
+
+\noindent{}Result: \texttt{api.notes.example.com} → \texttt{203.0.113.42}
+
+\textbf{Step 2: TCP three-way handshake}
+
+\texttt{curl} asks the OS to open a TCP connection to \texttt{203.0.113.42:443}:
+
+\begin{diagrambox}[short]{331.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Client                              Server
+  │                                    │
+  │──── SYN (seq=1000) ───────────────►│
+  │                                    │ Kernel receives SYN
+  │                                    │ Creates half-open connection
+  │◄─── SYN-ACK (seq=2000, ack=1001) ──│
+  │                                    │
+  │──── ACK (ack=2001) ───────────────►│
+  │                                    │ Three-way handshake complete
+  │                                    │ Connection in accept queue
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}\textbf{SYN}: Client says ``I want to connect. My sequence number starts at 1000.''
+\textbf{SYN-ACK}: Server says ``OK. I'll use sequence number 2000. Acknowledging your 1000.''
+\textbf{ACK}: Client says ``Acknowledged.''
+
+After the three-way handshake, the connection is established but not yet accepted by the application. It sits in the \textbf{accept queue} until the program listening on that port calls \texttt{accept()}~--- for the client's connection to port 443, that is Nginx. (Nginx then opens a second, separate connection to Gunicorn on port 5000, which waits in Gunicorn's accept queue in exactly the same way.)
+
+\textbf{Step 3: TLS handshake}
+
+For HTTPS, TLS negotiation happens after TCP:
+
+\begin{diagrambox}[short]{243.4pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Client                              Server (Nginx)
+  │                                    │
+  │──── ClientHello ──────────────────►│
+  │     (TLS version, cipher suites,   │
+  │      random bytes)                 │
+  │                                    │
+  │◄─── ServerHello ───────────────────│
+  │     (chosen cipher, server cert)   │
+  │                                    │
+  │──── [verify cert, send key data] ──►│
+  │                                    │
+  │◄─── [finish] ──────────────────────│
+  │                                    │
+  │ [Encrypted symmetric session key established]
+  │                                    │
+  │──── encrypted HTTP request ───────►│
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}The TLS handshake takes 1--2 round trips. Modern TLS 1.3 can complete in 1 round trip. The server's certificate proves the server's identity (so the client knows it is talking to the real \texttt{api.notes.example.com}, not an impostor).
+
+After TLS, all data is encrypted. The encryption/decryption happens in Nginx (TLS termination), which then forwards the decrypted HTTP request to Gunicorn.
+
+\setcounter{section}{2}
+\section{The Server's Network Stack}\label{26-network-stack-flow:263-the-servers-network-stack}
+
+When a packet arrives at the server:
+
+\begin{diagrambox}[short]{363.2pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+PACKET ARRIVAL
+─────────────────────────────────────────────────────────────────────
+1. NIC (Network Interface Card) receives the Ethernet frame
+2. NIC writes the frame directly into kernel memory (DMA), into a slot
+   of its receive ring buffer
+3. NIC raises an interrupt: "I have data"
+4. Kernel interrupt handler (NAPI/softirq) runs:
+   a. Wraps the frame's memory in a socket buffer structure (sk_buff) —
+      no copy
+   b. Re-enables interrupts (to accept more packets)
+5. Network stack processes the frame:
+   a. Ethernet driver: strips Ethernet header, passes IP packet up
+   b. IP layer: checks destination IP (203.0.113.42 = us!), strips IP header
+   c. TCP layer: finds the socket for (src_ip, src_port, dst_ip:443)
+   d. TCP layer: verifies sequence numbers, sends ACK if needed
+   e. TCP layer: copies data to socket's receive buffer
+6. Application reads data from socket receive buffer via recv()/read()
+─────────────────────────────────────────────────────────────────────
+\end{Verbatim}
+\end{diagrambox}
+
+\subsection*{The socket receive buffer}\phantomsection\label{26-network-stack-flow:the-socket-receive-buffer}
+
+Each TCP socket has two buffers:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Receive buffer}: data received from the network, waiting to be read by the application
+\item
+  \textbf{Send buffer}: data the application has written, waiting to be sent over the network
+\end{itemize}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# View socket buffer sizes}
+\ExtensionTok{sysctl}\NormalTok{ net.ipv4.tcp\_rmem       }\CommentTok{\# TCP receive buffer: min, default, max (auto{-}tuned)}
+\ExtensionTok{sysctl}\NormalTok{ net.core.rmem\_default   }\CommentTok{\# Default receive buffer size for other sockets (bytes)}
+\ExtensionTok{sysctl}\NormalTok{ net.core.rmem\_max       }\CommentTok{\# Maximum receive buffer size}
+\ExtensionTok{sysctl}\NormalTok{ net.core.wmem\_default   }\CommentTok{\# Default send buffer size}
+\ExtensionTok{sysctl}\NormalTok{ net.core.wmem\_max       }\CommentTok{\# Maximum send buffer size}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}If the receive buffer fills up (because the application is not reading fast enough), the kernel advertises a smaller and smaller \textbf{receive window} in its ACKs~--- until it reaches zero, which tells the sender to stop. The sender pauses and periodically probes until space frees up. This is \textbf{TCP flow control}; it is separate from congestion control, which reacts to packet loss in the network. This is called \textbf{receive buffer pressure} and can look like a ``slow application'' when the real cause is a slow consumer.
+
+\subsection*{The file descriptor}\phantomsection\label{26-network-stack-flow:the-file-descriptor}
+
+When the kernel creates a TCP connection, it creates a \textbf{socket}~--- identified by a file descriptor in the application's process. The file descriptor is an integer (\texttt{4}, \texttt{7}, \texttt{23}). Reading from this file descriptor reads from the socket's receive buffer.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Conceptually, what happens when a Gunicorn worker calls accept()}
+\CommentTok{\# on the connection Nginx opened to port 5000:}
+\ImportTok{import}\NormalTok{ socket}
+
+\CommentTok{\# Create the listening socket}
+\NormalTok{server\_sock }\OperatorTok{=}\NormalTok{ socket.socket(socket.AF\_INET, socket.SOCK\_STREAM)}
+\NormalTok{server\_sock.bind((}\StringTok{\textquotesingle{}0.0.0.0\textquotesingle{}}\NormalTok{, }\DecValTok{5000}\NormalTok{))}
+\NormalTok{server\_sock.listen(}\DecValTok{128}\NormalTok{)}
+
+\CommentTok{\# accept() returns a NEW socket for the connected client}
+\NormalTok{client\_sock, client\_addr }\OperatorTok{=}\NormalTok{ server\_sock.accept()}
+\CommentTok{\# client\_sock is a file descriptor — e.g., fd=7}
+\CommentTok{\# client\_addr is the client\textquotesingle{}s (IP, port) — e.g., (\textquotesingle{}172.17.0.1\textquotesingle{}, 54322)}
+
+\CommentTok{\# Read the HTTP request from the client socket}
+\NormalTok{data }\OperatorTok{=}\NormalTok{ client\_sock.recv(}\DecValTok{4096}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}After \texttt{accept()}, Gunicorn has a file descriptor for the client connection. Reading from it reads the HTTP request bytes. Writing to it sends the HTTP response bytes.
+
+\setcounter{section}{3}
+\section{TCP States}\label{26-network-stack-flow:264-tcp-states}
+
+TCP connections pass through a sequence of states. Understanding these states helps diagnose network issues.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# View all TCP connections and their states}
+\ExtensionTok{ss} \AttributeTok{{-}tn}
+\CommentTok{\# State      Recv{-}Q  Send{-}Q   Local Address:Port  Peer Address:Port}
+\CommentTok{\# ESTABLISHED   0       0       203.0.113.42:443   1.2.3.4:54322}
+\CommentTok{\# TIME{-}WAIT     0       0       203.0.113.42:443   1.2.3.5:54323}
+\CommentTok{\# LISTEN        0       511     0.0.0.0:443        *:*}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\Needspace{16\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.2353}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.7647}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+State
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{LISTEN} & Waiting for incoming connections \\
+\texttt{SYN\_RECEIVED} & SYN received, SYN-ACK sent, waiting for ACK \\
+\texttt{ESTABLISHED} & Connection established, data can flow \\
+\texttt{FIN\_WAIT\_1} & Our side sent FIN (closing) \\
+\texttt{FIN\_WAIT\_2} & Received ACK to our FIN, waiting for remote FIN \\
+\texttt{TIME\_WAIT} & Both sides closed; waiting to ensure delayed packets are gone \\
+\texttt{CLOSE\_WAIT} & Remote side closed; we have not closed yet \\
+\end{longtable}
+}
+
+\textbf{TIME\_WAIT} is the state the side that closed first stays in after both sides close~--- for 60 seconds on Linux (the standard calls it 2 × MSL, twice the Maximum Segment Lifetime). This prevents delayed duplicate packets from being mistaken for packets on a new connection.
+
+A server under heavy traffic might have thousands of \texttt{TIME\_WAIT} connections. This is normal. It becomes a problem only if the server exhausts its ephemeral port range~--- which happens to the side making many \emph{outgoing} connections. On this server that is Nginx, opening a fresh connection to Gunicorn for each request; that is exactly the case \texttt{net.}\allowbreak{}\texttt{ipv4.}\allowbreak{}\texttt{tcp\_}\allowbreak{}\texttt{tw\_}\allowbreak{}\texttt{reuse\ =}\allowbreak{}\texttt{\ 1}, set in \hyperref[ch:21-system-setup]{Chapter 21}, helps with.
+
+\setcounter{section}{4}
+\section{The Kernel Receive Path in Detail}\label{26-network-stack-flow:265-the-kernel-receive-path-in-detail}
+
+Zooming into step 4 of the packet arrival sequence: the kernel uses \textbf{NAPI} (New API) to handle high-speed packet reception efficiently.
+
+\subsection*{Interrupt-driven vs polling}\phantomsection\label{26-network-stack-flow:interrupt-driven-vs-polling}
+
+The naive approach: every packet triggers a hardware interrupt → interrupt handler copies the packet. At high packet rates (millions per second), interrupt overhead dominates.
+
+NAPI uses a hybrid approach:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{First packet}: interrupt fires, handler starts
+\item
+  \textbf{Subsequent packets} (during interrupt handling): poll the NIC ring buffer directly (no interrupt per packet)
+\item
+  \textbf{After a budget of packets}: re-enable interrupts
+\end{itemize}
+
+\noindent{}This dramatically reduces interrupt overhead at high packet rates while maintaining low latency at low packet rates.
+
+\subsection*{sk\_buff --- the socket buffer structure}\phantomsection\label{26-network-stack-flow:sk-buff--the-socket-buffer-structure}
+
+Every packet in the kernel is represented by an \texttt{sk\_buff} structure (socket buffer). It contains:
+
+\begin{itemize}
+\tightlist
+\item
+  Pointers to the packet data (not a copy~--- the kernel avoids copying where possible)
+\item
+  Metadata: source/destination addresses, protocol, timestamps
+\item
+  State: whether checksums have been verified, whether this is a clone
+\end{itemize}
+
+\noindent{}As the packet moves up the network stack, each layer's header pointer moves forward (stripping the layer's header without copying the data).
+
+\setcounter{section}{5}
+\section{Nginx's Role in the Network Stack}\label{26-network-stack-flow:266-nginxs-role-in-the-network-stack}
+
+Nginx sits between the network stack and Gunicorn. It:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Accepts TLS connections (decrypts HTTPS)
+\item
+  Buffers the complete HTTP request
+\item
+  Forwards the decrypted request to Gunicorn over a local TCP connection
+\item
+  Receives Gunicorn's response
+\item
+  Sends the response back to the client (with TLS)
+\end{enumerate}
+
+\noindent{}Why buffer the complete request? Gunicorn workers are expensive (full Python processes). If Nginx did not buffer the request and a slow client sent the request one byte at a time, the Gunicorn worker would be occupied waiting for the slow client. With buffering, Nginx holds the connection with the slow client and only talks to Gunicorn when it has the complete request.
+
+\subsection*{The Nginx-to-Gunicorn connection}\phantomsection\label{26-network-stack-flow:the-nginx-to-gunicorn-connection}
+
+\begin{diagrambox}[short]{326.3pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Client                 Nginx                    Gunicorn
+  │                      │                          │
+  │── HTTPS request ────►│                          │
+  │                      │ decrypt                  │
+  │                      │── HTTP request (TCP) ───►│
+  │                      │                          │ handle request
+  │                      │◄── HTTP response (TCP) ──│
+  │                      │ encrypt                  │
+  │◄── HTTPS response ───│                          │
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}The connection between Nginx and Gunicorn is a local TCP connection~--- same host, no encryption needed. Nginx connects to \texttt{127.0.0.1:5000}; Docker forwards this to the container's port 5000. For connections from the host's own loopback address, the forwarding is done by \texttt{docker-proxy}, a small userspace process that listens on \texttt{127.0.0.1:5000} and relays the bytes into the container; traffic arriving from other machines is forwarded by iptables DNAT rules instead.
+
+\subsection*{Nginx buffering settings}\phantomsection\label{26-network-stack-flow:nginx-buffering-settings}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# In nginx configuration:}
+\NormalTok{\# Buffer size for reading the client request body}
+\NormalTok{client\_body\_buffer\_size 16k;}
+\NormalTok{\# Maximum allowed size of the client request body (file uploads, etc.)}
+\NormalTok{client\_max\_body\_size 10m;}
+
+\NormalTok{\# Buffer for responses from Gunicorn}
+\NormalTok{proxy\_buffers 8 16k;}
+\NormalTok{proxy\_buffer\_size 16k;}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{6}
+\section{The Complete Network Path (End to End)}\label{26-network-stack-flow:267-the-complete-network-path-end-to-end}
+
+\begin{diagrambox}{358.6pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+CLIENT (curl or browser)
+│
+│ 1. DNS: api.notes.example.com → 203.0.113.42
+│ 2. TCP SYN to 203.0.113.42:443
+│
+INTERNET ROUTING
+│
+│ 3. Packet traverses ISP networks, internet exchange points
+│    BGP routing directs packet toward destination AS
+│
+SERVER'S CLOUD PROVIDER NETWORK
+│
+│ 4. Cloud firewall: port 443 allowed? → yes
+│ 5. Reserved IP routes packet to server's NIC
+│
+SERVER KERNEL (Ubuntu 22.04)
+│
+│ 6. NIC hardware interrupt → NAPI polling
+│ 7. Ethernet frame → IP packet → TCP segment
+│ 8. UFW (netfilter INPUT): port 443 allowed? → yes
+│ 9. TCP: SYN → SYN-ACK → ACK (three-way handshake)
+│ 10. Connection placed in accept queue
+│ 11. Socket receive buffer: HTTP request bytes accumulate
+│
+NGINX (PID ~500, listening on 0.0.0.0:443)
+│
+│ 12. accept() returns client socket fd
+│ 13. TLS handshake with client
+│ 14. Decrypt HTTP request
+│ 15. Buffer complete request
+│ 16. Open TCP connection to 127.0.0.1:5000
+│ 17. Forward HTTP request (unencrypted)
+│
+DOCKER PORT MAPPING
+│
+│ 18. docker-proxy (listening on 127.0.0.1:5000) relays the
+│     connection to 172.17.0.2:5000 (the container's internal IP)
+│
+CONTAINER NETWORK INTERFACE
+│
+│ 19. Packet enters container's network namespace
+│ 20. veth pair: packet crosses from host to container
+│
+GUNICORN (PID 1 in container, workers on port 5000)
+│
+│ 21. Kernel: connection ready in accept queue
+│ 22. Worker calls accept() → client socket fd
+│ 23. Worker reads HTTP bytes from socket receive buffer
+│
+FLASK APPLICATION
+│
+│ 24. Werkzeug: parse HTTP request bytes → Request object
+│ 25. URL routing: /notes/ + GET → list_notes handler
+│ 26. Before-request hooks run
+│ 27. Route handler executes
+│ 28. Database query: open connection to PostgreSQL (managed, over the VPC)
+│ 29. Execute SQL, receive rows
+│ 30. Build response JSON
+│ 31. After-request hooks run
+│ 32. Return response bytes to Gunicorn
+│
+GUNICORN (response path)
+│
+│ 33. Write response bytes to socket
+│ 34. Worker calls accept() again (ready for next request)
+│
+NGINX (response path)
+│
+│ 35. Receive response from Gunicorn
+│ 36. Encrypt response (TLS)
+│ 37. Send HTTPS response to client
+│
+CLIENT
+│
+│ 38. Receive HTTPS response
+│ 39. Decrypt → HTTP response
+│ 40. Display to user / return to program
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}40 steps for one HTTP request. Most take microseconds. The server's share of a simple \texttt{GET\ /notes/}~--- with the managed database in the same region~--- is about 5--10 milliseconds; the client adds its network round trips on top. The breakdown:
+
+\Needspace{18\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Phase & Typical time \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+DNS resolution (cached) & 0 ms \\
+TCP handshake & 1 RTT = client-server latency \\
+TLS handshake (TLS 1.3) & 1 RTT \\
+HTTP request transmission & \textless{} 1 ms \\
+Nginx processing & \textless{} 1 ms \\
+Gunicorn/Flask processing & 1--5 ms \\
+Database query & 1--3 ms \\
+Response transmission & \textless{} 1 ms \\
+\textbf{Total (same datacenter)} & \textbf{\textasciitilde5--10 ms} \\
+\textbf{Total (client in different region)} & \textbf{50--150 ms} (RTT dominates) \\
+\end{longtable}
+}
+
+\setcounter{section}{7}
+\section{Where Network Failures Occur}\label{26-network-stack-flow:268-where-network-failures-occur}
+
+Understanding the network path makes it possible to diagnose failures systematically:
+
+\begin{diagrambox}[short]{367.8pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+CLIENT → DNS resolution failed?
+  └── Check: dig api.notes.example.com
+              nslookup api.notes.example.com
+
+CLIENT → TCP connection refused? (the server answered: nothing listens there)
+  └── Check: nc -zv SERVER_IP 443
+              Is Nginx running? systemctl status nginx
+
+CLIENT → TCP connection timed out? (packets are dropped: usually a firewall)
+  └── Check: sudo ufw status
+              The cloud firewall's rules in the provider's control panel
+
+CLIENT → TLS handshake failed?
+  └── Check: curl -v https://api.notes.example.com
+              openssl s_client -connect api.notes.example.com:443
+              Is the certificate expired? certbot certificates
+
+NGINX → Gunicorn connection refused?
+  └── Check: Is the container running? docker ps
+              Is port 5000 mapped? docker port notes-api
+              nc -zv 127.0.0.1 5000
+
+GUNICORN → Application error?
+  └── Check: docker logs notes-api
+              journalctl -u notes-api
+
+APPLICATION → Database connection failed?
+  └── Check: nc -zv DB_HOST DB_PORT   (not ping: managed databases
+                                         usually do not answer ICMP)
+              DATABASE_URL correct in env file?
+\end{Verbatim}
+\end{diagrambox}
+
+\phantomsection\label{26-network-stack-flow:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  The network stack is a series of layers: Physical → Ethernet → IP → TCP → HTTP. Each layer adds/removes headers as packets travel up or down.
+\item
+  \textbf{The TCP three-way handshake} (SYN → SYN-ACK → ACK) must complete before any HTTP data flows. The TLS handshake happens after TCP, before HTTP.
+\item
+  \textbf{NAPI} is the kernel's mechanism for efficient high-speed packet reception: first packet triggers an interrupt, subsequent packets are polled.
+\item
+  \textbf{Socket receive buffers} hold incoming data until the application reads it. If the application is slow, the buffer fills, the advertised receive window shrinks to zero, and TCP flow control pauses the sender.
+\item
+  \textbf{Nginx buffers the complete request} before forwarding to Gunicorn, protecting expensive Python workers from slow clients.
+\item
+  \textbf{The Docker network} forwards host port 5000 to the container's internal IP~--- through \texttt{docker-proxy} for loopback connections such as Nginx's, and iptables DNAT rules for traffic from other machines. Traffic crosses a virtual Ethernet pair (veth) between the host and container namespaces.
+\item
+  \textbf{Diagnosing network failures} requires checking each layer in sequence: DNS → TCP connectivity → TLS → Nginx → Container → Application → Database.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{26-network-stack-flow:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} On the server, run \texttt{ss\ -tan} while you send requests with \texttt{curl\ http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{127.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{1:}\allowbreak{}\texttt{5000/}\allowbreak{}\texttt{health} from a second SSH session. Which connections do you see, and in which states?
+\item
+  \textbf{Break and fix.} Stop the application container, then call \texttt{curl\ -}\allowbreak{}\texttt{v\ http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{127.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{1:}\allowbreak{}\texttt{5000/}\allowbreak{}\texttt{health} on the server. What error do you get, and from which layer? Start the container again.
+\item
+  \textbf{Extend.} Capture one request on the server with \texttt{sudo\ tcpdump\ -}\allowbreak{}\texttt{i\ lo\ port\ 5000\ -}\allowbreak{}\texttt{c\ 20} while you run \texttt{curl\ http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{127.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{1:}\allowbreak{}\texttt{5000/}\allowbreak{}\texttt{health}, and label the TCP handshake, the request, the response and the close.
+\item
+  \textbf{Explain.} Follow a failed request down the layers: how would you tell a DNS failure from a TCP failure from a TLS failure, using only \texttt{curl\ -v}?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-26.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{26-network-stack-flow:whats-next}
+
+Traffic arrives at the server's network stack. Before it can arrive, it must know where to go~--- and that knowledge comes from DNS.
+
+\noindent{}→ \hyperref[ch:27-domain-and-dns]{Chapter 27}~--- Domain Names and DNS

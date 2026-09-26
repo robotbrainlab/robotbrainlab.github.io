@@ -1,0 +1,1060 @@
+\unnumberedchapter{Project Planning Guide}\label{ch:project-planning-guide}
+
+\chaptersubtitle{A structured documentation template for new projects.
+Technology-agnostic: independent of any specific framework or language.}
+
+\chapterrule
+
+\unnumberedsection{true}{What This Guide Is}\label{project-planning-guide:what-this-guide-is}
+
+This is a structured documentation template to complete before~--- or at the very start of~--- any new project. Every section a project needs~--- across problem framing, architecture, code craft, operations, and delivery~--- is defined here at the conceptual level, ready to be filled in with project-specific detail.
+
+The Guide is \textbf{technology-agnostic}. It does not prescribe which language to write in, which database to use, or which platform to deploy on. It defines \emph{what topics must be documented}, \emph{what each section should contain}, and \emph{what a well-completed entry looks like}.
+
+The structure mirrors what real project documentation actually contains~--- the sections any project's docs would cover are the sections this Guide prompts you to complete.
+
+\unnumberedsection{true}{How to Read This Guide}\label{project-planning-guide:how-to-read-this-guide}
+
+For each subsection:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{One-line definition}~--- what this section \emph{is}
+\item
+  \textbf{Why it matters}~--- what the project loses if this section is skipped or left vague
+\item
+  \textbf{What this topic covers}~--- the specific questions and details to address
+\item
+  \textbf{You understand this when}~--- a completeness check: the standard a well-filled section should meet
+\end{itemize}
+
+\noindent{}This is not a tutorial. It is a documentation prompt. The entries you write for each section are the deliverable; this Guide is the structure that tells you what to write.
+
+\unnumberedsection{true}{Section 1 --- Problem Statement \& Goals}\label{project-planning-guide:section-1--problem-statement--goals}
+
+\subsection*{1.1 Background \& Context}\phantomsection\label{project-planning-guide:11-background--context}
+
+The history and surrounding conditions that gave rise to the project~--- the situation, team, system, or workflow this work plugs into.
+
+\textbf{Why it matters:} Without context, a project's purpose is ambiguous. Engineers without context build technically correct systems that solve the wrong problem.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  The triggering event or pain point that initiated this project
+\item
+  Upstream and downstream systems
+\item
+  The team, process, or workflow this fits into
+\item
+  Previous attempts and why they didn't work
+\item
+  The history that informs current constraints
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can explain in two paragraphs why this project exists \emph{now}, what alternatives were considered, and what would happen if it weren't done.
+
+\subsection*{1.2 Core Problem}\phantomsection\label{project-planning-guide:12-core-problem}
+
+The specific, concrete problem this project solves~--- narrow enough to be solvable, broad enough to matter.
+
+\textbf{Why it matters:} A vague problem statement allows scope creep and produces a system that satisfies no one. A precise problem statement is the foundation for every later decision.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  The current pain, stated in 1--2 sentences
+\item
+  How often the problem occurs
+\item
+  Who is affected and what it costs them
+\item
+  The root cause where known
+\item
+  How to distinguish the problem from any proposed solution
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can describe the problem in 30 seconds and a stranger understands what's broken without needing technical context.
+
+\subsection*{1.3 Goals \& Success Criteria}\phantomsection\label{project-planning-guide:13-goals--success-criteria}
+
+What ``done'' looks like~--- observable, ideally measurable conditions that indicate the problem is solved.
+
+\textbf{Why it matters:} Goals like ``improve performance'' never tell you when to stop. Goals like ``reduce p99 latency from 800 ms to 200 ms'' do.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Each goal as a specific outcome
+\item
+  Each goal paired with an observable success condition
+\item
+  The difference between vague aspirations and measurable criteria
+\item
+  Functional vs non-functional goals
+\item
+  Goals measurable before, during, and after the work
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} every goal has a clear, testable success condition that even an outsider could verify.
+
+\subsection*{1.4 Out of Scope}\phantomsection\label{project-planning-guide:14-out-of-scope}
+
+What this project explicitly does \textbf{not} address~--- the boundaries that protect against scope creep.
+
+\textbf{Why it matters:} Without explicit scope boundaries, every stakeholder assumes their pet feature is in scope. Listing what's out makes it possible to ship.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Specific features or capabilities not being built
+\item
+  The reason each thing is excluded
+\item
+  Items deferred to a future phase, with the reason
+\item
+  The distinction between ``not yet'' and ``never''
+\item
+  How to negotiate scope when new requests arrive
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} the team can answer ``is X in scope?'' without re-litigating the question every meeting.
+
+\subsection*{1.5 Stakeholders \& Users}\phantomsection\label{project-planning-guide:15-stakeholders--users}
+
+Who is affected by this project~--- users, beneficiaries, owners, and decision-makers.
+
+\textbf{Why it matters:} Different roles need different things. Confusing ``user'' with ``decision-maker'' or ``owner'' with ``beneficiary'' causes communication failures and missed requirements.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Primary users who interact day-to-day
+\item
+  Beneficiaries who consume output indirectly
+\item
+  Owners and maintainers responsible for the running system
+\item
+  Stakeholders with input on priorities or compliance
+\item
+  How to talk to each group about the work
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can name every role, what they care about, how often they're consulted, and who has final say.
+
+\subsection*{1.6 Constraints \& Assumptions}\phantomsection\label{project-planning-guide:16-constraints--assumptions}
+
+Hard constraints (non-negotiable) and assumptions (things assumed true, that would change the design if false).
+
+\textbf{Why it matters:} Implicit constraints become bugs. Implicit assumptions become outages. Both must be made explicit before they bite.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Technical constraints (platforms, languages, integrations)
+\item
+  Legal and compliance constraints
+\item
+  Budget and timeline constraints
+\item
+  Team and capability constraints
+\item
+  Assumptions about user behavior, data, and environment
+\item
+  Distinguishing constraints (hard) from assumptions (probabilistic)
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} an outside engineer reading the constraints list can predict where the design is going to bend before they see it.
+
+\unnumberedsection{true}{Section 2 --- Architecture \& Design}\label{project-planning-guide:section-2--architecture--design}
+
+\subsection*{2.1 System Overview}\phantomsection\label{project-planning-guide:21-system-overview}
+
+A narrative of three to five steps describing what happens from trigger to output, in plain language, including how the system runs as a process.
+
+\textbf{Why it matters:} Without an overview, every other architecture decision is unmoored. The overview is the elevator pitch for the whole system.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Entry points~--- what initiates the system (user action, cron, event, API call)
+\item
+  Process model~--- how the application exists as a running process (single process, worker pool, scheduled job) and what supervises it
+\item
+  Core processing~--- what the system does with its input
+\item
+  Output~--- what the system produces and where it goes
+\item
+  Runtime lifecycle~--- startup → ready → handle → shutdown
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can sketch the system for someone in five sentences, with no implementation jargon~--- the details belong in the sections that follow.
+
+\subsection*{2.2 Architecture Diagram}\phantomsection\label{project-planning-guide:22-architecture-diagram}
+
+A visual of the system showing components, data flow, external systems, storage, and APIs.
+
+\textbf{Why it matters:} A diagram often communicates faster than prose. A team without diagrams reinvents the architecture in every conversation.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Diagram types~--- flowchart, data-flow, system context, sequence, deployment
+\item
+  What to show~--- components, arrows, external systems, storage, APIs
+\item
+  The C4 model (context, container, component, code) and when each level fits
+\item
+  ASCII diagrams as a viable medium when there's ``no time for diagrams''
+\item
+  The discipline of keeping diagrams current
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can produce a diagram for a system you just understood, at the right level of detail for the audience.
+
+\subsection*{2.3 Component Breakdown}\phantomsection\label{project-planning-guide:23-component-breakdown}
+
+Each major component, its responsibility, its inputs and outputs, its dependencies.
+
+\textbf{Why it matters:} A system is its components. Without explicit responsibility boundaries, ownership is unclear and changes cascade unpredictably.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  One responsibility per component
+\item
+  Inputs each component accepts
+\item
+  Outputs each component produces
+\item
+  Dependencies between components
+\item
+  Interfaces~--- what's exposed, what's internal
+\item
+  How to recognize when one component is doing too much (or too little)
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can tell whether a change should live in component A or component B, and defend the choice.
+
+\subsection*{2.4 Data Flow}\phantomsection\label{project-planning-guide:24-data-flow}
+
+The journey data takes through the system, from source to final destination, including the end-to-end request lifecycle.
+
+\textbf{Why it matters:} Bugs in distributed systems are usually data-flow bugs~--- data that didn't arrive, arrived in the wrong order, or arrived in the wrong form. Tracing data flow is one of the most effective debugging techniques.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Source~--- where data originates
+\item
+  Ingestion~--- how data enters the system
+\item
+  Processing~--- transformations, validations, enrichments
+\item
+  Storage~--- intermediate and final results
+\item
+  Output~--- final form and destination
+\item
+  Error paths~--- what happens to data that fails validation or processing
+\item
+  The request lifecycle in detail~--- client → network → kernel → application → database → response → back
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can trace any input through the system and predict every transformation it undergoes.
+
+\subsection*{2.5 External Integrations}\phantomsection\label{project-planning-guide:25-external-integrations}
+
+Every external system, API, or service the project depends on~--- and the contract with each one.
+
+\textbf{Why it matters:} External integrations are where systems meet. A bad integration contract is harder to fix than internal bugs because it requires both sides to change.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Each integration's purpose
+\item
+  Authentication method (API key, OAuth, mTLS, service account)
+\item
+  Failure modes and how the system degrades when the integration is unavailable
+\item
+  Contract dimensions~--- shape (REST/GraphQL/gRPC), versioning, identity, authorization, failure semantics
+\item
+  Idempotency for safely retryable operations
+\item
+  Rate limits imposed by external services
+\item
+  Webhook handling for incoming events
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} for every external dependency, you can answer ``what happens when this is unavailable?'' and ``how do we handle version skew safely?''
+
+\subsection*{2.6 Data Storage \& Schema}\phantomsection\label{project-planning-guide:26-data-storage--schema}
+
+Every database, file store, and cache used~--- including the schema design and storage choice rationale.
+
+\textbf{Why it matters:} Schema choices outlive everything else. The application can be rewritten; the database structure usually cannot.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Storage type (relational, document, key-value, graph, columnar, time-series, search, object/blob)
+\item
+  Schema design~--- entities, attributes, relationships
+\item
+  Normalization (1NF--BCNF) and when to denormalize
+\item
+  Key strategies (auto-increment, UUID, ULID; surrogate vs natural)
+\item
+  Indexing strategy
+\item
+  Transactions and consistency model
+\item
+  Retention policy, archival, deletion behavior
+\item
+  Schema evolution patterns (expand/contract, dual-write, backfills)
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} for every entity in the system, you can defend the choice of storage type, the schema design, and the indexing strategy.
+
+\subsection*{2.7 Key Design Decisions}\phantomsection\label{project-planning-guide:27-key-design-decisions}
+
+The significant decisions made during architecture and design~--- and crucially, \emph{why}.
+
+\textbf{Why it matters:} Decisions made today are forgotten in six months. Without a written record, every architectural debate gets re-litigated.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  The decision itself
+\item
+  Alternatives considered
+\item
+  Rationale~--- why this option won
+\item
+  Trade-offs accepted
+\item
+  Date and owner of the decision
+\item
+  ADR (Architecture Decision Record) format and lifecycle
+\item
+  When a decision deserves an ADR and when it doesn't
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can read an ADR and reconstruct the discussion that produced it, including the rejected alternatives.
+
+\subsection*{2.8 Security Considerations}\phantomsection\label{project-planning-guide:28-security-considerations}
+
+How the system protects against misuse, attack, and accidental exposure.
+
+\textbf{Why it matters:} Security cannot be bolted on at the end. It must be designed in. A breach costs more than a hundred features.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Authentication~--- how identity is verified (sessions, tokens, OAuth, mTLS)
+\item
+  Authorization~--- who can do what (RBAC, ABAC, ownership-based)
+\item
+  Secrets management~--- where credentials live, how they rotate
+\item
+  Data sensitivity~--- classifying data (PII, financial, public) and handling each appropriately
+\item
+  Transport security~--- HTTPS everywhere, TLS configuration
+\item
+  Input validation and injection prevention (SQL, command, XSS, SSRF)
+\item
+  Defense in depth~--- multiple layers, no single point of failure
+\item
+  Logging policy~--- what to log, what \emph{not} to log
+\item
+  OWASP Top 10 awareness
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can threat-model a new feature in your head and identify the top three risks before implementation begins.
+
+\unnumberedsection{true}{Section 3 --- Developer Guide}\label{project-planning-guide:section-3--developer-guide}
+
+\subsection*{3.1 Prerequisites}\phantomsection\label{project-planning-guide:31-prerequisites}
+
+Everything that must exist on a machine before the project can run.
+
+\textbf{Why it matters:} Undocumented prerequisites are a leading cause of ``works on my machine'' failures.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Runtime~--- language and version
+\item
+  Package manager
+\item
+  External tools and system libraries
+\item
+  Credentials required (env vars, API keys, certificates)
+\item
+  System requirements (OS, RAM, disk, network)
+\item
+  How to verify each prerequisite is present
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} a colleague can install every documented prerequisite on a fresh machine without asking anyone for help.
+
+\subsection*{3.2 Repository Structure}\phantomsection\label{project-planning-guide:32-repository-structure}
+
+A map of the codebase~--- where things live, the conventions followed.
+
+\textbf{Why it matters:} Developers should be able to find code by following the structure, not by searching.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Top-level directories and what each contains
+\item
+  Application code organization
+\item
+  Where configuration, tests, scripts, documentation, and fixtures live
+\item
+  A single, explicit composition point where the application is assembled (in Flask, the application factory)
+\item
+  Naming conventions for files and directories
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can predict where to add a new feature file before opening the project.
+
+\subsection*{3.3 Environment Setup}\phantomsection\label{project-planning-guide:33-environment-setup}
+
+The step-by-step process for getting the project running locally.
+
+\textbf{Why it matters:} The setup process is the first impression. Bad setup means lost developers.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Cloning the repository
+\item
+  Creating and activating an isolated environment
+\item
+  Installing dependencies
+\item
+  Copying and configuring the environment file
+\item
+  Running migrations or seed scripts
+\item
+  Verifying setup with a smoke test
+\item
+  Common setup failures and their fixes
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} someone new can go from \texttt{git\ clone} to a running local instance in under 15 minutes following only your documented steps.
+
+\subsection*{3.4 Running Locally}\phantomsection\label{project-planning-guide:34-running-locally}
+
+How to start the application, in development mode and in production-like mode.
+
+\textbf{Why it matters:} Running locally is where most code is written and debugged. Subtle differences between local and production cause bugs that only surface late.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Start command for development mode
+\item
+  Start command for production-like mode
+\item
+  How to switch environments (env var, config flag)
+\item
+  Hot reload behavior
+\item
+  Ports and URLs to access the running service
+\item
+  A sample invocation with expected output
+\item
+  How to verify the service is healthy
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can run the project in both dev and prod modes locally and know why each mode exists.
+
+\subsection*{3.5 Configuration Reference}\phantomsection\label{project-planning-guide:35-configuration-reference}
+
+Every configuration variable the project supports~--- type, default, description.
+
+\textbf{Why it matters:} Undocumented config is invisible config. Engineers who don't know an option exists won't use it correctly.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Each variable's name, type, default
+\item
+  Required vs optional vs derived
+\item
+  What each variable controls
+\item
+  Format expected (URL, integer, boolean string)
+\item
+  Validation that runs at startup
+\item
+  The \texttt{.env.example} pattern for documenting variables
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can read the configuration reference and predict the system's behavior in a new environment.
+
+\subsection*{3.6 Testing}\phantomsection\label{project-planning-guide:36-testing}
+
+The test strategy~--- what's tested, how, and at what level.
+
+\textbf{Why it matters:} Untested code is owned by no one. Tests document intent, catch regressions, and enable safe change.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  The test pyramid~--- unit, integration, contract, end-to-end
+\item
+  How to run the full test suite
+\item
+  How to run a single test or test file
+\item
+  How to add a new test
+\item
+  Test doubles~--- mock, stub, fake, spy~--- when each fits
+\item
+  Test fixtures and data management
+\item
+  Coverage as a signal (its uses and limits)
+\item
+  Mocking strategy for external services
+\item
+  Flaky tests and what to do about them
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can write a test that catches a real regression and explain why each level of the pyramid is needed.
+
+\subsection*{3.7 Code Conventions}\phantomsection\label{project-planning-guide:37-code-conventions}
+
+The agreed-upon style and design principles the codebase follows.
+
+\textbf{Why it matters:} Consistency reduces cognitive load. Code that all looks the same is code that's easier to read. Code-craft principles are also the foundation under every other layer~--- design, testing, deployment, operations.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Naming~--- files, functions, variables, constants
+\item
+  Linting and formatting tools
+\item
+  Comment style~--- when and how to comment
+\item
+  Module design~--- deep modules, information hiding, coupling vs cohesion
+\item
+  Error handling~--- how errors are raised, caught, logged; where to handle them
+\item
+  Function design~--- size, parameters, return shapes, side effects
+\item
+  Code smells~--- long methods, large classes, primitive obsession, feature envy
+\item
+  Refactoring as a discipline~--- small steps, under test
+\item
+  The cost of complexity over time
+\item
+  Commit message format
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can read existing code and tell which conventions are followed, then write new code that fits in seamlessly.
+
+\subsection*{3.8 Common Debugging Scenarios}\phantomsection\label{project-planning-guide:38-common-debugging-scenarios}
+
+The recurring problems developers hit, and how to resolve them.
+
+\textbf{Why it matters:} A debugging guide saves hours of repeated investigation. The ``five-minute fix you've forgotten how to do'' is exactly what this section captures.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Per-layer diagnosis~--- where to look first (DNS, network, app, database)
+\item
+  Tools for each layer (strace, dig, curl, log search, journalctl, jq, database stats)
+\item
+  Reproducing production issues locally
+\item
+  Reading logs effectively~--- filtering, correlating with request IDs
+\item
+  Using a debugger~--- breakpoints, stepping, watching state
+\item
+  Common failure symptoms and their typical causes
+\item
+  When to escalate vs when to dig deeper
+\end{itemize}
+
+\noindent{}\textbf{You understand this when}, the moment something breaks, you can identify which layer it's in within two minutes and have a diagnostic command ready.
+
+\unnumberedsection{true}{Section 4 --- Operational Guide}\label{project-planning-guide:section-4--operational-guide}
+
+\subsection*{4.1 Deployment}\phantomsection\label{project-planning-guide:41-deployment}
+
+How the application gets from source to running production~--- including build, packaging, infrastructure, and the path traffic takes to reach it.
+
+\textbf{Why it matters:} Deployment is where code becomes a service. A team that can't deploy reliably can't ship.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Build process~--- turning source into a deployable artifact
+\item
+  Packaging strategy (containers, wheels, OS packages)
+\item
+  Artifact storage (registries, versioning by git hash)
+\item
+  Infrastructure~--- servers, VMs, containers, managed services
+\item
+  The path from artifact to running process (pull, supervise, start)
+\item
+  Networking~--- DNS, reverse proxy, TLS termination, firewalls
+\item
+  Deployment strategies~--- recreate, rolling, blue-green, canary
+\item
+  Rollback procedure
+\item
+  How configuration and secrets are injected at runtime
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can trace a code change from \texttt{git\ push} all the way to user traffic, naming every system it passes through.
+
+\subsection*{4.2 Scheduling \& Triggers}\phantomsection\label{project-planning-guide:42-scheduling--triggers}
+
+How the system handles work that isn't direct user requests~--- scheduled jobs, event-triggered tasks, webhooks.
+
+\textbf{Why it matters:} Most production systems have hidden work running in the background. Missed runs are silent failures.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Trigger types~--- cron, event, webhook, manual
+\item
+  Cron expressions and the timezone trap (cron uses the server's local time~--- schedule in UTC)
+\item
+  Modern alternatives to cron (systemd timers, cloud schedulers)
+\item
+  Event-triggered work~--- webhooks, message queues
+\item
+  Overlap handling~--- what if one run is still active when the next fires
+\item
+  Idempotency for scheduled jobs~--- essential; jobs must be safely re-runnable
+\item
+  Durability~--- what if the scheduler or job crashes mid-execution
+\item
+  Monitoring missed runs (not just failed runs)
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} for every scheduled job in the system, you can describe what triggers it, what happens if it fails, and how you'd notice if it stopped running.
+
+\subsection*{4.3 Monitoring \& Health Checks}\phantomsection\label{project-planning-guide:43-monitoring--health-checks}
+
+How you know the system is alive and behaving correctly.
+
+\textbf{Why it matters:} A system you can't observe is a system you can't operate. Problems must surface before users notice.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  The three pillars~--- logs, metrics, traces
+\item
+  Structured logging (JSON) and request ID correlation
+\item
+  Health check endpoints~--- deep vs shallow
+\item
+  The four golden signals~--- latency, traffic, errors, saturation
+\item
+  Metrics~--- counters, gauges, histograms
+\item
+  Log aggregation
+\item
+  Alerting on symptoms (not causes), and the alert-fatigue trap
+\item
+  SLIs, SLOs, error budgets
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can answer ``is the system healthy right now?'' with a single command, and you trust the answer.
+
+\subsection*{4.4 Common Failure Modes}\phantomsection\label{project-planning-guide:44-common-failure-modes}
+
+The known ways the system can fail in production, and how to diagnose each one.
+
+\textbf{Why it matters:} Engineers diagnose faster when failures are familiar. A documented failure mode is a failure that's already half-solved.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Per-layer failures~--- server (OOM, disk full), reverse proxy (cert expiry, misconfig), container (crash loop, unhealthy), application (worker timeout, queue saturation), database (connection refused, slow queries)
+\item
+  Symptoms~--- what the user sees
+\item
+  Detection~--- what to look for in logs/metrics
+\item
+  Diagnosis commands~--- what to run to confirm
+\item
+  Recovery steps
+\item
+  Prevention measures for the future
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can pattern-match an alert to a likely failure mode in under a minute and start diagnosis with the right command.
+
+\subsection*{4.5 Restart \& Recovery Procedures}\phantomsection\label{project-planning-guide:45-restart--recovery-procedures}
+
+The step-by-step procedure for restoring a service after a failure.
+
+\textbf{Why it matters:} Under stress, fresh thinking fails. A documented runbook is the difference between five-minute and five-hour recovery.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Assess~--- how to determine the scope of the failure
+\item
+  Stop~--- how to cleanly stop a running process if needed
+\item
+  Fix~--- what commonly needs to be resolved before restart
+\item
+  Restart~--- the exact command
+\item
+  Verify~--- how to confirm the system is healthy
+\item
+  Process supervisors and restart policies
+\item
+  Graceful shutdown~--- draining in-flight requests, signal handling
+\item
+  The PID 1 signal-handling gotcha in containers
+\item
+  Restoring from backup during an incident (strategy and restore testing live in 4.6)
+\item
+  Postmortem documentation and blameless culture
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can recover the service from a cold start without consulting documentation~--- but you wrote the runbook anyway.
+
+\subsection*{4.6 Data Management}\phantomsection\label{project-planning-guide:46-data-management}
+
+How data is retained, archived, deleted, and protected over time.
+
+\textbf{Why it matters:} Real systems accumulate data that's expensive to keep and legally fraught to delete badly. Both retention and deletion are increasingly regulated.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Retention policy~--- how long different data lives
+\item
+  Storage tiers~--- hot, warm, cold, archival
+\item
+  Archival procedures~--- moving old data without losing it
+\item
+  Cleanup jobs~--- safe deletion with dry-runs and audit logs
+\item
+  PII handling~--- minimization, pseudonymization, what to log and what not to
+\item
+  Backup strategy~--- frequency, storage, verification
+\item
+  Restore testing~--- an untested backup is a hope, not a backup
+\item
+  Compliance-driven retention (GDPR right-to-delete, legal hold)
+\item
+  The difference between soft delete, hard delete, and cryptographic deletion
+\item
+  Local vs production parity in data behavior
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} for every category of data in the system, you can describe how long it lives, how it's backed up, how it would be deleted, and how a data-subject deletion request would be handled.
+
+\unnumberedsection{true}{Section 5 --- Delivery \& Changelog}\label{project-planning-guide:section-5--delivery--changelog}
+
+\subsection*{5.1 Delivery Phases}\phantomsection\label{project-planning-guide:51-delivery-phases}
+
+The discrete milestones the project is broken into~--- each with a clear goal and definition of done.
+
+\textbf{Why it matters:} Without phases, projects either drift indefinitely or get rushed at the end. Phases create natural checkpoints.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Each phase's goal
+\item
+  Scope included in each phase
+\item
+  Status (completed / in progress / planned)
+\item
+  Target or actual completion date
+\item
+  The distinction between phases (stable milestones) and tasks (individual work items)
+\item
+  How to handle scope additions during a phase
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can describe the project's phases to a stakeholder and predict when each one delivers value.
+
+\subsection*{5.2 Current State}\phantomsection\label{project-planning-guide:52-current-state}
+
+A snapshot of what's live in production right now.
+
+\textbf{Why it matters:} Without a current-state record, no one knows what version is deployed or what works. New team members can't get up to speed.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  What features are live in production
+\item
+  Current version (release tag or git hash)
+\item
+  Date of most recent change to production
+\item
+  Known limitations of the current state
+\item
+  Active workarounds in place
+\item
+  The relationship between current state and the roadmap
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} any team member can answer ``what's in production right now?''~--- and the answer matches what the deployment system reports.
+
+\subsection*{5.3 Changelog}\phantomsection\label{project-planning-guide:53-changelog}
+
+A running record of significant changes~--- what was changed, when, and by whom.
+
+\textbf{Why it matters:} Without a changelog, releases are opaque. Users can't tell what's new; engineers can't tell what's broken.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Date of each significant change
+\item
+  Version number (semantic versioning~--- major.minor.patch)
+\item
+  Author
+\item
+  Category of change~--- added, changed, deprecated, removed, fixed, security
+\item
+  Conventions~--- Keep a Changelog, Conventional Commits
+\item
+  The difference between deploys (technical) and releases (user-visible)
+\item
+  Release notes for stakeholders vs developer changelog
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can read the changelog and reconstruct the project's history at a glance.
+
+\subsection*{5.4 Known Issues \& Tech Debt}\phantomsection\label{project-planning-guide:54-known-issues--tech-debt}
+
+The acknowledged problems that haven't been fixed yet~--- and the trade-offs made deliberately.
+
+\textbf{Why it matters:} Tech debt nobody tracks compounds silently. Acknowledged debt can be paid down strategically.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Each known issue with impact~--- who or what is affected
+\item
+  The current workaround
+\item
+  The proper fix
+\item
+  Each piece of tech debt with: why it was done this way, what it would take to clean up
+\item
+  The technical-debt quadrant (Martin Fowler)~--- deliberate vs inadvertent, prudent vs reckless
+\item
+  How to prioritize debt against new feature work
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can defend the prioritization between paying down a piece of debt and shipping a new feature.
+
+\subsection*{5.5 Future Roadmap}\phantomsection\label{project-planning-guide:55-future-roadmap}
+
+What comes next~--- features and improvements planned, prioritized.
+
+\textbf{Why it matters:} A roadmap aligns the team and stakeholders on direction. Without one, every priority debate happens in isolation.
+
+\textbf{What this topic covers:}
+
+\begin{itemize}
+\tightlist
+\item
+  Each upcoming feature or improvement
+\item
+  Priority (High / Medium / Low)
+\item
+  Rationale for each priority
+\item
+  Dependencies between roadmap items
+\item
+  Time horizon (next quarter, next year, eventually)
+\item
+  How the roadmap is revised when reality intervenes
+\end{itemize}
+
+\noindent{}\textbf{You understand this when} you can explain to a new team member what's coming in the next quarter and why.
+
+\unnumberedsection{true}{A Worked Example: Planning the Notes API}\label{project-planning-guide:a-worked-example-planning-the-notes-api}
+
+The template is easier to use once you have seen it filled in. Here is a compressed plan for the notes service whose discovery was sketched in Part I~--- the same Notes API that Part IV builds, chapter by chapter. A real plan would say more in each section; the point here is what \emph{one good line} per section looks like.
+
+\textbf{Section 1~--- Problem Statement \& Goals}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Background \& context:} discovery showed that developers lose the snippets and decisions they jot down during the day; a two-week trial with a shared file confirmed they would use a simple capture tool daily.
+\item
+  \textbf{Core problem:} capturing a note must take one command from wherever the developer already is, and finding it again must be just as quick.
+\item
+  \textbf{Goals \& success criteria:} a note can be created, listed, read, updated, and deleted over HTTPS; success is ``each pilot user retrieves a saved note at least once a week'' after one month.
+\item
+  \textbf{Out of scope (v1):} user accounts and sharing, a web or mobile front end, full-text search ranking, attachments.
+\item
+  \textbf{Stakeholders \& users:} the twelve pilot developers (users); the one engineer building it (owner); the team lead who pays the hosting bill.
+\item
+  \textbf{Constraints \& assumptions:} one engineer, six weeks, hosting under \$25 a month; assumes a single region and a few requests per second at most.
+\end{itemize}
+
+\noindent{}\textbf{Section 2~--- Architecture \& Design}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{System overview:} a small REST API~--- Python and Flask~--- in a Docker container on one Linux VM, behind Nginx for TLS, with a managed PostgreSQL database.
+\item
+  \textbf{Architecture diagram:} client → DNS → cloud firewall → Nginx (TLS) → Gunicorn in Docker → managed PostgreSQL over a private network.
+\item
+  \textbf{Component breakdown:} application factory, configuration module, database access, route handlers, validation, error handlers, logging.
+\item
+  \textbf{Data flow:} a \texttt{POST\ /notes/} is validated, inserted, committed, and returned as JSON; every request is logged with its status and duration.
+\item
+  \textbf{External integrations:} none in v1 beyond the database~--- which is still a contract, with its own connection string, credentials, and failure modes.
+\item
+  \textbf{Data storage \& schema:} one table, \texttt{notes(id,}\allowbreak{}\texttt{\ content,}\allowbreak{}\texttt{\ created\_}\allowbreak{}\texttt{at,}\allowbreak{}\texttt{\ updated\_}\allowbreak{}\texttt{at)}; schema changes go through versioned migrations.
+\item
+  \textbf{Key design decisions:} SQLite for local development and PostgreSQL in production, recorded as an ADR~--- and later superseded by ``PostgreSQL everywhere'' when the difference hid a bug.
+\item
+  \textbf{Security considerations:} HTTPS only; all input validated; secrets in environment files, never in the repository; no authentication in v1 is an \emph{accepted, written-down} risk: the pilot's URL is shared only with the pilot users, the data is low-stakes, and authentication is first on the roadmap.
+\end{itemize}
+
+\noindent{}\textbf{Section 3~--- Developer Guide}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Prerequisites:} Python 3.11, Docker, git.
+\item
+  \textbf{Repository structure:} \texttt{app/} (the package), \texttt{tests/}, \texttt{migrations/}, \texttt{Dockerfile}, \texttt{Makefile}, \texttt{requirements*.txt}.
+\item
+  \textbf{Environment setup:} create a virtual environment, \texttt{pip\ install\ -}\allowbreak{}\texttt{r\ requirements-}\allowbreak{}\texttt{dev.}\allowbreak{}\texttt{txt}, copy \texttt{.env.example} to \texttt{.env} and fill in \texttt{SECRET\_KEY}.
+\item
+  \textbf{Running locally:} \texttt{python\ run.py}, then \texttt{curl\ http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{localhost:}\allowbreak{}\texttt{5000/}\allowbreak{}\texttt{health}.
+\item
+  \textbf{Configuration reference:} \texttt{DATABASE\_URL} and \texttt{SECRET\_KEY} (required); \texttt{FLASK\_DEBUG}, \texttt{PORT}, \texttt{HOST}, \texttt{LOG\_LEVEL}, \texttt{LOG\_FORMAT} (optional, with defaults).
+\item
+  \textbf{Testing:} \texttt{make\ build} runs lint, type checks, the test suite, and a dependency audit; CI runs the same on every push.
+\item
+  \textbf{Code conventions:} formatted by black, linted by ruff; one error-response shape for the whole API.
+\item
+  \textbf{Common debugging scenarios:} ``port already in use'', a missing environment variable at startup, a 415 because a client forgot \texttt{Content-}\allowbreak{}\texttt{Type:}\allowbreak{}\texttt{\ application/}\allowbreak{}\texttt{json}.
+\end{itemize}
+
+\noindent{}\textbf{Section 4~--- Operational Guide}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Deployment:} CI builds and smoke-tests an image tagged by commit, pushes it to the registry, and runs \texttt{deploy.sh\ sha-\textless{}commit\textgreater{}} on the server, which rolls back automatically if the health check fails.
+\item
+  \textbf{Scheduling \& triggers:} none in v1; a nightly cleanup job would be the first.
+\item
+  \textbf{Monitoring \& health checks:} \texttt{/health} checks the database and is watched by an external uptime monitor; structured JSON logs; alerts on downtime and error rate.
+\item
+  \textbf{Common failure modes:} database unreachable (503 from \texttt{/health}), expired TLS certificate, disk full from logs, a crash-looping container after a bad deploy.
+\item
+  \textbf{Restart \& recovery:} redeploy the last good tag; the service-down runbook covers the first ten minutes of any outage.
+\item
+  \textbf{Data management:} managed-database backups kept 7 days, plus an off-server copy before every schema change; a monthly restore test.
+\end{itemize}
+
+\noindent{}\textbf{Section 5~--- Delivery \& Changelog}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Delivery phases:} (1) runs locally, (2) portable and configurable, (3) packaged as an image, (4) deployed to a server, (5) reachable over HTTPS, (6) observable and hardened~--- each a working system before the next begins.
+\item
+  \textbf{Current state:} v1.2.0 in production (image \texttt{sha-a1b2c3d}), deployed on the date in the changelog.
+\item
+  \textbf{Changelog:} kept in \texttt{CHANGELOG.md} under \emph{Added / Changed / Fixed / Security}, one entry per release.
+\item
+  \textbf{Known issues \& tech debt:} no authentication (accepted for the pilot); one server is a single point of failure; the list endpoint needs pagination before the data grows.
+\item
+  \textbf{Future roadmap:} High~--- authentication, before anyone outside the pilot gets the URL; Medium~--- pagination and search; Low~--- a small web front end.
+\end{itemize}
+
+\noindent{}Filled in like this, the plan fits on three pages, and every line is something a newcomer, an operator, or a future you will need to know.
+
+\unnumberedsection{true}{How This Guide Evolves}\label{project-planning-guide:how-this-guide-evolves}
+
+This Guide is a living project artifact. Complete each section before or during early development, and return to update it as the project evolves~--- when architecture decisions are made, when scope changes, when new failure modes are discovered.
+
+Over time, the \textbf{Why it matters} and \textbf{What this topic covers} prompts recede into the background and the sections fill with real project content. The Guide is alive. Each decision made, each component added, and each incident resolved is an input to it.

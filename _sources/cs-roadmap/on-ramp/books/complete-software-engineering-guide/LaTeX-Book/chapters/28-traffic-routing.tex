@@ -1,0 +1,720 @@
+\setcounter{chapter}{27}
+\chapter{Traffic Routing Layer}\label{ch:28-traffic-routing}
+
+\chapterrule
+
+Traffic from the internet arrives at the server on port 443. It must be decrypted, inspected, and routed to the correct backend service. That routing job belongs to \textbf{Nginx}, configured as a \textbf{reverse proxy}.
+
+A \textbf{reverse proxy} is a server that sits in front of one or more backend services. Clients connect to the reverse proxy; the reverse proxy forwards requests to the appropriate backend. The client does not need to know what is behind the proxy.
+
+Nginx is one of the most widely deployed reverse proxies (and web servers) in the world. In the Notes API architecture, Nginx:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Terminates TLS (decrypts HTTPS connections)
+\item
+  Redirects HTTP to HTTPS
+\item
+  Forwards decrypted requests to Gunicorn
+\item
+  Adds security headers to responses
+\item
+  Handles static file serving if needed
+\end{enumerate}
+
+\noindent{}This chapter configures Nginx for the Notes API and issues a TLS certificate from Let's Encrypt, making the API accessible over HTTPS.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What a reverse proxy is and why it is necessary between the internet and Gunicorn
+\item
+  How Nginx configuration files are structured (server blocks, location blocks)
+\item
+  What TLS termination is and why it happens in Nginx, not Gunicorn
+\item
+  How to obtain a free, automatically-renewing TLS certificate from Let's Encrypt using Certbot
+\item
+  How to configure Nginx to proxy requests to Gunicorn
+\item
+  What security headers are and why they matter
+\item
+  How to test and debug Nginx configuration
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Why Gunicorn Cannot Face the Internet Directly}\label{28-traffic-routing:281-why-gunicorn-cannot-face-the-internet-directly}
+
+In development, \texttt{app.run()} handles HTTP directly. In production, Gunicorn handles HTTP. Could Gunicorn face the internet directly~--- no Nginx in front?
+
+Technically possible but inadvisable for several reasons:
+
+\textbf{TLS}: Gunicorn supports TLS (via \texttt{-\/-keyfile} and \texttt{-\/-certfile} flags), but TLS termination in a reverse proxy is simpler to configure and renew. Nginx handles TLS renewal without restarting Gunicorn.
+
+\textbf{Static files}: Nginx serves static files (CSS, JavaScript, images) much faster than Gunicorn. Python is not optimized for serving binary files.
+
+\textbf{Connection handling}: Nginx is asynchronous and can hold thousands of slow client connections with minimal resources. Gunicorn workers would be tied up waiting for slow clients to receive responses.
+
+\textbf{HTTP/2}: Nginx supports HTTP/2; Gunicorn's default sync workers do not. HTTP/2 allows multiplexing multiple requests over one connection, significantly improving performance for clients with many resources to fetch.
+
+\textbf{Security}: Nginx can inspect and filter requests before they reach Python. Rate limiting, IP blocking, header injection prevention~--- all at the network level, before expensive Python code runs.
+
+\textbf{Separation of concerns}: Nginx handles the edge~--- TLS, slow clients, request limits, headers every response needs~--- and Gunicorn runs the application. Both speak HTTP; each does the part it is designed for.
+
+\setcounter{section}{1}
+\section{Installing Nginx}\label{28-traffic-routing:282-installing-nginx}
+
+The commands in this chapter change system configuration: run them as root, or prefix each with \texttt{sudo}.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On the server (Ubuntu 22.04)}
+\ExtensionTok{apt{-}get}\NormalTok{ update}
+\ExtensionTok{apt{-}get}\NormalTok{ install }\AttributeTok{{-}y}\NormalTok{ nginx}
+
+\CommentTok{\# Verify installation}
+\ExtensionTok{nginx} \AttributeTok{{-}v}
+\CommentTok{\# nginx version: nginx/1.18.0 (Ubuntu)}
+
+\CommentTok{\# Nginx starts automatically after installation}
+\ExtensionTok{systemctl}\NormalTok{ status nginx}
+\CommentTok{\# Active: active (running)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{2}
+\section{Nginx Configuration Structure}\label{28-traffic-routing:283-nginx-configuration-structure}
+
+Nginx configuration files live in \texttt{/etc/nginx/}. The structure:
+
+\begin{diagrambox}[short]{372.4pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+/etc/nginx/
+├── nginx.conf            ← Main configuration file
+├── conf.d/               ← Drop-in configuration files (loaded by nginx.conf;
+│                            empty in Ubuntu's package)
+├── sites-available/      ← Virtual host configurations (not active)
+│   └── default
+└── sites-enabled/        ← Symlinks to active configurations
+    └── default → ../sites-available/default
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}\texttt{nginx.conf} includes:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# At the bottom of nginx.conf:}
+\NormalTok{include /etc/nginx/conf.d/*.conf;}
+\NormalTok{include /etc/nginx/sites{-}enabled/*;}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Both lines are inside the \texttt{http\ \{\}} block, so files in \texttt{conf.d/} can hold settings shared by every site. We place the Notes API site in \texttt{/}\allowbreak{}\texttt{etc/}\allowbreak{}\texttt{nginx/}\allowbreak{}\texttt{sites-}\allowbreak{}\texttt{available/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api} and symlink it to \texttt{sites-enabled/}. Two small shared pieces go in \texttt{conf.d/}: the upstream (below) and the rate-limiting zone (section 28.6).
+
+\subsection*{Nginx configuration concepts}\phantomsection\label{28-traffic-routing:nginx-configuration-concepts}
+
+\textbf{Context}: Nginx config has nested blocks (contexts):
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{http\ \{\}}: HTTP server settings
+\item
+  \texttt{server\ \{\}}: a virtual host (one server block per domain)
+\item
+  \texttt{location\ \{\}}: rules for specific URL paths
+\end{itemize}
+
+\noindent{}\textbf{Directive}: a configuration statement ending in \texttt{;}
+
+\textbf{Block}: a group of directives in \texttt{\{\}} that applies to a context
+
+\setcounter{section}{3}
+\section{Initial Nginx Configuration (HTTP only)}\label{28-traffic-routing:284-initial-nginx-configuration-http-only}
+
+Before configuring TLS, set up an HTTP-only configuration to verify basic connectivity. This is also required for Let's Encrypt certificate issuance (the ACME HTTP-01 challenge).
+
+First, the \textbf{upstream}~--- the named group of backend servers that the site proxies to. It lives in its own file because \hyperref[ch:23-code-transfer]{Chapter 23}'s blue-green deploy script rewrites exactly this file to switch traffic between containers. It must be defined only here: a second \texttt{upstream\ notes\_api} block anywhere else makes \texttt{nginx\ -t} fail with ``duplicate upstream''.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# /etc/nginx/conf.d/notes{-}api{-}upstream.conf}
+\NormalTok{upstream notes\_api \{}
+\NormalTok{    server 127.0.0.1:5000;}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(\texttt{127.0.0.1}, not \texttt{localhost}: \texttt{localhost} may resolve to the IPv6 address \texttt{::1} first, where the container is not published.)
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 28.1}\enspace /etc/nginx/sites-available/notes-api (HTTP only, initial)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# HTTP{-}only configuration for initial setup and ACME challenge.}
+\NormalTok{\# This will be replaced by the full HTTPS configuration after certificate issuance.}
+
+\NormalTok{server \{}
+\NormalTok{    \# Listen on port 80 for IPv4}
+\NormalTok{    listen 80;}
+\NormalTok{    \# Listen on port 80 for IPv6}
+\NormalTok{    listen [::]:80;}
+
+\NormalTok{    \# The domain name this server block handles.}
+\NormalTok{    \# Nginx compares the incoming HTTP Host header against this value.}
+\NormalTok{    server\_name api.notes.example.com;}
+
+\NormalTok{    \# All requests: proxy to Gunicorn (through the upstream defined above).}
+\NormalTok{    \# No special location is needed for Let\textquotesingle{}s Encrypt\textquotesingle{}s challenge: Certbot\textquotesingle{}s}
+\NormalTok{    \# Nginx plugin adds one temporarily while it proves domain ownership.}
+\NormalTok{    location / \{}
+\NormalTok{        proxy\_pass http://notes\_api;}
+\NormalTok{        proxy\_set\_header Host $host;}
+\NormalTok{        proxy\_set\_header X{-}Real{-}IP $remote\_addr;}
+\NormalTok{        proxy\_set\_header X{-}Forwarded{-}For $proxy\_add\_x\_forwarded\_for;}
+\NormalTok{        proxy\_set\_header X{-}Forwarded{-}Proto $scheme;}
+\NormalTok{    \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Enable it:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create the symlink to enable the site}
+\FunctionTok{ln} \AttributeTok{{-}s}\NormalTok{ /etc/nginx/sites{-}available/notes{-}api /etc/nginx/sites{-}enabled/}
+
+\CommentTok{\# Remove the default site (optional)}
+\FunctionTok{rm}\NormalTok{ /etc/nginx/sites{-}enabled/default}
+
+\CommentTok{\# Test the configuration for syntax errors}
+\ExtensionTok{nginx} \AttributeTok{{-}t}
+\CommentTok{\# nginx: configuration file /etc/nginx/nginx.conf test is successful}
+
+\CommentTok{\# Reload Nginx with the new configuration}
+\ExtensionTok{systemctl}\NormalTok{ reload nginx}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Test:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# From your laptop}
+\ExtensionTok{curl}\NormalTok{ http://api.notes.example.com/health}
+\CommentTok{\# \{"status":"ok"\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{4}
+\section{TLS Certificates with Let's Encrypt}\label{28-traffic-routing:285-tls-certificates-with-lets-encrypt}
+
+\textbf{TLS (Transport Layer Security)} encrypts the connection between the client and server. Without TLS:
+
+\begin{itemize}
+\tightlist
+\item
+  Anyone between the client and server can read the request and response in plaintext
+\item
+  Passwords, API keys, and sensitive data are exposed
+\item
+  Browsers show ``Not Secure'' warnings
+\end{itemize}
+
+\noindent{}\textbf{Let's Encrypt} is a free, automated, and open Certificate Authority. It issues TLS certificates at no cost. Each certificate is valid for 90 days, and Certbot renews it automatically about 30 days before it expires. (Let's Encrypt has announced a move to shorter lifetimes over the next few years~--- automated renewal is what makes that painless.) It changed the web by making HTTPS accessible to everyone.
+
+\subsection*{How Let's Encrypt works (ACME protocol)}\phantomsection\label{28-traffic-routing:how-lets-encrypt-works-acme-protocol}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  You request a certificate for \texttt{api.notes.example.com}
+\item
+  Let's Encrypt responds with a \textbf{challenge}: ``Prove you control this domain''
+\item
+  For the \textbf{HTTP-01 challenge}: place a specific file at \texttt{http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{api.}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{example.}\allowbreak{}\texttt{com/}\allowbreak{}\texttt{.}\allowbreak{}\texttt{well-}\allowbreak{}\texttt{known/}\allowbreak{}\texttt{acme-}\allowbreak{}\texttt{challenge/}\allowbreak{}\texttt{TOKEN}
+\item
+  Let's Encrypt retrieves the file from the internet~--- proving the server controls the domain
+\item
+  Let's Encrypt issues the certificate
+\end{enumerate}
+
+\noindent{}\textbf{Certbot} is the official Let's Encrypt client. It automates challenge completion and certificate installation.
+
+\subsection*{Installing Certbot}\phantomsection\label{28-traffic-routing:installing-certbot}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install certbot and the Nginx plugin}
+\ExtensionTok{apt{-}get}\NormalTok{ install }\AttributeTok{{-}y}\NormalTok{ certbot python3{-}certbot{-}nginx}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(Ubuntu 22.04's package is an older Certbot release; Certbot's own documentation recommends installing it as a snap, which stays current. Either works for this chapter.)
+
+\subsection*{Obtaining the certificate}\phantomsection\label{28-traffic-routing:obtaining-the-certificate}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Request a certificate for the API domain}
+\CommentTok{\# {-}{-}nginx: use the Nginx plugin (automatically configures Nginx)}
+\CommentTok{\# {-}{-}agree{-}tos: agree to Let\textquotesingle{}s Encrypt\textquotesingle{}s terms of service}
+\CommentTok{\# {-}{-}email: your email (for certificate expiry notifications)}
+\ExtensionTok{certbot} \AttributeTok{{-}{-}nginx} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}agree{-}tos} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}email}\NormalTok{ admin@example.com }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}domains}\NormalTok{ api.notes.example.com }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}non{-}interactive} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}redirect}  \CommentTok{\# Automatically configure HTTP → HTTPS redirect}
+
+\CommentTok{\# Output (abbreviated):}
+\CommentTok{\# Requesting a certificate for api.notes.example.com}
+\CommentTok{\#}
+\CommentTok{\# Successfully received certificate.}
+\CommentTok{\# Certificate is saved at: /etc/letsencrypt/live/api.notes.example.com/fullchain.pem}
+\CommentTok{\# Key is saved at:         /etc/letsencrypt/live/api.notes.example.com/privkey.pem}
+\CommentTok{\# ...}
+\CommentTok{\# Deploying certificate}
+\CommentTok{\# Successfully deployed certificate for api.notes.example.com to /etc/nginx/sites{-}enabled/notes{-}api}
+\CommentTok{\# Congratulations! You have successfully enabled HTTPS on https://api.notes.example.com}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}After Certbot completes, Nginx automatically reloads with the new configuration. Test HTTPS:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ https://api.notes.example.com/health}
+\CommentTok{\# \{"status":"ok"\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Automatic certificate renewal}\phantomsection\label{28-traffic-routing:automatic-certificate-renewal}
+
+Let's Encrypt certificates expire after 90 days. Certbot installs a systemd timer (or cron job) for automatic renewal:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Verify the renewal timer}
+\ExtensionTok{systemctl}\NormalTok{ status certbot.timer}
+\CommentTok{\# ● certbot.timer {-} Run certbot twice daily}
+\CommentTok{\#    Active: active (waiting)}
+
+\CommentTok{\# Test renewal without actually renewing (dry run)}
+\ExtensionTok{certbot}\NormalTok{ renew }\AttributeTok{{-}{-}dry{-}run}
+\CommentTok{\# Simulating renewal of an existing certificate...}
+\CommentTok{\# Congratulations, all simulated renewals succeeded.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The timer runs twice daily. When a certificate is within 30 days of expiration, Certbot renews it automatically~--- and, because the certificate was obtained with the \texttt{-\/-nginx} plugin, reloads Nginx so it serves the new certificate. (With other methods, such as \texttt{-\/-webroot}, add \texttt{-}\allowbreak{}\texttt{-}\allowbreak{}\texttt{deploy-}\allowbreak{}\texttt{hook\ "systemctl\ reload\ nginx"} to get the same reload.)
+
+\setcounter{section}{5}
+\section{The Complete Production Nginx Configuration}\label{28-traffic-routing:286-the-complete-production-nginx-configuration}
+
+After certificate issuance, configure Nginx fully.
+
+\begin{notebox}
+
+\textbf{Note:} TLS recommendations (protocol versions, cipher suites, header advice) evolve as attacks and browsers change. The settings below reflect current guidance at the time of writing; before deploying, compare them with Mozilla's SSL Configuration Generator (ssl-config.mozilla.org) for your Nginx and OpenSSL versions.
+
+\end{notebox}
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 28.2}\enspace /etc/nginx/sites-available/notes-api (complete production config)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\NormalTok{\# The upstream "notes\_api" is defined in conf.d/notes{-}api{-}upstream.conf}
+\NormalTok{\# (section 28.4) — not here — because the deploy script rewrites it.}
+\NormalTok{\#}
+\NormalTok{\# (No "keepalive" pool in the upstream: Gunicorn\textquotesingle{}s default sync workers}
+\NormalTok{\# close the connection after every response, so a pool would stay empty.}
+\NormalTok{\# With the gthread worker class, add "keepalive 16;" to the upstream.)}
+
+\NormalTok{\# HTTP server block — redirect all HTTP to HTTPS}
+\NormalTok{server \{}
+\NormalTok{    listen 80;}
+\NormalTok{    listen [::]:80;}
+\NormalTok{    server\_name api.notes.example.com;}
+
+\NormalTok{    \# (Certbot\textquotesingle{}s Nginx plugin answers the ACME challenge on port 80 itself}
+\NormalTok{    \# during renewal, so no challenge location is needed here.)}
+\NormalTok{    location / \{}
+\NormalTok{        return 301 https://$host$request\_uri;}
+\NormalTok{    \}}
+\NormalTok{\}}
+
+\NormalTok{\# HTTPS server block — the main configuration}
+\NormalTok{server \{}
+\NormalTok{    \# On Nginx 1.25.1 and later, write "listen 443 ssl;" plus "http2 on;"}
+\NormalTok{    \# instead: the http2 parameter of listen is deprecated there.}
+\NormalTok{    listen 443 ssl http2;}
+\NormalTok{    listen [::]:443 ssl http2;}
+\NormalTok{    server\_name api.notes.example.com;}
+
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+\NormalTok{    \# TLS Configuration}
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+
+\NormalTok{    \# Certificate files from Let\textquotesingle{}s Encrypt}
+\NormalTok{    ssl\_certificate /etc/letsencrypt/live/api.notes.example.com/fullchain.pem;}
+\NormalTok{    ssl\_certificate\_key /etc/letsencrypt/live/api.notes.example.com/privkey.pem;}
+
+\NormalTok{    \# Only allow TLS 1.2 and 1.3 (1.0 and 1.1 have known vulnerabilities)}
+\NormalTok{    ssl\_protocols TLSv1.2 TLSv1.3;}
+
+\NormalTok{    \# TLS 1.2 cipher suites: only ECDHE key exchange (forward secrecy) with}
+\NormalTok{    \# AES{-}GCM or ChaCha20 — OpenSSL shorthand for the core of Mozilla\textquotesingle{}s}
+\NormalTok{    \# "intermediate" profile. TLS 1.3\textquotesingle{}s cipher suites are all strong and}
+\NormalTok{    \# are not affected by this setting.}
+\NormalTok{    ssl\_ciphers ECDHE+AESGCM:ECDHE+CHACHA20;}
+\NormalTok{    ssl\_prefer\_server\_ciphers off;}
+
+\NormalTok{    \# SSL session cache (improves performance for repeated connections)}
+\NormalTok{    ssl\_session\_cache shared:SSL:10m;}
+\NormalTok{    ssl\_session\_timeout 1d;}
+\NormalTok{    ssl\_session\_tickets off;}
+
+\NormalTok{    \# (Older guides also enable OCSP stapling here. Let\textquotesingle{}s Encrypt shut down}
+\NormalTok{    \# its OCSP service in 2025, so for its certificates there is nothing}
+\NormalTok{    \# to staple; Nginx would only log a warning.)}
+
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+\NormalTok{    \# Security Headers}
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+
+\NormalTok{    \# HSTS: tell browsers to always use HTTPS for this domain}
+\NormalTok{    \# max{-}age=63072000 = 2 years in seconds}
+\NormalTok{    \# includeSubDomains: also applies to subdomains of this name.}
+\NormalTok{    \# Hard to undo: browsers remember it for max{-}age, so enable it only}
+\NormalTok{    \# once HTTPS works reliably.}
+\NormalTok{    add\_header Strict{-}Transport{-}Security "max{-}age=63072000; includeSubDomains" always;}
+
+\NormalTok{    \# Prevent the browser from MIME{-}type sniffing}
+\NormalTok{    add\_header X{-}Content{-}Type{-}Options "nosniff" always;}
+
+\NormalTok{    \# Prevent clickjacking (embedding in iframes on other sites)}
+\NormalTok{    add\_header X{-}Frame{-}Options "DENY" always;}
+
+\NormalTok{    \# (X{-}XSS{-}Protection is deliberately absent: the browser feature it}
+\NormalTok{    \# controlled is gone, could itself be abused, and never applied to JSON.)}
+
+\NormalTok{    \# Referrer Policy: how much referrer info to send with requests}
+\NormalTok{    add\_header Referrer{-}Policy "strict{-}origin{-}when{-}cross{-}origin" always;}
+
+\NormalTok{    \# Permissions Policy: disable features not needed by the API}
+\NormalTok{    add\_header Permissions{-}Policy "geolocation=(), microphone=(), camera=()" always;}
+
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+\NormalTok{    \# Request size limit}
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+
+\NormalTok{    \# Maximum size of the client request body. A note may have 10,000}
+\NormalTok{    \# characters, and in UTF{-}8 one character can take up to 4 bytes — plus}
+\NormalTok{    \# JSON syntax and escaping. 64k leaves room for every valid note.}
+\NormalTok{    client\_max\_body\_size 64k;}
+
+\NormalTok{    \# Answer the errors Nginx itself produces in the API\textquotesingle{}s JSON format,}
+\NormalTok{    \# instead of Nginx\textquotesingle{}s HTML error pages}
+\NormalTok{    error\_page 413 = @too\_large;}
+\NormalTok{    error\_page 429 = @rate\_limited;}
+
+\NormalTok{    location @too\_large \{}
+\NormalTok{        default\_type application/json;}
+\NormalTok{        return 413 \textquotesingle{}\{"error": "Request body too large"\}\textbackslash{}n\textquotesingle{};}
+\NormalTok{    \}}
+
+\NormalTok{    location @rate\_limited \{}
+\NormalTok{        default\_type application/json;}
+\NormalTok{        return 429 \textquotesingle{}\{"error": "Too many requests, please slow down"\}\textbackslash{}n\textquotesingle{};}
+\NormalTok{    \}}
+
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+\NormalTok{    \# Proxy configuration}
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+
+\NormalTok{    location / \{}
+\NormalTok{        \# Rate limiting: at most 10 requests per second per client IP, with}
+\NormalTok{        \# bursts of up to 20 served at once. The zone "api" is defined in}
+\NormalTok{        \# conf.d/ratelimit.conf (below). Rejected requests get a 429.}
+\NormalTok{        limit\_req zone=api burst=20 nodelay;}
+\NormalTok{        limit\_req\_status 429;}
+
+\NormalTok{        \# Forward to the upstream (Gunicorn)}
+\NormalTok{        proxy\_pass http://notes\_api;}
+
+\NormalTok{        \# Use HTTP/1.1 for the connection to Gunicorn, and clear the}
+\NormalTok{        \# Connection header (both needed for upstream keep{-}alive)}
+\NormalTok{        proxy\_http\_version 1.1;}
+\NormalTok{        proxy\_set\_header Connection "";}
+
+\NormalTok{        \# Pass the original Host header (Flask\textquotesingle{}s request.host uses this)}
+\NormalTok{        proxy\_set\_header Host $host;}
+
+\NormalTok{        \# Pass the client\textquotesingle{}s real IP address. Without this, Flask sees the}
+\NormalTok{        \# address of the hop in front of it — 172.17.0.1, Docker\textquotesingle{}s bridge}
+\NormalTok{        \# gateway, where docker{-}proxy relays Nginx\textquotesingle{}s connection.}
+\NormalTok{        proxy\_set\_header X{-}Real{-}IP $remote\_addr;}
+
+\NormalTok{        \# Pass the chain of IPs (client → proxy1 → proxy2 → server)}
+\NormalTok{        proxy\_set\_header X{-}Forwarded{-}For $proxy\_add\_x\_forwarded\_for;}
+
+\NormalTok{        \# Tell the application that the original request was HTTPS}
+\NormalTok{        \# Flask uses this to generate correct redirect URLs}
+\NormalTok{        proxy\_set\_header X{-}Forwarded{-}Proto $scheme;}
+
+\NormalTok{        \# Timeouts}
+\NormalTok{        proxy\_connect\_timeout 5s;   \# Time to connect to Gunicorn}
+\NormalTok{        proxy\_send\_timeout 60s;     \# Time to send request to Gunicorn}
+\NormalTok{        proxy\_read\_timeout 60s;     \# Time to wait for response from Gunicorn}
+
+\NormalTok{        \# Buffer settings}
+\NormalTok{        proxy\_buffering on;}
+\NormalTok{        proxy\_buffer\_size 4k;}
+\NormalTok{        proxy\_buffers 8 4k;}
+\NormalTok{    \}}
+
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+\NormalTok{    \# Health check endpoint (no rate limiting: limit\_req is set only in}
+\NormalTok{    \# "location /", and this more specific location takes precedence)}
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+\NormalTok{    location /health \{}
+\NormalTok{        proxy\_pass http://notes\_api;}
+\NormalTok{        proxy\_http\_version 1.1;}
+\NormalTok{        proxy\_set\_header Connection "";}
+\NormalTok{        proxy\_set\_header Host $host;}
+\NormalTok{        access\_log off;   \# Don\textquotesingle{}t log health check requests (very frequent)}
+\NormalTok{    \}}
+
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+\NormalTok{    \# Logging}
+\NormalTok{    \# ─────────────────────────────────────────────────────────────────────}
+\NormalTok{    access\_log /var/log/nginx/notes{-}api{-}access.log;}
+\NormalTok{    error\_log /var/log/nginx/notes{-}api{-}error.log warn;}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{Define the rate-limiting zone}\phantomsection\label{28-traffic-routing:define-the-rate-limiting-zone}
+
+The \texttt{limit\_req} line above refers to a zone named \texttt{api}, which must be defined in the \texttt{http\ \{\}} context. A file in \texttt{conf.d/} is inside that context (section 28.3), so it needs no edit to \texttt{nginx.conf}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# /etc/nginx/conf.d/ratelimit.conf}
+\NormalTok{\# Define a rate limiting zone:}
+\NormalTok{\# "api" = zone name}
+\NormalTok{\# $binary\_remote\_addr = key (per client IP, binary encoding is more compact)}
+\NormalTok{\# zone=api:10m = 10 MB of memory to store state (holds \textasciitilde{}160,000 IPs)}
+\NormalTok{\# rate=10r/s = 10 requests per second limit}
+\NormalTok{limit\_req\_zone $binary\_remote\_addr zone=api:10m rate=10r/s;}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Apply and test}\phantomsection\label{28-traffic-routing:apply-and-test}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Test configuration}
+\ExtensionTok{nginx} \AttributeTok{{-}t}
+\CommentTok{\# nginx: configuration file /etc/nginx/nginx.conf test is successful}
+
+\CommentTok{\# Reload (graceful — no dropped connections)}
+\ExtensionTok{systemctl}\NormalTok{ reload nginx}
+
+\CommentTok{\# Test HTTPS from laptop}
+\ExtensionTok{curl} \AttributeTok{{-}I}\NormalTok{ https://api.notes.example.com/health}
+\CommentTok{\# HTTP/2 200}
+\CommentTok{\# server: nginx}
+\CommentTok{\# content{-}type: application/json}
+\CommentTok{\# strict{-}transport{-}security: max{-}age=63072000; includeSubDomains}
+\CommentTok{\# x{-}content{-}type{-}options: nosniff}
+\CommentTok{\# x{-}frame{-}options: DENY}
+\CommentTok{\# referrer{-}policy: strict{-}origin{-}when{-}cross{-}origin}
+\CommentTok{\# permissions{-}policy: geolocation=(), microphone=(), camera=()}
+\CommentTok{\# (date, content{-}length and the timing header omitted)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Check SSL configuration}\phantomsection\label{28-traffic-routing:check-ssl-configuration}
+
+Grade the TLS configuration with Qualys SSL Labs, in a browser:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+https://www.ssllabs.com/ssltest/analyze.html?d=api.notes.example.com
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The test takes a minute or two. A well-configured TLS setup with HSTS, like this one, achieves an \textbf{A+} grade.
+
+\setcounter{section}{6}
+\section{Understanding X-Forwarded-For}\label{28-traffic-routing:287-understanding-x-forwarded-for}
+
+When Nginx proxies a request to Gunicorn, Gunicorn sees the previous hop's IP as the client's IP~--- here \texttt{172.17.0.1}, the Docker bridge address that \texttt{docker-proxy} connects from~--- not the real client's IP. The real IP is passed via the \texttt{X-Forwarded-For} header.
+
+Flask needs to be configured to trust this header:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In app/\_\_init\_\_.py}
+\ImportTok{from}\NormalTok{ werkzeug.middleware.proxy\_fix }\ImportTok{import}\NormalTok{ ProxyFix}
+
+\KeywordTok{def}\NormalTok{ create\_app() }\OperatorTok{{-}\textgreater{}}\NormalTok{ Flask:}
+\NormalTok{    app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+    \CommentTok{\# ...}
+    \CommentTok{\# Tell Flask to trust the headers set by exactly 1 proxy (Nginx)}
+    \CommentTok{\# x\_for=1: take the client IP from the last entry of X{-}Forwarded{-}For}
+    \CommentTok{\# x\_proto=1: trust X{-}Forwarded{-}Proto}
+    \CommentTok{\# (No x\_host: Nginx does not set X{-}Forwarded{-}Host, and trusting a header}
+    \CommentTok{\# nobody sets would let clients supply it.)}
+\NormalTok{    app.wsgi\_app }\OperatorTok{=}\NormalTok{ ProxyFix(app.wsgi\_app, x\_for}\OperatorTok{=}\DecValTok{1}\NormalTok{, x\_proto}\OperatorTok{=}\DecValTok{1}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ app}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Without \texttt{ProxyFix}, \texttt{request.remote\_addr} always returns \texttt{172.17.0.1}. With it, Flask reads the correct client IP from \texttt{X-Forwarded-For}, enabling IP-based logging and rate limiting.
+
+\setcounter{section}{7}
+\section{Nginx as a Load Balancer}\label{28-traffic-routing:288-nginx-as-a-load-balancer}
+
+If the application scales to multiple servers (\hyperref[ch:36-scaling-load]{Chapter 36}), Nginx can distribute traffic across them:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{upstream notes\_api \{}
+\NormalTok{    \# Round{-}robin by default (each request goes to the next server)}
+\NormalTok{    server 10.0.0.5:5000;   \# Server 1}
+\NormalTok{    server 10.0.0.6:5000;   \# Server 2}
+\NormalTok{    server 10.0.0.7:5000;   \# Server 3}
+
+\NormalTok{    \# Or: least connections (prefer the server with fewest active connections)}
+\NormalTok{    \# least\_conn;}
+
+\NormalTok{    \# Or: IP hash (sticky sessions — same client always goes to same server)}
+\NormalTok{    \# ip\_hash;}
+
+\NormalTok{    keepalive 32;}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With this configuration, Nginx distributes requests across three servers. Open-source Nginx checks backends \emph{passively}: if requests to a server fail (\texttt{max\_fails} times within \texttt{fail\_timeout}, by default once in 10 seconds), it stops sending that server traffic for a while, then tries again. (Active health checks~--- probing a URL on a schedule~--- are a feature of the commercial NGINX Plus.) And since the Notes API keeps no per-user state in the application, it does not need \texttt{ip\_hash}'s sticky sessions.
+
+\phantomsection\label{28-traffic-routing:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Nginx as a reverse proxy} sits between the internet and Gunicorn, handling TLS termination, connection management, and security headers.
+\item
+  \textbf{TLS termination} decrypts HTTPS at Nginx, forwarding plaintext HTTP to Gunicorn. Gunicorn only handles HTTP; TLS complexity is isolated in Nginx.
+\item
+  \textbf{Let's Encrypt + Certbot} provides free, automatically-renewed TLS certificates. The ACME HTTP-01 challenge proves domain ownership by placing a file at \texttt{/}\allowbreak{}\texttt{.}\allowbreak{}\texttt{well-}\allowbreak{}\texttt{known/}\allowbreak{}\texttt{acme-}\allowbreak{}\texttt{challenge/}.
+\item
+  \textbf{Security headers} (HSTS, X-Content-Type-Options, X-Frame-Options) protect against common attacks. Add them in the Nginx \texttt{server\{\}} block.
+\item
+  \textbf{\texttt{proxy\_}\allowbreak{}\texttt{set\_}\allowbreak{}\texttt{header\ X-}\allowbreak{}\texttt{Forwarded-}\allowbreak{}\texttt{For}} (and \texttt{X-Real-IP}) pass the client's actual IP to Gunicorn. Flask's \texttt{ProxyFix} middleware reads \texttt{X-Forwarded-For} and \texttt{X-Forwarded-Proto} to restore the real client IP and scheme.
+\item
+  \textbf{Nginx rate limiting} (\texttt{limit\_req\_zone} + \texttt{limit\_req}) protects against brute-force attempts and abusive single clients. It does not stop a distributed attack from many IPs~--- that needs protection upstream of the server (the provider's network, or a CDN).
+\item
+  \textbf{One upstream, one owner}: the \texttt{notes\_api} upstream lives in \texttt{conf.}\allowbreak{}\texttt{d/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api-}\allowbreak{}\texttt{upstream.}\allowbreak{}\texttt{conf}, which the deploy script rewrites; the site configuration only refers to it.
+\item
+  \textbf{HTTP redirect}: the HTTP server block should only redirect to HTTPS. All content is served from the HTTPS block.
+\item
+  \textbf{\texttt{nginx\ -t}} always before \texttt{systemctl\ reload\ nginx}. A syntax error in the config causes Nginx to fail~--- test before applying.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{28-traffic-routing:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Send 30 requests in one second from one IP with a small \texttt{for} loop and \texttt{curl}. How many get \texttt{429}, given \texttt{rate=}\allowbreak{}\texttt{10r/}\allowbreak{}\texttt{s\ burst=}\allowbreak{}\texttt{20\ nodelay}?
+\item
+  \textbf{Break and fix.} Remove \texttt{proxy\_}\allowbreak{}\texttt{set\_}\allowbreak{}\texttt{header\ X-}\allowbreak{}\texttt{Forwarded-}\allowbreak{}\texttt{Proto\ \$scheme;} and \texttt{ProxyFix}. What does Flask now get wrong about each request? Find one URL it generates that comes out wrong. Restore both.
+\item
+  \textbf{Extend.} Add a \texttt{location\ =}\allowbreak{}\texttt{\ /}\allowbreak{}\texttt{robots.txt} that returns \texttt{User-}\allowbreak{}\texttt{agent:}\allowbreak{}\texttt{\ *\textbackslash{}nDisallow:}\allowbreak{}\texttt{\ /} directly from Nginx, without reaching the application.
+\item
+  \textbf{Explain.} Why does TLS end at Nginx rather than at Gunicorn, and what does the traffic between them rely on for protection?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-28.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{28-traffic-routing:whats-next}
+
+The traffic routing layer is configured. HTTPS traffic arrives at Nginx, is decrypted, and forwarded to Gunicorn. Now it is time to trace the complete client-to-server journey~--- a single request from the browser through every layer to the Flask handler~--- to synthesize everything covered in the past several chapters.
+
+\noindent{}→ \hyperref[ch:29-client-server-journey]{Chapter 29}~--- Client-to-Server Journey

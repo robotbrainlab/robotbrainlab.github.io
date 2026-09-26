@@ -1,0 +1,39 @@
+% ================================================================
+%  book.tex — the sample mini book (sources: ../markdown/*.md)
+%  Build from book-template/:  make sample   ->  sample/sample.pdf
+% ================================================================
+\documentclass[10pt, twoside, openany]{book}
+\input{book-meta}
+\input{preamble}
+
+\begin{document}
+
+\input{front/cover}
+
+\frontmatter
+\input{front/titlepage}
+\input{front/copyright}
+\tableofcontents
+\input{front/preface}
+
+\mainmatter
+
+\bookpart{I}{Understand}
+  {file systems and inodes, the history of ASCII and code pages, and Unicode normalisation.
+   None of it stops you from reading and writing text files correctly.}
+\input{chapters/01-what-a-text-file-is}
+
+\bookpart{II}{Use}
+  {every option of every tool; the few you need are shown.}
+\input{chapters/02-counting-words-with-python}
+
+\appendix
+\input{chapters/A-cheat-sheet}
+\input{chapters/B-glossary}
+
+\backmatter
+\printindex
+
+\input{front/backcover}
+
+\end{document}

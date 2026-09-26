@@ -1,0 +1,79 @@
+# Glossary
+
+| Term | Meaning |
+|---|---|
+| Argument | What a command acts on; in a script, read as `$1`, `$2`, … |
+| Bare repository | A repository with history but no working tree, used as a shared remote |
+| Branch | A movable name that points at one commit |
+| Clone | A full copy of an existing repository, history included |
+| Commit | A snapshot with an author, time, message, and parent |
+| cron | The classic Unix scheduler that runs commands at set times |
+| Distribution | The Linux kernel bundled with tools, such as Ubuntu |
+| Environment variable | A named setting, such as `HOME`, that programs inherit |
+| Exit code | The number a command returns: `0` for success |
+| Fast-forward | A merge that only moves the branch pointer forward |
+| Feature branch | A branch that holds one change, to be reviewed and merged |
+| Fork | Your own copy of someone else's repository on a hosting site |
+| Git | The free version control program that runs on your computer |
+| GitHub | A website that hosts Git repositories, with pull requests |
+| .gitignore | A file listing patterns of files Git should not track |
+| HEAD | Git's marker for "you are here": normally the current branch |
+| Hidden file | A file whose name starts with `.`; plain `ls` doesn't show it |
+| Home directory | Your personal folder, written `~` |
+| Idempotent | Safe to run many times, always leaving the same result |
+| Init system | PID 1, which starts and supervises services |
+| JSON | A text format for data made of objects (`{}`) and lists (`[]`) |
+| Kernel | The core of the operating system, which controls access |
+| Key pair | A linked public and private key that prove who you are |
+| Least privilege | Giving each user and program only the access it needs, and no more |
+| Licence | The terms that say what others may do with the code |
+| Linux | A Unix-like kernel, and by extension the operating systems built on it |
+| Log | A record of timestamped messages written by a program |
+| Man page | The built-in manual for a command, opened with `man` |
+| Merge | Combining the work of two branches |
+| Merge conflict | When both branches changed the same lines, so Git needs you to choose |
+| Open source | Code that anyone may use, study, change, and share under its licence |
+| Operating system | The software that shares one computer among many programs |
+| Option | A flag, such as `-l`, that changes how a command behaves |
+| Package manager | A tool that installs and updates software, such as `apt` |
+| PATH | The folders the shell searches for commands |
+| Path | The address of a file or folder, such as `/home/ada/notes.txt` |
+| Permissions | The read, write, and execute rules for a file's owner, group, and others |
+| PID | Process ID: the number the kernel gives each process |
+| Pipe | The `|` symbol, which feeds one program's output into the next program's input |
+| Private key | The secret half of a key pair; it never leaves your machine |
+| Process | A running instance of a program |
+| Public key | The half of a key pair you share, installed on servers like a padlock |
+| Pull | Bringing a remote's new commits into your repository |
+| Pull request | A hosting site's page proposing and reviewing a merge |
+| Push | Sending your new commits to a remote |
+| Rebase | Replaying a branch's commits on top of another |
+| Redirection | Sending a program's output to a file with `>`, `>>`, or `2>` |
+| Reflog | Git's record of everywhere HEAD has pointed, used to find lost commits |
+| Regular expression | A small pattern language for matching text |
+| Remote | Another copy of a repository that you push to and pull from |
+| Remote-tracking branch | Git's record of a remote's branch, such as `origin/main` |
+| Repository | A project's collected history, stored in the `.git` folder |
+| root | The superuser (UID 0), who bypasses permission checks |
+| Script | A file of commands that the shell runs in order |
+| Service | A background program supervised by the system; also called a daemon |
+| Shebang | The `#!` first line of a script, naming the program that should run it |
+| Shell | The program that reads your commands and runs them, such as bash or zsh |
+| Signal | A small numbered message sent to a process, such as SIGTERM or SIGKILL |
+| SSH | Secure Shell: an encrypted way to use a shell on another machine |
+| Staging area | The changes chosen for the next commit; also called the index |
+| Standard error | The output stream a program uses for error messages (stderr) |
+| Standard input | The stream a program reads from, usually the keyboard (stdin) |
+| Standard output | The stream a program writes results to, usually the screen (stdout) |
+| Strict mode | `set -euo pipefail`: stop a script at the first error |
+| sudo | Runs one command as root, after checking your password |
+| System call | A program's request to the kernel, such as "open this file" |
+| Terminal | The window that shows text and passes your typing to the shell |
+| Unix | The older operating system whose design Linux and macOS follow |
+| Upstream | The original repository that a fork was copied from |
+| Variable | A name that holds a value; in the shell, read with `$name` |
+| Version control | A system that records every state of a project |
+| Virtual environment | A per-project folder with its own Python interpreter and packages |
+| Working directory | The folder the shell is currently in |
+| Working tree | The project files you see and edit, outside `.git` |
+| WSL | Windows Subsystem for Linux: a real Linux running inside Windows |

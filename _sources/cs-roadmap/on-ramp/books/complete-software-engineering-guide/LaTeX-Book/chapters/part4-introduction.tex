@@ -1,0 +1,235 @@
+\unnumberedchapter{Introduction to Part IV}\label{ch:part4-introduction}
+
+\chapterrule
+
+\unnumberedsection{true}{About This Part}\label{part4-introduction:about-this-part}
+
+\subsection*{What This Part Is}\phantomsection\label{part4-introduction:what-this-part-is}
+
+This part exists to solve a specific problem.
+
+When you start learning to program, you write code on your own machine. You save a file, run it, and watch it do something. For a while, that is enough. You learn how to write functions, how to work with data, how to build things that solve small problems. It feels good. It feels like you are making progress.
+
+Then one day, someone asks: ``Great~--- but how do we put it on a server?''
+
+And you realize that you do not know.
+
+Not because you are not capable. Not because the question is unanswerable. But because the path from ``running on my machine'' to ``running in production'' was never described to you in full. You have seen pieces of it~--- a tutorial about Flask here, a guide about Docker there, a blog post about deploying to a cloud service somewhere else. But the pieces do not connect. You do not understand how a program starts, how it listens for connections, how a request travels across the internet, how it reaches your code, or what your code actually does with it at runtime.
+
+That gap~--- between writing code and running a real system~--- is what this part closes.
+
+\subsection*{The Problem with Most Explanations}\phantomsection\label{part4-introduction:the-problem-with-most-explanations}
+
+Most explanations of backend systems make one of two mistakes.
+
+The first mistake is starting too late. They begin at deployment and work backwards. They show you how to set up a server, configure a reverse proxy, write a Dockerfile~--- but they skip over the question of what the program actually is before all of that infrastructure surrounds it. This produces a developer who can deploy things but does not understand what they are deploying.
+
+The second mistake is starting too early. They begin deep inside the application~--- routing, middleware, database connections~--- but skip over the question of how the program exists as a running process, how it acquires network capability, and what actually happens when a request arrives at the machine. This produces a developer who can write code but does not understand how that code connects to the outside world.
+
+This part makes neither mistake. It starts at the very beginning~--- the command that starts your program~--- and follows every layer of the system outward, in the same order that a careful engineer would reason about it.
+
+\subsection*{The Progression That Matters}\phantomsection\label{part4-introduction:the-progression-that-matters}
+
+The journey this part takes is not arbitrary. It mirrors the actual sequence in which a real system is built and understood.
+
+First, you will understand what happens when you run a program. Not in a vague sense~--- concretely. What the operating system does, what memory gets allocated, what the Python interpreter does before your first line of code runs.
+
+Second, you will understand how that program becomes capable of receiving network connections. How a socket is created, how a port is bound, how the kernel connects incoming traffic to your process.
+
+Third, you will understand how request-handling behavior is defined. Where routes come from, how Flask knows which function to call, what middleware does and when it runs.
+
+Fourth, you will confront the limitations of the local machine. What ``works on my machine'' actually hides. Why your program is fragile, environment-dependent, and unready for anyone else to run.
+
+Fifth, you will learn to remove those limitations~--- to make the program portable, then packageable.
+
+Sixth, you will place the program into a real environment: a server with an operating system, a public IP address, a firewall, and real constraints.
+
+Seventh, you will make that program reachable from the outside world~--- through DNS, through a reverse proxy, through HTTPS.
+
+Eighth, you will trace the complete journey of a real request: from a user's browser, through DNS resolution, across the internet, into the server, through the kernel, into your application's memory, through your code, and back out as a response.
+
+Ninth, you will zoom into the internal execution of that request~--- the exact code path the program follows, the decisions it makes, the data it accesses, the response it constructs.
+
+And finally, you will deal with production reality: the monitoring, scaling, reliability, and security concerns that separate a program that merely runs from a system that actually operates.
+
+That is the progression of this part. It is deliberate, and it is the right order.
+
+\subsection*{Who This Part Is For}\phantomsection\label{part4-introduction:who-this-part-is-for}
+
+This part is for developers who are starting from scratch.
+
+You do not need prior experience with servers, networking, or deployment. You need only to know that Python is a programming language and that a terminal is a place where you type commands. Everything else is explained from first principles.
+
+That said, this part does not talk down to you. It explains beginner concepts with full precision and technical accuracy. The goal is not to simplify~--- it is to make complexity approachable by showing it in the right order and with the right examples. By the time you finish, you will understand things that many working developers find opaque.
+
+If you have some Python experience already~--- you have written scripts, played with Flask, deployed a small project~--- you will find this part gives you the underlying mental model that experience alone does not provide. You will stop wondering why things work and start understanding how.
+
+\subsection*{The Running Example: A Notes API}\phantomsection\label{part4-introduction:the-running-example-a-notes-api}
+
+Throughout this part, a single application evolves from the very first chapter to the very last. It is called the \textbf{Notes API}.
+
+The Notes API is a simple web service that allows users to create, list, read, update, and delete short text notes. It starts as an extremely small Flask application~--- barely twenty lines of code~--- and grows with each new concept introduced.
+
+By the time you reach the final chapter, the Notes API will be:
+
+\begin{itemize}
+\tightlist
+\item
+  Running as a containerized process on a remote Linux server
+\item
+  Accessible through a real domain name over HTTPS
+\item
+  Restarted automatically if it crashes, and started again when the server reboots
+\item
+  Sitting behind Nginx, which terminates TLS and forwards traffic
+\item
+  Writing structured logs that can be searched and monitored
+\item
+  Health-checked, rate-limited, and secured
+\end{itemize}
+
+\noindent{}Every piece of infrastructure introduced in this part is connected to the same application. Where a chapter needs an example the Notes API cannot provide~--- a native library, a message queue, a data warehouse~--- it says so. This means that when Chapter 26 explains how packets arrive at a network interface, you can trace that packet all the way to the Notes API code you wrote in Chapter 4. The system is always whole. Only your understanding of it grows.
+
+\subsection*{A Note on Python}\phantomsection\label{part4-introduction:a-note-on-python}
+
+Every code example in this part is written in Python. Python is used for two reasons.
+
+First, it is approachable. The syntax does not get in the way of understanding the concepts. A beginner can read Python code and focus on what it is doing without fighting with types, brackets, or ceremony.
+
+Second, it is real. Python powers a significant portion of the world's production web services. Everything this part shows you is the way things are actually done in professional engineering environments, not a simplified toy version designed only for teaching.
+
+The primary web framework used is \textbf{Flask}. Flask is a small, explicit framework~--- it does only what you ask it to do, and it makes the underlying mechanics visible. This makes it ideal for a book whose purpose is to show how things work. Where the more modern \textbf{FastAPI} framework offers advantages (and it does), those alternatives are noted.
+
+The target Python version is \textbf{3.11 or later}. All code targets this version.
+
+\unnumberedsection{true}{How to Read This Part}\label{part4-introduction:how-to-read-this-part}
+
+\subsection*{The Recommended Path: Linear}\phantomsection\label{part4-introduction:the-recommended-path-linear}
+
+If you are new to backend systems, read this part from beginning to end, in order.
+
+This is not a reference manual. It is a progression. Each chapter assumes you have read the ones before it. Terms are defined once, at the moment they first become necessary, and then used freely afterward. Concepts are introduced at the layer of the system where they belong, not before.
+
+If you skip chapters, you will encounter terms you do not understand and concepts that seem to arrive from nowhere. If you read in order, each chapter will feel like a natural next step, because it is.
+
+The progression is structured so that by the time a new layer of the system is introduced, all the layers beneath it are already understood. Networking is introduced after you understand processes. Deployment is introduced after you understand packaging. Production concerns are introduced after you understand what the running system actually is. Nothing appears before it is needed.
+
+\subsection*{How to Use the Code Examples}\phantomsection\label{part4-introduction:how-to-use-the-code-examples}
+
+Code examples in this part are real programs, not pseudocode. Where a listing is only a sketch~--- a fragment of a larger file, or a hypothetical scenario~--- the text says so.
+
+You will need:
+
+\begin{itemize}
+\tightlist
+\item
+  Python 3.11 or later installed on your machine
+\item
+  \texttt{pip}, the Python package manager (included with Python)
+\item
+  A terminal (on macOS or Linux: Terminal.app, iTerm2, or any terminal emulator; on Windows: PowerShell or Windows Terminal with WSL recommended)
+\end{itemize}
+
+\noindent{}Instructions for setting up your machine, including installing Python, creating virtual environments, and installing Flask, are in \textbf{→ Appendix A~--- Python Environment Setup}.
+
+Code examples are presented in blocks like this:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# A minimal Python program}
+\BuiltInTok{print}\NormalTok{(}\StringTok{"Hello from the Notes API"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Every listing is numbered by chapter. ``Listing 4.2'' means the second code example in Chapter 4. When a later chapter refers back to an earlier listing, it will say so explicitly.
+
+\subsection*{Conventions Used in This Part}\phantomsection\label{part4-introduction:conventions-used-in-this-part}
+
+The following typographic conventions are used throughout:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{monospace\ text} indicates code, commands, file names, and terminal output.
+\item
+  \textbf{Bold text} introduces a new term for the first time.
+\item
+  \emph{Italic text} is used for emphasis and for referring to named concepts.
+\item
+  \texttt{→\ Chapter\ N} indicates a forward reference~--- something explained in a later chapter.
+\item
+  \texttt{←\ Chapter\ N} indicates a backward reference~--- something established in an earlier chapter.
+\item
+  Boxes marked \textbf{Note:} contain supplementary information that is useful but not part of the main flow.
+\item
+  Boxes marked \textbf{Warning:} flag something that is easy to get wrong and worth paying attention to.
+\end{itemize}
+
+\unnumberedsection{true}{A Note on Examples, Tools, and the Running Project}\label{part4-introduction:a-note-on-examples-tools-and-the-running-project}
+
+\subsection*{The Notes API}\phantomsection\label{part4-introduction:the-notes-api}
+
+The application that runs through this entire book is a Notes API: a web service that lets users create, read, update, and delete short text notes. It is small by design. The point is not to impress you with the application~--- it is to keep the application simple enough that you can focus entirely on the infrastructure and systems around it.
+
+The Notes API begins in Chapter 1 as a raw Python program that prints a message. By Chapter 3 it can listen for network connections. By Chapter 4 it is a Flask application with real routes. By Chapter 6 it stores notes in a SQLite database. By Chapter 13 it uses PostgreSQL, driven by environment variables. By Chapter 18 it lives inside a Docker container. By Chapter 25 it is supervised and restarted automatically on a remote server. By Chapter 28 it is behind Nginx with HTTPS. By Chapter 35 it emits structured logs and metrics.
+
+At each stage, only the concept being taught changes. The application itself remains recognizable. This is intentional: you should be able to look at the Chapter 35 version and trace every line of it back to the chapter where it was first introduced.
+
+\subsection*{Tools Used}\phantomsection\label{part4-introduction:tools-used}
+
+The following tools appear in this part. You do not need to install all of them before you start. Each is introduced at the chapter where it becomes relevant.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2685}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2685}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1296}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3333}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Tool
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Version
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+First Used
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Purpose
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Python & 3.11+ & Chapter 1 & Programming language and runtime \\
+Flask & 3.x & Chapter 4 & Web framework \\
+pip & Included with Python & Chapter 6 & Package installer \\
+venv & Included with Python & Chapter 6 & Virtual environment manager \\
+SQLite & Included with Python & Chapter 6 & Local database \\
+python-dotenv & Latest stable & Chapter 6 & Loading \texttt{.env} files \\
+Git & 2.x+ & Chapter 6 & Version control \\
+PostgreSQL & Latest stable & Chapter 13 & Production-grade database \\
+pytest & Latest stable & Chapter 17 & Test runner \\
+Docker & Latest stable & Chapter 18 & Container runtime \\
+Gunicorn & Latest stable & Chapter 18 & Production WSGI server \\
+GitHub Container Registry & --- & Chapter 19 & Container image registry \\
+SSH & Included with macOS/Linux & Chapter 21 & Remote server access \\
+systemd & --- & Chapter 24 & Service manager (Linux) \\
+Nginx & Latest stable & Chapter 28 & Reverse proxy \\
+Certbot & Latest stable & Chapter 28 & TLS certificate management \\
+\end{longtable}
+}
+
+\subsection*{Operating System Notes}\phantomsection\label{part4-introduction:operating-system-notes}
+
+This part uses Linux as the primary target for server-side examples. Linux is what the vast majority of production servers run. Command examples use the bash shell.
+
+For local development, macOS and Linux behave nearly identically. Windows users can follow along by using \textbf{Windows Subsystem for Linux (WSL2)}, which provides a full Linux environment inside Windows. Where behavior differs meaningfully between operating systems, a note is included.
+
+\subsection*{A Note on Simplification}\phantomsection\label{part4-introduction:a-note-on-simplification}
+
+Every technical book makes choices about what to include and what to defer. Where this part simplifies~--- for example, by using SQLite before PostgreSQL, or by deploying to a single VM before discussing Kubernetes~--- it does so consciously and says so. The goal is always to introduce the simplest version of something that is still real and accurate, then graduate to more production-appropriate versions as the book progresses.
+
+Where something is simplified, the text says so, and a later chapter fills in what is missing.

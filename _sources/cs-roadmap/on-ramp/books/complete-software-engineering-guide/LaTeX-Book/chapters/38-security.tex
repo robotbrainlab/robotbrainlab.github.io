@@ -1,0 +1,1604 @@
+\setcounter{chapter}{37}
+\chapter{Security}\label{ch:38-security}
+
+\chapterrule
+
+Security is not a feature you add at the end~--- it is a property that must be designed in from the beginning. The Notes API has already incorporated several security measures: HTTPS (\hyperref[ch:28-traffic-routing]{Chapter 28}), SQL injection prevention (\hyperref[ch:31-input-handling]{Chapter 31}), rate limiting (\hyperref[ch:28-traffic-routing]{Chapter 28} and \hyperref[ch:36-scaling-load]{Chapter 36}). This chapter gathers those measures into a coherent security model, fills in the remaining gaps, and explains the reasoning behind each defense.
+
+Security thinking follows a useful mental model: \textbf{defense in depth}. No single defense is perfect. Attackers are creative and persistent. The goal is to stack multiple layers of defense so that compromising one layer does not compromise the entire system.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  The threat model for the Notes API (who might attack, with what goals)
+\item
+  How each security measure addresses specific threats
+\item
+  How to add real user accounts: password hashing with bcrypt, login tokens that can expire and be revoked, and protection that is on by default
+\item
+  How to enforce authorization in every query, why the answer is 404 rather than 403, and how to test that one user can never reach another's data
+\item
+  How secrets management prevents credential leaks
+\item
+  What OWASP's Top 10 vulnerabilities are and how the Notes API addresses each
+\item
+  How to audit your application's security posture
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Threat Modeling}\label{38-security:381-threat-modeling}
+
+\textbf{Threat modeling} is the process of identifying who might attack your system, what they want, and how they might achieve it. It helps prioritize security work.
+
+For the Notes API:
+
+\textbf{Who might attack?}
+
+\begin{itemize}
+\tightlist
+\item
+  Opportunistic bots that scan for known vulnerabilities (SQL injection, default passwords, unpatched CVEs)
+\item
+  Curious users who probe the API's behavior
+\item
+  Competitors trying to read users' data
+\item
+  Disgruntled users who try to delete others' data
+\end{itemize}
+
+\noindent{}\textbf{What do they want?}
+
+\begin{itemize}
+\tightlist
+\item
+  Read notes that don't belong to them (confidentiality breach)
+\item
+  Modify or delete others' notes (integrity breach)
+\item
+  Make the service unavailable (denial of service)
+\item
+  Gain access to the underlying server (full compromise)
+\end{itemize}
+
+\noindent{}\textbf{How might they achieve it?}
+
+\begin{itemize}
+\tightlist
+\item
+  Exploit vulnerabilities in the application code (SQL injection, command injection)
+\item
+  Exploit vulnerabilities in dependencies (outdated libraries)
+\item
+  Steal credentials from environment variables or logs
+\item
+  Brute-force weak authentication
+\item
+  Send malformed requests that crash the application
+\item
+  Overwhelm the server with traffic (DDoS)
+\end{itemize}
+
+\subsection*{The current threat surface}\phantomsection\label{38-security:the-current-threat-surface}
+
+The Notes API, as deployed, has:
+
+\begin{itemize}
+\tightlist
+\item
+  No authentication (any client can read and write any note). The shared API-key check sketched in \hyperref[ch:05-internal-request-execution]{Chapter 5} was never carried into the restructured application.
+\item
+  Public internet access on port 443 (and 80, which only redirects)
+\item
+  Nothing else reachable from the internet~--- \emph{provided} the container port is published on \texttt{127.0.0.1} only and the cloud firewall is in place. Docker-published ports bypass UFW (\hyperref[ch:21-system-setup]{Chapter 21}); a \texttt{-p\ 5000:5000} anywhere would put Gunicorn, unencrypted, on the public internet. This is the most dangerous mistake a setup like this one invites, which is why section 38.9's checklist tests for it from the outside.
+\end{itemize}
+
+\noindent{}Until now, the lack of authentication was deliberate: it kept the earlier chapters focused on one thing at a time. A real notes API cannot go without it, so sections 38.3 and 38.4 add accounts, login, and per-user ownership of notes, and the rest of the chapter covers the security measures beyond them.
+
+\setcounter{section}{1}
+\section{Transport Security: HTTPS Everywhere}\label{38-security:382-transport-security-https-everywhere}
+
+\hyperref[ch:28-traffic-routing]{Chapter 28} configured HTTPS with TLS 1.2+ and strong cipher suites. The key security properties:
+
+\textbf{Encryption}: all data in transit is encrypted. An attacker observing network traffic cannot read note content or API responses.
+
+\textbf{Authentication}: the TLS certificate proves that the server is the genuine \texttt{api.notes.example.com} (not an attacker intercepting traffic). Clients verify the certificate against trusted Certificate Authorities.
+
+\textbf{HTTP Strict Transport Security (HSTS)}: the \texttt{Strict-}\allowbreak{}\texttt{Transport-}\allowbreak{}\texttt{Security} header tells browsers to only ever connect via HTTPS. A first-time visitor who types \texttt{http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{api.}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{example.}\allowbreak{}\texttt{com} still makes one plain-HTTP request, which Nginx answers with a redirect to HTTPS. From then on, HSTS takes over: the browser will not even attempt an HTTP connection to the domain. (That first request is the remaining gap; the \textbf{HSTS preload list} built into browsers closes it for domains that register.)
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# From Chapter 28 Nginx configuration:}
+\NormalTok{add\_header Strict{-}Transport{-}Security "max{-}age=63072000; includeSubDomains" always;}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{max-age=63072000} is 2 years. Once a browser has seen this header, it enforces HTTPS for 2 years even if the server later removes the header.
+
+\textbf{What HTTPS does NOT protect against}:
+
+\begin{itemize}
+\tightlist
+\item
+  Attackers who compromise the server itself (HTTPS is between client and server, not within the server)
+\item
+  Mistakes in the application code (SQL injection, XSS, etc.)
+\item
+  Attackers with valid certificates for a domain they've stolen (DNSSEC and Certificate Transparency help here)
+\end{itemize}
+
+\setcounter{section}{2}
+\section{Authentication: Who Is Asking?}\label{38-security:383-authentication-who-is-asking}
+
+\textbf{Authentication} answers ``who are you?'' \textbf{Authorization} (section 38.4) answers ``what are you allowed to do?'' The Notes API has had neither, so any client could read, change or delete any note. This section gives it real user accounts: people register with an email and a password, log in to receive a \textbf{login token}, and send that token with every request.
+
+\subsection*{The design, and the alternatives it rejects}\phantomsection\label{38-security:the-design-and-the-alternatives-it-rejects}
+
+There are several established ways to authenticate an API. The choice is worth making deliberately:
+
+\Needspace{26\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Approach
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+How it works
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Good for
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+The catch
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Opaque login tokens} (this chapter) & a long random string; the server stores its hash and looks it up on every request & first-party apps and APIs & one database lookup per request \\
+\textbf{JWT} (JSON Web Token) & a signed token that carries the user's id and an expiry inside it; the server only checks the signature & many services checking tokens without a shared database & cannot be revoked before it expires, unless you add the very lookup it was meant to avoid \\
+\textbf{API keys} & an opaque token that does not expire, made for a program rather than a person & scripts and integrations & must be rotated by hand, and a leaked one works until someone notices \\
+\textbf{``Log in with Google'' (OAuth 2.0 / OpenID Connect)} & another company confirms who the user is, and your service trusts its answer & consumer apps; companies with a central login & a protocol with many moving parts; always use a well-tested library \\
+\end{longtable}
+}
+
+The Notes API uses opaque login tokens. They are the simplest design that is fully correct. Logging out \emph{really} ends a session (delete its row, and the token is dead at once), and a stolen database reveals only hashes of tokens, which are useless to an attacker. JWTs are often recommended for APIs, but their real advantage, checking a token without asking a database, matters only once many services must check tokens independently (\hyperref[ch:40-distributed-systems]{Chapter 40}). They pay for it with the one thing a simple service needs most: the ability to cancel a token. An API key, if the Notes API ever needs one for scripts, is built exactly like a login token without the expiry. And ``Log in with Google'' can be added later, \emph{on top of} accounts like these, as a second way of proving who someone is.
+
+The design needs two new tables and an owner for every note:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} migrations/postgresql/0004\_add\_users\_and\_sessions.sql}
+\CommentTok{{-}{-} (its SQLite twin differs only in the column types, as in Chapter 33)}
+\CommentTok{{-}{-} Accounts, the login sessions that belong to them, and an owner for}
+\CommentTok{{-}{-} every note (Chapter 38).}
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ users (}
+    \KeywordTok{id}\NormalTok{             SERIAL }\KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{,}
+\NormalTok{    email          TEXT }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{UNIQUE} \KeywordTok{CHECK}\NormalTok{ (email }\OperatorTok{=} \FunctionTok{lower}\NormalTok{(email)),}
+\NormalTok{    password\_hash  TEXT }\KeywordTok{NOT} \KeywordTok{NULL}\NormalTok{,}
+\NormalTok{    created\_at     TIMESTAMPTZ }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{DEFAULT} \FunctionTok{CURRENT\_TIMESTAMP}
+\NormalTok{);}
+
+\CommentTok{{-}{-} A login token is stored only as its SHA{-}256 hash; expires\_at is a Unix}
+\CommentTok{{-}{-} timestamp (seconds), which compares the same way in every database.}
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ sessions (}
+    \KeywordTok{id}\NormalTok{          SERIAL }\KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{,}
+\NormalTok{    user\_id     }\DataTypeTok{INTEGER} \KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{REFERENCES}\NormalTok{ users(}\KeywordTok{id}\NormalTok{) }\KeywordTok{ON} \KeywordTok{DELETE} \KeywordTok{CASCADE}\NormalTok{,}
+\NormalTok{    token\_hash  TEXT }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{UNIQUE}\NormalTok{,}
+\NormalTok{    expires\_at  BIGINT }\KeywordTok{NOT} \KeywordTok{NULL}\NormalTok{,}
+\NormalTok{    created\_at  TIMESTAMPTZ }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{DEFAULT} \FunctionTok{CURRENT\_TIMESTAMP}
+\NormalTok{);}
+
+\CommentTok{{-}{-} Expand step: nullable, so the notes that already exist stay valid.}
+\CommentTok{{-}{-} RESTRICT: an account that still owns notes cannot simply be deleted.}
+\KeywordTok{ALTER} \KeywordTok{TABLE}\NormalTok{ notes}
+    \KeywordTok{ADD} \KeywordTok{COLUMN}\NormalTok{ user\_id }\DataTypeTok{INTEGER} \KeywordTok{REFERENCES}\NormalTok{ users(}\KeywordTok{id}\NormalTok{) }\KeywordTok{ON} \KeywordTok{DELETE} \KeywordTok{RESTRICT}\NormalTok{;}
+\KeywordTok{CREATE} \KeywordTok{INDEX}\NormalTok{ idx\_notes\_user\_id }\KeywordTok{ON}\NormalTok{ notes (user\_id);}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Three details are worth a second look:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\texttt{users.email} is \texttt{UNIQUE} and must be lower case.} \texttt{Ana@Example.com} and \texttt{ana@example.com} are one person, so the application lower-cases emails, and the \texttt{CHECK} constraint makes sure no code path forgets.
+\item
+  \textbf{\texttt{sessions.expires\_at} is a plain number}, seconds since 1970 (a \emph{Unix timestamp}). It compares correctly in SQLite and PostgreSQL alike, with no time-zone handling in either.
+\item
+  \textbf{\texttt{notes.user\_id} is added as nullable.} Notes created before accounts existed have no owner yet. This is the \emph{expand} step of expand/contract (\hyperref[ch:06-local-dependencies]{Chapter 6}). Once every existing note has been assigned to an account (with an \texttt{UPDATE} run by an operator), a later migration can make the column \texttt{NOT\ NULL}: the \emph{contract} step. Until then, notes without an owner are simply invisible, because no user's queries match them. \texttt{ON\ DELETE\ RESTRICT} means an account that still owns notes cannot be deleted by accident.
+\end{itemize}
+
+\subsection*{Passwords are never stored, only their hashes}\phantomsection\label{38-security:passwords-are-never-stored-only-their-hashes}
+
+A password must never be stored in a form that can be turned back into the password. Not in plain text, obviously. And not encrypted either, because whoever steals the database can often steal the key as well. The server stores a \textbf{hash}: the output of a one-way function. At login it hashes the password it was given and compares the two hashes.
+
+But the hash function matters enormously. General-purpose hashes like SHA-256 are designed to be \emph{fast}: an ordinary graphics card computes billions per second. An attacker with a stolen table of SHA-256 password hashes can try every common password against every account in minutes. Password hashing needs the opposite: a function that is \textbf{deliberately slow}, and \textbf{salted} (mixed with a random value unique to each user), so that identical passwords produce different hashes and nothing can be precomputed. \textbf{bcrypt} is the long-standing standard. (Argon2 is the newer choice, and scrypt another; all three are fine.)
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/auth.py}
+\CommentTok{"""}
+\CommentTok{Authentication for the Notes API: passwords, login tokens, and the check}
+\CommentTok{that a protected request carries a valid token.}
+\CommentTok{"""}
+
+\ImportTok{import}\NormalTok{ hashlib}
+\ImportTok{import}\NormalTok{ secrets}
+\ImportTok{import}\NormalTok{ time}
+\ImportTok{from}\NormalTok{ datetime }\ImportTok{import}\NormalTok{ datetime, timezone}
+\ImportTok{from}\NormalTok{ functools }\ImportTok{import}\NormalTok{ wraps}
+
+\ImportTok{import}\NormalTok{ bcrypt}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Blueprint, g, jsonify, request}
+
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ BCRYPT\_ROUNDS}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db, sql}
+
+\NormalTok{TOKEN\_LIFETIME\_SECONDS }\OperatorTok{=} \DecValTok{30} \OperatorTok{*} \DecValTok{24} \OperatorTok{*} \DecValTok{60} \OperatorTok{*} \DecValTok{60}  \CommentTok{\# 30 days}
+
+
+\CommentTok{\# ── Passwords ───────────────────────────────────────────────────────────────}
+
+
+\KeywordTok{def}\NormalTok{ hash\_password(password: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""A bcrypt hash; the random salt is stored inside the hash itself."""}
+    \ControlFlowTok{return}\NormalTok{ bcrypt.hashpw(password.encode(), bcrypt.gensalt(BCRYPT\_ROUNDS)).decode()}
+
+
+\CommentTok{\# Checked when the email is unknown, so that a login attempt takes as long}
+\CommentTok{\# for an unknown email as for a wrong password}
+\NormalTok{\_DUMMY\_HASH }\OperatorTok{=}\NormalTok{ hash\_password(secrets.token\_urlsafe(}\DecValTok{16}\NormalTok{))}
+
+
+\KeywordTok{def}\NormalTok{ check\_credentials(cursor, email: }\BuiltInTok{str}\NormalTok{, password: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict} \OperatorTok{|} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""The user with this email and password, or None. Never says which failed."""}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"SELECT id, email, password\_hash FROM users WHERE email = ?"}\NormalTok{), (email,)}
+\NormalTok{    )}
+\NormalTok{    user }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+\NormalTok{    password\_bytes }\OperatorTok{=}\NormalTok{ password.encode()}
+    \ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(password\_bytes) }\OperatorTok{\textgreater{}} \DecValTok{72}\NormalTok{:}
+        \CommentTok{\# Never a valid password (register rejects it), and newer bcrypt}
+        \CommentTok{\# versions raise an error for it: check the dummy hash instead}
+\NormalTok{        user, password\_bytes }\OperatorTok{=} \VariableTok{None}\NormalTok{, password\_bytes[:}\DecValTok{72}\NormalTok{]}
+\NormalTok{    stored }\OperatorTok{=}\NormalTok{ user[}\StringTok{"password\_hash"}\NormalTok{] }\ControlFlowTok{if}\NormalTok{ user }\ControlFlowTok{else}\NormalTok{ \_DUMMY\_HASH}
+\NormalTok{    password\_ok }\OperatorTok{=}\NormalTok{ bcrypt.checkpw(password\_bytes, stored.encode())}
+    \ControlFlowTok{return}\NormalTok{ (}
+\NormalTok{        \{}\StringTok{"id"}\NormalTok{: user[}\StringTok{"id"}\NormalTok{], }\StringTok{"email"}\NormalTok{: user[}\StringTok{"email"}\NormalTok{]\} }\ControlFlowTok{if}\NormalTok{ user }\KeywordTok{and}\NormalTok{ password\_ok }\ControlFlowTok{else} \VariableTok{None}
+\NormalTok{    )}
+
+
+\CommentTok{\# ── Login tokens ────────────────────────────────────────────────────────────}
+
+
+\KeywordTok{def}\NormalTok{ \_token\_hash(token: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \ControlFlowTok{return}\NormalTok{ hashlib.sha256(token.encode()).hexdigest()}
+
+
+\KeywordTok{def}\NormalTok{ create\_session(cursor, user\_id: }\BuiltInTok{int}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict}\NormalTok{:}
+    \CommentTok{"""Store a new login session; return the token, which the client sees once."""}
+\NormalTok{    token }\OperatorTok{=} \StringTok{"ns\_"} \OperatorTok{+}\NormalTok{ secrets.token\_urlsafe(}\DecValTok{32}\NormalTok{)  }\CommentTok{\# 256 bits of randomness}
+\NormalTok{    expires\_at }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(time.time()) }\OperatorTok{+}\NormalTok{ TOKEN\_LIFETIME\_SECONDS}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}
+            \StringTok{"INSERT INTO sessions (user\_id, token\_hash, expires\_at) "}
+            \StringTok{"VALUES (?, ?, ?)"}
+\NormalTok{        ),}
+\NormalTok{        (user\_id, \_token\_hash(token), expires\_at),}
+\NormalTok{    )}
+\NormalTok{    expires }\OperatorTok{=}\NormalTok{ datetime.fromtimestamp(expires\_at, timezone.utc).isoformat()}
+    \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"token"}\NormalTok{: token, }\StringTok{"expires\_at"}\NormalTok{: expires\}}
+
+
+\KeywordTok{def}\NormalTok{ end\_session(cursor, token: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"DELETE FROM sessions WHERE token\_hash = ?"}\NormalTok{), (\_token\_hash(token),)}
+\NormalTok{    )}
+
+
+\KeywordTok{def}\NormalTok{ \_user\_for\_token(token: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict} \OperatorTok{|} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""The user a token belongs to, or None if it is unknown or expired."""}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"""}
+\StringTok{            SELECT u.id, u.email}
+\StringTok{            FROM sessions s}
+\StringTok{            JOIN users u ON u.id = s.user\_id}
+\StringTok{            WHERE s.token\_hash = ? AND s.expires\_at \textgreater{} ?}
+\StringTok{        """}\NormalTok{),}
+\NormalTok{        (\_token\_hash(token), }\BuiltInTok{int}\NormalTok{(time.time())),}
+\NormalTok{    )}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \ControlFlowTok{return} \BuiltInTok{dict}\NormalTok{(row) }\ControlFlowTok{if}\NormalTok{ row }\ControlFlowTok{else} \VariableTok{None}
+
+
+\KeywordTok{def}\NormalTok{ bearer\_token() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str} \OperatorTok{|} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""The token from "Authorization: Bearer \textless{}token\textgreater{}", or None."""}
+\NormalTok{    scheme, \_, token }\OperatorTok{=}\NormalTok{ request.headers.get(}\StringTok{"Authorization"}\NormalTok{, }\StringTok{""}\NormalTok{).partition(}\StringTok{" "}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ token.strip() }\KeywordTok{or} \VariableTok{None} \ControlFlowTok{if}\NormalTok{ scheme.lower() }\OperatorTok{==} \StringTok{"bearer"} \ControlFlowTok{else} \VariableTok{None}
+
+
+\CommentTok{\# ── The check ───────────────────────────────────────────────────────────────}
+
+
+\KeywordTok{def}\NormalTok{ authenticate\_request():}
+    \CommentTok{"""}
+\CommentTok{    Set g.user from the request\textquotesingle{}s token, or return a 401 response.}
+\CommentTok{    (A before\_request hook that returns a response ends the request there.)}
+\CommentTok{    """}
+\NormalTok{    token }\OperatorTok{=}\NormalTok{ bearer\_token()}
+    \ControlFlowTok{if}\NormalTok{ token }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{        message }\OperatorTok{=} \StringTok{"Authentication required"}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        g.user }\OperatorTok{=}\NormalTok{ \_user\_for\_token(token)}
+        \ControlFlowTok{if}\NormalTok{ g.user }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+\NormalTok{            g.token }\OperatorTok{=}\NormalTok{ token  }\CommentTok{\# logout needs to know which session to end}
+            \ControlFlowTok{return} \VariableTok{None}
+\NormalTok{        message }\OperatorTok{=} \StringTok{"Invalid or expired token"}
+    \CommentTok{\# A 401 must say which authentication scheme to use (RFC 9110)}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: message\}), }\DecValTok{401}\NormalTok{, \{}\StringTok{"WWW{-}Authenticate"}\NormalTok{: }\StringTok{"Bearer"}\NormalTok{\}}
+
+
+\KeywordTok{def}\NormalTok{ protect(blueprint: Blueprint) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""Require login for EVERY route in the blueprint, even ones added later."""}
+\NormalTok{    blueprint.before\_request(authenticate\_request)}
+
+
+\KeywordTok{def}\NormalTok{ login\_required(view):}
+    \CommentTok{"""Require login for a single route."""}
+
+    \AttributeTok{@wraps}\NormalTok{(view)}
+    \KeywordTok{def}\NormalTok{ wrapped(}\OperatorTok{*}\NormalTok{args, }\OperatorTok{**}\NormalTok{kwargs):}
+        \ControlFlowTok{return}\NormalTok{ authenticate\_request() }\KeywordTok{or}\NormalTok{ view(}\OperatorTok{*}\NormalTok{args, }\OperatorTok{**}\NormalTok{kwargs)}
+
+    \ControlFlowTok{return}\NormalTok{ wrapped}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{bcrypt.gensalt()} takes the \textbf{cost factor}: each step up doubles the work. At cost 12, one check takes about a fifth of a second on a modern CPU. A user logging in never notices, but an attacker's billions of guesses per second shrink to a handful. The cost comes from a setting in \texttt{app/config.py}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/config.py (added)}
+\CommentTok{\# bcrypt\textquotesingle{}s cost factor: each +1 doubles the time a password check takes.}
+\CommentTok{\# 12 (a fifth of a second or so) in production; the tests use 4.}
+\NormalTok{BCRYPT\_ROUNDS: }\BuiltInTok{int} \OperatorTok{=} \BuiltInTok{int}\NormalTok{(os.getenv(}\StringTok{"BCRYPT\_ROUNDS"}\NormalTok{, }\StringTok{"12"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(The tests set \texttt{BCRYPT\_ROUNDS=4}, because a test suite that registers dozens of users at a fifth of a second each would crawl. Nothing in production changes.) Add the library to \texttt{requirements.txt} as usual, pinned: \texttt{bcrypt==4.1.2}.
+
+Two more lines in that module answer questions you might otherwise not think to ask:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Why check a dummy hash for an unknown email?} Without it, a login for an email that does not exist returns instantly, while a wrong password takes a fifth of a second. By timing the response, anyone could find out which emails have accounts: one wrong password, and the response time tells them. Checking against \texttt{\_DUMMY\_HASH} makes both cases take the same time. (Measured on this machine: 0.1665 s for a wrong password, 0.1667 s for an unknown email.) This is the same family of problem as the timing attack below.
+\item
+  \textbf{Why is a token stored only as a SHA-256 hash, when passwords need bcrypt?} A password is chosen by a person, so it is guessable, and a slow hash is what protects it. A token is 256 random bits, so it cannot be guessed at any speed, and a fast hash is enough. What matters is that the database holds only hashes, so a copy of it cannot be used to log in as anyone.
+\end{itemize}
+
+\subsection*{Timing attacks}\phantomsection\label{38-security:timing-attacks}
+
+The dummy hash guards against one kind of \textbf{timing attack}: learning a secret from \emph{how long} the server takes to answer. The classic form targets string comparison. \texttt{==} on two strings stops at the first character that differs, so comparing \texttt{"abcd"} with \texttt{"axyz"} stops after the second character, and a match of several characters takes measurably longer than none:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Guess "aaa..." → fast (mismatch at position 0)
+Guess "naa..." → slower (prefix 'n' matches)
+Guess "nka..." → slower still (prefix 'nk' matches)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}With enough measurements, an attacker can recover a secret one character at a time. This has been demonstrated against real systems. The defence, whenever code compares a secret directly, is \texttt{hmac.}\allowbreak{}\texttt{compare\_}\allowbreak{}\texttt{digest(a,}\allowbreak{}\texttt{\ b)}, which takes the same time wherever the strings differ. The Notes API never compares secrets with \texttt{==}. \texttt{bcrypt.checkpw} compares in constant time internally. And tokens are found by looking up the \emph{hash} of the token, which is not the secret itself: learning which hashes are ``close'' to a stored hash tells an attacker nothing about any token.
+
+\subsection*{The endpoints}\phantomsection\label{38-security:the-endpoints}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/auth.py}
+\ImportTok{import}\NormalTok{ logging}
+
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Blueprint, g, jsonify, request}
+
+\ImportTok{from}\NormalTok{ app.auth }\ImportTok{import}\NormalTok{ (}
+\NormalTok{    check\_credentials,}
+\NormalTok{    create\_session,}
+\NormalTok{    end\_session,}
+\NormalTok{    hash\_password,}
+\NormalTok{    login\_required,}
+\NormalTok{)}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db, sql}
+\ImportTok{from}\NormalTok{ app.validation }\ImportTok{import}\NormalTok{ Validator}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\NormalTok{auth\_bp }\OperatorTok{=}\NormalTok{ Blueprint(}\StringTok{"auth"}\NormalTok{, }\VariableTok{\_\_name\_\_}\NormalTok{, url\_prefix}\OperatorTok{=}\StringTok{"/auth"}\NormalTok{)}
+
+
+\KeywordTok{def}\NormalTok{ \_credentials(validator: Validator) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{tuple}\NormalTok{[}\BuiltInTok{str} \OperatorTok{|} \VariableTok{None}\NormalTok{, }\BuiltInTok{str} \OperatorTok{|} \VariableTok{None}\NormalTok{]:}
+    \CommentTok{"""The email (lower{-}cased) and password from the request body."""}
+\NormalTok{    email }\OperatorTok{=}\NormalTok{ validator.require\_email(}\StringTok{"email"}\NormalTok{)}
+    \CommentTok{\# Never strip a password: its spaces are part of it}
+\NormalTok{    password }\OperatorTok{=}\NormalTok{ validator.require\_string(}\StringTok{"password"}\NormalTok{, strip}\OperatorTok{=}\VariableTok{False}\NormalTok{, max\_length}\OperatorTok{=}\DecValTok{1000}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ email, password}
+
+
+\AttributeTok{@auth\_bp.route}\NormalTok{(}\StringTok{"/register"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ register():}
+    \CommentTok{"""Create an account: \{"email", "password"\} → 201 \{"id", "email"\}."""}
+\NormalTok{    validator }\OperatorTok{=}\NormalTok{ Validator(request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{))}
+\NormalTok{    email, password }\OperatorTok{=}\NormalTok{ \_credentials(validator)}
+    \ControlFlowTok{if}\NormalTok{ password }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(password) }\OperatorTok{\textless{}} \DecValTok{12}\NormalTok{:}
+\NormalTok{            validator.errors.append(}
+                \StringTok{"\textquotesingle{}password\textquotesingle{} must be at least 12 characters long"}
+\NormalTok{            )}
+        \ControlFlowTok{elif} \BuiltInTok{len}\NormalTok{(password.encode()) }\OperatorTok{\textgreater{}} \DecValTok{72}\NormalTok{:  }\CommentTok{\# bcrypt reads only the first 72 bytes}
+\NormalTok{            validator.errors.append(}\StringTok{"\textquotesingle{}password\textquotesingle{} cannot be longer than 72 bytes"}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ email }\KeywordTok{is} \VariableTok{None} \KeywordTok{or}\NormalTok{ password }\KeywordTok{is} \VariableTok{None} \KeywordTok{or}\NormalTok{ validator.has\_errors():}
+        \ControlFlowTok{return}\NormalTok{ validator.error\_response()}
+
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"""}
+\StringTok{            INSERT INTO users (email, password\_hash) VALUES (?, ?)}
+\StringTok{            ON CONFLICT (email) DO NOTHING}
+\StringTok{            RETURNING id, email}
+\StringTok{        """}\NormalTok{),}
+\NormalTok{        (email, hash\_password(password)),}
+\NormalTok{    )}
+\NormalTok{    user }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \ControlFlowTok{if}\NormalTok{ user }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"An account with this email already exists"}\NormalTok{\}), }\DecValTok{409}
+\NormalTok{    db.commit()}
+\NormalTok{    logger.info(}\StringTok{"Registered user id=}\SpecialCharTok{\%d}\StringTok{."}\NormalTok{, user[}\StringTok{"id"}\NormalTok{])  }\CommentTok{\# the id; never the email}
+    \ControlFlowTok{return}\NormalTok{ jsonify(}\BuiltInTok{dict}\NormalTok{(user)), }\DecValTok{201}
+
+
+\AttributeTok{@auth\_bp.route}\NormalTok{(}\StringTok{"/login"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ login():}
+    \CommentTok{"""Exchange email and password for a token: 200 \{"token", "expires\_at"\}."""}
+\NormalTok{    validator }\OperatorTok{=}\NormalTok{ Validator(request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{))}
+\NormalTok{    email, password }\OperatorTok{=}\NormalTok{ \_credentials(validator)}
+    \ControlFlowTok{if}\NormalTok{ email }\KeywordTok{is} \VariableTok{None} \KeywordTok{or}\NormalTok{ password }\KeywordTok{is} \VariableTok{None} \KeywordTok{or}\NormalTok{ validator.has\_errors():}
+        \ControlFlowTok{return}\NormalTok{ validator.error\_response()}
+
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    user }\OperatorTok{=}\NormalTok{ check\_credentials(cursor, email, password)}
+    \ControlFlowTok{if}\NormalTok{ user }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{        logger.warning(}\StringTok{"Failed login attempt."}\NormalTok{)}
+        \CommentTok{\# 401 needs WWW{-}Authenticate (RFC 9110); "Bearer" names the scheme}
+        \CommentTok{\# that the token from a successful login is used with}
+        \ControlFlowTok{return}\NormalTok{ (}
+\NormalTok{            jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Invalid email or password"}\NormalTok{\}),}
+            \DecValTok{401}\NormalTok{,}
+\NormalTok{            \{}\StringTok{"WWW{-}Authenticate"}\NormalTok{: }\StringTok{"Bearer"}\NormalTok{\},}
+\NormalTok{        )}
+
+\NormalTok{    session }\OperatorTok{=}\NormalTok{ create\_session(cursor, user[}\StringTok{"id"}\NormalTok{])}
+\NormalTok{    db.commit()}
+\NormalTok{    logger.info(}\StringTok{"User id=}\SpecialCharTok{\%d}\StringTok{ logged in."}\NormalTok{, user[}\StringTok{"id"}\NormalTok{])}
+    \ControlFlowTok{return}\NormalTok{ jsonify(session), }\DecValTok{200}
+
+
+\AttributeTok{@auth\_bp.route}\NormalTok{(}\StringTok{"/session"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\AttributeTok{@login\_required}
+\KeywordTok{def}\NormalTok{ logout():}
+    \CommentTok{"""Log out: delete this session, so its token stops working at once."""}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    end\_session(db.cursor(), g.token)}
+\NormalTok{    db.commit()}
+\NormalTok{    logger.info(}\StringTok{"User id=}\SpecialCharTok{\%d}\StringTok{ logged out."}\NormalTok{, g.user[}\StringTok{"id"}\NormalTok{])}
+    \ControlFlowTok{return} \StringTok{""}\NormalTok{, }\DecValTok{204}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(\texttt{create\_app()} registers \texttt{auth\_bp} like the other blueprints. The email check is the \texttt{Validator}'s \texttt{require\_email()}, added in section 37.5.) In use:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{$}\NormalTok{ curl }\AttributeTok{{-}s} \AttributeTok{{-}X}\NormalTok{ POST https://api.notes.example.com/auth/register }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"email": "ana@example.com", "password": "correct horse battery"\}\textquotesingle{}}
+\DataTypeTok{\{}\StringTok{"email"}\DataTypeTok{:}\StringTok{"ana@example.com"}\OperatorTok{,}\StringTok{"id"}\DataTypeTok{:1\}}
+
+\ExtensionTok{$}\NormalTok{ curl }\AttributeTok{{-}s} \AttributeTok{{-}X}\NormalTok{ POST https://api.notes.example.com/auth/login }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"email": "ana@example.com", "password": "correct horse battery"\}\textquotesingle{}}
+\DataTypeTok{\{}\StringTok{"expires\_at"}\DataTypeTok{:}\StringTok{"2024{-}02{-}14T14:00:05+00:00"}\OperatorTok{,}\StringTok{"token"}\DataTypeTok{:}\StringTok{"ns\_Qe3k…"}\DataTypeTok{\}}
+
+\ExtensionTok{$}\NormalTok{ curl }\AttributeTok{{-}s}\NormalTok{ https://api.notes.example.com/notes/ }\AttributeTok{{-}H} \StringTok{"Authorization: Bearer ns\_Qe3k…"}
+\DataTypeTok{\{}\StringTok{"count"}\DataTypeTok{:0}\OperatorTok{,}\StringTok{"notes"}\DataTypeTok{:[]\}}
+
+\ExtensionTok{$}\NormalTok{ curl }\AttributeTok{{-}s} \AttributeTok{{-}X}\NormalTok{ DELETE https://api.notes.example.com/auth/session }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}H} \StringTok{"Authorization: Bearer ns\_Qe3k…"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Each decision in these handlers protects against something specific:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{One error for both failures.} ``Invalid email or password'' never reveals which of the two was wrong, and the dummy hash makes the timing match too. Registration \emph{does} reveal that an email is taken (\texttt{409\ Conflict}). Almost every site accepts that trade-off, because ``this email already has an account'' is useful to real users. The protections against someone abusing it are the rate limits below.
+\item
+  \textbf{Passwords: at least 12 characters, no composition rules.} Length is what makes a password hard to guess. Rules like ``one digit and one symbol'' mostly produce \texttt{Password1!}. Current guidance (NIST SP 800-63B) says exactly this, and adds that sites should check new passwords against lists of known-leaked ones. The upper limit of 72 \emph{bytes} comes from bcrypt itself, which reads only the first 72 bytes of a password. Older versions of the library silently ignore the rest, and newer ones raise an error. Rejecting longer passwords up front makes the behaviour clear.
+\item
+  \textbf{Logout is \texttt{DELETE\ /}\allowbreak{}\texttt{auth/}\allowbreak{}\texttt{session}.} Logging out destroys the session, so \texttt{DELETE} is the honest HTTP method. It also needs no body, and \texttt{DELETE} is not among the methods that the ``writes must be JSON'' check of \hyperref[ch:16-logging-error-handling]{Chapter 16} covers (\texttt{POST}, \texttt{PUT} and \texttt{PATCH}).
+\item
+  \textbf{The contract says it too.} \texttt{openapi.yaml} (section 34.10) gains the three endpoints and a security scheme, \texttt{bearerAuth:}\allowbreak{}\texttt{\ \{type:}\allowbreak{}\texttt{\ http,}\allowbreak{}\texttt{\ scheme:}\allowbreak{}\texttt{\ bearer\}}, applied to every protected path, so that client developers see exactly which calls need a token.
+\item
+  \textbf{Nothing secret is logged.} The handlers log user \emph{ids}, never emails, passwords or tokens. The request log (\hyperref[ch:16-logging-error-handling]{Chapter 16}) records only the method and path, never the \texttt{Authorization} header.
+\end{itemize}
+
+\subsection*{Protecting routes by default}\phantomsection\label{38-security:protecting-routes-by-default}
+
+\texttt{protect()} attaches the token check as a \texttt{before\_request} hook to a whole blueprint:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/notes.py (and the same in app/routes/tags.py)}
+\ImportTok{from}\NormalTok{ app.auth }\ImportTok{import}\NormalTok{ protect}
+
+\NormalTok{notes\_bp }\OperatorTok{=}\NormalTok{ Blueprint(}\StringTok{"notes"}\NormalTok{, }\VariableTok{\_\_name\_\_}\NormalTok{, url\_prefix}\OperatorTok{=}\StringTok{"/notes"}\NormalTok{)}
+\NormalTok{protect(notes\_bp)  }\CommentTok{\# every /notes/ route requires login}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The alternative, a decorator on each route, works, and \texttt{login\_required} provides one for single routes such as logout. But it makes security something each new route has to \emph{remember}. With \texttt{protect()}, a route added to the notes blueprint next year is protected before anyone thinks about it. Secure by default beats secure by discipline. The public routes, \texttt{/health}, \texttt{/ping}, \texttt{/auth/register} and \texttt{/auth/login}, live in blueprints that are simply not protected.
+
+\subsection*{Limiting login attempts}\phantomsection\label{38-security:limiting-login-attempts}
+
+A login endpoint is an open invitation to guess passwords. bcrypt makes each guess expensive for someone who has stolen the database. Against someone guessing through the API itself, the defence is a limit on how often one client may try. The general \texttt{api} zone from \hyperref[ch:28-traffic-routing]{Chapter 28} allows 10 requests a second, which is far too generous for logins. Give the login endpoint a zone of its own:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# /etc/nginx/conf.d/ratelimit.conf (added): 5 login attempts a minute per IP}
+\NormalTok{limit\_req\_zone $binary\_remote\_addr zone=login:10m rate=5r/m;}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# In the server block, next to "location /": the exact{-}match location wins}
+\NormalTok{\# for this one path, so logins get the strict limit instead of the general one}
+\NormalTok{location = /auth/login \{}
+\NormalTok{    limit\_req zone=login burst=5 nodelay;}
+\NormalTok{    limit\_req\_status 429;}
+\NormalTok{    proxy\_pass http://notes\_api;}
+\NormalTok{    proxy\_http\_version 1.1;}
+\NormalTok{    proxy\_set\_header Connection "";}
+\NormalTok{    proxy\_set\_header Host $host;}
+\NormalTok{    proxy\_set\_header X{-}Real{-}IP $remote\_addr;}
+\NormalTok{    proxy\_set\_header X{-}Forwarded{-}For $proxy\_add\_x\_forwarded\_for;}
+\NormalTok{    proxy\_set\_header X{-}Forwarded{-}Proto $scheme;}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With \texttt{burst=5\ nodelay}, the first attempt and five more are let through at once, and the seventh in quick succession gets a \texttt{429}. After that, one attempt is allowed every twelve seconds. (Tested against a real Nginx with this exact configuration: \texttt{401\ 401\ 401\ 401\ 401\ 401\ 429\ 429}, where the \texttt{401}s are wrong passwords reaching the application.)
+
+A per-IP limit does not stop an attacker who spreads guesses over thousands of addresses, each trying one common password against many accounts (``password spraying''). Larger services therefore also count failures \emph{per account}, and alert on unusual volumes of failed logins in total (\hyperref[ch:35-observability]{Chapter 35}). Both belong on the list of things to add as the service grows.
+
+\subsection*{Password reset, in outline}\phantomsection\label{38-security:password-reset-in-outline}
+
+Every real service needs a way back in for someone who has forgotten their password. The Notes API does not build one, because a reset email should be sent in the background, with the machinery that \hyperref[ch:41-event-driven-architecture]{Chapter 41} builds. But the design is standard, and every step of it defends against something:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The user asks for a reset by entering their email. The response is always the same (``if an account exists, we have sent an email''), so the form cannot be used to discover accounts.
+\item
+  The server creates a \textbf{single-use reset token}. Like a login token it is random, stored only as a hash, and short-lived (an hour at most). The server emails a link containing it.
+\item
+  The link lets the user choose a new password. Using the token deletes it, and so does every other open reset token for that account.
+\item
+  After a reset, \textbf{all of the user's sessions are deleted}. If an attacker was logged in, they are now logged out.
+\end{enumerate}
+
+\subsection*{Tests}\phantomsection\label{38-security:tests}
+
+Authentication brings a practical problem for the test suite: every existing test calls \texttt{/notes/}, which now requires a token. The fixtures solve it once, in \texttt{conftest.py}. The \texttt{client} fixture that every test already uses becomes a client that is \emph{logged in} as a test user, so none of the existing tests has to change:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/conftest.py (added and changed)}
+\NormalTok{os.environ[}\StringTok{"BCRYPT\_ROUNDS"}\NormalTok{] }\OperatorTok{=} \StringTok{"4"}  \CommentTok{\# next to the other test settings}
+
+
+\AttributeTok{@pytest.fixture}
+\KeywordTok{def}\NormalTok{ anon\_client(app):}
+    \CommentTok{"""A test client that is not logged in."""}
+    \ControlFlowTok{return}\NormalTok{ app.test\_client()}
+
+
+\AttributeTok{@pytest.fixture}
+\KeywordTok{def}\NormalTok{ login\_as(app):}
+    \CommentTok{"""}
+\CommentTok{    A factory: login\_as("alice@example.com") registers that user, logs in,}
+\CommentTok{    and returns a test client that sends the user\textquotesingle{}s token with every request.}
+\CommentTok{    """}
+
+    \KeywordTok{def}\NormalTok{ \_login(email: }\BuiltInTok{str}\NormalTok{, password: }\BuiltInTok{str} \OperatorTok{=} \StringTok{"correct horse battery"}\NormalTok{) }\OperatorTok{{-}\textgreater{}}\NormalTok{ FlaskClient:}
+\NormalTok{        client }\OperatorTok{=}\NormalTok{ app.test\_client()}
+\NormalTok{        client.post(}\StringTok{"/auth/register"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"email"}\NormalTok{: email, }\StringTok{"password"}\NormalTok{: password\})}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}
+            \StringTok{"/auth/login"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"email"}\NormalTok{: email, }\StringTok{"password"}\NormalTok{: password\}}
+\NormalTok{        )}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{200}\NormalTok{, response.get\_json()}
+\NormalTok{        token }\OperatorTok{=}\NormalTok{ response.get\_json()[}\StringTok{"token"}\NormalTok{]}
+\NormalTok{        client.environ\_base[}\StringTok{"HTTP\_AUTHORIZATION"}\NormalTok{] }\OperatorTok{=} \SpecialStringTok{f"Bearer }\SpecialCharTok{\{}\NormalTok{token}\SpecialCharTok{\}}\SpecialStringTok{"}
+        \ControlFlowTok{return}\NormalTok{ client}
+
+    \ControlFlowTok{return}\NormalTok{ \_login}
+
+
+\AttributeTok{@pytest.fixture}
+\KeywordTok{def}\NormalTok{ client(login\_as):}
+    \CommentTok{"""}
+\CommentTok{    The client most tests use: logged in as a test user, so tests written}
+\CommentTok{    before authentication existed keep working unchanged.}
+\CommentTok{    """}
+    \ControlFlowTok{return}\NormalTok{ login\_as(}\StringTok{"tester@example.com"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(\texttt{from\ flask.}\allowbreak{}\texttt{testing\ import\ FlaskClient} joins the imports at the top, and \texttt{clean\_database} now also runs \texttt{DELETE\ FROM\ users}, whose sessions go with them through \texttt{ON\ DELETE\ CASCADE}.) \texttt{environ\_base} holds values that the test client adds to every request it sends. This is the factory-fixture idea from \hyperref[ch:17-build-process]{Chapter 17}, applied to logged-in users.
+
+A few of the new tests in \texttt{tests/}\allowbreak{}\texttt{test\_auth.py}:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ test\_a\_wrong\_password\_and\_an\_unknown\_email\_look\_the\_same(anon\_client):}
+\NormalTok{    register(anon\_client)}
+\NormalTok{    wrong\_password }\OperatorTok{=}\NormalTok{ anon\_client.post(}
+        \StringTok{"/auth/login"}\NormalTok{,}
+\NormalTok{        json}\OperatorTok{=}\NormalTok{\{}\StringTok{"email"}\NormalTok{: }\StringTok{"ana@example.com"}\NormalTok{, }\StringTok{"password"}\NormalTok{: }\StringTok{"wrong password!"}\NormalTok{\},}
+\NormalTok{    )}
+\NormalTok{    unknown\_email }\OperatorTok{=}\NormalTok{ anon\_client.post(}
+        \StringTok{"/auth/login"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"email"}\NormalTok{: }\StringTok{"nobody@example.com"}\NormalTok{, }\StringTok{"password"}\NormalTok{: PASSWORD\}}
+\NormalTok{    )}
+    \ControlFlowTok{assert}\NormalTok{ wrong\_password.status\_code }\OperatorTok{==}\NormalTok{ unknown\_email.status\_code }\OperatorTok{==} \DecValTok{401}
+    \ControlFlowTok{assert}\NormalTok{ wrong\_password.get\_json() }\OperatorTok{==}\NormalTok{ unknown\_email.get\_json()}
+
+
+\KeywordTok{def}\NormalTok{ test\_an\_expired\_token\_is\_rejected(client, app):}
+    \ControlFlowTok{with}\NormalTok{ app.app\_context():}
+        \ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db}
+
+\NormalTok{        db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{        db.cursor().execute(}\StringTok{"UPDATE sessions SET expires\_at = 0"}\NormalTok{)  }\CommentTok{\# expire them all}
+\NormalTok{        db.commit()}
+    \ControlFlowTok{assert}\NormalTok{ client.get(}\StringTok{"/notes/"}\NormalTok{).status\_code }\OperatorTok{==} \DecValTok{401}
+
+
+\KeywordTok{def}\NormalTok{ test\_logout\_ends\_the\_session(client):}
+    \ControlFlowTok{assert}\NormalTok{ client.get(}\StringTok{"/notes/"}\NormalTok{).status\_code }\OperatorTok{==} \DecValTok{200}
+    \ControlFlowTok{assert}\NormalTok{ client.delete(}\StringTok{"/auth/session"}\NormalTok{).status\_code }\OperatorTok{==} \DecValTok{204}
+    \ControlFlowTok{assert}\NormalTok{ client.get(}\StringTok{"/notes/"}\NormalTok{).status\_code }\OperatorTok{==} \DecValTok{401}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{3}
+\section{Authorization: What May They Do?}\label{38-security:384-authorization-what-may-they-do}
+
+Knowing \emph{who} is asking is only half the job. The other half is making sure every request touches only what that person is allowed to touch. The Notes API's rule is simple: \textbf{a note belongs to the user who created it, and nobody else can see it, change it, or learn that it exists.}
+
+\subsection*{The check lives in the query}\phantomsection\label{38-security:the-check-lives-in-the-query}
+
+The most reliable place to enforce ownership is the database query itself. Every query on notes carries \texttt{AND\ user\_id\ =\ ?}, with the id of the logged-in user from \texttt{g.user}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/notes.py: create stores the owner...}
+\NormalTok{cursor.execute(}
+\NormalTok{    sql(}
+        \StringTok{"INSERT INTO notes (content, user\_id) VALUES (?, ?) "}
+        \StringTok{"RETURNING id, content, created\_at"}
+\NormalTok{    ),}
+\NormalTok{    (content, g.user[}\StringTok{"id"}\NormalTok{]),}
+\NormalTok{)}
+
+\CommentTok{\# ...and every read, update and delete asks for "this note, if it is mine"}
+\NormalTok{cursor.execute(}
+\NormalTok{    sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ? AND user\_id = ?"}\NormalTok{),}
+\NormalTok{    (note\_id, g.user[}\StringTok{"id"}\NormalTok{]),}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The same condition goes into the list query (\texttt{WHERE\ user\_id\ =\ ?}, together with section 34.9's pagination), \texttt{update\_note}, \texttt{delete\_note}, both tag handlers, \texttt{GET\ /}\allowbreak{}\texttt{tags/}\allowbreak{}\texttt{\textless{}name\textgreater{}/}\allowbreak{}\texttt{notes}, and the email endpoint of section 37.5, which must never email someone else's note. That makes nine queries, and none of them may be missed. Finding one that was missed is the most common serious security bug in web applications: it heads the OWASP Top 10 (A01, section 38.6).
+
+A query written this way cannot leak, whatever the rest of the handler does. The alternative, loading the note and then checking \texttt{if\ note{[}"user\_}\allowbreak{}\texttt{id"{]}\ !=}\allowbreak{}\texttt{\ g.}\allowbreak{}\texttt{user{[}"id"{]}} in Python, works too. But it spreads the rule across code paths, and each new handler is another chance to forget it.
+
+\subsection*{Every shortcut must respect the boundary}\phantomsection\label{38-security:every-shortcut-must-respect-the-boundary}
+
+\begin{warnbox}
+
+\textbf{Warning:} the ownership check in the query protects only code that runs the query. Anything that answers \emph{without} querying bypasses it, and the classic culprit is a cache. The Redis cache of \hyperref[ch:36-scaling-load]{Chapter 36} (section 36.6) stores a note under the key \texttt{note:\{note\_id\}} and serves a cache hit before any SQL runs. Once notes have owners, that is a data leak: Alice reads note 42, it is cached, and Bob's request for note 42 is answered from the cache. The fix is to make the owner part of every cache key, \texttt{f"note:}\allowbreak{}\texttt{\{g.}\allowbreak{}\texttt{user{[}\textquotesingle{}id\textquotesingle{}{]}\}:}\allowbreak{}\texttt{\{note\_}\allowbreak{}\texttt{id\}"}, and to use the same key when an update or delete removes the entry. The HTTP caching of that section is already safe: \texttt{Cache-Control:\ private} tells shared caches (proxies, CDNs) never to store the response.
+
+\end{warnbox}
+
+\noindent{}The same question applies to anything that stores or reuses responses: search indexes, exports, background jobs, logs. For each one, ask whose data it holds, and who can reach it.
+
+\subsection*{404, not 403}\phantomsection\label{38-security:404-not-403}
+
+When Bob asks for Alice's note 42, the query finds nothing, because nothing matches both \texttt{id\ =\ 42} and \texttt{user\_id\ =\ \textless{}Bob\textgreater{}}. The handler answers exactly as it would for a note that does not exist: \texttt{404\ Not\ Found}. A \texttt{403\ Forbidden} would be technically accurate, but it would confirm that note 42 exists and belongs to someone. That is a small leak, but a leak all the same. Use \texttt{403} when the caller may know the thing exists but may not do this particular action to it, for example a read-only member of a shared notebook trying to edit it.
+
+\subsection*{Roles, and sharing, when you need them}\phantomsection\label{38-security:roles-and-sharing-when-you-need-them}
+
+Ownership is the simplest authorization model, and it is enough for the Notes API as it stands. Two extensions come up in almost every real product:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Roles.} A \texttt{role} column on \texttt{users} (\texttt{\textquotesingle{}member\textquotesingle{}}, \texttt{\textquotesingle{}admin\textquotesingle{}}) and a check such as \texttt{if\ g.}\allowbreak{}\texttt{user{[}"role"{]}\ !=}\allowbreak{}\texttt{\ "admin":}\allowbreak{}\texttt{\ return\ 404} for administrative endpoints. Keep role checks in one place (a \texttt{require\_role("admin")} helper, like \texttt{protect()}), never scattered through the handlers.
+\item
+  \textbf{Sharing.} Letting Alice give Bob access to one note turns ``the note's owner'' into ``the people with access'', stored in a join table (\texttt{note\_}\allowbreak{}\texttt{shares(note\_}\allowbreak{}\texttt{id,}\allowbreak{}\texttt{\ user\_}\allowbreak{}\texttt{id,}\allowbreak{}\texttt{\ permission)}). The queries become joins, as in \hyperref[ch:33-logic-execution]{Chapter 33}. The project at the end of Part IV builds exactly this.
+\end{itemize}
+
+\subsection*{Tests that prove the boundary}\phantomsection\label{38-security:tests-that-prove-the-boundary}
+
+Authorization is the kind of rule that one forgotten \texttt{AND\ user\_id\ =\ ?} silently breaks, so it deserves tests that try every door:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_authorization.py}
+\CommentTok{"""Every note belongs to one user, and nobody else can see or change it."""}
+
+\ImportTok{import}\NormalTok{ pytest}
+
+
+\AttributeTok{@pytest.fixture}
+\KeywordTok{def}\NormalTok{ alice(login\_as):}
+    \ControlFlowTok{return}\NormalTok{ login\_as(}\StringTok{"alice@example.com"}\NormalTok{)}
+
+
+\AttributeTok{@pytest.fixture}
+\KeywordTok{def}\NormalTok{ bob(login\_as):}
+    \ControlFlowTok{return}\NormalTok{ login\_as(}\StringTok{"bob@example.com"}\NormalTok{)}
+
+
+\AttributeTok{@pytest.fixture}
+\KeywordTok{def}\NormalTok{ alices\_note(alice):}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ alice.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Alice\textquotesingle{}s private note"}\NormalTok{\})}
+    \ControlFlowTok{return}\NormalTok{ response.get\_json()}
+
+
+\AttributeTok{@pytest.mark.parametrize}\NormalTok{(}
+\NormalTok{    (}\StringTok{"method"}\NormalTok{, }\StringTok{"path"}\NormalTok{, }\StringTok{"body"}\NormalTok{),}
+\NormalTok{    [}
+\NormalTok{        (}\StringTok{"get"}\NormalTok{, }\StringTok{"/notes/}\SpecialCharTok{\{id\}}\StringTok{"}\NormalTok{, }\VariableTok{None}\NormalTok{),}
+\NormalTok{        (}\StringTok{"put"}\NormalTok{, }\StringTok{"/notes/}\SpecialCharTok{\{id\}}\StringTok{"}\NormalTok{, \{}\StringTok{"content"}\NormalTok{: }\StringTok{"Bob was here"}\NormalTok{\}),}
+\NormalTok{        (}\StringTok{"delete"}\NormalTok{, }\StringTok{"/notes/}\SpecialCharTok{\{id\}}\StringTok{"}\NormalTok{, }\VariableTok{None}\NormalTok{),}
+\NormalTok{        (}\StringTok{"get"}\NormalTok{, }\StringTok{"/notes/}\SpecialCharTok{\{id\}}\StringTok{/tags"}\NormalTok{, }\VariableTok{None}\NormalTok{),}
+\NormalTok{        (}\StringTok{"put"}\NormalTok{, }\StringTok{"/notes/}\SpecialCharTok{\{id\}}\StringTok{/tags"}\NormalTok{, \{}\StringTok{"tags"}\NormalTok{: [}\StringTok{"hacked"}\NormalTok{]\}),}
+\NormalTok{    ],}
+\NormalTok{)}
+\KeywordTok{def}\NormalTok{ test\_another\_users\_note\_does\_not\_exist\_for\_bob(}
+\NormalTok{    bob, alices\_note, method, path, body}
+\NormalTok{):}
+\NormalTok{    url }\OperatorTok{=}\NormalTok{ path.}\BuiltInTok{format}\NormalTok{(}\BuiltInTok{id}\OperatorTok{=}\NormalTok{alices\_note[}\StringTok{"id"}\NormalTok{])}
+\NormalTok{    response }\OperatorTok{=} \BuiltInTok{getattr}\NormalTok{(bob, method)(url, json}\OperatorTok{=}\NormalTok{body)}
+    \CommentTok{\# 404, not 403: Bob must not even learn that the note exists}
+    \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{404}
+
+
+\KeywordTok{def}\NormalTok{ test\_bobs\_attempts\_changed\_nothing(alice, bob, alices\_note):}
+\NormalTok{    bob.put(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{alices\_note[}\StringTok{\textquotesingle{}id\textquotesingle{}}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Bob was here"}\NormalTok{\})}
+\NormalTok{    bob.delete(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{alices\_note[}\StringTok{\textquotesingle{}id\textquotesingle{}}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ alice.get(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{alices\_note[}\StringTok{\textquotesingle{}id\textquotesingle{}}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+    \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{200}
+    \ControlFlowTok{assert}\NormalTok{ response.get\_json()[}\StringTok{"content"}\NormalTok{] }\OperatorTok{==} \StringTok{"Alice\textquotesingle{}s private note"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With these in place, the full suite passes on SQLite and on PostgreSQL. Try deleting \texttt{AND\ user\_id\ =\ ?} from any one query: at least one of these tests fails.
+
+\setcounter{section}{4}
+\section{Secrets Management}\label{38-security:385-secrets-management}
+
+A \textbf{secret} is a credential that must be kept confidential: database passwords, API keys, TLS private keys. If a secret is exposed, an attacker can use it to gain unauthorized access.
+
+\subsection*{Where secrets must NOT be stored}\phantomsection\label{38-security:where-secrets-must-not-be-stored}
+
+\textbf{Source code (git repositories)}: git history is permanent. Even if you remove a secret from a file, it remains in the git history forever. Anyone who clones the repository can find it.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# NEVER DO THIS:}
+\NormalTok{DATABASE\_URL }\OperatorTok{=} \StringTok{"postgresql://notes\_user:SuperSecret123@db.example.com/notesdb"}
+\NormalTok{SECRET\_KEY }\OperatorTok{=} \StringTok{"hardcoded{-}flask{-}secret{-}key{-}please{-}dont{-}do{-}this"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Dockerfile}: Docker image layers are often pushed to public registries and inspected by others.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# NEVER DO THIS:}
+\KeywordTok{ENV}\NormalTok{ DATABASE\_URL=postgresql://notes\_user:SuperSecret123@db/notesdb}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Log files}: logs may be stored long-term, shipped to third parties, or accidentally made public.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# NEVER DO THIS:}
+\NormalTok{logger.info(}\StringTok{"Connecting to database: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, os.environ[}\StringTok{"DATABASE\_URL"}\NormalTok{])}
+\CommentTok{\# This logs the password!}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Where secrets SHOULD be stored}\phantomsection\label{38-security:where-secrets-should-be-stored}
+
+\textbf{Environment variables}: passed to the container at startup, not visible in the image.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# The deploy.sh script (Chapter 23) passes secrets as environment variables:}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}name}\NormalTok{ notes{-}api }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}env{-}file}\NormalTok{ /opt/notes{-}api/config/notes{-}api.env }\DataTypeTok{\textbackslash{}}
+\NormalTok{    ...}
+    \ExtensionTok{ghcr.io/your{-}username/notes{-}api:sha{-}a1b2c3d}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# /opt/notes-api/config/notes-api.env
+# This file has permissions 600 (owner read/write only)
+DATABASE_URL=postgresql://notes_user:<password>@private-db-….db.ondigitalocean.com:25060/notesdb?sslmode=require
+SECRET_KEY=<the output of: python3 -c "import secrets; print(secrets.token_hex(32))">
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Environment variables keep secrets out of the image and the repository, but they are not a vault. Anyone who can run \texttt{docker\ inspect\ notes-}\allowbreak{}\texttt{api}~--- every member of the \texttt{docker} group~--- can read them, as can anything that reads the process's \texttt{/}\allowbreak{}\texttt{proc/}\allowbreak{}\texttt{\textless{}pid\textgreater{}/}\allowbreak{}\texttt{environ}. Treat access to the server's Docker as access to the secrets.
+
+\textbf{Secrets management services}: for larger teams:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{HashiCorp Vault}: open-source, self-hosted, full-featured
+\item
+  \textbf{AWS Secrets Manager}: managed, integrates with IAM
+\item
+  \textbf{GCP Secret Manager}: managed, integrates with GCP IAM
+\item
+  \textbf{Doppler}: developer-focused secrets management
+\end{itemize}
+
+\noindent{}These services:
+
+\begin{itemize}
+\tightlist
+\item
+  Store secrets encrypted at rest
+\item
+  Provide audit logs of who accessed which secret
+\item
+  Support automatic secret rotation
+\item
+  Allow secrets to be updated without redeploying the application
+\end{itemize}
+
+\subsection*{Checking for accidentally committed secrets}\phantomsection\label{38-security:checking-for-accidentally-committed-secrets}
+
+Before pushing code to a repository:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install detect{-}secrets (Yelp\textquotesingle{}s scanner) and the pre{-}commit framework}
+\ExtensionTok{pip}\NormalTok{ install detect{-}secrets pre{-}commit}
+
+\CommentTok{\# Record the current state: known, accepted findings go in the baseline}
+\ExtensionTok{detect{-}secrets}\NormalTok{ scan }\OperatorTok{\textgreater{}}\NormalTok{ .secrets.baseline}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Then let the \texttt{pre-commit} framework run it before every commit, on the files being committed:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# .pre{-}commit{-}config.yaml}
+\FunctionTok{repos}\KeywordTok{:}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{repo}\KeywordTok{:}\AttributeTok{ https://github.com/Yelp/detect{-}secrets}
+\AttributeTok{    }\FunctionTok{rev}\KeywordTok{:}\AttributeTok{ v1.5.0}
+\AttributeTok{    }\FunctionTok{hooks}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ detect{-}secrets}
+\AttributeTok{        }\FunctionTok{args}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"{-}{-}baseline"}\KeywordTok{,}\AttributeTok{ }\StringTok{".secrets.baseline"}\KeywordTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pre{-}commit}\NormalTok{ install   }\CommentTok{\# installs the hook into .git/hooks/pre{-}commit}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{GitHub secret scanning}: GitHub automatically scans repositories for known secret patterns (AWS keys, GitHub tokens, Stripe API keys) and alerts you if they are committed. This is a safety net, not a primary defense.
+
+\subsection*{The .gitignore for secrets}\phantomsection\label{38-security:the-gitignore-for-secrets}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# .gitignore — created in Chapter 6; these are the secret{-}specific lines}
+
+\NormalTok{\# Environment files (may contain secrets)}
+\NormalTok{.env}
+\NormalTok{.env.*}
+\NormalTok{*.env}
+\NormalTok{\# ...except the example, which holds no real secrets. (Comments must be on}
+\NormalTok{\# lines of their own: text after a pattern becomes part of the pattern.)}
+\NormalTok{!.env.example}
+
+\NormalTok{\# Local configuration}
+\NormalTok{config/local.py}
+\NormalTok{notes{-}api.env}
+
+\NormalTok{\# TLS private keys}
+\NormalTok{*.pem}
+\NormalTok{*.key}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{5}
+\section{OWASP Top 10}\label{38-security:386-owasp-top-10}
+
+The \textbf{Open Web Application Security Project (OWASP)} publishes a list of the 10 most critical web application security risks. Every web developer should be familiar with them. This section follows the \textbf{2021 edition}; OWASP revises the list every few years (a 2025 edition reshuffles it, adding software supply-chain failures and the mishandling of exceptional conditions as their own categories), but the risks below remain the core.
+
+\subsection*{A01: Broken Access Control}\phantomsection\label{38-security:a01-broken-access-control}
+
+\textbf{What it is}: users can access resources or perform actions they should not be able to.
+
+\textbf{Example}: user A can delete user B's notes by calling \texttt{DELETE\ /notes/42} even though note 42 belongs to user B.
+
+\textbf{Notes API mitigation} (section 38.4): every query filters by \texttt{user\_id}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cursor.execute(}
+\NormalTok{    sql(}\StringTok{"DELETE FROM notes WHERE id = ? AND user\_id = ?"}\NormalTok{),}
+\NormalTok{    (note\_id, g.current\_user[}\StringTok{"id"}\NormalTok{]),}
+\NormalTok{)}
+\CommentTok{\# If note\_id doesn\textquotesingle{}t belong to the current user, nothing is deleted}
+\CommentTok{\# (cursor.rowcount == 0) and the handler answers 404}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{A02: Cryptographic Failures}\phantomsection\label{38-security:a02-cryptographic-failures}
+
+\textbf{What it is}: data transmitted or stored without adequate encryption.
+
+\textbf{Notes API mitigation}:
+
+\begin{itemize}
+\tightlist
+\item
+  HTTPS (TLS 1.2+) for all data in transit~--- including to the database (\texttt{sslmode=require})
+\item
+  Database reached over the private VPC network, with its public endpoint restricted to trusted sources
+\item
+  API keys stored as SHA-256 hashes, not plaintext
+\item
+  Environment variables for secrets (not hardcoded)
+\end{itemize}
+
+\subsection*{A03: Injection}\phantomsection\label{38-security:a03-injection}
+
+\textbf{What it is}: user-supplied data is interpreted as code. SQL injection is the most common form.
+
+\textbf{Notes API mitigation}: \hyperref[ch:31-input-handling]{Chapter 31}~--- parameterized queries for all database operations: values are never interpolated into SQL strings. (The one piece of SQL built from input, the sort column, comes from an allow-list.)
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# VULNERABLE:}
+\NormalTok{cursor.execute(}\SpecialStringTok{f"SELECT * FROM notes WHERE id = }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+\CommentTok{\# SAFE:}
+\NormalTok{cursor.execute(sql(}\StringTok{"SELECT * FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{A04: Insecure Design}\phantomsection\label{38-security:a04-insecure-design}
+
+\textbf{What it is}: fundamental design flaws that no amount of coding fixes. An insecure design cannot be fixed by just adding security controls around it.
+
+\textbf{Notes API design considerations}:
+
+\begin{itemize}
+\tightlist
+\item
+  Authentication is a design-level requirement, not an afterthought
+\item
+  User data is isolated by \texttt{user\_id} at the database query level
+\item
+  Rate limiting is designed in, not bolted on
+\end{itemize}
+
+\subsection*{A05: Security Misconfiguration}\phantomsection\label{38-security:a05-security-misconfiguration}
+
+\textbf{What it is}: default configurations left unchanged, unnecessary features enabled, error messages disclosing system internals.
+
+\textbf{Notes API mitigations}:
+
+\begin{itemize}
+\tightlist
+\item
+  Debug mode disabled in production (\texttt{FLASK\_DEBUG=false})
+\item
+  No internal error details in error responses (just ``An unexpected error occurred'')
+\item
+  Server headers reduced: Nginx replaces Gunicorn's \texttt{Server} header with its own; add \texttt{server\_tokens\ off;} to the Nginx configuration so it does not advertise its version either
+\item
+  Security headers added (HSTS, X-Content-Type-Options, X-Frame-Options)
+\item
+  Minimal Docker image (no debug tools, no compilers)
+\item
+  Non-root user in Docker container
+\end{itemize}
+
+\noindent{}Check for security misconfiguration:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/startup.py — an extra startup check for production}
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ DATABASE\_URL, FLASK\_DEBUG, SECRET\_KEY}
+
+\NormalTok{KNOWN\_PLACEHOLDERS }\OperatorTok{=}\NormalTok{ (}\StringTok{"CHANGE"}\NormalTok{, }\StringTok{"change"}\NormalTok{, }\StringTok{"\textless{}"}\NormalTok{, }\StringTok{"your{-}"}\NormalTok{, }\StringTok{"example"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ check\_security\_configuration():}
+\NormalTok{    issues }\OperatorTok{=}\NormalTok{ []}
+    \ControlFlowTok{if}\NormalTok{ FLASK\_DEBUG:}
+\NormalTok{        issues.append(}\StringTok{"FLASK\_DEBUG is on — must be off in production"}\NormalTok{)}
+    \ControlFlowTok{if} \BuiltInTok{any}\NormalTok{(marker }\KeywordTok{in}\NormalTok{ SECRET\_KEY }\ControlFlowTok{for}\NormalTok{ marker }\KeywordTok{in}\NormalTok{ KNOWN\_PLACEHOLDERS):}
+\NormalTok{        issues.append(}\StringTok{"SECRET\_KEY looks like a placeholder — generate a random key"}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ DATABASE\_URL.startswith(}\StringTok{"sqlite:///"}\NormalTok{):}
+\NormalTok{        issues.append(}\StringTok{"Using SQLite in production — use PostgreSQL"}\NormalTok{)}
+    \ControlFlowTok{for}\NormalTok{ issue }\KeywordTok{in}\NormalTok{ issues:}
+\NormalTok{        logger.warning(}\StringTok{"Security configuration issue: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, issue)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(A placeholder that someone forgot to replace is the realistic risk: it passes the length check from Chapter 14 while being published in the repository's own \texttt{.env.example}.)
+
+\subsection*{A06: Vulnerable and Outdated Components}\phantomsection\label{38-security:a06-vulnerable-and-outdated-components}
+
+\textbf{What it is}: using libraries with known security vulnerabilities.
+
+\textbf{Notes API mitigation}: \hyperref[ch:17-build-process]{Chapter 17} introduced \texttt{pip-audit}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip{-}audit}
+
+\CommentTok{\# Output (example):}
+\CommentTok{\# Name     Version ID                  Fix Versions}
+\CommentTok{\# {-}{-}{-}{-}{-}{-}{-}{-} {-}{-}{-}{-}{-}{-}{-} {-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-} {-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}}
+\CommentTok{\# werkzeug 3.0.1   GHSA{-}2g68{-}c3qc{-}8985 3.0.3}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Run \texttt{pip-audit} in CI. Update dependencies regularly. Subscribe to security advisories for major dependencies (Flask, Werkzeug, psycopg2).
+
+\subsection*{A07: Identification and Authentication Failures}\phantomsection\label{38-security:a07-identification-and-authentication-failures}
+
+\textbf{What it is}: weak authentication implementation~--- weak passwords, missing rate limiting on authentication, insecure session management.
+
+\textbf{Notes API mitigations} (section 38.3):
+
+\begin{itemize}
+\tightlist
+\item
+  Passwords hashed with bcrypt at cost 12 (never SHA-256, which is far too fast for passwords), with a minimum length of 12 and no composition rules
+\item
+  Login tokens with 256 bits of randomness, stored only as hashes, expiring after 30 days, and revoked at logout
+\item
+  One error message, and equal timing, for an unknown email and a wrong password
+\item
+  A strict rate limit on \texttt{/auth/login} (5 attempts a minute per IP), on top of the general limit
+\end{itemize}
+
+\subsection*{A08: Software and Data Integrity Failures}\phantomsection\label{38-security:a08-software-and-data-integrity-failures}
+
+\textbf{What it is}: not verifying the integrity of software updates, critical data, or CI/CD pipelines.
+
+\textbf{What the Notes API does today}:
+
+\begin{itemize}
+\tightlist
+\item
+  Docker images built only in CI and tagged by commit (traceable to the exact code; tags are kept unchanged by convention, or made immutable by the registry~--- \hyperref[ch:19-artifact-storage]{Chapter 19})
+\item
+  The deploy action pinned to a full commit SHA; the CI deploy key restricted to one command (\hyperref[ch:23-code-transfer]{Chapter 23})
+\end{itemize}
+
+\noindent{}\textbf{What to adopt next}:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{pip\ install\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{require-}\allowbreak{}\texttt{hashes} (verify package checksums)
+\item
+  The base image pinned by digest (\texttt{python:}\allowbreak{}\texttt{3.}\allowbreak{}\texttt{11-}\allowbreak{}\texttt{slim@sha256:}\allowbreak{}\texttt{…}), so rebuilding the same commit gives the same image
+\item
+  OIDC federation between CI and the cloud provider, replacing long-lived secrets such as the deploy key
+\end{itemize}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Generate requirements with hashes:}
+\ExtensionTok{pip{-}compile} \AttributeTok{{-}{-}generate{-}hashes}\NormalTok{ requirements.in}
+
+\CommentTok{\# requirements.txt with hashes (auto{-}generated):}
+\VariableTok{flask}\OperatorTok{=}\NormalTok{=3.0.0 }\DataTypeTok{\textbackslash{}}
+    \ExtensionTok{{-}{-}hash=sha256:abc123...} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}hash}\OperatorTok{=}\NormalTok{sha256:def456...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{A09: Security Logging and Monitoring Failures}\phantomsection\label{38-security:a09-security-logging-and-monitoring-failures}
+
+\textbf{What it is}: not logging security-relevant events, or not monitoring for attacks.
+
+\textbf{Notes API mitigations} (\hyperref[ch:35-observability]{Chapter 35}):
+
+\begin{itemize}
+\tightlist
+\item
+  All requests logged with IP, method, path, status code
+\item
+  Failed authentication attempts logged (if you implement auth)
+\item
+  Error rates monitored with alerting
+\item
+  Nginx access logs capturing all traffic
+\end{itemize}
+
+\noindent{}Log these security events explicitly:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In the auth middleware:}
+\ControlFlowTok{if}\NormalTok{ user }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{    logger.warning(}
+        \StringTok{"Authentication failed"}\NormalTok{,}
+\NormalTok{        extra}\OperatorTok{=}\NormalTok{\{}
+            \StringTok{"remote\_addr"}\NormalTok{: request.remote\_addr,}
+            \StringTok{"user\_agent"}\NormalTok{: request.headers.get(}\StringTok{"User{-}Agent"}\NormalTok{),}
+            \StringTok{"path"}\NormalTok{: request.path,}
+\NormalTok{        \},}
+\NormalTok{    )}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Invalid API key"}\NormalTok{\}), }\DecValTok{401}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{A10: Server-Side Request Forgery (SSRF)}\phantomsection\label{38-security:a10-server-side-request-forgery-ssrf}
+
+\textbf{What it is}: an attacker tricks the server into making HTTP requests to internal resources on their behalf.
+
+\textbf{Example}: the API accepts a URL parameter and fetches content from it. An attacker passes \texttt{http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{169.}\allowbreak{}\texttt{254.}\allowbreak{}\texttt{169.}\allowbreak{}\texttt{254/}\allowbreak{}\texttt{latest/}\allowbreak{}\texttt{meta-}\allowbreak{}\texttt{data/} (AWS metadata endpoint) to read internal cloud metadata.
+
+\textbf{Notes API mitigation}: the Notes API doesn't accept URLs as input or make outbound HTTP requests. If you add features that do (e.g., fetching URL previews), validate and restrict the allowed URLs:
+
+A blocklist of hostnames is not enough: \texttt{http://127.1/}, \texttt{http://{[}::1{]}/}, \texttt{http:/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{2130706433/} (127.0.0.1 as a decimal number), or a public DNS name that \emph{resolves} to an internal address all get past it. Check the address the name actually resolves to, and refuse to follow redirects:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ ipaddress}
+\ImportTok{import}\NormalTok{ socket}
+\ImportTok{from}\NormalTok{ urllib.parse }\ImportTok{import}\NormalTok{ urlparse}
+
+\NormalTok{ALLOWED\_SCHEMES }\OperatorTok{=}\NormalTok{ \{}\StringTok{"http"}\NormalTok{, }\StringTok{"https"}\NormalTok{\}}
+
+\KeywordTok{def}\NormalTok{ validate\_url(url: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{bool}\NormalTok{:}
+    \CommentTok{"""Allow only http(s) URLs whose host resolves to public addresses."""}
+\NormalTok{    parsed }\OperatorTok{=}\NormalTok{ urlparse(url)}
+    \ControlFlowTok{if}\NormalTok{ parsed.scheme }\KeywordTok{not} \KeywordTok{in}\NormalTok{ ALLOWED\_SCHEMES }\KeywordTok{or} \KeywordTok{not}\NormalTok{ parsed.hostname:}
+        \ControlFlowTok{return} \VariableTok{False}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        infos }\OperatorTok{=}\NormalTok{ socket.getaddrinfo(parsed.hostname, parsed.port }\KeywordTok{or} \DecValTok{443}\NormalTok{)}
+    \ControlFlowTok{except}\NormalTok{ socket.gaierror:}
+        \ControlFlowTok{return} \VariableTok{False}
+    \ControlFlowTok{for}\NormalTok{ info }\KeywordTok{in}\NormalTok{ infos:}
+\NormalTok{        addr }\OperatorTok{=}\NormalTok{ ipaddress.ip\_address(info[}\DecValTok{4}\NormalTok{][}\DecValTok{0}\NormalTok{])}
+        \CommentTok{\# Loopback, private (10/8, 172.16/12, 192.168/16, ...), link{-}local}
+        \CommentTok{\# (169.254/16 — where cloud metadata services live, DigitalOcean\textquotesingle{}s}
+        \CommentTok{\# included), and other reserved ranges are all refused}
+        \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ addr.is\_global:}
+            \ControlFlowTok{return} \VariableTok{False}
+    \ControlFlowTok{return} \VariableTok{True}
+
+\CommentTok{\# When fetching: requests.get(url, allow\_redirects=False, timeout=5) — a}
+\CommentTok{\# redirect to an internal address would otherwise undo the check. And}
+\CommentTok{\# connect to the address you checked: DNS can answer differently the}
+\CommentTok{\# second time ("DNS rebinding").}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Where possible, go further: allow only a fixed list of domains the feature actually needs.
+
+\setcounter{section}{6}
+\section{Security Headers Deep Dive}\label{38-security:387-security-headers-deep-dive}
+
+\hyperref[ch:28-traffic-routing]{Chapter 28} configured security headers in Nginx. Let's understand what each one does.
+
+\subsection*{Strict-Transport-Security (HSTS)}\phantomsection\label{38-security:strict-transport-security-hsts}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Strict-Transport-Security: max-age=63072000; includeSubDomains
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Tells browsers: for the next 2 years, only connect to this domain via HTTPS. Even if the user types \texttt{http://}, the browser silently upgrades to HTTPS. Prevents protocol downgrade attacks.
+
+\texttt{includeSubDomains} applies the policy to all subdomains. Be careful~--- this means ALL subdomains must have valid HTTPS.
+
+\subsection*{X-Content-Type-Options}\phantomsection\label{38-security:x-content-type-options}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+X-Content-Type-Options: nosniff
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Prevents browsers from ``sniffing'' the content type and treating a response as something other than what the \texttt{Content-Type} header says. Prevents attacks where malicious data is uploaded and served as JavaScript.
+
+\subsection*{X-Frame-Options}\phantomsection\label{38-security:x-frame-options}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+X-Frame-Options: DENY
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Prevents the page from being embedded in an \texttt{\textless{}iframe\textgreater{}}. Protects against \textbf{clickjacking}~--- an attack where an attacker overlays an invisible iframe over a legitimate button, tricking users into clicking the attacker's content.
+
+For an API, \texttt{DENY} is always correct.
+
+\subsection*{X-XSS-Protection}\phantomsection\label{38-security:x-xss-protection}
+
+This header controlled the browser's built-in XSS filter, which modern browsers have removed (it could itself introduce vulnerabilities). Chapter 28's configuration leaves it out; if you meet it in an older configuration, the only sensible value is \texttt{0}, which switches the filter off. Use \texttt{Content-Security-Policy} instead.
+
+\subsection*{Content-Security-Policy (CSP)}\phantomsection\label{38-security:content-security-policy-csp}
+
+CSP is the most powerful security header, and the most complex. It specifies which sources of content the browser may load. For a pure API (no browser UI), CSP is less relevant~--- add it if you ever serve HTML.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Content-Security-Policy: default-src 'self'; script-src 'none'; object-src 'none'
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}For an API response (JSON, no HTML), a minimal policy:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Content-Security-Policy: default-src 'none'
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{7}
+\section{Input Sanitization vs Validation}\label{38-security:388-input-sanitization-vs-validation}
+
+\hyperref[ch:31-input-handling]{Chapter 31} covered validation: rejecting input that doesn't meet requirements. \textbf{Sanitization} is different: transforming input to remove dangerous content before using it.
+
+For the Notes API:
+
+\textbf{Validation} (\hyperref[ch:31-input-handling]{Chapter 31}):
+
+\begin{itemize}
+\tightlist
+\item
+  Content must be a non-empty string
+\item
+  Content must be 10,000 characters or fewer
+\end{itemize}
+
+\noindent{}\textbf{Sanitization}:
+
+\begin{itemize}
+\tightlist
+\item
+  Strip leading/trailing whitespace (the \texttt{strip=True} parameter in the Validator)
+\item
+  Optionally limit to specific Unicode character ranges
+\end{itemize}
+
+\noindent{}(Stripping HTML tags from stored content is tempting, but it destroys legitimate text~--- a note about \texttt{\textless{}div\textgreater{}} layout, say. The better rule is to store what the user wrote and escape it at the moment it is rendered as HTML, as below.)
+
+For an API that only returns JSON (not HTML), HTML injection in the content field is not a direct security risk~--- the JSON is not rendered as HTML. If you later add a web frontend that renders note content as HTML, you must escape it:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In a Jinja2 template (Flask\textquotesingle{}s default templating engine):}
+\OperatorTok{\textless{}}\NormalTok{p}\OperatorTok{\textgreater{}}\NormalTok{\{\{ note.content \}\}}\OperatorTok{\textless{}/}\NormalTok{p}\OperatorTok{\textgreater{}}
+\CommentTok{\# Jinja2 auto{-}escapes: \& → \&amp;  \textless{} → \&lt;  \textgreater{} → \&gt;  etc.}
+\CommentTok{\# Safe against XSS}
+
+\CommentTok{\# DANGEROUS — bypasses escaping:}
+\OperatorTok{\textless{}}\NormalTok{p}\OperatorTok{\textgreater{}}\NormalTok{\{\{ note.content }\OperatorTok{|}\NormalTok{ safe \}\}}\OperatorTok{\textless{}/}\NormalTok{p}\OperatorTok{\textgreater{}}
+\CommentTok{\# Only use |safe for content you know is HTML{-}safe (e.g., content you generated)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{8}
+\section{Security Audit Checklist}\label{38-security:389-security-audit-checklist}
+
+Use this checklist periodically to audit the security of a Flask application:
+
+\subsection*{Secrets and Configuration}\phantomsection\label{38-security:secrets-and-configuration}
+
+\begin{itemize}
+\tightlist
+\item[$\square$]
+  No secrets in source code or Dockerfile
+\item[$\square$]
+  \texttt{.env} files in \texttt{.gitignore}
+\item[$\square$]
+  \texttt{SECRET\_KEY} is randomly generated (\texttt{secrets.token\_hex(32)}: 64 characters), not a placeholder
+\item[$\square$]
+  \texttt{DEBUG\ =\ False} in production
+\item[$\square$]
+  \texttt{pip-audit} runs in CI with no high-severity findings
+\item[$\square$]
+  Dependencies updated in the last 90 days
+\end{itemize}
+
+\subsection*{Transport Security}\phantomsection\label{38-security:transport-security}
+
+\begin{itemize}
+\tightlist
+\item[$\square$]
+  HTTPS enforced (HTTP redirects to HTTPS)
+\item[$\square$]
+  TLS 1.2+ only (TLS 1.0 and 1.1 disabled)
+\item[$\square$]
+  Valid, non-expired certificate
+\item[$\square$]
+  HSTS header with long \texttt{max-age}
+\item[$\square$]
+  Certificate monitored for upcoming expiry
+\end{itemize}
+
+\subsection*{Application Security}\phantomsection\label{38-security:application-security}
+
+\begin{itemize}
+\tightlist
+\item[$\square$]
+  Every route except \texttt{/health}, \texttt{/ping}, \texttt{/auth/register} and \texttt{/auth/login} returns \texttt{401} without a valid token
+\item[$\square$]
+  Every query on user data includes the owner (\texttt{AND\ user\_id\ =\ ?}), and a test tries each endpoint as another user
+\item[$\square$]
+  Passwords stored with bcrypt (or Argon2), never with a fast hash; tokens stored only as hashes
+\item[$\square$]
+  All database queries use parameterized statements
+\item[$\square$]
+  User input validated before use
+\item[$\square$]
+  Error responses don't include internal details (stack traces, SQL)
+\item[$\square$]
+  Rate limiting on all public endpoints
+\end{itemize}
+
+\subsection*{Infrastructure Security}\phantomsection\label{38-security:infrastructure-security}
+
+\begin{itemize}
+\tightlist
+\item[$\square$]
+  Non-root user in Docker container
+\item[$\square$]
+  Cloud firewall allows only ports 22, 80, 443
+\item[$\square$]
+  UFW configured as a second firewall layer
+\item[$\square$]
+  Container ports published on \texttt{127.0.0.1} only: \texttt{sudo\ ss\ -tlnp} shows 5000 (and 9200, 9090, 3000 if you run the Chapter 35 monitoring) bound to \texttt{127.0.0.1}
+\item[$\square$]
+  Tested from outside: \texttt{nc\ -}\allowbreak{}\texttt{zv\ -}\allowbreak{}\texttt{w\ 5\ \textless{}server-}\allowbreak{}\texttt{ip\textgreater{}\ 5000} from your laptop times out or is refused
+\item[$\square$]
+  SSH key authentication only (password SSH disabled)
+\item[$\square$]
+  Unattended upgrades enabled for security patches
+\item[$\square$]
+  PostgreSQL not accessible from public internet
+\end{itemize}
+
+\subsection*{Logging and Monitoring}\phantomsection\label{38-security:logging-and-monitoring}
+
+\begin{itemize}
+\item[$\square$]
+  Failed authentication attempts logged
+\item[$\square$]
+  Security headers present in responses
+\item[$\square$]
+  Access logs retaining 14 days minimum
+\item[$\square$]
+  Alerting on high error rates
+\end{itemize}
+
+\phantomsection\label{38-security:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Defense in depth}: stack multiple layers of security so that compromising one layer does not compromise the entire system~--- and verify the layers from outside: Docker-published ports bypass UFW.
+\item
+  \textbf{Threat modeling}: identify who might attack, what they want, and how they might do it. Prioritize defenses based on the most realistic threats.
+\item
+  \textbf{Authentication} (who are you?) and \textbf{authorization} (what can you do?) are distinct, and a real API needs both. The Notes API uses \textbf{opaque login tokens}: random, stored only as hashes, expiring, and revoked at logout. JWTs trade away revocation for checks that need no database, which is a trade worth making only across many services.
+\item
+  \textbf{Hash passwords with a deliberately slow, salted function} (bcrypt, Argon2), never a fast one like SHA-256. Require length (12+ characters), not composition rules. Give one error, and equal timing, for an unknown email and a wrong password, and rate-limit the login endpoint separately.
+\item
+  \textbf{Protect by default.} Attach the login check to whole blueprints, so that a new route cannot forget it; make only the few public routes public on purpose.
+\item
+  \textbf{Enforce ownership in every query} (\texttt{AND\ user\_id\ =\ ?}), answer \texttt{404} rather than \texttt{403} for another user's data, and test every endpoint as a second user. A missed check here is the most common serious web vulnerability (OWASP A01).
+\item
+  \textbf{Constant-time comparison} (\texttt{hmac.compare\_digest}) is required whenever code compares a secret directly, to prevent timing attacks.
+\item
+  \textbf{Never store secrets in source code}. Use environment variables, with a secrets manager for larger deployments.
+\item
+  \textbf{OWASP Top 10} is the essential reading list for web application security. The deployed Notes API covers several of them~--- parameterized queries (A03), HTTPS (A02), security headers and hardened configuration (A05), pip-audit (A06), structured logging (A09)~--- and this chapter adds access control (A01) and authentication (A07).
+\item
+  \textbf{Security headers} (HSTS, X-Content-Type-Options, X-Frame-Options) are added by Nginx and tell browsers how to handle responses safely.
+\item
+  \textbf{The security audit checklist} is a practical tool for periodically verifying the security posture of a deployed application.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{38-security:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Log in twice from two terminals, then log out in one. Does the other token still work? Why?
+\item
+  \textbf{Break and fix.} Change \texttt{check\_credentials} to return early, skipping bcrypt, when the email is unknown. Measure both kinds of failed login with \texttt{curl\ -w\ \%\{time\_total\}}. What can an attacker learn? Restore it.
+\item
+  \textbf{Extend.} Add \texttt{GET\ /}\allowbreak{}\texttt{auth/}\allowbreak{}\texttt{sessions}, listing the current user's active sessions (created time, expiry, never the token), and \texttt{DELETE\ /}\allowbreak{}\texttt{auth/}\allowbreak{}\texttt{sessions/}\allowbreak{}\texttt{\textless{}id\textgreater{}}, to log out a session elsewhere.
+\item
+  \textbf{Explain.} Why does the Notes API use opaque tokens rather than JWTs, and what would make you choose JWTs?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-38.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{38-security:whats-next}
+
+The final chapter before the appendices addresses a persistent confusion for new developers: why does the production system behave differently from the local development environment, and how to bridge that gap.
+
+\noindent{}→ \hyperref[ch:39-local-vs-production]{Chapter 39}~--- Local vs Production

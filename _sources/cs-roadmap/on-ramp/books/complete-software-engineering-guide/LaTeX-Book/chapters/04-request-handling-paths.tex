@@ -1,0 +1,1180 @@
+\setcounter{chapter}{3}
+\chapter{Defining Request Handling Paths}\label{ch:04-request-handling-paths}
+
+\chaptersubtitle{The API Is Created Here}
+
+\chapterrule
+
+In the previous chapter, we built a raw TCP server. It listened on a port, accepted connections, read bytes from the network, and sent bytes back. It was a complete, working network server.
+
+But it treated every connection the same way. It had no concept of \texttt{/notes} versus \texttt{/users} versus \texttt{/login}. It could not distinguish a GET request from a POST request. It could not route a request about creating a note to a function that creates notes, or a request about listing notes to a function that lists them.
+
+That differentiation~--- the ability to take an incoming HTTP request and decide which piece of code should handle it~--- is what makes a raw TCP server into an \textbf{API}.
+
+An \textbf{API} (Application Programming Interface) is a contract. It declares: ``If you send me a message in this specific form (this URL, this HTTP method, this data format), I will perform this specific action and return this specific kind of response.'' The client~--- a browser, a mobile app, another service~--- knows exactly what to expect. The server knows exactly what to do.
+
+This contract is created during initialization, as we saw in \hyperref[ch:02-runtime-initialization]{Chapter 2}. When Python reads through your \texttt{app.py} file top to bottom, it encounters decorator expressions like \texttt{@app.}\allowbreak{}\texttt{route("/}\allowbreak{}\texttt{notes",}\allowbreak{}\texttt{\ methods=}\allowbreak{}\texttt{{[}"GET"{]})}, and Flask adds entries to its internal route table. By the time the first connection ever arrives, the route table is complete and ready.
+
+This chapter explains every aspect of how that route table is built: what routes are, how HTTP methods work, how Flask constructs and stores the routing map, how handler functions are connected to routes, how middleware chains are defined, and how you test your routes locally before deploying anywhere.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What a route is and what it represents in an API
+\item
+  How \texttt{@app.route()} decorators work under the hood
+\item
+  What HTTP methods (GET, POST, PUT, DELETE) mean and when to use each
+\item
+  How Flask builds and stores its route table (the \texttt{Map} object)
+\item
+  How handler functions are bound to routes
+\item
+  How middleware is defined in Flask and what it does
+\item
+  How to test the Notes API locally using \texttt{curl}, Postman, and the browser
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{What a Route Is and What It Represents}\label{04-request-handling-paths:41-what-a-route-is-and-what-it-represents}
+
+A \textbf{route} is a rule that maps an incoming HTTP request~--- characterized by a URL path and an HTTP method~--- to a specific Python function.
+
+Every time a request arrives at a Flask server, Flask must answer two questions:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  What URL path is being requested? (e.g., \texttt{/notes}, \texttt{/notes/42}, \texttt{/users/login})
+\item
+  What HTTP method is being used? (e.g., \texttt{GET}, \texttt{POST}, \texttt{PUT}, \texttt{DELETE})
+\end{enumerate}
+
+\noindent{}The combination of path and method identifies what the client wants to do. A route tells Flask: ``When these two conditions match, call this Python function.''
+
+\subsection*{URL paths}\phantomsection\label{04-request-handling-paths:url-paths}
+
+A \textbf{URL path} is the part of the URL after the domain name and port. Given the URL:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+http://localhost:5000/notes/42
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The path is \texttt{/notes/42}. It identifies a resource (note number 42) that the client wants to interact with.
+
+Paths can be:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Static paths}: Exactly as written. \texttt{/notes} matches only the string \texttt{/notes}.
+\item
+  \textbf{Dynamic paths}: Contain variable parts that Flask extracts. \texttt{/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\textless{}int:note\_id\textgreater{}} matches \texttt{/notes/42}, \texttt{/notes/100}, \texttt{/notes/7}~--- any path matching the pattern~--- and Flask extracts the integer part as \texttt{note\_id}.
+\end{itemize}
+
+\subsection*{HTTP methods}\phantomsection\label{04-request-handling-paths:http-methods}
+
+HTTP methods (sometimes called ``HTTP verbs'') describe what the client wants to do with the resource at the given path. The main methods are:
+
+\Needspace{16\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1063}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3940}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4997}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Method
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Notes API use
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{GET} & Retrieve a resource & \texttt{GET\ /notes} → list all notes; \texttt{GET\ /notes/42} → get note 42 \\
+\textbf{POST} & Create a new resource & \texttt{POST\ /notes} → create a new note \\
+\textbf{PUT} & Replace an existing resource entirely & \texttt{PUT\ /notes/42} → replace note 42 \\
+\textbf{PATCH} & Update part of an existing resource & \texttt{PATCH\ /notes/42} → update only the content field \\
+\textbf{DELETE} & Remove a resource & \texttt{DELETE\ /notes/42} → delete note 42 \\
+\end{longtable}
+}
+
+A GET request should never modify data. A POST request creates. A DELETE request removes. The HTTP standard defines these meanings (GET is ``safe''; GET, PUT, and DELETE are ``idempotent''), but nothing enforces them~--- following them is what makes your API predictable and interoperable with standard tools.
+
+\subsection*{Routes are the API's contract}\phantomsection\label{04-request-handling-paths:routes-are-the-apis-contract}
+
+Every route you define is a public commitment: ``This path and method combination is supported.'' Routes you do not define return a \texttt{404\ Not\ Found} response automatically (Flask handles this). The set of routes in your application is the API's contract~--- the specification of what the server can do.
+
+\setcounter{section}{1}
+\section{\texorpdfstring{Defining Routes in Flask: \texttt{@app.route()}}{Defining Routes in Flask: @app.route()}}\label{04-request-handling-paths:42-defining-routes-in-flask-approute}
+
+Flask uses \textbf{Python decorators} to register routes. A decorator is a function that takes a function and returns a function~--- often a wrapped version that adds behavior. Flask's \texttt{@app.route()} decorator does not wrap anything: it registers the decorated function as the handler for a specific URL pattern and method combination.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 4.1}\enspace The simplest Flask route}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ index():}
+    \ControlFlowTok{return} \StringTok{"Notes API is running."}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The \texttt{@app.route("/")} line does two things when Python reads it:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  It calls \texttt{app.route("/")}, which returns a decorator function
+\item
+  That decorator function is applied to \texttt{index}, registering \texttt{index} as the handler for \texttt{GET\ /}
+\end{enumerate}
+
+\noindent{}This is standard Python decorator syntax. The \texttt{@} symbol is syntactic sugar. Writing:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ index():}
+    \ControlFlowTok{return} \StringTok{"Notes API is running."}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}is exactly equivalent to:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ index():}
+    \ControlFlowTok{return} \StringTok{"Notes API is running."}
+
+\NormalTok{index }\OperatorTok{=}\NormalTok{ app.route(}\StringTok{"/"}\NormalTok{)(index)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Both expressions register \texttt{index} as the handler for \texttt{GET\ /} and then rebind the name \texttt{index} to the (possibly wrapped) function.
+
+\subsection*{\texorpdfstring{What happens inside \texttt{app.route()}}{What happens inside app.route()}}\phantomsection\label{04-request-handling-paths:what-happens-inside-approute}
+
+When \texttt{app.route("/")} is called, Flask calls \texttt{app.add\_url\_rule()} internally. Here is a simplified view of what that does:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Conceptual illustration of what Flask does internally}
+\KeywordTok{def}\NormalTok{ add\_url\_rule(}\VariableTok{self}\NormalTok{, rule, endpoint, view\_func, methods}\OperatorTok{=}\VariableTok{None}\NormalTok{):}
+    \CommentTok{\# \textquotesingle{}rule\textquotesingle{} is the URL pattern: "/"}
+    \CommentTok{\# \textquotesingle{}endpoint\textquotesingle{} is a name for this route (defaults to the function name)}
+    \CommentTok{\# \textquotesingle{}view\_func\textquotesingle{} is the handler function}
+    \CommentTok{\# \textquotesingle{}methods\textquotesingle{} is the list of allowed HTTP methods}
+
+    \ControlFlowTok{if}\NormalTok{ methods }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{        methods }\OperatorTok{=}\NormalTok{ [}\StringTok{"GET"}\NormalTok{]  }\CommentTok{\# Default to GET (Flask also adds HEAD and OPTIONS)}
+
+    \CommentTok{\# Add to the URL map (the route table)}
+    \VariableTok{self}\NormalTok{.url\_map.add(Rule(rule, endpoint}\OperatorTok{=}\NormalTok{endpoint, methods}\OperatorTok{=}\NormalTok{methods))}
+
+    \CommentTok{\# Associate the endpoint name with the handler function}
+    \VariableTok{self}\NormalTok{.view\_functions[endpoint] }\OperatorTok{=}\NormalTok{ view\_func}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The URL map (\texttt{self.url\_map}) is a Werkzeug \texttt{Map} object~--- a compiled, efficient data structure for URL pattern matching. Adding a \texttt{Rule} to it registers the pattern.
+
+The \texttt{view\_functions} dictionary maps endpoint names (strings) to handler functions. The endpoint name defaults to the function's name. So \texttt{@app.route("/")} on a function named \texttt{index} creates an endpoint named \texttt{"index"} that maps to the \texttt{index} function.
+
+\setcounter{section}{2}
+\section{HTTP Method Mapping: GET, POST, PUT, DELETE}\label{04-request-handling-paths:43-http-method-mapping-get-post-put-delete}
+
+By default, \texttt{@app.route()} responds only to GET requests (plus the HEAD and OPTIONS requests Flask answers automatically). To handle other methods, specify them explicitly:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 4.2}\enspace Defining routes with specific HTTP methods}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, request, jsonify}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \CommentTok{"""Return all notes."""}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: []\})}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+    \CommentTok{"""Create a new note."""}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json()}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"message"}\NormalTok{: }\StringTok{"Note created"}\NormalTok{, }\StringTok{"data"}\NormalTok{: data\}), }\DecValTok{201}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+    \CommentTok{"""Return a specific note by ID."""}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"id"}\NormalTok{: note\_id, }\StringTok{"content"}\NormalTok{: }\StringTok{"Sample note"}\NormalTok{\})}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"PUT"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ update\_note(note\_id):}
+    \CommentTok{"""Replace a note entirely."""}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json()}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"id"}\NormalTok{: note\_id, }\StringTok{"content"}\NormalTok{: data.get(}\StringTok{"content"}\NormalTok{)\})}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ delete\_note(note\_id):}
+    \CommentTok{"""Delete a note."""}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"message"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ deleted"}\NormalTok{\}), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Notice that \texttt{/notes} and \texttt{/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\textless{}int:note\_id\textgreater{}} are two different route patterns:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{/notes} matches the collection (all notes)
+\item
+  \texttt{/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\textless{}int:note\_id\textgreater{}} matches a specific note by ID
+\end{itemize}
+
+\noindent{}And within each pattern, different methods perform different operations:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{GET\ /notes} lists notes; \texttt{POST\ /notes} creates one
+\item
+  \texttt{GET\ /notes/42} retrieves note 42; \texttt{PUT\ /notes/42} replaces it; \texttt{DELETE\ /notes/42} removes it
+\end{itemize}
+
+\noindent{}This design~--- paths identify resources, methods identify operations~--- is the foundation of \textbf{REST} (Representational State Transfer), the dominant API design style for web services.
+
+\subsection*{What happens when a method is not allowed}\phantomsection\label{04-request-handling-paths:what-happens-when-a-method-is-not-allowed}
+
+If a client sends a request using a method that is not registered for that path, Flask automatically returns a \texttt{405\ Method\ Not\ Allowed} response. For example, if you only define \texttt{GET\ /notes} and a client sends \texttt{DELETE\ /notes}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ DELETE http://localhost:5000/notes}
+\CommentTok{\# Response: 405 Method Not Allowed}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Flask handles this automatically~--- you do not need to write code for it.
+
+\subsection*{Combining methods on a single function}\phantomsection\label{04-request-handling-paths:combining-methods-on-a-single-function}
+
+You can register multiple methods on a single handler function. This is sometimes done when the same function handles both viewing and submitting a form (common in traditional web applications):
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 4.3}\enspace One handler for multiple methods}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{, }\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ notes():}
+    \ControlFlowTok{if}\NormalTok{ request.method }\OperatorTok{==} \StringTok{"GET"}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: []\})}
+    \ControlFlowTok{elif}\NormalTok{ request.method }\OperatorTok{==} \StringTok{"POST"}\NormalTok{:}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ request.get\_json()}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"message"}\NormalTok{: }\StringTok{"Created"}\NormalTok{\}), }\DecValTok{201}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}For APIs, however, it is cleaner to have separate functions for separate operations, as in Listing 4.2. The code is easier to read and reason about.
+
+\setcounter{section}{3}
+\section{How Flask Builds Its Internal Route Table}\label{04-request-handling-paths:44-how-flask-builds-its-internal-route-table}
+
+Flask uses Werkzeug's URL routing system to build its route table. When you understand this system, you understand why some routes match and others do not, and how URL patterns with variables work.
+
+\subsection*{\texorpdfstring{The \texttt{Map} and \texttt{Rule} objects}{The Map and Rule objects}}\phantomsection\label{04-request-handling-paths:the-map-and-rule-objects}
+
+Werkzeug's URL routing centers on two classes:
+
+\textbf{\texttt{Rule}}: Represents one URL pattern. A \texttt{Rule} stores:
+
+\begin{itemize}
+\tightlist
+\item
+  The URL pattern string (e.g., \texttt{"/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\textless{}int:note\_id\textgreater{}"})
+\item
+  The allowed HTTP methods (e.g., \texttt{{[}"GET",}\allowbreak{}\texttt{\ "PUT",}\allowbreak{}\texttt{\ "DELETE"{]}})
+\item
+  The endpoint name (e.g., \texttt{"get\_note"})
+\item
+  Whether the URL must end with a trailing slash
+\end{itemize}
+
+\noindent{}\textbf{\texttt{Map}}: A collection of \texttt{Rule} objects. After all rules are added, the \texttt{Map} is ``locked'' (compiled into an efficient matching structure). You can inspect Flask's URL map at runtime:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 4.4}\enspace Inspecting Flask\textquotesingle s route table}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, jsonify}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: []\})}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"id"}\NormalTok{: note\_id\})}
+
+\CommentTok{\# Print the route table}
+\ControlFlowTok{with}\NormalTok{ app.app\_context():}
+    \ControlFlowTok{for}\NormalTok{ rule }\KeywordTok{in}\NormalTok{ app.url\_map.iter\_rules():}
+\NormalTok{        methods }\OperatorTok{=} \StringTok{", "}\NormalTok{.join(}\BuiltInTok{sorted}\NormalTok{(rule.methods))}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{rule}\SpecialCharTok{.}\NormalTok{rule}\SpecialCharTok{:30s\}}\SpecialStringTok{ [}\SpecialCharTok{\{}\NormalTok{methods}\SpecialCharTok{\}}\SpecialStringTok{] → }\SpecialCharTok{\{}\NormalTok{rule}\SpecialCharTok{.}\NormalTok{endpoint}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+/static/<path:filename>        [GET, HEAD, OPTIONS] → static
+/notes                         [GET, HEAD, OPTIONS] → list_notes
+/notes/<int:note_id>           [GET, HEAD, OPTIONS] → get_note
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The first rule, \texttt{static}, is Flask's built-in route for serving files from a \texttt{static/} folder. You will also notice \texttt{HEAD} and \texttt{OPTIONS} appear even though you did not define them. Flask adds these automatically:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{HEAD} is like \texttt{GET} but returns only the headers, no body. Flask handles it by running the GET handler and stripping the response body.
+\item
+  \texttt{OPTIONS} is used by browsers for CORS preflight checks. Flask handles it automatically.
+\end{itemize}
+
+\subsection*{URL variable converters}\phantomsection\label{04-request-handling-paths:url-variable-converters}
+
+In the pattern \texttt{/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\textless{}int:note\_id\textgreater{}}, the \texttt{\textless{}int:note\_id\textgreater{}} part is a \textbf{variable converter}. It tells Flask:
+
+\begin{itemize}
+\tightlist
+\item
+  Extract the part of the URL at this position
+\item
+  Convert it to an \texttt{int} (if it cannot be converted, return 404)
+\item
+  Pass it to the handler as the \texttt{note\_id} argument
+\end{itemize}
+
+\noindent{}Flask's built-in converters:
+
+\Needspace{14\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2222}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Converter
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Matches
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Example
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{string} (default) & Any text without slashes & \texttt{\textless{}name\textgreater{}} matches \texttt{"alice"} \\
+\texttt{int} & Non-negative integers & \texttt{\textless{}int:id\textgreater{}} matches \texttt{"42"} \\
+\texttt{float} & Floating-point numbers & \texttt{\textless{}float:value\textgreater{}} matches \texttt{"3.14"} \\
+\texttt{path} & Text including slashes & \texttt{\textless{}path:filename\textgreater{}} matches \texttt{"dir/file.txt"} \\
+\texttt{uuid} & UUID strings & \texttt{\textless{}uuid:token\textgreater{}} matches a valid UUID \\
+\end{longtable}
+}
+
+If the URL contains something that does not match the converter~--- for example, \texttt{/notes/abc} when the pattern is \texttt{/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\textless{}int:note\_id\textgreater{}}~--- Flask returns a \texttt{404\ Not\ Found} response automatically.
+
+\subsection*{Route ordering and conflicts}\phantomsection\label{04-request-handling-paths:route-ordering-and-conflicts}
+
+More specific patterns take precedence over less specific ones. For example:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/latest"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_latest\_note():}
+\NormalTok{    ...}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}A request for \texttt{GET\ /notes/latest} will match the first route (the static string \texttt{"latest"} is more specific than the \texttt{\textless{}int:note\_id\textgreater{}} pattern, which also fails to match because \texttt{"latest"} is not an integer). A request for \texttt{GET\ /notes/42} will match the second route.
+
+Werkzeug builds the route table so that more specific patterns always win over less specific ones, regardless of registration order.
+
+\setcounter{section}{4}
+\section{Binding Handler Functions to Routes}\label{04-request-handling-paths:45-binding-handler-functions-to-routes}
+
+The handler function~--- the Python function that executes when a request matches a route~--- is the heart of the API. It is where the actual work happens.
+
+Flask calls handler functions \textbf{view functions} (a term inherited from the Model-View-Controller pattern). When Flask matches a request to a route, it calls the corresponding view function and uses its return value to construct the HTTP response.
+
+\subsection*{What a handler function receives}\phantomsection\label{04-request-handling-paths:what-a-handler-function-receives}
+
+Handler functions receive their URL variable arguments as keyword arguments:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 4.5}\enspace Handler functions and their arguments}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+    \CommentTok{\# note\_id is automatically extracted from the URL and passed here}
+    \CommentTok{\# It is already an int (Flask applied the converter)}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Fetching note with ID: }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{, type: }\SpecialCharTok{\{}\BuiltInTok{type}\NormalTok{(note\_id)}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+    \CommentTok{\# Output: Fetching note with ID: 42, type: \textless{}class \textquotesingle{}int\textquotesingle{}\textgreater{}}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}For request data (headers, body, query parameters), Flask provides the \texttt{request} object, which is a context-local proxy that automatically refers to the request currently being handled:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 4.6}\enspace Accessing request data in a handler}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, request, jsonify}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+    \CommentTok{\# Request headers}
+\NormalTok{    content\_type }\OperatorTok{=}\NormalTok{ request.headers.get(}\StringTok{"Content{-}Type"}\NormalTok{)}
+
+    \CommentTok{\# Query string parameters: /notes?page=2}
+\NormalTok{    page }\OperatorTok{=}\NormalTok{ request.args.get(}\StringTok{"page"}\NormalTok{, default}\OperatorTok{=}\DecValTok{1}\NormalTok{, }\BuiltInTok{type}\OperatorTok{=}\BuiltInTok{int}\NormalTok{)}
+
+    \CommentTok{\# Request body as JSON}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json()}
+
+    \CommentTok{\# Request body as raw bytes}
+\NormalTok{    raw\_body }\OperatorTok{=}\NormalTok{ request.data}
+
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}
+        \StringTok{"content\_type"}\NormalTok{: content\_type,}
+        \StringTok{"page"}\NormalTok{: page,}
+        \StringTok{"data"}\NormalTok{: data,}
+\NormalTok{    \})}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{What a handler function must return}\phantomsection\label{04-request-handling-paths:what-a-handler-function-must-return}
+
+Flask handler functions must return a value that Flask can convert into an HTTP response. Flask accepts:
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{string}: becomes the response body with a 200 status and \texttt{text/html} content type
+\item
+  A \textbf{\texttt{Response} object}: used as-is
+\item
+  A \textbf{tuple} of \texttt{(body,}\allowbreak{}\texttt{\ status\_code)} or \texttt{(body,}\allowbreak{}\texttt{\ status\_}\allowbreak{}\texttt{code,}\allowbreak{}\texttt{\ headers)}
+\item
+  A \textbf{dictionary}: automatically serialized to JSON (Flask 1.1+)
+\end{itemize}
+
+\noindent{}The most common pattern for APIs is to use \texttt{jsonify()}, which creates a \texttt{Response} object with the correct \texttt{Content-}\allowbreak{}\texttt{Type:}\allowbreak{}\texttt{\ application/}\allowbreak{}\texttt{json} header:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 4.7}\enspace Different return value formats}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, jsonify, Response}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/a"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ returns\_string():}
+    \ControlFlowTok{return} \StringTok{"Hello"}  \CommentTok{\# 200 OK, Content{-}Type: text/html}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/b"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ returns\_json():}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"message"}\NormalTok{: }\StringTok{"Hello"}\NormalTok{\})  }\CommentTok{\# 200 OK, Content{-}Type: application/json}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/c"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ returns\_tuple():}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Not found"}\NormalTok{\}), }\DecValTok{404}  \CommentTok{\# 404 Not Found}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/d"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ returns\_dict():}
+    \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"message"}\NormalTok{: }\StringTok{"Hello"}\NormalTok{\}  }\CommentTok{\# Flask auto{-}converts to JSON (Flask 1.1+)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}For the Notes API, we always use \texttt{jsonify()} to be explicit about the content type.
+
+\setcounter{section}{5}
+\section{Defining Middleware Chains}\label{04-request-handling-paths:46-defining-middleware-chains}
+
+\textbf{Middleware} is code that runs before or after every request, regardless of which route was matched. Middleware is the right place for concerns that apply to all requests: logging, authentication, rate limiting, and request validation.
+
+Flask provides several hooks for registering middleware functions:
+
+\subsection*{\texorpdfstring{\texttt{@app.before\_request}}{@app.before\_request}}\phantomsection\label{04-request-handling-paths:appbefore-request}
+
+Functions decorated with \texttt{@app.before\_request} run before the handler function. They can inspect or modify the request. If they return a value, that value becomes the response and the handler is never called:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 4.8}\enspace A before\_request middleware for request logging}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, request, jsonify, g}
+\ImportTok{import}\NormalTok{ time}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\AttributeTok{@app.before\_request}
+\KeywordTok{def}\NormalTok{ log\_request\_start():}
+    \CommentTok{"""Record when the request started."""}
+\NormalTok{    g.start\_time }\OperatorTok{=}\NormalTok{ time.time()}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"→ }\SpecialCharTok{\{}\NormalTok{request}\SpecialCharTok{.}\NormalTok{method}\SpecialCharTok{\}}\SpecialStringTok{ }\SpecialCharTok{\{}\NormalTok{request}\SpecialCharTok{.}\NormalTok{path}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+\AttributeTok{@app.before\_request}
+\KeywordTok{def}\NormalTok{ require\_json\_for\_post():}
+    \CommentTok{"""Reject POST requests that are not JSON."""}
+    \ControlFlowTok{if}\NormalTok{ request.method }\OperatorTok{==} \StringTok{"POST"}\NormalTok{:}
+        \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ request.is\_json:}
+            \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Content{-}Type must be application/json"}\NormalTok{\}), }\DecValTok{415}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Two \texttt{@before\_request} functions are registered here. Flask calls them in registration order. If \texttt{require\_json\_for\_post} returns a response, Flask skips the handler and any remaining \texttt{before\_request} functions; the \texttt{after\_request} functions still run on that response before it is sent.
+
+\subsection*{\texorpdfstring{\texttt{@app.after\_request}}{@app.after\_request}}\phantomsection\label{04-request-handling-paths:appafter-request}
+
+Functions decorated with \texttt{@app.after\_request} run after the handler returns a response. They receive the response object and must return it (possibly modified):
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 4.9}\enspace An after\_request middleware for logging and headers}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.after\_request}
+\KeywordTok{def}\NormalTok{ log\_request\_end(response):}
+    \CommentTok{"""Log the request duration and add a response header."""}
+\NormalTok{    duration }\OperatorTok{=}\NormalTok{ time.time() }\OperatorTok{{-}}\NormalTok{ g.start\_time}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"← }\SpecialCharTok{\{}\NormalTok{response}\SpecialCharTok{.}\NormalTok{status\_code}\SpecialCharTok{\}}\SpecialStringTok{ in }\SpecialCharTok{\{}\NormalTok{duration }\OperatorTok{*} \DecValTok{1000}\SpecialCharTok{:.1f\}}\SpecialStringTok{ms"}\NormalTok{)}
+
+    \CommentTok{\# Add a custom header to every response}
+\NormalTok{    response.headers[}\StringTok{"X{-}Response{-}Time{-}Ms"}\NormalTok{] }\OperatorTok{=} \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{duration }\OperatorTok{*} \DecValTok{1000}\SpecialCharTok{:.1f\}}\SpecialStringTok{"}
+    \ControlFlowTok{return}\NormalTok{ response}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{\texorpdfstring{\texttt{@app.teardown\_request}}{@app.teardown\_request}}\phantomsection\label{04-request-handling-paths:appteardown-request}
+
+Functions decorated with \texttt{@app.teardown\_request} run after every request, even if an exception occurred. They are used for cleanup (closing database connections, releasing resources):
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 4.10}\enspace Teardown for database connection cleanup}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.teardown\_request}
+\KeywordTok{def}\NormalTok{ close\_db\_connection(exception):}
+    \CommentTok{"""Close the database connection if one was opened."""}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ g.pop(}\StringTok{"db"}\NormalTok{, }\VariableTok{None}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ db }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+\NormalTok{        db.close()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{\texorpdfstring{Flask's \texttt{g} object}{Flask's g object}}\phantomsection\label{04-request-handling-paths:flasks-g-object}
+
+You saw \texttt{g} in Listing 4.8 and 4.10. \texttt{g} is Flask's \textbf{request context global}~--- a storage object that lives for exactly one request. Unlike Python module-level variables (which persist across all requests), \texttt{g} is fresh for each request and discarded after the response is sent.
+
+\texttt{g} is how you share data between \texttt{before\_request}, the handler, and \texttt{after\_request} without using global variables. In Listing 4.8, \texttt{g.start\_time} is set in \texttt{log\_request\_start} and read in \texttt{log\_request\_end}. This is safe even with multiple simultaneous requests because each request has its own \texttt{g} object.
+
+\subsection*{The middleware execution order}\phantomsection\label{04-request-handling-paths:the-middleware-execution-order}
+
+\begin{diagrambox}[short]{377.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Request arrives
+      │
+      ▼
+before_request functions (in registration order)
+      │
+      │ (if any before_request function returns a value, skip to after_request)
+      │
+      ▼
+Handler function (view function)
+      │
+      ▼
+after_request functions (in reverse registration order)
+      │
+      ▼
+teardown_request functions (always runs, even on exception)
+      │
+      ▼
+Response sent to client
+\end{Verbatim}
+\end{diagrambox}
+
+\setcounter{section}{6}
+\section{\texorpdfstring{Testing Locally: \texttt{curl}, Postman, and the Browser}{Testing Locally: curl, Postman, and the Browser}}\label{04-request-handling-paths:47-testing-locally-curl-postman-and-the-browser}
+
+Before connecting any frontend, before deploying anywhere, before writing more code~--- test every route locally. This is the fastest feedback loop you have.
+
+\subsection*{Starting the Notes API}\phantomsection\label{04-request-handling-paths:starting-the-notes-api}
+
+Here is the full Notes API at this stage of the book, incorporating everything from Chapters 2 and 4:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 4.11}\enspace The Notes API with full routing and middleware (app.py)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, request, jsonify, g}
+\ImportTok{import}\NormalTok{ sqlite3}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ time}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\NormalTok{DATABASE\_PATH }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_PATH"}\NormalTok{, }\StringTok{"notes.db"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ get\_db():}
+    \CommentTok{"""Get the database connection for this request."""}
+    \ControlFlowTok{if} \StringTok{"db"} \KeywordTok{not} \KeywordTok{in}\NormalTok{ g:}
+\NormalTok{        g.db }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_PATH)}
+\NormalTok{        g.db.row\_factory }\OperatorTok{=}\NormalTok{ sqlite3.Row  }\CommentTok{\# Return rows as dict{-}like objects}
+    \ControlFlowTok{return}\NormalTok{ g.db}
+
+\KeywordTok{def}\NormalTok{ init\_db():}
+    \CommentTok{"""Create the notes table if it does not exist."""}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_PATH)}
+\NormalTok{    conn.execute(}\StringTok{"""}
+\StringTok{        CREATE TABLE IF NOT EXISTS notes (}
+\StringTok{            id INTEGER PRIMARY KEY AUTOINCREMENT,}
+\StringTok{            content TEXT NOT NULL,}
+\StringTok{            created\_at TIMESTAMP DEFAULT CURRENT\_TIMESTAMP}
+\StringTok{        )}
+\StringTok{    """}\NormalTok{)}
+\NormalTok{    conn.commit()}
+\NormalTok{    conn.close()}
+
+\NormalTok{init\_db()  }\CommentTok{\# Runs at startup — also when a server such as Gunicorn imports this file}
+
+\CommentTok{\# ── Middleware ─────────────────────────────────────────────────────────────}
+
+\AttributeTok{@app.before\_request}
+\KeywordTok{def}\NormalTok{ start\_timer():}
+\NormalTok{    g.start\_time }\OperatorTok{=}\NormalTok{ time.time()}
+
+\AttributeTok{@app.before\_request}
+\KeywordTok{def}\NormalTok{ require\_json\_for\_writes():}
+    \ControlFlowTok{if}\NormalTok{ request.method }\KeywordTok{in}\NormalTok{ (}\StringTok{"POST"}\NormalTok{, }\StringTok{"PUT"}\NormalTok{, }\StringTok{"PATCH"}\NormalTok{) }\KeywordTok{and} \KeywordTok{not}\NormalTok{ request.is\_json:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Content{-}Type must be application/json"}\NormalTok{\}), }\DecValTok{415}
+
+\AttributeTok{@app.after\_request}
+\KeywordTok{def}\NormalTok{ add\_timing\_header(response):}
+\NormalTok{    duration\_ms }\OperatorTok{=}\NormalTok{ (time.time() }\OperatorTok{{-}}\NormalTok{ g.start\_time) }\OperatorTok{*} \DecValTok{1000}
+\NormalTok{    response.headers[}\StringTok{"X{-}Response{-}Time{-}Ms"}\NormalTok{] }\OperatorTok{=} \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{duration\_ms}\SpecialCharTok{:.1f\}}\SpecialStringTok{"}
+    \ControlFlowTok{return}\NormalTok{ response}
+
+\AttributeTok{@app.teardown\_request}
+\KeywordTok{def}\NormalTok{ close\_db(exception):}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ g.pop(}\StringTok{"db"}\NormalTok{, }\VariableTok{None}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ db }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+\NormalTok{        db.close()}
+
+\CommentTok{\# ── Routes ─────────────────────────────────────────────────────────────────}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/health"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ health\_check():}
+    \CommentTok{"""A simple health check endpoint."""}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"status"}\NormalTok{: }\StringTok{"ok"}\NormalTok{\})}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \CommentTok{"""Return all notes."""}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.execute(}\StringTok{"SELECT id, content, created\_at FROM notes ORDER BY id DESC"}\NormalTok{)}
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [}\BuiltInTok{dict}\NormalTok{(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: notes, }\StringTok{"count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(notes)\})}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+    \CommentTok{"""Create a new note."""}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)  }\CommentTok{\# None if the body is not valid JSON}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(data, }\BuiltInTok{dict}\NormalTok{):}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Request body must be a JSON object"}\NormalTok{\}), }\DecValTok{400}
+
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ data.get(}\StringTok{"content"}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(content, }\BuiltInTok{str}\NormalTok{) }\KeywordTok{or} \KeywordTok{not}\NormalTok{ content.strip():}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"content is required and cannot be empty"}\NormalTok{\}), }\DecValTok{400}
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ content.strip()}
+
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.execute(}\StringTok{"INSERT INTO notes (content) VALUES (?)"}\NormalTok{, (content,))}
+\NormalTok{    db.commit()}
+
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"id"}\NormalTok{: cursor.lastrowid, }\StringTok{"content"}\NormalTok{: content\}), }\DecValTok{201}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+    \CommentTok{"""Return a specific note by ID."""}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.execute(}
+        \StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ?"}\NormalTok{, (note\_id,)}
+\NormalTok{    )}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+    \ControlFlowTok{return}\NormalTok{ jsonify(}\BuiltInTok{dict}\NormalTok{(row))}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ delete\_note(note\_id):}
+    \CommentTok{"""Delete a note by ID."""}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.execute(}\StringTok{"DELETE FROM notes WHERE id = ?"}\NormalTok{, (note\_id,))}
+\NormalTok{    db.commit()}
+    \ControlFlowTok{if}\NormalTok{ cursor.rowcount }\OperatorTok{==} \DecValTok{0}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"message"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ deleted"}\NormalTok{\})}
+
+\CommentTok{\# ── Entry point ────────────────────────────────────────────────────────────}
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    app.run(debug}\OperatorTok{=}\VariableTok{True}\NormalTok{, host}\OperatorTok{=}\StringTok{"localhost"}\NormalTok{, port}\OperatorTok{=}\DecValTok{5000}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Save this as \texttt{app.py} in a directory called \texttt{notes-api}. Then create a virtual environment, install Flask into it, and start the server (Chapter 6 explains virtual environments in detail~--- on many systems a plain \texttt{pip\ install} outside one is refused):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ venv venv}
+\BuiltInTok{source}\NormalTok{ venv/bin/activate}
+\ExtensionTok{pip}\NormalTok{ install flask}
+\ExtensionTok{python}\NormalTok{ app.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}You should see:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+ * Serving Flask app 'app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://localhost:5000
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 123-456-789
+\end{Verbatim}
+\end{outputbox}
+
+\begin{notebox}
+
+\textbf{Note:} With debug mode on, Flask pretty-prints JSON responses over several lines. With debug mode off~--- as in production~--- it sends the same JSON compactly on one line. Either way, Flask sorts the keys alphabetically. This book shows the compact form.
+
+\end{notebox}
+
+\subsection*{\texorpdfstring{Testing with \texttt{curl}}{Testing with curl}}\phantomsection\label{04-request-handling-paths:testing-with-curl}
+
+\texttt{curl} is a command-line tool for making HTTP requests. It is available on macOS, Linux, and Windows (via WSL or natively in recent Windows versions).
+
+\textbf{Check that the server is running:}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ http://localhost:5000/health}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected output:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}\DataTypeTok{"status"}\FunctionTok{:}\StringTok{"ok"}\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Create a note:}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ POST http://localhost:5000/notes }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"content": "Buy groceries"\}\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected output:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}\DataTypeTok{"content"}\FunctionTok{:}\StringTok{"Buy groceries"}\FunctionTok{,}\DataTypeTok{"id"}\FunctionTok{:}\DecValTok{1}\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{List all notes:}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ http://localhost:5000/notes}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected output:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}\DataTypeTok{"count"}\FunctionTok{:}\DecValTok{1}\FunctionTok{,}\DataTypeTok{"notes"}\FunctionTok{:}\OtherTok{[}\FunctionTok{\{}\DataTypeTok{"content"}\FunctionTok{:}\StringTok{"Buy groceries"}\FunctionTok{,}\DataTypeTok{"created\_at"}\FunctionTok{:}\StringTok{"2024{-}01{-}01 12:00:00"}\FunctionTok{,}\DataTypeTok{"id"}\FunctionTok{:}\DecValTok{1}\FunctionTok{\}}\OtherTok{]}\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Get a specific note:}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ http://localhost:5000/notes/1}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Try to get a note that does not exist:}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ http://localhost:5000/notes/999}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected output:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}\DataTypeTok{"error"}\FunctionTok{:}\StringTok{"Note 999 not found"}\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}HTTP status: 404
+
+\textbf{Delete a note:}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ DELETE http://localhost:5000/notes/1}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected output:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}\DataTypeTok{"message"}\FunctionTok{:}\StringTok{"Note 1 deleted"}\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Try to POST without the correct Content-Type (middleware should reject it):}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ POST http://localhost:5000/notes }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"content": "test"\}\textquotesingle{}}
+\CommentTok{\# Missing Content{-}Type: application/json header}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected output:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}\DataTypeTok{"error"}\FunctionTok{:}\StringTok{"Content{-}Type must be application/json"}\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}HTTP status: 415
+
+Each of these tests exercises a different route and a different code path. Testing this way~--- with \texttt{curl}~--- gives you the exact HTTP request and response, including status codes and headers. It is the most direct way to verify your API behaves as expected.
+
+\subsection*{\texorpdfstring{Viewing headers with \texttt{curl\ -i}}{Viewing headers with curl -i}}\phantomsection\label{04-request-handling-paths:viewing-headers-with-curl--i}
+
+Adding \texttt{-i} to a \texttt{curl} command shows response headers, which is important for verifying your middleware worked:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl} \AttributeTok{{-}i}\NormalTok{ http://localhost:5000/health}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+HTTP/1.1 200 OK
+Server: Werkzeug/3.0.1 Python/3.11.8
+Date: Mon, 01 Jan 2024 12:00:00 GMT
+Content-Type: application/json
+Content-Length: 16
+X-Response-Time-Ms: 0.8
+Connection: close
+
+{"status":"ok"}
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The \texttt{X-Response-Time-Ms} header confirms that the \texttt{after\_request} middleware ran and added the timing information.
+
+\subsection*{Testing with Postman}\phantomsection\label{04-request-handling-paths:testing-with-postman}
+
+\textbf{Postman} is a graphical tool for testing APIs. It provides a visual interface for constructing requests, viewing responses, and saving test cases.
+
+To test the Notes API in Postman:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Open Postman and create a new request
+\item
+  Set the method to \texttt{POST} and the URL to \texttt{http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{localhost:}\allowbreak{}\texttt{5000/}\allowbreak{}\texttt{notes}
+\item
+  Go to the ``Body'' tab, select ``raw'' and ``JSON''
+\item
+  Enter \texttt{\{"content":}\allowbreak{}\texttt{\ "Learn\ Flask"\}} in the body
+\item
+  Click ``Send''
+\end{enumerate}
+
+\noindent{}Postman shows the response body, status code, response time, and headers in separate panes. It is particularly useful when:
+
+\begin{itemize}
+\tightlist
+\item
+  Constructing complex request bodies
+\item
+  Testing with authentication headers
+\item
+  Organizing multiple requests into a collection for repeated testing
+\end{itemize}
+
+\subsection*{Testing with the browser}\phantomsection\label{04-request-handling-paths:testing-with-the-browser}
+
+For \texttt{GET} requests, the browser is the simplest tool. With the server running, open:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{localhost:}\allowbreak{}\texttt{5000/}\allowbreak{}\texttt{health}
+\item
+  \texttt{http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{localhost:}\allowbreak{}\texttt{5000/}\allowbreak{}\texttt{notes}
+\item
+  \texttt{http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{localhost:}\allowbreak{}\texttt{5000/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{1}
+\end{itemize}
+
+\noindent{}The browser will display the JSON response body. For \texttt{POST}, \texttt{PUT}, and \texttt{DELETE} requests, you need either \texttt{curl} or Postman~--- the browser's address bar only makes \texttt{GET} requests.
+
+\unnumberedsection{false}{The Route Table After Listing 4.11}\label{04-request-handling-paths:the-route-table-after-listing-411}
+
+After running the application in Listing 4.11, Flask's route table looks like this:
+
+\begin{diagrambox}[short]{312.5pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Route Pattern            Methods               Handler
+─────────────────────────────────────────────────────────────────
+/health                  GET, HEAD, OPTIONS    health_check
+/notes                   GET, HEAD, OPTIONS    list_notes
+/notes                   OPTIONS, POST         create_note
+/notes/<int:note_id>     GET, HEAD, OPTIONS    get_note
+/notes/<int:note_id>     DELETE, OPTIONS       delete_note
+/static/<path:filename>  GET, HEAD, OPTIONS    static (built-in)
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}When a request arrives:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Flask extracts the method and path
+\item
+  Flask matches against this table using Werkzeug's URL matcher
+\item
+  Flask retrieves the handler function for the matching endpoint
+\item
+  Flask calls the handler, passing any URL variables as arguments
+\end{enumerate}
+
+\noindent{}This table is the API. It is the contract. Everything that happens from this point forward~--- deployment, networking, production operations~--- exists to make this contract available to the outside world.
+
+\phantomsection\label{04-request-handling-paths:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{route} maps a URL path and HTTP method combination to a Python handler function. Routes define the API's contract.
+\item
+  \textbf{\texttt{@app.route()}} is a decorator that calls Flask's \texttt{add\_url\_rule()} internally, registering the handler in Flask's URL map and view function registry.
+\item
+  \textbf{HTTP methods} (GET, POST, PUT, DELETE) describe what operation the client wants to perform. Use GET to read, POST to create, PUT to replace, DELETE to remove.
+\item
+  \textbf{URL variable converters} (\texttt{\textless{}int:note\_id\textgreater{}}) extract and type-convert parts of the URL path, passing them to handler functions as arguments. Invalid conversions produce automatic 404 responses.
+\item
+  Flask builds a \textbf{Werkzeug \texttt{Map}} (the route table) during initialization. It is complete before the first request arrives.
+\item
+  \textbf{Middleware} (\texttt{@before\_request}, \texttt{@after\_request}, \texttt{@teardown\_request}) runs around every request. It is the right place for cross-cutting concerns like logging, authentication, and resource cleanup.
+\item
+  Flask's \texttt{g} object stores request-scoped data safely, even with multiple concurrent requests.
+\item
+  Test every route locally with \texttt{curl\ -}\allowbreak{}\texttt{X\ METHOD\ URL\ -}\allowbreak{}\texttt{H\ "Header"\ -}\allowbreak{}\texttt{d\ "body"} before doing anything else.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{04-request-handling-paths:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} What status code does \texttt{curl\ -}\allowbreak{}\texttt{X\ PATCH\ -}\allowbreak{}\texttt{H\ \textquotesingle{}Content-}\allowbreak{}\texttt{Type:}\allowbreak{}\texttt{\ application/}\allowbreak{}\texttt{json\textquotesingle{}\ -}\allowbreak{}\texttt{d\ \textquotesingle{}\{\}\textquotesingle{}\ http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{127.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{1:}\allowbreak{}\texttt{5000/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{1} return, and which part of Flask produces it? Then try it without the header.
+\item
+  \textbf{Break and fix.} Register two handlers for the same method and path. What happens at start-up, and which one handles requests? Fix it so that each has a distinct route.
+\item
+  \textbf{Extend.} Add \texttt{GET\ /notes/count} returning \texttt{\{"count":\ n\}}. Make sure it does not collide with \texttt{GET\ /}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\textless{}int:}\allowbreak{}\texttt{note\_}\allowbreak{}\texttt{id\textgreater{}}, and prove it with \texttt{curl}.
+\item
+  \textbf{Explain.} Why is a route ``part of the API's contract'', and what goes wrong if you rename one after clients start using it?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-04.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{04-request-handling-paths:whats-next}
+
+The routes are defined. The handler functions are registered. Middleware is in place. The server is running and the route table is ready.
+
+Now a request actually arrives. The next chapter traces exactly what happens from the moment \texttt{accept()} returns a connection to the moment \texttt{send()} delivers the response~--- the complete internal execution path of a single API request.
+
+\noindent{}→ \hyperref[ch:05-internal-request-execution]{Chapter 5}~--- Internal Request Execution: The Local API Flow

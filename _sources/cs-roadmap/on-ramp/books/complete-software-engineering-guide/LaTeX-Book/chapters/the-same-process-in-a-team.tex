@@ -1,0 +1,315 @@
+\unnumberedchapter{The Same Process in a Real Team}\label{ch:the-same-process-in-a-team}
+
+\chaptersubtitle{What you did alone, as a team does it --- and the same map laid over any
+kind of software}
+
+\chapterrule
+
+You have now been around the loop from \hyperref[ch:how-software-gets-built]{How Software Gets Built} once, from start to finish, entirely on your own. Every job was yours. You decided what to build and wrote the plan. You wrote the code and its tests, packaged it, rented a machine, deployed to it and gave it a name. Then you watched it, secured it, scaled it, and saw how it would grow into many services. That was deliberate: doing every job once is the only way to see how the jobs connect.
+
+Real software is rarely built by one person. This chapter replays the same journey with a team. It shows who does each step, what they hand to each other, and where things go wrong between them. Then it lays the same map over other kinds of software, to show what stays the same when the technology changes. You will not meet many new techniques here. You will see the techniques you already know from a new angle: as the way a group of people builds one thing together.
+
+\unnumberedsection{true}{The Team}\label{the-same-process-in-a-team:the-team}
+
+Imagine a small company that has grown the Notes API into a product. People use it through a website and a phone app, and both talk to the API. The people who build it:
+
+\Needspace{29\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3118}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1290}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5591}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Role
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+How many
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What they own
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Product manager & 1 & what gets built, and why; what comes first \\
+Designer & 1 & what users see and do, on the website and the app \\
+Tech lead & 1 & the design of the whole system; also writes backend code \\
+Backend engineers & 2 & the Notes API, its database and its background workers \\
+Frontend engineer & 1 & the website \\
+Mobile engineer & 1 & the phone app \\
+Platform engineer & shared & the road to production: automatic checks, packaging, servers, deployment \\
+Site reliability engineer & shared & reliability; leading the response when something breaks \\
+Security engineer & shared & reviews of anything that touches access, data or secrets \\
+Engineering manager & 1 & the people, their priorities, and how the team works \\
+\end{longtable}
+}
+
+Eight people, five of whom write code for this product, plus three specialists shared with the rest of the company. It is a very ordinary team. Every job you did alone in this book belongs to at least one of them.
+
+\unnumberedsection{true}{The First Version, as a Team}\label{the-same-process-in-a-team:the-first-version-as-a-team}
+
+Here is the first trip around the loop, as this team would make it.
+
+\textbf{Discover.} The product manager spends two weeks with people who take notes for their work. The aim is to learn what they do today, what annoys them, and what they would pay for. The designer sketches screens on paper and tries them with five of those people. The tech lead joins a few of the conversations to spot, early, the ideas that would be very expensive to build. The result is a one-page \textbf{problem statement}. It says who has the problem, what ``solved'' means in measurable terms, and what is out of scope for the first version (no sharing, no attachments). The whole team reads it and questions it before anyone plans anything. This is \hyperref[ch:product-discovery]{Part I}, done by several people instead of one.
+
+\textbf{Plan.} The tech lead writes the \textbf{design document} (\hyperref[ch:project-planning-guide]{Part II}). It names the pieces: the API, its database, the website and the app. It describes the data and how the service will be run. Most importantly, it defines the \textbf{API contract} early: the exact requests the API accepts and the answers it gives. Three groups will build against that contract at the same time~--- backend, web and mobile~--- so it has to be settled first. \hyperref[ch:34-response-handling]{Chapter 34} (section 34.10) explains why a contract is so hard to change once others depend on it. Big decisions go into \textbf{decision records} (\hyperref[ch:39-local-vs-production]{Chapter 39}), such as which database to use and why.
+
+Before any code is written, others review the design. The platform engineer asks whether the service can be run on the company's usual setup. The security engineer asks what could go wrong: who might attack it, and what they would want (\hyperref[ch:38-security]{Chapter 38}). Finally, the work is cut into small pieces, often called \textbf{tickets}. Each takes a few days and has a clear definition of ``done''.
+
+\textbf{Code.} Each backend engineer takes a ticket. They work on a separate copy of the code (a \textbf{branch}) and open a \textbf{pull request}, a proposed change that others can see. The automatic checks run the tests and code-quality tools on it (\hyperref[ch:17-build-process]{Chapter 17}). Another engineer reads the change and approves it or asks for changes. Only then is it merged into the main code. The shared conventions and review habits of \hyperref[ch:writing-good-code]{Part III} are what let several people change one codebase without stepping on each other.
+
+Meanwhile, the frontend and mobile engineers build their screens against the agreed contract. Until the real API exists, they use a stand-in that returns realistic answers. Because the contract was settled first, nobody waits for anybody.
+
+\textbf{Ship.} In a company this size, nobody builds the road to production from scratch for each service. The platform engineer built it once, and every team uses it: the automatic pipeline, the container image, the package store and the deployment scripts. These are the things you built yourself in Stages 4 to 6.
+
+The backend team's job is to keep its service \emph{shippable}: dependencies pinned, configuration outside the code, a health check that tells the truth. Each change goes first to \textbf{staging}, a copy of production with no real users, and then to production. The public name, the certificates and the front door (Stage 7) are usually shared, and the platform team runs them for everyone.
+
+The website ships the moment it is ready. The phone app ships differently. It goes through the app store's review, which can take days, and reaches users only as they update.
+
+\textbf{Launch.} The first version goes to a small group of users first. The team measures it against the success criteria in the problem statement. It is not ``done'' when the code is merged. It is done when users have the problem solved.
+
+\textbf{Run.} Each team runs what it builds. The backend team owns the dashboards and alerts for the API (\hyperref[ch:35-observability]{Chapter 35}). One backend engineer at a time is \textbf{on call} for a week and is woken if an alert fires. When something breaks, the on-call engineer's first job is to stop the harm, not to find the perfect fix. For a serious incident, the SRE joins and coordinates. The team keeps a \textbf{runbook} for each alert: step-by-step instructions written in daylight for the person reading them at 3 a.m. After every serious incident comes a blameless \textbf{postmortem}. Both are in \hyperref[ch:37-reliability]{Chapter 37}.
+
+\textbf{Learn.} The product manager reads the usage numbers and the support messages. Follow-up work from the postmortems becomes tickets. Requests from users go into the next round of discovery, and the loop begins again.
+
+\unnumberedsection{true}{Where Hand-offs Break}\label{the-same-process-in-a-team:where-hand-offs-break}
+
+Most problems in a team come from the gaps \emph{between} steps and \emph{between} people, not from inside them. One person can do each step well and the team can still fail. The problem statement said one thing and the design assumed another, or the code worked on the author's laptop and nowhere else.
+
+The table below lists the seams you have seen in this book. For each one it gives the failure that happens there and the practice that protects it.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1465}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3312}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3312}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1911}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Seam
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What goes wrong there
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+The practice that protects it
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Where in this book
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Discover → Plan & a well-built answer to the wrong question & a written problem statement with success criteria and scope & Part I; Part II, Section 1 \\
+Plan → Code & engineers build different ideas; the pieces do not fit & a design document; the API contract agreed before building & Part II; section 34.10 \\
+Engineer → engineer & code only its author understands & code review, shared conventions, tests & Part III; Chapter 17 \\
+Laptop → server & ``it works on my machine'' & pinned dependencies, configuration outside the code, containers & Stages 2--4 \\
+Build → release & what runs in production is not what was tested & one versioned package, promoted unchanged & Chapters 18, 19 and 23 \\
+Ship → Run & the system is handed to people who cannot see inside it & health checks, logs, metrics, runbooks & Chapters 25, 35 and 37 \\
+Backend ↔ clients & a change breaks the website, or old copies of the app & a versioned contract; changes that only add & section 34.10 \\
+Today → next year & nobody remembers why it was built this way & decision records and a changelog & Chapter 39 \\
+Run → Learn & the same failure happens again & blameless postmortems, with follow-up work that gets done & Chapter 37 \\
+\end{longtable}
+}
+
+This table is the real reason the book is full of \emph{practices}. Each one exists because some hand-off failed often enough, at enough companies, that people found a way to protect it. When a practice feels like bureaucracy, find the hand-off it protects. Then decide whether your team actually has that hand-off. A practice without a hand-off to protect usually \emph{is} bureaucracy.
+
+\unnumberedsection{true}{A Change to a Live System}\label{the-same-process-in-a-team:a-change-to-a-live-system}
+
+After launch, almost all of a team's work is changing the live system. Here is one change, followed through the loop: \textbf{letting a user share a note with a colleague.}
+
+\textbf{Day 1~--- Learn → Discover.} Many users have asked for sharing, and the support messages show it. The product manager writes a short problem statement: who needs it, why, and what ``done'' looks like. Editing a shared note is out of scope, and so is sharing with people outside the company.
+
+\textbf{Day 2~--- Plan.} The designer sketches the ``share'' flow. The tech lead writes a one-page design with three parts:
+
+\begin{itemize}
+\tightlist
+\item
+  a new database table recording which notes are shared with whom;
+\item
+  two new API requests, one to share a note and one to list what has been shared with you;
+\item
+  a change to the rule for who may read a note.
+\end{itemize}
+
+\noindent{}The security engineer reviews it within the hour, because a shared note must never be visible to anyone it was not shared with (\hyperref[ch:38-security]{Chapter 38}). The web and mobile engineers agree the additions to the contract.
+
+\textbf{Days 3--6~--- Code and Ship, in small steps.} The backend engineer does the work in stages:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  First, a database change that only \emph{adds} a table, so the code already running is not affected (\hyperref[ch:33-logic-execution]{Chapter 33}).
+\item
+  Then the new requests, with their tests. One test checks that a user who was not given access gets ``not found'', exactly as if the note did not exist.
+\item
+  Each step goes in as its own small pull request, which is reviewed, checked, merged and released on its own.
+\end{enumerate}
+
+\noindent{}The new feature reaches production switched off. It is hidden behind a setting called a \textbf{feature flag}, so code can be released before users see it.
+
+\textbf{Days 4--8~--- the clients.} The web and mobile engineers build the screens against the agreed contract. The website change goes live the day it is finished. The app update goes to store review and reaches users over the next few weeks. Meanwhile, older copies of the app know nothing about sharing, and they must keep working. That is why the contract only gained new requests, and nothing existing changed.
+
+\textbf{Day 9~--- Run.} The flag is turned on for one user in twenty. The team watches the dashboards for errors and slow requests. Two days later, it is turned on for everyone.
+
+\textbf{The weeks after~--- Learn.} The product manager sees how many people share notes. Support notices a new request: people want colleagues to be able to \emph{edit} shared notes. That becomes the next trip around the loop.
+
+Look at what happened. The change went through every step of the loop and involved seven people, yet no single step was big. That is what a healthy change loop looks like. The steps are small and safe, the hand-offs are clear, and the system is never broken in between.
+
+\unnumberedsection{true}{The Rituals, and What They Are For}\label{the-same-process-in-a-team:the-rituals-and-what-they-are-for}
+
+Teams have regular meetings and habits. From outside they can look like overhead. Each one, though, serves a hand-off or the Learn arrow:
+
+\Needspace{26\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2103}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3008}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4889}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Ritual
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+How often
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What it is for on the map
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Planning & every week or two & choosing which pieces of work come next (Plan → Code) \\
+Stand-up & daily, a few minutes & finding out who is stuck (engineer ↔ engineer) \\
+Design review & before any large change & checking a design before code exists (Plan → Code) \\
+Code review & every change & a second pair of eyes on everything (engineer → engineer) \\
+Release & many times a day, ideally & a change reaching users (Code → Ship) \\
+On-call hand-over & weekly & telling the next person what is fragile (Run → Run) \\
+Postmortem & after every serious incident & turning a failure into lessons (Run → Learn) \\
+Retrospective & every few weeks & looking at how the team works, not what it built (Learn, applied to the team itself) \\
+\end{longtable}
+}
+
+This book does not teach how to run these meetings well; that belongs to books about teams and process. You do now know where each one sits on the map, and what goes wrong when it is skipped.
+
+\unnumberedsection{true}{The Same Map, for Any Application}\label{the-same-process-in-a-team:the-same-map-for-any-application}
+
+The Notes API is a backend service. Here is the same loop for four other common kinds of software:
+
+\Needspace{28\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1360}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2160}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2160}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2160}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2160}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Step
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Website
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Phone app
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Data pipeline
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Library or installed software
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Discover & users and their problem & the same, plus where and when people use their phones & the ``users'' are the people who need the numbers & the users are other developers \\
+Plan & screens and flows, as well as the API & also: working offline, small screens, slow networks & where the data comes from, how often, how it is checked & the public interface, the hardest part to change later \\
+Code & code for the browser and the backend & code for the phone and the backend & the steps that clean and combine data, and checks on the data itself & the library itself, its tests and examples \\
+Ship & every user gets the new version at once & store review; users update slowly & each scheduled run is, in effect, a release & publish a numbered release \\
+Run & everything in this book, plus errors in users' browsers & crash reports from devices you cannot reach & ``is the data fresh and correct?'' & you do not run it; bug reports and support \\
+Learn & how people use the pages & store reviews and crash rates & are the numbers used, and trusted? & issues, questions, downloads \\
+\end{longtable}
+}
+
+What never changes is even more useful than what does:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{The loop.} Every kind of software is discovered, planned, coded, shipped, run and learned from.
+\item
+  \textbf{The workshop.} A code repository, automatic checks, versioned releases, monitoring and written decisions appear everywhere, under different names.
+\item
+  \textbf{Contracts between pieces.} Wherever two teams or two programs meet, there is an agreement about what one gives the other, and changing it safely follows the same rules.
+\item
+  \textbf{Observing what is real.} Every team needs to see what its software is actually doing in the hands of real users.
+\end{itemize}
+
+\noindent{}That is why what you learned from one small API carries over to software you have never seen.
+
+\unnumberedsection{true}{Where Specialists Sit}\label{the-same-process-in-a-team:where-specialists-sit}
+
+Every specialty in software is a close-up of one region of the map:
+
+\Needspace{15\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3067}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6933}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Specialty
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Its region of the map
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Frontend and mobile & the client, in depth \\
+Backend & the program, the data and the helpers, plus the contract every client depends on \\
+Platform and DevOps & the workshop, and Ship \\
+Site reliability & Run \\
+Data & the data, and Learn \\
+Security & a thread through every step and every piece \\
+Product and design & Discover and Plan \\
+\end{longtable}
+}
+
+Specialists go deep, and they should. The map is what lets them talk to one another. The people who end up leading technical work are usually those who carry the whole map, and who can talk with each role about its own region. Leading technical work is mostly a matter of managing the seams.
+
+Backend is an especially good place to stand while you learn the whole map. The program sits in the middle of all the pieces. Its contract is where the clients, the data and the platform meet, and its failures show up in every other role's work.
+
+\unnumberedsection{true}{Using the Map from Now On}\label{the-same-process-in-a-team:using-the-map-from-now-on}
+
+The map is not only for reading this book. Use it at work, in four situations:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Joining a team.} First place the team on the map. Which regions does it own? What does it receive, and from whom? What does it hand over, and to whom? Then use the questions in \hyperref[ch:44-appendices-5]{Appendix E} to learn the system itself.
+\item
+  \textbf{Meeting a new tool or practice.} Ask the four questions from the opening chapter: when, where, who and why. A tool you cannot place is a tool you do not yet understand.
+\item
+  \textbf{In a meeting that goes nowhere.} Ask which step of the loop the discussion belongs to. Many unproductive meetings are two people in different steps talking past each other. For example, one is still deciding \emph{whether} to build something (Discover) while the other is arguing about \emph{how} (Plan).
+\item
+  \textbf{Learning something new.} Go deep on one region at a time, and keep the map in view while you do. Depth attached to the map becomes understanding. Depth without it becomes another pile of disconnected facts, and that pile is where this book began.
+\end{itemize}
+
+\unnumberedsection{true}{Where to Go Next}\label{the-same-process-in-a-team:where-to-go-next}
+
+This book went deep on one region of the map, the backend, and walked the whole loop around it. Here is where to go from here. The directions are ordered by how directly they build on what you now have. Each one comes with a first project built on the Notes API, because extending a system you understand teaches faster than starting from nothing.
+
+\textbf{Go deeper where you stand.} Most backend work is data work. Learn how PostgreSQL stores, indexes and plans (\emph{Use The Index, Luke}, then \emph{Designing Data-Intensive Applications}, both in \hyperref[ch:44-appendices-4]{Appendix D}). \emph{First project:} load a million notes, find the three slowest queries with \texttt{pg\_stat\_statements}, and make each one ten times faster, measuring before and after (section 36.2).
+
+\textbf{Own the client.} Every API exists for its clients, and building one shows you your API from the other side: the error you thought was clear, the pagination that is awkward to use. Learn enough HTML, CSS and JavaScript to write a small web page that calls an API (the MDN Web Docs are the reference). \emph{First project:} a one-page client for the Notes API, with login, a list, and search. You will meet CORS, where to keep a token in a browser, and why \texttt{openapi.yaml} matters to the people on the other side.
+
+\textbf{Hand over the workshop.} You ran everything yourself on one server. The next step is to let a platform run parts of it. Chapter 43 introduced both halves. \textbf{Kubernetes} runs containers across a fleet from a declaration of what you want, and \textbf{Terraform} declares the machines, networks and databases themselves. \emph{First project:} run the Notes API and its worker in a local Kubernetes cluster (kind or minikube), with the migration as a Job that runs before the Deployment. Then write the Terraform for the server and firewall of Chapters 20 to 22, and destroy and recreate them.
+
+\textbf{Use a cloud provider's managed pieces.} Replace one piece you ran by hand with a managed service: a managed PostgreSQL, with backups and failover you no longer have to operate; object storage for files; a managed queue. Each one trades control and money for time. \emph{First project:} move the database to a managed PostgreSQL, and write down exactly what you no longer have to do, and what you can no longer do.
+
+\textbf{Split a service, only when there is a reason.} Microservices solve problems of \emph{teams} and of scale, and they add every problem of Chapter 40. Learn them by doing one split for a real reason. \emph{First project:} make the email sender a separate service with its own small API and its own deployment, and list everything that got harder: tracing a request, deploying the two together, testing across the boundary.
+
+\textbf{Strengthen the foundations under all of it.} The book touched algorithms, operating systems and networks wherever the Notes API needed them. Depth there pays off everywhere, and especially in interviews and in the hardest production problems. For algorithms and data structures, \emph{Grokking Algorithms} (Bhargava) is a gentle start and \emph{The Algorithm Design Manual} (Skiena) goes much further. For operating systems and networks, see \emph{The Linux Programming Interface} and \emph{Computer Networking: A Top-Down Approach}, also in Appendix D.
+
+Whichever direction you choose, keep going around the loop: decide what to build and why, plan it, build it in small steps with tests, ship it, run it and watch it, and learn from what you see. The tools will change many times during your career. The loop will not.

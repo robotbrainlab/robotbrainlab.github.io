@@ -1,0 +1,169 @@
+\setcounter{chapter}{39}
+\chapter{Distributed Systems}\label{ch:40-distributed-systems}
+
+\chapterrule
+
+\emph{Stage 11~--- Beyond a Single Service.} The previous thirty-nine chapters followed one service, on one machine, as far as it could go. The next four widen the lens to the paradigms you will meet in larger systems~--- distributed topologies, asynchronous flows, data platforms, and orchestrated fleets. They are deliberately \emph{mental-model first}: lighter on code, heavier on the thinking, because what you most need when you land in unfamiliar territory is a map, not a tutorial. Each builds on the substrate you already have~--- processes, sockets, the request lifecycle, supervision, observability~--- so none of it is mysterious, only new.
+
+This chapter is about what changes when one service becomes \emph{many}.
+
+The Notes API has run as a single Gunicorn server behind one Nginx, talking to one database. That works until it doesn't: until one machine cannot serve the traffic, or until one machine failing means the whole service is down. The answer to both is the same~--- \emph{more than one machine}~--- and the moment you have more than one, you are building a \textbf{distributed system}, and a new class of problems arrives that simply does not exist on a single box.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  Why systems distribute at all~--- scale and availability~--- and what it costs you
+\item
+  The fundamental shift: the network is unreliable, and partial failure becomes normal
+\item
+  \textbf{Replication} and \textbf{partitioning (sharding)}~--- the two ways to spread data across machines
+\item
+  \textbf{Consistency models} and the CAP trade-off~--- strong vs eventual consistency
+\item
+  Why distributed transactions are hard, and the \textbf{saga} pattern that replaces them
+\item
+  Why \textbf{idempotency} becomes essential, not optional, at scale
+\item
+  How coordination works~--- consensus, quorums, leader election~--- at a conceptual level
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Why Distribute --- and What It Costs}\label{40-distributed-systems:401-why-distribute--and-what-it-costs}
+
+There are two main reasons to run more than one machine, and it is worth being precise about which you are buying:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Scale.} One machine has a ceiling~--- CPU, memory, connections. When demand exceeds it, you add machines and spread the load. This is \textbf{horizontal scaling} (\hyperref[ch:36-scaling-load]{Chapter 36}), now taken to its conclusion: not two app servers, but fifty, and a database too big for one host.
+\item
+  \textbf{Availability.} One machine is a single point of failure. If it dies, the service dies. Run the work on several machines and the service survives any one of them failing.
+\end{itemize}
+
+\noindent{}(Others come later, and more rarely: serving users on several continents with low latency, or keeping data inside a particular country's borders.)
+
+Neither is free. The price of distribution is a new and permanent source of complexity: \textbf{the machines must talk over a network, and the network is not reliable.} Everything hard about distributed systems flows from that one fact. A wise default follows directly: \emph{do not distribute until a single machine genuinely cannot do the job.} A single beefy server with a managed database carries most applications further than people expect, and it spares you every problem in this chapter. Distribution is a tool you reach for under proven pressure, not by default.
+
+\setcounter{section}{1}
+\section{The Network Changes Everything}\label{40-distributed-systems:402-the-network-changes-everything}
+
+On a single machine, a function call either returns or it doesn't, and if your process is alive, so are the functions it calls. Across a network, none of that holds. The classic \textbf{fallacies of distributed computing} (L Peter Deutsch and colleagues at Sun Microsystems listed eight of them) are the comforting assumptions that quietly break: that the network is reliable, latency is zero, bandwidth is infinite, the topology never changes. It is none of those.
+
+The deepest consequence is \textbf{partial failure}. On one machine, things mostly fail all-or-nothing~--- the process is up or down. In a distributed system, \emph{some} parts work while others fail, and worst of all, \textbf{you often cannot tell which.} When the Notes API calls another service and the call times out, three things are indistinguishable from where you stand: the request never arrived; it arrived, succeeded, and the \emph{reply} was lost; or it is still running. You sent a write and you genuinely do not know if it happened.
+
+This single uncertainty~--- \emph{did my request succeed?}~--- is the seed of most distributed-systems machinery. Retries, idempotency, timeouts, and consistency models all exist to cope with not knowing. Hold onto it; it explains everything that follows.
+
+\setcounter{section}{2}
+\section{Spreading Data: Replication and Partitioning}\label{40-distributed-systems:403-spreading-data-replication-and-partitioning}
+
+Stateless app servers are easy to multiply~--- run fifty copies of the Notes API container behind a load balancer, and because each handles one request and holds nothing between requests, they need no coordination (this is exactly why \hyperref[ch:36-scaling-load]{Chapter 36} checked that the app is stateless before scaling it out). \textbf{State is the hard part.} There are two fundamental moves for spreading data across machines, and real systems use both:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Replication}~--- keep \emph{copies} of the same data on several machines. This buys availability (lose one replica, the others still serve) and read scale (spread reads across copies). Its cost is keeping the copies in agreement: when a note is written to one replica, the others are briefly stale. Replication is usually \emph{leader--follower}~--- writes go to one leader, which streams changes to followers (this is what a managed database's read replicas and automatic failover~--- part of the managed service \hyperref[ch:20-server-fundamentals]{Chapter 20} chose~--- are doing under the hood).
+\item
+  \textbf{Partitioning (sharding)}~--- \emph{split} the data so each machine holds a different slice. Notes for users A--M live on shard 1, N--Z on shard 2. This buys write scale and lets the dataset exceed any single machine. Its cost is that queries spanning shards become hard, and choosing the \textbf{partition key} is a fateful decision~--- a bad one creates ``hot'' shards that concentrate load and defeat the point.
+\end{itemize}
+
+\noindent{}The mental model: replication is \emph{the same data in many places} (for safety and read scale); partitioning is \emph{different data in different places} (for size and write scale).
+
+\setcounter{section}{3}
+\section{Consistency and the CAP Trade-off}\label{40-distributed-systems:404-consistency-and-the-cap-trade-off}
+
+Once data is replicated, a hard question appears: when you read, do you always get the \emph{latest} write? The answer is a spectrum called the \textbf{consistency model}, and its two anchors are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Strong consistency}~--- every read returns the most recent write, as if there were a single copy. Intuitive, but it requires replicas to coordinate on every write, which costs latency and stalls when they cannot reach each other.
+\item
+  \textbf{Eventual consistency}~--- replicas converge \emph{given time}, but a read just after a write may return stale data. Cheaper and more available, at the price of temporary disagreement your application must tolerate.
+\end{itemize}
+
+\noindent{}The reason you cannot simply always pick ``strong'' is captured by the \textbf{CAP theorem}: when a network \textbf{P}artition occurs (some machines cannot reach others~--- and partitions \emph{will} occur), you must choose between \textbf{C}onsistency and \textbf{A}vailability. Refuse to serve possibly-stale data and you sacrifice availability (the system stops); serve it and you sacrifice consistency. You cannot have both \emph{during a partition}.
+
+CAP is not abstract~--- it is a product decision. For the Notes API, a note appearing a few seconds late on one replica is mostly harmless: choose availability and eventual consistency. Mostly~--- a user who creates a note and immediately lists their notes expects to see it, so reads right after a write should go to the leader (\textbf{read-your-own-writes} consistency). For a bank balance or a ``username already taken'' check, stale data is dangerous: choose consistency, and accept that the feature may pause during a partition. The engineering skill is matching each piece of data to the weakest consistency it can tolerate, because weaker consistency is cheaper and more available.
+
+\setcounter{section}{4}
+\section{Transactions Across Services: the Saga}\label{40-distributed-systems:405-transactions-across-services-the-saga}
+
+\hyperref[ch:33-logic-execution]{Chapter 33} relied on database \textbf{transactions}: several writes that all commit or all roll back, atomically. That guarantee lives inside \emph{one} database. The moment a business operation spans \emph{two} services~--- say, a Notes service and a separate Billing service~--- there is no shared transaction to wrap them, and you cannot hold a lock across the network while waiting on another team's system.
+
+The standard replacement is the \textbf{saga}: break the operation into a sequence of local steps, each in its own service with its own local transaction, and for every step define a \textbf{compensating action} that undoes it. If step 3 fails, you run the compensations for steps 2 and 1 to walk the system back to consistency. There is no instant in which everything is atomically consistent; instead the system is \emph{eventually} consistent, having either completed all steps or compensated for the ones it did. Sagas trade the simplicity of a transaction for the only thing available across services: explicit, reversible steps.
+
+\setcounter{section}{5}
+\section{Idempotency Becomes Mandatory}\label{40-distributed-systems:406-idempotency-becomes-mandatory}
+
+Recall §40.2: when a call times out, you do not know if it succeeded, so you retry~--- and retries are the lifeblood of a reliable distributed system. But a retry of a non-idempotent operation does the work \emph{twice}: two charges, two notes, two emails. Therefore, in a distributed system, \textbf{idempotency stops being a nice-to-have and becomes a requirement.} Every operation that can be retried must be safe to apply more than once.
+
+You met the tools already, in the single-service world, and now you see why they mattered so much: idempotent HTTP methods and \textbf{idempotency keys} (\hyperref[ch:34-response-handling]{Chapter 34}), idempotent webhook and job handlers (Chapters 25 and 34). At scale these are not polish~--- they are what makes ``retry on failure'' safe instead of catastrophic. A useful instinct: whenever you add a network call, ask ``what happens if this runs twice?'' and design so the answer is ``nothing bad.''
+
+\setcounter{section}{6}
+\section{Coordination: Consensus, Quorums, Leaders}\label{40-distributed-systems:407-coordination-consensus-quorums-leaders}
+
+Sometimes distributed machines must \emph{agree} on a single fact: which replica is the leader, whether a lock is held, what the next sequence number is. Agreement across unreliable machines is the deepest problem in the field, and it is solved by \textbf{consensus} algorithms (Raft and Paxos are the famous ones). You will rarely implement one, but you must recognize when you are leaning on one, because they are doing heavy lifting on your behalf.
+
+Two ideas are enough to carry:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Quorum}~--- a decision is made by a \emph{majority} of machines, not all of them. Requiring a majority both to write and to read guarantees the two sets overlap, so every read reaches at least one machine that has the latest committed write (and, by comparing versions, picks it)~--- agreement without needing every machine present, which is what lets the system tolerate some being down.
+\item
+  \textbf{Leader election}~--- the machines use consensus to pick one leader to make decisions; if it dies, they elect another. This is how a replicated database promotes a new primary on failover. The danger to know by name is \textbf{split-brain}~--- two machines both believing they are leader during a partition~--- which quorums exist to prevent.
+\end{itemize}
+
+\noindent{}When you find yourself wanting a distributed lock or a single source of truth across machines, reach for a system built on consensus (ZooKeeper, etcd, Consul) rather than inventing your own. Hand-rolled coordination is where careers go to learn humility.
+
+\phantomsection\label{40-distributed-systems:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  Distribute mainly for two reasons~--- \textbf{scale} and \textbf{availability}~--- and not before a single machine truly cannot cope. Distribution's price is permanent complexity born from one fact: \textbf{the network is unreliable.}
+\item
+  \textbf{Partial failure} is the defining problem: parts fail while others work, and a timeout leaves you unable to tell whether your write succeeded. Most distributed machinery exists to cope with that uncertainty.
+\item
+  Spread data two ways: \textbf{replication} (same data, many copies~--- for availability and read scale) and \textbf{partitioning/sharding} (different data, different machines~--- for size and write scale). Keep app servers \textbf{stateless} so they multiply freely.
+\item
+  \textbf{CAP}: during a network partition you choose \textbf{consistency or availability}, not both. Match each piece of data to the weakest consistency it can tolerate.
+\item
+  Across services, there are no shared transactions~--- use \textbf{sagas} (local steps + compensating actions) and accept \textbf{eventual consistency}.
+\item
+  Retries are essential, so \textbf{idempotency is mandatory}: every retryable operation must be safe to run twice.
+\item
+  Agreement across machines is \textbf{consensus}; lean on \textbf{quorums} and \textbf{leader election} via battle-tested tools, and never hand-roll a distributed lock.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{40-distributed-systems:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Two replicas of a database accept writes, and the network between them breaks. What can each side do if you choose consistency? If you choose availability?
+\item
+  \textbf{Break and fix.} Simulate a lost response: make an endpoint commit a transfer, then return \texttt{500}. Call it with a client that retries. What happens, and how does an idempotency key fix it?
+\item
+  \textbf{Extend.} Design, on paper, a saga for ``create a user and a billing account in another service'', with a compensating action for each step.
+\item
+  \textbf{Explain.} Why is ``never hand-roll a distributed lock'' such common advice?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-40.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{40-distributed-systems:whats-next}
+
+Distribution forces work apart in \emph{space}. The next chapter decouples it in \emph{time}: instead of one service calling another and waiting, work is handed off as events and messages to be processed when convenient~--- the asynchronous, event-driven architectures that large systems are built from.
+
+\noindent{}→ \hyperref[ch:41-event-driven-architecture]{Chapter 41}~--- Event-Driven and Asynchronous Architecture

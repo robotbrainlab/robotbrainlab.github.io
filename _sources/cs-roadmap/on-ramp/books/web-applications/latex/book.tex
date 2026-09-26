@@ -1,0 +1,47 @@
+% ================================================================
+%  book.tex — master file: the order of the book.
+%  Build:  make        (Markdown -> chapters/*.tex -> book.pdf)
+%
+%  Each Markdown file ../markdown/<stem>.md becomes chapters/<stem>.tex;
+%  include it here with \input{chapters/<stem>}.
+%  Parts:  \bookpart{<roman numeral>}{<title>}{<what to ignore for now, or empty>}
+% ================================================================
+\documentclass[10pt, twoside, openany]{book}
+\input{book-meta}
+\input{preamble}
+
+\begin{document}
+
+\input{front/cover}
+
+\frontmatter
+\input{front/titlepage}
+\input{front/copyright}
+\tableofcontents
+\input{front/preface}                 % includes chapters/00-preface (markdown/00-preface.md)
+
+\mainmatter
+
+% ---------------------------------------------------------------- Part I
+\bookpart{I}{Understand}
+  {specific frameworks, how to build a front end or back end, and network protocols in detail.}
+\input{chapters/01-two-sides-of-every-app}
+\input{chapters/02-the-front-end}
+\input{chapters/03-the-back-end}
+\input{chapters/04-following-one-tap}
+
+% ---------------------------------------------------------------- Part II
+\bookpart{II}{What Next}{}
+\input{chapters/05-security-speed-failure-cost}
+\input{chapters/06-where-to-go-from-here}
+
+% ---------------------------------------------------------------- Appendix
+\appendix
+\input{chapters/A-glossary}
+
+\backmatter
+\printindex
+
+\input{front/backcover}
+
+\end{document}

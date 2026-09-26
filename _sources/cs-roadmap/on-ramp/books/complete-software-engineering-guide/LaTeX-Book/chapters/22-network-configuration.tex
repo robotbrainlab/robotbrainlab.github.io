@@ -1,0 +1,563 @@
+\setcounter{chapter}{21}
+\chapter{Network Configuration}\label{ch:22-network-configuration}
+
+\chapterrule
+
+The server is prepared: Docker installed, users created, SSH secured, UFW firewall active. But the server is not yet reachable from the internet in a useful way. Traffic from the internet needs a clear path to the application~--- and most of that path is defined not on the server itself, but at the network layer surrounding it.
+
+This chapter covers network configuration at two levels:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Cloud-level networking}: the virtual network infrastructure managed by the cloud provider (VPCs, reserved IPs, cloud firewalls, load balancers)
+\item
+  \textbf{Server-level networking}: the network configuration on the server itself (network interfaces, routing, the relationship between Nginx and Gunicorn)
+\end{enumerate}
+
+\noindent{}Understanding both levels is necessary because they interact. A cloud firewall blocks traffic before it reaches the server's own firewall. Nginx listens on a different port than Gunicorn. These relationships must be explicit.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What a Virtual Private Cloud (VPC) is and why it matters
+\item
+  What a reserved IP (floating IP, elastic IP) is and why you need one
+\item
+  How cloud-level firewalls (security groups) differ from server-level firewalls (UFW)
+\item
+  How to verify that traffic can reach the server
+\item
+  How the network path from the internet to Gunicorn works
+\item
+  What NAT is in the context of cloud networking
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{The Network Layers}\label{22-network-configuration:221-the-network-layers}
+
+Traffic from the internet to the Notes API passes through several distinct network layers:
+
+\begin{diagrambox}[short]{289.5pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Internet
+    │
+    │ DNS lookup: api.notes.example.com → 203.0.113.42
+    │
+    ▼
+Cloud Provider Network
+    │
+    ├── Reserved IP / Elastic IP (203.0.113.42)
+    │     A stable public IP that routes to the server
+    │
+    ├── Cloud Firewall / Security Group
+    │     Allow: TCP 80, 443 from anywhere
+    │            TCP 22 from your IP only
+    │     Deny:  everything else
+    │     (Before traffic reaches the server)
+    │
+    ├── Virtual Private Cloud (VPC)
+    │     Private network connecting your cloud resources
+    │     The server has a private IP: 10.0.0.5
+    │
+    ▼
+Server (Ubuntu 22.04 LTS)
+    │
+    ├── Network Interfaces
+    │     eth0: the Droplet's own public IP (the Reserved IP
+    │           is routed to it, but not configured on it)
+    │     eth1: private VPC IP 10.0.0.5
+    │
+    ├── UFW Firewall (iptables)
+    │     Allow: TCP 80, 443, 22
+    │     Deny: everything else
+    │     (Second layer of defense)
+    │
+    ├── Nginx (port 80, 443)
+    │     TLS termination, reverse proxy
+    │
+    ▼
+Docker Container (Gunicorn, published on 127.0.0.1:5000)
+    │
+    ▼
+Flask Application
+    │
+    ▼
+PostgreSQL (separate server, port 5432)
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Each layer has its own rules. Traffic must pass every layer to reach the application.
+
+\setcounter{section}{1}
+\section{Virtual Private Cloud (VPC)}\label{22-network-configuration:222-virtual-private-cloud-vpc}
+
+A \textbf{Virtual Private Cloud (VPC)} is an isolated private network within the cloud provider's infrastructure. Resources you create (servers, databases, load balancers) are placed within a VPC.
+
+Think of a VPC as a private office building: it has its own private address space, its own internal routing, and controlled connections to the outside world (the internet). Resources inside the VPC communicate with each other using private IP addresses. Only resources explicitly configured to be internet-facing have public IP addresses.
+
+\subsection*{Why VPCs matter for security}\phantomsection\label{22-network-configuration:why-vpcs-matter-for-security}
+
+Without a VPC, every cloud resource would be on the public internet with a public IP. A PostgreSQL database with a public IP is reachable by anyone who knows the IP and can authenticate. With a VPC:
+
+\begin{itemize}
+\tightlist
+\item
+  The PostgreSQL database lives inside the VPC with only a private IP
+\item
+  The application server lives inside the VPC, with a public IP
+\item
+  The application server reaches PostgreSQL using its private IP (never leaving the VPC)
+\item
+  Attackers cannot directly reach PostgreSQL~--- there is no route from the internet to the private IP
+\end{itemize}
+
+\begin{diagrambox}[short]{294.1pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+VPC (private network 10.0.0.0/24)
+┌───────────────────────────────────────────────────────────┐
+│                                                           │
+│   Application Server          PostgreSQL Database         │
+│   private: 10.0.0.5           private: 10.0.0.10          │
+│   public: 203.0.113.42        NO public IP                │
+│                                                           │
+│   ↑ internet traffic            ↑ only reachable from     │
+│   can reach this                inside the VPC            │
+└───────────────────────────────────────────────────────────┘
+              │
+              ▼
+         Internet Gateway
+              │
+              ▼
+           Internet
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}DigitalOcean creates a default VPC for each region. New Droplets are automatically placed in the VPC. A managed PostgreSQL database joins the VPC too, but it also gets a \emph{public} hostname by default. Use its private (VPC) hostname in \texttt{DATABASE\_URL}, and restrict the database's \textbf{trusted sources} to your Droplet, so that the public endpoint accepts connections from nothing else.
+
+\setcounter{section}{2}
+\section{The Public IP Address}\label{22-network-configuration:223-the-public-ip-address}
+
+Every server needs a \textbf{public IP address} to be reachable from the internet. This is a globally unique IP that the internet's routing infrastructure knows how to deliver packets to.
+
+\subsection*{Static vs dynamic IPs}\phantomsection\label{22-network-configuration:static-vs-dynamic-ips}
+
+A server's own public IP is not permanent. On AWS EC2 it changes every time an instance is stopped and started. A DigitalOcean Droplet keeps its IP for as long as the Droplet exists~--- but a replacement Droplet (after a rebuild, or a move to a bigger machine) gets a new one. Either way, if your DNS record points to \texttt{203.0.113.42} and the server's IP becomes \texttt{203.0.113.99}, your domain stops working until the DNS record is updated.
+
+A \textbf{static IP} (called a \textbf{Reserved IP} on DigitalOcean~--- formerly \emph{Floating IP}~--- an \textbf{Elastic IP} on AWS, and a \textbf{static external IP} on Google Cloud) is a public IP that you own independently of any specific server. You can associate it with different servers. If you destroy a server and create a new one, you re-attach the same IP~--- your DNS record never needs to change.
+
+\subsection*{Creating a Reserved IP on DigitalOcean}\phantomsection\label{22-network-configuration:creating-a-reserved-ip-on-digitalocean}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  In the DigitalOcean control panel: Networking → Reserved IPs → Reserve a Reserved IP
+\item
+  Assign it to your Droplet
+\end{enumerate}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Verify the Reserved IP is reachable}
+\FunctionTok{ping}\NormalTok{ 203.0.113.42   }\CommentTok{\# Replace with your actual Reserved IP}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The Reserved IP does not appear on any of the server's network interfaces. Look at them on the server:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On the server}
+\ExtensionTok{ip}\NormalTok{ addr show}
+\CommentTok{\# 2: eth0: \textless{}BROADCAST,MULTICAST,UP,LOWER\_UP\textgreater{} mtu 1500 qdisc fq\_codel state UP}
+\CommentTok{\#     inet 198.51.100.17/20 brd 198.51.111.255 scope global eth0}
+\CommentTok{\#     inet 10.17.0.5/16 brd 10.17.255.255 scope global eth0}
+\CommentTok{\# 3: eth1: \textless{}BROADCAST,MULTICAST,UP,LOWER\_UP\textgreater{} mtu 1500 qdisc fq\_codel state UP}
+\CommentTok{\#     inet 10.0.0.5/20 brd 10.0.15.255 scope global eth1}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The server has:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{198.51.100.17} on \texttt{eth0}~--- the Droplet's own public IP
+\item
+  \texttt{10.17.0.5} on \texttt{eth0}~--- an \textbf{anchor IP}, which DigitalOcean's network uses to deliver traffic for the Reserved IP (\texttt{203.0.113.42}) to this Droplet
+\item
+  \texttt{10.0.0.5} on \texttt{eth1}~--- the private VPC IP (used for internal communication)
+\end{itemize}
+
+\noindent{}Incoming connections to the Reserved IP arrive through the anchor IP; the server's own outgoing connections still leave from \texttt{198.51.100.17}. This book uses the Reserved IP, \texttt{203.0.113.42}, as ``the server's IP'' from here on.
+
+\setcounter{section}{3}
+\section{Cloud-Level Firewalls}\label{22-network-configuration:224-cloud-level-firewalls}
+
+Most cloud providers offer a \textbf{cloud-level firewall} that operates before traffic reaches the server. This is different from and complementary to the server-level UFW firewall.
+
+\subsection*{Why two firewalls?}\phantomsection\label{22-network-configuration:why-two-firewalls}
+
+\textbf{Cloud firewall (DigitalOcean Cloud Firewalls, AWS Security Groups):}
+
+\begin{itemize}
+\tightlist
+\item
+  Operated by the cloud provider's network infrastructure
+\item
+  Traffic is dropped before it reaches the server's network interface
+\item
+  No CPU usage on the server (the server never sees rejected traffic)
+\item
+  Centrally managed~--- apply one firewall rule to multiple servers
+\item
+  Sits outside the server, so it also filters ports that Docker publishes~--- which bypass UFW (\hyperref[ch:21-system-setup]{Chapter 21})
+\item
+  If a rule locks you out, you fix it in the provider's control panel, not over SSH
+\end{itemize}
+
+\noindent{}\textbf{Server firewall (UFW/iptables):}
+
+\begin{itemize}
+\tightlist
+\item
+  Operates on the server itself
+\item
+  Provides a second layer of defense if the cloud firewall is misconfigured
+\item
+  Can implement more granular rules (per-application, per-process)
+\item
+  Required when the cloud provider does not offer network-level firewalls
+\end{itemize}
+
+\noindent{}Using both provides \textbf{defense in depth}: two independent layers of protection. A misconfiguration in one does not immediately expose the server.
+
+\subsection*{Configuring a DigitalOcean Cloud Firewall}\phantomsection\label{22-network-configuration:configuring-a-digitalocean-cloud-firewall}
+
+In the DigitalOcean control panel: Networking → Firewalls → Create Firewall
+
+Configure inbound rules:
+
+\begin{diagrambox}[short]{248.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Type       Protocol  Port Range  Sources
+─────────  ────────  ──────────  ──────────────────
+SSH        TCP       22          YOUR_IP_ADDRESS/32
+HTTP       TCP       80          All IPv4, All IPv6
+HTTPS      TCP       443         All IPv4, All IPv6
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Leave outbound rules as defaults (allow all outbound).
+
+Assign the firewall to your Droplet.
+
+\textbf{Restricting SSH to your IP at the cloud level} is more effective than restricting it at the server level: the connection attempt never reaches the server. Attackers see their connection dropped by the cloud network, not even establishing a TCP handshake.
+
+\setcounter{section}{4}
+\section{Verifying Network Connectivity}\label{22-network-configuration:225-verifying-network-connectivity}
+
+After configuring firewalls, verify that the correct ports are reachable.
+
+\subsection*{From the server (outbound tests)}\phantomsection\label{22-network-configuration:from-the-server-outbound-tests}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Test internet connectivity}
+\ExtensionTok{curl} \AttributeTok{{-}s}\NormalTok{ https://example.com }\OperatorTok{\textgreater{}}\NormalTok{ /dev/null }\KeywordTok{\&\&} \BuiltInTok{echo} \StringTok{"Internet: OK"}
+
+\CommentTok{\# Test DNS resolution}
+\ExtensionTok{dig}\NormalTok{ google.com +short }\KeywordTok{\&\&} \BuiltInTok{echo} \StringTok{"DNS: OK"}
+
+\CommentTok{\# Test that PostgreSQL is reachable (if using a managed DB).}
+\CommentTok{\# Replace with your database\textquotesingle{}s private host; DigitalOcean\textquotesingle{}s managed}
+\CommentTok{\# PostgreSQL listens on port 25060}
+\ExtensionTok{nc} \AttributeTok{{-}zv} \AttributeTok{{-}w}\NormalTok{ 5 private{-}db{-}host.example.com 25060 }\KeywordTok{\&\&} \BuiltInTok{echo} \StringTok{"DB: OK"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{From your laptop (inbound tests)}\phantomsection\label{22-network-configuration:from-your-laptop-inbound-tests}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Test that port 22 is open}
+\ExtensionTok{nc} \AttributeTok{{-}zv}\NormalTok{ 203.0.113.42 22}
+\CommentTok{\# Connection to 203.0.113.42 22 port [tcp/ssh] succeeded!}
+
+\CommentTok{\# Test that port 80 is open}
+\ExtensionTok{nc} \AttributeTok{{-}zv}\NormalTok{ 203.0.113.42 80}
+\CommentTok{\# Connection to 203.0.113.42 80 port [tcp/http] succeeded!}
+
+\CommentTok{\# Test that port 443 is open}
+\ExtensionTok{nc} \AttributeTok{{-}zv}\NormalTok{ 203.0.113.42 443}
+\CommentTok{\# Connection to 203.0.113.42 443 port [tcp/https] succeeded!}
+
+\CommentTok{\# Test that port 5000 is NOT open (should fail)}
+\ExtensionTok{nc} \AttributeTok{{-}zv} \AttributeTok{{-}w}\NormalTok{ 5 203.0.113.42 5000 }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1}
+\CommentTok{\# nc: connect to 203.0.113.42 port 5000 (tcp) timed out: Operation now in progress}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Port 5000 is used by Gunicorn but must be reachable only from the server itself (via Nginx), not from the internet. Notice \emph{how} the test fails: a firewall that drops packets makes the connection attempt \textbf{time out}, while ``Connection refused'' means the packets reached the server and nothing was listening. Either is a pass here; a \emph{successful} connection means the application port is exposed~--- check that the container is published on \texttt{127.0.0.1} (\hyperref[ch:21-system-setup]{Chapter 21}).
+
+\subsection*{Network diagnostic tools}\phantomsection\label{22-network-configuration:network-diagnostic-tools}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On the server: show which processes are listening on which ports}
+\CommentTok{\# (output simplified; the real Process column reads users:(("sshd",pid=…,fd=3)))}
+\FunctionTok{sudo}\NormalTok{ ss }\AttributeTok{{-}tlnp}
+\CommentTok{\# State    Recv{-}Q  Send{-}Q  Local Address:Port  Process}
+\CommentTok{\# LISTEN   0       128     0.0.0.0:22         sshd}
+\CommentTok{\# LISTEN   0       511     0.0.0.0:80         nginx}
+\CommentTok{\# LISTEN   0       511     0.0.0.0:443        nginx}
+\CommentTok{\# LISTEN   0       4096    127.0.0.1:5000     docker{-}proxy (gunicorn inside)}
+
+\CommentTok{\# Check routing table}
+\ExtensionTok{ip}\NormalTok{ route}
+\CommentTok{\# default via 198.51.96.1 dev eth0 proto static}
+\CommentTok{\# 10.0.0.0/20 dev eth1 proto kernel scope link src 10.0.0.5}
+
+\CommentTok{\# Check network interfaces}
+\ExtensionTok{ip}\NormalTok{ addr show}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{5}
+\section{Docker Networking Inside the Container}\label{22-network-configuration:226-docker-networking-inside-the-container}
+
+When Docker runs the Notes API container, it creates an internal network for that container. Understanding this network is necessary for configuring Nginx correctly.
+
+\subsection*{Docker bridge network}\phantomsection\label{22-network-configuration:docker-bridge-network}
+
+By default, Docker creates a \textbf{bridge network}~--- a private network inside the host, managed by Docker:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# View Docker networks}
+\ExtensionTok{docker}\NormalTok{ network ls}
+\CommentTok{\# NETWORK ID     NAME      DRIVER    SCOPE}
+\CommentTok{\# a1b2c3d4e5f6   bridge    bridge    local}
+\CommentTok{\# b2c3d4e5f6a7   host      host      local}
+\CommentTok{\# c3d4e5f6a7b8   none      null      local}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}When a container runs on the default bridge network:
+
+\begin{itemize}
+\tightlist
+\item
+  The container gets a private IP in the \texttt{172.17.0.0/16} range (e.g., \texttt{172.17.0.2})
+\item
+  The host gets \texttt{172.17.0.1} (the Docker bridge IP)
+\item
+  The container can reach the internet via the host's NAT
+\item
+  The host can reach the container via its container IP
+\end{itemize}
+
+\noindent{}Port mapping creates a rule: traffic arriving at a host port is forwarded to the container's port. On the server, the mapping always names the loopback address, \texttt{-p\ 127.0.0.1:5000:5000}, so only programs on the server itself can use it:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Nginx on the host → 127.0.0.1:5000 → Docker bridge NAT → container 172.17.0.2:5000
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Without the \texttt{127.0.0.1:} part, Docker would listen on every interface and add firewall rules that route internet traffic around UFW to the container (\hyperref[ch:21-system-setup]{Chapter 21}).
+
+\subsection*{Nginx reaching Gunicorn}\phantomsection\label{22-network-configuration:nginx-reaching-gunicorn}
+
+When Nginx (running on the host) needs to forward requests to Gunicorn (running in the container), it connects to \texttt{127.0.0.1:5000}~--- the host's port, forwarded by Docker's port mapping to the container.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# Nginx configuration for proxying to Gunicorn}
+\NormalTok{upstream notes\_api \{}
+\NormalTok{    server 127.0.0.1:5000;   \# Host\textquotesingle{}s port 5000 → Docker → container\textquotesingle{}s port 5000}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Write \texttt{127.0.0.1}, not \texttt{localhost}: \texttt{localhost} can resolve to the IPv6 address \texttt{::1} first, where nothing is listening, and Nginx would log a failed connection before falling back.
+
+This is the most straightforward configuration when Nginx and the container run on the same server.
+
+\subsection*{The docker-compose network}\phantomsection\label{22-network-configuration:the-docker-compose-network}
+
+When using Docker Compose, all services share a custom network where they reach each other by service name:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{services}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{app}\KeywordTok{:}
+\AttributeTok{    ...}
+\AttributeTok{  }\FunctionTok{db}\KeywordTok{:}
+\AttributeTok{    ...}
+\CommentTok{\# Docker Compose creates a network where:}
+\CommentTok{\# {-} \textquotesingle{}app\textquotesingle{} container can reach \textquotesingle{}db\textquotesingle{} at hostname \textquotesingle{}db\textquotesingle{}}
+\CommentTok{\# {-} \textquotesingle{}db\textquotesingle{} container can reach \textquotesingle{}app\textquotesingle{} at hostname \textquotesingle{}app\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is why \texttt{DATABASE\_}\allowbreak{}\texttt{URL=}\allowbreak{}\texttt{postgresql:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{notes\_}\allowbreak{}\texttt{user:}\allowbreak{}\texttt{pass@db:}\allowbreak{}\texttt{5432/}\allowbreak{}\texttt{notesdb} works in docker-compose.yml~--- \texttt{db} resolves to the PostgreSQL container's IP on the compose network.
+
+\setcounter{section}{6}
+\section{Network Monitoring and Diagnostics}\label{22-network-configuration:227-network-monitoring-and-diagnostics}
+
+These commands are useful for diagnosing network issues on the server:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# What is listening on what port?}
+\FunctionTok{sudo}\NormalTok{ ss }\AttributeTok{{-}tlnp}          \CommentTok{\# Modern replacement for netstat {-}tlnp}
+
+\CommentTok{\# Is the container\textquotesingle{}s port exposed?}
+\ExtensionTok{docker}\NormalTok{ ps }\AttributeTok{{-}{-}format} \StringTok{"table \{\{.Names\}\}\textbackslash{}t\{\{.Ports\}\}"}
+
+\CommentTok{\# Trace the route a packet takes to a destination}
+\ExtensionTok{traceroute}\NormalTok{ 8.8.8.8}
+
+\CommentTok{\# Test connectivity to a specific port}
+\ExtensionTok{nc} \AttributeTok{{-}zv}\NormalTok{ 203.0.113.42 443}
+
+\CommentTok{\# Capture network packets (useful for debugging — stop with Ctrl+C)}
+\ExtensionTok{tcpdump} \AttributeTok{{-}i}\NormalTok{ eth0 port 80}
+
+\CommentTok{\# Check iptables rules (Docker adds many rules here)}
+\FunctionTok{sudo}\NormalTok{ iptables }\AttributeTok{{-}L} \AttributeTok{{-}n} \AttributeTok{{-}v} \AttributeTok{{-}{-}line{-}numbers} \KeywordTok{|} \FunctionTok{head} \AttributeTok{{-}50}
+
+\CommentTok{\# Check Docker\textquotesingle{}s iptables rules. These DNAT rules in the nat table are}
+\CommentTok{\# what forward published ports to containers — before UFW\textquotesingle{}s INPUT rules}
+\CommentTok{\# ever see the traffic, which is why published ports bypass UFW.}
+\FunctionTok{sudo}\NormalTok{ iptables }\AttributeTok{{-}t}\NormalTok{ nat }\AttributeTok{{-}L} \AttributeTok{{-}n} \AttributeTok{{-}v} \KeywordTok{|} \FunctionTok{grep} \AttributeTok{{-}A5}\NormalTok{ DOCKER}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{7}
+\section{Network Security Best Practices}\label{22-network-configuration:228-network-security-best-practices}
+
+Beyond the firewall configuration, several network-level security practices protect the server:
+
+\subsection*{Fail2ban (configured in Chapter 21)}\phantomsection\label{22-network-configuration:fail2ban-configured-in-chapter-21}
+
+Automatically bans IPs with repeated authentication failures. This complements firewall rules by dynamically blocking active attack sources.
+
+\subsection*{Private network for database access}\phantomsection\label{22-network-configuration:private-network-for-database-access}
+
+The PostgreSQL database should never be accessible from the public internet. Use the database's private (VPC) hostname for the \texttt{DATABASE\_URL}, and require TLS:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Wrong — uses the public PostgreSQL endpoint}
+\VariableTok{DATABASE\_URL}\OperatorTok{=}\NormalTok{postgresql://user:pass@db{-}postgresql{-}nyc3{-}12345.db.ondigitalocean.com:25060/notesdb}
+
+\CommentTok{\# Correct — uses the private VPC hostname, with TLS required}
+\VariableTok{DATABASE\_URL}\OperatorTok{=}\NormalTok{postgresql://user:pass@private{-}db{-}postgresql{-}nyc3{-}12345.db.ondigitalocean.com:25060/notesdb}\PreprocessorTok{?}\NormalTok{sslmode=require}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Use the hostname, not its IP address: the database's TLS certificate is issued for the name, so connecting by IP breaks certificate verification.
+
+Traffic between the application server and the database stays inside the VPC~--- it never traverses the public internet, reducing latency and eliminating exposure.
+
+\subsection*{Rate limiting at the network level}\phantomsection\label{22-network-configuration:rate-limiting-at-the-network-level}
+
+DDoS (Distributed Denial of Service) attacks flood the server with traffic. Cloud providers offer DDoS protection at the network level (DigitalOcean includes basic DDoS protection). For application-level rate limiting, see \hyperref[ch:38-security]{Chapter 38}.
+
+\phantomsection\label{22-network-configuration:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  Network configuration operates at \textbf{two levels}: the cloud provider's network infrastructure (cloud firewalls, reserved IPs, VPCs) and the server's own network stack (UFW, network interfaces, Docker networking).
+\item
+  A \textbf{VPC (Virtual Private Cloud)} is an isolated private network for your cloud resources. Databases should have only private VPC IPs~--- never public IPs.
+\item
+  A \textbf{Reserved IP} (DigitalOcean; formerly Floating IP~--- Elastic IP on AWS) is a stable public IP address that persists independently of any specific server. Always use one for production~--- your DNS records never need to change when a server is replaced.
+\item
+  \textbf{Two firewalls provide defense in depth}: the cloud-level firewall drops traffic before it reaches the server; UFW on the server drops traffic before it reaches its services. A misconfiguration in one does not immediately expose the server~--- and only the cloud firewall also covers ports that Docker publishes.
+\item
+  \textbf{Docker networking}: containers on the default bridge network get private IPs in \texttt{172.17.0.0/16}. Port mapping (\texttt{-p\ 127.0.0.1:5000:5000}) forwards traffic from the host's loopback port to the container. Nginx on the host connects to \texttt{127.0.0.1:5000} to reach Gunicorn in the container.
+\item
+  \textbf{Only allow necessary ports}: 22 (SSH~--- from your IP only), 80 (HTTP), 443 (HTTPS). Port 5000 (Gunicorn) must not be accessible from the internet.
+\item
+  \textbf{PostgreSQL must use the private VPC endpoint}, with TLS. Traffic between the application and database should stay inside the VPC~--- never on the public internet.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{22-network-configuration:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} From your laptop, run \texttt{nc\ -zv\ \textless{}server-ip\textgreater{}\ 5432}. Should it connect? What would it mean if it did?
+\item
+  \textbf{Break and fix.} Temporarily remove port 443 from the cloud firewall. What does a browser report, and how does it differ from Nginx being stopped? Restore the rule.
+\item
+  \textbf{Extend.} Draw the network diagram of your deployment, marking every firewall, every IP (public, private, reserved) and every port that is open, and for whom.
+\item
+  \textbf{Explain.} Why use two firewalls (the cloud's and UFW) when either one could block the same ports?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-22.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{22-network-configuration:whats-next}
+
+The network layers are configured and verified. Traffic can reach the server on ports 80 and 443. The server is ready to receive the application.
+
+The next step is getting the application code and its Docker image onto the server. This is the code transfer problem: how does the image stored in the registry get pulled and running on the server?
+
+\noindent{}→ \hyperref[ch:23-code-transfer]{Chapter 23}~--- Code Transfer

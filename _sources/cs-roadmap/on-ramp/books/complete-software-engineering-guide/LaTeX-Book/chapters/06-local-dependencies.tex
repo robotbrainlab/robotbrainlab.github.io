@@ -1,0 +1,1010 @@
+\setcounter{chapter}{5}
+\chapter{Local Dependencies and Resources}\label{ch:06-local-dependencies}
+
+\chapterrule
+
+The Notes API works. You have run it, tested it, sent requests to it, and watched it store notes in a SQLite database. From your perspective, sitting at your laptop, it works perfectly.
+
+Here is what you might not have noticed: your working API is tightly coupled to your machine.
+
+It relies on a specific version of Python~--- whichever one is installed on your laptop. It relies on Flask being installed in the right place, accessible to that Python version. It relies on a SQLite database at a file path that is meaningful only on your machine. It relies on environment variables that exist only in your shell session. It relies on \texttt{pip} and \texttt{venv} (or their absence) being set up exactly the way you set them up, at some point in the past, possibly without documentation.
+
+None of this is visible in the code. None of it is in \texttt{app.py}. It exists in the silent agreement between your code and your machine~--- an agreement that will break the moment the code moves to a different machine.
+
+This chapter makes that hidden agreement visible. It names every resource the Notes API depends on, explains exactly what that dependency is, and shows how each one is managed locally. Naming these dependencies is the first step to controlling them. Controlling them is the first step to portability (→ Stage 3~--- Making the Program Portable).
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What ``dependencies'' means at each layer: the runtime, the libraries, the virtual environment
+\item
+  How Python's package manager (\texttt{pip}) installs and locates packages
+\item
+  What a virtual environment is, why it exists, and how to use one
+\item
+  How your program accesses the local filesystem and database
+\item
+  How to \textbf{design the database schema} deliberately~--- entities and relationships, primary keys, normalization, audit columns, soft vs hard deletes, and designing for change
+\item
+  What environment variables are, how they reach your program, and why they matter for configuration
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Runtime Dependencies: What Python Itself Depends On}\label{06-local-dependencies:61-runtime-dependencies-what-python-itself-depends-on}
+
+Before Flask. Before SQLite. Before any of your code. Your program needs the Python interpreter itself.
+
+\subsection*{Python's own dependencies}\phantomsection\label{06-local-dependencies:pythons-own-dependencies}
+
+The CPython interpreter is not self-contained. It depends on:
+
+\textbf{The C standard library (libc)}: CPython is written in C. It links against your operating system's C library for low-level operations: memory allocation, file access, process management, and more. On Linux, this is typically \texttt{glibc}. On macOS, it is Apple's \texttt{libSystem}. On different systems, different versions of libc are present.
+
+\textbf{OpenSSL}: CPython's \texttt{ssl} module (used by HTTPS connections) links against OpenSSL. The version of OpenSSL on the system affects which TLS versions and cipher suites Python supports. A system with an old OpenSSL version may fail to connect to servers that require TLS 1.3, for example.
+
+\textbf{zlib}: Used for compression, which underlies Python's \texttt{gzip} and \texttt{zipimport} (\texttt{.zip} file imports).
+
+\textbf{SQLite's C library}: Python's built-in \texttt{sqlite3} module links against \texttt{libsqlite3}. On most systems it is present. On a minimal Linux Docker image, it may not be.
+
+\textbf{readline or libedit}: Used by the interactive Python interpreter (the REPL) for command-line editing. Not strictly required for server applications, but sometimes a missing dependency causes confusing build failures.
+
+None of these appear in your \texttt{app.py} or in any requirements file. They are system-level dependencies~--- assumed to exist, never declared, and perfectly capable of being absent on a different machine or a minimal container image.
+
+\subsection*{Checking Python's dependencies}\phantomsection\label{06-local-dependencies:checking-pythons-dependencies}
+
+On Linux, you can see which shared libraries a program links against with \texttt{ldd}. The \texttt{python3} executable itself links only a few core libraries; most of the libraries above are loaded by Python's \emph{extension modules}~--- compiled \texttt{.so} files such as \texttt{\_ssl} and \texttt{\_sqlite3}~--- the first time you import \texttt{ssl} or \texttt{sqlite3}. So check those modules:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ldd} \VariableTok{$(}\ExtensionTok{python3} \AttributeTok{{-}c} \StringTok{"import \_ssl; print(\_ssl.\_\_file\_\_)"}\VariableTok{)}
+\FunctionTok{ldd} \VariableTok{$(}\ExtensionTok{python3} \AttributeTok{{-}c} \StringTok{"import \_sqlite3; print(\_sqlite3.\_\_file\_\_)"}\VariableTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Output (typical Ubuntu, abbreviated):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+libssl.so.3 => /lib/x86_64-linux-gnu/libssl.so.3
+libcrypto.so.3 => /lib/x86_64-linux-gnu/libcrypto.so.3
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6
+...
+libsqlite3.so.0 => /lib/x86_64-linux-gnu/libsqlite3.so.0
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Each of these \texttt{.so} files is a shared library. If one of them is missing or is the wrong version, Python still starts~--- but \texttt{import\ ssl} or \texttt{import\ sqlite3} fails the moment your code needs it.
+
+On macOS, the equivalent command is \texttt{otool\ -L}.
+
+\subsection*{Why this matters}\phantomsection\label{06-local-dependencies:why-this-matters}
+
+When you deploy to a server (→ \hyperref[ch:21-system-setup]{Chapter 21}~--- System Setup), the server may be running a different Linux distribution, a different version of the same distribution, or a minimal container image with fewer libraries installed. A Flask application that runs perfectly on Ubuntu 22.04 may fail to start on Alpine Linux because Alpine uses \texttt{musl\ libc} instead of \texttt{glibc}, and some Python packages compiled against glibc will not work on musl.
+
+This class of problem~--- where system-level libraries do not match~--- is one of the main reasons Docker containers (→ \hyperref[ch:18-containerization]{Chapter 18}~--- Containerization) became so popular. A container bundles the application and all its system-level dependencies together, making the system-level environment reproducible.
+
+\setcounter{section}{1}
+\section{\texorpdfstring{Library Dependencies: \texttt{pip} and the Package Ecosystem}{Library Dependencies: pip and the Package Ecosystem}}\label{06-local-dependencies:62-library-dependencies-pip-and-the-package-ecosystem}
+
+The Notes API depends on Flask. Flask itself depends on Werkzeug, Jinja2, Click, ItsDangerous, and Blinker. Each of those packages may have their own dependencies. The result is a \textbf{dependency tree}~--- a hierarchy of packages that your application needs to run.
+
+\textbf{\texttt{pip}} is Python's package installer. It downloads packages from the \textbf{Python Package Index (PyPI)}~--- a public registry of hundreds of thousands of Python packages~--- and installs them so the Python interpreter can find them.
+
+\subsection*{\texorpdfstring{How \texttt{pip\ install\ flask} works}{How pip install flask works}}\phantomsection\label{06-local-dependencies:how-pip-install-flask-works}
+
+When you run:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install flask}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}pip does the following:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Queries PyPI} for the Flask package metadata
+\item
+  \textbf{Resolves the dependency tree}: Flask requires Werkzeug, Jinja2, etc. pip resolves which versions of each are compatible with each other
+\item
+  \textbf{Downloads wheel files}: Modern packages are distributed as \texttt{.whl} (wheel) files~--- pre-compiled archives that can be installed without building from source
+\item
+  \textbf{Installs packages} into the active Python environment's \texttt{site-packages} directory
+\item
+  \textbf{Records the installation} in a file called \texttt{RECORD} inside the package's metadata directory
+\end{enumerate}
+
+\noindent{}After this, \texttt{import\ flask} works because Python's \texttt{sys.path} includes the \texttt{site-packages} directory where Flask was installed.
+
+\subsection*{Where packages are installed}\phantomsection\label{06-local-dependencies:where-packages-are-installed}
+
+Outside a virtual environment, \texttt{pip\ install} places packages in your Python installation's \texttt{site-packages} directory:
+
+\begin{itemize}
+\tightlist
+\item
+  For a Python installed from python.org or Homebrew on macOS: \texttt{/}\allowbreak{}\texttt{Library/}\allowbreak{}\texttt{Frameworks/}\allowbreak{}\texttt{Python.}\allowbreak{}\texttt{framework/}\allowbreak{}\texttt{Versions/}\allowbreak{}\texttt{3.}\allowbreak{}\texttt{x/}\allowbreak{}\texttt{lib/}\allowbreak{}\texttt{python3.}\allowbreak{}\texttt{x/}\allowbreak{}\texttt{site-}\allowbreak{}\texttt{packages/} or \texttt{/}\allowbreak{}\texttt{opt/}\allowbreak{}\texttt{homebrew/}\allowbreak{}\texttt{lib/}\allowbreak{}\texttt{python3.}\allowbreak{}\texttt{x/}\allowbreak{}\texttt{site-}\allowbreak{}\texttt{packages/}
+\item
+  For the system Python on Linux: \texttt{/}\allowbreak{}\texttt{usr/}\allowbreak{}\texttt{lib/}\allowbreak{}\texttt{python3/}\allowbreak{}\texttt{dist-}\allowbreak{}\texttt{packages/} (managed by the OS package manager) or \texttt{/}\allowbreak{}\texttt{usr/}\allowbreak{}\texttt{local/}\allowbreak{}\texttt{lib/}\allowbreak{}\texttt{python3.}\allowbreak{}\texttt{x/}\allowbreak{}\texttt{site-}\allowbreak{}\texttt{packages/}
+\item
+  For a per-user install (\texttt{pip\ install\ -\/-user}): \texttt{/}\allowbreak{}\texttt{home/}\allowbreak{}\texttt{yourname/}\allowbreak{}\texttt{.}\allowbreak{}\texttt{local/}\allowbreak{}\texttt{lib/}\allowbreak{}\texttt{python3.}\allowbreak{}\texttt{x/}\allowbreak{}\texttt{site-}\allowbreak{}\texttt{packages/}
+\end{itemize}
+
+\begin{notebox}
+
+\textbf{Note:} On current Debian, Ubuntu (23.04 and later), and Homebrew installations, a plain \texttt{pip\ install} outside a virtual environment is refused with \texttt{error:}\allowbreak{}\texttt{\ externally-}\allowbreak{}\texttt{managed-}\allowbreak{}\texttt{environment} (PEP 668). The operating system protects its own Python from packages installed with \texttt{pip}. The fix is the one this chapter recommends anyway: create a virtual environment (Section 6.3) and install packages there.
+
+\end{notebox}
+
+\noindent{}You can check where a package is installed:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 6.1}\enspace Finding where a package is installed}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ flask}
+\BuiltInTok{print}\NormalTok{(flask.}\VariableTok{\_\_file\_\_}\NormalTok{)}
+\CommentTok{\# /home/yourname/.local/lib/python3.11/site{-}packages/flask/\_\_init\_\_.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The path tells you which Python installation owns this Flask, and from which directory it was loaded.
+
+\subsection*{The global install problem}\phantomsection\label{06-local-dependencies:the-global-install-problem}
+
+If you install Flask globally (without a virtual environment), it is available to all Python programs on your machine that use the same Python interpreter. This sounds convenient. It is actually a problem.
+
+Imagine two projects on your machine:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Project A} requires Flask 2.3
+\item
+  \textbf{Project B} requires Flask 3.0
+\end{itemize}
+
+\noindent{}These two requirements conflict. \texttt{pip\ install} can only install one version of Flask at a time globally. Installing Flask 3.0 for Project B will break Project A if Flask 3.0 has incompatible changes.
+
+This is the fundamental dependency isolation problem, and it is solved by virtual environments (Section 6.3).
+
+\setcounter{section}{2}
+\section{Virtual Environments: Isolating Your Project's Dependencies}\label{06-local-dependencies:63-virtual-environments-isolating-your-projects-dependencies}
+
+A \textbf{virtual environment} (venv) is a self-contained directory that holds a specific Python interpreter and a set of packages, isolated from the system-wide Python installation and from other virtual environments.
+
+When a virtual environment is active, \texttt{pip\ install} installs packages into the virtual environment's \texttt{site-packages}, not the system-wide one. \texttt{python} refers to the interpreter inside the virtual environment. \texttt{import\ flask} finds the Flask version inside the virtual environment.
+
+\subsection*{Creating and activating a virtual environment}\phantomsection\label{06-local-dependencies:creating-and-activating-a-virtual-environment}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Step 1: Create the virtual environment}
+\CommentTok{\# "venv" is the directory name — conventional, but you can choose any name}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ venv venv}
+
+\CommentTok{\# Step 2: Activate the virtual environment}
+\CommentTok{\# On macOS / Linux:}
+\BuiltInTok{source}\NormalTok{ venv/bin/activate}
+
+\CommentTok{\# On Windows (PowerShell):}
+\CommentTok{\# venv\textbackslash{}Scripts\textbackslash{}Activate.ps1}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}After activation, your terminal prompt changes to show the active environment:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{(}\ExtensionTok{venv}\KeywordTok{)} \ExtensionTok{yourname@machine:\textasciitilde{}/notes{-}api$}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \texttt{(venv)} prefix tells you the virtual environment is active. Now:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{python} refers to \texttt{\textasciitilde{}/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api/}\allowbreak{}\texttt{venv/}\allowbreak{}\texttt{bin/}\allowbreak{}\texttt{python}
+\item
+  \texttt{pip} refers to \texttt{\textasciitilde{}/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api/}\allowbreak{}\texttt{venv/}\allowbreak{}\texttt{bin/}\allowbreak{}\texttt{pip}
+\item
+  Packages installed with \texttt{pip} go to \texttt{\textasciitilde{}/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api/}\allowbreak{}\texttt{venv/}\allowbreak{}\texttt{lib/}\allowbreak{}\texttt{python3.}\allowbreak{}\texttt{11/}\allowbreak{}\texttt{site-}\allowbreak{}\texttt{packages/}
+\end{itemize}
+
+\subsection*{What the venv directory contains}\phantomsection\label{06-local-dependencies:what-the-venv-directory-contains}
+
+\begin{diagrambox}[short]{404.7pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+└── venv/
+    ├── bin/
+    │   ├── activate        ← the script you `source` to activate the venv
+    │   ├── python          ← symlink to the system Python interpreter
+    │   ├── python3         ← symlink to the same interpreter
+    │   ├── pip             ← venv-specific pip
+    │   └── flask           ← Flask's CLI entry point (added when Flask is installed)
+    ├── lib/
+    │   └── python3.11/
+    │       └── site-packages/
+    │           ├── flask/              ← Flask and its files
+    │           ├── werkzeug/           ← Werkzeug
+    │           ├── jinja2/             ← Jinja2
+    │           └── ...
+    └── pyvenv.cfg          ← Configuration: which Python version, home path
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}The \texttt{bin/python} is typically a symlink to the system Python interpreter~--- the virtual environment does not copy Python, it just uses the system one. What it isolates is the \texttt{site-packages}~--- each venv has its own, independent set of installed packages.
+
+\subsection*{Installing Flask in the virtual environment}\phantomsection\label{06-local-dependencies:installing-flask-in-the-virtual-environment}
+
+With the virtual environment active:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install flask}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This installs Flask into \texttt{venv/}\allowbreak{}\texttt{lib/}\allowbreak{}\texttt{python3.}\allowbreak{}\texttt{11/}\allowbreak{}\texttt{site-}\allowbreak{}\texttt{packages/}. It does not touch the system-wide Python installation.
+
+You can verify:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 6.2}\enspace Verifying that Flask comes from the virtual environment}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ flask}
+\BuiltInTok{print}\NormalTok{(flask.}\VariableTok{\_\_file\_\_}\NormalTok{)}
+\CommentTok{\# /home/yourname/notes{-}api/venv/lib/python3.11/site{-}packages/flask/\_\_init\_\_.py}
+\CommentTok{\#                                  \^{}\^{}\^{}\^{} inside the venv}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{Deactivating the virtual environment}\phantomsection\label{06-local-dependencies:deactivating-the-virtual-environment}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{deactivate}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}After deactivating, \texttt{python} and \texttt{pip} refer back to the system-wide versions. Flask, if installed only in the venv, is no longer accessible.
+
+\subsection*{Why you must always use a virtual environment}\phantomsection\label{06-local-dependencies:why-you-must-always-use-a-virtual-environment}
+
+For every project, create a virtual environment. Not sometimes. Always.
+
+\begin{itemize}
+\tightlist
+\item
+  It prevents version conflicts between projects
+\item
+  It makes it easy to see exactly which packages are installed for the project (\texttt{pip\ freeze})
+\item
+  It makes the project portable: when you move to another machine, you can recreate the exact same environment from a list of packages (→ \hyperref[ch:12-dependency-declaration]{Chapter 12}~--- Dependency Declaration)
+\item
+  It prevents accidentally breaking system tools that rely on specific package versions
+\item
+  It is the industry standard: every professional Python project uses virtual environments
+\end{itemize}
+
+\noindent{}The only exception is when using Docker (→ \hyperref[ch:18-containerization]{Chapter 18}~--- Containerization). Inside a Docker container, the container itself provides isolation, so a virtual environment inside a container is redundant (though not harmful).
+
+\subsection*{\texorpdfstring{\texttt{.gitignore} and the virtual environment}{.gitignore and the virtual environment}}\phantomsection\label{06-local-dependencies:gitignore-and-the-virtual-environment}
+
+The \texttt{venv/} directory should \textbf{not} be committed to version control. It is large, platform-specific, and regenerable. Add it to \texttt{.gitignore}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# .gitignore
+venv/
+__pycache__/
+*.pyc
+# Exclude the SQLite database from version control
+*.db
+# Exclude the environment variable file (it contains secrets)
+.env
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\texttt{.gitignore} does not support comments at the end of a line: in \texttt{*.db\ \ \#\ comment}, the whole line is the pattern, and it matches nothing. Put comments on their own lines, starting with \texttt{\#}.
+
+The \texttt{venv/} directory is a local artifact, not part of the project's source code. The project's source code plus a dependency list (→ \hyperref[ch:12-dependency-declaration]{Chapter 12}) is sufficient to recreate the venv on any machine.
+
+\setcounter{section}{3}
+\section{Local Databases and the Filesystem}\label{06-local-dependencies:64-local-databases-and-the-filesystem}
+
+The Notes API stores notes in a SQLite database file. SQLite is a \textbf{file-based database}~--- all data is stored in a single file on disk. No network connection, no server process, no configuration. The database is just a file.
+
+This is the simplest possible database setup, and it is appropriate for local development. The database file is created automatically when the application starts:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# From app.py (Chapter 4)}
+\NormalTok{DATABASE\_PATH }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_PATH"}\NormalTok{, }\StringTok{"notes.db"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ init\_db():}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_PATH)  }\CommentTok{\# Creates notes.db if it does not exist}
+\NormalTok{    conn.execute(}\StringTok{"""}
+\StringTok{        CREATE TABLE IF NOT EXISTS notes (...)}
+\StringTok{    """}\NormalTok{)}
+\NormalTok{    conn.commit()}
+\NormalTok{    conn.close()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{sqlite3.}\allowbreak{}\texttt{connect("notes.}\allowbreak{}\texttt{db")} creates the file \texttt{notes.db} in the current working directory if it does not already exist. The database schema is created by the \texttt{CREATE\ TABLE\ IF\ NOT\ EXISTS} statement.
+
+That three-column table looks too obvious to think about~--- and that is exactly why it is worth stopping on. The \textbf{schema} (the set of tables, columns, types, keys, and relationships) is the most consequential design decision in the whole application, because it outlives everything else. You can rewrite \texttt{app.py} over a weekend; you cannot casually restructure a table that has a million rows and live traffic. The application is a guest in the data's house. So before we move on, let us design that house on purpose.
+
+\subsection*{The schema is a design decision, not a default}\phantomsection\label{06-local-dependencies:the-schema-is-a-design-decision-not-a-default}
+
+Every column in the \texttt{notes} table encodes a choice:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ notes (}
+    \KeywordTok{id}         \DataTypeTok{INTEGER} \KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{ AUTOINCREMENT,  }\CommentTok{{-}{-} identity: how is a row uniquely named?}
+\NormalTok{    content    TEXT }\KeywordTok{NOT} \KeywordTok{NULL}\NormalTok{,                       }\CommentTok{{-}{-} the data, and a rule: it may not be missing}
+\NormalTok{    created\_at }\DataTypeTok{TIMESTAMP} \KeywordTok{DEFAULT} \FunctionTok{CURRENT\_TIMESTAMP}  \CommentTok{{-}{-} metadata about the row, not the note}
+\NormalTok{);}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Why a separate \texttt{id} and not just the content? Why is \texttt{content} \texttt{NOT\ NULL} but \texttt{created\_at} defaulted? Why store a timestamp at all? Good schema design is the habit of being able to answer ``why these columns, these types, this key'' for every table you create or inherit. The rest of this section is the toolkit for answering it.
+
+\subsection*{Entities, attributes, and relationships}\phantomsection\label{06-local-dependencies:entities-attributes-and-relationships}
+
+Schema design starts before SQL, with a small model of the world. An \textbf{entity} is a kind of thing you need to remember~--- here, a \emph{note}. Its \textbf{attributes} are the facts about it~--- its content, when it was created. A row is one specific note; the table is all notes.
+
+Real systems have more than one entity, and entities \textbf{relate}. Imagine the Notes API grows: notes belong to \emph{users}, and notes can be tagged. Now you have three entities and two relationships, and each relationship has a \textbf{cardinality}~--- how many of one side connect to the other:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{One-to-many:} one user has many notes; each note has exactly one author. You model this by putting a \texttt{user\_id} column on \texttt{notes} that points at a row in \texttt{users}~--- a \textbf{foreign key}.
+\item
+  \textbf{Many-to-many:} a note can have many tags, and a tag can apply to many notes. You cannot express this with a column on either side; you create a third \textbf{join table}, \texttt{note\_}\allowbreak{}\texttt{tags(note\_}\allowbreak{}\texttt{id,}\allowbreak{}\texttt{\ tag\_}\allowbreak{}\texttt{id)}, whose rows \emph{are} the connections.
+\end{itemize}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} The Notes API, grown up: three entities, two relationships}
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ users (}
+    \KeywordTok{id}    \DataTypeTok{INTEGER} \KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{ AUTOINCREMENT,}
+\NormalTok{    email TEXT }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{UNIQUE}
+\NormalTok{);}
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ notes (}
+    \KeywordTok{id}         \DataTypeTok{INTEGER} \KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{ AUTOINCREMENT,}
+\NormalTok{    user\_id    }\DataTypeTok{INTEGER} \KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{REFERENCES}\NormalTok{ users(}\KeywordTok{id}\NormalTok{),   }\CommentTok{{-}{-} one user → many notes}
+\NormalTok{    content    TEXT }\KeywordTok{NOT} \KeywordTok{NULL}\NormalTok{,}
+\NormalTok{    created\_at }\DataTypeTok{TIMESTAMP} \KeywordTok{DEFAULT} \FunctionTok{CURRENT\_TIMESTAMP}
+\NormalTok{);}
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ tags (}
+    \KeywordTok{id}   \DataTypeTok{INTEGER} \KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{ AUTOINCREMENT,}
+\NormalTok{    name TEXT }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{UNIQUE}
+\NormalTok{);}
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ note\_tags (                                  }\CommentTok{{-}{-} many notes ↔ many tags}
+\NormalTok{    note\_id }\DataTypeTok{INTEGER} \KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{REFERENCES}\NormalTok{ notes(}\KeywordTok{id}\NormalTok{),}
+\NormalTok{    tag\_id  }\DataTypeTok{INTEGER} \KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{REFERENCES}\NormalTok{ tags(}\KeywordTok{id}\NormalTok{),}
+    \KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{ (note\_id, tag\_id)}
+\NormalTok{);}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Sketching entities, attributes, and cardinalities~--- on paper or as an ER diagram~--- is how you turn a vague ``we need to store X'' into tables that fit the domain. Get the relationships right and the queries write themselves; get them wrong and you fight the schema forever.
+
+\subsection*{Choosing a primary key}\phantomsection\label{06-local-dependencies:choosing-a-primary-key}
+
+Every row needs a stable, unique name: its \textbf{primary key}. There are two families, and the choice has long consequences.
+
+A \textbf{natural key} is a real-world attribute that is already unique~--- a user's email, an ISBN, a country code. A \textbf{surrogate key} is a meaningless identifier the system invents purely to name the row~--- our \texttt{id}. Prefer surrogate keys for anything that represents a real-world entity, because \emph{natural facts change}: people change their email, products get renumbered, and the moment a ``unique'' real-world value changes, every row and foreign key that referenced it has to change too. A surrogate key never changes, because it never meant anything in the first place.
+
+Among surrogate keys there is a further choice:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Auto-increment integers} (\texttt{AUTOINCREMENT}/\texttt{SERIAL}): small, fast, naturally ordered, human-readable. But they are \emph{guessable} (exposing \texttt{/notes/41} tells the world you have at least 41 notes), and they \textbf{collide} if you ever merge two databases or shard across machines, because both start counting at 1.
+\item
+  \textbf{UUIDs}: 128-bit random identifiers, globally unique with no coordination~--- safe to generate on the client, across shards, or before the row is even saved. The cost: they are large and random, which hurts index locality and makes inserts slower at scale.
+\item
+  \textbf{ULIDs} (and UUIDv7): the modern compromise~--- globally unique like a UUID, but time-ordered like an auto-increment, so they index well \emph{and} don't leak counts.
+\end{itemize}
+
+\noindent{}The Notes API uses auto-increment because it is one SQLite file on one machine~--- the simplest thing that works. The point is to know that this is a \emph{decision}, so that when you later expose IDs publicly or split the database, you recognize the moment to revisit it.
+
+\subsection*{Normalization: every fact in exactly one place}\phantomsection\label{06-local-dependencies:normalization-every-fact-in-exactly-one-place}
+
+\textbf{Normalization} is organizing columns so that each fact lives in one and only one place. It exists to prevent \textbf{anomalies}. Picture a denormalized \texttt{notes} table that stores the author's details on every note:
+
+\Needspace{8\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+id & content & author\_name & author\_email \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & Buy milk & Dana & dana@x.com \\
+2 & Call Sam & Dana & dana@x.com \\
+\end{longtable}
+}
+
+The duplication is not just wasteful, it is dangerous:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Update anomaly:} Dana changes her email~--- now you must find and update \emph{every} note she ever wrote, and if you miss one the data contradicts itself.
+\item
+  \textbf{Insertion anomaly:} you cannot record a new user until they have written at least one note (there is nowhere else to put them).
+\item
+  \textbf{Deletion anomaly:} delete Dana's last note and you silently erase the fact that Dana exists.
+\end{itemize}
+
+\noindent{}The fix is the \texttt{users} table from earlier: store each author \emph{once}, and have notes reference them by \texttt{user\_id}. The informal ladder is worth memorizing:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{First normal form (1NF):} values are atomic~--- one fact per cell. Do \textbf{not} store tags as a comma-separated string \texttt{"work,urgent"}; that is a repeating group hiding in a column. Use rows (the join table) instead.
+\item
+  \textbf{Second \& third normal form (2NF/3NF):} every non-key column depends on \emph{the key, the whole key, and nothing but the key}. \texttt{author\_email} depends on the user, not on the note, so it does not belong on \texttt{notes}.
+\end{itemize}
+
+\noindent{}Normalization optimizes for correct, non-contradictory writes. Occasionally you will deliberately \textbf{denormalize}~--- duplicate a value for read speed, like caching a \texttt{note\_count} on each user to avoid counting rows on every page load. That is legitimate, but it is a trade: you have just taken personal responsibility for keeping the copy in sync, and a stale denormalized value is a bug waiting to happen. Normalize by default; denormalize consciously, with a reason.
+
+\subsection*{Time and audit columns}\phantomsection\label{06-local-dependencies:time-and-audit-columns}
+
+\texttt{created\_at} is not part of the note~--- it is \textbf{metadata about the row}: a fact about when the record came to exist. Columns like this are \textbf{audit columns}, and the common set is \texttt{created\_at}, \texttt{updated\_at}, and sometimes \texttt{created\_by}. They cost almost nothing, and they answer ``when did this happen, and who did it?'' for the rest of the table's life. Add them by default; you will never regret having them, and you cannot reconstruct them after the fact.
+
+Time itself is deceptively hard. SQLite's \texttt{CURRENT\_TIMESTAMP} records the current time in UTC, but stores it as plain text with no timezone marker (\texttt{2024-01-15\ 14:00:00}), so nothing in the value says it is UTC~--- and code that writes its own timestamps easily mixes in local time. That is harmless on your laptop and a latent bug in production, where a note created in Tokyo and read in New York must still refer to the same instant. The rule is \textbf{store UTC, render local}, and use a timezone-aware type in production (\texttt{TIMESTAMP\ WITH\ TIME\ ZONE} in PostgreSQL~--- → \hyperref[ch:34-response-handling]{Chapter 34}~--- Response Handling covers this when we serialize timestamps). Choosing the right time type now is free; migrating millions of ambiguous timestamps later is not.
+
+\subsection*{Deleting: soft vs hard}\phantomsection\label{06-local-dependencies:deleting-soft-vs-hard}
+
+When a user deletes note 41, what happens to the row? Two answers:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Hard delete:} \texttt{DELETE\ FROM\ notes\ WHERE\ id\ =}\allowbreak{}\texttt{\ 41}. The row is gone, the space is reclaimed, every query stays simple. But the data~--- and any history of it~--- is unrecoverable.
+\item
+  \textbf{Soft delete:} add a \texttt{deleted\_at} column, set it to ``now,'' and keep the row. Now you can undo, audit, and report on deletions. The price is that \emph{every} query must remember \texttt{WHERE\ deleted\_}\allowbreak{}\texttt{at\ IS\ NULL} (forget once and deleted notes reappear), and the user's content still physically sits in your table, which matters for privacy and retention (→ \hyperref[ch:37-reliability]{Chapter 37}~--- Reliability, where we cover data management).
+\end{itemize}
+
+\noindent{}Neither is universally correct: hard-delete low-stakes data and anything a user has a right to have truly erased; soft-delete when undo or audit history is genuinely valuable. What matters is choosing on purpose~--- because retrofitting soft delete onto a table after you have already hard-deleted the rows is impossible; the data is simply gone.
+
+\subsection*{Schemas change: designing for evolution}\phantomsection\label{06-local-dependencies:schemas-change-designing-for-evolution}
+
+The one certainty about a schema is that it will change~--- a new feature needs a \texttt{title}, an \texttt{is\_pinned} flag, a \texttt{user\_id}. The skill is changing it \emph{without downtime and without breaking the running version}.
+
+Changes come in two kinds. \textbf{Additive} changes are safe: adding a \emph{nullable} column, or one with a default, leaves every existing row and the currently-deployed code working untouched. \textbf{Breaking} changes are not: renaming or dropping a column, or making an existing one \texttt{NOT\ NULL}, will break either old rows or old code the instant they land. The professional pattern for a breaking change is \textbf{expand/contract} (also called parallel change):
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Expand}~--- add the new column alongside the old, and have the application write to both.
+\item
+  \textbf{Migrate}~--- backfill the existing rows so the new column is fully populated.
+\item
+  \textbf{Contract}~--- switch reads to the new column, stop writing the old one, and only then drop it.
+\end{enumerate}
+
+\noindent{}Each step is independently deployable, so the database and the application are never out of sync at any single moment~--- that is what lets you change schemas on a live system with zero downtime. Schema changes themselves are written as \textbf{migrations}: small, ordered, versioned SQL scripts committed to the repository and applied in sequence, so that every environment~--- your laptop, staging, production~--- reaches the same schema the same way. The golden rule is never to alter a production table by hand. (Configuration-driven databases arrive in → \hyperref[ch:13-configuration-externalization]{Chapter 13}~--- Configuration Externalization, and connection and transaction handling in → \hyperref[ch:33-logic-execution]{Chapter 33}~--- Logic Execution.)
+
+\subsection*{Reading someone else's schema}\phantomsection\label{06-local-dependencies:reading-someone-elses-schema}
+
+For most of your career you will \emph{inherit} schemas far more often than you design them, and reading one fluently is how you learn an unfamiliar system fastest~--- often faster than reading its code. Dump the schema (\texttt{.schema} in SQLite, \texttt{\textbackslash{}d} in \texttt{psql}) and interrogate each table with the same questions you now know to ask:
+
+\begin{itemize}
+\tightlist
+\item
+  What \textbf{entity} is this table about?
+\item
+  What is the \textbf{primary key}~--- and is it surrogate or natural?
+\item
+  Which columns are \textbf{foreign keys}? Those are the relationships; together they are the map of the domain.
+\item
+  What is \texttt{NOT\ NULL} (required) versus nullable (optional)? The constraints tell you the business rules.
+\item
+  What do the \textbf{audit columns} reveal about how rows are created and changed?
+\end{itemize}
+
+\noindent{}Answer those for every table and you have reconstructed the original designer's mental model of the domain, constraints and all.
+
+\begin{notebox}
+
+\textbf{Note~--- when not to use a relational table at all.} Relational tables fit data with clear structure and relationships, which is most business data, and certainly the Notes API. But other shapes exist: document stores for nested, schema-flexible data; key-value stores for caches and sessions; time-series databases for metrics; search indexes for full-text. The skill is recognizing when one of these genuinely earns its place~--- and resisting the temptation to reach for an exotic store before the relational model has actually failed you.
+
+\end{notebox}
+
+\subsection*{Where the database file lives}\phantomsection\label{06-local-dependencies:where-the-database-file-lives}
+
+The database is created at the \textbf{current working directory} when the server starts. If you start the server from \texttt{\textasciitilde{}/notes-api/}, the database is at \texttt{\textasciitilde{}/}\allowbreak{}\texttt{notes-api/}\allowbreak{}\texttt{notes.db}.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/notes{-}api}
+\ExtensionTok{python}\NormalTok{ app.py}
+\CommentTok{\# notes.db is created at \textasciitilde{}/notes{-}api/notes.db}
+
+\FunctionTok{ls} \AttributeTok{{-}lh}\NormalTok{ notes.db}
+\CommentTok{\# {-}rw{-}r{-}{-}r{-}{-} 1 yourname staff 12K notes.db}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}After creating a few notes and stopping the server, the data persists in the file. When you restart the server, the notes are still there because the file is still there.
+
+\subsection*{Filesystem dependencies}\phantomsection\label{06-local-dependencies:filesystem-dependencies}
+
+The application depends on the filesystem in several ways:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{The database file location}: The application assumes it can write to the current directory. On some servers, the application may run in a read-only directory, or the current directory may not be writable. This assumption is hidden.
+\item
+  \textbf{File permissions}: The application's user account must have write permission to the directory where \texttt{notes.db} lives. On a server with restricted permissions, this may not be the case.
+\item
+  \textbf{Disk space}: The database file grows as notes are added. If the disk fills up, write operations will fail.
+\item
+  \textbf{Absolute vs relative paths}: \texttt{"notes.db"} is a relative path. Its meaning depends on the current working directory when the server starts~--- which may differ between your laptop and a server.
+\end{enumerate}
+
+\noindent{}These are local filesystem assumptions~--- perfectly reasonable for development, but fragile in deployment. We address this with configuration externalization in → \hyperref[ch:13-configuration-externalization]{Chapter 13}~--- Configuration Externalization.
+
+\subsection*{Viewing and querying the database manually}\phantomsection\label{06-local-dependencies:viewing-and-querying-the-database-manually}
+
+SQLite includes a command-line tool for inspecting databases directly:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{sqlite3}\NormalTok{ notes.db}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Inside the SQLite shell:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{.}\KeywordTok{tables}
+\CommentTok{{-}{-} notes}
+
+\NormalTok{.}\KeywordTok{schema}\NormalTok{ notes}
+\CommentTok{{-}{-} CREATE TABLE notes (}
+\CommentTok{{-}{-}   id INTEGER PRIMARY KEY AUTOINCREMENT,}
+\CommentTok{{-}{-}   content TEXT NOT NULL,}
+\CommentTok{{-}{-}   created\_at TIMESTAMP DEFAULT CURRENT\_TIMESTAMP}
+\CommentTok{{-}{-} );}
+
+\KeywordTok{SELECT} \OperatorTok{*} \KeywordTok{FROM}\NormalTok{ notes;}
+\CommentTok{{-}{-} 1|Buy groceries|2024{-}01{-}01 12:00:00}
+\CommentTok{{-}{-} 2|Learn Flask|2024{-}01{-}01 12:05:00}
+
+\NormalTok{.exit}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Being able to inspect the database directly~--- independently of the application~--- is essential for debugging. If a request seems to be failing, checking the database state directly tells you whether the problem is in the database or in the code.
+
+\setcounter{section}{4}
+\section{\texorpdfstring{Environment Variables and the \texttt{.env} File}{Environment Variables and the .env File}}\label{06-local-dependencies:65-environment-variables-and-the-env-file}
+
+The Notes API has one configurable value at this stage: \texttt{DATABASE\_PATH}. It is read from an environment variable:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{DATABASE\_PATH }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_PATH"}\NormalTok{, }\StringTok{"notes.db"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}An \textbf{environment variable} is a named value stored in the process's environment~--- the key-value pairs inherited from the parent process when the program started (← \hyperref[01-command-to-process:13-how-the-operating-system-starts-a-new-program-fork-and-exec]{Section 1.3}~--- how a new process receives its environment).
+
+\subsection*{What environment variables are}\phantomsection\label{06-local-dependencies:what-environment-variables-are}
+
+Every process on a Unix-like system has an \textbf{environment}~--- a set of key-value pairs that the process can read. These are separate from the program's variables. They are set by the shell or by the parent process before the program starts.
+
+Common environment variables you already have:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{echo} \VariableTok{$HOME}     \CommentTok{\# /home/yourname}
+\BuiltInTok{echo} \VariableTok{$PATH}     \CommentTok{\# /usr/local/bin:/usr/bin:/bin:...}
+\BuiltInTok{echo} \VariableTok{$USER}     \CommentTok{\# yourname}
+\BuiltInTok{echo} \VariableTok{$SHELL}    \CommentTok{\# /bin/bash}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}These were set when you logged in, by the system's login scripts. Every process you run inherits them.
+
+You can create your own:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{export} \VariableTok{DATABASE\_PATH}\OperatorTok{=}\NormalTok{/var/data/notes.db}
+\ExtensionTok{python}\NormalTok{ app.py}
+\CommentTok{\# DATABASE\_PATH is now in app.py\textquotesingle{}s environment}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Or set one only for a single command:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\VariableTok{DATABASE\_PATH}\OperatorTok{=}\NormalTok{/tmp/test.db }\ExtensionTok{python}\NormalTok{ app.py}
+\CommentTok{\# DATABASE\_PATH is set only for this run; your shell environment is unchanged}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Reading environment variables in Python}\phantomsection\label{06-local-dependencies:reading-environment-variables-in-python}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 6.3}\enspace Accessing environment variables}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+
+\CommentTok{\# Get a value; returns None if not set}
+\NormalTok{value }\OperatorTok{=}\NormalTok{ os.environ.get(}\StringTok{"DATABASE\_PATH"}\NormalTok{)}
+
+\CommentTok{\# Get a value with a default}
+\NormalTok{value }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_PATH"}\NormalTok{, }\StringTok{"notes.db"}\NormalTok{)}
+
+\CommentTok{\# Get a value; raises KeyError if not set}
+\NormalTok{value }\OperatorTok{=}\NormalTok{ os.environ[}\StringTok{"DATABASE\_PATH"}\NormalTok{]}
+
+\CommentTok{\# Check if a variable is set}
+\NormalTok{is\_set }\OperatorTok{=} \StringTok{"DATABASE\_PATH"} \KeywordTok{in}\NormalTok{ os.environ}
+
+\CommentTok{\# Print all environment variables}
+\ControlFlowTok{for}\NormalTok{ key, val }\KeywordTok{in}\NormalTok{ os.environ.items():}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{key}\SpecialCharTok{\}}\SpecialStringTok{=}\SpecialCharTok{\{}\NormalTok{val}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{os.environ} is a dictionary-like object that maps environment variable names to their values. It is read from the process's environment when the Python interpreter starts. Changes made to \texttt{os.environ} at runtime affect only the current process (and any child processes it spawns)~--- they do not persist in the shell.
+
+\subsection*{\texorpdfstring{The \texttt{.env} file and \texttt{python-dotenv}}{The .env file and python-dotenv}}\phantomsection\label{06-local-dependencies:the-env-file-and-python-dotenv}
+
+Setting environment variables by exporting them in the shell is tedious for development. You would need to remember to export them every time you open a terminal. The solution is the \texttt{.env} file.
+
+A \texttt{.env} file is a plain text file that lists environment variables in \texttt{KEY=VALUE} format:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# .env
+DATABASE_PATH=notes.db
+FLASK_DEBUG=true
+API_KEY=dev-secret-key-not-for-production
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The \texttt{python-dotenv} library reads this file and loads its contents into \texttt{os.environ} when your application starts:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install python{-}dotenv}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 6.4}\enspace Loading a .env file with python-dotenv}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ dotenv }\ImportTok{import}\NormalTok{ load\_dotenv}
+\ImportTok{import}\NormalTok{ os}
+
+\CommentTok{\# Find the nearest .env file (searching upward from this file\textquotesingle{}s directory)}
+\CommentTok{\# and load it into os.environ}
+\NormalTok{load\_dotenv()}
+
+\CommentTok{\# Now these variables are in os.environ}
+\NormalTok{DATABASE\_PATH }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_PATH"}\NormalTok{, }\StringTok{"notes.db"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}You can also use Flask's integration with python-dotenv. When python-dotenv is installed, the \texttt{flask\ run} command (and \texttt{app.run()} in debug mode) loads a \texttt{.env} file automatically. The explicit \texttt{load\_dotenv()} call matters most for other ways of starting the app~--- a production server such as Gunicorn does not load \texttt{.env} files:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{flask}\NormalTok{ run}
+\CommentTok{\# Flask automatically loads .env before starting}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{\texorpdfstring{The updated \texttt{app.py} with python-dotenv}{The updated app.py with python-dotenv}}\phantomsection\label{06-local-dependencies:the-updated-apppy-with-python-dotenv}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 6.5}\enspace Updated app.py with python-dotenv}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ dotenv }\ImportTok{import}\NormalTok{ load\_dotenv}
+\NormalTok{load\_dotenv()  }\CommentTok{\# Must be called before os.getenv}
+
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, request, jsonify, g}
+\ImportTok{import}\NormalTok{ sqlite3}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ time}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\NormalTok{DATABASE\_PATH }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_PATH"}\NormalTok{, }\StringTok{"notes.db"}\NormalTok{)}
+
+\CommentTok{\# ... rest of the application (unchanged from Listing 4.11)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The \texttt{load\_dotenv()} call must come before any \texttt{os.getenv()} calls, because it populates \texttt{os.environ} from the \texttt{.env} file.
+
+\subsection*{\texorpdfstring{Why \texttt{.env} files must never be committed to version control}{Why .env files must never be committed to version control}}\phantomsection\label{06-local-dependencies:why-env-files-must-never-be-committed-to-version-control}
+
+The \texttt{.env} file often contains \textbf{secrets}: API keys, database passwords, signing tokens. If you commit the \texttt{.env} file to Git, those secrets become part of the repository history~--- visible to anyone with access to the repository, and very difficult to truly remove (even deleting the file does not remove it from the git history).
+
+The \texttt{.env} file belongs in \texttt{.gitignore}. Every developer or environment creates their own \texttt{.env} file with values appropriate to their context. The \texttt{.env.example} file~--- a version of \texttt{.env} with placeholder values, committed to version control~--- documents which variables are needed without exposing actual secrets:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# .env.example (committed to version control)
+DATABASE_PATH=notes.db
+FLASK_DEBUG=false
+API_KEY=your-api-key-here
+\end{Verbatim}
+\end{outputbox}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# .env (NOT committed — your actual values)
+DATABASE_PATH=/home/yourname/notes-api/notes.db
+FLASK_DEBUG=true
+API_KEY=sk_dev_abc123...
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Every developer who clones the repository copies \texttt{.env.example} to \texttt{.env} and fills in their own values.
+
+\subsection*{Why environment variables instead of a config file}\phantomsection\label{06-local-dependencies:why-environment-variables-instead-of-a-config-file}
+
+You might wonder: why not just use a configuration file (a Python file or JSON file) instead of environment variables? The answer comes in three parts:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Separation of code and config}: Configuration is not code. It changes per environment (development, staging, production) while the code stays the same. Environment variables make this separation explicit.
+\item
+  \textbf{Security}: Configuration injected at runtime is not part of the code. The \texttt{.env} file is only a local convenience and stays out of Git, while in production the values come from the server's environment or a secrets manager. (Environment variables are not a vault, though: anyone who can inspect the process, or \texttt{docker\ inspect} a container, can read them~--- → \hyperref[ch:38-security]{Chapter 38}.)
+\item
+  \textbf{Standard}: Environment variables are the standard mechanism for injecting configuration into processes in containerized and cloud environments. Docker, Kubernetes, AWS Elastic Beanstalk, Heroku~--- all of them use environment variables to configure applications. A program that reads its config from environment variables will work with all of these systems.
+\end{enumerate}
+
+\noindent{}We explore this in depth in → \hyperref[ch:13-configuration-externalization]{Chapter 13}~--- Configuration Externalization.
+
+\unnumberedsection{false}{The Full Dependency Map of the Notes API}\label{06-local-dependencies:the-full-dependency-map-of-the-notes-api}
+
+At this stage of development, the Notes API depends on the following things existing exactly right on your machine:
+
+\begin{diagrambox}[short]{298.7pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Notes API Dependency Map
+──────────────────────────────────────────────────────────────
+Layer 1: System (silent, undeclared)
+  - Operating system: macOS / Linux (specific version)
+  - C standard library (glibc or musl)
+  - OpenSSL
+  - SQLite C library (libsqlite3)
+  - Disk: write access to the current directory
+
+Layer 2: Runtime (partially declared)
+  - Python 3.11+ interpreter
+  - Path: whichever Python $PATH finds first
+
+Layer 3: Virtual environment (locally managed)
+  - venv/ directory
+  - Contains: Flask, Werkzeug, Jinja2, Click, etc.
+  - Tied to: Layer 2 Python version
+
+Layer 4: Application configuration (externalized)
+  - DATABASE_PATH (from .env or environment)
+  - FLASK_DEBUG (from .env or environment)
+  - API_KEY (from .env or environment)
+
+Layer 5: Data (local file)
+  - notes.db (SQLite file in CWD)
+  - Grows as notes are created
+  - Not version controlled
+──────────────────────────────────────────────────────────────
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}That is five layers: four kinds of dependency the code needs in order to run, plus the data it works on. None of Layer 1 is written down anywhere. Layers 2 and 3 are partially managed through \texttt{pip} and \texttt{venv} but not yet documented in a \texttt{requirements.txt} file. Layer 4 exists in a \texttt{.env} file that is not committed. Layer 5 is a local file that does not exist on any other machine.
+
+This is what ``working locally'' actually means: a web of assumptions about the local machine, none of which are guaranteed to hold anywhere else.
+
+\unnumberedsection{false}{Setting Up the Notes API from Scratch}\label{06-local-dependencies:setting-up-the-notes-api-from-scratch}
+
+To see what is required to recreate the Notes API on a fresh machine (or a fresh clone of the repository), here is the complete setup sequence:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. Get the code (clone the repository, or copy app.py into a new directory)}
+\FunctionTok{git}\NormalTok{ clone https://github.com/yourname/notes{-}api.git }\KeywordTok{\&\&} \BuiltInTok{cd}\NormalTok{ notes{-}api}
+
+\CommentTok{\# 2. Create a virtual environment}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ venv venv}
+
+\CommentTok{\# 3. Activate the virtual environment}
+\BuiltInTok{source}\NormalTok{ venv/bin/activate   }\CommentTok{\# macOS/Linux}
+
+\CommentTok{\# 4. Install dependencies}
+\ExtensionTok{pip}\NormalTok{ install flask python{-}dotenv}
+
+\CommentTok{\# 5. Create the .env file (not committed — each machine needs its own)}
+\FunctionTok{cat} \OperatorTok{\textgreater{}}\NormalTok{ .env }\OperatorTok{\textless{}\textless{} EOF}
+\StringTok{DATABASE\_PATH=notes.db}
+\StringTok{FLASK\_DEBUG=true}
+\OperatorTok{EOF}
+
+\CommentTok{\# 6. Run the server}
+\ExtensionTok{python}\NormalTok{ app.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Step 4 works only because you remembered which packages to install. Nothing in the project records that list~--- the next person has to guess it. This is the problem that \texttt{requirements.txt} solves (→ \hyperref[ch:12-dependency-declaration]{Chapter 12}~--- Dependency Declaration).
+
+\phantomsection\label{06-local-dependencies:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  Your application has \textbf{four layers of dependencies}~--- system libraries (silent), Python runtime, Python packages, and configuration~--- plus a fifth layer, its \textbf{data}. Each must be present and correct for the application to run.
+\item
+  \textbf{\texttt{pip\ install}} downloads packages from PyPI and installs them in the active Python environment's \texttt{site-packages} directory. Without a virtual environment, this installs globally and can create conflicts between projects.
+\item
+  A \textbf{virtual environment} (\texttt{python3\ -m\ venv\ venv}) creates an isolated Python environment for one project. Always use one. Add \texttt{venv/} to \texttt{.gitignore}.
+\item
+  SQLite stores data in a \textbf{local file} (\texttt{notes.db}) in the current working directory. This is fine for development but is a machine-specific artifact~--- it does not belong in version control.
+\item
+  \textbf{The schema is the most durable design decision in the system}~--- the application is a guest in the data's house. Model \textbf{entities, attributes, and relationships} (with their cardinality) before writing SQL; the foreign keys \emph{are} the relationships.
+\item
+  Prefer \textbf{surrogate primary keys} (a meaningless \texttt{id}) over natural keys, because real-world facts change. Know the trade-offs between auto-increment, UUID, and ULID before you expose IDs publicly or shard.
+\item
+  \textbf{Normalize so every fact lives in exactly one place} (the key, the whole key, and nothing but the key) to prevent update, insertion, and deletion anomalies. Denormalize only deliberately, accepting the duty to keep the copy in sync.
+\item
+  Add \textbf{audit columns} (\texttt{created\_at}, \texttt{updated\_at}) by default, store time as \textbf{UTC with a timezone-aware type}, and choose \textbf{soft vs hard delete} on purpose~--- these are cheap now and impossible to reconstruct later.
+\item
+  Schemas always change: make \textbf{additive} changes safely, and use \textbf{expand/contract migrations} (versioned, in the repo) for breaking ones so a live system never has downtime. Reading an unfamiliar schema~--- keys, foreign keys, constraints, audit columns~--- is the fastest way to understand a system you have inherited.
+\item
+  \textbf{Environment variables} are key-value pairs inherited from the parent process. They are the standard mechanism for injecting configuration into a running program without hardcoding values.
+\item
+  The \textbf{\texttt{.env} file} (loaded by \texttt{python-dotenv}) is a convenient way to manage environment variables during local development. It must \textbf{never} be committed to version control. Use \texttt{.env.example} as a template.
+\item
+  The full set of local dependencies~--- system libraries, Python version, installed packages, database file, environment variables~--- is the ``working on my machine'' assumption. Making these dependencies explicit is the first step toward portability.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{06-local-dependencies:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Deactivate your virtual environment and run \texttt{python3\ -}\allowbreak{}\texttt{c\ "import\ flask"}. What happens, and what does that tell you about where packages live?
+\item
+  \textbf{Break and fix.} Rename your \texttt{.env} file and start the application. What fails, and how quickly? Restore it.
+\item
+  \textbf{Extend.} Sketch (on paper, as tables with keys) the schema for notes with tags and authors. Mark each primary key, each foreign key, and the cardinality of each relationship.
+\item
+  \textbf{Explain.} Explain the difference between a soft delete and a hard delete, and give one situation where each is the right choice.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-06.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{06-local-dependencies:whats-next}
+
+Stage 1 is complete. You have a working local API. You understand how it starts, how it listens for connections, how it handles requests, and what it depends on.
+
+Stage 2 is about confronting everything that makes this local setup fragile. The next five chapters examine, one by one, the ways in which ``it works on my machine'' can fail everywhere else.
+
+\noindent{}→ \hyperref[ch:07-environment-drift]{Chapter 7}~--- Environment Drift

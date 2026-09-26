@@ -1,0 +1,695 @@
+\setcounter{chapter}{19}
+\chapter{Server Fundamentals}\label{ch:20-server-fundamentals}
+
+\chapterrule
+
+The Docker image is built. The registry holds it. Now the image needs somewhere to run. That somewhere is a \textbf{server}~--- a computer that is always on, always connected to the internet, and dedicated to running your application.
+
+This chapter is about understanding what a production server is: what makes it different from a laptop, what the choices are when selecting one, and what properties a server needs to run the Notes API correctly. This understanding is foundational for everything in Stage 5 (infrastructure setup): you cannot configure something you do not understand.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What a server is at the hardware and operating system level, and how it differs from a developer's laptop
+\item
+  The difference between physical servers, virtual machines, and cloud instances
+\item
+  What CPU, RAM, disk, and network mean in the context of choosing a server
+\item
+  What a Linux distribution is and which one to use
+\item
+  What ``always on'' means and why it requires dedicated infrastructure
+\item
+  How to choose the right server size for the Notes API
+\item
+  What managed services are and when to use them instead of a raw server
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{What a Production Server Is}\label{20-server-fundamentals:201-what-a-production-server-is}
+
+A \textbf{server} is a computer optimized for running services continuously, reliably, and without direct human interaction. The word ``server'' comes from its function: it serves requests from clients. The hardware and software are chosen with that function in mind.
+
+\Needspace{29\baselineskip}
+
+\subsection*{How a server differs from a laptop}\phantomsection\label{20-server-fundamentals:how-a-server-differs-from-a-laptop}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1657}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3523}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4820}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Property
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Laptop
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Server
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Power} & Battery-powered, designed to sleep & Always plugged in, never sleeps \\
+\textbf{Uptime} & Typically hours per day & Target: 99.9\%+ (less than 9 hours down per year) \\
+\textbf{CPU} & Optimized for burst performance & Optimized for sustained throughput \\
+\textbf{RAM} & 8--32 GB typically & 1 GB to terabytes, depending on workload \\
+\textbf{Disk} & Fast NVMe SSD, local & Can be local SSD or network-attached storage \\
+\textbf{Display} & Built-in screen & No screen~--- accessed via SSH \\
+\textbf{Location} & On your desk & In a data center \\
+\textbf{Cooling} & Fan, ambient air & Precision cooling systems \\
+\textbf{Redundancy} & Single power supply & Redundant power supplies, redundant NICs \\
+\textbf{OS} & macOS, Windows, or Linux & Almost always Linux \\
+\textbf{Management} & GUI (click-based) & CLI via SSH \\
+\end{longtable}
+}
+
+The fundamental difference is \textbf{continuous operation}. A laptop is designed to start, be used, and sleep. A server is designed to run indefinitely. When you deploy an application to a server, you are handing it to a machine that will keep running it without any human being in the loop.
+
+\subsection*{No one sits at the server}\phantomsection\label{20-server-fundamentals:no-one-sits-at-the-server}
+
+This is the most important operational difference. When your Flask application crashes on your laptop, you see the error in the terminal and restart it. When your Flask application crashes on a server, no one is there to restart it unless you have configured something to do that automatically.
+
+This is why:
+
+\begin{itemize}
+\tightlist
+\item
+  You need a process supervisor (\hyperref[ch:25-process-management]{Chapter 25})~--- to restart crashed processes automatically
+\item
+  You need logging (\hyperref[ch:16-logging-error-handling]{Chapter 16})~--- to know that a crash happened and why
+\item
+  You need monitoring (\hyperref[ch:35-observability]{Chapter 35})~--- to be alerted when something goes wrong
+\item
+  You need a startup sequence (\hyperref[ch:24-process-startup]{Chapter 24})~--- so the application starts automatically when the server reboots
+\end{itemize}
+
+\setcounter{section}{1}
+\section{Physical Servers vs Virtual Machines vs Cloud Instances}\label{20-server-fundamentals:202-physical-servers-vs-virtual-machines-vs-cloud-instances}
+
+Three categories of servers exist, and understanding the difference matters for how you provision and manage them.
+
+\subsection*{Physical servers (bare metal)}\phantomsection\label{20-server-fundamentals:physical-servers-bare-metal}
+
+A \textbf{physical server} (also called a \textbf{bare metal} server) is a real, physical computer in a data center. You have exclusive use of all its hardware: the CPU cores, RAM, and disk belong entirely to your application.
+
+Pros:
+
+\begin{itemize}
+\tightlist
+\item
+  Maximum performance~--- no virtualization overhead
+\item
+  Predictable latency~--- no ``noisy neighbor'' effect from sharing hardware
+\item
+  Full control over the hardware configuration
+\end{itemize}
+
+\noindent{}Cons:
+
+\begin{itemize}
+\tightlist
+\item
+  Expensive~--- you pay for the full machine even when you only use 10\% of it
+\item
+  Slow to provision~--- ordering a physical server might take days or weeks
+\item
+  No elasticity~--- you cannot add more CPUs or RAM without physically replacing hardware
+\item
+  You are responsible for hardware failures~--- if a disk fails, you replace it
+\end{itemize}
+
+\noindent{}Physical servers are used for high-performance computing (machine learning training), databases at extreme scale, or applications with strict latency requirements.
+
+For the Notes API: overkill.
+
+\subsection*{Virtual machines}\phantomsection\label{20-server-fundamentals:virtual-machines}
+
+A \textbf{virtual machine (VM)} is a software emulation of a physical server. A \textbf{hypervisor} (such as VMware, KVM, or Hyper-V) runs on a physical server and creates multiple isolated virtual machines, each appearing to be a complete computer.
+
+\begin{diagrambox}[short]{294.1pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Physical Server (64 cores, 512 GB RAM)
+├── VM 1: 4 cores, 8 GB RAM → your application
+├── VM 2: 8 cores, 32 GB RAM → another customer's application
+├── VM 3: 2 cores, 4 GB RAM → another customer's application
+└── ...
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}The hypervisor manages resource sharing: each VM believes it has exclusive hardware, but the hypervisor arbitrates access to the underlying physical resources.
+
+Pros:
+
+\begin{itemize}
+\tightlist
+\item
+  More affordable than dedicated hardware
+\item
+  Faster to provision (minutes, not days)
+\item
+  Can resize (more vCPUs or RAM) with a reboot
+\item
+  Data center handles hardware failures~--- if the host machine fails, the provider restarts your VM on healthy hardware (after a short outage; data on local, non-replicated disks can be lost)
+\end{itemize}
+
+\noindent{}Cons:
+
+\begin{itemize}
+\tightlist
+\item
+  Slight performance overhead from virtualization
+\item
+  ``Noisy neighbor'' effect~--- other VMs on the same physical host can affect your performance if they consume disproportionate resources
+\end{itemize}
+
+\noindent{}VMs are the backbone of cloud computing. When you rent a server from AWS, DigitalOcean, or Google Cloud, you are almost always getting a VM.
+
+\subsection*{Cloud instances}\phantomsection\label{20-server-fundamentals:cloud-instances}
+
+A \textbf{cloud instance} (also called an \textbf{instance} or a \textbf{droplet}, depending on the provider) is a VM rented from a cloud provider on demand. The cloud provider handles the physical servers, power, cooling, networking, and hardware maintenance. You provision and manage VMs through an API or web console.
+
+Cloud instances add important capabilities beyond basic VMs:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{On-demand provisioning}: an instance can be running within seconds of you clicking ``create''
+\item
+  \textbf{Elastic scaling}: add more instances when demand increases, remove them when demand decreases
+\item
+  \textbf{Pay-per-use}: pay by the hour (or second) for what you actually use
+\item
+  \textbf{Managed services}: the provider can run your database, load balancer, or cache~--- you interact with an API, not a server
+\item
+  \textbf{Global availability}: provision servers in dozens of geographic regions
+\end{itemize}
+
+\noindent{}For the Notes API, a cloud instance is the right choice. We will use a \textbf{DigitalOcean Droplet} (their term for a cloud VM) as the concrete example, though the concepts apply to any provider.
+
+\setcounter{section}{2}
+\section{Choosing a Cloud Provider}\label{20-server-fundamentals:203-choosing-a-cloud-provider}
+
+The major cloud providers differ in their feature sets, pricing, complexity, and documentation quality.
+
+\subsection*{Amazon Web Services (AWS)}\phantomsection\label{20-server-fundamentals:amazon-web-services-aws}
+
+The largest and most feature-rich provider. AWS has services for almost every conceivable use case. The downside is complexity: AWS has hundreds of services with overlapping functionality, and the learning curve is steep.
+
+Good for: large organizations, teams that need advanced features, applications already using AWS services (RDS, S3, ECS, etc.).
+
+\subsection*{Google Cloud Platform (GCP)}\phantomsection\label{20-server-fundamentals:google-cloud-platform-gcp}
+
+Strong in machine learning and data analytics. Good documentation and developer experience. More straightforward than AWS in some areas.
+
+Good for: ML/AI workloads, applications using BigQuery or Kubernetes (Google created Kubernetes), organizations already using Google Workspace.
+
+\subsection*{Microsoft Azure}\phantomsection\label{20-server-fundamentals:microsoft-azure}
+
+Strong in Windows and enterprise integrations (.NET, Active Directory, SQL Server). Large presence in enterprise organizations.
+
+Good for: applications that integrate with Microsoft products, organizations already using Microsoft Entra ID (formerly Azure Active Directory).
+
+\subsection*{DigitalOcean}\phantomsection\label{20-server-fundamentals:digitalocean}
+
+Simpler, developer-friendly, cheaper than the major cloud providers for basic workloads. Excellent documentation. Fewer advanced services.
+
+Good for: individual developers, small teams, applications that do not need advanced cloud services, learning environments.
+
+\textbf{For this book, we use DigitalOcean.} The concepts (instances, networking, DNS, firewalls) are identical across providers. DigitalOcean's simplicity makes the concepts clearer without the complexity of AWS's hundreds of overlapping services. When you understand the concepts on DigitalOcean, applying them to AWS or GCP is a matter of learning different names for the same ideas.
+
+\setcounter{section}{3}
+\section{Understanding Server Resources}\label{20-server-fundamentals:204-understanding-server-resources}
+
+When choosing a server, you are choosing a combination of CPU, RAM, disk, and network. Understanding what each means for a web application guides the choice.
+
+\subsection*{CPU (Central Processing Unit)}\phantomsection\label{20-server-fundamentals:cpu-central-processing-unit}
+
+The CPU executes instructions. For a web application, CPU matters during:
+
+\begin{itemize}
+\tightlist
+\item
+  Parsing JSON request bodies
+\item
+  Executing Python code (your route handlers)
+\item
+  JSON serialization of response bodies
+\item
+  Database query execution (if the database is on the same server)
+\item
+  TLS encryption/decryption (HTTPS)
+\end{itemize}
+
+\noindent{}\textbf{vCPU} (virtual CPU) is the unit for cloud instances. One vCPU is typically one hardware thread on a physical CPU core. The Notes API runs as a handful of processes~--- a Gunicorn master and its workers. More vCPUs allow more concurrent workers.
+
+For the Notes API with 2 Gunicorn workers: \textbf{1--2 vCPUs} is sufficient.
+
+\subsection*{RAM (Random Access Memory)}\phantomsection\label{20-server-fundamentals:ram-random-access-memory}
+
+RAM stores the running application's code and data. For a Python web application, RAM usage comes from:
+
+\begin{itemize}
+\tightlist
+\item
+  The Python interpreter itself (\textasciitilde20 MB per process)
+\item
+  Imported libraries (Flask, psycopg2, etc.)
+\item
+  In-memory data (cached results, connection pools)
+\item
+  Each Gunicorn worker is a separate OS process with its own memory
+\end{itemize}
+
+\noindent{}Estimate for the Notes API:
+
+\begin{itemize}
+\tightlist
+\item
+  Base Python + Flask: \textasciitilde50 MB per Gunicorn worker
+\item
+  2 workers: \textasciitilde100 MB total for the application
+\item
+  PostgreSQL (only if it runs on the same server): \textasciitilde100 MB minimum
+\item
+  Docker itself (dockerd and containerd): \textasciitilde100 MB
+\item
+  OS overhead: \textasciitilde100 MB
+\item
+  Total: \textasciitilde300--500 MB
+\end{itemize}
+
+\noindent{}\textbf{512 MB RAM} is the minimum for the Notes API. \textbf{1 GB} gives comfortable headroom.
+
+\subsection*{Disk (Storage)}\phantomsection\label{20-server-fundamentals:disk-storage}
+
+Disk stores:
+
+\begin{itemize}
+\tightlist
+\item
+  The operating system (\textasciitilde5 GB for Ubuntu minimal)
+\item
+  Docker and container images (\textasciitilde200 MB for the Notes API image; each old version kept for rollback adds only its changed layers)
+\item
+  Log files (growing over time)
+\item
+  The SQLite database file (if not using PostgreSQL)
+\item
+  Temporary files
+\end{itemize}
+
+\noindent{}For the Notes API with PostgreSQL (which stores data on its own server), the application server needs minimal disk:
+
+\begin{itemize}
+\tightlist
+\item
+  OS: \textasciitilde5 GB
+\item
+  Docker: \textasciitilde2 GB
+\item
+  Logs: 1--5 GB (depends on traffic and retention)
+\end{itemize}
+
+\noindent{}\textbf{20 GB} is comfortable for the application server. (The smallest DigitalOcean droplet comes with 25 GB, which is the figure used below.)
+
+\textbf{Disk type matters more than size}: SSDs (Solid State Drives) are orders of magnitude faster than HDDs (Hard Disk Drives) for random I/O. Database servers especially benefit from SSDs. All major cloud providers offer SSD-backed instances.
+
+\subsection*{Network}\phantomsection\label{20-server-fundamentals:network}
+
+Network determines:
+
+\begin{itemize}
+\tightlist
+\item
+  How fast data can flow in and out of the server
+\item
+  How much data you can transfer per month
+\item
+  Whether the server has a public IP address
+\end{itemize}
+
+\noindent{}Most cloud instances come with a \textbf{1 Gbps} network connection~--- enough bandwidth for hundreds of concurrent HTTP requests. Network is rarely the bottleneck for web applications (CPU and I/O typically bottleneck first).
+
+\textbf{Data transfer costs}: most providers charge for outbound traffic (data leaving the data center). DigitalOcean includes 1 TB of outbound transfer per month with most instances. The Notes API's responses are small (JSON), so data transfer costs are minimal.
+
+\setcounter{section}{4}
+\section{The Linux Distribution Choice}\label{20-server-fundamentals:205-the-linux-distribution-choice}
+
+A \textbf{Linux distribution} is a complete operating system built around the Linux kernel. Distributions differ in:
+
+\begin{itemize}
+\tightlist
+\item
+  The package manager (how software is installed)
+\item
+  The default configuration
+\item
+  The release cycle (how often security updates are released)
+\item
+  Support lifetime (how long security updates are provided)
+\end{itemize}
+
+\noindent{}For production servers, the choice is almost always between:
+
+\subsection*{Ubuntu LTS (Long-Term Support)}\phantomsection\label{20-server-fundamentals:ubuntu-lts-long-term-support}
+
+Ubuntu LTS releases come every two years and receive security updates for 5 years (10 years with paid Extended Security Maintenance). This book uses \textbf{Ubuntu 22.04 LTS} (``Jammy''), supported until 2027. Ubuntu 24.04 LTS (``Noble'', April 2024) is the newer release; the commands in this book also work there, but they were written and checked against 22.04.
+
+Ubuntu is the most widely used Linux distribution for cloud servers. Most documentation, tutorials, and cloud provider examples use Ubuntu. The package manager is \texttt{apt}.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Update package lists and upgrade installed packages}
+\FunctionTok{sudo}\NormalTok{ apt{-}get update }\KeywordTok{\&\&} \FunctionTok{sudo}\NormalTok{ apt{-}get upgrade }\AttributeTok{{-}y}
+
+\CommentTok{\# Install a package}
+\FunctionTok{sudo}\NormalTok{ apt{-}get install }\AttributeTok{{-}y}\NormalTok{ docker.io}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Debian}\phantomsection\label{20-server-fundamentals:debian}
+
+Debian is the upstream distribution from which Ubuntu is derived. Debian supports each release for about 5 years (3 years of regular security support plus 2 years of LTS) and takes a more conservative approach to software versions. Debian's package manager is also \texttt{apt}.
+
+Debian is preferred by some organizations for its stability and security track record.
+
+\subsection*{Amazon Linux (for AWS)}\phantomsection\label{20-server-fundamentals:amazon-linux-for-aws}
+
+Amazon Linux 2023 is Amazon's own distribution, optimized for AWS. It includes AWS tools pre-installed and receives security updates for 5 years.
+
+If your application runs exclusively on AWS, Amazon Linux is a reasonable choice. If you want to avoid vendor lock-in, Ubuntu is more portable.
+
+\textbf{For this book: Ubuntu 22.04 LTS.} All commands and configurations in Stage 5 use Ubuntu.
+
+\setcounter{section}{5}
+\section{Sizing the Notes API Server}\label{20-server-fundamentals:206-sizing-the-notes-api-server}
+
+For the Notes API in a learning/small-production context, here is the appropriate server size:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Target: DigitalOcean Droplet (or equivalent on any provider)
+
+CPU:    1 vCPU (sufficient for 2 Gunicorn workers)
+RAM:    1 GB   (comfortable for application + Docker + OS overhead)
+Disk:   25 GB  (SSD — OS + Docker images + logs)
+Network: 1 Gbps / 1 TB outbound transfer per month
+
+Cost (DigitalOcean as of 2024): ~$6–$12/month
+
+Operating System: Ubuntu 22.04 LTS (x86_64)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}For comparison, here is how this scales:
+
+\Needspace{15\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3958}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2083}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1458}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Workload
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+CPU
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RAM
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Notes
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Learning / personal project & 1 vCPU & 512 MB & Absolute minimum \\
+Small production (\textless{} 1000 req/day) & 1 vCPU & 1 GB & This book's target \\
+Medium production (\textless{} 100K req/day) & 2 vCPU & 2--4 GB & Add more workers \\
+High traffic (\textgreater{} 100K req/day) & Multiple servers & 8+ GB each & Load balancer needed \\
+\end{longtable}
+}
+
+These are starting points, not exact specifications. Production sizing is always validated with load testing (\hyperref[ch:36-scaling-load]{Chapter 36}).
+
+\setcounter{section}{6}
+\section{Managed Services vs Self-Managed Servers}\label{20-server-fundamentals:207-managed-services-vs-self-managed-servers}
+
+A recurring choice in infrastructure is: should you manage the server yourself, or use a managed service?
+
+\subsection*{Self-managed server (a ``raw'' VM)}\phantomsection\label{20-server-fundamentals:self-managed-server-a-raw-vm}
+
+You provision a VM, install the OS, install dependencies, deploy the application, manage security updates, and handle failures. Full control, full responsibility.
+
+\textbf{Pros:}
+
+\begin{itemize}
+\tightlist
+\item
+  Full control over configuration
+\item
+  Potentially cheaper at scale
+\item
+  Works with any technology stack
+\end{itemize}
+
+\noindent{}\textbf{Cons:}
+
+\begin{itemize}
+\tightlist
+\item
+  You are responsible for OS security updates
+\item
+  You manage backups, monitoring, scaling
+\item
+  Operational burden grows with the number of servers
+\end{itemize}
+
+\subsection*{Managed database (e.g., DigitalOcean Managed PostgreSQL, AWS RDS)}\phantomsection\label{20-server-fundamentals:managed-database-eg-digitalocean-managed-postgresql-aws-rds}
+
+The cloud provider runs PostgreSQL for you. You get an endpoint to connect to; the provider handles installation, updates, backups, failover, and monitoring.
+
+\textbf{Pros:}
+
+\begin{itemize}
+\tightlist
+\item
+  No server to manage for the database
+\item
+  Automatic backups (often configurable: daily snapshots, point-in-time recovery)
+\item
+  Automatic failover (if the primary fails, a replica is promoted)
+\item
+  Security patches applied automatically
+\end{itemize}
+
+\noindent{}\textbf{Cons:}
+
+\begin{itemize}
+\tightlist
+\item
+  More expensive than running PostgreSQL on the application server
+\item
+  Less control (cannot install custom PostgreSQL extensions easily)
+\item
+  Vendor dependency
+\end{itemize}
+
+\noindent{}\textbf{For the Notes API in production: use a managed PostgreSQL database.} The operational complexity of managing a database server correctly (replication, backups, failover) far exceeds the cost of a managed service. Spend your time on the application, not the database infrastructure. Budget for it, though: the smallest managed PostgreSQL plan typically costs two to three times as much as the smallest droplet, so a small production setup is around \$20--25 a month rather than \$6.
+
+So the production topology in this book is: \textbf{the application (in Docker) and Nginx on one VM, and PostgreSQL as a managed service on its own server.} SQLite on the VM remains an option for a single-server deployment that can live without the managed database.
+
+\subsection*{Managed container platforms}\phantomsection\label{20-server-fundamentals:managed-container-platforms}
+
+Managed container platforms (AWS ECS, Google Cloud Run, DigitalOcean App Platform) run Docker containers for you. You provide the image; they handle servers, networking, scaling, and restarts.
+
+\textbf{Google Cloud Run} is notable: it runs a Docker container, scales to zero when there is no traffic (costs nothing), and scales up automatically when requests arrive. The trade-off is the \textbf{cold start}: the first request after an idle period waits while a container starts. Cost: you pay only for the CPU and RAM used while handling requests.
+
+For small-to-medium applications, managed container platforms can be significantly cheaper and simpler than managing servers directly. The tradeoff: less control over the execution environment and networking.
+
+\textbf{For this book: we deploy to a raw VM.} Understanding the raw VM gives you the complete picture of what managed platforms abstract away. After you understand how to configure a server, configure a process supervisor, configure Nginx, and configure firewalls manually~--- then you appreciate what Cloud Run or App Platform does for you.
+
+\setcounter{section}{7}
+\section{What the Production Server Must Provide}\label{20-server-fundamentals:208-what-the-production-server-must-provide}
+
+Based on the Notes API's runtime contract (\hyperref[ch:14-runtime-contract]{Chapter 14}) and the architecture chapters ahead, here is what the production server must provide:
+
+\begin{diagrambox}[short]{344.8pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+PRODUCTION SERVER REQUIREMENTS FOR THE NOTES API
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HARDWARE
+  CPU:   ≥1 vCPU (x86_64 architecture)
+  RAM:   ≥1 GB
+  Disk:  ≥20 GB SSD
+
+OPERATING SYSTEM
+  Ubuntu 22.04 LTS (or Debian 12+)
+  Fully updated with security patches
+
+SOFTWARE (to be installed — Chapter 21)
+  Docker Engine 24+ (to run the container)
+  Docker Compose v2 (for local development; optional in production)
+  Nginx (as reverse proxy — Chapter 28)
+  Certbot (for TLS certificates — Chapter 28)
+
+NETWORK
+  One static public IPv4 address
+  DNS A record pointing domain to the public IP (Chapter 27)
+  Inbound TCP allowed on port 80 (HTTP)
+  Inbound TCP allowed on port 443 (HTTPS)
+  Inbound TCP allowed on port 22 (SSH) — from specific IPs only
+  All other inbound ports blocked (firewall — Chapter 22)
+
+PROCESS MANAGEMENT
+  Docker restart policy (unless-stopped), with Docker itself
+    started by systemd at boot (Chapters 24–25)
+  Restarts the container on failure and on server reboot
+
+DATABASE
+  Managed PostgreSQL (separate server, accessed via DATABASE_URL)
+  OR SQLite for single-server deployments (simpler, less scalable)
+
+ENVIRONMENT VARIABLES
+  DATABASE_URL — connection string to the database
+  SECRET_KEY — random secret (required by the runtime contract; Flask
+    uses it to sign cookies and tokens, which a future feature may need)
+  LOG_FORMAT=json, LOG_LEVEL=INFO (defaults baked into the image)
+  Set via environment file or systemd unit (Chapter 25)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Each item in this list is addressed in the following chapters.
+
+\setcounter{section}{8}
+\section{The Architecture of the Complete System}\label{20-server-fundamentals:209-the-architecture-of-the-complete-system}
+
+Before diving into server setup, it helps to see the complete architecture that the following chapters will build:
+
+\begin{diagrambox}[short]{284.9pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+                     INTERNET
+                         │
+                         │ HTTPS (port 443)
+                         │ HTTP  (port 80)
+                         ▼
+                   ┌──────────────┐
+                   │   Firewall   │   ← Chapter 22
+                   │ (allow 80,   │
+                   │  443, 22)    │
+                   └──────┬───────┘
+                          │
+                   ┌──────▼─────────┐
+                   │     Nginx      │   ← Chapter 28
+                   │ (port 80/443)  │
+                   │ TLS termination│
+                   │ Reverse proxy  │
+                   └──────┬─────────┘
+                          │ HTTP (127.0.0.1:5000, internal)
+                   ┌──────▼─────────┐
+                   │  Docker        │   ← Chapter 18
+                   │  Container     │
+                   │  (Gunicorn)    │
+                   │  port 5000     │
+                   └──────┬─────────┘
+                          │
+                   ┌──────▼─────────┐
+                   │  PostgreSQL    │   ← Managed service
+                   │  Database      │     (its own server)
+                   │  (port 5432)   │
+                   └────────────────┘
+
+Everything except the managed database lives on:
+┌──────────────────────────────────────┐
+│  Ubuntu 22.04 LTS VM                 │
+│  1 vCPU, 1 GB RAM, 25 GB SSD         │
+│  Public IP: 203.0.113.42             │
+│  Domain: api.notes.example.com       │
+└──────────────────────────────────────┘
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Reading from top to bottom:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  A client sends a request to \texttt{api.notes.example.com} (DNS resolves to the server's public IP)
+\item
+  The firewall allows traffic on port 443 (HTTPS)
+\item
+  Nginx receives the request, terminates TLS, and forwards it to Gunicorn on port 5000
+\item
+  Gunicorn passes it to the Flask application
+\item
+  Flask queries PostgreSQL (on a separate managed server)
+\item
+  The response travels back through the same path
+\end{enumerate}
+
+\noindent{}This is the architecture that Stages 5 through 7 build, one layer at a time.
+
+\phantomsection\label{20-server-fundamentals:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{server} is a computer optimized for continuous, unattended operation: always on, always connected, managed via SSH rather than a graphical interface.
+\item
+  The critical operational difference from a laptop: no one is watching. Automated restarts, logging, and monitoring are not optional~--- they are requirements.
+\item
+  \textbf{Physical servers} offer maximum performance; \textbf{virtual machines} offer flexibility and cost efficiency; \textbf{cloud instances} (VMs on demand) offer elasticity and managed infrastructure.
+\item
+  \textbf{Cloud providers} (AWS, GCP, DigitalOcean, Azure) differ in features, complexity, and pricing. DigitalOcean is the simplest entry point; AWS is the most feature-rich. The underlying concepts are identical.
+\item
+  \textbf{CPU, RAM, disk, and network} are the four dimensions of server sizing. For the Notes API: 1 vCPU, 1 GB RAM, 25 GB SSD is the target.
+\item
+  \textbf{Ubuntu 22.04 LTS} is the operating system for production Linux servers. ``LTS'' means 5 years of security updates. The package manager is \texttt{apt}.
+\item
+  \textbf{Managed services} (managed databases, managed container platforms) reduce operational burden at the cost of control and (sometimes) money. For the database layer: use managed PostgreSQL. For the application layer: understanding raw VMs first gives the complete picture.
+\item
+  The production architecture for the Notes API is: Internet → Firewall → Nginx (TLS) → Docker (Gunicorn) → PostgreSQL. Each layer is built in subsequent chapters.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{20-server-fundamentals:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Estimate the Notes API's memory use: two Gunicorn workers of about 60 MB each, plus the master. How much headroom does a 1 GB droplet leave, and what will use it?
+\item
+  \textbf{Break and fix.} In a container limited to 64 MB (\texttt{docker\ run\ -m\ 64m}), start the API with eight workers. What happens? Find the evidence in \texttt{docker\ inspect} and \texttt{docker\ events}.
+\item
+  \textbf{Extend.} Price the architecture of section 20.9 at two providers of your choice, for one year, including backups and the managed database.
+\item
+  \textbf{Explain.} When is a managed database worth its price, and when is running PostgreSQL yourself reasonable?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-20.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{20-server-fundamentals:whats-next}
+
+The server is understood. Now it must be created and configured: installing Docker, setting up users, hardening the OS, and preparing the environment for the application.
+
+\noindent{}→ \hyperref[ch:21-system-setup]{Chapter 21}~--- System Setup

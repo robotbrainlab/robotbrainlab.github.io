@@ -1,0 +1,1355 @@
+\setcounter{chapter}{14}
+\chapter{Structuring the Application}\label{ch:15-structuring-the-application}
+
+\chapterrule
+
+You have been writing your Notes API in a single file: \texttt{app.py}. Every route handler, every database function, every configuration loader, every startup check~--- all of it lives in one file. For learning, this is fine. For a production system, it creates a problem.
+
+The problem has a precise name~--- \textbf{complexity}~--- and structure is how we fight it. A single file has no boundaries: no way to separate things that belong apart, no way to know where to look for something, no way to add functionality without touching everything else. When the file grows to 500 lines, finding the database connection function requires reading through middleware. When it grows to 1,000 lines, understanding any one part requires understanding the whole. That growing difficulty \emph{is} complexity, and it is what eventually kills a codebase's ability to change.
+
+So this chapter does two things at once. On the surface, it restructures the Notes API from a single file into a proper directory layout~--- the layout used by most production Flask and FastAPI applications (Django prescribes its own, but the principles are the same). Underneath, it uses that restructuring to teach the \textbf{craft of writing code that stays simple}: how to recognize complexity, how to design modules that hide it, how to name and shape functions well, and how to refactor toward better structure in safe steps. Structure is the visible result; code craft is the discipline that produces it.
+
+\textbf{Application structure} is the art of dividing a codebase into files and directories so that each part is findable, understandable, and independently modifiable. Good structure does not add features or make the application faster. What it does is make the application \emph{survivable}: a new developer can find the handler for \texttt{GET\ /notes} without reading the configuration system; you, returning after three months, can remember where things are in ten seconds.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What \textbf{complexity} actually is, and the three symptoms~--- change amplification, cognitive load, and unknown unknowns~--- by which you recognize it
+\item
+  Why a flat single-file structure becomes unmanageable, and which \textbf{code smells} signal it
+\item
+  How to organize a Python web application into logical subdirectories with high \textbf{cohesion} and low \textbf{coupling}
+\item
+  What a Python \textbf{package} is, why \texttt{\_\_init\_\_.py} matters, and how packages enforce \textbf{information hiding}
+\item
+  What \textbf{deep modules} are, and why the \textbf{application factory pattern} is a good one
+\item
+  How \textbf{naming, function design, and command/query separation} turn working code into readable code
+\item
+  The difference between \textbf{strategic and tactical programming}, and why restructuring now is an investment
+\item
+  How to define a clear entry point and standardize the startup command
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{The Problem with a Single File}\label{15-structuring-the-application:151-the-problem-with-a-single-file}
+
+Everything that has gone wrong with \texttt{app.py} over the last fourteen chapters has one name, and it is worth saying out loud before we fix it: \textbf{complexity}.
+
+Complexity is not ``lots of code,'' and it is not ``advanced code.'' The most useful working definition comes from John Ousterhout: \emph{complexity is anything about the structure of a system that makes it hard to understand or modify.} By that definition a 130-line file can already be complex, and a 100,000-line system can be simple. Complexity is about how hard the thing is to \emph{change safely}, not how big it is. It is the single idea the rest of this chapter~--- and much of your career~--- is organized around.
+
+Let us be concrete about what the current \texttt{app.py} contains after fourteen chapters of development:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Everything in one file — an outline of app.py after Chapters 13 and 14}
+\ImportTok{from}\NormalTok{ dotenv }\ImportTok{import}\NormalTok{ load\_dotenv}
+\NormalTok{load\_dotenv()}
+
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, request, jsonify, g}
+\ImportTok{import}\NormalTok{ os, sys, time}
+
+\CommentTok{\# Configuration loading and validation (Chapter 13)}
+\KeywordTok{def}\NormalTok{ validate\_config(): ...}
+\NormalTok{CONFIG }\OperatorTok{=}\NormalTok{ validate\_config()}
+
+\CommentTok{\# Flask app creation}
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\NormalTok{app.config[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=}\NormalTok{ CONFIG[}\StringTok{"SECRET\_KEY"}\NormalTok{]}
+
+\CommentTok{\# Database functions and SQLite/PostgreSQL helpers}
+\KeywordTok{def}\NormalTok{ open\_db(): ...}
+\KeywordTok{def}\NormalTok{ get\_db(): ...}
+\KeywordTok{def}\NormalTok{ sql(query): ...}
+\KeywordTok{def}\NormalTok{ to\_iso(value): ...}
+\KeywordTok{def}\NormalTok{ note\_to\_dict(row): ...}
+\KeywordTok{def}\NormalTok{ init\_db(): ...}
+
+\CommentTok{\# Middleware}
+\AttributeTok{@app.before\_request}
+\KeywordTok{def}\NormalTok{ start\_timer(): ...}
+
+\AttributeTok{@app.before\_request}
+\KeywordTok{def}\NormalTok{ require\_json\_for\_writes(): ...}
+
+\AttributeTok{@app.after\_request}
+\KeywordTok{def}\NormalTok{ add\_timing\_header(response): ...}
+
+\AttributeTok{@app.teardown\_request}
+\KeywordTok{def}\NormalTok{ close\_db(exception): ...}
+
+\CommentTok{\# Error handlers}
+\AttributeTok{@app.errorhandler}\NormalTok{(}\DecValTok{404}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ not\_found(error): ...}
+\CommentTok{\# ... 405 and 500 handlers ...}
+
+\CommentTok{\# Route handlers}
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/health"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ health\_check(): ...}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes(): ...}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note(): ...}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id): ...}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ delete\_note(note\_id): ...}
+
+\CommentTok{\# Entry point, with the startup checks (Chapter 14)}
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+    \ImportTok{import}\NormalTok{ startup}
+\NormalTok{    startup.run()}
+\NormalTok{    app.run(host}\OperatorTok{=}\NormalTok{CONFIG[}\StringTok{"HOST"}\NormalTok{], port}\OperatorTok{=}\NormalTok{CONFIG[}\StringTok{"PORT"}\NormalTok{], debug}\OperatorTok{=}\NormalTok{CONFIG[}\StringTok{"DEBUG"}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is around 130 lines of code right now. As the application grows~--- authentication, more endpoints, background tasks, scheduled jobs~--- each new feature adds more lines to this one file, and the categories of code bleed together: database code beside route code beside configuration code beside middleware. In the catalogue of \textbf{code smells}~--- recognizable patterns that signal deeper trouble~--- this one has a name: a \textbf{large module} (informally, a ``god file''), a single unit that has quietly absorbed every responsibility in the system. It is the sibling of other smells you will learn to spot: long methods, large classes, \textbf{primitive obsession} (passing raw strings and dicts where a named type belongs), \textbf{feature envy} (a function more interested in another module's data than its own), and \textbf{shotgun surgery} (one change forcing edits in many places at once).
+
+\subsection*{The specific problems --- three symptoms of complexity}\phantomsection\label{15-structuring-the-application:the-specific-problems--three-symptoms-of-complexity}
+
+Complexity is abstract, so engineers learn to recognize it by three concrete \textbf{symptoms}. Once you can name them, you can argue for fixing them. Each problem our single file has is one of these symptoms wearing local clothes.
+
+\textbf{Symptom 1~--- Change amplification: a simple change touches many places.} This is the absence of \textbf{separation of concerns}. A \emph{concern} is a category of responsibility~--- configuration loading is one, database access another, HTTP routing another. When concerns are interleaved in one file, a change to one risks breaking another, and editing the database code means scrolling past every route handler to reach it. Shotgun surgery~--- one logical change scattered across many edits~--- is change amplification at its worst.
+
+\textbf{Symptom 2~--- High cognitive load: you must hold too much in your head.} A new developer cannot answer ``where is the database code?'' without reading the whole file~--- there is no \textbf{discoverability}. And testing one route in isolation drags in startup checks, environment variables, and a real database, because nothing is \emph{hidden} behind a boundary you could substitute. The amount you must understand to make a safe edit is the truest measure of complexity, and here it is ``everything, at once.''
+
+\textbf{Symptom 3~--- Unknown unknowns: you cannot tell what a change will break.} When File A imports File B and File B imports File A~--- a \textbf{circular import}~--- things work or fail depending on which file happens to be imported first; when they fail, Python raises an \texttt{ImportError} (``cannot import name \ldots{} most likely due to a circular import''). It is the system warning you that the dependencies have no clear direction. The deeper danger is the confident change that breaks something you did not know was connected. A clear structure with a one-way dependency hierarchy eliminates whole classes of these by design.
+
+\subsection*{Why fix it now, and how}\phantomsection\label{15-structuring-the-application:why-fix-it-now-and-how}
+
+We could keep adding to \texttt{app.py}. It runs. Every feature is faster to bolt on than to place properly~--- that is \textbf{tactical programming}: optimizing for \emph{this change works today}. The trouble is that each tactical change leaves a little complexity behind, and complexity compounds. The alternative is \textbf{strategic programming}: treating clean structure as an investment that keeps every \emph{future} change cheap. Restructuring the Notes API now, before authentication and scheduled jobs arrive, is that investment~--- and the last cheap moment to make it.
+
+The move itself is a \textbf{refactoring}: changing the \emph{structure} of code without changing its \emph{behavior}. Done well, it proceeds in small, safe steps~--- each one leaving the application runnable~--- rather than as one big rewrite. The solution is to divide the application into files and directories where each file has one clear responsibility~--- and hides the rest behind a small interface.
+
+We will also take this moment to make three small, \emph{deliberate} changes to the API's behavior. In a real project they would be a separate change, announced to clients, because each one alters the contract (← \hyperref[ch:13-configuration-externalization]{Chapter 13}); we bundle them here and call them out so that nothing changes silently:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The collection URL becomes \textbf{\texttt{/notes/}}, with a trailing slash~--- the Flask convention for collections. Flask automatically redirects \texttt{/notes} to \texttt{/notes/} (a \texttt{308} redirect, which keeps the method and body), so old clients keep working as long as they follow redirects (\texttt{curl} needs \texttt{-L}).
+\item
+  \textbf{\texttt{DELETE} returns \texttt{204\ No\ Content}} with an empty body, instead of \texttt{200} with a message~--- the standard answer for ``done, nothing to return.''
+\item
+  Notes include \textbf{\texttt{created\_at} in ISO 8601 format} (\texttt{2024-}\allowbreak{}\texttt{01-}\allowbreak{}\texttt{15T14:}\allowbreak{}\texttt{00:}\allowbreak{}\texttt{05+00:}\allowbreak{}\texttt{00}) everywhere, including in the response to \texttt{POST}.
+\end{enumerate}
+
+\noindent{}Everything else~--- the endpoints' names, the list response \texttt{\{"notes":}\allowbreak{}\texttt{\ {[}.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{{]},}\allowbreak{}\texttt{\ "count":}\allowbreak{}\texttt{\ n\}}, the error format~--- stays exactly as it was. The timing header, the JSON content-type check, and the JSON error handlers from Chapter 13 are left out of this chapter's listings to keep them short; Chapter 16 gives them their own modules.
+
+\setcounter{section}{1}
+\section{The Standard Python Web Application Directory Structure}\label{15-structuring-the-application:152-the-standard-python-web-application-directory-structure}
+
+Here is the target structure for the Notes API after this chapter:
+
+\begin{diagrambox}[short]{340.2pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+├── app/                        ← Application package
+│   ├── __init__.py             ← Package marker + application factory
+│   ├── config.py               ← Configuration loading and validation
+│   ├── database.py             ← Database connection management
+│   ├── routes/                 ← Route handlers (organized by feature)
+│   │   ├── __init__.py         ← Package marker
+│   │   ├── health.py           ← Health check routes
+│   │   └── notes.py            ← Notes CRUD routes
+│   └── startup.py              ← Startup checks (from Chapter 14)
+├── run.py                      ← Entry point (the one file you run)
+├── requirements.txt            ← Python dependencies
+├── .env                        ← Local environment (NOT committed)
+├── .env.example                ← Template (committed)
+├── .python-version             ← Python version declaration
+└── .gitignore                  ← Files to exclude from git
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}This is not arbitrary. Each decision follows from a principle:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\texttt{app/} is a package}: all application code lives under this directory. Separating it from the root keeps the root clean: only entry points and configuration files at the root level.
+\item
+  \textbf{\texttt{app/config.py}}: all configuration loading in one file. When you need to add a new environment variable, there is exactly one place to change.
+\item
+  \textbf{\texttt{app/database.py}}: all database code in one file. When you switch from SQLite to PostgreSQL (or from PostgreSQL to something else), you change one file.
+\item
+  \textbf{\texttt{app/routes/}}: route handlers organized by feature area. As the application grows with dozens of endpoints, this directory grows with it~--- without touching the database code or configuration code.
+\item
+  \textbf{\texttt{run.py}}: the one entry point for development. Anyone starting the development server runs \texttt{python\ run.py}. No ambiguity. (In production, a WSGI server starts the application instead~--- → \hyperref[ch:18-containerization]{Chapter 18} and \hyperref[ch:24-process-startup]{Chapter 24}.)
+\end{itemize}
+
+\noindent{}This layout is really two design properties made physical. \textbf{Cohesion} is how strongly the things inside one unit belong together: \texttt{config.py} contains \emph{only} configuration, so it is highly cohesive. \textbf{Coupling} is how much one unit must know about another's internals: a route handler calls \texttt{get\_db()} without knowing whether the database is SQLite or PostgreSQL, so the two are loosely coupled. The target you are aiming for~--- in this directory tree and in every module you will ever write~--- is \textbf{high cohesion, low coupling}: each part has one clear job, and the parts touch through the narrowest possible interface. Almost every structural rule in this chapter is a specific application of that one sentence.
+
+\setcounter{section}{2}
+\section{What a Python Package Is}\label{15-structuring-the-application:153-what-a-python-package-is}
+
+Before restructuring the code, you need to understand a fundamental Python concept: the \textbf{package}.
+
+In Python:
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{module} is a single \texttt{.py} file. \texttt{config.py} is a module.
+\item
+  A \textbf{package} is a directory of modules. A directory containing a special file called \texttt{\_\_init\_\_.py} is a \textbf{regular package}.
+\end{itemize}
+
+\noindent{}When Python sees a directory with an \texttt{\_\_init\_\_.py} file, it treats that directory as a regular package~--- a namespace that can contain modules and sub-packages, and that runs \texttt{\_\_init\_\_.py} when it is first imported.
+
+\subsection*{\texorpdfstring{The \texttt{\_\_init\_\_.py} file}{The \_\_init\_\_.py file}}\phantomsection\label{15-structuring-the-application:the---init--py-file}
+
+\texttt{\_\_init\_\_.py} can be completely empty, or it can contain initialization code. Since Python 3.3, a directory \emph{without} an \texttt{\_\_init\_\_.py} can still be imported, as a \textbf{namespace package}~--- a feature meant for splitting one package across several locations. For your own application, always include \texttt{\_\_init\_\_.py}: it makes the package explicit, gives you a place for package-level code, and avoids surprises with tools.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# A regular package:}
+\ExtensionTok{my\_package/}
+    \ExtensionTok{\_\_init\_\_.py}
+    \ExtensionTok{config.py}
+\CommentTok{\# You can do: from my\_package import config}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}A package's directory name must be a valid Python identifier. \texttt{my-package/} (with a hyphen) cannot be imported at all~--- there is no way to write \texttt{import\ my-package}~--- so use underscores. (pip does treat \texttt{-} and \texttt{\_} as the same in \emph{distribution} names, such as \texttt{python-dotenv}; that is a different thing from the import name, which for that package is \texttt{dotenv}.)
+
+\subsection*{How imports work across files}\phantomsection\label{15-structuring-the-application:how-imports-work-across-files}
+
+Once \texttt{app/} is a package (has \texttt{\_\_init\_\_.py}), you can import between its modules:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In app/routes/notes.py:}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db    }\CommentTok{\# Import get\_db from app/database.py}
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ DATABASE\_URL  }\CommentTok{\# Import DATABASE\_URL from app/config.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Python resolves \texttt{app.database} by:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Finding the \texttt{app} package (the \texttt{app/} directory with \texttt{\_\_init\_\_.py})
+\item
+  Finding the \texttt{database} module inside it (\texttt{app/database.py})
+\item
+  Looking up \texttt{get\_db} inside that module
+\end{enumerate}
+
+\noindent{}This is the foundation of organized Python code: files can import from each other through package paths.
+
+A package is also a unit of \textbf{information hiding}~--- one of the most important ideas in software design. Each module exposes a few names the rest of the application is meant to use (\texttt{get\_db}, \texttt{create\_app}, \texttt{DATABASE\_URL}) and keeps everything else as private implementation detail. By convention, Python signals ``private'' with a leading underscore: in \texttt{config.py} (coming up) you will see \texttt{\_require()} and \texttt{\_bool\_env()}~--- helpers that exist only to build the public values and that no other module should import. The \texttt{\_\_init\_\_.py} of a package is where you decide, deliberately, what the package's public surface is. Good modules expose little and hide much; the secret a module keeps is exactly the complexity its users never have to think about. That is the whole game: every well-placed boundary is a place the reader is \emph{allowed not to look}.
+
+\setcounter{section}{3}
+\section{The Application Factory Pattern}\label{15-structuring-the-application:154-the-application-factory-pattern}
+
+The most important structural decision in a Flask application is whether to create the Flask app object at module level (at the top of a file, when the file is imported) or inside a function (explicitly, when called).
+
+The current approach creates the app at module level:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Current approach — app created when app.py is imported}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \textbf{application factory pattern} creates the app inside a function:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Application factory pattern — app created by calling create\_app()}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+
+\KeywordTok{def}\NormalTok{ create\_app():}
+\NormalTok{    app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+    \CommentTok{\# ... configure the app ...}
+    \ControlFlowTok{return}\NormalTok{ app}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Why the factory pattern is better}\phantomsection\label{15-structuring-the-application:why-the-factory-pattern-is-better}
+
+\textbf{Reason 1: Testability.} When the app is created at module level, importing the module creates the app~--- immediately, once, with whatever environment variables happen to be set. With a factory, tests decide \emph{when} an app is created: they can prepare a test configuration (a temporary database, for example) and then call \texttt{create\_app()} to get a fresh application for each test (→ \hyperref[ch:17-build-process]{Chapter 17}).
+
+\textbf{Reason 2: Multiple instances.} Rarely needed, but sometimes you want to run two Flask applications in the same process (for example, an API and an admin panel). The factory pattern makes this possible.
+
+\textbf{Reason 3: Separation of creation from configuration.} The factory function is the single, explicit place where the app is assembled: configuration loaded, blueprints registered, middleware attached. There is no question of ``is the app configured yet?''~--- if \texttt{create\_app()} has been called and returned, the app is ready.
+
+\textbf{Reason 4: Avoids circular imports.} When the app is created at module level, other modules that import from \texttt{app.py} might run into the app being partially initialized. The factory pattern defers creation until everything is ready.
+
+\subsection*{\texorpdfstring{\texttt{create\_app()} as a deep module}{create\_app() as a deep module}}\phantomsection\label{15-structuring-the-application:create-app-as-a-deep-module}
+
+The factory is worth pausing on, because it is a clean example of a \textbf{deep module}~--- the single most useful idea for judging whether code is well-designed. A module's \emph{depth} is the ratio of how much it does to how much you must know to use it. A \textbf{deep module} hides a lot of functionality behind a small, simple interface. A \textbf{shallow module} exposes nearly as much complexity as it contains, so it barely pays for the cost of existing.
+
+\texttt{create\_app()} is deep. Its interface is the simplest imaginable~--- call it with no arguments, receive a finished application:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{app }\OperatorTok{=}\NormalTok{ create\_app()   }\CommentTok{\# the entire interface}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Behind that one line sits everything the application needs, assembled in the right order: startup checks run, configuration applied, the database teardown handler registered, two Blueprints imported and registered, the schema initialized. The caller knows \emph{none} of it. That asymmetry~--- trivial interface, substantial hidden work~--- is what you want from every module you design. When you instead find yourself writing a function whose interface is about as complicated as its body (a thin wrapper that just forwards its arguments, or a ``manager'' class whose every method you must understand before you can call any of them), you have written a shallow module, and you should ask whether it earns its place or should be inlined away.
+
+The application factory is the standard pattern recommended by Flask's own documentation and used by virtually every production Flask application~--- not by fashion, but because it is deep, testable, and explicit.
+
+\setcounter{section}{4}
+\section{Building the Restructured Application}\label{15-structuring-the-application:155-building-the-restructured-application}
+
+Now build the actual files, one at a time.
+
+\subsection*{Step 1: Create the directory structure}\phantomsection\label{15-structuring-the-application:step-1-create-the-directory-structure}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Starting from the notes{-}api/ root directory}
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ app/routes}
+\FunctionTok{touch}\NormalTok{ app/\_\_init\_\_.py}
+\FunctionTok{touch}\NormalTok{ app/routes/\_\_init\_\_.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \texttt{mkdir\ -p} flag creates parent directories as needed. After this, you have:
+
+\begin{diagrambox}[short]{307.9pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+├── app/
+│   ├── __init__.py        (empty for now)
+│   └── routes/
+│       └── __init__.py    (empty for now)
+├── app.py                 (the old monolith — will be replaced)
+├── requirements.txt
+├── .env
+└── .env.example
+\end{Verbatim}
+\end{diagrambox}
+
+\begin{warnbox}
+
+\textbf{Warning:} Once the \texttt{app/} directory exists, \texttt{import\ app} refers to the \emph{package}, not to \texttt{app.py}~--- Python finds a package directory before a module file of the same name. Anything that imports the old file (a test, a server command such as \texttt{gunicorn\ app:app}) now silently gets the new, still-empty package. Rename the old file (for example to \texttt{app\_old.py}) as the first step, and delete it when the move is complete.
+
+\end{warnbox}
+
+\noindent{}A related naming note: the package is called \texttt{app}, and inside it \texttt{create\_app()} builds a Flask object that is conventionally \emph{also} named \texttt{app}. That is common in Flask projects and harmless once you know it~--- \texttt{from\ app\ import\ create\_}\allowbreak{}\texttt{app} imports from the package; \texttt{app\ =}\allowbreak{}\texttt{\ create\_app()} is the application object. Many teams avoid the double meaning by naming the package after the project (\texttt{notes\_api/}).
+
+\subsection*{\texorpdfstring{Step 2: \texttt{app/config.py} --- Configuration}{Step 2: app/config.py --- Configuration}}\phantomsection\label{15-structuring-the-application:step-2-appconfigpy--configuration}
+
+This module loads and validates all environment variables. It is the first thing the application needs, so it is the first module to write.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 15.1}\enspace app/config.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Configuration loading and validation for the Notes API.}
+
+\CommentTok{All environment variables are read here and here only.}
+\CommentTok{Other modules import from this module — they never call os.getenv() directly.}
+\CommentTok{"""}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{from}\NormalTok{ dotenv }\ImportTok{import}\NormalTok{ load\_dotenv}
+
+\CommentTok{\# Load .env file before reading any environment variables.}
+\CommentTok{\# load\_dotenv() only sets variables that aren\textquotesingle{}t already in the environment,}
+\CommentTok{\# so real environment variables (set by the shell or deployment system)}
+\CommentTok{\# always take precedence over .env file values.}
+\NormalTok{load\_dotenv()}
+
+\KeywordTok{def}\NormalTok{ \_require(name: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Read a required environment variable.}
+
+\CommentTok{    If the variable is missing, exit immediately with a clear error message}
+\CommentTok{    rather than letting the application start with broken configuration.}
+\CommentTok{    """}
+\NormalTok{    value }\OperatorTok{=}\NormalTok{ os.environ.get(name)}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ value:}
+        \ImportTok{import}\NormalTok{ sys}
+        \BuiltInTok{print}\NormalTok{(}
+            \SpecialStringTok{f"Error: Required environment variable \textquotesingle{}}\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} is not set.}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+            \SpecialStringTok{f"Add it to your .env file or set it in your shell before starting."}\NormalTok{,}
+            \BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr,}
+\NormalTok{        )}
+\NormalTok{        sys.exit(}\DecValTok{1}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ value}
+
+\KeywordTok{def}\NormalTok{ \_bool\_env(name: }\BuiltInTok{str}\NormalTok{, default: }\BuiltInTok{str} \OperatorTok{=} \StringTok{"false"}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{bool}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Read an environment variable and interpret it as a boolean.}
+
+\CommentTok{    Accepts \textquotesingle{}true\textquotesingle{} or \textquotesingle{}false\textquotesingle{} (case{-}insensitive).}
+\CommentTok{    Any other value is treated as False.}
+\CommentTok{    """}
+    \ControlFlowTok{return}\NormalTok{ os.getenv(name, default).lower() }\OperatorTok{==} \StringTok{"true"}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Required configuration — the application cannot start without these}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\NormalTok{DATABASE\_URL: }\BuiltInTok{str} \OperatorTok{=}\NormalTok{ \_require(}\StringTok{"DATABASE\_URL"}\NormalTok{)}
+\NormalTok{SECRET\_KEY: }\BuiltInTok{str} \OperatorTok{=}\NormalTok{ \_require(}\StringTok{"SECRET\_KEY"}\NormalTok{)}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Optional configuration — these have safe defaults}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\NormalTok{FLASK\_DEBUG: }\BuiltInTok{bool} \OperatorTok{=}\NormalTok{ \_bool\_env(}\StringTok{"FLASK\_DEBUG"}\NormalTok{, default}\OperatorTok{=}\StringTok{"false"}\NormalTok{)}
+\NormalTok{PORT: }\BuiltInTok{int} \OperatorTok{=} \BuiltInTok{int}\NormalTok{(os.getenv(}\StringTok{"PORT"}\NormalTok{, }\StringTok{"5000"}\NormalTok{))}
+\NormalTok{HOST: }\BuiltInTok{str} \OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"HOST"}\NormalTok{, }\StringTok{"127.0.0.1"}\NormalTok{)}
+\NormalTok{LOG\_DIR: }\BuiltInTok{str} \OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"LOG\_DIR"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Derived configuration — computed from other values}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\CommentTok{\# True if using SQLite, False if using PostgreSQL or another remote database.}
+\CommentTok{\# Used by the database module to choose the right connection approach.}
+\NormalTok{IS\_SQLITE: }\BuiltInTok{bool} \OperatorTok{=}\NormalTok{ DATABASE\_URL.startswith(}\StringTok{"sqlite:///"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\textbf{Key design decisions in this file:}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \texttt{load\_dotenv()} is called once, at module import time. Because Python caches module imports (\hyperref[ch:02-runtime-initialization]{Chapter 2}'s discussion of \texttt{sys.modules}), \texttt{load\_dotenv()} runs exactly once no matter how many files import from \texttt{config.py}.
+\item
+  Every environment variable is read in this file and this file only. No other module calls \texttt{os.getenv()}. This means that to understand what environment variables the application uses, you read exactly one file.
+\item
+  Variables are module-level names (e.g., \texttt{DATABASE\_URL}, \texttt{PORT}). Other modules import them: \texttt{from\ app.}\allowbreak{}\texttt{config\ import\ DATABASE\_}\allowbreak{}\texttt{URL}. This is cleaner than passing config as function arguments or storing it in a global dictionary.
+\item
+  \textbf{The names do design work.} \texttt{\_require} reads as a sentence at its call site~--- \texttt{DATABASE\_}\allowbreak{}\texttt{URL\ =}\allowbreak{}\texttt{\ \_}\allowbreak{}\texttt{require("DATABASE\_}\allowbreak{}\texttt{URL")} says \emph{this value is mandatory} with no comment needed, and the leading underscore marks it private (information hiding again). Compare a vague name like \texttt{get} or \texttt{check}: a good name tells you what you get back and what it costs, so the reader never has to open the function to find out. Naming is not decoration applied after the code works~--- it \emph{is} part of the design. A function you struggle to name is usually a function doing too many things, and the naming difficulty is the design telling you to split it.
+\end{enumerate}
+
+\subsection*{\texorpdfstring{Step 3: \texttt{app/database.py} --- Database Access}{Step 3: app/database.py --- Database Access}}\phantomsection\label{15-structuring-the-application:step-3-appdatabasepy--database-access}
+
+This module handles all database connections: opening, closing, and initializing.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 15.2}\enspace app/database.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Database connection management for the Notes API.}
+
+\CommentTok{Uses Flask\textquotesingle{}s application context (the \textquotesingle{}g\textquotesingle{} object) to manage one database}
+\CommentTok{connection per HTTP request. The connection is opened when first needed}
+\CommentTok{and closed when the request ends.}
+
+\CommentTok{Everything that differs between SQLite and PostgreSQL lives in this file,}
+\CommentTok{so the route handlers never need to know which database is in use.}
+\CommentTok{"""}
+\ImportTok{import}\NormalTok{ sqlite3}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ g}
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ DATABASE\_URL, IS\_SQLITE}
+
+\KeywordTok{def}\NormalTok{ open\_db():}
+    \CommentTok{"""}
+\CommentTok{    Open a database connection appropriate for the configured DATABASE\_URL.}
+
+\CommentTok{    Both kinds of connection return rows that behave like dictionaries}
+\CommentTok{    (row["id"]), so the code that reads them does not care which it got.}
+\CommentTok{    """}
+    \ControlFlowTok{if}\NormalTok{ IS\_SQLITE:}
+        \CommentTok{\# "sqlite:///notes.db" → path "notes.db"}
+\NormalTok{        conn }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_URL[}\BuiltInTok{len}\NormalTok{(}\StringTok{"sqlite:///"}\NormalTok{):])}
+\NormalTok{        conn.row\_factory }\OperatorTok{=}\NormalTok{ sqlite3.Row}
+        \ControlFlowTok{return}\NormalTok{ conn}
+
+    \ImportTok{import}\NormalTok{ psycopg2}
+    \ImportTok{import}\NormalTok{ psycopg2.extras}
+    \CommentTok{\# psycopg2 starts a transaction automatically; handlers commit explicitly}
+    \ControlFlowTok{return}\NormalTok{ psycopg2.}\ExtensionTok{connect}\NormalTok{(DATABASE\_URL, cursor\_factory}\OperatorTok{=}\NormalTok{psycopg2.extras.RealDictCursor)}
+
+\KeywordTok{def}\NormalTok{ get\_db():}
+    \CommentTok{"""}
+\CommentTok{    Return the database connection for the current request.}
+
+\CommentTok{    If no connection exists yet (first database call in this request),}
+\CommentTok{    opens one and stores it on Flask\textquotesingle{}s \textquotesingle{}g\textquotesingle{} object for reuse within}
+\CommentTok{    the same request. Subsequent calls return the same connection.}
+\CommentTok{    """}
+    \ControlFlowTok{if} \StringTok{"db"} \KeywordTok{not} \KeywordTok{in}\NormalTok{ g:}
+\NormalTok{        g.db }\OperatorTok{=}\NormalTok{ open\_db()}
+    \ControlFlowTok{return}\NormalTok{ g.db}
+
+\KeywordTok{def}\NormalTok{ close\_db(error}\OperatorTok{=}\VariableTok{None}\NormalTok{):}
+    \CommentTok{"""}
+\CommentTok{    Close the database connection at the end of a request.}
+
+\CommentTok{    Flask calls this automatically via teardown\_appcontext. Handlers commit}
+\CommentTok{    their own work *before* they return a response, so anything still}
+\CommentTok{    uncommitted here belongs to a request that failed part{-}way: it is rolled}
+\CommentTok{    back, never committed.}
+\CommentTok{    """}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ g.pop(}\StringTok{"db"}\NormalTok{, }\VariableTok{None}\NormalTok{)  }\CommentTok{\# Remove \textquotesingle{}db\textquotesingle{} from g, return None if not present}
+    \ControlFlowTok{if}\NormalTok{ db }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+\NormalTok{        db.rollback()       }\CommentTok{\# A no{-}op after a commit; discards half{-}finished work}
+\NormalTok{        db.close()}
+
+\KeywordTok{def}\NormalTok{ sql(query: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""Queries are written with ? placeholders; psycopg2 expects \%s."""}
+    \ControlFlowTok{return}\NormalTok{ query }\ControlFlowTok{if}\NormalTok{ IS\_SQLITE }\ControlFlowTok{else}\NormalTok{ query.replace(}\StringTok{"?"}\NormalTok{, }\StringTok{"}\SpecialCharTok{\%s}\StringTok{"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ to\_iso(value) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""A timestamp as ISO 8601 in UTC, whichever database produced it."""}
+    \ControlFlowTok{if} \BuiltInTok{isinstance}\NormalTok{(value, }\BuiltInTok{str}\NormalTok{):                    }\CommentTok{\# SQLite: "2024{-}01{-}15 14:00:05" (UTC)}
+        \ControlFlowTok{return}\NormalTok{ value.replace(}\StringTok{" "}\NormalTok{, }\StringTok{"T"}\NormalTok{) }\OperatorTok{+} \StringTok{"+00:00"}
+    \ControlFlowTok{return}\NormalTok{ value.isoformat()                      }\CommentTok{\# PostgreSQL: a timezone{-}aware datetime}
+
+\KeywordTok{def}\NormalTok{ row\_to\_note(row) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict}\NormalTok{:}
+    \CommentTok{"""Convert a database row into the note dictionary the API returns."""}
+\NormalTok{    note }\OperatorTok{=} \BuiltInTok{dict}\NormalTok{(row)}
+\NormalTok{    note[}\StringTok{"created\_at"}\NormalTok{] }\OperatorTok{=}\NormalTok{ to\_iso(note[}\StringTok{"created\_at"}\NormalTok{])}
+    \ControlFlowTok{return}\NormalTok{ note}
+
+\KeywordTok{def}\NormalTok{ init\_db(app):}
+    \CommentTok{"""}
+\CommentTok{    Create database tables if they do not exist.}
+
+\CommentTok{    Called once at application startup. Uses CREATE TABLE IF NOT EXISTS}
+\CommentTok{    so it is safe to call on every startup.}
+
+\CommentTok{    The \textquotesingle{}app\textquotesingle{} parameter is the Flask application instance, needed to}
+\CommentTok{    push an application context so that \textquotesingle{}g\textquotesingle{} is available.}
+\CommentTok{    """}
+    \ControlFlowTok{with}\NormalTok{ app.app\_context():}
+\NormalTok{        db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{        cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+        \ControlFlowTok{if}\NormalTok{ IS\_SQLITE:}
+\NormalTok{            cursor.execute(}\StringTok{"""}
+\StringTok{                CREATE TABLE IF NOT EXISTS notes (}
+\StringTok{                    id         INTEGER PRIMARY KEY AUTOINCREMENT,}
+\StringTok{                    content    TEXT NOT NULL,}
+\StringTok{                    created\_at TIMESTAMP DEFAULT CURRENT\_TIMESTAMP}
+\StringTok{                )}
+\StringTok{            """}\NormalTok{)}
+        \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{            cursor.execute(}\StringTok{"""}
+\StringTok{                CREATE TABLE IF NOT EXISTS notes (}
+\StringTok{                    id         SERIAL PRIMARY KEY,}
+\StringTok{                    content    TEXT NOT NULL,}
+\StringTok{                    created\_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT\_TIMESTAMP}
+\StringTok{                )}
+\StringTok{            """}\NormalTok{)}
+\NormalTok{        db.commit()}
+        \BuiltInTok{print}\NormalTok{(}\StringTok{"Database initialized."}\NormalTok{, flush}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\textbf{Key concepts in this file:}
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{get\_db()} uses the \texttt{g} object to store one connection per request. This is the same pattern as \hyperref[ch:04-request-handling-paths]{Chapter 4} and \hyperref[ch:05-internal-request-execution]{Chapter 5}, but now isolated in its own file.
+\item
+  \texttt{init\_db(app)} takes the Flask \texttt{app} as a parameter and uses \texttt{app.app\_context()}. An \textbf{application context} is Flask's mechanism for making \texttt{g} available outside of a running request. We push one temporarily so that \texttt{get\_db()} can work during startup initialization.
+\item
+  \texttt{close\_db()} never commits. A handler that changes data commits \emph{before} it returns its response~--- so a \texttt{201\ Created} is only ever sent for a note that is really saved. Whatever is left uncommitted at teardown belongs to a request that failed, and is rolled back.
+\item
+  \texttt{sql()}, \texttt{to\_iso()}, and \texttt{row\_to\_note()} keep the two databases' differences~--- placeholder style and timestamp type~--- inside this one file.
+\end{itemize}
+
+\noindent{}\textbf{This file is also a small lesson in function design.} Look at how the four functions divide the work. \texttt{open\_db()} is a simple \emph{factory}: give it nothing, get a fresh connection. \texttt{get\_db()} is a \emph{query that memoizes}: it answers ``the connection for this request,'' creating one only if needed, and is safe to call repeatedly. \texttt{close\_db()} is a \emph{command}: it changes state (rolls back, then closes) and returns nothing useful. That split is an instance of \textbf{command/query separation}~--- a principle that a function should either \emph{do} something (a command, with side effects) or \emph{answer} something (a query, side-effect-free), but not both, because functions that quietly do both surprise their callers. Each function here is also small, takes few parameters, and has one job~--- the practical shape of code that is easy to test and easy to change. When a function instead grows past a screenful, sprouts a fourth or fifth parameter, or needs the word ``and'' to describe what it does, those are the §15.1 smells reappearing at the function level, and the same fix applies: split it.
+
+\subsection*{\texorpdfstring{Step 4:
+\texttt{app/}\allowbreak{}\texttt{routes/}\allowbreak{}\texttt{notes.py}
+--- Notes Route Handlers}{Step 4:  --- Notes Route Handlers}}\phantomsection\label{15-structuring-the-application:step-4-approutesnotespy--notes-route-handlers}
+
+Route handlers are the HTTP interface. They validate input, call database functions, and return responses.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 15.3}\enspace app/routes/notes.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Route handlers for the /notes endpoints.}
+
+\CommentTok{These functions handle HTTP requests for creating, reading, and deleting}
+\CommentTok{notes. They are registered with Flask via a Blueprint (explained below).}
+\CommentTok{"""}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Blueprint, request, jsonify}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db, sql, row\_to\_note}
+
+\CommentTok{\# A Blueprint is Flask\textquotesingle{}s mechanism for grouping related routes.}
+\CommentTok{\# Think of it as a mini Flask application that gets "registered"}
+\CommentTok{\# onto the main application later.}
+\CommentTok{\#}
+\CommentTok{\# Arguments:}
+\CommentTok{\#   "notes"    — the name of this Blueprint (used internally by Flask)}
+\CommentTok{\#   \_\_name\_\_   — tells Flask where this Blueprint is defined (for finding}
+\CommentTok{\#                template files, static files, etc.)}
+\CommentTok{\#}
+\CommentTok{\# url\_prefix="/notes" means every route in this Blueprint is automatically}
+\CommentTok{\# prefixed with /notes. So @notes\_bp.route("/") becomes /notes/.}
+\NormalTok{notes\_bp }\OperatorTok{=}\NormalTok{ Blueprint(}\StringTok{"notes"}\NormalTok{, }\VariableTok{\_\_name\_\_}\NormalTok{, url\_prefix}\OperatorTok{=}\StringTok{"/notes"}\NormalTok{)}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \CommentTok{"""}
+\CommentTok{    GET /notes/ — Return all notes, newest first.}
+
+\CommentTok{    Response (HTTP 200):}
+\CommentTok{        \{"notes": [\{"id": 1, "content": "First note",}
+\CommentTok{                    "created\_at": "2024{-}01{-}15T14:00:05+00:00"\}, ...],}
+\CommentTok{         "count": 1\}}
+\CommentTok{    """}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(}\StringTok{"SELECT id, content, created\_at FROM notes ORDER BY id DESC"}\NormalTok{)}
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [row\_to\_note(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: notes, }\StringTok{"count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(notes)\}), }\DecValTok{200}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+    \CommentTok{"""}
+\CommentTok{    POST /notes/ — Create a new note.}
+
+\CommentTok{    Request body (JSON):}
+\CommentTok{        \{"content": "The text of the note"\}}
+
+\CommentTok{    Response (on success, HTTP 201 Created):}
+\CommentTok{        \{"id": 42, "content": "The text of the note", "created\_at": "..."\}}
+
+\CommentTok{    Response (on error, HTTP 400 Bad Request):}
+\CommentTok{        \{"error": "Description of what went wrong"\}}
+\CommentTok{    """}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+    \CommentTok{\# silent=True: None instead of an error if the body is missing or not valid JSON}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(data, }\BuiltInTok{dict}\NormalTok{):}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Request body must be a JSON object"}\NormalTok{\}), }\DecValTok{400}
+
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ data.get(}\StringTok{"content"}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ content }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} is required"}\NormalTok{\}), }\DecValTok{400}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(content, }\BuiltInTok{str}\NormalTok{):}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} must be a string"}\NormalTok{\}), }\DecValTok{400}
+
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ content.strip()  }\CommentTok{\# Remove leading/trailing whitespace}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ content:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} cannot be empty"}\NormalTok{\}), }\DecValTok{400}
+    \ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(content) }\OperatorTok{\textgreater{}} \DecValTok{10\_000}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} cannot exceed 10,000 characters"}\NormalTok{\}), }\DecValTok{400}
+
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+    \CommentTok{\# RETURNING (PostgreSQL, and SQLite 3.35+) hands back the new row in one step}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"INSERT INTO notes (content) VALUES (?) RETURNING id, content, created\_at"}\NormalTok{),}
+\NormalTok{        (content,),}
+\NormalTok{    )}
+\NormalTok{    note }\OperatorTok{=}\NormalTok{ row\_to\_note(cursor.fetchone())}
+\NormalTok{    db.commit()  }\CommentTok{\# Commit before responding: a 201 must mean the note is saved}
+    \ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{201}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+    \CommentTok{"""}
+\CommentTok{    GET /notes/\textless{}note\_id\textgreater{} — Return a specific note by ID.}
+
+\CommentTok{    The \textless{}int:note\_id\textgreater{} in the route pattern tells Flask to extract the}
+\CommentTok{    value from the URL and pass it as an integer to this function.}
+\CommentTok{    If the value in the URL is not a valid integer, Flask returns 404}
+\CommentTok{    automatically before this function is called.}
+
+\CommentTok{    Response (on not found, HTTP 404):}
+\CommentTok{        \{"error": "Note 42 not found"\}}
+\CommentTok{    """}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+    \ControlFlowTok{return}\NormalTok{ jsonify(row\_to\_note(row)), }\DecValTok{200}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ delete\_note(note\_id):}
+    \CommentTok{"""}
+\CommentTok{    DELETE /notes/\textless{}note\_id\textgreater{} — Delete a specific note.}
+
+\CommentTok{    Response (on success, HTTP 204 No Content): empty body}
+\CommentTok{    Response (on not found, HTTP 404): \{"error": "Note 42 not found"\}}
+\CommentTok{    """}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"DELETE FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    db.commit()}
+    \ControlFlowTok{if}\NormalTok{ cursor.rowcount }\OperatorTok{==} \DecValTok{0}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+    \ControlFlowTok{return} \StringTok{""}\NormalTok{, }\DecValTok{204}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Notice what is \emph{not} here: no \texttt{if\ IS\_SQLITE:} anywhere. Each handler is written once, and \texttt{database.py} absorbs the differences between the two databases. That is information hiding at work~--- and it is what made the handlers short enough to read at a glance.
+
+\textbf{The Blueprint concept:}
+
+A \textbf{Blueprint} (imported from \texttt{flask}) is Flask's mechanism for grouping related routes. Think of it as a partial Flask application: it holds route definitions but is not itself a running application. When you call \texttt{app.}\allowbreak{}\texttt{register\_}\allowbreak{}\texttt{blueprint(notes\_}\allowbreak{}\texttt{bp)} in the factory, Flask adds all the Blueprint's routes to the main application's route table.
+
+Blueprints solve a specific problem: how to define routes in a file that is separate from the file where the Flask \texttt{app} object is created. Without Blueprints, you would need to import \texttt{app} into every routes file, which creates circular imports. With Blueprints, you create a Blueprint object locally, define routes on it, and register it onto the app later.
+
+\subsection*{\texorpdfstring{Step 5:
+\texttt{app/}\allowbreak{}\texttt{routes/}\allowbreak{}\texttt{health.py}
+--- Health Check Route}{Step 5:  --- Health Check Route}}\phantomsection\label{15-structuring-the-application:step-5-approuteshealthpy--health-check-route}
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 15.4}\enspace app/routes/health.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Health check route for the Notes API.}
+
+\CommentTok{A health check endpoint is a special route that returns a simple success}
+\CommentTok{response. Deployment systems, load balancers, and monitoring tools call}
+\CommentTok{this endpoint to verify that the application is running and responding.}
+
+\CommentTok{Unlike the /notes endpoints, the health check does not interact with the}
+\CommentTok{database. It only verifies that the Flask application itself is alive.}
+\CommentTok{A separate, more detailed health check could verify database connectivity;}
+\CommentTok{Chapter 35 — Observability builds one.}
+\CommentTok{"""}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Blueprint, jsonify}
+
+\NormalTok{health\_bp }\OperatorTok{=}\NormalTok{ Blueprint(}\StringTok{"health"}\NormalTok{, }\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\AttributeTok{@health\_bp.route}\NormalTok{(}\StringTok{"/health"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ health():}
+    \CommentTok{"""}
+\CommentTok{    GET /health — Return a simple health status.}
+
+\CommentTok{    This route is intentionally minimal. Its purpose is to answer}
+\CommentTok{    the question "is the process running and accepting HTTP requests?"}
+\CommentTok{    If this endpoint returns 200, the answer is yes.}
+
+\CommentTok{    Response (HTTP 200 OK):}
+\CommentTok{        \{"status": "ok"\}}
+\CommentTok{    """}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"status"}\NormalTok{: }\StringTok{"ok"}\NormalTok{\}), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{\texorpdfstring{Step 6: \texttt{app/startup.py} --- Startup Checks}{Step 6: app/startup.py --- Startup Checks}}\phantomsection\label{15-structuring-the-application:step-6-appstartuppy--startup-checks}
+
+Move the startup checks from \hyperref[ch:14-runtime-contract]{Chapter 14}'s \texttt{startup.py} into the application package. They now take their values from \texttt{app.config} instead of reading the environment themselves~--- \texttt{config.py} stays the one place where environment variables are read~--- and they are split by \emph{when} they apply: most checks apply wherever the application runs, but the port check applies only to the development server (a production server such as Gunicorn binds the port itself, before it loads the application).
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 15.5}\enspace app/startup.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Startup validation for the Notes API.}
+
+\CommentTok{These checks run before the application begins accepting requests.}
+\CommentTok{If any check fails, the process exits immediately with a clear error message}
+\CommentTok{and a non{-}zero exit code.}
+
+\CommentTok{This is the enforcement of the runtime contract defined in Chapter 14.}
+\CommentTok{"""}
+\ImportTok{import}\NormalTok{ errno}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ socket}
+\ImportTok{import}\NormalTok{ sys}
+\ImportTok{from}\NormalTok{ urllib.parse }\ImportTok{import}\NormalTok{ urlsplit}
+
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ DATABASE\_URL, IS\_SQLITE, SECRET\_KEY}
+
+\KeywordTok{def}\NormalTok{ check\_python\_version():}
+    \CommentTok{"""Verify that the Python interpreter meets the minimum version requirement."""}
+\NormalTok{    required }\OperatorTok{=}\NormalTok{ (}\DecValTok{3}\NormalTok{, }\DecValTok{10}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ sys.version\_info }\OperatorTok{\textless{}}\NormalTok{ required:}
+\NormalTok{        \_fail(}
+            \SpecialStringTok{f"Python }\SpecialCharTok{\{}\NormalTok{required[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{.}\SpecialCharTok{\{}\NormalTok{required[}\DecValTok{1}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{+ is required.}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+            \SpecialStringTok{f"You are running Python }\SpecialCharTok{\{}\NormalTok{sys}\SpecialCharTok{.}\NormalTok{version}\SpecialCharTok{.}\NormalTok{split()[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{."}
+\NormalTok{        )}
+
+\KeywordTok{def}\NormalTok{ check\_secret\_key():}
+    \CommentTok{"""Verify that SECRET\_KEY is long enough to be a real secret."""}
+    \CommentTok{\# (config.py has already exited if SECRET\_KEY or DATABASE\_URL is missing)}
+    \ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(SECRET\_KEY) }\OperatorTok{\textless{}} \DecValTok{24}\NormalTok{:}
+\NormalTok{        \_fail(}
+            \SpecialStringTok{f"SECRET\_KEY must be at least 24 characters long "}
+            \SpecialStringTok{f"(current length: }\SpecialCharTok{\{}\BuiltInTok{len}\NormalTok{(SECRET\_KEY)}\SpecialCharTok{\}}\SpecialStringTok{).}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+            \SpecialStringTok{f"Generate one with: python {-}c }\CharTok{\textbackslash{}"}\SpecialStringTok{import secrets; print(secrets.token\_hex(32))}\CharTok{\textbackslash{}"}\SpecialStringTok{"}
+\NormalTok{        )}
+
+\KeywordTok{def}\NormalTok{ check\_database():}
+    \CommentTok{"""Verify that the database is reachable before accepting requests."""}
+    \ControlFlowTok{if}\NormalTok{ IS\_SQLITE:}
+        \ControlFlowTok{return}  \CommentTok{\# SQLite is a local file — no network connectivity to verify}
+    \ControlFlowTok{try}\NormalTok{:}
+        \ImportTok{import}\NormalTok{ psycopg2}
+\NormalTok{        conn }\OperatorTok{=}\NormalTok{ psycopg2.}\ExtensionTok{connect}\NormalTok{(DATABASE\_URL, connect\_timeout}\OperatorTok{=}\DecValTok{5}\NormalTok{)}
+\NormalTok{        conn.close()}
+        \BuiltInTok{print}\NormalTok{(}\StringTok{"Database connectivity: OK"}\NormalTok{, flush}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+    \ControlFlowTok{except} \PreprocessorTok{Exception} \ImportTok{as}\NormalTok{ e:}
+\NormalTok{        \_fail(}
+            \SpecialStringTok{f"Cannot connect to the database.}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+            \SpecialStringTok{f"DATABASE\_URL: }\SpecialCharTok{\{}\NormalTok{\_mask(DATABASE\_URL)}\SpecialCharTok{\}}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+            \SpecialStringTok{f"Error: }\SpecialCharTok{\{}\NormalTok{e}\SpecialCharTok{\}}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+            \SpecialStringTok{f"Ensure the database server is running and reachable."}
+\NormalTok{        )}
+
+\KeywordTok{def}\NormalTok{ check\_port(host: }\BuiltInTok{str}\NormalTok{, port: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""}
+\CommentTok{    Verify that the development server\textquotesingle{}s port is free.}
+
+\CommentTok{    Only for \textasciigrave{}python run.py\textasciigrave{}. Skipped in the child process of Flask\textquotesingle{}s}
+\CommentTok{    reloader (FLASK\_DEBUG=true), because the parent already holds the port.}
+\CommentTok{    """}
+    \ControlFlowTok{if}\NormalTok{ os.environ.get(}\StringTok{"WERKZEUG\_RUN\_MAIN"}\NormalTok{) }\OperatorTok{==} \StringTok{"true"}\NormalTok{:}
+        \ControlFlowTok{return}
+    \ControlFlowTok{with}\NormalTok{ socket.socket(socket.AF\_INET, socket.SOCK\_STREAM) }\ImportTok{as}\NormalTok{ s:}
+\NormalTok{        s.setsockopt(socket.SOL\_SOCKET, socket.SO\_REUSEADDR, }\DecValTok{1}\NormalTok{)}
+        \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{            s.bind((host, port))}
+        \ControlFlowTok{except} \PreprocessorTok{OSError} \ImportTok{as}\NormalTok{ e:}
+            \ControlFlowTok{if}\NormalTok{ e.errno }\OperatorTok{!=}\NormalTok{ errno.EADDRINUSE:}
+                \ControlFlowTok{raise}
+\NormalTok{            \_fail(}
+                \SpecialStringTok{f"Port }\SpecialCharTok{\{}\NormalTok{port}\SpecialCharTok{\}}\SpecialStringTok{ on }\SpecialCharTok{\{}\NormalTok{host}\SpecialCharTok{\}}\SpecialStringTok{ is already in use.}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+                \SpecialStringTok{f"Find the process with: lsof {-}i :}\SpecialCharTok{\{}\NormalTok{port}\SpecialCharTok{\}}\SpecialStringTok{"}
+\NormalTok{            )}
+
+\KeywordTok{def}\NormalTok{ run():}
+    \CommentTok{"""Run the checks that apply wherever the application starts."""}
+    \BuiltInTok{print}\NormalTok{(}\StringTok{"Running startup checks..."}\NormalTok{, flush}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\NormalTok{    check\_python\_version()}
+\NormalTok{    check\_secret\_key()}
+\NormalTok{    check\_database()}
+    \BuiltInTok{print}\NormalTok{(}\StringTok{"All startup checks passed."}\NormalTok{, flush}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ \_mask(url: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""Hide the password in a database URL before it is printed."""}
+\NormalTok{    password }\OperatorTok{=}\NormalTok{ urlsplit(url).password}
+    \ControlFlowTok{return}\NormalTok{ url.replace(}\SpecialStringTok{f":}\SpecialCharTok{\{}\NormalTok{password}\SpecialCharTok{\}}\SpecialStringTok{@"}\NormalTok{, }\StringTok{":****@"}\NormalTok{, }\DecValTok{1}\NormalTok{) }\ControlFlowTok{if}\NormalTok{ password }\ControlFlowTok{else}\NormalTok{ url}
+
+\KeywordTok{def}\NormalTok{ \_fail(message: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""Print an error message and exit with code 1."""}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\CharTok{\textbackslash{}n}\SpecialStringTok{Startup failed:}\CharTok{\textbackslash{}n}\SpecialStringTok{  }\SpecialCharTok{\{}\NormalTok{message}\SpecialCharTok{\}}\CharTok{\textbackslash{}n}\SpecialStringTok{"}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+\NormalTok{    sys.exit(}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{\texorpdfstring{Step 7: \texttt{app/\_\_init\_\_.py} --- The Application Factory}{Step 7: app/\_\_init\_\_.py --- The Application Factory}}\phantomsection\label{15-structuring-the-application:step-7-app--init--py--the-application-factory}
+
+This is the central file of the restructured application. It defines \texttt{create\_app()}, which assembles all the pieces.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 15.6}\enspace app/\_\_init\_\_.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Application factory for the Notes API.}
+
+\CommentTok{Call create\_app() to get a configured, ready{-}to{-}use Flask application}
+\CommentTok{instance. This is the application factory pattern: instead of creating}
+\CommentTok{the Flask app at module level, we create it inside a function.}
+
+\CommentTok{Benefits:}
+\CommentTok{  {-} Each call to create\_app() returns a fresh instance (useful in tests)}
+\CommentTok{  {-} All assembly happens in one place: checks, configuration, database, blueprints}
+\CommentTok{  {-} No circular imports: blueprints don\textquotesingle{}t need to import the app object}
+\CommentTok{"""}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+\ImportTok{from}\NormalTok{ app }\ImportTok{import}\NormalTok{ startup}
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ SECRET\_KEY, FLASK\_DEBUG}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ close\_db, init\_db}
+
+\KeywordTok{def}\NormalTok{ create\_app() }\OperatorTok{{-}\textgreater{}}\NormalTok{ Flask:}
+    \CommentTok{"""}
+\CommentTok{    Create and configure a Flask application instance.}
+
+\CommentTok{    This function:}
+\CommentTok{    1. Runs the startup checks (the runtime contract from Chapter 14)}
+\CommentTok{    2. Creates the Flask application object and applies configuration}
+\CommentTok{    3. Registers the teardown handler (to close database connections)}
+\CommentTok{    4. Registers Blueprints (the route handlers)}
+\CommentTok{    5. Initializes the database schema}
+
+\CommentTok{    Returns the configured application, ready to serve requests.}
+\CommentTok{    """}
+\NormalTok{    startup.run()}
+
+\NormalTok{    app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────────}
+    \CommentTok{\# Apply configuration to the Flask application}
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────────}
+    \CommentTok{\# Flask uses app.config as a dictionary for its own settings and for}
+    \CommentTok{\# settings you want available via current\_app.config in route handlers.}
+\NormalTok{    app.config[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=}\NormalTok{ SECRET\_KEY}
+\NormalTok{    app.config[}\StringTok{"DEBUG"}\NormalTok{] }\OperatorTok{=}\NormalTok{ FLASK\_DEBUG}
+
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────────}
+    \CommentTok{\# Register the database teardown handler}
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────────}
+    \CommentTok{\# Flask calls teardown\_appcontext functions at the end of every request,}
+    \CommentTok{\# even if an exception occurred, so connections are always closed.}
+\NormalTok{    app.teardown\_appcontext(close\_db)}
+
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────────}
+    \CommentTok{\# Register Blueprints (route handlers)}
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────────}
+    \ImportTok{from}\NormalTok{ app.routes.health }\ImportTok{import}\NormalTok{ health\_bp}
+    \ImportTok{from}\NormalTok{ app.routes.notes }\ImportTok{import}\NormalTok{ notes\_bp}
+
+\NormalTok{    app.register\_blueprint(health\_bp)}
+\NormalTok{    app.register\_blueprint(notes\_bp)}
+
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────────}
+    \CommentTok{\# Initialize the database schema (CREATE TABLE IF NOT EXISTS)}
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────────}
+\NormalTok{    init\_db(app)}
+
+    \ControlFlowTok{return}\NormalTok{ app}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\textbf{Why Blueprint imports are inside the function:}
+
+Notice that \texttt{from\ app.}\allowbreak{}\texttt{routes.}\allowbreak{}\texttt{health\ import\ health\_}\allowbreak{}\texttt{bp} appears \emph{inside} \texttt{create\_app()}, not at the top of the file. Configuration is not the reason~--- importing \texttt{app.config} at the top of this file already loaded and validated it the moment the package was imported. The reason is \textbf{import direction}: route modules import from the \texttt{app} package (\texttt{app.database}), so if the package's \texttt{\_\_init\_\_.py} also imported the route modules at its top, the two would import each other while both were half-initialized. Importing the Blueprints inside the function, when the package is fully loaded, keeps the dependency one-way.
+
+This is the general solution to circular imports in Flask applications. \texttt{app/}\allowbreak{}\texttt{routes/}\allowbreak{}\texttt{notes.py} imports from \texttt{app.database}. \texttt{app/\_\_init\_\_.py} imports \texttt{app.routes.notes}. If \texttt{app/}\allowbreak{}\texttt{routes/}\allowbreak{}\texttt{notes.py} also imported the \texttt{app} object from \texttt{app/\_\_init\_\_.py}, that would be circular. With Blueprints, route files never import the \texttt{app} object directly~--- they only import their Blueprint object.
+
+\setcounter{section}{5}
+\section{\texorpdfstring{The Entry Point: \texttt{run.py}}{The Entry Point: run.py}}\label{15-structuring-the-application:156-the-entry-point-runpy}
+
+The entry point is the one file that humans and deployment systems run to start the application.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 15.7}\enspace run.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Entry point for the Notes API development server.}
+
+\CommentTok{    python run.py}
+
+\CommentTok{In production, a WSGI server calls the application factory directly}
+\CommentTok{(Chapters 18 and 24):}
+
+\CommentTok{    gunicorn "app:create\_app()"}
+
+\CommentTok{This file is intentionally minimal. Its job is to:}
+\CommentTok{  1. Create the Flask application (create\_app() also runs the startup checks)}
+\CommentTok{  2. Check that the development server\textquotesingle{}s port is free}
+\CommentTok{  3. Start the development server}
+
+\CommentTok{All application logic lives in the app/ package.}
+\CommentTok{"""}
+\ImportTok{from}\NormalTok{ app }\ImportTok{import}\NormalTok{ create\_app}
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ FLASK\_DEBUG, HOST, PORT}
+\ImportTok{from}\NormalTok{ app.startup }\ImportTok{import}\NormalTok{ check\_port}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ create\_app()}
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    check\_port(HOST, PORT)}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Starting Notes API on http://}\SpecialCharTok{\{}\NormalTok{HOST}\SpecialCharTok{\}}\SpecialStringTok{:}\SpecialCharTok{\{}\NormalTok{PORT}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, flush}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\NormalTok{    app.run(host}\OperatorTok{=}\NormalTok{HOST, port}\OperatorTok{=}\NormalTok{PORT, debug}\OperatorTok{=}\NormalTok{FLASK\_DEBUG)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\textbf{Why \texttt{run.py} does so little:} it no longer loads the \texttt{.env} file or reads any environment variable itself~--- \texttt{app/config.py} does both, the first time anything imports the package. It keeps \texttt{app\ =}\allowbreak{}\texttt{\ create\_app()} at module level so that tools which look for an \texttt{app} object in a file (for example \texttt{flask\ -\/-app\ run\ shell}) can find one. The \texttt{if\ \_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{name\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{\ =}\allowbreak{}\texttt{=}\allowbreak{}\texttt{\ "\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{main\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{":} block runs only when you execute \texttt{python\ run.py} directly: that is the one situation in which \emph{this} process will bind the port, so it is the one place to check that the port is free.
+
+\setcounter{section}{6}
+\section{The Updated Project Structure}\label{15-structuring-the-application:157-the-updated-project-structure}
+
+After creating all these files, the project looks like this:
+
+\begin{diagrambox}[short]{358.6pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+├── app/
+│   ├── __init__.py         ← create_app() factory function
+│   ├── config.py           ← All environment variable loading
+│   ├── database.py         ← Database connection management
+│   ├── startup.py          ← Startup checks (runtime contract enforcement)
+│   └── routes/
+│       ├── __init__.py     ← (empty — marks routes/ as a package)
+│       ├── health.py       ← GET /health
+│       └── notes.py        ← GET/POST /notes/, GET/DELETE /notes/<id>
+├── run.py                  ← Entry point
+├── requirements.txt        ← Pinned dependencies
+├── .env                    ← Local configuration (NOT committed)
+├── .env.example            ← Template (committed)
+├── .python-version         ← Python version declaration
+└── .gitignore              ← Excludes venv/, .env, *.db, __pycache__/
+\end{Verbatim}
+\end{diagrambox}
+
+\Needspace{17\baselineskip}
+
+\subsection*{What each file is responsible for}\phantomsection\label{15-structuring-the-application:what-each-file-is-responsible-for}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+File & Single Responsibility \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{run.py} & Start the application \\
+\texttt{app/\_\_init\_\_.py} & Assemble the application (factory) \\
+\texttt{app/config.py} & Load and validate configuration \\
+\texttt{app/database.py} & Manage database connections \\
+\texttt{app/startup.py} & Enforce the runtime contract \\
+\texttt{app/}\allowbreak{}\texttt{routes/}\allowbreak{}\texttt{health.py} & Handle GET /health \\
+\texttt{app/}\allowbreak{}\texttt{routes/}\allowbreak{}\texttt{notes.py} & Handle all /notes endpoints \\
+\end{longtable}
+}
+
+Each file has exactly one reason to change. If you change how the database is connected, you change \texttt{database.py}. If you add a new configuration variable, you change \texttt{config.py}. If you add a new endpoint category (for example, \texttt{/users}), you add a new file \texttt{app/}\allowbreak{}\texttt{routes/}\allowbreak{}\texttt{users.py} without touching any existing file.
+
+\setcounter{section}{7}
+\section{The Startup Sequence in the Restructured Application}\label{15-structuring-the-application:158-the-startup-sequence-in-the-restructured-application}
+
+When you run \texttt{python\ run.py}, this is the sequence of events:
+
+\begin{diagrambox}[short]{404.7pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+python run.py
+│
+├── 1. Python runs run.py as the __main__ module
+│
+├── 2. from app import create_app
+│      Importing anything from the package first runs app/__init__.py, which imports:
+│        app.startup   → which imports app.config:
+│                        load_dotenv() reads .env;
+│                        DATABASE_URL and SECRET_KEY are read — or the process exits
+│        app.config    (already loaded — taken from sys.modules)
+│        app.database  (open_db, get_db, close_db, sql, init_db ...)
+│      (route modules not yet imported)
+│
+├── 3. app = create_app()
+│      startup.run():
+│        check_python_version() ─── passes or exits
+│        check_secret_key()     ─── passes or exits
+│        check_database()       ─── passes or exits
+│        "All startup checks passed."
+│      Creates the Flask instance and applies configuration (SECRET_KEY, DEBUG)
+│      Registers the teardown handler (close_db)
+│      Imports and registers health_bp → loads app/routes/health.py
+│      Imports and registers notes_bp  → loads app/routes/notes.py
+│      init_db(app) → creates tables if they don't exist
+│      Returns the configured Flask app
+│
+├── 4. if __name__ == "__main__": block runs
+│      check_port("127.0.0.1", 5000) ─── passes or exits
+│      "Starting Notes API on http://127.0.0.1:5000"
+│
+└── 5. app.run(host="127.0.0.1", port=5000, debug=False)
+       Flask's development server starts
+       Werkzeug socket binding: listen on 127.0.0.1:5000
+       "Waiting for connections..."
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Step 2 holds a subtlety worth remembering: in Python, importing \emph{any} module inside a package~--- even \texttt{from\ app.}\allowbreak{}\texttt{startup\ import\ .}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}~--- first runs the package's \texttt{\_\_init\_\_.py}. That is why configuration is loaded and validated before the startup checks are even defined, and why \texttt{config.py} is the right place to fail fast on missing variables.
+
+When a production server starts the application instead (\texttt{gunicorn\ "app:}\allowbreak{}\texttt{create\_}\allowbreak{}\texttt{app()"}), steps 2 and 3 happen exactly the same way inside each server process; only step 4 and 5 differ~--- the server has already bound the port, and it takes over from there.
+
+This sequence is explicit and ordered. Each step depends only on what came before it. Compare this to the original \texttt{app.py}, where import time and runtime were mixed together and the order of operations was difficult to reason about.
+
+\setcounter{section}{8}
+\section{Verifying the Restructured Application}\label{15-structuring-the-application:159-verifying-the-restructured-application}
+
+After creating all the files, verify that everything works:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# From the notes{-}api/ root directory}
+\CommentTok{\# Make sure your virtual environment is activated and requirements are installed}
+
+\CommentTok{\# Start the application}
+\ExtensionTok{python}\NormalTok{ run.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Running startup checks...
+Database connectivity: OK       ← (only if using PostgreSQL)
+All startup checks passed.
+Database initialized.
+Starting Notes API on http://127.0.0.1:5000
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+Press CTRL+C to quit
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Test each endpoint:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Health check}
+\ExtensionTok{curl}\NormalTok{ http://127.0.0.1:5000/health}
+\CommentTok{\# \{"status":"ok"\}}
+
+\CommentTok{\# Create a note}
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ POST http://127.0.0.1:5000/notes/ }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"content": "Testing the restructured application"\}\textquotesingle{}}
+\CommentTok{\# \{"content":"Testing the restructured application","created\_at":"2024{-}01{-}15T14:00:05+00:00","id":1\}}
+
+\CommentTok{\# Retrieve all notes}
+\ExtensionTok{curl}\NormalTok{ http://127.0.0.1:5000/notes/}
+\CommentTok{\# \{"count":1,"notes":[\{"content":"Testing the restructured application","created\_at":"2024{-}01{-}15T14:00:05+00:00","id":1\}]\}}
+
+\CommentTok{\# The old URL still works through a redirect ({-}L tells curl to follow it)}
+\ExtensionTok{curl} \AttributeTok{{-}L}\NormalTok{ http://127.0.0.1:5000/notes}
+
+\CommentTok{\# Retrieve one note}
+\ExtensionTok{curl}\NormalTok{ http://127.0.0.1:5000/notes/1}
+\CommentTok{\# \{"content":"Testing the restructured application","created\_at":"2024{-}01{-}15T14:00:05+00:00","id":1\}}
+
+\CommentTok{\# Delete a note}
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ DELETE http://127.0.0.1:5000/notes/1}
+\CommentTok{\# (empty body, HTTP 204)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}If everything works, the restructuring is complete. Apart from the three deliberate changes listed in §15.1~--- the \texttt{/notes/} URL, \texttt{204} on delete, and ISO timestamps~--- the application behaves as before, with the same data, but is now organized in a maintainable structure.
+
+\subsection*{Common errors during restructuring}\phantomsection\label{15-structuring-the-application:common-errors-during-restructuring}
+
+\textbf{A second, empty \texttt{notes.db} appears somewhere else}
+
+\texttt{python\ notes-api/}\allowbreak{}\texttt{run.py}, run from the parent directory, \emph{does} start: Python puts the script's own directory (\texttt{notes-api/}) on \texttt{sys.path}, so the \texttt{app} package is found (← \hyperref[ch:02-runtime-initialization]{Chapter 2}). But \texttt{DATABASE\_}\allowbreak{}\texttt{URL=}\allowbreak{}\texttt{sqlite:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{db} is a path relative to the \textbf{current working directory}, so SQLite quietly creates a new, empty \texttt{notes.db} in the parent directory, and your notes seem to have vanished. Run the application from the project root~--- or use an absolute path in \texttt{DATABASE\_URL}.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Surprising — works, but uses ../notes.db:}
+\BuiltInTok{cd}\NormalTok{ ..}
+\ExtensionTok{python}\NormalTok{ notes{-}api/run.py}
+
+\CommentTok{\# Correct — running from project root:}
+\BuiltInTok{cd}\NormalTok{ notes{-}api}
+\ExtensionTok{python}\NormalTok{ run.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{\texttt{ModuleNotFoundError:}\allowbreak{}\texttt{\ No\ module\ named\ \textquotesingle{}app\textquotesingle{}}}
+
+This one appears when a tool imports the package from a directory where \texttt{app/} is not on the path~--- for example, running \texttt{pytest} or \texttt{python\ -m\ app.something} from the wrong directory. Run tools from the project root.
+
+\textbf{\texttt{ImportError:}\allowbreak{}\texttt{\ cannot\ import\ name\ \textquotesingle{}create\_}\allowbreak{}\texttt{app\textquotesingle{}\ from\ \textquotesingle{}app\textquotesingle{}}}
+
+The \texttt{app/\_\_init\_\_.py} file exists but does not define \texttt{create\_app}. Check that the file was saved correctly.
+
+\textbf{\texttt{sqlite3.}\allowbreak{}\texttt{OperationalError:}\allowbreak{}\texttt{\ unable\ to\ open\ database\ file}}
+
+The directory in \texttt{DATABASE\_URL} does not exist, or the current user cannot write to it. Check the path (it is relative to the directory you start the application from) and its permissions.
+
+\setcounter{section}{9}
+\section{The Standardized Startup Command}\label{15-structuring-the-application:1510-the-standardized-startup-command}
+
+Before this chapter, starting the application required knowing to run \texttt{python\ app.py}. After restructuring, it is \texttt{python\ run.py}. This is a convention: the entry point is always called \texttt{run.py} (or sometimes \texttt{wsgi.py} or \texttt{main.py}~--- projects differ, but they always have a single designated entry point).
+
+Standardize this further by documenting it in two places:
+
+\subsection*{\texorpdfstring{In \texttt{.env.example} --- add a comment at the top}{In .env.example --- add a comment at the top}}\phantomsection\label{15-structuring-the-application:in-envexample--add-a-comment-at-the-top}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# .env.example — environment variable template}
+\CommentTok{\# Run the application with: python run.py}
+\CommentTok{\# Development server only — for production, see: gunicorn "app:create\_app()"}
+
+\VariableTok{DATABASE\_URL}\OperatorTok{=}\NormalTok{sqlite:///notes.db}
+\CommentTok{\# Required — generate a value with:}
+\CommentTok{\#   python {-}c "import secrets; print(secrets.token\_hex(32))"}
+\VariableTok{SECRET\_KEY}\OperatorTok{=}
+\VariableTok{FLASK\_DEBUG}\OperatorTok{=}\NormalTok{false}
+\VariableTok{PORT}\OperatorTok{=}\NormalTok{5000}
+\VariableTok{HOST}\OperatorTok{=}\NormalTok{127.0.0.1}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{\texorpdfstring{In a \texttt{Makefile} (optional but common)}{In a Makefile (optional but common)}}\phantomsection\label{15-structuring-the-application:in-a-makefile-optional-but-common}
+
+Many Python projects use a \texttt{Makefile} to standardize common commands:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Makefile — common development commands}
+\CommentTok{\# Run with: make \textless{}target\textgreater{}}
+
+\OtherTok{.PHONY:}\DataTypeTok{ run install test clean}
+
+\CommentTok{\# Start the development server}
+\DecValTok{run:}
+\ErrorTok{    }\NormalTok{python run.py}
+
+\CommentTok{\# Install dependencies into the active virtual environment}
+\DecValTok{install:}
+\ErrorTok{    }\NormalTok{pip install {-}r requirements.txt}
+
+\CommentTok{\# Run the test suite (Chapter 17 introduces testing)}
+\DecValTok{test:}
+\ErrorTok{    }\NormalTok{pytest}
+
+\CommentTok{\# Remove Python bytecode cache files}
+\DecValTok{clean:}
+\ErrorTok{    }\NormalTok{find . {-}type d {-}name \_\_pycache\_\_ {-}exec rm {-}rf \{\} +}
+\NormalTok{    find . {-}name }\StringTok{"*.pyc"}\NormalTok{ {-}delete}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With a Makefile:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make}\NormalTok{ run      }\CommentTok{\# starts the server}
+\FunctionTok{make}\NormalTok{ install  }\CommentTok{\# installs dependencies}
+\FunctionTok{make}\NormalTok{ clean    }\CommentTok{\# removes cache files}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}A Makefile is not required, but it reduces the cognitive load for new developers: they read the Makefile, see \texttt{make\ run}, and know how to start the application without reading any other documentation.
+
+\phantomsection\label{15-structuring-the-application:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{single-file application} becomes unmanageable as it grows. The solution is a directory structure where each file has one clear responsibility.
+\item
+  A \textbf{Python package} is a directory of modules; with an \texttt{\_\_init\_\_.py} file it is a \emph{regular} package, which is what an application should use. Directory names must be valid identifiers (underscores, not hyphens).
+\item
+  The \textbf{application factory pattern} defines \texttt{create\_app()} as the function that creates and configures the Flask application. Calling this function returns a ready-to-use app. This pattern enables testing, prevents circular imports, and makes the startup sequence explicit.
+\item
+  \textbf{Blueprints} are Flask's mechanism for defining routes in files separate from the \texttt{Flask} app object. Each Blueprint groups related routes (all \texttt{/notes} routes in \texttt{notes\_bp}) and is registered onto the main app in \texttt{create\_app()}.
+\item
+  The \textbf{entry point} (\texttt{run.py}) is the single file you run in development. It is intentionally minimal: create the app (which runs the startup checks), check the port, start the server. In production, a WSGI server calls \texttt{create\_app()} directly.
+\item
+  \textbf{One responsibility per file} is the organizing principle. \texttt{config.py} loads configuration. \texttt{database.py} manages connections. \texttt{routes/notes.py} handles note endpoints. Changing one area of the application means changing at most one file.
+\item
+  The \textbf{import order matters}: importing anything from a package runs its \texttt{\_\_init\_\_.py} first, so configuration is loaded the moment the package is imported. Put checks where they run on every path into the application (\texttt{create\_app()}), and development-only checks (the port) where only the development server runs them.
+\item
+  \textbf{Complexity is the real enemy}, and you recognize it by three symptoms: change amplification, high cognitive load, and unknown unknowns. Structure exists to reduce all three.
+\item
+  Aim for \textbf{high cohesion and low coupling}: each unit does one job and touches others through the narrowest interface. \textbf{Information hiding}~--- exposing little, hiding much~--- is how you achieve low coupling.
+\item
+  Prefer \textbf{deep modules} (simple interface, substantial hidden work, like \texttt{create\_app()}) over shallow ones (interfaces nearly as complex as their bodies).
+\item
+  \textbf{Naming, small single-purpose functions, and command/query separation} are design tools, not cosmetics. A name you cannot find, or a function you cannot describe in one sentence, is the design asking to be split.
+\item
+  Restructuring is \textbf{strategic programming}~--- paying a small cost now to keep all future changes cheap~--- carried out as \textbf{refactoring}: behavior-preserving changes made in small, safe steps.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{15-structuring-the-application:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Move a route from the notes blueprint into \texttt{create\_app()} directly. Does the application still work? What does it cost you in structure?
+\item
+  \textbf{Break and fix.} Create a circular import: import something from \texttt{app.routes.notes} inside \texttt{app/database.py}. Read the error, and fix it by moving the import to where it is needed.
+\item
+  \textbf{Extend.} Add a second blueprint, \texttt{stats\_bp}, with \texttt{GET\ /stats/} returning the number of notes, registered in \texttt{create\_app()}.
+\item
+  \textbf{Explain.} Pick one module in the Notes API and argue whether it is ``deep'' or ``shallow'' in the sense of this chapter.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-15.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{15-structuring-the-application:whats-next}
+
+The application is now structured for maintainability. But there is a critical operational gap: when something goes wrong~--- an unhandled exception, a database error, a validation failure~--- where does that information go? Right now it goes to the terminal, which disappears when the terminal closes, and which no one is reading in production.
+
+The next step is building a proper logging and error handling system: one that persists across process restarts, can be searched and filtered, and surfaces problems to the people responsible for fixing them.
+
+\noindent{}→ \hyperref[ch:16-logging-error-handling]{Chapter 16}~--- Logging and Error Handling

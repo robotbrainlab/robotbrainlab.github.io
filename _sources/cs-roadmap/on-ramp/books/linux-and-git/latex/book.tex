@@ -1,0 +1,64 @@
+% ================================================================
+%  book.tex — master file: the order of the book.
+%  Build:  make        (Markdown -> chapters/*.tex -> book.pdf)
+%
+%  Each Markdown file ../markdown/<stem>.md becomes chapters/<stem>.tex;
+%  include it here with \input{chapters/<stem>}.
+%  Parts:  \bookpart{<roman numeral>}{<title>}{<what to ignore for now, or empty>}
+% ================================================================
+\documentclass[10pt, twoside, openany]{book}
+\input{book-meta}
+\input{preamble}
+
+\begin{document}
+
+\input{front/cover}
+
+\frontmatter
+\input{front/titlepage}
+\input{front/copyright}
+\tableofcontents
+\input{front/preface}                 % includes chapters/00-preface (markdown/00-preface.md)
+
+\mainmatter
+
+% ---------------------------------------------------------------- Part I
+\bookpart{I}{Understand}
+  {how the kernel manages memory, the history of Unix, and Git's internal file formats.}
+\input{chapters/01-the-machine-behind-the-terminal}
+\input{chapters/02-the-shell-talking-to-your-computer-in-words}
+\input{chapters/03-files-folders-and-who-may-touch-them}
+\input{chapters/04-why-code-needs-a-history}
+
+% ---------------------------------------------------------------- Part II
+\bookpart{II}{Use}
+  {every flag of every command, advanced \texttt{awk}, and Git plumbing commands.}
+\input{chapters/05-the-everyday-command-line}
+\input{chapters/06-programs-that-keep-running}
+\input{chapters/07-installing-software-and-working-remotely}
+\input{chapters/08-git-every-day}
+
+% ---------------------------------------------------------------- Part III
+\bookpart{III}{Apply}
+  {Git hooks, submodules, and complex branching strategies.}
+\input{chapters/09-lab-automate-a-daily-chore}
+\input{chapters/10-lab-try-an-idea-without-breaking-anything}
+\input{chapters/11-lab-work-on-a-project-with-someone-else}
+
+% ---------------------------------------------------------------- Part IV
+\bookpart{IV}{What Next}{}
+\input{chapters/12-security-speed-failure-and-cost}
+\input{chapters/13-where-to-go-from-here}
+
+% ---------------------------------------------------------------- Appendices
+\appendix
+\input{chapters/A-command-cheat-sheet}
+\input{chapters/B-git-cheat-sheet}
+\input{chapters/C-glossary}
+
+\backmatter
+\printindex
+
+\input{front/backcover}
+
+\end{document}

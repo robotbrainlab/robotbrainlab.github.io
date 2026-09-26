@@ -1,0 +1,516 @@
+\setcounter{chapter}{10}
+\chapter{Reliability and Security Gaps}\label{ch:11-reliability-security-gaps}
+
+\chapterrule
+
+The previous four chapters examined what makes a local development setup fragile: environment drift, hidden dependencies, configuration coupling, and networking limitations. These are problems of portability and reachability~--- the system cannot survive being moved, and it cannot be reached from outside.
+
+This final chapter of Stage 2 examines a different category of problems: operational gaps. Even if we somehow solved all the portability and reachability issues~--- somehow put the local server on a public IP with a domain name~--- it would still not be a production system. It would be a fragile, invisible, unencrypted, unauthenticated server that crashes once and never comes back.
+
+The difference between a server that runs and a service that operates lies in four properties: it must restart when it crashes, it must be observable (you can know what it is doing), it must be encrypted (communication is private), and it must be authenticated (access is controlled). A local development setup has none of these.
+
+This chapter explains each gap clearly. The gaps are not argued from theory~--- they are demonstrated with concrete failure scenarios. The solutions are not detailed here (they appear in Stages 6, 9, and 10), but after reading this chapter you will understand exactly what the solutions need to provide.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What happens when a process crashes and there is nothing to restart it
+\item
+  Why running blind without monitoring is operationally untenable
+\item
+  Why HTTP without HTTPS is not acceptable for real user data
+\item
+  What authentication and authorization are, and why their absence is a security failure
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{No Process Restart: What Happens When Your Program Crashes}\label{11-reliability-security-gaps:111-no-process-restart-what-happens-when-your-program-crashes}
+
+Flask's development server runs as a single Python process. When you press Ctrl+C, it stops. But processes do not stop only on command~--- they also stop unexpectedly.
+
+\subsection*{Ways a process can die}\phantomsection\label{11-reliability-security-gaps:ways-a-process-can-die}
+
+A Python process can terminate for many reasons beyond your control:
+
+\textbf{Unhandled exceptions at startup}: An exception that propagates all the way up the call stack without being caught causes the Python interpreter to print a traceback and exit. Inside a request handler, Flask protects you~--- it catches the exception and turns it into a \texttt{500\ Internal\ Server\ Error} response, and the process keeps running:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 11.1}\enspace An unhandled exception in a handler becomes a 500, not a crash}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ db.execute(}\StringTok{"SELECT * FROM notes WHERE id = ?"}\NormalTok{, (note\_id,)).fetchone()}
+    \CommentTok{\# If row is None and we don\textquotesingle{}t check, the next line raises TypeError}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"content"}\NormalTok{: row[}\StringTok{"content"}\NormalTok{]\})  }\CommentTok{\# TypeError if row is None}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}If \texttt{note\_id} does not exist, \texttt{row} is \texttt{None}, and \texttt{None{[}"content"{]}} raises \texttt{TypeError:}\allowbreak{}\texttt{\ \textquotesingle{}NoneType\textquotesingle{}\ object\ is\ not\ subscriptable}. Flask catches it: the client gets a 500 (or, in debug mode, the interactive debugger) and the server carries on. But the same kind of mistake in code that runs at \emph{startup}~--- a typo in a module-level line, a missing environment variable read at import time~--- has no framework to catch it, and the process exits before it serves a single request.
+
+\textbf{Memory exhaustion (OOM)}: If the process allocates more memory than the system has available, the Linux kernel's \textbf{Out-Of-Memory (OOM) killer} selects a process to terminate. It chooses the process with the largest memory footprint, which is often your application. The kernel terminates it with SIGKILL~--- a signal that cannot be caught or ignored. The process is gone. No error message. No traceback. Just silence.
+
+\textbf{Signals}: The operating system can send signals to processes. \texttt{SIGKILL} (kill -9) terminates a process immediately. \texttt{SIGSEGV} (segmentation fault~--- rare in Python, but possible with certain C extensions) terminates the process with a core dump.
+
+\textbf{Resource exhaustion}: Too many open file descriptors, disk full, or network interface failure can cause a process to fail.
+
+\textbf{Hardware failures}: A server running virtual machines may experience a hypervisor failure. The underlying machine may reboot for maintenance.
+
+\subsection*{What happens when the process dies and nothing restarts it}\phantomsection\label{11-reliability-security-gaps:what-happens-when-the-process-dies-and-nothing-restarts-it}
+
+On a developer's laptop, when the Python process crashes, the developer notices (the server is gone) and types \texttt{python\ app.py} again. This takes seconds. It is fine.
+
+On a production server, when the process crashes, nobody notices~--- until a user's request fails. Depending on the time of day, this could be minutes or hours later. During that entire period:
+
+\begin{itemize}
+\tightlist
+\item
+  Every request to the API returns a ``connection refused'' error
+\item
+  Users see errors or a non-functional application
+\item
+  No alert is sent (there is no monitoring)
+\item
+  No automatic recovery happens (there is no process supervisor)
+\end{itemize}
+
+\noindent{}The server is down. It stays down until someone manually notices, logs in, and restarts it.
+
+This is operationally unacceptable. A service that requires human intervention to recover from every crash cannot provide reliable uptime.
+
+\subsection*{The solution: process supervisors}\phantomsection\label{11-reliability-security-gaps:the-solution-process-supervisors}
+
+A \textbf{process supervisor} is a system service that manages application processes: it starts them, monitors them, and restarts them when they die. On Linux, the standard process supervisor is \textbf{systemd}.
+
+With a supervisor in place (→ \hyperref[ch:24-process-startup]{Chapter 24} and → \hyperref[ch:25-process-management]{Chapter 25}: Docker's restart policy, backed by systemd), when the application process crashes, it is detected within seconds and restarted automatically. The requests in flight at that moment fail; users do not see prolonged downtime.
+
+In container orchestrators, Kubernetes provides similar restart behavior through its pod restart policy (→ \hyperref[ch:43-cloud-native-orchestration]{Chapter 43}).
+
+\setcounter{section}{1}
+\section{No Monitoring: Running Blind Without Visibility}\label{11-reliability-security-gaps:112-no-monitoring-running-blind-without-visibility}
+
+The development server prints request logs to the terminal:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+127.0.0.1 - - [01/Jan/2024 12:00:00] "GET /notes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Jan/2024 12:00:05] "POST /notes HTTP/1.1" 201 -
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}When you are sitting at your laptop, watching the terminal, these logs tell you what is happening. When you close the terminal, the logs disappear. When the process restarts, the history is gone.
+
+On a production server, nobody sits watching terminal output. You need to know what is happening without being present.
+
+\subsection*{What monitoring provides}\phantomsection\label{11-reliability-security-gaps:what-monitoring-provides}
+
+\textbf{Logging} is the practice of writing a persistent record of events to a durable location (a file or a log aggregation service). Unlike terminal output that disappears, logs persist and can be searched after the fact.
+
+\textbf{Metrics} are numerical measurements of system behavior over time: request count, error rate, response time, memory usage, CPU usage. Metrics allow you to answer questions like ``how many requests per second is the server handling?'' and ``has error rate increased in the last hour?''
+
+\textbf{Monitoring} is the process of watching metrics and logs, detecting anomalies, and alerting humans when something requires attention.
+
+Without these, you are running blind. Specific consequences:
+
+\textbf{You cannot detect problems before users do.} If response times are increasing (a warning sign of a saturated database or memory leak), you will not know until requests start failing outright and users complain. With monitoring, you detect the trend early and intervene before users are affected.
+
+\textbf{You cannot investigate past failures.} When a user reports that ``the API was broken around 3pm yesterday,'' you need logs from 3pm yesterday to investigate. Without persistent logs, that information is gone.
+
+\textbf{You cannot answer basic capacity questions.} ``Should we scale up the server before the marketing campaign launches?'' requires knowing current request volume, peak load, and resource usage. Without metrics, you are guessing.
+
+\textbf{You cannot audit access.} Regulatory requirements (GDPR, HIPAA, SOC 2, PCI DSS) often require audit logs of who accessed what data and when. Without structured logging, you cannot provide this.
+
+\subsection*{The Flask development server's logging limitations}\phantomsection\label{11-reliability-security-gaps:the-flask-development-servers-logging-limitations}
+
+Flask's development server logs requests in \textbf{Common Log Format} (CLF):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+127.0.0.1 - - [01/Jan/2024 12:00:00] "GET /notes HTTP/1.1" 200 -
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This format has several limitations for production use:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Output destination}: it goes to stderr, which in development goes to the terminal and disappears when the terminal closes
+\item
+  \textbf{Format}: CLF is human-readable but hard to parse programmatically; modern log analysis tools work better with structured JSON logs
+\item
+  \textbf{Information content}: it logs the IP, method, path, and status code, but not the user, the duration, the request body, or application-specific context
+\item
+  \textbf{No log rotation}: no mechanism to prevent log files from growing indefinitely
+\end{enumerate}
+
+\noindent{}Production logging uses a proper logging system (Python's \texttt{logging} module, configured for structured output), writes to persistent files or a log aggregation service, and includes all the context needed for investigation.
+
+We build production-ready logging in → \hyperref[ch:16-logging-error-handling]{Chapter 16}~--- Logging and Error Handling and → \hyperref[ch:35-observability]{Chapter 35}~--- Observability.
+
+\setcounter{section}{2}
+\section{No HTTPS: Why HTTP Is Not Safe Enough}\label{11-reliability-security-gaps:113-no-https-why-http-is-not-safe-enough}
+
+The Notes API runs over plain HTTP. Every request and response travels as unencrypted text across the network. For local development on the loopback interface, this is harmless~--- the traffic never leaves the machine. For a production service accessible from the internet, it is a fundamental security failure.
+
+\subsection*{What HTTP looks like on the wire}\phantomsection\label{11-reliability-security-gaps:what-http-looks-like-on-the-wire}
+
+When a client sends a \texttt{POST\ /notes} request with authentication:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+POST /notes HTTP/1.1
+Host: api.example.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+
+{"content": "My private note about my medical condition"}
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Over HTTP, this is transmitted as exactly that~--- plain text. Any device that can intercept the network packets sees the complete request, including:
+
+\begin{itemize}
+\tightlist
+\item
+  The full content of the note
+\item
+  The Authorization header containing the user's authentication token
+\item
+  The fact that this user is creating notes (metadata is also sensitive)
+\end{itemize}
+
+\subsection*{Who can intercept HTTP traffic}\phantomsection\label{11-reliability-security-gaps:who-can-intercept-http-traffic}
+
+\textbf{On a local network}: on an open Wi-Fi network (no password), any nearby device can capture everyone's traffic with a wireless card in monitor mode. On any shared network~--- coffee shop, hotel, conference~--- an attacker can also redirect other devices' traffic through their own machine (for example with ARP spoofing) and read or modify it. Protected Wi-Fi (WPA2/WPA3) encrypts each device's traffic to the access point, but the network's operator still sees everything.
+
+\textbf{At the ISP level}: Internet Service Providers can and do inspect customer traffic for various purposes (content filtering, government surveillance, targeted advertising). Without HTTPS, your traffic is readable to them.
+
+\textbf{At transit routers}: Traffic travels through many routers between client and server. Each router sees the packet in transit and could, in principle, read its contents.
+
+\textbf{By malicious DNS or ARP poisoning}: Attacks that redirect traffic through an attacker's machine (man-in-the-middle attacks) are significantly easier against HTTP than HTTPS. HTTPS authentication (certificate verification) makes man-in-the-middle attacks much harder.
+
+\subsection*{What HTTPS provides}\phantomsection\label{11-reliability-security-gaps:what-https-provides}
+
+\textbf{HTTPS} is HTTP running over \textbf{TLS} (Transport Layer Security), a cryptographic protocol that provides:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Encryption}: the request and response content are encrypted between the client and server. An intercepting third party sees only encrypted bytes, not the content.
+\item
+  \textbf{Authentication}: the server presents a \textbf{TLS certificate}~--- a cryptographically signed document that proves the server is who it claims to be. The client's browser verifies this certificate. Without a valid certificate, the browser shows a security warning.
+\item
+  \textbf{Integrity}: TLS uses cryptographic message authentication codes (MACs) that detect if data was modified in transit. An attacker cannot inject or alter data without the client detecting it.
+\end{enumerate}
+
+\noindent{}Without HTTPS:
+
+\begin{itemize}
+\tightlist
+\item
+  Any user credentials, session tokens, or API keys transmitted over the network are exposed
+\item
+  Any data in transit (note content, personal information) is readable
+\item
+  Users cannot verify that they are talking to the real server (not an impostor)
+\item
+  Modern browsers show ``Not Secure'' for HTTP sites and may block certain features (geolocation, camera access, service workers)
+\end{itemize}
+
+\subsection*{Why local development uses HTTP}\phantomsection\label{11-reliability-security-gaps:why-local-development-uses-http}
+
+Setting up HTTPS requires a TLS certificate signed by a trusted Certificate Authority (CA). Certificates for \texttt{localhost} from public CAs are not issued. For local development, you have options:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{HTTP only}: acceptable on the loopback interface where no interception is possible
+\item
+  \textbf{Self-signed certificates}: create your own certificate, but browsers will show security warnings
+\item
+  \textbf{mkcert}: a tool that creates a local CA trusted by your browser, allowing \texttt{localhost} HTTPS without warnings:
+\end{enumerate}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install mkcert (macOS with Homebrew)}
+\ExtensionTok{brew}\NormalTok{ install mkcert}
+\ExtensionTok{mkcert} \AttributeTok{{-}install}  \CommentTok{\# Install local CA into system trust store}
+\ExtensionTok{mkcert}\NormalTok{ localhost 127.0.0.1  }\CommentTok{\# Generate certificate}
+\CommentTok{\# Creates localhost.pem and localhost{-}key.pem}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Use the certificate with Flask\textquotesingle{}s development server (development only)}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    app.run(ssl\_context}\OperatorTok{=}\NormalTok{(}\StringTok{"localhost.pem"}\NormalTok{, }\StringTok{"localhost{-}key.pem"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}For production, TLS certificates come from public CAs. \textbf{Let's Encrypt} provides free certificates, automated through the \texttt{certbot} tool. We set this up in → \hyperref[ch:28-traffic-routing]{Chapter 28}~--- Traffic Routing Layer.
+
+\setcounter{section}{3}
+\section{No Authentication or Security Layers}\label{11-reliability-security-gaps:114-no-authentication-or-security-layers}
+
+The Notes API, as built in Stage 1, accepts requests from anyone. There is no concept of a user. There are no access controls. Anyone who can reach the API can create, read, and delete any note.
+
+In a local development setup, this is fine~--- the API is only accessible from your own machine, so ``anyone'' means only you. In production, ``anyone'' means the entire internet.
+
+\subsection*{Authentication vs authorization}\phantomsection\label{11-reliability-security-gaps:authentication-vs-authorization}
+
+Two distinct security concepts are often conflated:
+
+\textbf{Authentication} is the process of verifying who someone is. ``Are you who you claim to be?'' The most common forms are:
+
+\begin{itemize}
+\tightlist
+\item
+  Username and password (user provides credentials, server verifies)
+\item
+  API keys (client presents a key, server verifies it is valid)
+\item
+  OAuth tokens (server issues a token after successful login, client presents the token)
+\item
+  JWT (JSON Web Token)~--- a cryptographically signed token that carries claims about the user
+\end{itemize}
+
+\noindent{}\textbf{Authorization} is the process of determining what an authenticated user is allowed to do. ``You are Alice. Are you allowed to delete note \#42?'' Authorization answers this question.
+
+Both are required for a multi-user API. Authentication without authorization means every authenticated user can do everything. Authorization without authentication means access controls are meaningless (since there is no verified identity to apply them to).
+
+\subsection*{The absence of authentication in the Notes API}\phantomsection\label{11-reliability-security-gaps:the-absence-of-authentication-in-the-notes-api}
+
+The current Notes API has no authentication:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# This handler (from Listing 4.11) accepts requests from anyone}
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ delete\_note(note\_id):}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.execute(}\StringTok{"DELETE FROM notes WHERE id = ?"}\NormalTok{, (note\_id,))}
+\NormalTok{    db.commit()}
+    \ControlFlowTok{if}\NormalTok{ cursor.rowcount }\OperatorTok{==} \DecValTok{0}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"message"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ deleted"}\NormalTok{\})}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Any HTTP client~--- authenticated or not~--- can send \texttt{DELETE\ /notes/42} and the note will be deleted. There is no check for who made the request or whether they are allowed to delete that note.
+
+In a real Notes API with multiple users, this means:
+
+\begin{itemize}
+\tightlist
+\item
+  User A can delete User B's notes
+\item
+  An anonymous user can delete all notes with a simple loop
+\item
+  An automated script can enumerate all note IDs and delete everything
+\end{itemize}
+
+\subsection*{What an authentication layer looks like}\phantomsection\label{11-reliability-security-gaps:what-an-authentication-layer-looks-like}
+
+A minimal API key authentication approach:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 11.2}\enspace Simple API key authentication middleware}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, request, jsonify}
+\ImportTok{import}\NormalTok{ functools}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\CommentTok{\# In production, this comes from a database of valid API keys}
+\CommentTok{\# For illustration, we use a single environment variable}
+\NormalTok{VALID\_API\_KEYS }\OperatorTok{=}\NormalTok{ \{os.environ[}\StringTok{"API\_KEY"}\NormalTok{]\}  }\CommentTok{\# KeyError at startup if it is not set}
+
+\KeywordTok{def}\NormalTok{ require\_auth(f):}
+    \CommentTok{"""Decorator that enforces API key authentication."""}
+    \AttributeTok{@functools.wraps}\NormalTok{(f)}
+    \KeywordTok{def}\NormalTok{ decorated(}\OperatorTok{*}\NormalTok{args, }\OperatorTok{**}\NormalTok{kwargs):}
+        \CommentTok{\# API key from header: Authorization: Bearer \textless{}key\textgreater{}}
+\NormalTok{        auth\_header }\OperatorTok{=}\NormalTok{ request.headers.get(}\StringTok{"Authorization"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+        \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ auth\_header.startswith(}\StringTok{"Bearer "}\NormalTok{):}
+            \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Authorization header required"}\NormalTok{\}), }\DecValTok{401}
+
+\NormalTok{        api\_key }\OperatorTok{=}\NormalTok{ auth\_header[}\BuiltInTok{len}\NormalTok{(}\StringTok{"Bearer "}\NormalTok{):]}
+        \CommentTok{\# (Chapter 38 replaces this simple set lookup with a constant{-}time comparison)}
+        \ControlFlowTok{if}\NormalTok{ api\_key }\KeywordTok{not} \KeywordTok{in}\NormalTok{ VALID\_API\_KEYS:}
+            \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Invalid API key"}\NormalTok{\}), }\DecValTok{401}
+
+        \ControlFlowTok{return}\NormalTok{ f(}\OperatorTok{*}\NormalTok{args, }\OperatorTok{**}\NormalTok{kwargs)}
+    \ControlFlowTok{return}\NormalTok{ decorated}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\AttributeTok{@require\_auth}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+\NormalTok{    ...}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\AttributeTok{@require\_auth}
+\KeywordTok{def}\NormalTok{ delete\_note(note\_id):}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}With this middleware, every request must include \texttt{Authorization:}\allowbreak{}\texttt{\ Bearer\ \textless{}key\textgreater{}}. Requests without a valid key receive a \texttt{401\ Unauthorized} response.
+
+This is a minimal example. A real authentication system would:
+
+\begin{itemize}
+\tightlist
+\item
+  Store API keys in a database (not an environment variable)
+\item
+  Hash keys before storing (so a database breach does not expose all keys)
+\item
+  Support multiple users, each with their own keys
+\item
+  Implement token expiration
+\item
+  Rate-limit authentication attempts to prevent brute force
+\end{itemize}
+
+\noindent{}We address authentication more thoroughly in → \hyperref[ch:38-security]{Chapter 38}~--- Security.
+
+\subsection*{Other missing security layers}\phantomsection\label{11-reliability-security-gaps:other-missing-security-layers}
+
+Beyond authentication, a production API needs several additional security measures:
+
+\textbf{Rate limiting}: prevents a single client from overwhelming the server with requests (either accidentally or deliberately). Without rate limiting, a misbehaving client can consume all server resources, affecting every other user.
+
+\textbf{Input validation at the boundary}: validating that incoming data conforms to expected types, sizes, and formats. Malicious input can cause SQL injection, buffer overflows (in C extensions), or resource exhaustion.
+
+\textbf{Content security}: ensuring the application does not leak sensitive data in error messages, response headers, or log files.
+
+\textbf{CORS (Cross-Origin Resource Sharing)}: controlling which other websites may call your API from a user's browser. By default, browsers block a page on one site from reading responses from another site's API (the \emph{same-origin policy}); CORS headers are how you selectively \emph{relax} that for trusted front-ends. The danger is a careless configuration~--- allowing every origin while also allowing credentials~--- which reopens exactly the hole the browser was closing. (The related attack in which another site makes a user's browser send requests with their cookies is \textbf{CSRF}; APIs that authenticate with tokens in headers, as this one will, are not exposed to it.)
+
+None of these are present in the local development setup. All of them are required in production.
+
+\unnumberedsection{false}{Stage 2 Summary: The Complete Picture of Local Limitations}\label{11-reliability-security-gaps:stage-2-summary-the-complete-picture-of-local-limitations}
+
+Having completed Stage 2, here is the full picture of what the local development setup lacks:
+
+\begin{diagrambox}[short]{363.2pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+LOCAL DEVELOPMENT GAPS
+─────────────────────────────────────────────────────────────────────
+ENVIRONMENT
+  □ Tied to specific OS (macOS), version, file system behavior
+  □ Tied to specific Python version (whichever happens to be first in $PATH)
+  □ System libraries may differ from production (libc, OpenSSL, SQLite)
+
+DEPENDENCIES
+  □ No requirements.txt (or incomplete one)
+  □ Global packages may be leaking into the application
+  □ External tools (binaries) are undocumented requirements
+  □ Implicit assumptions (locale, timezone, ports) are undeclared
+
+CONFIGURATION
+  □ Secrets may be in source code
+  □ Database path is machine-specific
+  □ Debug mode may be hardcoded
+  □ Environment-specific logic buried in code
+
+NETWORKING
+  □ Bound to localhost (invisible to others)
+  □ Private IP (not internet-routable)
+  □ No DNS entry
+  □ No firewall rules
+
+RELIABILITY
+  □ No process restart on crash
+  □ No persistent logging
+  □ No metrics or monitoring
+  □ No alerting
+
+SECURITY
+  □ No HTTPS (all traffic in plaintext)
+  □ No authentication
+  □ No rate limiting
+  □ No input validation beyond basic checks
+  □ No CORS configuration
+─────────────────────────────────────────────────────────────────────
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}This is not a list of failures. It is a list of things that are appropriate to defer during development but must be addressed before production. Stage 2 has named them all. Stages 3 through 10 address them, one by one, in the right order.
+
+\phantomsection\label{11-reliability-security-gaps:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{No process restart}: a process that crashes stays down until manually restarted. In production, a process supervisor (systemd) detects crashes and restarts automatically within seconds.
+\item
+  \textbf{No monitoring}: Flask's development server logs to the terminal. In production, logs must be persistent, structured, and searchable. Metrics must be collected. Alerts must be configured to notify engineers before users notice problems.
+\item
+  \textbf{No HTTPS}: HTTP traffic is unencrypted plaintext, readable by anyone who can intercept network packets. HTTPS (HTTP over TLS) encrypts all traffic, authenticates the server, and detects tampering. It is mandatory for any service handling real user data.
+\item
+  \textbf{No authentication}: the Notes API accepts all requests without verifying who sent them. Production APIs require authentication (verifying identity) and authorization (verifying permission). Common mechanisms include API keys, OAuth tokens, and JWT.
+\item
+  The combination of these gaps means the local development setup is not a production system. It is a development tool. Stages 3 through 10 convert it into something that can actually operate in the real world.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{11-reliability-security-gaps:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} While the development server runs, insert \texttt{raise\ RuntimeError("boom")} just above \texttt{if\ \_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{name\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{\ =}\allowbreak{}\texttt{=}\allowbreak{}\texttt{\ "\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{main\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{":} in \texttt{app.py} and save (or \texttt{kill\ -9} the server). What brings it back? What would a user see meanwhile?
+\item
+  \textbf{Break and fix.} Capture your own HTTP traffic to the local API with \texttt{sudo\ tcpdump\ -}\allowbreak{}\texttt{i\ lo0\ -}\allowbreak{}\texttt{A\ port\ 5000} while you send a note. Find the note's text in the capture. What would HTTPS change?
+\item
+  \textbf{Extend.} Write the list of alerts you would want if the Notes API were already live, before you know any tools: what should wake someone up, and what can wait until morning?
+\item
+  \textbf{Explain.} Explain, without jargon, the difference between authentication and authorization, using the Notes API as the example.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-11.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{11-reliability-security-gaps:whats-next}
+
+Stage 2 is complete. You now have a precise understanding of every way the local setup is fragile, invisible, unportable, and insecure. Stage 3 begins the work of fixing these problems~--- starting with the most foundational: making the program's dependencies explicit.
+
+\noindent{}→ Stage 3~--- Making the Program Portable\\
+→ \hyperref[ch:12-dependency-declaration]{Chapter 12}~--- Dependency Declaration

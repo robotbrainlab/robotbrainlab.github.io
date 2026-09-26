@@ -1,0 +1,1197 @@
+\setcounter{chapter}{20}
+\chapter{System Setup}\label{ch:21-system-setup}
+
+\chapterrule
+
+You have a fresh Ubuntu 22.04 LTS server~--- a blank slate. It has an operating system installed, a public IP address, and a root user. That is all. Nothing else is there: no Docker, no application user, no firewall configuration, no security hardening, no monitoring tools.
+
+Setting up a server correctly is a discipline. Done well, it results in a system that is secure, predictable, and easy to maintain. Done poorly, it results in a system where the application runs until something breaks and no one can figure out why~--- or where a simple vulnerability leaves the server open to attackers.
+
+This chapter walks through the complete initial setup of a production server for the Notes API: from first SSH login to a fully prepared environment ready to receive the application.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  How to connect to a server via SSH and why SSH is the standard remote access method
+\item
+  How to create a non-root application user and why root should never be used for applications
+\item
+  How to configure SSH securely (disable root login, use key authentication)
+\item
+  How to install and configure Docker Engine on Ubuntu
+\item
+  How to configure automatic security updates
+\item
+  How to set up the basic directory structure for the application
+\item
+  How to verify that the server is correctly set up before deploying
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{First Contact: SSH}\label{21-system-setup:211-first-contact-ssh}
+
+\textbf{SSH (Secure Shell)} is the protocol for remotely managing Linux servers. It provides an encrypted terminal session over the network. Every command you type in the SSH session executes on the remote server.
+
+\subsection*{How SSH works}\phantomsection\label{21-system-setup:how-ssh-works}
+
+SSH uses \textbf{asymmetric cryptography}. You generate a key pair:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Private key} (\texttt{\textasciitilde{}/.ssh/id\_ed25519}): stays on your laptop, never shared
+\item
+  \textbf{Public key} (\texttt{\textasciitilde{}/}\allowbreak{}\texttt{.ssh/}\allowbreak{}\texttt{id\_ed25519.pub}): placed on the server in \texttt{\textasciitilde{}/}\allowbreak{}\texttt{.ssh/}\allowbreak{}\texttt{authorized\_keys}
+\end{itemize}
+
+\noindent{}When you SSH to the server, the server challenges your SSH client to prove it has the private key corresponding to the public key in \texttt{authorized\_keys}. This proof happens through a cryptographic protocol~--- your private key never leaves your machine.
+
+This is more secure than password authentication because:
+
+\begin{itemize}
+\tightlist
+\item
+  Keys are effectively impossible to brute-force (an Ed25519 key offers about 128 bits of security)
+\item
+  Passwords can be guessed or phished; a private key never leaves your machine, so it is much harder to steal (and the passphrase protects it if the file itself is stolen)
+\end{itemize}
+
+\subsection*{Generating an SSH key pair}\phantomsection\label{21-system-setup:generating-an-ssh-key-pair}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Generate an Ed25519 key pair}
+\CommentTok{\# Ed25519 is the recommended algorithm — fast, small, secure}
+\FunctionTok{ssh{-}keygen} \AttributeTok{{-}t}\NormalTok{ ed25519 }\AttributeTok{{-}C} \StringTok{"your{-}email@example.com"}
+
+\CommentTok{\# When prompted:}
+\CommentTok{\#   Enter file in which to save the key: press Enter (uses default: \textasciitilde{}/.ssh/id\_ed25519)}
+\CommentTok{\#   Enter passphrase: enter a strong passphrase (protects the private key on disk)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This creates two files:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+~/.ssh/id_ed25519       ← Private key (never share this)
+~/.ssh/id_ed25519.pub   ← Public key (share this with servers)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}View the public key:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{ \textasciitilde{}/.ssh/id\_ed25519.pub}
+\CommentTok{\# ssh{-}ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... your{-}email@example.com}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Adding your key to DigitalOcean}\phantomsection\label{21-system-setup:adding-your-key-to-digitalocean}
+
+When creating a Droplet on DigitalOcean (or an instance on any cloud provider), you add your public key during setup. DigitalOcean places your public key in the root user's \texttt{authorized\_keys} file automatically.
+
+Alternatively, after creating the server, you can add the key manually:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Copy public key to the server (if you have password access initially)}
+\ExtensionTok{ssh{-}copy{-}id}\NormalTok{ root@SERVER\_IP\_ADDRESS}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{The first SSH login}\phantomsection\label{21-system-setup:the-first-ssh-login}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ssh}\NormalTok{ root@203.0.113.42}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(Replace \texttt{203.0.113.42} with your server's actual IP address.)
+
+First connection output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+The authenticity of host '203.0.113.42 (203.0.113.42)' can't be established.
+ED25519 key fingerprint is SHA256:abc123xyz...
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '203.0.113.42' (ED25519) to the list of known hosts.
+
+Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 5.15.0-91-generic x86_64)
+...
+root@ubuntu-server:~#
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}You are now at a terminal on the remote server. Every command you type runs on the server.
+
+\setcounter{section}{1}
+\section{Initial System Update}\label{21-system-setup:212-initial-system-update}
+
+The first thing to do on any new server is update the installed packages. The operating system image provided by the cloud provider might be weeks or months old, meaning security patches released since then are not applied.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Update the package list (information about available packages)}
+\ExtensionTok{apt{-}get}\NormalTok{ update}
+
+\CommentTok{\# Upgrade all installed packages to their latest versions}
+\ExtensionTok{apt{-}get}\NormalTok{ upgrade }\AttributeTok{{-}y}
+
+\CommentTok{\# Remove packages that are no longer needed}
+\ExtensionTok{apt{-}get}\NormalTok{ autoremove }\AttributeTok{{-}y}
+
+\CommentTok{\# Clean up downloaded package files}
+\ExtensionTok{apt{-}get}\NormalTok{ clean}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Why update immediately:}
+Security vulnerabilities are discovered continuously. A server that has been running for 6 months without updates might have dozens of known, exploitable vulnerabilities. Always update first, before installing anything else or opening any ports.
+
+After upgrading, if the kernel was updated, reboot to run the new kernel:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Check if a reboot is required}
+\FunctionTok{cat}\NormalTok{ /var/run/reboot{-}required }\DecValTok{2}\OperatorTok{\textgreater{}}\NormalTok{/dev/null }\KeywordTok{\&\&} \BuiltInTok{echo} \StringTok{"Reboot required"} \KeywordTok{||} \BuiltInTok{echo} \StringTok{"No reboot needed"}
+
+\CommentTok{\# Reboot if needed}
+\ExtensionTok{reboot}
+
+\CommentTok{\# Wait 30–60 seconds, then reconnect}
+\FunctionTok{ssh}\NormalTok{ root@203.0.113.42}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{2}
+\section{Creating a Non-Root User}\label{21-system-setup:213-creating-a-non-root-user}
+
+\textbf{Never run the application as root.}
+
+Root is the superuser on Linux~--- it can do anything: delete any file, modify any configuration, install any software, kill any process. Running an application as root means that if the application is compromised, the attacker has root access to the server.
+
+Create a dedicated user for running the application:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create user \textquotesingle{}deploy\textquotesingle{} with a home directory and bash shell}
+\ExtensionTok{useradd} \AttributeTok{{-}{-}create{-}home} \AttributeTok{{-}{-}shell}\NormalTok{ /bin/bash deploy}
+
+\CommentTok{\# Set a password. SSH logins will use keys, but sudo asks for this password.}
+\FunctionTok{passwd}\NormalTok{ deploy}
+
+\CommentTok{\# Add \textquotesingle{}deploy\textquotesingle{} to the \textquotesingle{}sudo\textquotesingle{} group so they can run administrative commands}
+\ExtensionTok{usermod} \AttributeTok{{-}aG}\NormalTok{ sudo deploy}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(The \texttt{deploy} user also joins the \texttt{docker} group~--- but that group is created by the Docker installation in section 21.6, so that step comes there.)
+
+\subsection*{Adding SSH access for the deploy user}\phantomsection\label{21-system-setup:adding-ssh-access-for-the-deploy-user}
+
+The root user's SSH key needs to be copied to the deploy user:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create .ssh directory for deploy user}
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ /home/deploy/.ssh}
+\FunctionTok{chmod}\NormalTok{ 700 /home/deploy/.ssh}
+
+\CommentTok{\# Copy root\textquotesingle{}s authorized\_keys to deploy user}
+\FunctionTok{cp}\NormalTok{ /root/.ssh/authorized\_keys /home/deploy/.ssh/authorized\_keys}
+\FunctionTok{chmod}\NormalTok{ 600 /home/deploy/.ssh/authorized\_keys}
+\FunctionTok{chown} \AttributeTok{{-}R}\NormalTok{ deploy:deploy /home/deploy/.ssh}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Now verify that the deploy user can log in from your laptop:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# From your laptop (new terminal):}
+\FunctionTok{ssh}\NormalTok{ deploy@203.0.113.42}
+\CommentTok{\# The server should not ask for a password. (If you gave your key a}
+\CommentTok{\# passphrase, your laptop asks for that; the server never sees it.)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{3}
+\section{Securing SSH}\label{21-system-setup:214-securing-ssh}
+
+The default SSH configuration has several insecure settings. Harden it~--- but not by editing \texttt{/}\allowbreak{}\texttt{etc/}\allowbreak{}\texttt{ssh/}\allowbreak{}\texttt{sshd\_config} directly. On Ubuntu 22.04, that file first includes every file in \texttt{/}\allowbreak{}\texttt{etc/}\allowbreak{}\texttt{ssh/}\allowbreak{}\texttt{sshd\_config.d/}, and cloud images ship one there (DigitalOcean's is \texttt{50-cloud-init.conf}) that sets \texttt{PasswordAuthentication\ yes}. \texttt{sshd} keeps the \emph{first} value it reads for each setting, so a change further down in \texttt{sshd\_config} is silently ignored. Put the hardening in its own drop-in file, named so that it is read first:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{nano}\NormalTok{ /etc/ssh/sshd\_config.d/00{-}hardening.conf}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# /etc/ssh/sshd_config.d/00-hardening.conf — key security settings
+
+# Disable password authentication entirely.
+# Everyone must use SSH keys.
+PasswordAuthentication no
+
+# Disable root login entirely.
+# Attackers constantly try to log in as root.
+# After this change, you MUST use the 'deploy' user.
+PermitRootLogin no
+
+# Allow only the deploy user to SSH in.
+# Add more users separated by spaces if needed.
+AllowUsers deploy
+
+# Close connections whose client has stopped responding (laptop asleep,
+# network gone): probe every 300 seconds, give up after 2 missed replies.
+# This detects DEAD connections, not idle users — a connected client
+# answers the probes, so an idle session stays open.
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
+# Limit the number of concurrent unauthenticated connections
+# This reduces the impact of brute-force attempts
+MaxStartups 3:50:10
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}(You may see \texttt{Protocol\ 2} in older guides. Modern OpenSSH supports only protocol 2 and ignores the setting.)
+
+Check the configuration, then restart the SSH service:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Test the configuration for errors first: a typo here can lock you out}
+\ExtensionTok{sshd} \AttributeTok{{-}t}
+
+\CommentTok{\# Restart SSH (on Ubuntu the service is called "ssh")}
+\ExtensionTok{systemctl}\NormalTok{ restart ssh}
+
+\CommentTok{\# Confirm the settings sshd is actually using}
+\ExtensionTok{sshd} \AttributeTok{{-}T} \KeywordTok{|} \FunctionTok{grep} \AttributeTok{{-}Ei} \StringTok{\textquotesingle{}\^{}(passwordauthentication|permitrootlogin|allowusers)\textquotesingle{}}
+\CommentTok{\# passwordauthentication no}
+\CommentTok{\# permitrootlogin no}
+\CommentTok{\# allowusers deploy}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{warnbox}
+
+\textbf{CRITICAL: Test the new configuration before closing your current session.}
+
+\end{warnbox}
+
+\noindent{}Open a NEW terminal and try to SSH in:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In a NEW terminal on your laptop:}
+\FunctionTok{ssh}\NormalTok{ deploy@203.0.113.42}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}If this works, you have configured SSH correctly. If it fails, go back to the old session and fix the configuration before closing it. If you close the old session with a broken SSH configuration, you may lock yourself out of the server permanently (requiring a recovery console through the cloud provider's web interface).
+
+\setcounter{section}{4}
+\section{Configuring the Firewall}\label{21-system-setup:215-configuring-the-firewall}
+
+Ubuntu uses \textbf{UFW (Uncomplicated Firewall)} as a frontend to the Linux \texttt{iptables} firewall. UFW makes firewall rule management straightforward.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Check current UFW status}
+\ExtensionTok{ufw}\NormalTok{ status}
+\CommentTok{\# Status: inactive  (not enabled yet — all traffic allowed)}
+
+\CommentTok{\# Reset to defaults (deny all inbound, allow all outbound)}
+\ExtensionTok{ufw}\NormalTok{ default deny incoming}
+\ExtensionTok{ufw}\NormalTok{ default allow outgoing}
+
+\CommentTok{\# Allow SSH (port 22) — DO THIS BEFORE ENABLING THE FIREWALL}
+\CommentTok{\# If you forget this, you will lock yourself out immediately}
+\ExtensionTok{ufw}\NormalTok{ allow 22/tcp}
+
+\CommentTok{\# Allow HTTP (port 80)}
+\ExtensionTok{ufw}\NormalTok{ allow 80/tcp}
+
+\CommentTok{\# Allow HTTPS (port 443)}
+\ExtensionTok{ufw}\NormalTok{ allow 443/tcp}
+
+\CommentTok{\# Review the rules before enabling}
+\ExtensionTok{ufw}\NormalTok{ show added}
+\CommentTok{\# Added user rules (see \textquotesingle{}ufw status\textquotesingle{} for running firewall):}
+\CommentTok{\# ufw allow 22/tcp}
+\CommentTok{\# ufw allow 80/tcp}
+\CommentTok{\# ufw allow 443/tcp}
+
+\CommentTok{\# Enable the firewall}
+\ExtensionTok{ufw}\NormalTok{ enable}
+\CommentTok{\# Command may disrupt existing ssh connections. Proceed with operation (y|n)? y}
+\CommentTok{\# Firewall is active and enabled on system startup}
+
+\ExtensionTok{ufw}\NormalTok{ status verbose}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected status:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere
+80/tcp                     ALLOW IN    Anywhere
+443/tcp                    ALLOW IN    Anywhere
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Port 5000 (where the Flask/Gunicorn application runs) is NOT listed, because only Nginx on the same server should reach it.
+
+\begin{warnbox}
+
+\textbf{Warning: Docker bypasses UFW.} UFW's rules live in the \texttt{INPUT} chain of the kernel's firewall. When Docker publishes a container port (\texttt{docker\ run\ -p\ 5000:5000}), it adds its own rules to the \texttt{nat} and \texttt{FORWARD} chains, and traffic to the container never passes through \texttt{INPUT}. The result: \texttt{-p\ 5000:5000} makes the unencrypted application port reachable from the entire internet, even though \texttt{ufw\ status} shows it blocked. Two defenses, and this book uses both:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Publish container ports on the loopback address only: \texttt{-p\ 127.0.0.1:5000:5000}. Every \texttt{docker\ run} on the server in the following chapters does this.
+\item
+  Add the provider's cloud firewall (\hyperref[ch:22-network-configuration]{Chapter 22}), which filters traffic before it reaches the server at all~--- Docker cannot bypass it.
+\end{enumerate}
+
+\end{warnbox}
+
+\subsection*{Restricting SSH to specific IPs (recommended)}\phantomsection\label{21-system-setup:restricting-ssh-to-specific-ips-recommended}
+
+If your team always connects from known IP ranges (office, VPN), further restrict SSH:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# First allow SSH from your specific IP (add the new rule before removing}
+\CommentTok{\# the old one, so there is never a moment when SSH is blocked)}
+\ExtensionTok{ufw}\NormalTok{ allow from YOUR.IP.ADDRESS to any port 22 proto tcp}
+
+\CommentTok{\# Example: allow from your home IP}
+\ExtensionTok{ufw}\NormalTok{ allow from 203.0.113.100 to any port 22 proto tcp}
+
+\CommentTok{\# Then remove the rule that allows SSH from anywhere}
+\ExtensionTok{ufw}\NormalTok{ delete allow 22/tcp}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This makes SSH brute-force attacks from random internet addresses impossible~--- the firewall drops the connection before it even reaches the SSH server. One caveat: most home internet connections get a new IP address from time to time. When yours changes, you are locked out until you update the rule~--- through the provider's web console, which is why it is worth knowing where that console is before you need it.
+
+\setcounter{section}{5}
+\section{Installing Docker Engine}\label{21-system-setup:216-installing-docker-engine}
+
+Install Docker Engine (the open-source version, not Docker Desktop):
+
+\begin{notebox}
+
+\textbf{Note:} Docker's installation steps (the repository URL, key location, and package names) change from time to time. The commands below follow Docker's documentation at the time of writing; if one fails, use the current instructions at docs.docker.com for your Ubuntu release.
+
+\end{notebox}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install prerequisite packages}
+\ExtensionTok{apt{-}get}\NormalTok{ install }\AttributeTok{{-}y} \DataTypeTok{\textbackslash{}}
+\NormalTok{    ca{-}certificates }\DataTypeTok{\textbackslash{}}
+\NormalTok{    curl }\DataTypeTok{\textbackslash{}}
+\NormalTok{    gnupg }\DataTypeTok{\textbackslash{}}
+\NormalTok{    lsb{-}release}
+
+\CommentTok{\# Add Docker\textquotesingle{}s official GPG key}
+\CommentTok{\# This allows apt to verify that downloaded packages are authentic}
+\FunctionTok{install} \AttributeTok{{-}m}\NormalTok{ 0755 }\AttributeTok{{-}d}\NormalTok{ /etc/apt/keyrings}
+\ExtensionTok{curl} \AttributeTok{{-}fsSL}\NormalTok{ https://download.docker.com/linux/ubuntu/gpg }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
+    \ExtensionTok{gpg} \AttributeTok{{-}{-}dearmor} \AttributeTok{{-}o}\NormalTok{ /etc/apt/keyrings/docker.gpg}
+\FunctionTok{chmod}\NormalTok{ a+r /etc/apt/keyrings/docker.gpg}
+
+\CommentTok{\# Add the Docker repository to apt\textquotesingle{}s sources list}
+\BuiltInTok{echo} \DataTypeTok{\textbackslash{}}
+  \StringTok{"deb [arch=}\VariableTok{$(}\ExtensionTok{dpkg} \AttributeTok{{-}{-}print{-}architecture}\VariableTok{)}\StringTok{ signed{-}by=/etc/apt/keyrings/docker.gpg] }\DataTypeTok{\textbackslash{}}
+\StringTok{  https://download.docker.com/linux/ubuntu }\DataTypeTok{\textbackslash{}}
+\StringTok{  }\VariableTok{$(}\ExtensionTok{lsb\_release} \AttributeTok{{-}cs}\VariableTok{)}\StringTok{ stable"} \KeywordTok{|} \DataTypeTok{\textbackslash{}}
+  \FunctionTok{tee}\NormalTok{ /etc/apt/sources.list.d/docker.list }\OperatorTok{\textgreater{}}\NormalTok{ /dev/null}
+
+\CommentTok{\# Update package lists (now includes Docker\textquotesingle{}s repository)}
+\ExtensionTok{apt{-}get}\NormalTok{ update}
+
+\CommentTok{\# Install Docker Engine, CLI, and container runtime}
+\ExtensionTok{apt{-}get}\NormalTok{ install }\AttributeTok{{-}y}\NormalTok{ docker{-}ce docker{-}ce{-}cli containerd.io docker{-}compose{-}plugin}
+
+\CommentTok{\# Verify installation}
+\ExtensionTok{docker} \AttributeTok{{-}{-}version}
+\CommentTok{\# Docker version 25.0.3, build 4debf41}
+
+\ExtensionTok{docker}\NormalTok{ compose version}
+\CommentTok{\# Docker Compose version v2.24.5}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Configure Docker to start on boot}\phantomsection\label{21-system-setup:configure-docker-to-start-on-boot}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Enable Docker to start automatically when the server boots}
+\ExtensionTok{systemctl}\NormalTok{ enable docker}
+
+\CommentTok{\# Start Docker now}
+\ExtensionTok{systemctl}\NormalTok{ start docker}
+
+\CommentTok{\# Verify it is running}
+\ExtensionTok{systemctl}\NormalTok{ status docker}
+\CommentTok{\# ● docker.service {-} Docker Application Container Engine}
+\CommentTok{\#    Active: active (running) since ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Let the deploy user run Docker}\phantomsection\label{21-system-setup:let-the-deploy-user-run-docker}
+
+The installation created the \texttt{docker} group. Add \texttt{deploy} to it, so that it can run \texttt{docker} commands without \texttt{sudo}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{usermod} \AttributeTok{{-}aG}\NormalTok{ docker deploy}
+\CommentTok{\# Takes effect at deploy\textquotesingle{}s next login}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Be clear about what this grants: anyone who can talk to the Docker daemon can start a container that mounts the host's root filesystem, so membership of the \texttt{docker} group is equivalent to root access. That is acceptable here because \texttt{deploy} is the account that administers the server anyway (it is in \texttt{sudo} too), while the application itself runs as the unprivileged \texttt{notes} user \emph{inside} its container. Docker's \textbf{rootless mode} removes this equivalence, at the cost of some extra setup and a few restrictions.
+
+\subsection*{Test Docker works}\phantomsection\label{21-system-setup:test-docker-works}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Test with the hello{-}world image}
+\ExtensionTok{docker}\NormalTok{ run hello{-}world}
+\CommentTok{\# Hello from Docker! ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Configure the Docker daemon}\phantomsection\label{21-system-setup:configure-the-docker-daemon}
+
+Create a Docker daemon configuration file to set production-appropriate defaults:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create or edit /etc/docker/daemon.json}
+\FunctionTok{cat} \OperatorTok{\textgreater{}}\NormalTok{ /etc/docker/daemon.json }\OperatorTok{\textless{}\textless{} \textquotesingle{}EOF\textquotesingle{}}
+\StringTok{\{}
+\StringTok{  "log{-}driver": "json{-}file",}
+\StringTok{  "log{-}opts": \{}
+\StringTok{    "max{-}size": "10m",}
+\StringTok{    "max{-}file": "3"}
+\StringTok{  \},}
+\StringTok{  "live{-}restore": true}
+\StringTok{\}}
+\OperatorTok{EOF}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Explanation:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{log-driver:\ json-file}: Docker stores container logs as JSON files (the default)
+\item
+  \texttt{max-size:\ 10m}: each log file is limited to 10 MB
+\item
+  \texttt{max-file:\ 3}: keep at most 3 log files per container (30 MB total)
+\item
+  \texttt{live-restore:\ true}: containers keep running if the Docker daemon is restarted (prevents application downtime during Docker updates)
+\end{itemize}
+
+\noindent{}Restart Docker to apply the new configuration:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{systemctl}\NormalTok{ restart docker}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{6}
+\section{Setting Up Automatic Security Updates}\label{21-system-setup:217-setting-up-automatic-security-updates}
+
+Security vulnerabilities are discovered continuously. Applying security updates manually is risky~--- you might miss one, or apply it too late. \textbf{Unattended upgrades} automatically install security updates.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install the unattended{-}upgrades package (already present on Ubuntu Server;}
+\CommentTok{\# this makes sure)}
+\ExtensionTok{apt{-}get}\NormalTok{ install }\AttributeTok{{-}y}\NormalTok{ unattended{-}upgrades apt{-}listchanges}
+
+\CommentTok{\# Ubuntu\textquotesingle{}s own settings live in 50unattended{-}upgrades, and by default they}
+\CommentTok{\# already install security updates. Leave that file alone and put your}
+\CommentTok{\# changes in a file that is read after it (a higher number wins):}
+\FunctionTok{cat} \OperatorTok{\textgreater{}}\NormalTok{ /etc/apt/apt.conf.d/52unattended{-}upgrades{-}local }\OperatorTok{\textless{}\textless{} \textquotesingle{}EOF\textquotesingle{}}
+\StringTok{// Email notification when a package is upgraded}
+\StringTok{// Replace with your email address}
+\StringTok{// Unattended{-}Upgrade::Mail "admin@example.com";}
+
+\StringTok{// Automatically remove unused packages}
+\StringTok{Unattended{-}Upgrade::Remove{-}Unused{-}Dependencies "true";}
+
+\StringTok{// Automatically reboot if required by an update (e.g., kernel update).}
+\StringTok{// Set to "true" only once Docker and the application container come back}
+\StringTok{// by themselves after a reboot (Chapters 24–25), and pick a quiet time}
+\StringTok{// with Automatic{-}Reboot{-}Time (e.g. "04:00").}
+\StringTok{Unattended{-}Upgrade::Automatic{-}Reboot "false";}
+
+\StringTok{// Log output}
+\StringTok{Unattended{-}Upgrade::Verbose "false";}
+\OperatorTok{EOF}
+
+\CommentTok{\# Configure the schedule (run daily)}
+\FunctionTok{cat} \OperatorTok{\textgreater{}}\NormalTok{ /etc/apt/apt.conf.d/20auto{-}upgrades }\OperatorTok{\textless{}\textless{} \textquotesingle{}EOF\textquotesingle{}}
+\StringTok{APT::Periodic::Update{-}Package{-}Lists "1";}
+\StringTok{APT::Periodic::Unattended{-}Upgrade "1";}
+\StringTok{APT::Periodic::Download{-}Upgradeable{-}Packages "1";}
+\StringTok{APT::Periodic::AutocleanInterval "7";}
+\OperatorTok{EOF}
+
+\CommentTok{\# Test the configuration (dry run)}
+\ExtensionTok{unattended{-}upgrade} \AttributeTok{{-}{-}dry{-}run} \AttributeTok{{-}{-}debug}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With Ubuntu's defaults plus these overrides, security updates from Ubuntu's security repository are applied automatically. Non-security updates (new features, version upgrades) are not applied automatically~--- those require manual review and testing.
+
+\textbf{Why \texttt{Automatic-Reboot} is false:} Kernel updates sometimes require a reboot. Automatic reboots during peak traffic cause downtime. Instead, check for required reboots during maintenance windows:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Check if a reboot is pending}
+\BuiltInTok{[} \OtherTok{{-}f}\NormalTok{ /var/run/reboot{-}required }\BuiltInTok{]} \KeywordTok{\&\&} \BuiltInTok{echo} \StringTok{"Reboot required"} \KeywordTok{||} \BuiltInTok{echo} \StringTok{"No reboot needed"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{7}
+\section{Creating the Application Directory Structure}\label{21-system-setup:218-creating-the-application-directory-structure}
+
+Create the directory structure where the application will live:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create the application directory}
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ /opt/notes{-}api}
+
+\CommentTok{\# Create subdirectories}
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ /opt/notes{-}api/config   }\CommentTok{\# Environment files}
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ /opt/notes{-}api/data     }\CommentTok{\# Persistent data (if using SQLite)}
+
+\CommentTok{\# Set ownership to the deploy user}
+\FunctionTok{chown} \AttributeTok{{-}R}\NormalTok{ deploy:deploy /opt/notes{-}api}
+
+\CommentTok{\# The data directory is written by the application INSIDE the container,}
+\CommentTok{\# which runs as the \textquotesingle{}notes\textquotesingle{} user, UID 1001 (Chapter 18). Ownership on a}
+\CommentTok{\# bind{-}mounted directory is by number, so give it to UID 1001.}
+\FunctionTok{chown}\NormalTok{ 1001:1001 /opt/notes{-}api/data}
+
+\CommentTok{\# Set appropriate permissions}
+\CommentTok{\# 750 = owner can read/write/execute, group can read/execute, others cannot access}
+\FunctionTok{chmod}\NormalTok{ 750 /opt/notes{-}api}
+\FunctionTok{chmod}\NormalTok{ 750 /opt/notes{-}api/config}
+\FunctionTok{chmod}\NormalTok{ 750 /opt/notes{-}api/data}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}There is no log directory. In a container, the application writes its logs to standard output and standard error; Docker collects them, and the \texttt{daemon.json} settings in section 21.6 rotate them. (\texttt{docker\ logs} and, in Chapter 25, \texttt{journalctl} read them back.)
+
+\subsection*{The environment file}\phantomsection\label{21-system-setup:the-environment-file}
+
+The application needs environment variables. On a server running Docker, environment variables are passed to the container at runtime. Create a file that holds them:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create the environment file for the application}
+\CommentTok{\# This file is NOT committed to git — it contains secrets}
+\FunctionTok{nano}\NormalTok{ /opt/notes{-}api/config/notes{-}api.env}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# /opt/notes{-}api/config/notes{-}api.env}
+\CommentTok{\# Environment variables for the Notes API container}
+\CommentTok{\# This file is read by docker run {-}{-}env{-}file and by docker compose}
+
+\VariableTok{DATABASE\_URL}\OperatorTok{=}\NormalTok{postgresql://notes\_user:CHANGE\_ME@db{-}host:5432/notesdb}
+\VariableTok{SECRET\_KEY}\OperatorTok{=}
+\VariableTok{FLASK\_DEBUG}\OperatorTok{=}\NormalTok{false}
+\VariableTok{LOG\_FORMAT}\OperatorTok{=}\NormalTok{json}
+\VariableTok{LOG\_LEVEL}\OperatorTok{=}\NormalTok{INFO}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{docker\ run\ -\/-env-file} reads each \texttt{KEY=value} line literally: no quotes (they would become part of the value), no \texttt{export}, and no comments except on lines of their own.
+
+\texttt{SECRET\_KEY} is deliberately empty: if you forget to fill it in, the application refuses to start instead of running with a placeholder. Generate a real one and paste it after the \texttt{=}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3} \AttributeTok{{-}c} \StringTok{"import secrets; print(secrets.token\_hex(32))"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Set restrictive permissions on the environment file (it contains secrets):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{chown}\NormalTok{ deploy:deploy /opt/notes{-}api/config/notes{-}api.env}
+\FunctionTok{chmod}\NormalTok{ 600 /opt/notes{-}api/config/notes{-}api.env}
+\CommentTok{\# 600 = owner can read/write, no access for group or others}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{8}
+\section{Configuring System Limits}\label{21-system-setup:219-configuring-system-limits}
+
+Linux systems have configurable limits on resource usage. Two kinds matter for a web server: how many files and sockets a process may open, and how the kernel queues network connections. Before changing either, it is worth knowing which settings actually reach the application~--- here, a process inside a Docker container.
+
+\subsection*{File descriptor limits}\phantomsection\label{21-system-setup:file-descriptor-limits}
+
+Every open file (and socket, and pipe) uses a \textbf{file descriptor}. A server handling many concurrent HTTP connections might open thousands of sockets simultaneously, and the default limit for a login shell (1024 per process) could be exhausted.
+
+Guides often raise it in \texttt{/}\allowbreak{}\texttt{etc/}\allowbreak{}\texttt{security/}\allowbreak{}\texttt{limits.}\allowbreak{}\texttt{conf}. That file is applied by PAM when a user \emph{logs in}, so it affects SSH sessions~--- not services started by systemd, and not Docker containers. A container inherits its limit from the Docker daemon, whose systemd unit already sets a very high one. Check what the container actually gets:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# The limit in your login shell}
+\BuiltInTok{ulimit} \AttributeTok{{-}n}
+\CommentTok{\# 1024}
+
+\CommentTok{\# The limit inside a container}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}{-}rm}\NormalTok{ alpine sh }\AttributeTok{{-}c} \StringTok{\textquotesingle{}ulimit {-}n\textquotesingle{}}
+\CommentTok{\# 1048576}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}So there is nothing to raise for the Notes API. (If you ever need a different value for one container, \texttt{docker\ run\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{ulimit\ nofile=}\allowbreak{}\texttt{65536:}\allowbreak{}\texttt{65536} sets it; \texttt{"default-ulimits"} in \texttt{daemon.json} sets it for all.) The kernel-wide maximum, \texttt{fs.file-max}, is already far larger on 64-bit Ubuntu than any value you would set by hand.
+
+\subsection*{Network kernel parameters}\phantomsection\label{21-system-setup:network-kernel-parameters}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Put tuning in a drop{-}in file: re{-}running this command replaces the file,}
+\CommentTok{\# instead of appending duplicate lines to /etc/sysctl.conf}
+\FunctionTok{cat} \OperatorTok{\textgreater{}}\NormalTok{ /etc/sysctl.d/99{-}notes{-}api.conf }\OperatorTok{\textless{}\textless{} \textquotesingle{}EOF\textquotesingle{}}
+\StringTok{\# Queue of connections waiting to be accept()ed. Ubuntu 22.04\textquotesingle{}s default is}
+\StringTok{\# 4096; a larger value only helps if the listening program asks for a}
+\StringTok{\# larger backlog too (Gunicorn\textquotesingle{}s {-}{-}backlog, default 2048; Nginx\textquotesingle{}s}
+\StringTok{\# "listen ... backlog=N").}
+\StringTok{net.core.somaxconn = 8192}
+
+\StringTok{\# Queue of half{-}open connections (SYN received, handshake not finished)}
+\StringTok{net.ipv4.tcp\_max\_syn\_backlog = 8192}
+
+\StringTok{\# Let OUTGOING connections (to the database, for example) reuse local ports}
+\StringTok{\# still in TIME\_WAIT, which lasts about 60 seconds on Linux. It has no}
+\StringTok{\# effect on connections the server accepts.}
+\StringTok{net.ipv4.tcp\_tw\_reuse = 1}
+\OperatorTok{EOF}
+
+\CommentTok{\# Apply all sysctl configuration files}
+\ExtensionTok{sysctl} \AttributeTok{{-}{-}system}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}These settings are safe on a small server, but be honest about what they buy: they matter only at loads far above what a 1 GB droplet will see. They are here so you know where such tuning lives, and what each knob really changes, before you need it.
+
+\setcounter{section}{9}
+\section{Configuring the Server Timezone and Locale}\label{21-system-setup:2110-configuring-the-server-timezone-and-locale}
+
+Log timestamps and cron job schedules use the server's timezone. Set it to UTC for production servers.
+
+\textbf{Why UTC:} UTC is the global reference timezone. It never has daylight saving time changes. Log entries from servers in multiple timezones can be compared directly. The alternative~--- using a local timezone~--- adds confusion when interpreting logs during daylight saving time transitions.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Set timezone to UTC}
+\ExtensionTok{timedatectl}\NormalTok{ set{-}timezone UTC}
+
+\CommentTok{\# Verify}
+\ExtensionTok{timedatectl}
+\CommentTok{\# Local time: Mon 2024{-}01{-}15 14:00:00 UTC}
+\CommentTok{\# Universal time: Mon 2024{-}01{-}15 14:00:00 UTC}
+\CommentTok{\# RTC time: Mon 2024{-}01{-}15 14:00:00}
+\CommentTok{\# Time zone: UTC (UTC, +0000)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Configure the locale (language and character encoding settings):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install locale support}
+\ExtensionTok{apt{-}get}\NormalTok{ install }\AttributeTok{{-}y}\NormalTok{ locales}
+
+\CommentTok{\# Generate UTF{-}8 locale}
+\ExtensionTok{locale{-}gen}\NormalTok{ en\_US.UTF{-}8}
+\ExtensionTok{update{-}locale}\NormalTok{ LANG=en\_US.UTF{-}8}
+\CommentTok{\# (Set only LANG. LC\_ALL overrides every other locale setting and is}
+\CommentTok{\# meant for one{-}off commands, not for the system default.)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{10}
+\section{Installing Useful Server Tools}\label{21-system-setup:2111-installing-useful-server-tools}
+
+A minimal set of tools for diagnosing server issues:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{apt{-}get}\NormalTok{ install }\AttributeTok{{-}y}\NormalTok{ htop curl wget dnsutils lsof jq git vim fail2ban}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\Needspace{20\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Package & What it is for \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{htop} & Interactive process viewer \\
+\texttt{curl} & HTTP client, for testing endpoints from the server \\
+\texttt{wget} & File downloader \\
+\texttt{dnsutils} & DNS tools: \texttt{dig}, \texttt{nslookup} \\
+\texttt{lsof} & List open files and sockets \\
+\texttt{jq} & JSON processor (for JSON logs and Docker output) \\
+\texttt{git} & Version control \\
+\texttt{vim} & Text editor \\
+\texttt{fail2ban} & Intrusion prevention (bans IPs with too many failed logins) \\
+\end{longtable}
+}
+
+(A comment after a trailing \texttt{\textbackslash{}}~--- \texttt{htop\ \textbackslash{}\ \ \#\ viewer}~--- would break the command: the backslash then escapes a space instead of the newline, and the shell ends the command at the comment. Hence the table. The older \texttt{net-tools} package, with \texttt{netstat} and \texttt{ifconfig}, is deprecated; this book uses \texttt{ss} and \texttt{ip} instead.)
+
+\subsection*{Configuring fail2ban}\phantomsection\label{21-system-setup:configuring-fail2ban}
+
+\textbf{fail2ban} monitors log files for repeated authentication failures and automatically blocks offending IP addresses:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# fail2ban is installed above; configure it for SSH}
+\FunctionTok{cat} \OperatorTok{\textgreater{}}\NormalTok{ /etc/fail2ban/jail.local }\OperatorTok{\textless{}\textless{} \textquotesingle{}EOF\textquotesingle{}}
+\StringTok{[DEFAULT]}
+\StringTok{\# Ban for 1 hour}
+\StringTok{bantime = 3600}
+\StringTok{\# Consider 3 failed attempts within 10 minutes as an attack}
+\StringTok{findtime = 600}
+\StringTok{maxretry = 3}
+
+\StringTok{[sshd]}
+\StringTok{enabled = true}
+\StringTok{port = ssh}
+\StringTok{logpath = \%(sshd\_log)s}
+\StringTok{backend = \%(syslog\_backend)s}
+\StringTok{\# On Ubuntu 22.04, sshd\textquotesingle{}s messages reach /var/log/auth.log through rsyslog.}
+\StringTok{\# On a system where they go only to the systemd journal, use instead:}
+\StringTok{\#   backend = systemd}
+\OperatorTok{EOF}
+
+\ExtensionTok{systemctl}\NormalTok{ enable fail2ban}
+\ExtensionTok{systemctl}\NormalTok{ start fail2ban}
+
+\CommentTok{\# Check status}
+\ExtensionTok{fail2ban{-}client}\NormalTok{ status sshd}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}After a failed SSH brute-force attempt, fail2ban automatically adds an \texttt{iptables} rule blocking the attacker's IP. The firewall bans are visible:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{fail2ban{-}client}\NormalTok{ status sshd}
+\CommentTok{\# Status for the jail: sshd}
+\CommentTok{\# |{-} Filter}
+\CommentTok{\# |  |{-} Currently failed: 0}
+\CommentTok{\# |  |{-} Total failed: 0}
+\CommentTok{\# |  \textasciigrave{}{-} File list: /var/log/auth.log}
+\CommentTok{\# \textasciigrave{}{-} Actions}
+\CommentTok{\#    |{-} Currently banned: 0}
+\CommentTok{\#    |{-} Total banned: 0}
+\CommentTok{\#    \textasciigrave{}{-} Banned IP list:}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{11}
+\section{Verifying the Setup}\label{21-system-setup:2112-verifying-the-setup}
+
+Run through a checklist to verify the server is correctly configured before deploying the application.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 21.1}\enspace verify-setup.sh (server setup verification script)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#!/bin/bash}
+\CommentTok{\# Run with sudo: ufw and sshd {-}T need root.}
+\CommentTok{\#}
+\CommentTok{\# No "set {-}e" here: a failing check must not stop the script, and bash\textquotesingle{}s}
+\CommentTok{\# ((PASS++)) returns a failure status when PASS is 0, which set {-}e would}
+\CommentTok{\# treat as an error after the very first check.}
+
+\BuiltInTok{echo} \StringTok{"Verifying server setup..."}
+\VariableTok{PASS}\OperatorTok{=}\NormalTok{0}
+\VariableTok{FAIL}\OperatorTok{=}\NormalTok{0}
+
+\FunctionTok{check()} \KeywordTok{\{}
+    \BuiltInTok{local} \VariableTok{desc}\OperatorTok{=}\StringTok{"}\VariableTok{$1}\StringTok{"}
+    \BuiltInTok{local} \VariableTok{cmd}\OperatorTok{=}\StringTok{"}\VariableTok{$2}\StringTok{"}
+    \ControlFlowTok{if} \BuiltInTok{eval} \StringTok{"}\VariableTok{$cmd}\StringTok{"} \OperatorTok{\textgreater{}}\NormalTok{ /dev/null }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1}\KeywordTok{;} \ControlFlowTok{then}
+        \BuiltInTok{echo} \StringTok{"  ✓ }\VariableTok{$desc}\StringTok{"}
+        \VariableTok{PASS}\OperatorTok{=}\VariableTok{$((PASS} \OperatorTok{+} \DecValTok{1}\VariableTok{))}
+    \ControlFlowTok{else}
+        \BuiltInTok{echo} \StringTok{"  ✗ }\VariableTok{$desc}\StringTok{"}
+        \VariableTok{FAIL}\OperatorTok{=}\VariableTok{$((FAIL} \OperatorTok{+} \DecValTok{1}\VariableTok{))}
+    \ControlFlowTok{fi}
+\KeywordTok{\}}
+
+\CommentTok{\# System}
+\ExtensionTok{check} \StringTok{"Ubuntu 22.04"} \StringTok{"grep {-}q \textquotesingle{}Ubuntu 22.04\textquotesingle{} /etc/os{-}release"}
+\ExtensionTok{check} \StringTok{"No reboot pending"} \StringTok{"[ ! {-}f /var/run/reboot{-}required ]"}
+
+\CommentTok{\# Users}
+\ExtensionTok{check} \StringTok{"deploy user exists"} \StringTok{"id deploy"}
+\ExtensionTok{check} \StringTok{"deploy in docker group"} \StringTok{"groups deploy | grep {-}q docker"}
+
+\CommentTok{\# SSH}
+\CommentTok{\# (sshd {-}T prints the settings sshd really uses, drop{-}in files included)}
+\ExtensionTok{check} \StringTok{"Root login disabled"} \StringTok{"sshd {-}T | grep {-}qi \textquotesingle{}\^{}permitrootlogin no\textquotesingle{}"}
+\ExtensionTok{check} \StringTok{"Password auth disabled"} \StringTok{"sshd {-}T | grep {-}qi \textquotesingle{}\^{}passwordauthentication no\textquotesingle{}"}
+
+\CommentTok{\# Firewall}
+\ExtensionTok{check} \StringTok{"UFW active"} \StringTok{"ufw status | grep {-}q \textquotesingle{}Status: active\textquotesingle{}"}
+\ExtensionTok{check} \StringTok{"Port 80 open"} \StringTok{"ufw status | grep {-}q \textquotesingle{}80/tcp.*ALLOW\textquotesingle{}"}
+\ExtensionTok{check} \StringTok{"Port 443 open"} \StringTok{"ufw status | grep {-}q \textquotesingle{}443/tcp.*ALLOW\textquotesingle{}"}
+\ExtensionTok{check} \StringTok{"Port 22 open"} \StringTok{"ufw status | grep {-}q \textquotesingle{}22/tcp.*ALLOW\textquotesingle{}"}
+
+\CommentTok{\# Docker}
+\ExtensionTok{check} \StringTok{"Docker installed"} \StringTok{"docker {-}{-}version"}
+\ExtensionTok{check} \StringTok{"Docker running"} \StringTok{"systemctl is{-}active docker"}
+\ExtensionTok{check} \StringTok{"Docker starts on boot"} \StringTok{"systemctl is{-}enabled docker"}
+
+\CommentTok{\# Directory structure}
+\ExtensionTok{check} \StringTok{"/opt/notes{-}api exists"} \StringTok{"[ {-}d /opt/notes{-}api ]"}
+\ExtensionTok{check} \StringTok{"deploy owns /opt/notes{-}api"} \StringTok{"[ }\DataTypeTok{\textbackslash{}$}\StringTok{(stat {-}c \textquotesingle{}\%U\textquotesingle{} /opt/notes{-}api) = \textquotesingle{}deploy\textquotesingle{} ]"}
+\ExtensionTok{check} \StringTok{"Config directory exists"} \StringTok{"[ {-}d /opt/notes{-}api/config ]"}
+\ExtensionTok{check} \StringTok{"Data directory owned by UID 1001"} \StringTok{"[ }\DataTypeTok{\textbackslash{}$}\StringTok{(stat {-}c \textquotesingle{}\%u\textquotesingle{} /opt/notes{-}api/data) = \textquotesingle{}1001\textquotesingle{} ]"}
+
+\CommentTok{\# Timezone}
+\ExtensionTok{check} \StringTok{"UTC timezone"} \StringTok{"timedatectl | grep {-}q \textquotesingle{}Time zone: UTC\textquotesingle{}"}
+
+\CommentTok{\# Security}
+\ExtensionTok{check} \StringTok{"fail2ban running"} \StringTok{"systemctl is{-}active fail2ban"}
+\ExtensionTok{check} \StringTok{"Unattended upgrades configured"} \StringTok{"[ {-}f /etc/apt/apt.conf.d/50unattended{-}upgrades ]"}
+
+\BuiltInTok{echo} \StringTok{""}
+\BuiltInTok{echo} \StringTok{"Results: }\VariableTok{$PASS}\StringTok{ passed, }\VariableTok{$FAIL}\StringTok{ failed"}
+\ControlFlowTok{if} \BuiltInTok{[} \VariableTok{$FAIL} \OtherTok{{-}gt}\NormalTok{ 0 }\BuiltInTok{]}\KeywordTok{;} \ControlFlowTok{then}
+    \BuiltInTok{echo} \StringTok{"Fix the failures before deploying."}
+    \BuiltInTok{exit}\NormalTok{ 1}
+\ControlFlowTok{else}
+    \BuiltInTok{echo} \StringTok{"Server is ready for deployment."}
+\ControlFlowTok{fi}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Run this script:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# From your laptop: copy the script to the server, then run it with sudo}
+\CommentTok{\# ({-}t gives sudo a terminal to ask for deploy\textquotesingle{}s password)}
+\FunctionTok{scp}\NormalTok{ verify{-}setup.sh deploy@203.0.113.42:}
+\FunctionTok{ssh} \AttributeTok{{-}t}\NormalTok{ deploy@203.0.113.42 }\StringTok{\textquotesingle{}sudo bash verify{-}setup.sh\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected output:
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Verifying server setup...
+  ✓ Ubuntu 22.04
+  ✓ No reboot pending
+  ✓ deploy user exists
+  ✓ deploy in docker group
+  ✓ Root login disabled
+  ✓ Password auth disabled
+  ✓ UFW active
+  ✓ Port 80 open
+  ✓ Port 443 open
+  ✓ Port 22 open
+  ✓ Docker installed
+  ✓ Docker running
+  ✓ Docker starts on boot
+  ✓ /opt/notes-api exists
+  ✓ deploy owns /opt/notes-api
+  ✓ Config directory exists
+  ✓ Data directory owned by UID 1001
+  ✓ UTC timezone
+  ✓ fail2ban running
+  ✓ Unattended upgrades configured
+
+Results: 20 passed, 0 failed
+Server is ready for deployment.
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{12}
+\section{The SSH Config File: Simplifying Connections}\label{21-system-setup:2113-the-ssh-config-file-simplifying-connections}
+
+Typing \texttt{ssh\ deploy@203.0.113.42} every time is tedious. Create an SSH config file to simplify:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On your laptop: \textasciitilde{}/.ssh/config}
+\FunctionTok{cat} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ \textasciitilde{}/.ssh/config }\OperatorTok{\textless{}\textless{} \textquotesingle{}EOF\textquotesingle{}}
+
+\StringTok{Host notes{-}api}
+\StringTok{    \# Your server\textquotesingle{}s IP address, and the user to log in as}
+\StringTok{    HostName 203.0.113.42}
+\StringTok{    User deploy}
+\StringTok{    IdentityFile \textasciitilde{}/.ssh/id\_ed25519}
+\StringTok{    \# Send a keepalive every 60 seconds; disconnect after 3 missed replies}
+\StringTok{    ServerAliveInterval 60}
+\StringTok{    ServerAliveCountMax 3}
+\OperatorTok{EOF}
+
+\FunctionTok{chmod}\NormalTok{ 600 \textasciitilde{}/.ssh/config}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(Comments in \texttt{\textasciitilde{}/.ssh/config} must be on lines of their own; \texttt{ssh} rejects text after a value.)
+
+After this:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ssh}\NormalTok{ notes{-}api           }\CommentTok{\# Connects to deploy@203.0.113.42}
+\FunctionTok{scp}\NormalTok{ notes{-}api:file .    }\CommentTok{\# Copies file from server to current directory}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\phantomsection\label{21-system-setup:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{SSH with key authentication} is the standard way to access a production server. Disable password authentication and root login immediately~--- in a drop-in file under \texttt{/}\allowbreak{}\texttt{etc/}\allowbreak{}\texttt{ssh/}\allowbreak{}\texttt{sshd\_config.d/}, checked with \texttt{sshd\ -T}.
+\item
+  \textbf{Create a non-root user} (\texttt{deploy}) for all application operations. Applications running as root give attackers root access if compromised.
+\item
+  \textbf{UFW} (Uncomplicated Firewall) makes iptables rule management straightforward. The rule: allow only what is necessary (ports 22, 80, 443). Block everything else by default. \textbf{Docker-published ports bypass UFW}~--- publish them on \texttt{127.0.0.1} only, and add the provider's cloud firewall.
+\item
+  \textbf{Docker Engine} (not Docker Desktop) is the server-side container runtime. Enable it to start on boot. Configure log rotation to prevent disk fill.
+\item
+  \textbf{Automatic security updates} (\texttt{unattended-upgrades}) apply security patches without manual intervention. Configure it immediately~--- vulnerabilities are discovered continuously.
+\item
+  \textbf{System limits} (file descriptors, network parameters): know which settings reach the application before changing them. \texttt{limits.conf} affects login sessions, not containers; network tuning belongs in a drop-in file under \texttt{/etc/sysctl.d/}.
+\item
+  \textbf{UTC timezone} for all production servers. Log timestamps in UTC are consistent and unambiguous across timezones and daylight saving transitions.
+\item
+  \textbf{fail2ban} automatically blocks IP addresses that repeatedly fail authentication. Essential for any server with SSH exposed to the internet.
+\item
+  \textbf{Verify the setup} with a checklist script before deploying anything. A missed step discovered after deployment is much harder to fix.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{21-system-setup:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} After disabling password authentication, try \texttt{ssh\ -}\allowbreak{}\texttt{o\ PubkeyAuthentication=}\allowbreak{}\texttt{no\ deploy@server}. What happens?
+\item
+  \textbf{Break and fix.} Run a test container with \texttt{-p\ 8080:80} on the server, with UFW denying 8080. Can you reach it from outside? Explain why, then fix it the way the book does.
+\item
+  \textbf{Extend.} Configure \texttt{unattended-upgrades} to email you (or write to a log you check) when it installs updates, and to reboot automatically at 04:00 UTC when required.
+\item
+  \textbf{Explain.} Why is logging in as \texttt{root} over SSH disabled, when the \texttt{deploy} user can \texttt{sudo} anyway?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-21.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{21-system-setup:whats-next}
+
+The server is hardened, Docker is installed, and the directory structure is ready. The next step is configuring the server's network: assigning a static IP, understanding how traffic flows from the internet to the server, and configuring the network rules at the cloud provider level (above and in addition to the server-level UFW firewall).
+
+\noindent{}→ \hyperref[ch:22-network-configuration]{Chapter 22}~--- Network Configuration

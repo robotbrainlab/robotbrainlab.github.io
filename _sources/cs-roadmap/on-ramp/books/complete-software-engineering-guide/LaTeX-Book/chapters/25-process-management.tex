@@ -1,0 +1,902 @@
+\setcounter{chapter}{24}
+\chapter{Process Management}\label{ch:25-process-management}
+
+\chapterrule
+
+Process management is the discipline of knowing what processes are running, ensuring they stay running, controlling them deliberately, and understanding what they are doing at any moment.
+
+In development, process management is trivial: you run \texttt{python\ run.py}, the process runs in your terminal, and you press Ctrl+C to stop it. If it crashes, you see the error and restart it manually.
+
+In production, none of this is possible. No one is sitting at a terminal. There is no Ctrl+C to press. When the process crashes at 3:00 AM~--- and it will crash eventually~--- something needs to:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Detect that it crashed
+\item
+  Restart it automatically
+\item
+  Record what happened so you can investigate later
+\end{enumerate}
+
+\noindent{}This chapter examines process management in the production context: systemd as the server's service manager, Docker as the container manager, the relationship between the two, and the tools for inspecting and controlling running processes.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What a process supervisor is and why it is required in production
+\item
+  How systemd manages services: unit files, targets, states, and dependencies
+\item
+  How to use \texttt{systemctl} to start, stop, restart, and check the status of services
+\item
+  How to use \texttt{journalctl} to view and search service logs
+\item
+  How Docker's restart policies interact with systemd
+\item
+  How to manage multiple processes on one server (Nginx, Gunicorn, PostgreSQL)
+\item
+  How to handle process crashes gracefully
+\item
+  How to run \textbf{scheduled and event-triggered work} (cron, systemd timers, queues) safely~--- with idempotency, overlap protection, and alerting on missed runs
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{What a Process Supervisor Is}\label{25-process-management:251-what-a-process-supervisor-is}
+
+A \textbf{process supervisor} is a program that:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Starts a target process when the system boots
+\item
+  Monitors the target process while it runs
+\item
+  Restarts the target process if it exits unexpectedly
+\item
+  Logs the target process's output
+\end{enumerate}
+
+\noindent{}Without a supervisor, a process must be started manually. If it crashes, it stays crashed until someone notices and restarts it. For a web API, this means downtime.
+
+With a supervisor:
+
+\begin{itemize}
+\tightlist
+\item
+  The application starts automatically when the server boots
+\item
+  If the application crashes, the supervisor restarts it within seconds
+\item
+  No human intervention required for transient failures
+\end{itemize}
+
+\noindent{}Linux has several process supervisors:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{systemd}: the init system and service manager on virtually all modern Linux distributions. It starts and tracks every service on the system.
+\item
+  \textbf{supervisord}: a simpler, Python-based supervisor. Easier to configure than systemd, but less deeply integrated with the OS.
+\item
+  \textbf{Docker's restart policy}: Docker's built-in supervisor for containers. Sufficient for many use cases.
+\item
+  \textbf{Kubernetes}: a container orchestration platform that includes process management for containerized applications at scale.
+\end{itemize}
+
+\noindent{}For the Notes API: Docker's restart policy (\texttt{-}\allowbreak{}\texttt{-}\allowbreak{}\texttt{restart\ unless-}\allowbreak{}\texttt{stopped}) combined with systemd managing Docker itself provides adequate supervision. That is the setup the deploy scripts of \hyperref[ch:23-code-transfer]{Chapter 23} create.
+
+To teach systemd itself, this chapter uses the \textbf{alternative} from \hyperref[ch:24-process-startup]{Chapter 24}, section 24.7~--- the \texttt{notes-api.service} unit, in which systemd owns the container~--- as its running example, because one unit file shows every systemd concept in one place. The commands that act on \texttt{notes-api.service} apply if you chose that alternative. With the restart-policy setup, the container is not a systemd service; wherever the two differ, the Docker equivalent is shown alongside.
+
+\setcounter{section}{1}
+\section{systemd: The Linux Process Manager}\label{25-process-management:252-systemd-the-linux-process-manager}
+
+\textbf{systemd} is the init system on Ubuntu 22.04 (and virtually all modern Linux distributions). It is the first process started by the kernel (PID 1 on the host system) and is responsible for starting and managing all other processes.
+
+\subsection*{Units and unit files}\phantomsection\label{25-process-management:units-and-unit-files}
+
+In systemd terminology, everything it manages is a \textbf{unit}. Units are described by \textbf{unit files}~--- configuration files that tell systemd how to start, stop, and manage something.
+
+Types of units:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\texttt{.service}}: a long-running service (the Docker container, Nginx, PostgreSQL)
+\item
+  \textbf{\texttt{.socket}}: a network socket (for socket activation)
+\item
+  \textbf{\texttt{.timer}}: a scheduled task (like cron)
+\item
+  \textbf{\texttt{.target}}: a group of units (e.g., \texttt{multi-user.target} = ``system is ready for multi-user login'')
+\end{itemize}
+
+\noindent{}Unit files live in:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{/}\allowbreak{}\texttt{lib/}\allowbreak{}\texttt{systemd/}\allowbreak{}\texttt{system/} (the same directory as \texttt{/}\allowbreak{}\texttt{usr/}\allowbreak{}\texttt{lib/}\allowbreak{}\texttt{systemd/}\allowbreak{}\texttt{system/} on Ubuntu): units installed by packages (do not edit these)
+\item
+  \texttt{/}\allowbreak{}\texttt{etc/}\allowbreak{}\texttt{systemd/}\allowbreak{}\texttt{system/}: system-wide units you create (edit these)
+\item
+  \texttt{\textasciitilde{}/}\allowbreak{}\texttt{.config/}\allowbreak{}\texttt{systemd/}\allowbreak{}\texttt{user/}: user-specific units
+\end{itemize}
+
+\subsection*{\texorpdfstring{The \texttt{notes-api.service} unit file}{The notes-api.service unit file}}\phantomsection\label{25-process-management:the-notes-apiservice-unit-file}
+
+\hyperref[ch:24-process-startup]{Chapter 24} (section 24.7) showed this unit file. Let us examine it in detail:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# /etc/systemd/system/notes{-}api.service}
+\KeywordTok{[Unit]}
+\DataTypeTok{Description}\OtherTok{=}\StringTok{Notes API (Docker container)}
+\DataTypeTok{Documentation}\OtherTok{=}\StringTok{https://github.com/your{-}username/notes{-}api}
+\DataTypeTok{After}\OtherTok{=}\StringTok{docker.service}
+\DataTypeTok{Requires}\OtherTok{=}\StringTok{docker.service}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{\texttt{{[}Unit{]}} section}~--- general information about the unit:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{Description}: human-readable description (appears in \texttt{systemctl\ status})
+\item
+  \texttt{After=}\allowbreak{}\texttt{docker.service}: start this unit AFTER the Docker service starts
+\item
+  \texttt{Requires=}\allowbreak{}\texttt{docker.service}: if Docker stops, stop this unit too
+\end{itemize}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{[Service]}
+\DataTypeTok{User}\OtherTok{=}\StringTok{deploy}
+\DataTypeTok{Group}\OtherTok{=}\StringTok{deploy}
+\DataTypeTok{EnvironmentFile}\OtherTok{=}\StringTok{/opt/notes{-}api/config/image.env}
+\DataTypeTok{ExecStartPre}\OtherTok{=}\StringTok{{-}/usr/bin/docker rm {-}f notes{-}api}
+\DataTypeTok{ExecStart}\OtherTok{=}\StringTok{/usr/bin/docker run \textbackslash{}}
+\DataTypeTok{    {-}{-}name notes{-}api \textbackslash{}}
+\DataTypeTok{    {-}{-}stop{-}timeout 35 \textbackslash{}}
+\DataTypeTok{    {-}p 127.0.0.1:5000:5000 \textbackslash{}}
+\DataTypeTok{    {-}{-}env{-}file /opt/notes{-}api/config/notes{-}api.env \textbackslash{}}
+\DataTypeTok{    $\{IMAGE\}}
+\DataTypeTok{ExecStop}\OtherTok{=}\StringTok{/usr/bin/docker stop notes{-}api}
+\DataTypeTok{Restart}\OtherTok{=}\StringTok{always}
+\DataTypeTok{RestartSec}\OtherTok{=}\DecValTok{5}
+\DataTypeTok{StandardOutput}\OtherTok{=}\StringTok{journal}
+\DataTypeTok{StandardError}\OtherTok{=}\StringTok{journal}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{\texttt{{[}Service{]}} section}~--- how to start, stop, and manage the service:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{EnvironmentFile}: read variables from a file~--- here \texttt{IMAGE}, the exact image tag the last deployment wrote.
+\item
+  \texttt{ExecStartPre}: commands to run before ExecStart. A \texttt{-} right after the \texttt{=} means ``ignore errors''~--- we use it because the container might not exist yet.
+\item
+  \texttt{ExecStart}: the main command. systemd runs this and monitors it.
+\item
+  \texttt{ExecStop}: how to gracefully stop the service. systemd waits up to \texttt{TimeoutStopSec} (default 90 seconds) for it~--- comfortably more than the container's 35-second stop timeout.
+\item
+  \texttt{Restart=always}: restart the service if it exits for any reason.
+\item
+  \texttt{RestartSec=5}: wait 5 seconds between restart attempts.
+\item
+  \texttt{StandardOutput=}\allowbreak{}\texttt{journal}: send stdout to systemd's journal.
+\end{itemize}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{[Install]}
+\DataTypeTok{WantedBy}\OtherTok{=}\StringTok{multi{-}user.target}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{\texttt{{[}Install{]}} section}~--- how the unit fits into the system:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{WantedBy=}\allowbreak{}\texttt{multi-}\allowbreak{}\texttt{user.}\allowbreak{}\texttt{target}: start this unit when the system reaches multi-user mode (the normal running state, with network and all services).
+\end{itemize}
+
+\setcounter{section}{2}
+\section{\texorpdfstring{Managing Services with \texttt{systemctl}}{Managing Services with systemctl}}\label{25-process-management:253-managing-services-with-systemctl}
+
+\texttt{systemctl} is the command for interacting with systemd.
+
+\subsection*{Starting and stopping}\phantomsection\label{25-process-management:starting-and-stopping}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Start the service}
+\ExtensionTok{systemctl}\NormalTok{ start notes{-}api}
+
+\CommentTok{\# Stop the service (sends SIGTERM, waits for graceful shutdown)}
+\ExtensionTok{systemctl}\NormalTok{ stop notes{-}api}
+
+\CommentTok{\# Restart (stop + start)}
+\ExtensionTok{systemctl}\NormalTok{ restart notes{-}api}
+
+\CommentTok{\# Reload configuration without stopping — only for units that define}
+\CommentTok{\# ExecReload= (nginx does; notes{-}api.service does not, so this fails with}
+\CommentTok{\# "Job type reload is not applicable")}
+\ExtensionTok{systemctl}\NormalTok{ reload nginx}
+
+\CommentTok{\# Reload if the unit supports it, otherwise restart}
+\ExtensionTok{systemctl}\NormalTok{ reload{-}or{-}restart notes{-}api}
+
+\CommentTok{\# Restart only if the service is already running}
+\ExtensionTok{systemctl}\NormalTok{ try{-}restart notes{-}api}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Enabling and disabling}\phantomsection\label{25-process-management:enabling-and-disabling}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Enable: configure to start automatically on boot}
+\ExtensionTok{systemctl}\NormalTok{ enable notes{-}api}
+
+\CommentTok{\# Disable: do not start automatically on boot}
+\ExtensionTok{systemctl}\NormalTok{ disable notes{-}api}
+
+\CommentTok{\# Enable and start immediately}
+\ExtensionTok{systemctl}\NormalTok{ enable }\AttributeTok{{-}{-}now}\NormalTok{ notes{-}api}
+
+\CommentTok{\# Disable and stop immediately}
+\ExtensionTok{systemctl}\NormalTok{ disable }\AttributeTok{{-}{-}now}\NormalTok{ notes{-}api}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Checking status}\phantomsection\label{25-process-management:checking-status}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{systemctl}\NormalTok{ status notes{-}api}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Output:
+
+\begin{diagrambox}[short]{404.1pt}
+\begin{Verbatim}[fontsize=\fontsize{6.7}{6.37}\selectfont]
+● notes-api.service - Notes API (Docker container)
+     Loaded: loaded (/etc/systemd/system/notes-api.service; enabled; ...)
+     Active: active (running) since Mon 2024-01-15 14:00:00 UTC; 2 hours ago
+    Process: 12340 ExecStartPre=/usr/bin/docker stop notes-api (code=exited, ...)
+    Process: 12341 ExecStartPre=/usr/bin/docker rm notes-api (code=exited, ...)
+   Main PID: 12345 (docker)
+      Tasks: 7 (limit: 1141)
+     Memory: 25.6M
+        CPU: 45.2s
+     CGroup: /system.slice/notes-api.service
+             └─12345 /usr/bin/docker run --name notes-api ...
+
+Jan 15 14:00:00 server docker[12345]: [2024-01-15 14:00:00 +0000] [1] [INFO] Starting gunicorn 22.0.0
+Jan 15 14:00:00 server docker[12345]: [2024-01-15 14:00:00 +0000] [1] [INFO] Listening at: http://0.0.0.0:5000 (1)
+Jan 15 14:00:00 server docker[12345]: [2024-01-15 14:00:00 +0000] [7] [INFO] Booting worker with pid: 7
+Jan 15 14:00:00 server docker[12345]: [2024-01-15 14:00:00 +0000] [8] [INFO] Booting worker with pid: 8
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}(With the restart-policy setup, \texttt{docker\ ps\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{filter\ name=}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api} and \texttt{docker\ inspect\ notes-}\allowbreak{}\texttt{api} answer the same questions: is it running, since when, how often has it restarted.)
+
+Fields in the status output:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{Loaded}: the unit file is found and valid; \texttt{enabled} means it starts on boot
+\item
+  \texttt{Active}: \texttt{active\ (running)} means the service is currently running
+\item
+  \texttt{Main\ PID}: the PID of the main process (the \texttt{docker\ run} command)
+\item
+  \texttt{Memory}: RAM used by the unit's processes~--- here only the \texttt{docker\ run} client; the container's own processes live in Docker's cgroup (section 25.7)
+\item
+  \texttt{CGroup}: the control group (cgroup) that this service belongs to
+\end{itemize}
+
+\subsection*{Viewing all services}\phantomsection\label{25-process-management:viewing-all-services}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# List all running services}
+\ExtensionTok{systemctl}\NormalTok{ list{-}units }\AttributeTok{{-}{-}type}\OperatorTok{=}\NormalTok{service }\AttributeTok{{-}{-}state}\OperatorTok{=}\NormalTok{running}
+
+\CommentTok{\# List all failed services}
+\ExtensionTok{systemctl}\NormalTok{ list{-}units }\AttributeTok{{-}{-}type}\OperatorTok{=}\NormalTok{service }\AttributeTok{{-}{-}state}\OperatorTok{=}\NormalTok{failed}
+
+\CommentTok{\# List all enabled services (will start on boot)}
+\ExtensionTok{systemctl}\NormalTok{ list{-}unit{-}files }\AttributeTok{{-}{-}type}\OperatorTok{=}\NormalTok{service }\AttributeTok{{-}{-}state}\OperatorTok{=}\NormalTok{enabled}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{3}
+\section{\texorpdfstring{Logs with \texttt{journalctl}}{Logs with journalctl}}\label{25-process-management:254-logs-with-journalctl}
+
+systemd captures stdout and stderr from every service it manages and stores it in the \textbf{journal}~--- a binary log store with structured metadata.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# View all logs for notes{-}api (paginated, oldest first; {-}r reverses the}
+\CommentTok{\# order, {-}e jumps to the end)}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api}
+
+\CommentTok{\# Follow in real time (like tail {-}f)}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}f}
+
+\CommentTok{\# Show only recent logs (last 100 lines)}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}n}\NormalTok{ 100}
+
+\CommentTok{\# Show logs since a specific time}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}{-}since} \StringTok{"2024{-}01{-}15 14:00:00"}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}{-}since} \StringTok{"1 hour ago"}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}{-}since} \StringTok{"today"}
+
+\CommentTok{\# Show logs for a time range}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}{-}since} \StringTok{"2024{-}01{-}15 12:00:00"} \AttributeTok{{-}{-}until} \StringTok{"2024{-}01{-}15 14:00:00"}
+
+\CommentTok{\# Show only error messages}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}p}\NormalTok{ err}
+
+\CommentTok{\# Show in JSON format (useful for piping to jq)}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}o}\NormalTok{ json }\KeywordTok{|} \ExtensionTok{jq} \StringTok{\textquotesingle{}.\textquotesingle{}}
+
+\CommentTok{\# Show only the messages themselves, without journal prefixes}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}o}\NormalTok{ cat}
+
+\CommentTok{\# Show logs from the last boot}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}b}
+
+\CommentTok{\# Show logs from the previous boot (useful after a crash)}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}b} \AttributeTok{{-}1}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With the restart-policy setup, the container's output is not in the journal: read it with \texttt{docker\ logs}, which takes similar options~--- \texttt{docker\ logs\ -}\allowbreak{}\texttt{f\ notes-}\allowbreak{}\texttt{api}, \texttt{docker\ logs\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{since\ 1h\ notes-}\allowbreak{}\texttt{api}, \texttt{docker\ logs\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{tail\ 100\ notes-}\allowbreak{}\texttt{api}.
+
+\subsection*{Searching logs}\phantomsection\label{25-process-management:searching-logs}
+
+The application writes JSON log lines (\hyperref[ch:16-logging-error-handling]{Chapter 16}), mixed with Gunicorn's plain-text lines. \texttt{jq\ -R\ \textquotesingle{}fromjson?\textquotesingle{}} parses each line that is JSON and skips the rest, so you can select on real fields instead of grepping text:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Start from the raw log lines — one of:}
+\CommentTok{\#   journalctl {-}u notes{-}api {-}o cat {-}{-}since "24 hours ago"   (systemd unit)}
+\CommentTok{\#   docker logs {-}{-}since 24h notes{-}api 2\textgreater{}\&1                   (restart policy)}
+
+\CommentTok{\# Find all server errors (responses with a 5xx status) in the last 24 hours}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}since}\NormalTok{ 24h notes{-}api }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{|} \DataTypeTok{\textbackslash{}}
+    \ExtensionTok{jq} \AttributeTok{{-}cR} \StringTok{\textquotesingle{}fromjson? | select(.message | startswith("← 5"))\textquotesingle{}}
+
+\CommentTok{\# Find ERROR{-}level records (the handling boundary logs every traceback)}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}since}\NormalTok{ 24h notes{-}api }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{|} \DataTypeTok{\textbackslash{}}
+    \ExtensionTok{jq} \AttributeTok{{-}cR} \StringTok{\textquotesingle{}fromjson? | select(.level == "ERROR")\textquotesingle{}}
+
+\CommentTok{\# Find database connection failures at startup}
+\ExtensionTok{docker}\NormalTok{ logs notes{-}api }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{|} \FunctionTok{grep} \StringTok{"Cannot connect to the database"}
+
+\CommentTok{\# Count responses by status code in the last hour}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}since}\NormalTok{ 1h notes{-}api }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{|} \DataTypeTok{\textbackslash{}}
+    \ExtensionTok{jq} \AttributeTok{{-}rR} \StringTok{\textquotesingle{}fromjson? | .message | select(startswith("← ")) | split(" ")[1]\textquotesingle{}} \KeywordTok{|} \DataTypeTok{\textbackslash{}}
+    \FunctionTok{sort} \KeywordTok{|} \FunctionTok{uniq} \AttributeTok{{-}c} \KeywordTok{|} \FunctionTok{sort} \AttributeTok{{-}rn}
+\CommentTok{\#   412 200}
+\CommentTok{\#    37 201}
+\CommentTok{\#     9 404}
+\CommentTok{\#     2 400}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(An ERROR-level record and a 500 response are related but not the same: the handling boundary logs an ERROR \emph{and} returns a 500, while the request-logging middleware logs each 5xx response line itself.)
+
+\setcounter{section}{4}
+\section{Managing Multiple Processes on One Server}\label{25-process-management:255-managing-multiple-processes-on-one-server}
+
+A production server typically runs several services:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Nginx}: receives internet traffic on port 80/443
+\item
+  \textbf{Docker container (Gunicorn)}: the application on port 5000
+\item
+  \textbf{PostgreSQL} (only if self-hosted; this book uses a managed database): the database on port 5432
+\end{itemize}
+
+\noindent{}Each is a separate systemd service with its own unit file. They have dependencies:
+
+\begin{diagrambox}[short]{312.5pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+multi-user.target (normal system state)
+        │
+        ├── docker.service
+        │        │
+        │        └── notes-api.service (requires docker.service;
+        │                               systemd alternative only)
+        │
+        ├── nginx.service
+        │
+        └── postgresql.service (only if self-hosted)
+\end{Verbatim}
+\end{diagrambox}
+
+\subsection*{Nginx as a service}\phantomsection\label{25-process-management:nginx-as-a-service}
+
+Nginx is installed as a package and comes with a pre-configured systemd service:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Nginx service management}
+\ExtensionTok{systemctl}\NormalTok{ status nginx}
+\ExtensionTok{systemctl}\NormalTok{ start nginx}
+\ExtensionTok{systemctl}\NormalTok{ stop nginx}
+\ExtensionTok{systemctl}\NormalTok{ reload nginx   }\CommentTok{\# Reload config without dropping connections}
+\ExtensionTok{systemctl}\NormalTok{ restart nginx  }\CommentTok{\# Full restart (drops connections briefly)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Nginx writes its logs to its own files, not to the journal}
+\FunctionTok{tail} \AttributeTok{{-}f}\NormalTok{ /var/log/nginx/error.log}
+\FunctionTok{tail} \AttributeTok{{-}f}\NormalTok{ /var/log/nginx/access.log}
+
+\CommentTok{\# The journal has Nginx\textquotesingle{}s start/stop messages and early startup errors}
+\CommentTok{\# (e.g. a config error that kept it from starting)}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ nginx }\AttributeTok{{-}n}\NormalTok{ 50}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Service dependency ordering}\phantomsection\label{25-process-management:service-dependency-ordering}
+
+systemd respects the dependency declarations in unit files. If \texttt{notes-api.service} declares \texttt{After=}\allowbreak{}\texttt{docker.}\allowbreak{}\texttt{service\ Requires=}\allowbreak{}\texttt{docker.}\allowbreak{}\texttt{service}:
+
+\begin{itemize}
+\tightlist
+\item
+  systemd starts Docker before notes-api
+\item
+  If Docker fails to start, systemd marks notes-api as failed
+\item
+  If Docker stops while notes-api is running, systemd stops notes-api
+\end{itemize}
+
+\noindent{}This ordering is critical for correct boot behavior.
+
+\setcounter{section}{5}
+\section{Process Crash Investigation}\label{25-process-management:256-process-crash-investigation}
+
+When a service repeatedly crashes, \texttt{systemctl\ status} shows the restart count and recent logs:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{systemctl}\NormalTok{ status notes{-}api}
+\CommentTok{\# ● notes{-}api.service {-} Notes API (Docker container)}
+\CommentTok{\#    Active: activating (auto{-}restart) (Result: exit{-}code) since ... 3s ago}
+\CommentTok{\#    ...}
+\CommentTok{\#    ... notes{-}api.service: Main process exited, code=exited, status=1/FAILURE}
+\CommentTok{\#    ... notes{-}api.service: Failed with result \textquotesingle{}exit{-}code\textquotesingle{}.}
+\CommentTok{\#    ... notes{-}api.service: Scheduled restart job, restart counter is at 3.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{restart\ counter\ is\ at\ 3} means it has crashed and restarted 3 times. With the restart-policy setup, the equivalent is the container's \texttt{RestartCount} and a status of \texttt{restarting} in \texttt{docker\ ps}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ inspect notes{-}api }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}\{\{.State.Status\}\} restarts=\{\{.RestartCount\}\}\textquotesingle{}}
+\CommentTok{\# restarting restarts=3}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Crash loop detection}\phantomsection\label{25-process-management:crash-loop-detection}
+
+If a service crashes immediately after starting, systemd enters a \textbf{crash loop}. After too many restarts in a short time, systemd gives up:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+notes-api.service: Start request repeated too quickly.
+notes-api.service: Failed with result 'start-limit-hit'.
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}To investigate:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# View recent logs (the crash might have log output)}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}n}\NormalTok{ 50      }\CommentTok{\# systemd unit}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}tail}\OperatorTok{=}\NormalTok{50 notes{-}api    }\CommentTok{\# either setup}
+
+\CommentTok{\# View the container\textquotesingle{}s exit code}
+\ExtensionTok{docker}\NormalTok{ inspect notes{-}api }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}\{\{.State.ExitCode\}\}\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(Docker has no equivalent of systemd's ``start limit'': a crash-looping container with \texttt{-}\allowbreak{}\texttt{-}\allowbreak{}\texttt{restart\ unless-}\allowbreak{}\texttt{stopped} keeps being restarted, with a growing delay between attempts. \texttt{RestartCount} is how you notice.)
+
+Common causes of startup crashes:
+
+\begin{itemize}
+\tightlist
+\item
+  Missing or invalid environment variable (the startup checks from \hyperref[ch:14-runtime-contract]{Chapter 14}, run by \texttt{create\_app()}, log a ``Startup failed:'' line saying which)
+\item
+  Database unreachable (the same checks log ``Cannot connect to the database'')
+\item
+  Host port already in use (another container or process holding \texttt{127.0.0.1:5000}~--- \texttt{docker\ run} then fails with ``port is already allocated'')
+\item
+  Docker image not found (check \texttt{docker\ images\ \textbar{}\ grep\ notes-}\allowbreak{}\texttt{api})
+\end{itemize}
+
+\subsection*{Resetting the failure counter}\phantomsection\label{25-process-management:resetting-the-failure-counter}
+
+After fixing the root cause, reset systemd's failure counter to allow restarts again:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{systemctl}\NormalTok{ reset{-}failed notes{-}api}
+\ExtensionTok{systemctl}\NormalTok{ start notes{-}api}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{6}
+\section{Process Resource Monitoring}\label{25-process-management:257-process-resource-monitoring}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# View all processes on the server, interactive}
+\ExtensionTok{htop}
+
+\CommentTok{\# View Docker container resource usage (CPU, memory, network, disk)}
+\ExtensionTok{docker}\NormalTok{ stats notes{-}api}
+
+\CommentTok{\# View a specific process\textquotesingle{}s resource usage}
+\CommentTok{\# Replace PID with the actual PID from docker inspect}
+\FunctionTok{cat}\NormalTok{ /proc/PID/status }\KeywordTok{|} \FunctionTok{grep} \AttributeTok{{-}E} \StringTok{"VmRSS|VmPeak|Threads"}
+
+\CommentTok{\# The container\textquotesingle{}s cgroup, where the application\textquotesingle{}s memory is really counted}
+\CommentTok{\# (docker{-}\textless{}full container ID\textgreater{}.scope)}
+\FunctionTok{cat}\NormalTok{ /sys/fs/cgroup/system.slice/docker{-}}\VariableTok{$(}\ExtensionTok{docker}\NormalTok{ inspect }\AttributeTok{{-}f} \StringTok{\textquotesingle{}\{\{.Id\}\}\textquotesingle{}}\NormalTok{ notes{-}api}\VariableTok{)}\NormalTok{.scope/memory.current}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Be careful with systemd's own numbers here. With the systemd alternative, \texttt{systemctl\ status\ notes-}\allowbreak{}\texttt{api} reports \texttt{Memory:\ 25.6M}~--- but that is the \texttt{docker\ run} \emph{client}. The container's processes are not in \texttt{notes-api.service}'s cgroup; they are in the Docker scope shown above, and \texttt{docker\ stats} reads the same figures.
+
+\setcounter{section}{7}
+\section{The Relationship Between Docker and systemd}\label{25-process-management:258-the-relationship-between-docker-and-systemd}
+
+Docker itself is managed by systemd. The Docker daemon (\texttt{dockerd}) runs as a systemd service (\texttt{docker.service}). The relationship:
+
+\begin{diagrambox}[short]{358.6pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+systemd (PID 1)
+    │
+    ├── docker.service ──── dockerd (Docker daemon: API, images, networks)
+    │
+    ├── containerd.service ── containerd (runs containers for dockerd)
+    │
+    ├── docker-<id>.scope  (the container's own cgroup)
+    │       │
+    │       └── containerd-shim ── Gunicorn master (PID 1 inside container)
+    │                                 ├── Gunicorn worker 1
+    │                                 └── Gunicorn worker 2
+    │
+    └── nginx.service
+            │
+            └── nginx master
+                    ├── nginx worker 1
+                    └── nginx worker 2
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}The container's processes are not children of \texttt{dockerd}, and not part of any service you wrote: \texttt{dockerd} asks \texttt{containerd} to start them, a small \texttt{containerd-shim} process becomes their parent, and they get a cgroup of their own. That is why restarting \texttt{dockerd} need not stop containers (the \texttt{live-restore} setting from \hyperref[ch:21-system-setup]{Chapter 21}), and why a unit that runs \texttt{docker\ run} supervises only the client (section 25.7).
+
+With the systemd alternative, stopping \texttt{notes-api.service} runs \texttt{ExecStop} (\texttt{docker\ stop\ notes-api}), which sends SIGTERM to the container's PID 1 (Gunicorn), which shuts down gracefully.
+
+When the server reboots, systemd starts Docker, Docker starts the container (because of \texttt{-}\allowbreak{}\texttt{-}\allowbreak{}\texttt{restart\ unless-}\allowbreak{}\texttt{stopped}), and the application is running again without human intervention. (With the systemd alternative, systemd starts \texttt{notes-api.service} after Docker instead.)
+
+\setcounter{section}{8}
+\section{Beyond the Always-On Service: Scheduled and Triggered Work}\label{25-process-management:259-beyond-the-always-on-service-scheduled-and-triggered-work}
+
+Everything in this chapter so far keeps \emph{one} thing alive: the Notes API, a long-running process that waits for requests. But real systems also need work that is \emph{not} a response to a user request~--- work that runs on a schedule or in reaction to an event. Delete notes older than a year. Email a weekly digest. Rebuild a search index nightly. Process a payment-confirmation webhook. This is \textbf{background work}, and it is the most commonly under-engineered part of a system, because when it silently stops, no one gets an error page~--- the work just quietly doesn't happen.
+
+\subsection*{The three kinds of triggered work}\phantomsection\label{25-process-management:the-three-kinds-of-triggered-work}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Time-based (scheduled):} runs on a clock~--- ``every night at 02:00'', ``every 15 minutes''. Driven by cron, systemd timers, or a cloud scheduler.
+\item
+  \textbf{Event-based:} runs in reaction to something happening elsewhere~--- an incoming webhook (an HTTP call from another system; \hyperref[ch:34-response-handling]{Chapter 34}, section 34.10), a message landing on a queue, a file being uploaded.
+\item
+  \textbf{Manual:} a human runs it on demand~--- a one-off backfill or data migration.
+\end{itemize}
+
+\noindent{}The same job is often reachable more than one way (a nightly cleanup you can also trigger by hand). What they all share is the thing that makes them dangerous: none is driven by an HTTP request, so none appears in your request logs, and none fails in a way a user will report for you.
+
+\subsection*{cron: the classic scheduler, and its traps}\phantomsection\label{25-process-management:cron-the-classic-scheduler-and-its-traps}
+
+\textbf{cron} is the traditional Unix scheduler~--- a line in a \emph{crontab} maps a time specification to a command:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# minute  hour  day{-}of{-}month  month  day{-}of{-}week  command}
+\NormalTok{  0       2     *             *      *            /opt/notes{-}api/scripts/cleanup.sh}
+\NormalTok{\# "At 02:00 every day, run the cleanup script."}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Three traps bite everyone at least once:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Timezone.} cron uses the \emph{server's} local timezone unless told otherwise. Always think and schedule in \textbf{UTC}, or daylight-saving will shift your 02:00 job by an hour twice a year~--- and ``twice a year'' is exactly when you have forgotten this. (The server from \hyperref[ch:21-system-setup]{Chapter 21} is already set to UTC, section 21.10.)
+\item
+  \textbf{A minimal environment.} cron runs jobs with a bare environment: no \texttt{.env}, a tiny \texttt{\$PATH}, and a different working directory. Scripts that run fine in your shell fail under cron because \texttt{python} is not found or \texttt{DATABASE\_URL} is not set. Use absolute paths and load configuration explicitly~--- the same lesson as the systemd unit file's fully-specified \texttt{ExecStart} earlier in this chapter.
+\item
+  \textbf{Silent failure.} cron's default reaction to a failing job is to email its output to a local mailbox no one reads~--- or, on a fresh server with no mail system installed, to discard it (the system log records only ``No MTA installed, discarding output''). A broken cron job therefore produces \emph{no signal at all}. You must add your own (see ``Visibility'' below).
+\end{itemize}
+
+\subsection*{systemd timers: the modern alternative}\phantomsection\label{25-process-management:systemd-timers-the-modern-alternative}
+
+On a systemd server~--- which you already have (§25.2)~--- \textbf{timers} are a more observable replacement for cron. A \texttt{.timer} unit triggers a \texttt{.service} unit, which means the job becomes a first-class systemd service: its output goes to \texttt{journalctl} (debug it exactly like the API~--- §25.4), it gets proper environment handling, and \texttt{systemctl\ list-timers} shows the last and next run at a glance.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# /etc/systemd/system/notes{-}cleanup.timer}
+\KeywordTok{[Unit]}
+\DataTypeTok{Description}\OtherTok{=}\StringTok{Daily cleanup of old notes}
+\KeywordTok{[Timer]}
+\DataTypeTok{OnCalendar}\OtherTok{=}\StringTok{*{-}*{-}* 02:00:00 UTC}
+\CommentTok{\# If the server was off at 02:00, run on the next boot. (systemd allows}
+\CommentTok{\# comments only on lines of their own, never at the end of a setting.)}
+\DataTypeTok{Persistent}\OtherTok{=}\KeywordTok{true}
+\KeywordTok{[Install]}
+\DataTypeTok{WantedBy}\OtherTok{=}\StringTok{timers.target}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}paired with a \texttt{notes-cleanup.service} (a \texttt{Type=oneshot} unit that runs the script once and exits). \texttt{Persistent=true} cures one of cron's worst traps: a missed run~--- the server was down at 02:00~--- is caught up on the next boot instead of being silently skipped. On managed platforms you will meet the hosted equivalents: cloud schedulers such as AWS EventBridge or GCP Cloud Scheduler that fire a container or function on a cron expression.
+
+\subsection*{The hard parts every scheduled job must handle}\phantomsection\label{25-process-management:the-hard-parts-every-scheduled-job-must-handle}
+
+The schedule is the easy bit. These four properties separate a toy cron line from a production job:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Idempotency.} A scheduled job \emph{will} run twice eventually~--- a retry, an overlap, or a manual run on top of the automatic one. It must be safe to run twice. ``Delete notes older than a year'' is naturally idempotent (the second run finds nothing to do); ``email every user a digest'' is not, unless you record who has already been emailed. Design every job so a double-run causes no harm. (The same idea governs HTTP methods and webhooks; \hyperref[ch:34-response-handling]{Chapter 34}, section 34.10, returns to it.)
+\item
+  \textbf{Overlap.} What if the 02:00 run is still going when the next one fires, or a slow 15-minute job overruns its window? Two copies mutating the same data at once is a classic corruption source. Prevent it with a \textbf{lock}~--- a database row, a Postgres advisory lock, or systemd's built-in refusal to start a service instance that is already running.
+\item
+  \textbf{Durability.} What if the job~--- or the whole server~--- dies halfway through deleting 10,000 notes? The job must be able to resume or restart without losing or double-processing work. This is why idempotency and small, individually-committed batches matter: each batch either completed or it didn't, and re-running is safe.
+\item
+  \textbf{Visibility.} A missed run is a \emph{silent} failure, and you cannot alert on an error that never fires. So you alert on the \textbf{absence of success}: have the job record a heartbeat when it \emph{finishes}~--- a timestamp, a metric, or a ping to a dead-man's-switch service (Healthchecks.io, Cronitor)~--- and alert when that heartbeat is overdue. ``The nightly cleanup hasn't checked in for 26 hours'' is the signal you actually need, and it is the one cron will never give you.
+\end{itemize}
+
+\subsection*{Event-driven work and queues}\phantomsection\label{25-process-management:event-driven-work-and-queues}
+
+Time is not the only trigger. When work should happen \emph{in reaction} to an event, two patterns dominate. A \textbf{webhook} is an inbound HTTP call from another system; because senders retry, your handler must be idempotent and fast. A \textbf{message queue} (RabbitMQ, Amazon SQS, or Redis-backed task queues like Celery and RQ) decouples work from the request that caused it: instead of doing something slow inside a request~--- resizing an image, calling a sluggish third party~--- you drop a message on a queue, and a separate \textbf{worker} process, supervised exactly like the API (a container with a restart policy, or a systemd service), consumes it. Queues buy you retries, buffering under load spikes, and the ability to scale workers independently of web servers. This is the doorway to the asynchronous, decoupled architectures that large systems are built from; the idea to carry forward is simply that \emph{not all work belongs inside the request}.
+
+\subsection*{A checklist for adding a scheduled job}\phantomsection\label{25-process-management:a-checklist-for-adding-a-scheduled-job}
+
+Before you ship any cron line or timer, answer:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{What triggers it, and in what timezone?} (UTC.)
+\item
+  \textbf{Is it idempotent?} If not, make it so \emph{before} scheduling it.
+\item
+  \textbf{What happens if two runs overlap?} (Lock, or guarantee overlap cannot matter.)
+\item
+  \textbf{What happens if it crashes mid-run?} (Resume safely; small committed batches.)
+\item
+  \textbf{How will I know it ran~--- and how will I know if it \emph{stopped} running?} (Heartbeat plus alert-on-absence.)
+\item
+  \textbf{Where do its logs go?} (Somewhere you actually read~--- \texttt{journalctl}, not a local mailbox.)
+\end{enumerate}
+
+\noindent{}A scheduled job you cannot answer these for is an outage waiting for a quiet night.
+
+\setcounter{section}{9}
+\section{A Process Management Cheat Sheet}\label{25-process-management:2510-a-process-management-cheat-sheet}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Common process management commands for the Notes API}
+\CommentTok{\# (this book\textquotesingle{}s setup: Docker restart policy; systemd starts Docker)}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\CommentTok{\# Status}
+\ExtensionTok{docker}\NormalTok{ ps                          }\CommentTok{\# Running containers}
+\ExtensionTok{docker}\NormalTok{ stats notes{-}api             }\CommentTok{\# Container resource usage}
+\ExtensionTok{docker}\NormalTok{ inspect notes{-}api }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}\{\{.State.Status\}\} restarts=\{\{.RestartCount\}\}\textquotesingle{}}
+\ExtensionTok{systemctl}\NormalTok{ status docker            }\CommentTok{\# Docker daemon status}
+\ExtensionTok{systemctl}\NormalTok{ status nginx             }\CommentTok{\# Nginx status}
+
+\CommentTok{\# Starting and stopping}
+\ExtensionTok{docker}\NormalTok{ stop notes{-}api              }\CommentTok{\# Graceful stop (stays stopped)}
+\ExtensionTok{docker}\NormalTok{ start notes{-}api             }\CommentTok{\# Start it again}
+\ExtensionTok{docker}\NormalTok{ restart notes{-}api           }\CommentTok{\# Stop + start}
+\ExtensionTok{systemctl}\NormalTok{ reload nginx             }\CommentTok{\# Nginx config reload (no downtime)}
+
+\CommentTok{\# Logs}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}f}\NormalTok{ notes{-}api           }\CommentTok{\# Follow Notes API logs}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}since}\NormalTok{ 1h notes{-}api   }\CommentTok{\# Logs from the last hour}
+\FunctionTok{tail} \AttributeTok{{-}f}\NormalTok{ /var/log/nginx/error.log   }\CommentTok{\# Follow Nginx errors}
+
+\CommentTok{\# Deployment}
+\ExtensionTok{/opt/notes{-}api/deploy.sh}\NormalTok{ sha{-}HASH  }\CommentTok{\# Deploy (or roll back to) a version}
+\ExtensionTok{docker}\NormalTok{ pull ghcr.io/.../notes{-}api:sha{-}HASH  }\CommentTok{\# Manually pull an image}
+
+\CommentTok{\# Diagnostics}
+\ExtensionTok{docker}\NormalTok{ exec }\AttributeTok{{-}it}\NormalTok{ notes{-}api bash     }\CommentTok{\# Shell inside container}
+\ExtensionTok{docker}\NormalTok{ inspect notes{-}api           }\CommentTok{\# Full container configuration}
+\ExtensionTok{docker}\NormalTok{ top notes{-}api               }\CommentTok{\# Gunicorn master and workers}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ docker }\AttributeTok{{-}b} \AttributeTok{{-}1}         \CommentTok{\# Docker\textquotesingle{}s log from the previous boot}
+
+\CommentTok{\# With the systemd alternative (section 24.7) instead:}
+\ExtensionTok{systemctl}\NormalTok{ status notes{-}api         }\CommentTok{\# Service status}
+\ExtensionTok{systemctl}\NormalTok{ restart notes{-}api        }\CommentTok{\# Stop + start}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}f}         \CommentTok{\# Follow Notes API logs}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}b} \AttributeTok{{-}1}      \CommentTok{\# Logs from previous boot (post{-}crash)}
+\ExtensionTok{systemctl}\NormalTok{ reset{-}failed notes{-}api   }\CommentTok{\# Reset crash counter after fixing issue}
+\ExtensionTok{systemctl}\NormalTok{ daemon{-}reload            }\CommentTok{\# Reload unit files after editing}
+\ExtensionTok{systemctl}\NormalTok{ enable notes{-}api         }\CommentTok{\# Ensure it starts on boot}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\phantomsection\label{25-process-management:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{process supervisor} ensures a process starts on boot and restarts after crashes. Without supervision, crashes require human intervention.
+\item
+  \textbf{systemd} is the init system on Ubuntu. It manages every service on the server via unit files (\texttt{.service} files in \texttt{/}\allowbreak{}\texttt{etc/}\allowbreak{}\texttt{systemd/}\allowbreak{}\texttt{system/}).
+\item
+  \textbf{\texttt{systemctl}} controls services: \texttt{start}, \texttt{stop}, \texttt{restart}, \texttt{reload}, \texttt{enable}, \texttt{disable}, \texttt{status}.
+\item
+  \textbf{\texttt{journalctl}} queries the systemd journal: \texttt{-u\ SERVICE} for a specific service, \texttt{-f} to follow, \texttt{-\/-since} for time filtering.
+\item
+  \textbf{The \texttt{{[}Service{]}} section} of a unit file defines: \texttt{ExecStart} (how to start), \texttt{ExecStop} (how to stop), \texttt{Restart=always} (restart on any exit), \texttt{RestartSec=5} (seconds between restarts).
+\item
+  \textbf{Crash loops} occur when a service crashes immediately after starting. systemd eventually stops restarting. Fix the root cause (check logs), then \texttt{systemctl\ reset-failed} and \texttt{systemctl\ start}.
+\item
+  \textbf{The service hierarchy}: systemd starts \texttt{docker.service} (and \texttt{containerd}); containers run under \texttt{containerd-shim} in cgroups of their own, not inside any service you wrote; inside the container, the Gunicorn master manages its workers. Measure the application with \texttt{docker\ stats}, not with the numbers of a unit that runs \texttt{docker\ run}.
+\item
+  \textbf{For multiple services} (Nginx, Docker container, PostgreSQL), declare \texttt{After=} and \texttt{Requires=} dependencies. systemd starts them in the correct order.
+\item
+  \textbf{Background work}~--- scheduled (cron, systemd timers, cloud schedulers) and event-driven (webhooks, queues)~--- is not driven by user requests, so it fails \emph{silently}. Prefer \textbf{systemd timers} over cron (logs to \texttt{journalctl}, \texttt{Persistent=true} catches missed runs, visible in \texttt{systemctl\ list-timers}); always schedule in \textbf{UTC} and load config explicitly.
+\item
+  Every scheduled job must be \textbf{idempotent} (safe to run twice), \textbf{overlap-protected} (a lock), \textbf{durable} (resumable in small committed batches), and \textbf{visible}~--- alert on the \emph{absence of success} (a heartbeat), because a missed run produces no error to alert on.
+\item
+  When work doesn't belong inside a request, move it to a \textbf{queue} with a \textbf{worker} process supervised exactly like the API~--- the entry point to asynchronous architecture.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{25-process-management:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} On the server, run \texttt{systemctl\ status\ docker} and \texttt{journalctl\ -}\allowbreak{}\texttt{u\ docker\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{since\ "1\ hour\ ago"}. What do you expect to find after a deploy?
+\item
+  \textbf{Break and fix.} Create a systemd timer that runs a script that always fails. How would you notice? Add the ``alert on absence of success'' heartbeat from section 25.9.
+\item
+  \textbf{Extend.} Write the systemd timer and service that run section 25.9's \texttt{/}\allowbreak{}\texttt{opt/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api/}\allowbreak{}\texttt{scripts/}\allowbreak{}\texttt{cleanup.}\allowbreak{}\texttt{sh} daily at 03:00 UTC, with \texttt{Persistent=true}. Then check them with \texttt{systemctl\ list-timers} and \texttt{journalctl}.
+\item
+  \textbf{Explain.} Why is ``make every scheduled job idempotent'' the most important rule for background work?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-25.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{25-process-management:whats-next}
+
+Services are running, supervised, and logged. The next layer to understand is how traffic actually flows through the network~--- from a packet leaving a client device, through the internet's routing infrastructure, to the server's network interface, through the kernel's network stack, to Nginx, to Gunicorn, to Flask. Understanding this path is essential for diagnosing the inevitable network issues.
+
+\noindent{}→ \hyperref[ch:26-network-stack-flow]{Chapter 26}~--- Network Stack Flow

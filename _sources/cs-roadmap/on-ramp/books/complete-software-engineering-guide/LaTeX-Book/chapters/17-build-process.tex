@@ -1,0 +1,2065 @@
+\setcounter{chapter}{16}
+\chapter{Build Process}\label{ch:17-build-process}
+
+\chapterrule
+
+Imagine you have finished a feature. The code works on your machine. You have tested it manually. Now the question is: how does it get to production?
+
+The naive answer is: copy the files. But ``copy the files'' glosses over a chain of steps that must happen first: installing dependencies, running tests to verify the code is correct, checking code style, verifying the runtime contract, generating any derived files (compiled assets, documentation, version strings), and packaging the result into a form that the deployment target expects.
+
+A \textbf{build process} is the defined, automated sequence of steps that transforms source code into a deployable artifact. ``Automated'' is the critical word. If the build process requires a human to manually execute ten commands in the correct order, the process will eventually be done incorrectly. Someone will forget a step. Someone will run the steps in the wrong order. Someone will skip the tests because ``it's a small change.''
+
+An automated build process is a script~--- or a sequence of scripts~--- that runs all steps in the correct order, fails immediately if any step fails, and produces a known-good artifact at the end or nothing at all. If the tests fail, the build stops. If the dependency installation fails, the build stops. The artifact only exists if every step succeeded.
+
+This chapter builds the automated build process for the Notes API and introduces the testing foundation that makes the build process meaningful.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What a build artifact is for a Python web application
+\item
+  What steps belong in a build process and in what order
+\item
+  How to write automated tests with \texttt{pytest} and why tests are a non-negotiable part of the build
+\item
+  What to test at which level, and how to use parametrized tests, test doubles and factory fixtures to keep a suite fast and trustworthy
+\item
+  Why tests fail at random, and how to fix them; and how writing the test first fixes bugs for good
+\item
+  How a change travels through Git: branches, commits, pull requests, code review, and a protected \texttt{main}
+\item
+  How to use \texttt{Makefile} targets to define and run the build sequence
+\item
+  What code quality tools do and how to integrate them
+\item
+  How the build process connects to continuous integration (CI)
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{What a ``Build'' Means for a Python Web Application}\label{17-build-process:171-what-a-build-means-for-a-python-web-application}
+
+In languages like Java or C++, ``building'' has a clear meaning: the compiler transforms source code into machine code. The output is a binary file (for Java, \texttt{.class} files packaged into a \texttt{.jar}; for C++, an executable). You cannot run the source code directly~--- you must build it first.
+
+Python is different. You can run \texttt{python\ app.py} directly from source: the interpreter compiles each module to bytecode on the fly (\hyperref[ch:02-runtime-initialization]{Chapter 2}), so there is no separate compile step that produces an artifact you ship.
+
+So what does a ``build'' mean in the Python context?
+
+\subsection*{The Python build artifact}\phantomsection\label{17-build-process:the-python-build-artifact}
+
+For a Python web application deployed to a server or in a container, the ``build artifact'' is typically one of:
+
+\textbf{Option A: The source code itself, with a frozen dependency manifest.} The server receives the source files and a \texttt{requirements.txt}, installs dependencies, and runs the application. The ``artifact'' is the source code at a specific commit, pinned with its dependencies.
+
+\textbf{Option B: A Docker image.} The build process runs inside a Docker container, installs everything, and produces a self-contained image. The image is the artifact. (\hyperref[ch:18-containerization]{Chapter 18} covers this in depth.)
+
+\textbf{Option C: A wheel file (\texttt{.whl}).} For libraries distributed to other developers, a wheel is the standard Python artifact. For web applications deployed to servers, it is less common but possible.
+
+For the Notes API, the build produces \textbf{Option A}: a verified source tree with pinned dependencies, plus a test report confirming that the code works. \hyperref[ch:18-containerization]{Chapter 18} wraps this in a Docker image.
+
+\subsection*{The steps in the build}\phantomsection\label{17-build-process:the-steps-in-the-build}
+
+A complete build for a Python web application includes:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Clean}: remove previous build artifacts and cached files
+\item
+  \textbf{Install dependencies}: install the exact versions from \texttt{requirements.txt}
+\item
+  \textbf{Lint}: check code style and common mistakes
+\item
+  \textbf{Type check}: verify that function signatures and type annotations are consistent
+\item
+  \textbf{Test}: run automated tests; fail the build if any test fails
+\item
+  \textbf{Security scan}: check dependencies for known vulnerabilities
+\item
+  \textbf{Generate version info}: record the git commit hash or version number
+\item
+  \textbf{Package} (for Docker builds): produce the container image
+\end{enumerate}
+
+\noindent{}Steps 1--6 are covered in this chapter: the \texttt{Makefile} runs steps 3--6 as \texttt{make\ build}, and steps 1 and 2 as \texttt{make\ clean} and \texttt{make\ install}. Step 7 happens when the image is tagged with the commit (\hyperref[ch:19-artifact-storage]{Chapter 19}), and step 8 is in \hyperref[ch:18-containerization]{Chapter 18}.
+
+\setcounter{section}{1}
+\section{Setting Up the Test Infrastructure}\label{17-build-process:172-setting-up-the-test-infrastructure}
+
+Tests are the core of the build process. Without tests, you cannot automate confidence in the code. With tests, every build verifies that the application behaves correctly.
+
+\subsection*{\texorpdfstring{Installing \texttt{pytest}}{Installing pytest}}\phantomsection\label{17-build-process:installing-pytest}
+
+\texttt{pytest} is the de facto standard testing framework for Python. Install it in development:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install pytest}
+\ExtensionTok{pip}\NormalTok{ freeze }\OperatorTok{\textgreater{}}\NormalTok{ requirements.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Wait~--- \texttt{requirements.txt} is for production dependencies. You should not install \texttt{pytest} in production. (If you already ran those two commands, take \texttt{pytest} and its dependencies back out of \texttt{requirements.txt}.) The solution is two requirements files:
+
+\begin{diagrambox}[short]{377.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+├── requirements.txt          ← Production dependencies (what the server needs)
+└── requirements-dev.txt      ← Development dependencies (what developers need)
+\end{Verbatim}
+\end{diagrambox}
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# requirements-dev.txt
+# Development and testing dependencies
+# Install with: pip install -r requirements-dev.txt
+#
+# These packages are NOT installed on production servers.
+
+# Everything the application itself needs (Chapter 12's convention)
+-r requirements.txt
+
+# Testing
+pytest==8.1.1
+pytest-cov==5.0.0         # Test coverage measurement (section 17.7)
+
+# Code quality
+black==24.3.0             # Code formatter
+ruff==0.3.5               # Fast Python linter
+mypy==1.9.0               # Static type checker
+
+# Security scanning
+pip-audit==2.7.3          # Checks for known vulnerabilities in dependencies
+\end{Verbatim}
+\end{outputbox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install everything for development (the {-}r line pulls in requirements.txt):}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements{-}dev.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}From now on, \texttt{requirements.txt} is edited by hand: add the one package you need, with its pinned version. Running \texttt{pip\ freeze\ \textgreater{}\ requirements.}\allowbreak{}\texttt{txt} in this environment would write every development tool into the production list.
+
+Update \texttt{.gitignore} to include the pytest cache:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# .gitignore additions
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{Flask's test client}\phantomsection\label{17-build-process:flasks-test-client}
+
+Flask has a built-in \textbf{test client}, \texttt{app.test\_client()}: an HTTP client that sends requests straight to your Flask application without starting a real server. This is essential: tests run fast (no network round-trips) and do not require an open port. The \texttt{client} fixture in \texttt{conftest.py} below hands one to every test. (The \texttt{pytest-flask} plugin offers a similar fixture, but with our own fixtures it is not needed.)
+
+\subsection*{The test directory structure}\phantomsection\label{17-build-process:the-test-directory-structure}
+
+\begin{diagrambox}[short]{344.8pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+├── app/                      ← Application code
+├── tests/                    ← Test code (mirrors app/ structure)
+│   ├── __init__.py           ← Makes tests/ a Python package
+│   ├── conftest.py           ← pytest configuration and shared fixtures
+│   ├── test_health.py        ← Tests for app/routes/health.py
+│   ├── test_notes.py         ← Tests for app/routes/notes.py
+│   └── test_errors.py        ← Tests for app/errors.py
+├── run.py
+├── requirements.txt
+└── requirements-dev.txt
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Each test file is named after the module it tests (\texttt{test\_notes.py} tests \texttt{app/}\allowbreak{}\texttt{routes/}\allowbreak{}\texttt{notes.py}), which makes finding tests predictable. Modules such as \texttt{config.py} and \texttt{startup.py} have no test file yet; section 17.7 shows how coverage reveals gaps like these.
+
+\setcounter{section}{2}
+\section{Writing the Test Infrastructure}\label{17-build-process:173-writing-the-test-infrastructure}
+
+\subsection*{\texorpdfstring{\texttt{tests/conftest.py} --- Shared test configuration}{tests/conftest.py --- Shared test configuration}}\phantomsection\label{17-build-process:testsconftestpy--shared-test-configuration}
+
+\texttt{conftest.py} is a special file that \texttt{pytest} automatically loads before running tests. It defines \textbf{fixtures}~--- reusable objects that tests can request.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 17.1}\enspace tests/conftest.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Shared pytest fixtures for the Notes API test suite.}
+
+\CommentTok{pytest automatically discovers and loads this file before running tests.}
+\CommentTok{Fixtures defined here are available to all test files without importing.}
+
+\CommentTok{The two critical fixtures here are:}
+\CommentTok{  app    — a Flask application configured for testing}
+\CommentTok{  client — a test HTTP client that sends requests to the test app}
+\CommentTok{"""}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ shutil}
+\ImportTok{import}\NormalTok{ tempfile}
+
+\ImportTok{import}\NormalTok{ pytest}
+
+\CommentTok{\# app/config.py reads the environment once, when the app package is first}
+\CommentTok{\# imported. So the test settings must be in place BEFORE that import —}
+\CommentTok{\# here, at the top of conftest.py, which pytest loads before any test.}
+\CommentTok{\# (load\_dotenv() never overrides a variable that is already set, so a}
+\CommentTok{\# developer\textquotesingle{}s .env file cannot leak into the tests.)}
+\CommentTok{\#}
+\CommentTok{\# The database is a temporary FILE, not "sqlite:///:memory:". The app opens}
+\CommentTok{\# a new connection for every request, and every connection to ":memory:"}
+\CommentTok{\# gets its own, empty database: the table created at startup would be}
+\CommentTok{\# gone by the first request. A file is shared by all connections.}
+\NormalTok{\_TEST\_DB\_DIR }\OperatorTok{=}\NormalTok{ tempfile.mkdtemp(prefix}\OperatorTok{=}\StringTok{"notes{-}api{-}tests{-}"}\NormalTok{)}
+\NormalTok{os.environ[}\StringTok{"DATABASE\_URL"}\NormalTok{] }\OperatorTok{=} \SpecialStringTok{f"sqlite:///}\SpecialCharTok{\{}\NormalTok{\_TEST\_DB\_DIR}\SpecialCharTok{\}}\SpecialStringTok{/test.db"}
+\NormalTok{os.environ[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=} \StringTok{"test{-}secret{-}key{-}not{-}for{-}production{-}1234"}
+
+\ImportTok{from}\NormalTok{ app }\ImportTok{import}\NormalTok{ create\_app  }\CommentTok{\# noqa: E402  (must come after the settings above)}
+
+\AttributeTok{@pytest.fixture}\NormalTok{(scope}\OperatorTok{=}\StringTok{"session"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ app():}
+    \CommentTok{"""}
+\CommentTok{    Create a Flask application instance configured for testing.}
+
+\CommentTok{    \textquotesingle{}scope="session"\textquotesingle{} means pytest creates this fixture once per test}
+\CommentTok{    session and reuses it for all tests. Creating a Flask app is}
+\CommentTok{    moderately expensive (imports, database initialization), so}
+\CommentTok{    creating it once is significantly faster than once per test.}
+
+\CommentTok{    Test configuration differences from production:}
+\CommentTok{      {-} Uses a temporary SQLite database file, deleted after the run}
+\CommentTok{      {-} }\AlertTok{TESTING}\CommentTok{=True makes Flask re{-}raise exceptions that no error}
+\CommentTok{        handler catches (ours catches all of them; see test\_errors.py)}
+\CommentTok{      {-} SECRET\_KEY is a test{-}only value}
+\CommentTok{    """}
+\NormalTok{    application }\OperatorTok{=}\NormalTok{ create\_app()}
+\NormalTok{    application.config.update(\{}\StringTok{"TESTING"}\NormalTok{: }\VariableTok{True}\NormalTok{\})}
+
+    \ControlFlowTok{yield}\NormalTok{ application}
+    \CommentTok{\# Code after yield runs after all tests using this fixture complete.}
+\NormalTok{    shutil.rmtree(\_TEST\_DB\_DIR, ignore\_errors}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+
+\AttributeTok{@pytest.fixture}\NormalTok{(scope}\OperatorTok{=}\StringTok{"function"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ client(app):}
+    \CommentTok{"""}
+\CommentTok{    Create a test client for the Flask application.}
+
+\CommentTok{    \textquotesingle{}scope="function"\textquotesingle{} means pytest creates a fresh client for each}
+\CommentTok{    test function. This ensures test isolation: one test\textquotesingle{}s requests}
+\CommentTok{    do not affect another test\textquotesingle{}s requests.}
+
+\CommentTok{    The test client behaves like an HTTP client: you call}
+\CommentTok{    client.get("/health") and get a response object back. No server}
+\CommentTok{    needs to be running.}
+\CommentTok{    """}
+    \ControlFlowTok{return}\NormalTok{ app.test\_client()}
+
+\AttributeTok{@pytest.fixture}\NormalTok{(scope}\OperatorTok{=}\StringTok{"function"}\NormalTok{, autouse}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ clean\_database(app):}
+    \CommentTok{"""}
+\CommentTok{    Clear all database tables before each test.}
+
+\CommentTok{    \textquotesingle{}autouse=True\textquotesingle{} means this fixture runs before every test function}
+\CommentTok{    automatically, without tests needing to request it explicitly.}
+
+\CommentTok{    This ensures test isolation: one test\textquotesingle{}s database changes do not}
+\CommentTok{    affect another test. Each test starts with a clean slate.}
+\CommentTok{    """}
+    \ControlFlowTok{with}\NormalTok{ app.app\_context():}
+        \ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db}
+\NormalTok{        db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{        db.cursor().execute(}\StringTok{"DELETE FROM notes"}\NormalTok{)}
+\NormalTok{        db.commit()}
+    \ControlFlowTok{yield}
+    \CommentTok{\# No cleanup needed after the test — the next test\textquotesingle{}s setup handles it.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\textbf{Understanding \texttt{scope}:}
+
+\Needspace{11\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1707}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4634}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3659}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Scope
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+When created
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+When destroyed
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{"function"} & Before each test function & After each test function \\
+\texttt{"class"} & Before each test class & After each test class \\
+\texttt{"module"} & Before each test module (file) & After each test module \\
+\texttt{"session"} & Once, at the start of the test run & At the end of the test run \\
+\end{longtable}
+}
+
+Fixtures with broad scope (session, module) are faster but require careful design~--- a fixture with \texttt{scope="session"} is shared across all tests, so any state changes persist. The \texttt{clean\_database} fixture with \texttt{scope="function"} and \texttt{autouse=True} ensures each test gets a clean database regardless of what other tests did.
+
+\subsection*{\texorpdfstring{\texttt{tests/}\allowbreak{}\texttt{test\_health.py} --- Health check
+tests}{ --- Health check tests}}\phantomsection\label{17-build-process:teststest-healthpy--health-check-tests}
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 17.2}\enspace tests/test\_health.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Tests for the /health endpoint.}
+
+\CommentTok{Each test function\textquotesingle{}s name starts with \textquotesingle{}test\_\textquotesingle{}. pytest discovers test}
+\CommentTok{functions by this naming convention. A test function that returns normally}
+\CommentTok{passes; a test that raises any exception (such as the AssertionError from}
+\CommentTok{a failed assert statement) fails.}
+\CommentTok{"""}
+
+\KeywordTok{class}\NormalTok{ TestHealthEndpoint:}
+    \CommentTok{"""}
+\CommentTok{    Group related tests in a class for organization.}
+
+\CommentTok{    Class names must start with \textquotesingle{}Test\textquotesingle{} for pytest to discover them.}
+\CommentTok{    They must not define \_\_init\_\_: pytest skips test classes that do.}
+\CommentTok{    """}
+
+    \KeywordTok{def}\NormalTok{ test\_health\_returns\_200(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""}
+\CommentTok{        GET /health should return HTTP 200 OK.}
+
+\CommentTok{        The \textquotesingle{}client\textquotesingle{} parameter is the test client fixture defined in}
+\CommentTok{        conftest.py. pytest injects it automatically.}
+\CommentTok{        """}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/health"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{200}
+
+    \KeywordTok{def}\NormalTok{ test\_health\_returns\_json(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""GET /health should return a JSON response."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/health"}\NormalTok{)}
+        \CommentTok{\# response.content\_type is the Content{-}Type header value}
+        \ControlFlowTok{assert} \StringTok{"application/json"} \KeywordTok{in}\NormalTok{ response.content\_type}
+
+    \KeywordTok{def}\NormalTok{ test\_health\_returns\_status\_ok(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""GET /health should return \{"status": "ok"\}."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/health"}\NormalTok{)}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ response.get\_json()  }\CommentTok{\# Parses the JSON response body}
+        \ControlFlowTok{assert}\NormalTok{ data }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}
+        \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"status"}\NormalTok{] }\OperatorTok{==} \StringTok{"ok"}
+
+    \KeywordTok{def}\NormalTok{ test\_health\_post\_returns\_405(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""}
+\CommentTok{        POST /health should return HTTP 405 Method Not Allowed.}
+
+\CommentTok{        /health only accepts GET. Flask automatically returns 405 for}
+\CommentTok{        methods not registered on a route.}
+\CommentTok{        """}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/health"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{405}
+        \ControlFlowTok{assert}\NormalTok{ response.get\_json() }\OperatorTok{==}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"Method not allowed"}\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{\texorpdfstring{\texttt{tests/}\allowbreak{}\texttt{test\_notes.py} --- Notes endpoint
+tests}{ --- Notes endpoint tests}}\phantomsection\label{17-build-process:teststest-notespy--notes-endpoint-tests}
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 17.3}\enspace tests/test\_notes.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Tests for the /notes endpoints.}
+
+\CommentTok{Tests are organized into classes by endpoint/operation.}
+\CommentTok{Each test is independent — the clean\_database fixture in conftest.py}
+\CommentTok{ensures the database is empty before each test.}
+\CommentTok{"""}
+
+\KeywordTok{class}\NormalTok{ TestGetNotes:}
+    \CommentTok{"""Tests for GET /notes/"""}
+
+    \KeywordTok{def}\NormalTok{ test\_get\_notes\_empty\_returns\_200(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""GET /notes/ on an empty database returns HTTP 200."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/notes/"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{200}
+
+    \KeywordTok{def}\NormalTok{ test\_get\_notes\_empty\_returns\_empty\_list(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""GET /notes/ on an empty database returns an empty list."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/notes/"}\NormalTok{)}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+        \ControlFlowTok{assert}\NormalTok{ data }\OperatorTok{==}\NormalTok{ \{}\StringTok{"notes"}\NormalTok{: [], }\StringTok{"count"}\NormalTok{: }\DecValTok{0}\NormalTok{\}}
+
+    \KeywordTok{def}\NormalTok{ test\_get\_notes\_returns\_created\_notes(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""GET /notes/ returns notes that have been created."""}
+        \CommentTok{\# Create two notes (json= also sets Content{-}Type: application/json)}
+\NormalTok{        client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"First note"}\NormalTok{\})}
+\NormalTok{        client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Second note"}\NormalTok{\})}
+
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/notes/"}\NormalTok{)}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+
+        \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"count"}\NormalTok{] }\OperatorTok{==} \DecValTok{2}
+        \CommentTok{\# Notes are returned newest{-}first}
+        \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"notes"}\NormalTok{][}\DecValTok{0}\NormalTok{][}\StringTok{"content"}\NormalTok{] }\OperatorTok{==} \StringTok{"Second note"}
+        \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"notes"}\NormalTok{][}\DecValTok{1}\NormalTok{][}\StringTok{"content"}\NormalTok{] }\OperatorTok{==} \StringTok{"First note"}
+
+    \KeywordTok{def}\NormalTok{ test\_get\_notes\_response\_has\_required\_fields(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""Each note in the GET /notes/ response has id, content, created\_at."""}
+\NormalTok{        client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Test note"}\NormalTok{\})}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/notes/"}\NormalTok{)}
+\NormalTok{        notes }\OperatorTok{=}\NormalTok{ response.get\_json()[}\StringTok{"notes"}\NormalTok{]}
+
+        \ControlFlowTok{assert} \BuiltInTok{len}\NormalTok{(notes) }\OperatorTok{\textgreater{}=} \DecValTok{1}
+\NormalTok{        note }\OperatorTok{=}\NormalTok{ notes[}\DecValTok{0}\NormalTok{]}
+        \ControlFlowTok{assert} \StringTok{"id"} \KeywordTok{in}\NormalTok{ note}
+        \ControlFlowTok{assert} \StringTok{"content"} \KeywordTok{in}\NormalTok{ note}
+        \ControlFlowTok{assert} \StringTok{"created\_at"} \KeywordTok{in}\NormalTok{ note}
+
+\KeywordTok{class}\NormalTok{ TestCreateNote:}
+    \CommentTok{"""Tests for POST /notes/"""}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_note\_returns\_201(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""POST /notes/ with valid content returns HTTP 201 Created."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"My new note"}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{201}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_note\_returns\_note\_data(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""POST /notes/ returns the created note with id and content."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"My new note"}\NormalTok{\})}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+
+        \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"content"}\NormalTok{] }\OperatorTok{==} \StringTok{"My new note"}
+        \ControlFlowTok{assert} \StringTok{"id"} \KeywordTok{in}\NormalTok{ data}
+        \ControlFlowTok{assert} \BuiltInTok{isinstance}\NormalTok{(data[}\StringTok{"id"}\NormalTok{], }\BuiltInTok{int}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"id"}\NormalTok{] }\OperatorTok{\textgreater{}} \DecValTok{0}
+        \ControlFlowTok{assert} \StringTok{"created\_at"} \KeywordTok{in}\NormalTok{ data}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_note\_without\_json\_content\_type\_returns\_415(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""POST /notes/ with a non{-}JSON Content{-}Type returns HTTP 415."""}
+        \CommentTok{\# Sending plain text instead of JSON: rejected by the middleware}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}
+            \StringTok{"/notes/"}\NormalTok{,}
+\NormalTok{            data}\OperatorTok{=}\StringTok{"not json"}\NormalTok{,}
+\NormalTok{            content\_type}\OperatorTok{=}\StringTok{"text/plain"}\NormalTok{,}
+\NormalTok{        )}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{415}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_note\_with\_malformed\_json\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""POST /notes/ with a body that claims to be JSON but is not returns 400."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}
+            \StringTok{"/notes/"}\NormalTok{,}
+\NormalTok{            data}\OperatorTok{=}\StringTok{"\{not valid json"}\NormalTok{,}
+\NormalTok{            content\_type}\OperatorTok{=}\StringTok{"application/json"}\NormalTok{,}
+\NormalTok{        )}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+        \ControlFlowTok{assert}\NormalTok{ response.get\_json() }\OperatorTok{==}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"Request body must be a JSON object"}\NormalTok{\}}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_note\_without\_content\_field\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""POST /notes/ with JSON but no \textquotesingle{}content\textquotesingle{} field returns HTTP 400."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"title"}\NormalTok{: }\StringTok{"wrong field name"}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+        \ControlFlowTok{assert} \StringTok{"error"} \KeywordTok{in}\NormalTok{ data}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_note\_with\_empty\_content\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""POST /notes/ with empty content returns HTTP 400."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{""}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_note\_with\_whitespace\_only\_content\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""POST /notes/ with only whitespace content returns HTTP 400."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"   "}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_note\_with\_non\_string\_content\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""POST /notes/ with a non{-}string content value returns HTTP 400."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\DecValTok{42}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_note\_strips\_whitespace(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""POST /notes/ trims leading/trailing whitespace from content."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"  trimmed note  "}\NormalTok{\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{201}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+        \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"content"}\NormalTok{] }\OperatorTok{==} \StringTok{"trimmed note"}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_note\_persists\_to\_database(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""A created note is retrievable via GET /notes/."""}
+        \CommentTok{\# Create}
+\NormalTok{        post\_response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Persisted note"}\NormalTok{\})}
+\NormalTok{        note\_id }\OperatorTok{=}\NormalTok{ post\_response.get\_json()[}\StringTok{"id"}\NormalTok{]}
+
+        \CommentTok{\# Retrieve}
+\NormalTok{        get\_response }\OperatorTok{=}\NormalTok{ client.get(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ get\_response.status\_code }\OperatorTok{==} \DecValTok{200}
+        \ControlFlowTok{assert}\NormalTok{ get\_response.get\_json()[}\StringTok{"content"}\NormalTok{] }\OperatorTok{==} \StringTok{"Persisted note"}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_multiple\_notes\_have\_unique\_ids(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""Each created note gets a unique ID."""}
+\NormalTok{        resp1 }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Note one"}\NormalTok{\})}
+\NormalTok{        resp2 }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Note two"}\NormalTok{\})}
+\NormalTok{        resp3 }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Note three"}\NormalTok{\})}
+
+\NormalTok{        ids }\OperatorTok{=}\NormalTok{ [}
+\NormalTok{            resp1.get\_json()[}\StringTok{"id"}\NormalTok{],}
+\NormalTok{            resp2.get\_json()[}\StringTok{"id"}\NormalTok{],}
+\NormalTok{            resp3.get\_json()[}\StringTok{"id"}\NormalTok{],}
+\NormalTok{        ]}
+        \CommentTok{\# All IDs are unique}
+        \ControlFlowTok{assert} \BuiltInTok{len}\NormalTok{(}\BuiltInTok{set}\NormalTok{(ids)) }\OperatorTok{==} \DecValTok{3}
+
+    \KeywordTok{def}\NormalTok{ test\_create\_note\_content\_too\_long\_returns\_400(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""POST /notes/ with content over 10,000 chars returns HTTP 400."""}
+\NormalTok{        long\_content }\OperatorTok{=} \StringTok{"x"} \OperatorTok{*} \DecValTok{10\_001}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: long\_content\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+
+\KeywordTok{class}\NormalTok{ TestGetNote:}
+    \CommentTok{"""Tests for GET /notes/\textless{}note\_id\textgreater{}"""}
+
+    \KeywordTok{def}\NormalTok{ test\_get\_existing\_note\_returns\_200(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""GET /notes/\textless{}id\textgreater{} for an existing note returns HTTP 200."""}
+\NormalTok{        create\_resp }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Find me"}\NormalTok{\})}
+\NormalTok{        note\_id }\OperatorTok{=}\NormalTok{ create\_resp.get\_json()[}\StringTok{"id"}\NormalTok{]}
+
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.get(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{200}
+
+    \KeywordTok{def}\NormalTok{ test\_get\_existing\_note\_returns\_correct\_content(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""GET /notes/\textless{}id\textgreater{} returns the note with the correct content."""}
+\NormalTok{        create\_resp }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Specific content"}\NormalTok{\})}
+\NormalTok{        note\_id }\OperatorTok{=}\NormalTok{ create\_resp.get\_json()[}\StringTok{"id"}\NormalTok{]}
+
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.get(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+
+        \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"id"}\NormalTok{] }\OperatorTok{==}\NormalTok{ note\_id}
+        \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"content"}\NormalTok{] }\OperatorTok{==} \StringTok{"Specific content"}
+
+    \KeywordTok{def}\NormalTok{ test\_get\_nonexistent\_note\_returns\_404(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""GET /notes/\textless{}id\textgreater{} for a non{-}existent note returns HTTP 404."""}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/notes/99999"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{404}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+        \ControlFlowTok{assert} \StringTok{"error"} \KeywordTok{in}\NormalTok{ data}
+
+    \KeywordTok{def}\NormalTok{ test\_get\_note\_with\_string\_id\_returns\_404(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""}
+\CommentTok{        GET /notes/\textless{}non{-}integer\textgreater{} returns HTTP 404.}
+
+\CommentTok{        Flask\textquotesingle{}s \textless{}int:note\_id\textgreater{} converter rejects non{-}integer values}
+\CommentTok{        and returns 404 before the route handler is called.}
+\CommentTok{        """}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/notes/not{-}a{-}number"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{404}
+
+\KeywordTok{class}\NormalTok{ TestDeleteNote:}
+    \CommentTok{"""Tests for DELETE /notes/\textless{}note\_id\textgreater{}"""}
+
+    \KeywordTok{def}\NormalTok{ test\_delete\_existing\_note\_returns\_204(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""DELETE /notes/\textless{}id\textgreater{} for an existing note returns HTTP 204 No Content."""}
+\NormalTok{        create\_resp }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Delete me"}\NormalTok{\})}
+\NormalTok{        note\_id }\OperatorTok{=}\NormalTok{ create\_resp.get\_json()[}\StringTok{"id"}\NormalTok{]}
+
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.delete(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{204}
+
+    \KeywordTok{def}\NormalTok{ test\_delete\_existing\_note\_removes\_it(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""After DELETE /notes/\textless{}id\textgreater{}, the note is no longer retrievable."""}
+\NormalTok{        create\_resp }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Delete me"}\NormalTok{\})}
+\NormalTok{        note\_id }\OperatorTok{=}\NormalTok{ create\_resp.get\_json()[}\StringTok{"id"}\NormalTok{]}
+
+        \CommentTok{\# Delete it}
+\NormalTok{        client.delete(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+        \CommentTok{\# Verify it\textquotesingle{}s gone}
+\NormalTok{        get\_response }\OperatorTok{=}\NormalTok{ client.get(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ get\_response.status\_code }\OperatorTok{==} \DecValTok{404}
+
+    \KeywordTok{def}\NormalTok{ test\_delete\_nonexistent\_note\_returns\_404(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""}
+\CommentTok{        DELETE /notes/\textless{}id\textgreater{} for a non{-}existent note returns HTTP 404.}
+
+\CommentTok{        This pins down the design choice from Chapter 16 (section 16.5): the}
+\CommentTok{        Notes API reports a missing note instead of treating the delete as}
+\CommentTok{        already done. A test is where such a decision becomes enforceable.}
+\CommentTok{        """}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.delete(}\StringTok{"/notes/99999"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{404}
+
+    \KeywordTok{def}\NormalTok{ test\_delete\_does\_not\_affect\_other\_notes(}\VariableTok{self}\NormalTok{, client):}
+        \CommentTok{"""Deleting one note does not affect other notes."""}
+\NormalTok{        resp1 }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Keep me"}\NormalTok{\})}
+\NormalTok{        resp2 }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Delete me"}\NormalTok{\})}
+
+\NormalTok{        id\_to\_keep }\OperatorTok{=}\NormalTok{ resp1.get\_json()[}\StringTok{"id"}\NormalTok{]}
+\NormalTok{        id\_to\_delete }\OperatorTok{=}\NormalTok{ resp2.get\_json()[}\StringTok{"id"}\NormalTok{]}
+
+\NormalTok{        client.delete(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{id\_to\_delete}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+        \CommentTok{\# The other note is still there}
+\NormalTok{        get\_response }\OperatorTok{=}\NormalTok{ client.get(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{id\_to\_keep}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ get\_response.status\_code }\OperatorTok{==} \DecValTok{200}
+        \ControlFlowTok{assert}\NormalTok{ get\_response.get\_json()[}\StringTok{"content"}\NormalTok{] }\OperatorTok{==} \StringTok{"Keep me"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{\texorpdfstring{\texttt{tests/}\allowbreak{}\texttt{test\_errors.py} --- Error handler
+tests}{ --- Error handler tests}}\phantomsection\label{17-build-process:teststest-errorspy--error-handler-tests}
+
+Chapter 16 spent a whole section on the handling boundary; these tests check that it does what it promises. The second one needs an endpoint that fails unexpectedly. pytest's built-in \texttt{monkeypatch} fixture provides it: it temporarily replaces the \texttt{get\_db} function that the notes routes use with one that raises, and puts the original back after the test.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 17.4}\enspace tests/test\_errors.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""Tests for the JSON error handlers in app/errors.py."""}
+
+\KeywordTok{def}\NormalTok{ test\_unknown\_url\_returns\_json\_404(client):}
+    \CommentTok{"""A URL that matches no route gets a JSON 404, not Flask\textquotesingle{}s HTML page."""}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/no{-}such{-}page"}\NormalTok{)}
+    \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{404}
+    \ControlFlowTok{assert}\NormalTok{ response.get\_json() }\OperatorTok{==}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"Not found"}\NormalTok{\}}
+
+\KeywordTok{def}\NormalTok{ test\_unexpected\_exception\_returns\_generic\_500(client, monkeypatch):}
+    \CommentTok{"""An unexpected exception becomes a generic JSON 500 with no internal details."""}
+    \KeywordTok{def}\NormalTok{ broken\_get\_db():}
+        \ControlFlowTok{raise} \PreprocessorTok{RuntimeError}\NormalTok{(}\StringTok{"database password is hunter2"}\NormalTok{)}
+
+    \CommentTok{\# Replace get\_db where the notes routes look it up}
+\NormalTok{    monkeypatch.}\BuiltInTok{setattr}\NormalTok{(}\StringTok{"app.routes.notes.get\_db"}\NormalTok{, broken\_get\_db)}
+
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/notes/"}\NormalTok{)}
+    \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{500}
+    \ControlFlowTok{assert}\NormalTok{ response.get\_json() }\OperatorTok{==}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"An unexpected error occurred"}\NormalTok{\}}
+    \ControlFlowTok{assert} \StringTok{b"hunter2"} \KeywordTok{not} \KeywordTok{in}\NormalTok{ response.data   }\CommentTok{\# the exception message never leaks}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Notice that the second test gets a 500 \emph{response} even though \texttt{TESTING} is on. \texttt{TESTING} only re-raises exceptions that no error handler catches, and the catch-all \texttt{@app.}\allowbreak{}\texttt{errorhandler(Exception)} catches all of them.
+
+\subsection*{Running the tests}\phantomsection\label{17-build-process:running-the-tests}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Run all tests}
+\ExtensionTok{pytest}
+
+\CommentTok{\# Run with verbose output (shows each test name and result)}
+\ExtensionTok{pytest} \AttributeTok{{-}v}
+
+\CommentTok{\# Run a specific test file}
+\ExtensionTok{pytest}\NormalTok{ tests/test\_notes.py}
+
+\CommentTok{\# Run a specific test class}
+\ExtensionTok{pytest}\NormalTok{ tests/test\_notes.py::TestCreateNote}
+
+\CommentTok{\# Run a specific test function}
+\ExtensionTok{pytest}\NormalTok{ tests/test\_notes.py::TestCreateNote::test\_create\_note\_returns\_201}
+
+\CommentTok{\# Show print() output during tests (useful for debugging)}
+\ExtensionTok{pytest} \AttributeTok{{-}s}
+
+\CommentTok{\# Stop at the first failure}
+\ExtensionTok{pytest} \AttributeTok{{-}x}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+========================= test session starts ==========================
+platform linux -- Python 3.11.8, pytest-8.1.1, pluggy-1.4.0
+rootdir: /notes-api
+collected 30 items
+
+tests/test_errors.py ..                                          [  6%]
+tests/test_health.py ....                                        [ 20%]
+tests/test_notes.py ........................                     [100%]
+
+========================= 30 passed in 0.45s ===========================
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Thirty tests, under half a second. Fast, comprehensive, automated.
+
+(Once \texttt{pyproject.toml} from section 17.6 is in place, its \texttt{addopts\ =\ "-v"} makes every run verbose, listing each test by name instead of printing dots.)
+
+\setcounter{section}{3}
+\section{Code Quality Tools}\label{17-build-process:174-code-quality-tools}
+
+Tests verify behavior. Code quality tools verify structure and style. Both are part of the build.
+
+\subsection*{\texorpdfstring{\texttt{black} --- Code formatter}{black --- Code formatter}}\phantomsection\label{17-build-process:black--code-formatter}
+
+\texttt{black} is a Python code formatter. It takes your Python files and rewrites them according to a consistent style: consistent indentation, consistent quote style, consistent line lengths, consistent spacing.
+
+Unlike a linter (which tells you what is wrong), \texttt{black} just fixes it:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Check what black would change (without changing anything)}
+\ExtensionTok{black} \AttributeTok{{-}{-}check}\NormalTok{ app/ tests/ run.py}
+
+\CommentTok{\# Apply black\textquotesingle{}s formatting}
+\ExtensionTok{black}\NormalTok{ app/ tests/ run.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Black's philosophy is that style debates are wasteful. By using \texttt{black}, everyone on the team writes code that looks the same, regardless of personal preference. Code review focuses on logic, not formatting.
+
+\subsection*{\texorpdfstring{\texttt{ruff} --- Linter}{ruff --- Linter}}\phantomsection\label{17-build-process:ruff--linter}
+
+A \textbf{linter} analyzes code for potential errors, bad practices, and style violations without running the code. \texttt{ruff} is an extremely fast Python linter (written in Rust) that catches:
+
+\begin{itemize}
+\tightlist
+\item
+  Unused imports (\texttt{import\ os} but \texttt{os} is never used)
+\item
+  Undefined variables (\texttt{print(undefined\_}\allowbreak{}\texttt{variable)})
+\item
+  Unreachable code (code after a \texttt{return} statement)
+\item
+  Dangerous patterns (mutable default arguments, bare \texttt{except:} clauses)
+\item
+  Style violations (line too long, comparison to \texttt{None} using \texttt{==} instead of \texttt{is})
+\end{itemize}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Check code for issues}
+\ExtensionTok{ruff}\NormalTok{ check app/ tests/ run.py}
+
+\CommentTok{\# Fix automatically{-}fixable issues}
+\ExtensionTok{ruff}\NormalTok{ check }\AttributeTok{{-}{-}fix}\NormalTok{ app/ tests/ run.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Example ruff output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+app/routes/notes.py:12:1: F401 `os` imported but unused
+app/database.py:45:5: E711 comparison to `None` (use `is` or `is not`)
+Found 2 errors.
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{\texorpdfstring{\texttt{mypy} --- Static type checker}{mypy --- Static type checker}}\phantomsection\label{17-build-process:mypy--static-type-checker}
+
+\texttt{mypy} checks Python type annotations. If you annotate a function:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ get\_note(note\_id: }\BuiltInTok{int}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict}\NormalTok{:}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{mypy} verifies that everywhere \texttt{get\_note} is called, the caller passes an \texttt{int} and uses the return value as a \texttt{dict}. It catches type mismatches without running the code.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Check types}
+\ExtensionTok{mypy}\NormalTok{ app/ run.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Type checking is particularly valuable for catching bugs that tests might miss~--- for example, passing a \texttt{str} where an \texttt{int} is expected.
+
+\subsection*{\texorpdfstring{\texttt{pip-audit} --- Security scanner}{pip-audit --- Security scanner}}\phantomsection\label{17-build-process:pip-audit--security-scanner}
+
+\texttt{pip-audit} checks your installed packages against public databases of known security vulnerabilities: the Python Packaging Advisory Database and OSV.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Check for vulnerabilities in installed packages}
+\ExtensionTok{pip{-}audit}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Example output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Found 1 known vulnerability in 1 package
+Name     Version ID                  Fix Versions
+-------- ------- ------------------- ------------
+werkzeug 3.0.1   GHSA-2g68-c3qc-8985 3.0.3
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This tells you that Werkzeug 3.0.1 (the version pinned in \hyperref[ch:12-dependency-declaration]{Chapter 12}) has a known vulnerability~--- here, a flaw in the debugger~--- and that 3.0.3 fixes it. Running \texttt{pip-audit} as part of every build ensures that vulnerabilities in dependencies are caught as soon as they are discovered.
+
+\setcounter{section}{4}
+\section{\texorpdfstring{The \texttt{Makefile} --- Automating the Build}{The Makefile --- Automating the Build}}\label{17-build-process:175-the-makefile--automating-the-build}
+
+A \texttt{Makefile} defines named sequences of commands. With a Makefile, running the entire build is one command: \texttt{make\ build}.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 17.5}\enspace Makefile}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Build automation for the Notes API.}
+\CommentTok{\#}
+\CommentTok{\# Usage:}
+\CommentTok{\#   make install    Install all dependencies}
+\CommentTok{\#   make format     Auto{-}format code with black}
+\CommentTok{\#   make lint       Check code style and quality}
+\CommentTok{\#   make typecheck  Run static type checking}
+\CommentTok{\#   make test       Run the test suite}
+\CommentTok{\#   make test{-}coverage  Run the tests and report coverage}
+\CommentTok{\#   make security   Check for dependency vulnerabilities}
+\CommentTok{\#   make build      Run the complete build (lint + typecheck + test + security)}
+\CommentTok{\#   make run        Start the development server}
+\CommentTok{\#   make clean      Remove build artifacts}
+\CommentTok{\#}
+\CommentTok{\# Recipe lines must start with a TAB character, not spaces. If you copy}
+\CommentTok{\# this file from a PDF or a web page, check that the tabs survived:}
+\CommentTok{\# "missing separator" means they did not.}
+\CommentTok{\#}
+\CommentTok{\# Prerequisites: make (on Linux/macOS, built{-}in; on Windows, install via chocolatey)}
+
+\CommentTok{\# .PHONY tells make that these targets are commands, not files.}
+\CommentTok{\# Without .PHONY, if a file named "test" existed, "make test" would}
+\CommentTok{\# think the target was already built and skip running it.}
+\OtherTok{.PHONY:}\DataTypeTok{ install format lint typecheck test test{-}coverage security build clean run}
+
+\CommentTok{\# Default target (what runs when you just type "make")}
+\DataTypeTok{.DEFAULT\_GOAL} \CharTok{:=}\StringTok{ build}
+
+\CommentTok{\# Python interpreter — use python3 explicitly to avoid ambiguity on}
+\CommentTok{\# systems where "python" might be Python 2}
+\DataTypeTok{PYTHON} \CharTok{:=}\StringTok{ python3}
+
+\CommentTok{\# Source directories to check}
+\DataTypeTok{SRC} \CharTok{:=}\StringTok{ app/ tests/ run.py}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Dependency installation}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\DecValTok{install:}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{"→ Installing dependencies..."}
+    \CharTok{$(}\DataTypeTok{PYTHON}\CharTok{)}\NormalTok{ {-}m pip install {-}r requirements{-}dev.txt}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Dependencies installed."}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Code formatting}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\DecValTok{format:}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{"→ Formatting code with black..."}
+\NormalTok{    black }\CharTok{$(}\DataTypeTok{SRC}\CharTok{)}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Code formatted."}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Linting}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\DecValTok{lint:}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{"→ Checking code style with ruff..."}
+\NormalTok{    ruff check }\CharTok{$(}\DataTypeTok{SRC}\CharTok{)}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"→ Checking formatting with black..."}
+\NormalTok{    black {-}{-}check }\CharTok{$(}\DataTypeTok{SRC}\CharTok{)}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Linting passed."}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Static type checking}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\DecValTok{typecheck:}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{"→ Running type checks with mypy..."}
+\NormalTok{    mypy app/ run.py {-}{-}ignore{-}missing{-}imports}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Type checks passed."}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Testing}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\DecValTok{test:}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{"→ Running test suite..."}
+\NormalTok{    pytest tests/ {-}v}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ All tests passed."}
+
+\CommentTok{\# Run tests with coverage report}
+\DecValTok{test{-}coverage:}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{"→ Running tests with coverage..."}
+\NormalTok{    pytest tests/ {-}v {-}{-}cov=app {-}{-}cov{-}report=term{-}missing {-}{-}cov{-}report=html}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Coverage report generated in htmlcov/."}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Security scanning}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\DecValTok{security:}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{"→ Scanning for dependency vulnerabilities..."}
+\NormalTok{    pip{-}audit}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ No known vulnerabilities found."}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Complete build}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\DecValTok{build:}\DataTypeTok{ lint typecheck test security}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{""}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Build complete. All checks passed."}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Development server}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\DecValTok{run:}
+\ErrorTok{    }\CharTok{$(}\DataTypeTok{PYTHON}\CharTok{)}\NormalTok{ run.py}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Cleanup}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\DecValTok{clean:}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{"→ Removing build artifacts..."}
+\NormalTok{    find . {-}type d {-}name \_\_pycache\_\_ {-}exec rm {-}rf \{\} + 2\textgreater{}/dev/null || true}
+\NormalTok{    find . {-}name }\StringTok{"*.pyc"}\NormalTok{ {-}delete 2\textgreater{}/dev/null || true}
+\NormalTok{    find . {-}type d {-}name .pytest\_cache {-}exec rm {-}rf \{\} + 2\textgreater{}/dev/null || true}
+\NormalTok{    find . {-}type d {-}name .mypy\_cache {-}exec rm {-}rf \{\} + 2\textgreater{}/dev/null || true}
+\NormalTok{    find . {-}type d {-}name .ruff\_cache {-}exec rm {-}rf \{\} + 2\textgreater{}/dev/null || true}
+\NormalTok{    find . {-}type d {-}name htmlcov {-}exec rm {-}rf \{\} + 2\textgreater{}/dev/null || true}
+\NormalTok{    rm {-}f .coverage 2\textgreater{}/dev/null || true}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Clean."}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\textbf{How Makefile targets work:}
+
+Each target follows this structure:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DecValTok{target{-}name:}\DataTypeTok{ dependency1 dependency2}
+\ErrorTok{    }\NormalTok{command{-}to{-}run}
+\NormalTok{    another{-}command}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{itemize}
+\tightlist
+\item
+  The target name comes before the colon
+\item
+  Dependencies (other targets that must succeed first) come after the colon
+\item
+  Commands are indented with a \textbf{tab character} (spaces will not work~--- this is a quirk of Makefile syntax)
+\item
+  \texttt{@} before a command suppresses printing the command itself (you see only the output, not the command line)
+\end{itemize}
+
+\noindent{}When you run \texttt{make\ build}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+make build
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Make sees that \texttt{build} depends on \texttt{lint}, \texttt{typecheck}, \texttt{test}, and \texttt{security}. It runs them in order. If any step fails (returns a non-zero exit code), Make stops immediately. The build fails.
+
+\subsection*{Running the build}\phantomsection\label{17-build-process:running-the-build}
+
+Before the first \texttt{make\ build}, run \texttt{make\ format} and \texttt{ruff\ check\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{fix\ app/}\allowbreak{}\texttt{\ tests/}\allowbreak{}\texttt{\ run.}\allowbreak{}\texttt{py} once. The listings in this book are compressed to save space~--- one blank line between top-level functions instead of PEP 8's two, and imports not always in the order ruff's \texttt{I} rules expect~--- so \texttt{black\ -\/-check} and \texttt{ruff\ check} would reject them exactly as printed. After that one formatting pass:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make}\NormalTok{ build}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected output:
+
+\begin{diagrambox}[short]{404.7pt}
+\begin{Verbatim}[fontsize=\fontsize{8.5}{8.07}\selectfont]
+→ Checking code style with ruff...
+All checks passed!
+→ Checking formatting with black...
+All done! ✨ 🍰 ✨
+16 files would be left unchanged.
+✓ Linting passed.
+→ Running type checks with mypy...
+Success: no issues found in 11 source files
+✓ Type checks passed.
+→ Running test suite...
+========================= test session starts ==========================
+collected 30 items
+
+tests/test_errors.py::test_unknown_url_returns_json_404 PASSED    [  3%]
+tests/test_errors.py::test_unexpected_exception_returns_generic_500 PASSED [  6%]
+...
+tests/test_notes.py::TestDeleteNote::test_delete_does_not_affect_other_notes PASSED [100%]
+
+========================= 30 passed in 0.47s ===========================
+✓ All tests passed.
+→ Scanning for dependency vulnerabilities...
+No known vulnerabilities found
+✓ No known vulnerabilities found.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Build complete. All checks passed.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}This output confirms that the code passed every automated check. That is not the same as ``ready to deploy''~--- configuration, database migrations, and a smoke test after deployment (\hyperref[ch:23-code-transfer]{Chapter 23}) still stand between a green build and a working release~--- but it is the gate every release must pass first.
+
+\setcounter{section}{5}
+\section{Configuration Files for Code Quality Tools}\label{17-build-process:176-configuration-files-for-code-quality-tools}
+
+Create configuration files that standardize the behavior of the quality tools.
+
+\subsection*{\texorpdfstring{\texttt{pyproject.toml} --- Unified tool configuration}{pyproject.toml --- Unified tool configuration}}\phantomsection\label{17-build-process:pyprojecttoml--unified-tool-configuration}
+
+\texttt{pyproject.toml} is the modern Python configuration standard. Many tools (black, ruff, mypy, pytest) read their configuration from this file. If you created one in \hyperref[ch:12-dependency-declaration]{Chapter 12}, keep its \texttt{{[}project{]}} and \texttt{{[}build-system{]}} tables and add the \texttt{{[}tool.*{]}} sections below to it; otherwise create it at the project root:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 17.6}\enspace pyproject.toml}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{[project]}
+\DataTypeTok{name} \OperatorTok{=} \StringTok{"notes{-}api"}
+\DataTypeTok{version} \OperatorTok{=} \StringTok{"0.1.0"}
+\DataTypeTok{description} \OperatorTok{=} \StringTok{"A simple notes REST API"}
+\DataTypeTok{requires{-}python} \OperatorTok{=} \StringTok{"\textgreater{}=3.10"}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# pytest configuration}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\KeywordTok{[tool.pytest.ini\_options]}
+\CommentTok{\# Tell pytest where to find tests}
+\DataTypeTok{testpaths} \OperatorTok{=} \OperatorTok{[}\StringTok{"tests"}\OperatorTok{]}
+\CommentTok{\# Verbose output by default (shows each test name)}
+\DataTypeTok{addopts} \OperatorTok{=} \StringTok{"{-}v"}
+\CommentTok{\# Treat warnings as errors (forces you to fix deprecation warnings)}
+\DataTypeTok{filterwarnings} \OperatorTok{=} \OperatorTok{[}
+    \StringTok{"error"}\OperatorTok{,}
+    \CommentTok{\# Ignore specific known warnings from dependencies}
+    \StringTok{"ignore::DeprecationWarning:werkzeug"}\OperatorTok{,}
+\OperatorTok{]}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# black configuration}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\KeywordTok{[tool.black]}
+\CommentTok{\# Maximum line length before black wraps the line}
+\DataTypeTok{line{-}length} \OperatorTok{=} \DecValTok{100}
+\CommentTok{\# Minimum Python version to target (affects which syntax black uses)}
+\DataTypeTok{target{-}version} \OperatorTok{=} \OperatorTok{[}\StringTok{"py310"}\OperatorTok{,} \StringTok{"py311"}\OperatorTok{]}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# ruff configuration}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\KeywordTok{[tool.ruff]}
+\DataTypeTok{line{-}length} \OperatorTok{=} \DecValTok{100}
+\DataTypeTok{target{-}version} \OperatorTok{=} \StringTok{"py310"}
+
+\KeywordTok{[tool.ruff.lint]}
+\CommentTok{\# Rule sets to enable:}
+\CommentTok{\#   E, W — pycodestyle (PEP 8 style)}
+\CommentTok{\#   F     — pyflakes (common errors: unused imports, undefined names)}
+\CommentTok{\#   I     — isort (import ordering)}
+\CommentTok{\#   N     — pep8{-}naming (naming conventions)}
+\CommentTok{\#   UP    — pyupgrade (modernize Python syntax)}
+\DataTypeTok{select} \OperatorTok{=} \OperatorTok{[}\StringTok{"E"}\OperatorTok{,} \StringTok{"W"}\OperatorTok{,} \StringTok{"F"}\OperatorTok{,} \StringTok{"I"}\OperatorTok{,} \StringTok{"N"}\OperatorTok{,} \StringTok{"UP"}\OperatorTok{]}
+
+\CommentTok{\# Rules to ignore:}
+\CommentTok{\#   E501 — line too long (black handles this)}
+\DataTypeTok{ignore} \OperatorTok{=} \OperatorTok{[}\StringTok{"E501"}\OperatorTok{]}
+
+\CommentTok{\# Exclude directories that don\textquotesingle{}t need linting}
+\DataTypeTok{exclude} \OperatorTok{=} \OperatorTok{[}\StringTok{"venv/"}\OperatorTok{,} \StringTok{".venv/"}\OperatorTok{,} \StringTok{"\_\_pycache\_\_/"}\OperatorTok{]}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# mypy configuration}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\KeywordTok{[tool.mypy]}
+\DataTypeTok{python\_version} \OperatorTok{=} \StringTok{"3.10"}
+\CommentTok{\# Also check the bodies of functions that have no type annotations}
+\CommentTok{\# (by default mypy skips them, so "no issues found" would prove little)}
+\DataTypeTok{check\_untyped\_defs} \OperatorTok{=} \ConstantTok{true}
+\CommentTok{\# Warn when code can never be reached}
+\DataTypeTok{warn\_unreachable} \OperatorTok{=} \ConstantTok{true}
+\CommentTok{\# Don\textquotesingle{}t require type stubs for libraries that don\textquotesingle{}t have them}
+\DataTypeTok{ignore\_missing\_imports} \OperatorTok{=} \ConstantTok{true}
+\CommentTok{\# Check the app package}
+\DataTypeTok{files} \OperatorTok{=} \OperatorTok{[}\StringTok{"app/"}\OperatorTok{,} \StringTok{"run.py"}\OperatorTok{]}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# coverage configuration (for make test{-}coverage)}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\KeywordTok{[tool.coverage.run]}
+\DataTypeTok{source} \OperatorTok{=} \OperatorTok{[}\StringTok{"app"}\OperatorTok{]}
+\DataTypeTok{omit} \OperatorTok{=} \OperatorTok{[}\StringTok{"*/tests/*"}\OperatorTok{]}
+
+\KeywordTok{[tool.coverage.report]}
+\CommentTok{\# Fail if coverage drops below 80\%}
+\DataTypeTok{fail\_under} \OperatorTok{=} \DecValTok{80}
+\DataTypeTok{show\_missing} \OperatorTok{=} \ConstantTok{true}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\setcounter{section}{6}
+\section{What Test Coverage Means}\label{17-build-process:177-what-test-coverage-means}
+
+\textbf{Test coverage} is the percentage of your application code that is executed when your tests run. A coverage tool (like \texttt{pytest-cov}) tracks which lines were executed.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Run tests with coverage (pytest{-}cov is in requirements{-}dev.txt)}
+\ExtensionTok{pytest} \AttributeTok{{-}{-}cov}\OperatorTok{=}\NormalTok{app }\AttributeTok{{-}{-}cov{-}report}\OperatorTok{=}\NormalTok{term{-}missing}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Name                     Stmts   Miss  Cover   Missing
+------------------------------------------------------
+app/__init__.py             26      0   100%
+app/config.py               21      3    86%   28-35
+app/database.py             41      5    88%   35-39, 79, 111
+app/errors.py               22      2    91%   66, 76
+app/logging_config.py       63     17    73%   45-46, 117-140, 174, 193-211, 227
+app/middleware.py           27      0   100%
+app/routes/__init__.py       0      0   100%
+app/routes/health.py         5      0   100%
+app/routes/notes.py         57      0   100%
+app/startup.py              48     23    52%   27, 37, 48-55, 70-79, 96-97, 102-103
+------------------------------------------------------
+TOTAL                      310     50    84%
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}(Line numbers are for the files after \texttt{make\ format}.)
+
+\textbf{What coverage tells you:}
+
+\begin{itemize}
+\tightlist
+\item
+  Lines 28--35 in \texttt{config.py} are not tested: the exit path of \texttt{\_require()}, which runs only when a required variable is missing.
+\item
+  The missed lines in \texttt{database.py} are the PostgreSQL branches~--- the tests use SQLite.
+\item
+  \texttt{logging\_config.py} is at 73\%: the tests run with the default human format and no \texttt{LOG\_DIR}, so the JSON formatter and the log-file handler never run.
+\item
+  \texttt{startup.py} has the lowest coverage at 52\%: the failure paths (what happens when a startup check fails), the PostgreSQL connectivity check, and \texttt{check\_port()}, which only \texttt{run.py} calls.
+\end{itemize}
+
+\noindent{}\textbf{What coverage does not tell you:}
+
+Coverage tells you which lines were executed. It does not tell you whether those lines were tested correctly. A test that executes a line but does not assert anything about the result gives 100\% coverage for that line but provides no verification.
+
+The goal is not 100\% coverage at all costs. The goal is meaningful coverage: every important behavior has a test. The \texttt{fail\_under\ =\ 80} configuration causes the build to fail if total coverage drops below 80\%, which is a reasonable minimum.
+
+\subsection*{Testing the PostgreSQL code path}\phantomsection\label{17-build-process:testing-the-postgresql-code-path}
+
+The tests currently use SQLite, which means the PostgreSQL branches in \texttt{database.py} (and the database check in \texttt{startup.py}) are not covered. The route handlers themselves contain no database-specific code, so they are fully exercised. In a production build pipeline, you would run a second test configuration against a real PostgreSQL database:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In CI, after starting a PostgreSQL service:}
+\VariableTok{DATABASE\_URL}\OperatorTok{=}\NormalTok{postgresql://user:pass@localhost:5432/test\_db }\ExtensionTok{pytest}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}For now, noting where PostgreSQL-specific code is untested is sufficient. \hyperref[ch:18-containerization]{Chapter 18} (Docker) sets up the infrastructure that makes PostgreSQL testing in CI straightforward.
+
+\setcounter{section}{7}
+\section{A Test Suite You Can Trust}\label{17-build-process:178-a-test-suite-you-can-trust}
+
+Thirty passing tests are a good start. But a test suite earns trust only when three things are true: it checks the behaviours that matter, it fails when (and only when) something is broken, and it stays fast enough that people run it all the time. This section is about how to get there. It turns the principles from Part III (the test pyramid, ``never mock what you don't own'') into concrete decisions for the Notes API.
+
+\subsection*{What to test, and at which level}\phantomsection\label{17-build-process:what-to-test-and-at-which-level}
+
+Tests come in three sizes, according to how much of the system they run:
+
+\Needspace{16\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1806}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3120}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1954}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3120}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Level
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What it runs
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Speed
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+In the Notes API
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Unit} & one function, on its own: no HTTP, no database & microseconds & \texttt{to\_iso()}, \texttt{sql()}, \texttt{\_mask()}, below \\
+\textbf{Integration} & several real parts together: routing, handler, database & milliseconds & every test-client test in section 17.3 \\
+\textbf{End-to-end} & the real, running system, over real HTTP & seconds & the smoke test of the Docker image (\hyperref[ch:19-artifact-storage]{Chapter 19}); the deploy script's health check (\hyperref[ch:23-code-transfer]{Chapter 23}) \\
+\end{longtable}
+}
+
+The \textbf{test pyramid} says you should have many unit tests, fewer integration tests, and very few end-to-end tests. Lower tests are faster, more precise about \emph{what} broke, and cheaper to keep working. Treat the pyramid as a default, not a law. The right shape depends on where your code's logic lives. A service whose logic is mostly ``take a request, check it, run a query, return the row'' is best tested at the integration level, through the test client, with a real database. That is why most of the Notes API's tests look the way they do. A service with a pricing engine or a scheduling algorithm inside would have many unit tests for that core. In both cases the rule underneath is the same: \textbf{test each behaviour at the lowest level that can actually show it working.}
+
+Whatever the level, every endpoint needs tests for the same few kinds of situation:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{The normal case.} It works, and returns exactly the right shape and status.
+\item
+  \textbf{Bad input.} Missing, wrong type, empty, too long, strange characters. Each one gets a \texttt{400} with the right message.
+\item
+  \textbf{Things that do not exist.} A missing note is a \texttt{404}, never a \texttt{500}.
+\item
+  \textbf{The edges.} An empty list, exactly the maximum length, the first and the last item.
+\item
+  \textbf{The decisions.} Every ``we chose X over Y'' (for example, \texttt{404} for deleting a missing note, section 16.5) deserves a test, because a test is what makes a decision stick.
+\item
+  \textbf{Failure of what it depends on.} The database is down, so the response is a clean \texttt{500} with no leaked details (\texttt{test\_errors.py}).
+\end{itemize}
+
+\noindent{}What \emph{not} to test: the framework itself (Flask's routing works), and the private details of your own code. Test through the public interface (the HTTP API, or a function's arguments and return value), so that you can change \emph{how} something works without rewriting its tests.
+
+\subsection*{Unit tests: small functions on their own}\phantomsection\label{17-build-process:unit-tests-small-functions-on-their-own}
+
+The Notes API has a handful of small functions that need nothing but their arguments. They are ideal unit tests: precise, instant, and independent of everything else.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_units.py}
+\CommentTok{"""Unit tests: small functions, checked on their own, without HTTP or a database."""}
+
+\ImportTok{from}\NormalTok{ datetime }\ImportTok{import}\NormalTok{ datetime, timezone}
+
+\ImportTok{import}\NormalTok{ pytest}
+
+\ImportTok{from}\NormalTok{ app }\ImportTok{import}\NormalTok{ database, startup}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ row\_to\_note, to\_iso}
+
+
+\KeywordTok{def}\NormalTok{ test\_to\_iso\_turns\_sqlite\_text\_into\_utc\_iso\_8601():}
+    \ControlFlowTok{assert}\NormalTok{ to\_iso(}\StringTok{"2024{-}01{-}15 14:00:05"}\NormalTok{) }\OperatorTok{==} \StringTok{"2024{-}01{-}15T14:00:05+00:00"}
+
+
+\KeywordTok{def}\NormalTok{ test\_to\_iso\_formats\_a\_postgresql\_datetime():}
+\NormalTok{    value }\OperatorTok{=}\NormalTok{ datetime(}\DecValTok{2024}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{15}\NormalTok{, }\DecValTok{14}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{5}\NormalTok{, tzinfo}\OperatorTok{=}\NormalTok{timezone.utc)}
+    \ControlFlowTok{assert}\NormalTok{ to\_iso(value) }\OperatorTok{==} \StringTok{"2024{-}01{-}15T14:00:05+00:00"}
+
+
+\KeywordTok{def}\NormalTok{ test\_row\_to\_note\_converts\_the\_timestamp():}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ \{}\StringTok{"id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\StringTok{"content"}\NormalTok{: }\StringTok{"Buy milk"}\NormalTok{, }\StringTok{"created\_at"}\NormalTok{: }\StringTok{"2024{-}01{-}15 14:00:05"}\NormalTok{\}}
+    \ControlFlowTok{assert}\NormalTok{ row\_to\_note(row) }\OperatorTok{==}\NormalTok{ \{}
+        \StringTok{"id"}\NormalTok{: }\DecValTok{1}\NormalTok{,}
+        \StringTok{"content"}\NormalTok{: }\StringTok{"Buy milk"}\NormalTok{,}
+        \StringTok{"created\_at"}\NormalTok{: }\StringTok{"2024{-}01{-}15T14:00:05+00:00"}\NormalTok{,}
+\NormalTok{    \}}
+
+
+\AttributeTok{@pytest.mark.parametrize}\NormalTok{(}
+\NormalTok{    (}\StringTok{"is\_sqlite"}\NormalTok{, }\StringTok{"expected"}\NormalTok{),}
+\NormalTok{    [}
+\NormalTok{        (}\VariableTok{True}\NormalTok{, }\StringTok{"SELECT * FROM notes WHERE id = ?"}\NormalTok{),}
+\NormalTok{        (}\VariableTok{False}\NormalTok{, }\StringTok{"SELECT * FROM notes WHERE id = }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{),}
+\NormalTok{    ],}
+\NormalTok{)}
+\KeywordTok{def}\NormalTok{ test\_sql\_uses\_the\_right\_placeholder(monkeypatch, is\_sqlite, expected):}
+\NormalTok{    monkeypatch.}\BuiltInTok{setattr}\NormalTok{(database, }\StringTok{"IS\_SQLITE"}\NormalTok{, is\_sqlite)}
+    \ControlFlowTok{assert}\NormalTok{ database.sql(}\StringTok{"SELECT * FROM notes WHERE id = ?"}\NormalTok{) }\OperatorTok{==}\NormalTok{ expected}
+
+
+\KeywordTok{def}\NormalTok{ test\_mask\_hides\_the\_password\_in\_a\_database\_url():}
+\NormalTok{    url }\OperatorTok{=} \StringTok{"postgresql://notes\_user:s3cret@db.example.com:25060/notesdb"}
+    \ControlFlowTok{assert}\NormalTok{ startup.\_mask(url) }\OperatorTok{==}\NormalTok{ (}
+        \StringTok{"postgresql://notes\_user:****@db.example.com:25060/notesdb"}
+\NormalTok{    )}
+
+
+\KeywordTok{def}\NormalTok{ test\_a\_short\_secret\_key\_stops\_startup(monkeypatch):}
+\NormalTok{    monkeypatch.}\BuiltInTok{setattr}\NormalTok{(startup, }\StringTok{"SECRET\_KEY"}\NormalTok{, }\StringTok{"too{-}short"}\NormalTok{)}
+    \ControlFlowTok{with}\NormalTok{ pytest.raises(}\PreprocessorTok{SystemExit}\NormalTok{) }\ImportTok{as}\NormalTok{ exit\_info:}
+\NormalTok{        startup.check\_secret\_key()}
+    \ControlFlowTok{assert}\NormalTok{ exit\_info.value.code }\OperatorTok{==} \DecValTok{1}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Notice two things. First, \texttt{sql()}`s PostgreSQL branch, which the test database never exercises (section 17.7), is now tested directly: \texttt{monkeypatch.setattr} swaps the module's \texttt{IS\_SQLITE} constant for the length of one test. Second, the startup checks' \emph{failure} paths, the least-covered code in the coverage report, can be tested too. \texttt{pytest.}\allowbreak{}\texttt{raises(SystemExit)} asserts that the code tried to exit, and then catches that exit so that the test run itself carries on.
+
+\subsection*{Parametrized tests: one test, many cases}\phantomsection\label{17-build-process:parametrized-tests-one-test-many-cases}
+
+Section 17.3 has five nearly identical tests for bad \texttt{POST\ /notes/} bodies. Each one sends a body and expects a \texttt{400}. When tests differ only in their data, \textbf{parametrize} them: write the test once, and let pytest run it once per case.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_notes.py (replacing the five separate bad{-}body tests)}
+\ImportTok{import}\NormalTok{ pytest}
+
+
+\AttributeTok{@pytest.mark.parametrize}\NormalTok{(}
+\NormalTok{    (}\StringTok{"body"}\NormalTok{, }\StringTok{"error"}\NormalTok{),}
+\NormalTok{    [}
+\NormalTok{        (\{}\StringTok{"title"}\NormalTok{: }\StringTok{"wrong field"}\NormalTok{\}, }\StringTok{"\textquotesingle{}content\textquotesingle{} is required"}\NormalTok{),}
+\NormalTok{        (\{}\StringTok{"content"}\NormalTok{: }\StringTok{""}\NormalTok{\}, }\StringTok{"\textquotesingle{}content\textquotesingle{} cannot be empty"}\NormalTok{),}
+\NormalTok{        (\{}\StringTok{"content"}\NormalTok{: }\StringTok{" }\CharTok{\textbackslash{}t\textbackslash{}n}\StringTok{ "}\NormalTok{\}, }\StringTok{"\textquotesingle{}content\textquotesingle{} cannot be empty"}\NormalTok{),}
+\NormalTok{        (\{}\StringTok{"content"}\NormalTok{: }\DecValTok{42}\NormalTok{\}, }\StringTok{"\textquotesingle{}content\textquotesingle{} must be a string"}\NormalTok{),}
+\NormalTok{        (\{}\StringTok{"content"}\NormalTok{: }\StringTok{"x"} \OperatorTok{*} \DecValTok{10\_001}\NormalTok{\}, }\StringTok{"\textquotesingle{}content\textquotesingle{} cannot exceed 10,000 characters"}\NormalTok{),}
+\NormalTok{        ([}\StringTok{"not"}\NormalTok{, }\StringTok{"an"}\NormalTok{, }\StringTok{"object"}\NormalTok{], }\StringTok{"Request body must be a JSON object"}\NormalTok{),}
+\NormalTok{    ],}
+\NormalTok{    ids}\OperatorTok{=}\NormalTok{[}\StringTok{"missing"}\NormalTok{, }\StringTok{"empty"}\NormalTok{, }\StringTok{"whitespace"}\NormalTok{, }\StringTok{"not{-}a{-}string"}\NormalTok{, }\StringTok{"too{-}long"}\NormalTok{, }\StringTok{"list"}\NormalTok{],}
+\NormalTok{)}
+\KeywordTok{def}\NormalTok{ test\_create\_note\_rejects\_an\_invalid\_body(client, body, error):}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{body)}
+    \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+    \ControlFlowTok{assert}\NormalTok{ response.get\_json() }\OperatorTok{==}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: error\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Each case is reported as a test of its own, named by its \texttt{ids}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+tests/test_notes.py::test_create_note_rejects_an_invalid_body[missing] PASSED
+tests/test_notes.py::test_create_note_rejects_an_invalid_body[empty] PASSED
+tests/test_notes.py::test_create_note_rejects_an_invalid_body[whitespace] PASSED
+tests/test_notes.py::test_create_note_rejects_an_invalid_body[not-a-string] PASSED
+tests/test_notes.py::test_create_note_rejects_an_invalid_body[too-long] PASSED
+tests/test_notes.py::test_create_note_rejects_an_invalid_body[list] PASSED
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The table of cases is now easy to read, and easy to extend: a new rule is one new line. That is exactly how the next bug fix in this section starts. It also checks the \emph{exact} error message, which the five older tests did not always do.
+
+\subsection*{Test doubles: stubs, fakes, spies and mocks}\phantomsection\label{17-build-process:test-doubles-stubs-fakes-spies-and-mocks}
+
+Sometimes a test needs to replace a real part of the system: to make it fail on purpose, to make it faster, or to watch how it is used. The replacement is called a \textbf{test double}, like a stunt double in a film. There are four kinds, and the Notes API has already used most of them:
+
+\Needspace{16\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.0766}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4617}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4617}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Kind
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What it does
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+In this book
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Stub} & returns a fixed answer, or raises a fixed error & \texttt{broken\_get\_db()} in \texttt{test\_errors.py}, which always raises \\
+\textbf{Fake} & a real, working, lighter implementation & the SQLite test database standing in for PostgreSQL; later, a fake email service (\hyperref[ch:37-reliability]{Chapter 37}) \\
+\textbf{Spy} & lets the real thing run, and records what happened & pytest's \texttt{caplog} fixture, which records every log message \\
+\textbf{Mock} & records how it was called, so the test can check those calls & \texttt{unittest.mock.Mock}, below \\
+\end{longtable}
+}
+
+A spy is the right tool for a promise the application makes about its \emph{logs}. \hyperref[ch:16-logging-error-handling]{Chapter 16} promised that a note's content never reaches them, because a note may be private. That promise deserves a test:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_notes.py (added)}
+\KeywordTok{def}\NormalTok{ test\_a\_rejected\_note\_is\_logged\_without\_its\_content(client, caplog):}
+\NormalTok{    client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"my bank PIN is 4321"} \OperatorTok{+} \StringTok{"!"} \OperatorTok{*} \DecValTok{10\_000}\NormalTok{\})}
+    \ControlFlowTok{assert} \StringTok{"POST /notes/ rejected"} \KeywordTok{in}\NormalTok{ caplog.text}
+    \ControlFlowTok{assert} \StringTok{"4321"} \KeywordTok{not} \KeywordTok{in}\NormalTok{ caplog.text  }\CommentTok{\# a private note never reaches the logs}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}A mock is for when \emph{how something was called} is itself the behaviour. The startup check must give up on an unreachable database after five seconds instead of hanging forever, so the test checks the timeout that \texttt{check\_database()} passes along:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_startup.py}
+\ImportTok{import}\NormalTok{ sys}
+\ImportTok{from}\NormalTok{ unittest.mock }\ImportTok{import}\NormalTok{ Mock}
+
+\ImportTok{import}\NormalTok{ pytest}
+
+\ImportTok{from}\NormalTok{ app }\ImportTok{import}\NormalTok{ startup}
+
+
+\KeywordTok{def}\NormalTok{ test\_an\_unreachable\_database\_stops\_startup(monkeypatch):}
+\NormalTok{    fake\_psycopg2 }\OperatorTok{=}\NormalTok{ Mock()}
+\NormalTok{    fake\_psycopg2.}\ExtensionTok{connect}\NormalTok{.side\_effect }\OperatorTok{=} \PreprocessorTok{Exception}\NormalTok{(}\StringTok{"connection refused"}\NormalTok{)}
+    \CommentTok{\# check\_database() imports psycopg2 when it runs: hand it the fake}
+\NormalTok{    monkeypatch.setitem(sys.modules, }\StringTok{"psycopg2"}\NormalTok{, fake\_psycopg2)}
+\NormalTok{    monkeypatch.}\BuiltInTok{setattr}\NormalTok{(startup, }\StringTok{"IS\_SQLITE"}\NormalTok{, }\VariableTok{False}\NormalTok{)}
+
+    \ControlFlowTok{with}\NormalTok{ pytest.raises(}\PreprocessorTok{SystemExit}\NormalTok{):}
+\NormalTok{        startup.check\_database()}
+
+    \CommentTok{\# The mock recorded how it was called: the check must not wait forever}
+\NormalTok{    fake\_psycopg2.}\ExtensionTok{connect}\NormalTok{.assert\_called\_once()}
+    \ControlFlowTok{assert}\NormalTok{ fake\_psycopg2.}\ExtensionTok{connect}\NormalTok{.call\_args.kwargs[}\StringTok{"connect\_timeout"}\NormalTok{] }\OperatorTok{==} \DecValTok{5}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This test knowingly breaks Part III's rule, ``never mock what you don't own'', and it is worth seeing why the rule exists. The mock encodes an \emph{assumption} about psycopg2: that its function is called \texttt{connect} and takes a \texttt{connect\_timeout} argument. If psycopg2 changed, this test would go on passing while the real code broke. Here the risk is small, because the test mocks only one well-known call. Still, often there is a way to test without a double at all. Point \texttt{DATABASE\_URL} at a port nobody listens on (\texttt{postgresql:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{u:}\allowbreak{}\texttt{p@127.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{1:}\allowbreak{}\texttt{1/}\allowbreak{}\texttt{notesdb}), and a \emph{real} connection attempt is refused in a few milliseconds. When a real version is that cheap, prefer it.
+
+Where to stop:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Replace things at the edges of your system}, like a network service, the clock, or randomness, and not the code in the middle. A test that mocks your own functions checks how the code is \emph{written}, not what it \emph{does}, and breaks at every refactor.
+\item
+  \textbf{Prefer fakes to mocks.} A fake behaves like the real thing, so tests built on it check real behaviour.
+\item
+  \textbf{Know what each double hides.} The SQLite fake cannot show PostgreSQL-only bugs: the search query of \hyperref[ch:33-logic-execution]{Chapter 33}, the concurrency of section 33.13, and the bug at the end of this section. Every double buys speed or control with blind spots. Write the blind spots down, and cover them somewhere else. \hyperref[ch:39-local-vs-production]{Chapter 39} covers these by running the suite on PostgreSQL.
+\end{itemize}
+
+\subsection*{Factory fixtures: setting up data without repetition}\phantomsection\label{17-build-process:factory-fixtures-setting-up-data-without-repetition}
+
+Almost every test in section 17.3 starts by creating a note, and then repeats the same \texttt{POST} and the same \texttt{.get\_json(){[}"id"{]}}. A \textbf{factory fixture} gives tests a function that creates data, with sensible defaults, and checks that the setup itself worked:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/conftest.py (added)}
+\AttributeTok{@pytest.fixture}
+\KeywordTok{def}\NormalTok{ create\_note(client):}
+    \CommentTok{"""}
+\CommentTok{    A factory: tests call create\_note("text") to get a saved note back,}
+\CommentTok{    instead of repeating the POST and its checks in every test.}
+\CommentTok{    """}
+
+    \KeywordTok{def}\NormalTok{ \_create(content: }\BuiltInTok{str} \OperatorTok{=} \StringTok{"A note"}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict}\NormalTok{:}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: content\})}
+        \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{201}\NormalTok{, response.get\_json()}
+        \ControlFlowTok{return}\NormalTok{ response.get\_json()}
+
+    \ControlFlowTok{return}\NormalTok{ \_create}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_notes.py (added)}
+\KeywordTok{def}\NormalTok{ test\_get\_note\_returns\_what\_was\_saved(client, create\_note):}
+\NormalTok{    note }\OperatorTok{=}\NormalTok{ create\_note(}\StringTok{"Find me"}\NormalTok{)}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ client.get(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note[}\StringTok{\textquotesingle{}id\textquotesingle{}}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+    \ControlFlowTok{assert}\NormalTok{ response.get\_json() }\OperatorTok{==}\NormalTok{ note}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The test now says only what it is \emph{about}. When creating a note one day needs more (an owner in \hyperref[ch:38-security]{Chapter 38}, say), only the factory changes, not fifty tests.
+
+\subsection*{Tests that fail at random}\phantomsection\label{17-build-process:tests-that-fail-at-random}
+
+A \textbf{flaky test} passes and fails on the same code. It is worse than no test at all, because it teaches people to ignore red builds and press ``re-run''. Flakiness always has a cause, and the causes are few:
+
+\Needspace{25\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2353}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3824}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3824}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Cause
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Example
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Fix
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Tests share state & one test leaves a note behind; another counts notes & reset state before every test (\texttt{clean\_database}); never depend on test order \\
+Order that is not guaranteed & results with no \texttt{ORDER\ BY}, or ordered by a value that can tie & order by something unique, such as \texttt{id} \\
+Time & ``created today'' fails at midnight; timezones differ between laptop and CI & fix the clock in the test, or compare against values captured at the start \\
+Randomness & random test data that sometimes hits an edge case & use a fixed seed, and print it when the test fails \\
+Timing & \texttt{time.sleep(1)} ``to be sure it has finished'' & wait for the condition itself, with a timeout (as the CI smoke test of \hyperref[ch:19-artifact-storage]{Chapter 19} does with \texttt{curl\ -\/-retry}) \\
+The network & a test that calls a real outside service & use a fake at the edge; test the real thing separately \\
+\end{longtable}
+}
+
+The Notes API has a quiet example of the second row. \texttt{list\_notes} orders by \texttt{id\ DESC}, and the test that expects ``Second note'' before ``First note'' relies on that. Had it ordered by \texttt{created\_at\ DESC} instead, the test would fail now and then. SQLite's \texttt{CURRENT\_TIMESTAMP} counts whole seconds, so two notes created in the same test usually get \emph{identical} timestamps, and the database may return tied rows in either order.
+
+The rule for flaky tests is simple: \textbf{a flaky test is a bug, and it gets fixed, not re-run.} \texttt{pytest\ -\/-lf} (``last failed'') re-runs just the failures while you investigate. Running the suite in random order (the \texttt{pytest-randomly} plugin) flushes out hidden dependencies between tests.
+
+\subsection*{Writing the test first}\phantomsection\label{17-build-process:writing-the-test-first}
+
+Everything so far adds tests \emph{after} the code. Sometimes it pays to write the test \emph{first}, especially when fixing a bug. The loop is short and has three steps. Write a test that shows the problem and watch it fail (\textbf{red}). Make the smallest change that makes it pass (\textbf{green}). Then tidy up with the test as your safety net (\textbf{refactor}).
+
+Here is a real bug in the Notes API, as a worked example. JSON can carry a NUL character (\texttt{"\textbackslash{}u0000"}) inside a string, and SQLite stores it happily. PostgreSQL cannot store NUL in a \texttt{TEXT} column at all: psycopg2 raises \texttt{ValueError:}\allowbreak{}\texttt{\ A\ string\ literal\ cannot\ contain\ NUL\ (0x00)\ characters.}, and the catch-all handler turns that into a \texttt{500}. So a client can crash any write request in production, while every test on the laptop passes.
+
+First the test, which is one new line in the parametrized table:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{        (\{}\StringTok{"content"}\NormalTok{: }\StringTok{"a}\CharTok{\textbackslash{}x00}\StringTok{b"}\NormalTok{\}, }\StringTok{"\textquotesingle{}content\textquotesingle{} contains invalid characters"}\NormalTok{),}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(with \texttt{"nul"} added to \texttt{ids}). Run it: \textbf{red}. On SQLite the note is simply saved:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+________________ test_create_note_rejects_an_invalid_body[nul] _________________
+
+client = <FlaskClient <Flask 'app'>>, body = {'content': 'a\x00b'}
+error = "'content' contains invalid characters"
+    ...
+    def test_create_note_rejects_an_invalid_body(client, body, error):
+        response = client.post("/notes/", json=body)
+>       assert response.status_code == 400
+E       assert 201 == 400
+E        +  where 201 = <WrapperTestResponse streamed [201 CREATED]>.status_code
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Then the smallest fix, in \texttt{create\_note} right after the length check:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \CommentTok{\# PostgreSQL cannot store a NUL character; SQLite can, so only a test}
+    \CommentTok{\# written for this rule catches it before production does}
+    \ControlFlowTok{if} \StringTok{"}\CharTok{\textbackslash{}x00}\StringTok{"} \KeywordTok{in}\NormalTok{ content:}
+        \ControlFlowTok{return}\NormalTok{ \_invalid(}\StringTok{"\textquotesingle{}content\textquotesingle{} contains invalid characters"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Run it again: \textbf{green}, on both databases. The bug is fixed, and the test stays in the suite for good, so it can never quietly return. (When \hyperref[ch:31-input-handling]{Chapter 31} moves validation into a reusable \texttt{Validator}, this rule moves with it, and this test is what proves nothing was lost on the way.)
+
+Test-first is not a religion. Many good engineers write the test right after the code, and some code is easier to explore first and test afterwards. But for bug fixes it is almost always right: a fix without a failing test first is a fix you have not actually seen working.
+
+\setcounter{section}{8}
+\section{Working with Git: Branches, Pull Requests, and Review}\label{17-build-process:179-working-with-git-branches-pull-requests-and-review}
+
+Tests and CI check the code. The \textbf{Git workflow} decides \emph{how a change travels}, from one engineer's editor to the main line of the code that everyone shares and that gets deployed. Part III recommends \textbf{trunk-based development} for small teams. This section is what that looks like, day to day, for the Notes API.
+
+\subsection*{\texorpdfstring{One rule: \texttt{main} is always releasable}{One rule: main is always releasable}}\phantomsection\label{17-build-process:one-rule-main-is-always-releasable}
+
+Everything in a good Git workflow serves a single rule: \textbf{the \texttt{main} branch is always in a state that could be deployed.} From \hyperref[ch:23-code-transfer]{Chapter 23} on, the Notes API \emph{is} deployed from \texttt{main} automatically, so the rule stops being a nice idea and becomes a requirement. Nobody works on \texttt{main} directly. Every change goes on a short-lived \textbf{branch}, is checked by CI and read by a second person in a \textbf{pull request}, and only then is merged.
+
+\subsection*{The flow of one change}\phantomsection\label{17-build-process:the-flow-of-one-change}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. Start from an up{-}to{-}date main}
+\FunctionTok{git}\NormalTok{ switch main}
+\FunctionTok{git}\NormalTok{ pull}
+
+\CommentTok{\# 2. A branch for this one change, named after what it does}
+\FunctionTok{git}\NormalTok{ switch }\AttributeTok{{-}c}\NormalTok{ fix/reject{-}nul{-}in{-}content}
+
+\CommentTok{\# 3. Work in small steps; commit each one that makes sense on its own}
+\FunctionTok{git}\NormalTok{ add app/routes/notes.py tests/test\_notes.py}
+\FunctionTok{git}\NormalTok{ commit          }\CommentTok{\# opens the editor for the message (below)}
+
+\CommentTok{\# 4. Publish the branch and open a pull request}
+\FunctionTok{git}\NormalTok{ push }\AttributeTok{{-}u}\NormalTok{ origin HEAD}
+\ExtensionTok{gh}\NormalTok{ pr create }\AttributeTok{{-}{-}fill} \CommentTok{\# or use the "Compare \& pull request" button on GitHub}
+
+\CommentTok{\# 5. CI runs on the pull request (section 17.10); a colleague reviews it.}
+\CommentTok{\#    To take new commits from main while you wait:}
+\FunctionTok{git}\NormalTok{ pull }\AttributeTok{{-}{-}rebase}\NormalTok{ origin main}
+\FunctionTok{git}\NormalTok{ push }\AttributeTok{{-}{-}force{-}with{-}lease}    \CommentTok{\# safe only on YOUR branch, never on main}
+
+\CommentTok{\# 6. Once approved and green, merge, and delete the branch}
+\ExtensionTok{gh}\NormalTok{ pr merge }\AttributeTok{{-}{-}squash} \AttributeTok{{-}{-}delete{-}branch}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The branch should live for hours or days, not weeks. The longer a branch lives, the further it drifts from \texttt{main}, and the more painful merging it becomes. A big feature is delivered as a series of small pull requests, each of which is safe to merge on its own. That is the same idea as the expand/contract migrations of Chapter 33.
+
+\subsection*{Commits and their messages}\phantomsection\label{17-build-process:commits-and-their-messages}
+
+A commit message is written for the person who will run \texttt{git\ log} or \texttt{git\ blame} on this line in two years' time. It needs two things: \emph{what} changed, in a short subject, and \emph{why}, in the body.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Reject NUL characters in note content
+
+PostgreSQL cannot store NUL (0x00) in a TEXT column: psycopg2 raises
+ValueError, which reached clients as a 500. SQLite accepts it, so the
+test suite never noticed. Validate it as a 400 instead, with a test.
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The conventions: a subject under about 50 characters, in the imperative mood (``Reject\ldots{}'', not ``Rejected\ldots{}''), a blank line, then a body wrapped at about 72 characters. Each commit should leave the code working, so that any commit can be checked out, tested, or reverted on its own. Some teams also prefix subjects with a type (\texttt{fix:\ …}, \texttt{feat:\ …}, known as \emph{Conventional Commits}), so that release notes can be generated from the history.
+
+\subsection*{Pull requests}\phantomsection\label{17-build-process:pull-requests}
+
+A \textbf{pull request} (GitHub's name; GitLab calls it a \emph{merge request}) is a request to merge one branch into another. It is also the place where CI results, the review and the discussion about a change are collected. A good pull request:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{does one thing.} A bug fix and a refactor in the same pull request make both harder to review;
+\item
+  \textbf{is small.} Reviews of more than a few hundred changed lines get noticeably worse, because reviewers skim;
+\item
+  \textbf{explains itself}, in a description like this:
+\end{itemize}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+What: Reject note content containing NUL characters (400 instead of 500).
+
+Why: PostgreSQL cannot store NUL in TEXT; the insert failed with a
+ValueError that surfaced as a 500. Reproduced on PostgreSQL 16.
+
+How to verify: new case "nul" in test_create_note_rejects_an_invalid_body;
+POST {"content": "a\u0000b"} now returns 400.
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{Code review}\phantomsection\label{17-build-process:code-review}
+
+A review is a second engineer reading the change before it is merged. It catches bugs, but that is not its only value: it spreads knowledge of the code, so that no part of it is understood by only one person. Split the work between machines and people. \textbf{Machines} check formatting, lint, types, tests and coverage; that is \texttt{make\ build} in CI, and a reviewer should never spend attention on them. \textbf{People} check what machines cannot:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Correctness.} Does it do what the description says? What input breaks it?
+\item
+  \textbf{Tests.} Is the new behaviour tested? Would the tests fail if the fix were undone?
+\item
+  \textbf{Design.} Is it in the right place, and consistent with the rest of the code? Will the next change be easy?
+\item
+  \textbf{Clarity.} Could someone new understand it without the author explaining?
+\item
+  \textbf{Safety.} Secrets, error messages that leak internals, SQL built from strings, a migration that breaks the running version.
+\end{itemize}
+
+\noindent{}Review the code, not the person: ``this query can return two rows for one note, can't it?'' rather than ``you forgot the join condition''. As an author, answer every comment, either with a change or with a reason, and never take a review personally. A comment on your code is the cheapest bug report you will ever get.
+
+\subsection*{\texorpdfstring{Protecting \texttt{main}}{Protecting main}}\phantomsection\label{17-build-process:protecting-main}
+
+The rules above only hold if the repository enforces them. On GitHub, a \textbf{branch protection rule} (Settings → Branches), or a \textbf{ruleset} (Settings → Rules), can do exactly that for \texttt{main}:
+
+\begin{itemize}
+\tightlist
+\item
+  require a pull request before merging, with at least one approval;
+\item
+  require status checks to pass: select the CI jobs from section 17.10, which appear as \texttt{build\ (3.10)}, \texttt{build\ (3.11)} and \texttt{build\ (3.12)} once they have run at least once;
+\item
+  require the branch to be up to date with \texttt{main} before merging;
+\item
+  block force pushes and deletion;
+\item
+  do not allow bypassing these settings (without it, administrators, including the owner, can still push past them).
+\end{itemize}
+
+\noindent{}After this, even the repository's owner cannot push a broken change straight to \texttt{main}. That is the point: the protection guards against a hurried Friday afternoon, not against colleagues. (GitHub's settings pages move around over time; the names of the options are the stable part.)
+
+\subsection*{Merging, undoing, and release tags}\phantomsection\label{17-build-process:merging-undoing-and-release-tags}
+
+GitHub offers three ways to merge a pull request. A \textbf{merge commit} keeps every commit of the branch, plus a commit that joins the two histories. A \textbf{squash merge} turns the whole pull request into one commit on \texttt{main}. A \textbf{rebase merge} replays the branch's commits onto \texttt{main} one by one. For small pull requests, squash keeps \texttt{main}'s history linear and readable, with one commit per change and its message taken from the pull request. That readability matters when you later hunt for the commit that introduced a bug (\texttt{git\ bisect}, \hyperref[ch:16-logging-error-handling]{Chapter 16}).
+
+To undo a change that is already on \texttt{main}, \textbf{revert} it:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ revert }\OperatorTok{\textless{}}\NormalTok{commit}\OperatorTok{\textgreater{}}      \CommentTok{\# a NEW commit that undoes the old one}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Never rewrite the history of a shared branch (\texttt{git\ reset}, then \texttt{git\ push\ -\/-force}), because everyone else's copy of \texttt{main} would then disagree with GitHub's. A revert is an ordinary change: it goes through a pull request and CI like any other, and it is deployed like any other.
+
+Finally, mark releases with a \textbf{tag}, a permanent name for one commit:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ tag }\AttributeTok{{-}a}\NormalTok{ v1.4.0 }\AttributeTok{{-}m} \StringTok{"Tags on notes; migration runner"}
+\FunctionTok{git}\NormalTok{ push origin v1.4.0}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Version numbers usually follow \textbf{semantic versioning}, \texttt{MAJOR.MINOR.PATCH}. Raise PATCH for a fix, MINOR for a feature that keeps existing clients working, and MAJOR for a breaking change (the same distinction as section 34.10's API versioning). The container images in \hyperref[ch:19-artifact-storage]{Chapter 19} are tagged with commit hashes for machines. Release tags are for people: changelogs, support tickets, ``which version are you on?''.
+
+\setcounter{section}{9}
+\section{Continuous Integration: The Build Running Automatically}\label{17-build-process:1710-continuous-integration-the-build-running-automatically}
+
+The build process you have defined in \texttt{Makefile} is only valuable if it actually runs. Running \texttt{make\ build} manually before every deployment is better than nothing, but still relies on human discipline.
+
+\textbf{Continuous Integration (CI)} is the practice of running the build process automatically every time code is pushed to the repository. If the build fails, the developer knows immediately~--- not days later when someone tries to deploy.
+
+\subsection*{GitHub Actions: CI for free}\phantomsection\label{17-build-process:github-actions-ci-for-free}
+
+GitHub Actions is a CI platform built into GitHub. It runs your build on GitHub's servers, automatically, on every push.
+
+Create a directory and file:
+
+\begin{diagrambox}[short]{109.8pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+└── .github/
+    └── workflows/
+        └── build.yml
+\end{Verbatim}
+\end{diagrambox}
+
+\begin{notebox}
+
+\textbf{Note:} GitHub Actions evolves quickly: action major versions (\texttt{actions/}\allowbreak{}\texttt{checkout@v4}, \texttt{actions/}\allowbreak{}\texttt{setup-python@v5}), runner images, and workflow syntax change over time. Check each action's page for its current version.
+
+\end{notebox}
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 17.7}\enspace .github/workflows/build.yml}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# GitHub Actions workflow — runs the build on every push and pull request.}
+\CommentTok{\#}
+\CommentTok{\# GitHub Actions reads YAML files in .github/workflows/ and runs them}
+\CommentTok{\# automatically. No configuration in the GitHub UI is needed.}
+
+\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Build and Test}
+
+\CommentTok{\# Trigger conditions:}
+\CommentTok{\# {-} on push to any branch}
+\CommentTok{\# {-} on pull requests targeting the main branch}
+\FunctionTok{on}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{push}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{branches}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"**"}\KeywordTok{]}\CommentTok{   \# "**" matches every branch, including feature/login;}
+\CommentTok{                       \# "*" would skip names that contain a slash}
+\AttributeTok{  }\FunctionTok{pull\_request}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{branches}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"main"}\KeywordTok{]}
+
+\FunctionTok{jobs}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{build}\KeywordTok{:}
+\CommentTok{    \# Run on the latest Ubuntu Linux (a fresh, clean virtual machine)}
+\AttributeTok{    }\FunctionTok{runs{-}on}\KeywordTok{:}\AttributeTok{ ubuntu{-}latest}
+
+\CommentTok{    \# Test against multiple Python versions to catch version{-}specific issues}
+\AttributeTok{    }\FunctionTok{strategy}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{matrix}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{python{-}version}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"3.10"}\KeywordTok{,}\AttributeTok{ }\StringTok{"3.11"}\KeywordTok{,}\AttributeTok{ }\StringTok{"3.12"}\KeywordTok{]}
+
+\AttributeTok{    }\FunctionTok{steps}\KeywordTok{:}
+\CommentTok{      \# Step 1: Get the code}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Check out repository}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/checkout@v4}
+\CommentTok{        \# This downloads your repository\textquotesingle{}s code to the CI machine}
+
+\CommentTok{      \# Step 2: Set up Python}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Set up Python $\{\{ matrix.python{-}version \}\}}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/setup{-}python@v5}
+\AttributeTok{        }\FunctionTok{with}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{python{-}version}\KeywordTok{:}\AttributeTok{ $\{\{ matrix.python{-}version \}\}}
+\CommentTok{          \# Cache pip downloads to speed up subsequent runs}
+\AttributeTok{          }\FunctionTok{cache}\KeywordTok{:}\AttributeTok{ }\StringTok{"pip"}
+\FunctionTok{          cache{-}dependency{-}path}\KeywordTok{: }\CharTok{|}
+\NormalTok{            requirements.txt}
+\NormalTok{            requirements{-}dev.txt}
+
+\CommentTok{      \# Step 3: Install dependencies (requirements{-}dev.txt includes requirements.txt)}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Install dependencies}
+\AttributeTok{        }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ pip install {-}r requirements{-}dev.txt}
+
+\CommentTok{      \# Step 4: Run the build (lint + typecheck + test + security).}
+\CommentTok{      \# No DATABASE\_URL or SECRET\_KEY is needed here: tests/conftest.py}
+\CommentTok{      \# sets its own test values before the application is imported.}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Run build}
+\AttributeTok{        }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ make build}
+
+\CommentTok{      \# Step 5: Measure coverage and keep the report as an artifact}
+\CommentTok{      \# (viewable in the GitHub Actions UI). This runs the suite a second}
+\CommentTok{      \# time, which costs well under a second.}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Generate coverage report}
+\AttributeTok{        }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ pytest {-}{-}cov=app {-}{-}cov{-}report=xml}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Upload coverage report}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/upload{-}artifact@v4}
+\AttributeTok{        }\FunctionTok{with}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ coverage{-}report{-}py$\{\{ matrix.python{-}version \}\}}
+\AttributeTok{          }\FunctionTok{path}\KeywordTok{:}\AttributeTok{ coverage.xml}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\textbf{What this does:}
+
+Every time you push code to GitHub:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  GitHub's servers spin up a fresh Ubuntu virtual machine
+\item
+  They install Python (three versions, tested in parallel)
+\item
+  They install your dependencies
+\item
+  They run \texttt{make\ build}
+\item
+  If any step fails, GitHub marks the commit as ❌ and notifies you
+\item
+  If all steps pass, GitHub marks the commit as ✅
+\end{enumerate}
+
+\noindent{}This is the fundamental loop of CI: push code → automated build → pass or fail → repeat.
+
+\subsection*{The failing build as a safeguard}\phantomsection\label{17-build-process:the-failing-build-as-a-safeguard}
+
+When CI fails, it tells you:
+
+\begin{itemize}
+\tightlist
+\item
+  Which specific step failed (lint, typecheck, test, or security)
+\item
+  The exact error output
+\item
+  Which Python version failed
+\item
+  On which commit the failure occurred
+\end{itemize}
+
+\noindent{}A failing build is not a bad thing~--- it is the system working correctly. The goal is for every build to fail as early as possible in development, not after the code reaches production.
+
+The team rule that makes CI effective: \textbf{never merge code that fails the build.} If your CI check is failing, you fix the code before merging. CI only \emph{reports} the result; the rule is \emph{enforced} by the branch protection of section 17.9, which requires these checks to pass before a pull request can be merged. Together they keep \texttt{main} in a deployable state.
+
+This is also why the workflow runs on \texttt{pull\_request} as well as on \texttt{push}. The pull request run tests the branch \emph{as it would be once merged into \texttt{main}}, so the result the reviewer sees is the result \texttt{main} would get.
+
+\setcounter{section}{10}
+\section{The Complete Updated Project Structure}\label{17-build-process:1711-the-complete-updated-project-structure}
+
+After this chapter, the project structure is:
+
+\begin{diagrambox}[short]{372.4pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+├── .github/
+│   └── workflows/
+│       └── build.yml          ← CI configuration
+├── app/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── database.py
+│   ├── errors.py
+│   ├── logging_config.py
+│   ├── middleware.py
+│   ├── startup.py
+│   └── routes/
+│       ├── __init__.py
+│       ├── health.py
+│       └── notes.py
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py            ← pytest fixtures
+│   ├── test_errors.py         ← Error handler tests
+│   ├── test_health.py         ← Health endpoint tests
+│   ├── test_notes.py          ← Notes endpoint tests
+│   ├── test_startup.py        ← Startup checks, with a mock (section 17.8)
+│   └── test_units.py          ← Unit tests for small functions (section 17.8)
+├── Makefile                   ← Build automation
+├── pyproject.toml             ← Tool configuration
+├── requirements.txt           ← Production dependencies
+├── requirements-dev.txt       ← Development dependencies
+├── run.py
+├── .env
+├── .env.example
+├── .python-version
+└── .gitignore
+\end{Verbatim}
+\end{diagrambox}
+
+\phantomsection\label{17-build-process:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{build process} is the defined, automated sequence of steps that transforms source code into a verified, deployable artifact. Automation prevents human error.
+\item
+  For Python web applications, the build artifact is typically the source code itself (plus pinned dependencies) or a Docker image. There is no compiler in the Java sense.
+\item
+  \textbf{Separate production and development dependencies}: \texttt{requirements.txt} for the server, \texttt{requirements-dev.txt} for developers. Testing tools do not belong in production.
+\item
+  \textbf{\texttt{pytest}} is the standard Python testing framework. Tests are functions named \texttt{test\_*} in files named \texttt{test\_*.py}. \texttt{pytest} discovers and runs them automatically.
+\item
+  \textbf{Fixtures} in pytest are reusable setup functions. \texttt{scope="session"} creates a fixture once per run; \texttt{scope="function"} creates it per test. \texttt{autouse=True} runs a fixture automatically without being explicitly requested.
+\item
+  \textbf{The test client} (\texttt{app.test\_client()}) sends HTTP requests to Flask without a running server. Tests are fast and self-contained.
+\item
+  \textbf{Code quality tools}: \texttt{black} formats code, \texttt{ruff} lints for errors and style, \texttt{mypy} checks type annotations, \texttt{pip-audit} scans for security vulnerabilities.
+\item
+  \textbf{\texttt{make\ build}} is the one command that runs the complete build: lint → typecheck → test → security. If any step fails, Make stops.
+\item
+  \textbf{Continuous integration} (GitHub Actions, etc.) runs the build automatically on every push, providing immediate feedback on whether the build passes.
+\item
+  \textbf{Test coverage} measures which lines are executed by tests. 80\% is a reasonable minimum; 100\% is not the goal~--- meaningful tests are.
+\item
+  \textbf{Test each behaviour at the lowest level that can show it}: unit tests for small functions, integration tests through the test client for handlers, a few end-to-end checks of the running system. Every endpoint needs its normal case, bad input, missing things, edges, and its design decisions tested.
+\item
+  \textbf{Parametrize} tests that differ only in data. Use \textbf{test doubles} at the edges of the system: stubs to force failures, fakes for speed, spies (\texttt{caplog}) to observe, mocks when a call itself is the behaviour. Know what each one hides, and prefer the real thing when it is cheap.
+\item
+  \textbf{A flaky test is a bug.} Its causes are shared state, unordered results, time, randomness, timing and the network, and it gets fixed, not re-run. Fix bugs \textbf{test-first}: red, green, refactor.
+\item
+  \textbf{\texttt{main} is always releasable.} Changes travel on short-lived branches, as small, single-purpose pull requests with clear messages, reviewed by a person for what machines cannot check, and merged only when CI passes, which branch protection enforces. Undo with \texttt{git\ revert}; mark releases with tags and semantic versions.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{17-build-process:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Delete one line from a handler, a \texttt{db.commit()}, and run \texttt{make\ build}. Which step fails, and does the failure message point you to the cause?
+\item
+  \textbf{Break and fix.} Make one test depend on another by removing \texttt{clean\_database}'s \texttt{autouse=True}. Install \texttt{pytest-randomly} (\texttt{pip\ install\ pytest-}\allowbreak{}\texttt{randomly}), which runs the tests in a new random order every time, and run the suite a few times; \texttt{-p\ no:randomly} turns the shuffling off again. Explain the flakiness, then restore \texttt{autouse=True}.
+\item
+  \textbf{Extend.} Write a parametrized test for \texttt{GET\ /notes/\textless{}id\textgreater{}} covering an existing id, a missing id, and a non-integer id, with the status you expect for each. (Look closely at \texttt{\textless{}int:note\_id\textgreater{}} before you decide the third.)
+\item
+  \textbf{Explain.} When would you reach for a fake instead of a mock? Use an example from this book.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-17.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{17-build-process:whats-next}
+
+The build process produces a verified, tested application. The next step is packaging it in a form that is portable~--- that can be deployed to any server without ``it works on my machine'' problems.
+
+Docker is that packaging system. A Docker image captures not just the application code, but the entire execution environment: the specific Python version, all installed packages, the directory structure, the startup command. Building a Docker image is the final step of the build process that makes the application genuinely portable.
+
+\noindent{}→ \hyperref[ch:18-containerization]{Chapter 18}~--- Containerization

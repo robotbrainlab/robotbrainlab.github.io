@@ -1,0 +1,645 @@
+\setcounter{chapter}{7}
+\chapter{Hidden Dependencies}\label{ch:08-hidden-dependencies}
+
+\chapterrule
+
+Environment drift (← \hyperref[ch:07-environment-drift]{Chapter 7}) is largely visible. You can compare OS versions, Python versions, and installed packages. The differences are at least theoretically detectable.
+
+Hidden dependencies are different. They are the things your program needs that are not written down anywhere and are not even obviously connected to your application. They are the software your code uses without knowing it is using it. They are the assumptions so deeply embedded that the developer who wrote the code never noticed them as assumptions at all.
+
+A hidden dependency is not a bug in your code. It is a gap between what your code requires and what you have documented about those requirements. The code works because the developer's machine happens to have what the code needs. The gap is only discovered when the code runs in a different environment.
+
+This chapter examines four categories of hidden dependencies that affect Python applications:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Global vs local installs}: packages installed outside the virtual environment that your code depends on implicitly
+\item
+  \textbf{PATH dependencies}: command-line tools your code invokes that must exist at specific paths
+\item
+  \textbf{External binaries}: system programs called through \texttt{subprocess} or \texttt{os.system}
+\item
+  \textbf{Implicit assumptions}: things the code assumes are true about the environment without ever checking
+\end{enumerate}
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What each type of hidden dependency looks like
+\item
+  How each one appears in Python code
+\item
+  Why each one is dangerous
+\item
+  What makes a dependency ``hidden'' in the first place
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{The Difference Between Global and Local Installs}\label{08-hidden-dependencies:81-the-difference-between-global-and-local-installs}
+
+The term ``hidden global dependency'' describes a package that is installed globally on the developer's machine and imported by the application, but is not listed in the application's requirements file and is not installed in the virtual environment.
+
+\subsection*{How it happens}\phantomsection\label{08-hidden-dependencies:how-it-happens}
+
+A developer installs a useful tool globally one day:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install httpx}
+\CommentTok{\# Installed globally (no venv active)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Later, while working on the Notes API, they write code that uses it:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 8.1}\enspace Using a globally installed package without declaring it}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ httpx  }\CommentTok{\# This works on the developer\textquotesingle{}s machine}
+
+\KeywordTok{def}\NormalTok{ notify\_external\_service(note\_id: }\BuiltInTok{int}\NormalTok{, content: }\BuiltInTok{str}\NormalTok{):}
+    \CommentTok{"""Send a notification when a note is created."""}
+\NormalTok{    httpx.post(}\StringTok{"https://webhook.example.com/notes"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}
+        \StringTok{"id"}\NormalTok{: note\_id,}
+        \StringTok{"content"}\NormalTok{: content,}
+\NormalTok{    \})}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This code works on the developer's machine~--- but not because of the project's virtual environment. A virtual environment created with \texttt{python3\ -m\ venv} is isolated: when it is active, globally installed packages are \emph{not} on \texttt{sys.path}, and \texttt{import\ httpx} would fail. The code works because of one of these everyday slips:
+
+\begin{itemize}
+\tightlist
+\item
+  The developer ran the server \textbf{without activating the venv} (a new terminal tab, an IDE run configuration pointing at the system interpreter), so the global Python~--- which has \texttt{httpx}~--- ran the code.
+\item
+  The venv was created with \texttt{-\/-system-site-packages}, which deliberately lets it see global packages.
+\item
+  The developer installed \texttt{httpx} into the venv while experimenting, and never added it to the project's dependency list.
+\end{itemize}
+
+\noindent{}The developer commits this code. \texttt{httpx} is not in \texttt{requirements.txt}, because nothing forced anyone to write it down.
+
+A colleague clones the repository, creates a fresh virtual environment, installs from \texttt{requirements.txt}, and runs the server. When the first note is created, the application crashes:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+ModuleNotFoundError: No module named 'httpx'
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The package was never declared. It was never in \texttt{requirements.txt}. On the developer's machine, it happened to be available globally. Everywhere else, it does not exist.
+
+\subsection*{Why this happens without the developer noticing}\phantomsection\label{08-hidden-dependencies:why-this-happens-without-the-developer-noticing}
+
+The developer's workflow was:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Install \texttt{httpx} somewhere their interpreter could see it (possibly months ago, for a different project)
+\item
+  Write code that uses \texttt{httpx}
+\item
+  Test the code (it works~--- \texttt{httpx} is importable in \emph{that} interpreter)
+\item
+  Not notice that \texttt{httpx} is missing from \texttt{requirements.txt}
+\end{enumerate}
+
+\noindent{}There is no warning. \texttt{import\ httpx} does not care where the package came from; it only needs the package to be somewhere on the current interpreter's \texttt{sys.path}. Nothing compares what you import with what you declared.
+
+\subsection*{How to detect global dependency leaks}\phantomsection\label{08-hidden-dependencies:how-to-detect-global-dependency-leaks}
+
+The safest practice is to always develop in a virtual environment with \textbf{only} what is in \texttt{requirements.txt} installed~--- never install packages globally.
+
+You can also audit which packages are globally installed vs venv-installed:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Activate the venv, then check what\textquotesingle{}s available:}
+\ExtensionTok{pip}\NormalTok{ list  }\CommentTok{\# Shows packages in the active venv}
+
+\CommentTok{\# Compare to what is outside the venv:}
+\ExtensionTok{deactivate}
+\ExtensionTok{pip}\NormalTok{ list  }\CommentTok{\# Shows packages in the global Python installation}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}If a package appears in the global list but not in the venv list, and your code uses it, you have a hidden global dependency.
+
+A more systematic check: create a fresh virtual environment (a new directory) and try to run the application with only the packages from \texttt{requirements.txt}. If it fails, you have found a hidden dependency.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Test for hidden dependencies by using a fresh environment}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ venv /tmp/test{-}venv}
+\ExtensionTok{/tmp/test{-}venv/bin/pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
+\ExtensionTok{/tmp/test{-}venv/bin/python}\NormalTok{ app.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Any \texttt{ModuleNotFoundError} that appears in the fresh environment but not in your development venv is a hidden global dependency.
+
+\setcounter{section}{1}
+\section{PATH Dependencies: Tools Your Code Assumes Are Present}\label{08-hidden-dependencies:82-path-dependencies-tools-your-code-assumes-are-present}
+
+Your Python program can invoke external command-line tools using \texttt{subprocess.run()}, \texttt{os.system()}, or \texttt{os.popen()}. When it does, it assumes that tool exists on \texttt{\$PATH}. If the tool is not on \texttt{\$PATH} in the deployment environment, the call fails.
+
+\subsection*{A realistic example}\phantomsection\label{08-hidden-dependencies:a-realistic-example}
+
+The Notes API might need to export notes as Word documents. There is a widely used command-line tool called \texttt{pandoc} that converts between document formats, including HTML to \texttt{.docx}. A developer installs it on their macOS machine (via Homebrew):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{brew}\NormalTok{ install pandoc}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Then writes this code:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 8.2}\enspace Calling an external tool via subprocess}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ subprocess}
+\ImportTok{import}\NormalTok{ tempfile}
+\ImportTok{from}\NormalTok{ pathlib }\ImportTok{import}\NormalTok{ Path}
+
+\KeywordTok{def}\NormalTok{ export\_note\_as\_docx(note\_id: }\BuiltInTok{int}\NormalTok{, html\_content: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{bytes}\NormalTok{:}
+    \CommentTok{"""Convert note HTML content to a Word document using pandoc."""}
+    \ControlFlowTok{with}\NormalTok{ tempfile.TemporaryDirectory() }\ImportTok{as}\NormalTok{ tmp:        }\CommentTok{\# deleted automatically afterwards}
+\NormalTok{        input\_path }\OperatorTok{=}\NormalTok{ Path(tmp) }\OperatorTok{/} \StringTok{"note.html"}
+\NormalTok{        output\_path }\OperatorTok{=}\NormalTok{ Path(tmp) }\OperatorTok{/} \StringTok{"note.docx"}
+\NormalTok{        input\_path.write\_text(html\_content, encoding}\OperatorTok{=}\StringTok{"utf{-}8"}\NormalTok{)}
+
+\NormalTok{        result }\OperatorTok{=}\NormalTok{ subprocess.run(}
+\NormalTok{            [}\StringTok{"pandoc"}\NormalTok{, }\BuiltInTok{str}\NormalTok{(input\_path), }\StringTok{"{-}o"}\NormalTok{, }\BuiltInTok{str}\NormalTok{(output\_path)],}
+\NormalTok{            capture\_output}\OperatorTok{=}\VariableTok{True}\NormalTok{,}
+\NormalTok{            text}\OperatorTok{=}\VariableTok{True}\NormalTok{,}
+\NormalTok{        )}
+        \ControlFlowTok{if}\NormalTok{ result.returncode }\OperatorTok{!=} \DecValTok{0}\NormalTok{:}
+            \ControlFlowTok{raise} \PreprocessorTok{RuntimeError}\NormalTok{(}\SpecialStringTok{f"Document export failed: }\SpecialCharTok{\{}\NormalTok{result}\SpecialCharTok{.}\NormalTok{stderr}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+        \ControlFlowTok{return}\NormalTok{ output\_path.read\_bytes()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This code works on the developer's machine because \texttt{pandoc} is installed and in \texttt{\$PATH}.
+
+On a fresh Ubuntu server, \texttt{pandoc} is not installed by default. The \texttt{subprocess.run()} call fails:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+FileNotFoundError: [Errno 2] No such file or directory: 'pandoc'
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\texttt{pandoc} is a system-level dependency~--- not a Python package, not installable with \texttt{pip}. It must be installed with \texttt{apt-get\ install\ pandoc} (on Ubuntu). It is not in \texttt{requirements.txt}. It is not documented anywhere in the project. It is a hidden dependency.
+
+\subsection*{The PATH resolution trap}\phantomsection\label{08-hidden-dependencies:the-path-resolution-trap}
+
+When \texttt{subprocess.}\allowbreak{}\texttt{run({[}"pandoc",}\allowbreak{}\texttt{\ .}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{{]})} is called, Python's \texttt{subprocess} module uses the process's \texttt{\$PATH} to find \texttt{pandoc}. But the \texttt{\$PATH} in a production process launched by systemd or Docker may be different from the \texttt{\$PATH} in an interactive shell.
+
+systemd sets a minimal \texttt{\$PATH} by default:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}A developer's shell \texttt{\$PATH} might include:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+/home/yourname/.local/bin:/usr/local/bin:/usr/bin:/bin:/home/yourname/go/bin:/usr/local/go/bin
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}A tool installed at \texttt{/}\allowbreak{}\texttt{home/}\allowbreak{}\texttt{yourname/}\allowbreak{}\texttt{.}\allowbreak{}\texttt{local/}\allowbreak{}\texttt{bin/}\allowbreak{}\texttt{pandoc} is accessible from an interactive shell but not from a systemd service, because systemd does not include \texttt{\textasciitilde{}/.local/bin} in its PATH.
+
+\subsection*{The safer approach}\phantomsection\label{08-hidden-dependencies:the-safer-approach}
+
+Use absolute paths when calling external tools, or verify their presence at startup:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 8.3}\enspace Safer subprocess call with explicit validation}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ subprocess}
+\ImportTok{import}\NormalTok{ shutil}
+\ImportTok{import}\NormalTok{ os}
+
+\KeywordTok{def}\NormalTok{ \_find\_tool(name: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""Find the absolute path to a required external tool."""}
+    \CommentTok{\# 1. Check if an explicit path is configured}
+\NormalTok{    configured }\OperatorTok{=}\NormalTok{ os.getenv(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{.}\NormalTok{upper()}\SpecialCharTok{\}}\SpecialStringTok{\_PATH"}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ configured:}
+        \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ os.path.isfile(configured):}
+            \ControlFlowTok{raise} \PreprocessorTok{RuntimeError}\NormalTok{(}\SpecialStringTok{f"Configured path for }\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{ does not exist: }\SpecialCharTok{\{}\NormalTok{configured}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{return}\NormalTok{ configured}
+
+    \CommentTok{\# 2. Search PATH}
+\NormalTok{    found }\OperatorTok{=}\NormalTok{ shutil.which(name)}
+    \ControlFlowTok{if}\NormalTok{ found }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{raise} \PreprocessorTok{RuntimeError}\NormalTok{(}
+            \SpecialStringTok{f"Required tool \textquotesingle{}}\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} not found on PATH. "}
+            \SpecialStringTok{f"Install it with: apt{-}get install }\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{"}
+\NormalTok{        )}
+    \ControlFlowTok{return}\NormalTok{ found}
+
+\CommentTok{\# Called at startup, before the server begins accepting requests}
+\NormalTok{PANDOC\_PATH }\OperatorTok{=}\NormalTok{ \_find\_tool(}\StringTok{"pandoc"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ export\_note\_as\_docx(note\_id: }\BuiltInTok{int}\NormalTok{, html\_content: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{bytes}\NormalTok{:}
+\NormalTok{    ...}
+    \CommentTok{\# Use the verified absolute path}
+\NormalTok{    result }\OperatorTok{=}\NormalTok{ subprocess.run(}
+\NormalTok{        [PANDOC\_PATH, }\BuiltInTok{str}\NormalTok{(input\_path), }\StringTok{"{-}o"}\NormalTok{, }\BuiltInTok{str}\NormalTok{(output\_path)],}
+\NormalTok{        ...}
+\NormalTok{    )}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{shutil.which()} searches \texttt{\$PATH} for the tool and returns its absolute path (or \texttt{None} if not found). By calling this at startup and failing fast with a clear error, you turn a hidden runtime dependency into an explicit startup check.
+
+\setcounter{section}{2}
+\section{External Binaries: System Programs Called from Python}\label{08-hidden-dependencies:83-external-binaries-system-programs-called-from-python}
+
+External binaries are programs installed at the OS level that your Python code relies on. Unlike PATH dependencies, which are called directly by name, external binaries may be called by libraries that use them internally~--- making the dependency even less visible.
+
+\subsection*{Libraries that wrap external binaries}\phantomsection\label{08-hidden-dependencies:libraries-that-wrap-external-binaries}
+
+Some Python libraries are thin wrappers around external command-line tools:
+
+\textbf{\texttt{imagemagick}}: The \texttt{wand} Python library binds to ImageMagick's shared library (\texttt{libMagickWand}) for image processing. Importing \texttt{wand.image} works only if that library is installed on the system.
+
+\textbf{\texttt{ffmpeg}}: Libraries like \texttt{ffmpeg-python} wrap the \texttt{ffmpeg} tool for video processing. The Python library installs fine; the binary must be separately installed.
+
+\textbf{\texttt{git}}: The \texttt{gitpython} library wraps the \texttt{git} command. If \texttt{git} is not installed, \texttt{gitpython} fails when it tries to run git commands.
+
+\textbf{\texttt{latex}}: Libraries for rendering LaTeX to PDF invoke \texttt{pdflatex} or \texttt{xelatex}. These are part of a TeX distribution that must be installed separately.
+
+\textbf{\texttt{chromedriver}}: Web scraping libraries like Selenium use \texttt{chromedriver} (and Chrome itself) as external binaries.
+
+Example: the \texttt{wand} library (ImageMagick wrapper):
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 8.4}\enspace Using a library that wraps an external binary}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ wand.image }\ImportTok{import}\NormalTok{ Image  }\CommentTok{\# Works on developer\textquotesingle{}s Mac where ImageMagick is installed}
+
+\KeywordTok{def}\NormalTok{ generate\_thumbnail(image\_data: }\BuiltInTok{bytes}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{bytes}\NormalTok{:}
+    \CommentTok{"""Resize an image to thumbnail size."""}
+    \ControlFlowTok{with}\NormalTok{ Image(blob}\OperatorTok{=}\NormalTok{image\_data) }\ImportTok{as}\NormalTok{ img:}
+\NormalTok{        img.resize(}\DecValTok{128}\NormalTok{, }\DecValTok{128}\NormalTok{)}
+        \ControlFlowTok{return}\NormalTok{ img.make\_blob()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}On Ubuntu, if ImageMagick is not installed:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install wand}
+\ExtensionTok{python} \AttributeTok{{-}c} \StringTok{"from wand.image import Image"}
+\CommentTok{\# ImportError: MagickWand shared library not found.}
+\CommentTok{\#   You probably had not installed ImageMagick library.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The Python library (\texttt{wand}) installed fine. The ImageMagick shared library it loads at import time is missing.
+
+The fix:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{apt{-}get}\NormalTok{ install }\AttributeTok{{-}y}\NormalTok{ libmagickwand{-}dev   }\CommentTok{\# or: apt{-}get install {-}y imagemagick}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is a system-level operation, not a \texttt{pip\ install}. It must be part of your server setup (→ \hyperref[ch:21-system-setup]{Chapter 21}~--- System Setup) or your Docker image (→ \hyperref[ch:18-containerization]{Chapter 18}~--- Containerization).
+
+\subsection*{Finding all external binary dependencies}\phantomsection\label{08-hidden-dependencies:finding-all-external-binary-dependencies}
+
+There is no automated way to find all external binary dependencies. The best approaches are:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Read the documentation} for every library you use. Any library that wraps an external tool will say so.
+\item
+  \textbf{Test in a fresh environment} (a fresh Docker container or a new VM) with only the packages from \texttt{requirements.txt}. Any failure that mentions a missing binary reveals a hidden dependency.
+\item
+  \textbf{Instrument startup}: call \texttt{shutil.which()} for every external tool at startup and fail fast with a clear message if any are missing.
+\end{enumerate}
+
+\setcounter{section}{3}
+\section{Implicit Assumptions: What Your Code Relies On Without Knowing It}\label{08-hidden-dependencies:84-implicit-assumptions-what-your-code-relies-on-without-knowing-it}
+
+The fourth category of hidden dependencies is the most subtle: things the code assumes without ever making an explicit call for them. These assumptions are baked into how the code works, but they are never expressed as requirements.
+
+\subsection*{Locale and character encoding}\phantomsection\label{08-hidden-dependencies:locale-and-character-encoding}
+
+Python 3 strings are Unicode, and Python source files default to UTF-8. But the \textbf{locale}~--- the system-wide setting for language, encoding, and date/number formatting~--- can affect how files are read and written.
+
+On some older Linux systems, the default locale is \texttt{POSIX} (also called \texttt{C}), which does not support Unicode properly. In that locale:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 8.5}\enspace Character encoding assumptions}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{with} \BuiltInTok{open}\NormalTok{(}\StringTok{"notes.txt"}\NormalTok{, }\StringTok{"w"}\NormalTok{) }\ImportTok{as}\NormalTok{ f:}
+\NormalTok{    f.write(}\StringTok{"Note: café au lait 🍵"}\NormalTok{)}
+\CommentTok{\# On a system with POSIX locale, this may raise:}
+\CommentTok{\# UnicodeEncodeError: \textquotesingle{}ascii\textquotesingle{} codec can\textquotesingle{}t encode character \textquotesingle{}\textbackslash{}xe9\textquotesingle{} in position 9:}
+\CommentTok{\# ordinal not in range(128)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The \texttt{open()} call without an explicit \texttt{encoding} argument uses the locale's default encoding, which may not be UTF-8. Since Python 3.7, a plain \texttt{C}/\texttt{POSIX} locale is automatically upgraded to UTF-8, so this error is rare on modern Python~--- but other non-UTF-8 locales still exist, and relying on the default is still an implicit assumption.
+
+The fix: always specify the encoding explicitly:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 8.6}\enspace Explicit encoding --- no implicit locale dependency}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{with} \BuiltInTok{open}\NormalTok{(}\StringTok{"notes.txt"}\NormalTok{, }\StringTok{"w"}\NormalTok{, encoding}\OperatorTok{=}\StringTok{"utf{-}8"}\NormalTok{) }\ImportTok{as}\NormalTok{ f:}
+\NormalTok{    f.write(}\StringTok{"Note: café au lait 🍵"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}And set the system locale to UTF-8 in production (in Docker: \texttt{ENV\ LANG=C.UTF-8}).
+
+\subsection*{Time zones}\phantomsection\label{08-hidden-dependencies:time-zones}
+
+Python's \texttt{datetime.now()} returns the current time in the local timezone. If the server is in UTC and the developer's machine is in UTC-5, the same code produces different timestamps.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 8.7}\enspace Timezone-dependent code}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ datetime }\ImportTok{import}\NormalTok{ datetime}
+
+\NormalTok{created\_at }\OperatorTok{=}\NormalTok{ datetime.now()}
+\CommentTok{\# On developer\textquotesingle{}s machine (US Eastern, UTC{-}5): 2024{-}01{-}01 07:00:00}
+\CommentTok{\# On server (UTC):                             2024{-}01{-}01 12:00:00}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This can cause bugs in date comparisons, scheduled tasks, and audit logs. The fix: always use UTC:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 8.8}\enspace Timezone-aware datetime --- no implicit timezone dependency}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ datetime }\ImportTok{import}\NormalTok{ datetime, timezone}
+
+\NormalTok{created\_at }\OperatorTok{=}\NormalTok{ datetime.now(tz}\OperatorTok{=}\NormalTok{timezone.utc)}
+\CommentTok{\# Always 2024{-}01{-}01 12:00:00+00:00, regardless of system timezone}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}And set the server's timezone to UTC (in Docker: \texttt{ENV\ TZ=UTC}).
+
+\subsection*{Available ports}\phantomsection\label{08-hidden-dependencies:available-ports}
+
+The application assumes port 5000 is free. On macOS Monterey (12.x) and later, port 5000 is used by AirPlay Receiver. A developer who does not have AirPlay Receiver disabled will find that Flask fails to bind:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+OSError: [Errno 48] Address already in use
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This is an implicit assumption about port availability. The fix is to make the port configurable:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 8.9}\enspace Making the port configurable via environment variable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+
+\NormalTok{port }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(os.getenv(}\StringTok{"PORT"}\NormalTok{, }\StringTok{"5000"}\NormalTok{))}
+\NormalTok{app.run(host}\OperatorTok{=}\StringTok{"localhost"}\NormalTok{, port}\OperatorTok{=}\NormalTok{port, debug}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Now the port can be changed without modifying code:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\VariableTok{PORT}\OperatorTok{=}\NormalTok{8080 }\ExtensionTok{python}\NormalTok{ app.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{CPU architecture and compiled packages}\phantomsection\label{08-hidden-dependencies:cpu-architecture-and-compiled-packages}
+
+Some Python packages are distributed as precompiled wheels for specific CPU architectures:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{x86\_64} (most Intel/AMD desktops and servers)
+\item
+  \texttt{arm64} / \texttt{aarch64} (Apple Silicon Macs, AWS Graviton, Raspberry Pi)
+\end{itemize}
+
+\noindent{}A package compiled for \texttt{x86\_64} will not run on \texttt{arm64}, and vice versa. If you download a wheel on one architecture and try to run it on another:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+ImportError: /path/to/package.cpython-311-x86_64-linux-gnu.so: cannot execute binary file: Exec format error
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This is usually handled automatically by \texttt{pip}~--- it downloads the correct wheel for the current architecture, and it refuses to install a \texttt{.whl} file built for a different platform (``is not a supported wheel on this platform''). The error above appears when an already-installed environment is copied between machines~--- for example, a \texttt{venv/} directory or a container image built on an Apple Silicon Mac and run on an x86\_64 server.
+
+The implication: install packages on (or for) the target platform~--- let \texttt{pip} run there, or build images explicitly for the server's architecture (→ \hyperref[ch:18-containerization]{Chapter 18}). Never copy compiled packages between different architectures.
+
+\subsection*{File descriptor limits}\phantomsection\label{08-hidden-dependencies:file-descriptor-limits}
+
+The operating system limits how many file descriptors a process can have open simultaneously. On Linux, this default is typically 1024. A server that opens many database connections, log files, and network connections simultaneously may hit this limit.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 8.10}\enspace Checking the file descriptor limit}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ resource}
+
+\NormalTok{soft\_limit, hard\_limit }\OperatorTok{=}\NormalTok{ resource.getrlimit(resource.RLIMIT\_NOFILE)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Soft limit: }\SpecialCharTok{\{}\NormalTok{soft\_limit}\SpecialCharTok{\}}\SpecialStringTok{, Hard limit: }\SpecialCharTok{\{}\NormalTok{hard\_limit}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\CommentTok{\# Soft limit: 1024, Hard limit: 1048576}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The soft limit (1024) is the enforced limit. A process that exceeds it gets \texttt{OSError:}\allowbreak{}\texttt{\ {[}Errno\ 24{]}\ Too\ many\ open\ files}. This limit is implicitly assumed to be sufficient. On a heavily loaded server, it may not be. We address this in → \hyperref[ch:25-process-management]{Chapter 25}~--- Process Management.
+
+\unnumberedsection{false}{The Hidden Dependency Audit}\label{08-hidden-dependencies:the-hidden-dependency-audit}
+
+Before deploying the Notes API (or any application), conduct a hidden dependency audit:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 8.11}\enspace A startup check that surfaces hidden dependencies explicitly}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ shutil}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ sys}
+
+\KeywordTok{def}\NormalTok{ check\_dependencies():}
+    \CommentTok{"""Verify all hidden dependencies at startup. Fail fast with clear messages."""}
+\NormalTok{    errors }\OperatorTok{=}\NormalTok{ []}
+
+    \CommentTok{\# Check Python version}
+    \ControlFlowTok{if}\NormalTok{ sys.version\_info }\OperatorTok{\textless{}}\NormalTok{ (}\DecValTok{3}\NormalTok{, }\DecValTok{10}\NormalTok{):}
+\NormalTok{        errors.append(}
+            \SpecialStringTok{f"Python 3.10+ required. Running: }\SpecialCharTok{\{}\NormalTok{sys}\SpecialCharTok{.}\NormalTok{version\_info}\SpecialCharTok{.}\NormalTok{major}\SpecialCharTok{\}}\SpecialStringTok{.}\SpecialCharTok{\{}\NormalTok{sys}\SpecialCharTok{.}\NormalTok{version\_info}\SpecialCharTok{.}\NormalTok{minor}\SpecialCharTok{\}}\SpecialStringTok{"}
+\NormalTok{        )}
+
+    \CommentTok{\# Check required environment variables}
+\NormalTok{    required\_env }\OperatorTok{=}\NormalTok{ [}\StringTok{"DATABASE\_PATH"}\NormalTok{, }\StringTok{"API\_KEY"}\NormalTok{]}
+    \ControlFlowTok{for}\NormalTok{ var }\KeywordTok{in}\NormalTok{ required\_env:}
+        \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ os.getenv(var):}
+\NormalTok{            errors.append(}\SpecialStringTok{f"Required environment variable not set: }\SpecialCharTok{\{}\NormalTok{var}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+    \CommentTok{\# Check required external tools}
+\NormalTok{    required\_tools }\OperatorTok{=}\NormalTok{ [}\StringTok{"pandoc"}\NormalTok{]  }\CommentTok{\# add any tools your app uses}
+    \ControlFlowTok{for}\NormalTok{ tool }\KeywordTok{in}\NormalTok{ required\_tools:}
+        \ControlFlowTok{if}\NormalTok{ shutil.which(tool) }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{            errors.append(}\SpecialStringTok{f"Required external tool not found on PATH: }\SpecialCharTok{\{}\NormalTok{tool}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+    \CommentTok{\# Check writable paths}
+\NormalTok{    data\_dir }\OperatorTok{=}\NormalTok{ os.path.dirname(os.getenv(}\StringTok{"DATABASE\_PATH"}\NormalTok{, }\StringTok{"notes.db"}\NormalTok{))}
+    \ControlFlowTok{if}\NormalTok{ data\_dir }\KeywordTok{and} \KeywordTok{not}\NormalTok{ os.access(data\_dir, os.W\_OK):}
+\NormalTok{        errors.append(}\SpecialStringTok{f"Database directory is not writable: }\SpecialCharTok{\{}\NormalTok{data\_dir}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+    \CommentTok{\# Check required Python packages (by import name: python{-}dotenv imports as "dotenv")}
+\NormalTok{    required\_packages }\OperatorTok{=}\NormalTok{ [}\StringTok{"flask"}\NormalTok{, }\StringTok{"dotenv"}\NormalTok{]}
+    \ControlFlowTok{for}\NormalTok{ package }\KeywordTok{in}\NormalTok{ required\_packages:}
+        \ControlFlowTok{try}\NormalTok{:}
+            \BuiltInTok{\_\_import\_\_}\NormalTok{(package)}
+        \ControlFlowTok{except} \PreprocessorTok{ImportError}\NormalTok{:}
+\NormalTok{            errors.append(}\SpecialStringTok{f"Required Python package not importable: }\SpecialCharTok{\{}\NormalTok{package}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+    \ControlFlowTok{if}\NormalTok{ errors:}
+        \BuiltInTok{print}\NormalTok{(}\StringTok{"Startup failed — dependency check errors:"}\NormalTok{)}
+        \ControlFlowTok{for}\NormalTok{ error }\KeywordTok{in}\NormalTok{ errors:}
+            \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"  ✗ }\SpecialCharTok{\{}\NormalTok{error}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\NormalTok{        sys.exit(}\DecValTok{1}\NormalTok{)}
+
+    \BuiltInTok{print}\NormalTok{(}\StringTok{"All dependency checks passed."}\NormalTok{)}
+
+\CommentTok{\# Call this before app.run()}
+\NormalTok{check\_dependencies()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This function runs at startup and either confirms all dependencies are present or lists every missing one clearly. It turns hidden failures (crashes mid-request with cryptic errors) into explicit startup failures with actionable messages.
+
+\phantomsection\label{08-hidden-dependencies:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Hidden dependencies} are things your program needs that are not written down in any requirements file and may not be obviously connected to your application.
+\item
+  \textbf{Global vs local installs}: packages that happen to be importable on the developer's machine~--- because the venv was not active, or was never cleaned~--- work even without being in \texttt{requirements.txt}. Test in a fresh virtual environment with only \texttt{requirements.txt} packages to find these.
+\item
+  \textbf{PATH dependencies}: external tools invoked by name via \texttt{subprocess} are not Python packages and cannot be \texttt{pip\ install}-ed. They must be documented and installed separately at the OS level.
+\item
+  \textbf{External binaries}: Python libraries that wrap external tools or libraries (ImageMagick, ffmpeg, pandoc) have non-Python dependencies. Read each library's documentation for system requirements.
+\item
+  \textbf{Implicit assumptions}: character encoding, timezone, port availability, CPU architecture, and file descriptor limits are all assumptions embedded in the code that can silently differ between environments.
+\item
+  The solution is to write an explicit \textbf{startup dependency check} that fails fast with a clear error message when any dependency is missing.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{08-hidden-dependencies:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Create a fresh virtual environment, install only \texttt{flask} and \texttt{python-dotenv}, then start the application and call every endpoint with \texttt{curl}. Did anything fail that worked in your usual environment? What does that reveal?
+\item
+  \textbf{Break and fix.} Make the application call an external program (for example \texttt{subprocess.}\allowbreak{}\texttt{run({[}"convert",}\allowbreak{}\texttt{\ .}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{{]})}) and run it where that program is not installed. Then add a start-up check that fails fast with a clear message.
+\item
+  \textbf{Extend.} Extend the start-up check so it reports \emph{all} missing dependencies at once, not just the first.
+\item
+  \textbf{Explain.} Give three examples of implicit assumptions (not packages) that code can depend on without anyone noticing.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-08.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{08-hidden-dependencies:whats-next}
+
+We have looked at how the environment can differ from what the code expects. The next chapter looks at a specific and dangerous category of hidden coupling: configuration values~--- secrets, database URLs, debug flags~--- that are baked directly into the source code instead of externalized where they can be safely changed.
+
+\noindent{}→ \hyperref[ch:09-configuration-coupling]{Chapter 9}~--- Configuration Coupling

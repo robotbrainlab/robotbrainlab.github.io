@@ -1,0 +1,1845 @@
+\unnumberedchapter{Appendix A --- Python Environment Setup}\label{ch:44-appendices}
+
+\chapterrule
+
+This appendix provides a complete guide to setting up a Python development environment from scratch, for readers who are new to Python or need to set up a fresh machine.
+
+\unnumberedsection{true}{A.1 Installing Python}\label{44-appendices:a1-installing-python}
+
+\textbf{macOS}
+
+The recommended approach is using \textbf{pyenv}, a tool that manages multiple Python versions side by side.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install Homebrew (macOS package manager) if not already installed}
+\ExtensionTok{/bin/bash} \AttributeTok{{-}c} \StringTok{"}\VariableTok{$(}\ExtensionTok{curl} \AttributeTok{{-}fsSL}\NormalTok{ https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh}\VariableTok{)}\StringTok{"}
+
+\CommentTok{\# Install pyenv, plus the libraries Python is built against (without}
+\CommentTok{\# them, pyenv install fails or produces a Python missing ssl or sqlite3)}
+\ExtensionTok{brew}\NormalTok{ install pyenv openssl readline sqlite3 xz zlib tcl{-}tk}
+
+\CommentTok{\# Add pyenv to your shell (bash)}
+\BuiltInTok{echo} \StringTok{\textquotesingle{}export PYENV\_ROOT="$HOME/.pyenv"\textquotesingle{}} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ \textasciitilde{}/.bash\_profile}
+\BuiltInTok{echo} \StringTok{\textquotesingle{}export PATH="$PYENV\_ROOT/bin:$PATH"\textquotesingle{}} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ \textasciitilde{}/.bash\_profile}
+\BuiltInTok{echo} \StringTok{\textquotesingle{}eval "$(pyenv init {-})"\textquotesingle{}} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ \textasciitilde{}/.bash\_profile}
+\BuiltInTok{source}\NormalTok{ \textasciitilde{}/.bash\_profile}
+
+\CommentTok{\# For zsh (the default shell on modern macOS):}
+\BuiltInTok{echo} \StringTok{\textquotesingle{}export PYENV\_ROOT="$HOME/.pyenv"\textquotesingle{}} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ \textasciitilde{}/.zshrc}
+\BuiltInTok{echo} \StringTok{\textquotesingle{}export PATH="$PYENV\_ROOT/bin:$PATH"\textquotesingle{}} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ \textasciitilde{}/.zshrc}
+\BuiltInTok{echo} \StringTok{\textquotesingle{}eval "$(pyenv init {-})"\textquotesingle{}} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ \textasciitilde{}/.zshrc}
+\BuiltInTok{source}\NormalTok{ \textasciitilde{}/.zshrc}
+
+\CommentTok{\# Install Python 3.11 (the version used throughout this book)}
+\ExtensionTok{pyenv}\NormalTok{ install 3.11.8}
+
+\CommentTok{\# Set it as the default Python version}
+\ExtensionTok{pyenv}\NormalTok{ global 3.11.8}
+
+\CommentTok{\# Verify the installation}
+\ExtensionTok{python} \AttributeTok{{-}{-}version}
+\CommentTok{\# Python 3.11.8}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Ubuntu / Debian Linux}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install required build dependencies for compiling Python from source}
+\FunctionTok{sudo}\NormalTok{ apt{-}get update}
+\FunctionTok{sudo}\NormalTok{ apt{-}get install }\AttributeTok{{-}y} \DataTypeTok{\textbackslash{}}
+\NormalTok{    build{-}essential }\DataTypeTok{\textbackslash{}}
+\NormalTok{    libssl{-}dev }\DataTypeTok{\textbackslash{}}
+\NormalTok{    zlib1g{-}dev }\DataTypeTok{\textbackslash{}}
+\NormalTok{    libbz2{-}dev }\DataTypeTok{\textbackslash{}}
+\NormalTok{    libreadline{-}dev }\DataTypeTok{\textbackslash{}}
+\NormalTok{    libsqlite3{-}dev }\DataTypeTok{\textbackslash{}}
+\NormalTok{    libncursesw5{-}dev }\DataTypeTok{\textbackslash{}}
+\NormalTok{    xz{-}utils }\DataTypeTok{\textbackslash{}}
+\NormalTok{    tk{-}dev }\DataTypeTok{\textbackslash{}}
+\NormalTok{    libffi{-}dev }\DataTypeTok{\textbackslash{}}
+\NormalTok{    liblzma{-}dev}
+
+\CommentTok{\# Install pyenv}
+\ExtensionTok{curl}\NormalTok{ https://pyenv.run }\KeywordTok{|} \FunctionTok{bash}
+
+\CommentTok{\# Add to \textasciitilde{}/.bashrc}
+\BuiltInTok{echo} \StringTok{\textquotesingle{}export PYENV\_ROOT="$HOME/.pyenv"\textquotesingle{}} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ \textasciitilde{}/.bashrc}
+\BuiltInTok{echo} \StringTok{\textquotesingle{}export PATH="$PYENV\_ROOT/bin:$PATH"\textquotesingle{}} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ \textasciitilde{}/.bashrc}
+\BuiltInTok{echo} \StringTok{\textquotesingle{}eval "$(pyenv init {-})"\textquotesingle{}} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ \textasciitilde{}/.bashrc}
+\BuiltInTok{source}\NormalTok{ \textasciitilde{}/.bashrc}
+
+\CommentTok{\# Install Python}
+\ExtensionTok{pyenv}\NormalTok{ install 3.11.8}
+\ExtensionTok{pyenv}\NormalTok{ global 3.11.8}
+\ExtensionTok{python} \AttributeTok{{-}{-}version}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Windows (WSL2 recommended)}
+
+The smoothest development experience on Windows is Windows Subsystem for Linux (WSL2), which gives you a full Ubuntu environment:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In PowerShell (run as Administrator):}
+\NormalTok{wsl }\OperatorTok{{-}{-}}\NormalTok{install}
+\CommentTok{\# Restart when prompted}
+
+\CommentTok{\# After restart, WSL2 opens an Ubuntu terminal}
+\CommentTok{\# Follow the Ubuntu setup instructions above}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{A.2 Virtual Environments}\label{44-appendices:a2-virtual-environments}
+
+A \textbf{virtual environment} is an isolated Python environment with its own installed packages, separate from the system Python. Always use a virtual environment for each project to prevent dependency conflicts.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create a virtual environment in the project directory}
+\CommentTok{\# (named venv, as in Chapter 6)}
+\BuiltInTok{cd}\NormalTok{ notes{-}api}
+\ExtensionTok{python} \AttributeTok{{-}m}\NormalTok{ venv venv}
+
+\CommentTok{\# Activate the virtual environment}
+\BuiltInTok{source}\NormalTok{ venv/bin/activate     }\CommentTok{\# Linux / macOS}
+
+\CommentTok{\# After activation, the shell prompt shows (venv):}
+\CommentTok{\# (venv) user@machine:\textasciitilde{}/notes{-}api$}
+
+\CommentTok{\# Install project dependencies}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
+
+\CommentTok{\# Verify installation}
+\ExtensionTok{pip}\NormalTok{ list}
+
+\CommentTok{\# Deactivate when done}
+\ExtensionTok{deactivate}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(On Windows, in PowerShell, the activation command is \texttt{venv\textbackslash{}Scripts\textbackslash{}activate}.)
+
+The virtual environment creates a directory \texttt{venv/} in the project folder containing:
+
+\begin{itemize}
+\tightlist
+\item
+  A link to the Python interpreter (a copy, on Windows)
+\item
+  A \texttt{site-packages/} directory for installed packages
+\item
+  Scripts for activation and deactivation
+\end{itemize}
+
+\noindent{}Add it to \texttt{.gitignore}~--- never commit virtual environments to git.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# .gitignore}
+\NormalTok{venv/}
+\NormalTok{.venv/}
+\NormalTok{\_\_pycache\_\_/}
+\NormalTok{*.pyc}
+\NormalTok{.env}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{A.3 pip: Installing Packages}\label{44-appendices:a3-pip-installing-packages}
+
+\texttt{pip} is Python's package installer. It downloads packages from \textbf{PyPI} (the Python Package Index, at pypi.org).
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install a single package}
+\ExtensionTok{pip}\NormalTok{ install flask}
+
+\CommentTok{\# Install a specific version}
+\ExtensionTok{pip}\NormalTok{ install flask==3.0.0}
+
+\CommentTok{\# Install from a requirements file}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
+
+\CommentTok{\# Upgrade a package}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}{-}upgrade}\NormalTok{ flask}
+
+\CommentTok{\# Uninstall a package}
+\ExtensionTok{pip}\NormalTok{ uninstall flask}
+
+\CommentTok{\# List installed packages}
+\ExtensionTok{pip}\NormalTok{ list}
+
+\CommentTok{\# Show info about an installed package}
+\ExtensionTok{pip}\NormalTok{ show flask}
+
+\CommentTok{\# Save current environment to requirements.txt — only in an environment}
+\CommentTok{\# that holds nothing but the production dependencies (Chapter 17)}
+\ExtensionTok{pip}\NormalTok{ freeze }\OperatorTok{\textgreater{}}\NormalTok{ requirements.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Requirements files.} The Notes API's two files, as the chapters built them (\hyperref[ch:12-dependency-declaration]{Chapters 12}, \hyperref[ch:17-build-process]{17}, and \hyperref[ch:18-containerization]{18}):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# requirements.txt — production dependencies
+blinker==1.7.0
+click==8.1.7
+Flask==3.0.2
+gunicorn==22.0.0
+itsdangerous==2.1.2
+Jinja2==3.1.3
+MarkupSafe==2.1.5
+packaging==24.0
+psycopg2-binary==2.9.9
+python-dotenv==1.0.1
+Werkzeug==3.0.1
+\end{Verbatim}
+\end{outputbox}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# requirements-dev.txt — development and test dependencies
+# Everything the application itself needs
+-r requirements.txt
+pytest==8.1.1
+pytest-cov==5.0.0
+black==24.3.0
+ruff==0.3.5
+mypy==1.9.0
+pip-audit==2.7.3
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}(Later chapters add optional packages when you adopt their features: \texttt{prometheus-}\allowbreak{}\texttt{flask-}\allowbreak{}\texttt{exporter} in Chapter 35, \texttt{redis} in Chapter 36, \texttt{bcrypt} in Chapter 38~--- pin each as you add it. And \texttt{pip-audit} will report that Werkzeug 3.0.1 has a known vulnerability, as Chapter 17 showed: upgrading pins is routine maintenance.)
+
+\unnumberedsection{true}{A.4 The Project Structure}\label{44-appendices:a4-the-project-structure}
+
+The Notes API uses this directory structure:
+
+\begin{diagrambox}{400.8pt}
+\begin{Verbatim}[fontsize=\fontsize{7.5}{7.12}\selectfont]
+notes-api/
+├── .github/
+│   └── workflows/
+│       └── build.yml          # CI: test, build, smoke-test, publish, deploy
+├── app/
+│   ├── __init__.py            # create_app() factory
+│   ├── auth.py                # Passwords, login tokens, protect() (Chapter 38)
+│   ├── config.py              # All environment variables, read and validated
+│   ├── email.py               # The only module that talks to the email service
+│   ├── jobs.py                # The job queue: enqueue, claim, retry (Chapter 41)
+│   ├── database.py            # open_db(), get_db(), close_db(), sql(), for_update(), row_to_note()
+│   ├── errors.py              # JSON error handlers (the handling boundary)
+│   ├── logging_config.py      # Logging configuration
+│   ├── middleware.py          # Before/after request hooks
+│   ├── migrate.py             # The migration runner (python -m app.migrate)
+│   ├── startup.py             # Startup checks
+│   ├── tasks.py               # What each kind of job does
+│   ├── validation.py          # The Validator (Chapter 31)
+│   ├── worker.py              # The worker process (python -m app.worker)
+│   └── routes/
+│       ├── __init__.py
+│       ├── auth.py            # /auth/register, /auth/login, /auth/session
+│       ├── notes.py           # /notes/ endpoints, including a note's tags
+│       ├── tags.py            # /tags/<name>/notes
+│       └── health.py          # /health and /ping
+├── migrations/                # The schema, as numbered changes (Chapter 33)
+│   ├── postgresql/            # 0001_create_notes.sql, 0002_add_updated_at.sql, 0003_add_tags.sql, …
+│   └── sqlite/                # the same, in SQLite's dialect (removed in Chapter 39)
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py            # Pytest fixtures (including logged-in clients)
+│   ├── test_auth.py           # Register, login, logout, tokens
+│   ├── test_authorization.py  # One user can never reach another's notes
+│   ├── test_email_client.py   # app/email.py against a misbehaving local server
+│   ├── test_email_note.py     # POST /notes/<id>/email queues a job
+│   ├── test_worker.py         # The worker: retries, leases, SKIP LOCKED
+│   ├── test_errors.py         # Error handler tests
+│   ├── test_health.py         # Health check tests
+│   ├── test_migrations.py     # Migration runner tests
+│   ├── test_notes.py          # Note CRUD tests
+│   └── test_tags.py           # Tags: joins, constraints, cascades
+├── .dockerignore              # Files kept out of the image
+├── .env.example               # Environment variable documentation
+├── .gitignore
+├── Dockerfile                 # Container definition
+├── docker-compose.yml         # Local development stack
+├── gunicorn.conf.py           # Gunicorn configuration
+├── Makefile                   # Build automation
+├── pyproject.toml             # Tool configuration (pytest, black, ruff, mypy)
+├── requirements.txt           # Production dependencies
+├── requirements-dev.txt       # Development dependencies
+└── run.py                     # Development-server entry point
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}(The migrations are the only definition of the schema: a new database is built by running all of them with \texttt{python\ -m\ app.migrate}, and the application refuses to start while any is pending.)
+
+\unnumberedsection{true}{A.5 Common pip Issues and Fixes}\label{44-appendices:a5-common-pip-issues-and-fixes}
+
+\textbf{\texttt{pip:\ command\ not\ found}}
+
+Usually one of two things. On many systems only \texttt{pip3} exists, or pip belongs to a different Python than the one you run~--- \texttt{python3\ -m\ pip} always uses the right one. Or the virtual environment is not activated:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{source}\NormalTok{ venv/bin/activate}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(On recent Ubuntu and macOS Python installations, installing into the \emph{system} Python is refused with ``externally-managed-environment''~--- PEP 668. That is the system telling you to use a virtual environment.)
+
+\textbf{Package installation fails with compilation error}
+
+The package requires a system library that is not installed. For psycopg2:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Ubuntu/Debian: a compiler, Python\textquotesingle{}s headers, and PostgreSQL\textquotesingle{}s client library}
+\FunctionTok{sudo}\NormalTok{ apt{-}get install build{-}essential libpq{-}dev python3{-}dev}
+
+\CommentTok{\# macOS: PostgreSQL\textquotesingle{}s client library}
+\ExtensionTok{brew}\NormalTok{ install libpq}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Or use the binary wheel (no compilation needed):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install psycopg2{-}binary  }\CommentTok{\# Pre{-}compiled, includes libpq}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{\texttt{ModuleNotFoundError} even though the package is installed}
+
+The package was installed for a different Python than the one you are running~--- typically, you are outside the virtual environment. Check, and install with the interpreter you actually use:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{which}\NormalTok{ python                          }\CommentTok{\# Should show: .../notes{-}api/venv/bin/python}
+\ExtensionTok{python} \AttributeTok{{-}m}\NormalTok{ pip install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedchapter{Appendix B --- Glossary}\label{ch:44-appendices-2}
+
+\chapterrule
+
+This glossary defines the technical terms introduced throughout the book, in alphabetical order.
+
+\textbf{Accept queue}: The kernel data structure that holds fully-established TCP connections waiting to be retrieved by the application via \texttt{accept()}. If it fills, Linux silently drops new connection attempts, and clients see slow connects or timeouts.
+
+\textbf{ACME}: Automatic Certificate Management Environment. The protocol used by Let's Encrypt to automate certificate issuance and renewal. Defines the HTTP-01 and DNS-01 challenge types.
+
+\textbf{Advisory lock}: A lock on a number the application chooses, taken and released through the database (PostgreSQL's \texttt{pg\_advisory\_lock} family). Used to make processes take turns at something the database itself does not lock, such as running migrations.
+
+\textbf{API} (Application Programming Interface): A defined set of rules for how software components communicate. In this book, the Notes API provides an HTTP interface for CRUD operations on notes.
+
+\textbf{Application factory}: A design pattern where the Flask app is created inside a function (\texttt{create\_app()}) rather than at module level, enabling deferred configuration and easier testing.
+
+\textbf{Authentication}: Establishing who is making a request. The Notes API authenticates with login tokens obtained by email and password (Chapter 38).
+
+\textbf{Authorization}: Deciding what an authenticated user may do. In the Notes API, a note is visible only to its owner, enforced in every query.
+
+\textbf{Autocommit}: A PostgreSQL mode where each SQL statement is immediately committed as its own transaction. Not the default; psycopg2 begins transactions implicitly.
+
+\textbf{Backlog}: The maximum size of the accept queue, passed as the argument to \texttt{socket.listen(backlog)}. Connection attempts beyond this limit are dropped (clients retry and eventually time out).
+
+\textbf{bcrypt}: A deliberately slow, salted password-hashing function with an adjustable cost factor. Fast hashes such as SHA-256 must never be used for passwords.
+
+\textbf{Blueprint}: A Flask mechanism for grouping related routes, before/after request hooks, and error handlers. Blueprints are registered on the app with an optional URL prefix.
+
+\textbf{CIDR notation}: A way of expressing IP address ranges. \texttt{10.0.0.0/8} means all IP addresses from \texttt{10.0.0.0} to \texttt{10.255.255.255}. The \texttt{/8} is the number of fixed prefix bits.
+
+\textbf{Circuit breaker}: A reliability pattern that stops calling a failing service and returns immediate errors, giving the service time to recover.
+
+\textbf{CNAME record}: A DNS record type that maps a hostname to another hostname (an alias). Cannot be used at the apex of a domain.
+
+\textbf{Constraint}: A rule the database enforces on every write, whichever code makes it: \texttt{NOT\ NULL}, \texttt{UNIQUE}, \texttt{CHECK}, \texttt{PRIMARY\ KEY}, and foreign keys. Validation serves the client; constraints protect the data.
+
+\textbf{Container}: An isolated execution environment that shares the host operating system kernel but has its own filesystem, network, and process space. Docker is the most common container runtime.
+
+\textbf{Content negotiation}: The process where a client specifies acceptable response formats (via the \texttt{Accept} header) and the server chooses the best matching format.
+
+\textbf{Context local}: A variable that appears global but stores different values for different execution contexts (threads, asyncio tasks). Flask's \texttt{request} and \texttt{g} are context locals.
+
+\textbf{Cookie}: A small piece of data that the server asks the browser to store and send back with subsequent requests to the same domain. Used for sessions.
+
+\textbf{CRUD}: Create, Read, Update, Delete~--- the four basic operations on persistent data.
+
+\textbf{Deadlock}: Two transactions each waiting for a lock the other holds. PostgreSQL detects it and aborts one; the cure is to take locks in a consistent order, keep transactions short, and retry.
+
+\textbf{DMA} (Direct Memory Access): Hardware mechanism that allows devices (like NICs) to read/write system memory directly without CPU involvement, reducing interrupt overhead.
+
+\textbf{DNS} (Domain Name System): The global distributed database that maps human-readable domain names (\texttt{api.notes.example.com}) to IP addresses.
+
+\textbf{Docker image}: A read-only template containing the filesystem layers that make up a container. Built from a Dockerfile.
+
+\textbf{Dockerfile}: A text file containing instructions to build a Docker image. Each instruction that changes files (\texttt{RUN}, \texttt{COPY}, \texttt{ADD}) creates a layer.
+
+\textbf{ETag}: An HTTP response header containing a version identifier for the resource. Clients send it back in \texttt{If-None-Match}; if it still matches, the server answers 304 Not Modified and the client reuses its cached copy.
+
+\textbf{Endpoint}: In Flask, a named reference to a handler function. Every route has an endpoint name; \texttt{url\_}\allowbreak{}\texttt{for("notes.}\allowbreak{}\texttt{list\_}\allowbreak{}\texttt{notes")} builds the URL for the \texttt{list\_notes} endpoint in the \texttt{notes} Blueprint.
+
+\textbf{Environment variable}: A key-value pair stored in a process's environment, inherited by child processes. The primary mechanism for passing configuration (including secrets) to applications.
+
+\textbf{\texttt{epoll}}: A Linux kernel mechanism for efficiently monitoring many file descriptors simultaneously for I/O readiness. Used by Nginx and async Python frameworks.
+
+\textbf{File descriptor} (fd): An integer that the kernel assigns to an open file, socket, or other I/O resource. Processes use file descriptors to reference open resources.
+
+\textbf{Flask}: A lightweight Python web framework that provides URL routing, request/response handling, and an extensible middleware system.
+
+\textbf{Floating IP} (cloud): DigitalOcean's former name for a Reserved IP (see there).
+
+\textbf{Graceful degradation}: Returning a partial or degraded response when a dependency fails, rather than returning a complete error.
+
+\textbf{Graceful shutdown}: Allowing in-progress requests to complete before the server process exits, instead of terminating them abruptly.
+
+\textbf{Foreign key}: A column whose value must match the key of a row in another table (\texttt{REFERENCES\ notes(id)}). It is how a relationship is stored, and \texttt{ON\ DELETE} decides what happens to it when the referenced row is deleted.
+
+\textbf{g}: Flask's per-request namespace. Data stored in \texttt{g} is available throughout the current request (before-request hooks, handler, after-request hooks) and discarded at the end.
+
+\textbf{GIL} (Global Interpreter Lock): A mutex in CPython that prevents multiple Python threads from executing Python bytecode simultaneously. Limits true parallelism in CPU-bound Python code.
+
+\textbf{Gunicorn}: A Python WSGI HTTP server that implements the pre-fork worker model. The production server for the Notes API.
+
+\textbf{HSTS} (HTTP Strict Transport Security): An HTTP response header that tells browsers to only connect to this domain via HTTPS for a specified duration.
+
+\textbf{HTTP} (HyperText Transfer Protocol): The request-response protocol used for web communication. Defines methods (GET, POST, PUT, DELETE), status codes, and headers.
+
+\textbf{HTTPS}: HTTP over TLS. All communication is encrypted and the server's identity is verified.
+
+\textbf{Idempotency key}: A unique value sent with a request (often in an \texttt{Idempotency-Key} header) and repeated on every retry of it, so that the receiving service performs the action only once however many times it is asked.
+
+\textbf{Idempotent}: An operation that produces the same result whether performed once or many times. GET, PUT, and DELETE are idempotent by definition in HTTP; POST is not.
+
+\textbf{Image layer}: A read-only filesystem diff that Docker stacks to create container filesystems. Layers are cached and shared between images.
+
+\textbf{Index} (database): A data structure that allows the database to find rows matching a WHERE clause without scanning the entire table. Critical for query performance.
+
+\textbf{Inode}: A data structure in the Linux filesystem that stores metadata about a file (permissions, owner, size, timestamps, disk block locations) but not the filename.
+
+\textbf{iptables}: The Linux kernel's packet filtering framework. Docker uses it to implement port forwarding (DNAT rules).
+
+\textbf{ISO 8601}: The international standard for representing dates and times: \texttt{YYYY-}\allowbreak{}\texttt{MM-}\allowbreak{}\texttt{DDTHH:}\allowbreak{}\texttt{MM:}\allowbreak{}\texttt{SS+HH:}\allowbreak{}\texttt{MM}. The standard format for timestamps in JSON APIs.
+
+\textbf{Isolation level}: How much a transaction sees of other transactions running at the same time: Read Committed (PostgreSQL's default), Repeatable Read, or Serializable. Stronger levels prevent more races by aborting conflicting transactions.
+
+\textbf{Join}: Combining rows from several tables in one query where they match (\texttt{JOIN\ …\ ON}). An inner join keeps only rows with a partner; a \texttt{LEFT\ JOIN} keeps every row of the left table, filling the missing side with \texttt{NULL}.
+
+\textbf{JSON} (JavaScript Object Notation): A text-based data format using \texttt{\{\}} for objects, \texttt{{[}{]}} for arrays, \texttt{""} for strings. The standard format for REST API request and response bodies.
+
+\textbf{jsonify()}: Flask's function for creating a JSON HTTP response. Serializes a Python dict to JSON and sets \texttt{Content-}\allowbreak{}\texttt{Type:}\allowbreak{}\texttt{\ application/}\allowbreak{}\texttt{json}.
+
+\textbf{JWT}: JSON Web Token: a signed token that carries claims (such as a user id and an expiry) inside it, so it can be checked without a database, but cannot easily be revoked before it expires.
+
+\textbf{Kernel space}: The region of memory where the operating system kernel runs. Code here has full hardware access. Isolated from user space.
+
+\textbf{Lease}: A claim on a piece of work that expires by itself. A worker that takes a job holds it until \texttt{locked\_until}; if the worker crashes, the lease runs out and another worker takes the job.
+
+\textbf{Let's Encrypt}: A free, automated Certificate Authority that issues TLS certificates via the ACME protocol.
+
+\textbf{Load balancer}: A server that distributes incoming requests across multiple application servers. Used for horizontal scaling.
+
+\textbf{Managed database}: A database service where the cloud provider handles installation, backups, updates, and failover. The Notes API uses DigitalOcean Managed PostgreSQL.
+
+\textbf{Migration}: A numbered, versioned file that changes a database's schema, stored in the repository and applied in order by a migration runner, which records in the database which ones have run.
+
+\textbf{MIME type} (or media type): A two-part identifier for content formats. \texttt{application/json} means JSON data; \texttt{text/html} means HTML.
+
+\textbf{Mode switch}: The CPU operation of transitioning from user mode to kernel mode (or vice versa), required for every system call. Costs \textasciitilde100ns.
+
+\textbf{MVCC} (Multi-Version Concurrency Control): PostgreSQL's mechanism for allowing concurrent reads and writes without blocking each other, by maintaining multiple versions of rows.
+
+\textbf{N+1 query problem}: Running one query for a list and then one more query for each item in it. Invisible locally, slow across a network; fixed by fetching the related rows for all items at once.
+
+\textbf{NAPI} (New API): Linux's interrupt mitigation mechanism for network I/O. Switches from interrupt-driven to polling mode under heavy load to improve throughput.
+
+\textbf{NAT} (Network Address Translation): A technique that rewrites IP addresses in packet headers. Home routers use NAT to share a single public IP among multiple devices.
+
+\textbf{Nginx}: A high-performance web server used in this book as a reverse proxy and TLS terminator (it can also serve static files, which the Notes API does not have).
+
+\textbf{OOM killer}: The Linux kernel's mechanism for terminating processes when the system runs out of memory, freeing memory for critical processes.
+
+\textbf{Optimistic concurrency}: Detecting a conflicting change at write time instead of locking in advance: the update succeeds only if the row still has the version the change was based on (\texttt{WHERE\ version\ =\ ?}). Prevents lost updates.
+
+\textbf{ORM}: Object-relational mapper (SQLAlchemy, Django's ORM): a library that maps tables to classes and generates SQL from code. Convenient, but it hides the SQL it runs, including N+1 queries.
+
+\textbf{OWASP}: Open Web Application Security Project. A non-profit that publishes security guidelines including the OWASP Top 10 list of critical web application security risks.
+
+\textbf{Parameterized query}: A database query where variable values are passed separately from the SQL text, preventing SQL injection.
+
+\textbf{PID 1}: The first process started when the Linux kernel boots. In a Docker container, PID 1 receives signals sent to the container and is responsible for passing them to child processes. The kernel ignores any signal PID 1 has no handler for~--- which is why a shell as PID 1 does not stop on SIGTERM.
+
+\textbf{Port}: A 16-bit number (0-65535) that identifies a specific service on a host. Port 443 is HTTPS; port 5432 is PostgreSQL; port 5000 is the default Flask development server.
+
+\textbf{Postmortem}: A written analysis of an incident, conducted after resolution, identifying root causes and action items to prevent recurrence. Blameless in good engineering cultures.
+
+\textbf{PostgreSQL}: An open-source, production-grade relational database. The database used by the Notes API in production.
+
+\textbf{Pre-fork model}: A process model where a master process forks worker processes before any connections arrive. Gunicorn's default model.
+
+\textbf{Prometheus}: An open-source monitoring system that collects metrics by scraping HTTP endpoints.
+
+\textbf{ProxyFix}: A Werkzeug middleware that reads \texttt{X-Forwarded-For} and \texttt{X-Forwarded-Proto} headers from a trusted proxy (Nginx) to correctly set \texttt{request.remote\_addr} and \texttt{request.scheme}.
+
+\textbf{psycopg2}: The long-established PostgreSQL database driver for Python, used in this book (its successor is psycopg, version 3).
+
+\textbf{Race condition}: A bug that occurs when the outcome depends on the relative timing of two or more concurrent operations.
+
+\textbf{Rate limiting}: Restricting the number of requests a client can make in a given time window, to protect against abuse and ensure fair resource sharing.
+
+\textbf{Read timeout}: How long a client waits for an answer after its request has been sent. When it expires, the outcome is unknown: the other side may have completed the action. Distinct from a connect timeout, which expires before anything was sent.
+
+\textbf{Recursive resolver}: A DNS server that performs the full resolution chain (root → TLD → authoritative) on behalf of clients. Google's \texttt{8.8.8.8} is a recursive resolver.
+
+\textbf{Request context}: Flask's per-request state container. Makes \texttt{request} and \texttt{session} available as apparent globals within the duration of a request (\texttt{g} and \texttt{current\_app} belong to the application context, which Flask pushes alongside it).
+
+\textbf{Reserved IP} (cloud): A public IP address you own independently of any server, assignable to one server at a time, so DNS records survive a server replacement (DigitalOcean's name, formerly Floating IP; Elastic IP on AWS).
+
+\textbf{REST} (Representational State Transfer): An architectural style for HTTP APIs where URLs identify resources and HTTP methods identify operations.
+
+\textbf{Rollback}: Undoing an uncommitted database transaction, reverting all changes to the state before the transaction began.
+
+\textbf{Runbook}: A step-by-step guide for responding to a specific operational situation or incident.
+
+\textbf{Salt}: A random value mixed into each password before hashing, so identical passwords produce different hashes and precomputed tables are useless. bcrypt stores it inside the hash.
+
+\textbf{SIGTERM}: The ``polite shutdown'' signal in Linux. Gunicorn intercepts it to begin graceful shutdown. Contrast with SIGKILL (immediate, forceful termination).
+
+\textbf{sk\_buff}: The Linux kernel's data structure representing a network packet, from the NIC up to the socket's receive queue (the application gets copies of the data through \texttt{recv()}).
+
+\textbf{SKIP LOCKED}: A PostgreSQL option (\texttt{SELECT\ …\ FOR\ UPDATE\ SKIP\ LOCKED}) that makes a query pass over rows other transactions have locked, instead of waiting for them. It lets many workers take jobs from one table at once.
+
+\textbf{Socket}: An endpoint for network communication, represented by a file descriptor. Sockets can be TCP (connection-oriented, reliable) or UDP (connectionless).
+
+\textbf{SQL injection}: An attack where user-supplied input is interpreted as SQL code, allowing an attacker to execute arbitrary queries. Prevented by parameterized queries.
+
+\textbf{SSL/TLS}: TLS (Transport Layer Security) is the cryptographic protocol that secures HTTPS. SSL is the older predecessor; the terms are often used interchangeably, but SSL itself is obsolete and insecure, and no longer used.
+
+\textbf{Staging environment}: A production-like environment for testing code before it reaches production.
+
+\textbf{Stateless application}: An application that stores no per-session state locally. All state is in a shared database. Stateless applications can be horizontally scaled.
+
+\textbf{strace}: A Linux tool that traces the system calls made by a process. Useful for understanding low-level behavior.
+
+\textbf{systemd}: The init system and service manager used by Ubuntu (and most modern Linux distributions). Manages service startup, restart, logging, and dependencies.
+
+\textbf{TCP} (Transmission Control Protocol): A connection-oriented, reliable transport protocol. Establishes connections via the three-way handshake (SYN, SYN-ACK, ACK).
+
+\textbf{TLS} (Transport Layer Security): The cryptographic protocol providing encrypted communication over TCP. Used by HTTPS.
+
+\textbf{Transaction}: A group of database operations that succeed or fail as one unit: all of them are committed, or none is.
+
+\textbf{Transactional outbox}: Writing a message or job into a table in the same transaction as the change that causes it, so that both happen or neither does; the work is sent or done afterwards.
+
+\textbf{TTL} (Time to Live): In DNS, the number of seconds resolvers may cache a record before re-querying. In other contexts, the expiration time for a cached value.
+
+\textbf{URL} (Uniform Resource Locator): The address of a resource on the web. \texttt{https:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{api.}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{example.}\allowbreak{}\texttt{com/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{42} identifies the note with ID 42.
+
+\textbf{URL converter}: A Werkzeug component that constrains what a URL variable segment may contain and converts the matched string to a Python type.
+
+\textbf{User space}: The region of memory where application code runs. Cannot directly access hardware; must use system calls to request kernel services.
+
+\textbf{venv}: Python's built-in module for creating virtual environments (\texttt{python\ -m\ venv\ .venv}).
+
+\textbf{VPC} (Virtual Private Cloud): An isolated private network within a cloud provider. Resources in the same VPC can communicate over private IP addresses without traversing the public internet.
+
+\textbf{WAL} (Write-Ahead Log): PostgreSQL's durability mechanism. Changes are written to the WAL before being applied to data files. Enables crash recovery and replication.
+
+\textbf{Werkzeug}: The WSGI utility library that Flask is built on. Provides URL routing (\texttt{Map}, \texttt{Rule}), request/response objects, and the development server (which parses HTTP itself; in production, Gunicorn does the parsing).
+
+\textbf{Worker}: A process that runs background work outside any HTTP request, typically by taking jobs from a queue.
+
+\textbf{WSGI} (Web Server Gateway Interface): The Python standard (PEP 3333) that defines how web servers (Gunicorn) communicate with web applications (Flask). An application is a callable \texttt{(environ,}\allowbreak{}\texttt{\ start\_}\allowbreak{}\texttt{response)\ →\ iterable}.
+
+\textbf{XSS} (Cross-Site Scripting): An attack where malicious scripts are injected into web pages viewed by other users. Prevented by escaping user-supplied content before rendering as HTML.
+
+\textbf{Zero-copy}: A technique that avoids copying data between kernel and user-space buffers~--- for example \texttt{sendfile()}, which sends a file's contents to a socket entirely inside the kernel.
+
+\unnumberedchapter{Appendix C --- Command Cheat Sheet}\label{ch:44-appendices-3}
+
+\chapterrule
+
+This appendix collects the most frequently used commands from throughout the book, organized by tool.
+
+\unnumberedsection{true}{C.1 Python and pip}\label{44-appendices:c1-python-and-pip}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create a virtual environment}
+\ExtensionTok{python} \AttributeTok{{-}m}\NormalTok{ venv .venv}
+
+\CommentTok{\# Activate the virtual environment}
+\BuiltInTok{source}\NormalTok{ .venv/bin/activate               }\CommentTok{\# Linux/macOS}
+\ExtensionTok{venv\textbackslash{}Scripts\textbackslash{}activate}                   \CommentTok{\# Windows}
+
+\CommentTok{\# Install dependencies (requirements{-}dev.txt includes requirements.txt)}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements{-}dev.txt}
+
+\CommentTok{\# Install a specific package}
+\ExtensionTok{pip}\NormalTok{ install flask==3.0.2}
+
+\CommentTok{\# Upgrade a package}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}{-}upgrade}\NormalTok{ flask}
+
+\CommentTok{\# Freeze current environment (only one without development tools)}
+\ExtensionTok{pip}\NormalTok{ freeze }\OperatorTok{\textgreater{}}\NormalTok{ requirements.txt}
+
+\CommentTok{\# Audit for security vulnerabilities}
+\ExtensionTok{pip{-}audit}
+
+\CommentTok{\# Run the development server}
+\ExtensionTok{python}\NormalTok{ run.py}
+\ExtensionTok{flask} \AttributeTok{{-}{-}app} \StringTok{"app:create\_app()"}\NormalTok{ run }\AttributeTok{{-}{-}debug}   \CommentTok{\# the same, with auto{-}reload}
+\CommentTok{\# (On macOS, port 5000 may be taken by AirPlay Receiver: use PORT=5001)}
+
+\CommentTok{\# Open Flask shell (interactive Python with app context)}
+\ExtensionTok{flask} \AttributeTok{{-}{-}app}\NormalTok{ run shell}
+
+\CommentTok{\# List all registered routes}
+\ExtensionTok{flask} \AttributeTok{{-}{-}app}\NormalTok{ run routes}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{C.2 pytest}\label{44-appendices:c2-pytest}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Run all tests}
+\ExtensionTok{pytest}
+
+\CommentTok{\# Run with verbose output}
+\ExtensionTok{pytest} \AttributeTok{{-}v}
+
+\CommentTok{\# Run a specific test file}
+\ExtensionTok{pytest}\NormalTok{ tests/test\_notes.py}
+
+\CommentTok{\# Run a specific test by name (tests inside a class need the class too)}
+\ExtensionTok{pytest}\NormalTok{ tests/test\_notes.py::TestCreateNote::test\_create\_note\_returns\_201}
+
+\CommentTok{\# Run tests matching a keyword}
+\ExtensionTok{pytest} \AttributeTok{{-}k} \StringTok{"create"}
+
+\CommentTok{\# Show test output (don\textquotesingle{}t capture stdout)}
+\ExtensionTok{pytest} \AttributeTok{{-}s}
+
+\CommentTok{\# Stop on first failure}
+\ExtensionTok{pytest} \AttributeTok{{-}x}
+
+\CommentTok{\# Run in parallel (requires pytest{-}xdist, not in requirements{-}dev.txt)}
+\ExtensionTok{pytest} \AttributeTok{{-}n}\NormalTok{ auto}
+
+\CommentTok{\# Generate coverage report (pytest{-}cov is in requirements{-}dev.txt)}
+\ExtensionTok{pytest} \AttributeTok{{-}{-}cov}\OperatorTok{=}\NormalTok{app }\AttributeTok{{-}{-}cov{-}report}\OperatorTok{=}\NormalTok{html}
+
+\CommentTok{\# Run only tests without a given marker (markers are defined by you,}
+\CommentTok{\# e.g. @pytest.mark.slow, and registered in pyproject.toml)}
+\ExtensionTok{pytest} \AttributeTok{{-}m} \StringTok{"not slow"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{C.3 Docker}\label{44-appendices:c3-docker}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Build an image}
+\ExtensionTok{docker}\NormalTok{ build }\AttributeTok{{-}t}\NormalTok{ notes{-}api:latest .}
+\ExtensionTok{docker}\NormalTok{ build }\AttributeTok{{-}t}\NormalTok{ notes{-}api:sha{-}a1b2c3d }\AttributeTok{{-}{-}no{-}cache}\NormalTok{ .}
+
+\CommentTok{\# Run a container as on the server: loopback{-}only port (Docker bypasses}
+\CommentTok{\# UFW), restart policy, and time for a graceful shutdown}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}name}\NormalTok{ notes{-}api }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}restart}\NormalTok{ unless{-}stopped }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}stop{-}timeout}\NormalTok{ 35 }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}env{-}file}\NormalTok{ /path/to/notes{-}api.env }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}p}\NormalTok{ 127.0.0.1:5000:5000 }\DataTypeTok{\textbackslash{}}
+\NormalTok{    notes{-}api:sha{-}a1b2c3d}
+
+\CommentTok{\# List running containers}
+\ExtensionTok{docker}\NormalTok{ ps}
+
+\CommentTok{\# List all containers (including stopped)}
+\ExtensionTok{docker}\NormalTok{ ps }\AttributeTok{{-}a}
+
+\CommentTok{\# View container logs}
+\ExtensionTok{docker}\NormalTok{ logs notes{-}api}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}f}\NormalTok{ notes{-}api              }\CommentTok{\# Follow (stream) logs}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}tail}\NormalTok{ 50 notes{-}api       }\CommentTok{\# Last 50 lines}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}since} \StringTok{"1h"}\NormalTok{ notes{-}api    }\CommentTok{\# Logs from the last hour}
+
+\CommentTok{\# Execute a command inside a container}
+\ExtensionTok{docker}\NormalTok{ exec notes{-}api python }\AttributeTok{{-}c} \StringTok{"print(\textquotesingle{}hello\textquotesingle{})"}
+\ExtensionTok{docker}\NormalTok{ exec }\AttributeTok{{-}it}\NormalTok{ notes{-}api /bin/sh     }\CommentTok{\# Interactive shell}
+
+\CommentTok{\# Stop and remove a container}
+\ExtensionTok{docker}\NormalTok{ stop notes{-}api}
+\ExtensionTok{docker}\NormalTok{ rm notes{-}api}
+\ExtensionTok{docker}\NormalTok{ stop notes{-}api }\KeywordTok{\&\&} \ExtensionTok{docker}\NormalTok{ rm notes{-}api}
+
+\CommentTok{\# Remove all stopped containers}
+\ExtensionTok{docker}\NormalTok{ container prune}
+
+\CommentTok{\# Inspect a container}
+\ExtensionTok{docker}\NormalTok{ inspect notes{-}api}
+
+\CommentTok{\# View container resource usage}
+\ExtensionTok{docker}\NormalTok{ stats notes{-}api}
+
+\CommentTok{\# Pull an image from a registry}
+\ExtensionTok{docker}\NormalTok{ pull ghcr.io/username/notes{-}api:sha{-}a1b2c3d}
+
+\CommentTok{\# Push an image to a registry}
+\ExtensionTok{docker}\NormalTok{ push ghcr.io/username/notes{-}api:sha{-}a1b2c3d}
+
+\CommentTok{\# Tag an image}
+\ExtensionTok{docker}\NormalTok{ tag notes{-}api:sha{-}a1b2c3d notes{-}api:latest}
+
+\CommentTok{\# Remove an image}
+\ExtensionTok{docker}\NormalTok{ rmi notes{-}api:sha{-}a1b2c3d}
+
+\CommentTok{\# Remove unused images}
+\ExtensionTok{docker}\NormalTok{ image prune}
+
+\CommentTok{\# Build and push (common CI pattern)}
+\ExtensionTok{docker}\NormalTok{ build }\AttributeTok{{-}t}\NormalTok{ ghcr.io/username/notes{-}api:sha{-}}\VariableTok{$(}\FunctionTok{git}\NormalTok{ rev{-}parse }\AttributeTok{{-}{-}short}\NormalTok{ HEAD}\VariableTok{)}\NormalTok{ .}
+\ExtensionTok{docker}\NormalTok{ push ghcr.io/username/notes{-}api:sha{-}}\VariableTok{$(}\FunctionTok{git}\NormalTok{ rev{-}parse }\AttributeTok{{-}{-}short}\NormalTok{ HEAD}\VariableTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{C.4 Docker Compose}\label{44-appendices:c4-docker-compose}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Compose v2 is a docker subcommand: "docker compose", not the old}
+\CommentTok{\# "docker{-}compose" program (end{-}of{-}life since 2023)}
+
+\CommentTok{\# Start all services (defined in docker{-}compose.yml)}
+\ExtensionTok{docker}\NormalTok{ compose up }\AttributeTok{{-}d}
+
+\CommentTok{\# Stop all services}
+\ExtensionTok{docker}\NormalTok{ compose down}
+
+\CommentTok{\# Stop and remove volumes (delete database data)}
+\ExtensionTok{docker}\NormalTok{ compose down }\AttributeTok{{-}v}
+
+\CommentTok{\# View logs}
+\ExtensionTok{docker}\NormalTok{ compose logs }\AttributeTok{{-}f}
+
+\CommentTok{\# View logs for a specific service}
+\ExtensionTok{docker}\NormalTok{ compose logs }\AttributeTok{{-}f}\NormalTok{ app}
+
+\CommentTok{\# Rebuild images and restart}
+\ExtensionTok{docker}\NormalTok{ compose up }\AttributeTok{{-}d} \AttributeTok{{-}{-}build}
+
+\CommentTok{\# Execute a command in a running service}
+\ExtensionTok{docker}\NormalTok{ compose exec app flask }\AttributeTok{{-}{-}app} \StringTok{"app:create\_app()"}\NormalTok{ routes}
+
+\CommentTok{\# Scale a service (horizontal scaling locally). Only works for a service}
+\CommentTok{\# without a fixed host port: three copies cannot all publish port 5000}
+\ExtensionTok{docker}\NormalTok{ compose up }\AttributeTok{{-}d} \AttributeTok{{-}{-}scale}\NormalTok{ app=3}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{C.5 Gunicorn}\label{44-appendices:c5-gunicorn}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Start Gunicorn with a config file}
+\ExtensionTok{gunicorn} \AttributeTok{{-}{-}config}\NormalTok{ gunicorn.conf.py }\StringTok{"app:create\_app()"}
+
+\CommentTok{\# Start Gunicorn with command{-}line options}
+\ExtensionTok{gunicorn} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}workers}\NormalTok{ 2 }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}bind}\NormalTok{ 0.0.0.0:5000 }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}timeout}\NormalTok{ 30 }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}access{-}logfile} \AttributeTok{{-}} \DataTypeTok{\textbackslash{}}
+    \StringTok{"app:create\_app()"}
+
+\CommentTok{\# Graceful restart of the workers (new workers start, old ones finish}
+\CommentTok{\# their requests): send SIGHUP to the master — PID 1 in the container}
+\ExtensionTok{docker}\NormalTok{ kill }\AttributeTok{{-}{-}signal}\OperatorTok{=}\NormalTok{HUP notes{-}api}
+
+\CommentTok{\# Gunicorn\textquotesingle{}s processes, seen from the host}
+\ExtensionTok{docker}\NormalTok{ top notes{-}api}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{C.6 systemd}\label{44-appendices:c6-systemd}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# (For this book\textquotesingle{}s setup, notes{-}api is a container, not a systemd service:}
+\CommentTok{\# use the Docker commands above. These apply to any systemd service — nginx,}
+\CommentTok{\# docker — and to notes{-}api if you chose the systemd unit of Chapter 24.)}
+
+\CommentTok{\# Start a service}
+\FunctionTok{sudo}\NormalTok{ systemctl start notes{-}api}
+
+\CommentTok{\# Stop a service}
+\FunctionTok{sudo}\NormalTok{ systemctl stop notes{-}api}
+
+\CommentTok{\# Restart a service}
+\FunctionTok{sudo}\NormalTok{ systemctl restart notes{-}api}
+
+\CommentTok{\# Reload configuration without restart — only for services that support}
+\CommentTok{\# it (nginx does); reload{-}or{-}restart falls back to a restart}
+\FunctionTok{sudo}\NormalTok{ systemctl reload nginx}
+\FunctionTok{sudo}\NormalTok{ systemctl reload{-}or{-}restart notes{-}api}
+
+\CommentTok{\# Enable service to start on boot}
+\FunctionTok{sudo}\NormalTok{ systemctl enable notes{-}api}
+
+\CommentTok{\# Disable service from starting on boot}
+\FunctionTok{sudo}\NormalTok{ systemctl disable notes{-}api}
+
+\CommentTok{\# Check service status}
+\FunctionTok{sudo}\NormalTok{ systemctl status notes{-}api}
+
+\CommentTok{\# Reload systemd configuration (after editing unit files)}
+\FunctionTok{sudo}\NormalTok{ systemctl daemon{-}reload}
+
+\CommentTok{\# View service logs (via journald)}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}f}              \CommentTok{\# Follow (stream) logs}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}{-}since} \StringTok{"1h ago"}  \CommentTok{\# Last hour}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}n}\NormalTok{ 50          }\CommentTok{\# Last 50 lines}
+
+\CommentTok{\# View boot logs}
+\ExtensionTok{journalctl} \AttributeTok{{-}b}                           \CommentTok{\# This boot}
+\ExtensionTok{journalctl} \AttributeTok{{-}b} \AttributeTok{{-}1}                        \CommentTok{\# Previous boot}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{C.7 Nginx}\label{44-appendices:c7-nginx}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Test configuration syntax}
+\FunctionTok{sudo}\NormalTok{ nginx }\AttributeTok{{-}t}
+
+\CommentTok{\# Reload configuration (applies new config without dropping connections)}
+\FunctionTok{sudo}\NormalTok{ systemctl reload nginx}
+
+\CommentTok{\# Restart Nginx service}
+\FunctionTok{sudo}\NormalTok{ systemctl restart nginx}
+
+\CommentTok{\# View Nginx access log}
+\FunctionTok{tail} \AttributeTok{{-}f}\NormalTok{ /var/log/nginx/notes{-}api{-}access.log}
+
+\CommentTok{\# View Nginx error log (the site\textquotesingle{}s own, from Chapter 28)}
+\FunctionTok{tail} \AttributeTok{{-}f}\NormalTok{ /var/log/nginx/notes{-}api{-}error.log}
+
+\CommentTok{\# Count requests by status code}
+\FunctionTok{awk} \StringTok{\textquotesingle{}\{print $9\}\textquotesingle{}}\NormalTok{ /var/log/nginx/notes{-}api{-}access.log }\KeywordTok{|} \FunctionTok{sort} \KeywordTok{|} \FunctionTok{uniq} \AttributeTok{{-}c} \KeywordTok{|} \FunctionTok{sort} \AttributeTok{{-}rn}
+
+\CommentTok{\# Renew TLS certificate manually}
+\FunctionTok{sudo}\NormalTok{ certbot renew }\AttributeTok{{-}{-}dry{-}run}             \CommentTok{\# Test renewal (no actual renewal)}
+\FunctionTok{sudo}\NormalTok{ certbot renew                       }\CommentTok{\# Perform renewal}
+
+\CommentTok{\# Check certificate expiry}
+\BuiltInTok{echo} \KeywordTok{|} \ExtensionTok{openssl}\NormalTok{ s\_client }\AttributeTok{{-}connect}\NormalTok{ api.notes.example.com:443 }\DecValTok{2}\OperatorTok{\textgreater{}}\NormalTok{/dev/null }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
+    \ExtensionTok{openssl}\NormalTok{ x509 }\AttributeTok{{-}noout} \AttributeTok{{-}dates}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{C.8 PostgreSQL}\label{44-appendices:c8-postgresql}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Connect to PostgreSQL interactively (managed databases require TLS)}
+\ExtensionTok{psql} \StringTok{"postgresql://user:password@host:25060/database?sslmode=require"}
+
+\CommentTok{\# Execute a SQL command and exit}
+\ExtensionTok{psql} \StringTok{"}\VariableTok{$DATABASE\_URL}\StringTok{"} \AttributeTok{{-}{-}command}\OperatorTok{=}\StringTok{"SELECT COUNT(*) FROM notes;"}
+
+\CommentTok{\# Apply every pending migration / list them / record existing ones (Chapter 33)}
+\ExtensionTok{python} \AttributeTok{{-}m}\NormalTok{ app.migrate}
+\ExtensionTok{python} \AttributeTok{{-}m}\NormalTok{ app.migrate }\AttributeTok{{-}{-}status}
+\ExtensionTok{python} \AttributeTok{{-}m}\NormalTok{ app.migrate }\AttributeTok{{-}{-}baseline}\NormalTok{ 0002}
+
+\CommentTok{\# Run the worker by hand; list the queue (Chapter 41)}
+\ExtensionTok{python} \AttributeTok{{-}m}\NormalTok{ app.worker}
+\ExtensionTok{psql} \StringTok{"}\VariableTok{$DATABASE\_URL}\StringTok{"} \AttributeTok{{-}c} \StringTok{"SELECT status, count(*) FROM jobs GROUP BY status;"}
+
+\CommentTok{\# Create a backup (pg\_dump must be at least the server\textquotesingle{}s major version)}
+\ExtensionTok{pg\_dump} \StringTok{"}\VariableTok{$DATABASE\_URL}\StringTok{"} \AttributeTok{{-}{-}format}\OperatorTok{=}\NormalTok{custom }\AttributeTok{{-}{-}file}\OperatorTok{=}\NormalTok{backup.dump}
+
+\CommentTok{\# Restore from backup}
+\ExtensionTok{pg\_restore} \AttributeTok{{-}{-}dbname}\OperatorTok{=}\StringTok{"}\VariableTok{$TARGET\_DATABASE\_URL}\StringTok{"} \AttributeTok{{-}{-}no{-}owner}\NormalTok{ backup.dump}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Inside \texttt{psql}, the backslash commands:
+
+\Needspace{11\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Command & Does \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{\textbackslash{}l} & List databases \\
+\texttt{\textbackslash{}c\ database} & Connect to a database \\
+\texttt{\textbackslash{}dt} & List tables \\
+\texttt{\textbackslash{}d\ tablename} & Describe a table \\
+\texttt{\textbackslash{}q} & Quit \\
+\end{longtable}
+}
+
+(A \texttt{\#} after a backslash command is \emph{not} a comment in psql~--- it would be passed as an argument. psql comments start with \texttt{-\/-}.)
+
+\unnumberedsection{true}{C.9 SSH and Server Management}\label{44-appendices:c9-ssh-and-server-management}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# SSH to the server}
+\FunctionTok{ssh}\NormalTok{ deploy@203.0.113.42}
+
+\CommentTok{\# SSH with a specific key (e.g. the CI key from Chapter 23)}
+\FunctionTok{ssh} \AttributeTok{{-}i}\NormalTok{ \textasciitilde{}/.ssh/notes{-}api{-}ci deploy@203.0.113.42}
+
+\CommentTok{\# Copy files to the server}
+\FunctionTok{scp}\NormalTok{ localfile.txt deploy@203.0.113.42:/remote/path/}
+
+\CommentTok{\# Copy files from the server}
+\FunctionTok{scp}\NormalTok{ deploy@203.0.113.42:/remote/path/file.txt .}
+
+\CommentTok{\# View disk usage}
+\FunctionTok{df} \AttributeTok{{-}h}
+
+\CommentTok{\# View memory usage}
+\FunctionTok{free} \AttributeTok{{-}h}
+
+\CommentTok{\# View CPU and process usage}
+\ExtensionTok{top}
+\ExtensionTok{htop}   \CommentTok{\# More readable (install with: apt{-}get install htop)}
+
+\CommentTok{\# View listening sockets and their processes (process names need sudo)}
+\FunctionTok{sudo}\NormalTok{ ss }\AttributeTok{{-}tlnp}
+
+\CommentTok{\# Check UFW firewall status}
+\FunctionTok{sudo}\NormalTok{ ufw status verbose}
+
+\CommentTok{\# View system logs}
+\ExtensionTok{journalctl} \AttributeTok{{-}n}\NormalTok{ 50}
+
+\CommentTok{\# Check server uptime}
+\FunctionTok{uptime}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{C.10 DNS Debugging}\label{44-appendices:c10-dns-debugging}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Query a DNS record}
+\ExtensionTok{dig}\NormalTok{ api.notes.example.com A}
+
+\CommentTok{\# Query a specific resolver}
+\ExtensionTok{dig}\NormalTok{ @8.8.8.8 api.notes.example.com A}
+
+\CommentTok{\# Short output (just the answer)}
+\ExtensionTok{dig}\NormalTok{ +short api.notes.example.com A}
+
+\CommentTok{\# Check MX records (mail servers — set on the mail domain, not the API name)}
+\ExtensionTok{dig}\NormalTok{ example.com MX}
+
+\CommentTok{\# Trace the full resolution chain}
+\ExtensionTok{dig}\NormalTok{ +trace api.notes.example.com A}
+
+\CommentTok{\# Reverse DNS lookup (IP to hostname)}
+\ExtensionTok{dig} \AttributeTok{{-}x}\NormalTok{ 203.0.113.42}
+
+\CommentTok{\# Check if DNS has propagated globally}
+\CommentTok{\# (web tool, not command line)}
+\CommentTok{\# https://dnschecker.org}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{C.11 curl: Testing the API}\label{44-appendices:c11-curl-testing-the-api}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# GET request}
+\ExtensionTok{curl}\NormalTok{ https://api.notes.example.com/notes/}
+
+\CommentTok{\# GET with verbose output (shows headers)}
+\ExtensionTok{curl} \AttributeTok{{-}v}\NormalTok{ https://api.notes.example.com/notes/}
+
+\CommentTok{\# POST with JSON body}
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ POST https://api.notes.example.com/notes/ }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"content": "Buy groceries"\}\textquotesingle{}}
+
+\CommentTok{\# POST with pretty JSON output (requires jq)}
+\ExtensionTok{curl} \AttributeTok{{-}s} \AttributeTok{{-}X}\NormalTok{ POST https://api.notes.example.com/notes/ }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"content": "Buy groceries"\}\textquotesingle{}} \KeywordTok{|} \ExtensionTok{jq}\NormalTok{ .}
+
+\CommentTok{\# PUT (update)}
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ PUT https://api.notes.example.com/notes/42 }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"content": "Updated content"\}\textquotesingle{}}
+
+\CommentTok{\# DELETE}
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ DELETE https://api.notes.example.com/notes/42}
+
+\CommentTok{\# Log in (Chapter 38), then send the token with every request}
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ POST https://api.notes.example.com/auth/login }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"email": "ana@example.com", "password": "correct horse battery"\}\textquotesingle{}}
+\ExtensionTok{curl}\NormalTok{ https://api.notes.example.com/notes/ }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}H} \StringTok{"Authorization: Bearer ns\_…"}   \CommentTok{\# the "token" from the login response}
+
+\CommentTok{\# Show only status code}
+\ExtensionTok{curl} \AttributeTok{{-}s} \AttributeTok{{-}o}\NormalTok{ /dev/null }\AttributeTok{{-}w} \StringTok{"\%\{http\_code\}"}\NormalTok{ https://api.notes.example.com/health}
+
+\CommentTok{\# Test with a local server (bypass TLS)}
+\ExtensionTok{curl}\NormalTok{ http://localhost:5000/notes/}
+
+\CommentTok{\# Time the request}
+\ExtensionTok{curl} \AttributeTok{{-}w} \StringTok{"Total: \%\{time\_total\}s\textbackslash{}n"} \AttributeTok{{-}s} \AttributeTok{{-}o}\NormalTok{ /dev/null https://api.notes.example.com/notes/}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedchapter{Appendix D --- Further Reading}\label{ch:44-appendices-4}
+
+\chapterrule
+
+The following resources go deeper into the topics covered in this book.
+
+\unnumberedsection{true}{D.1 Python and Flask}\label{44-appendices:d1-python-and-flask}
+
+\textbf{Python Documentation}
+
+\begin{itemize}
+\tightlist
+\item
+  docs.python.org~--- The official Python documentation. Particularly valuable: the tutorial, the library reference, and the glossary.
+\end{itemize}
+
+\noindent{}\textbf{Flask Documentation}
+
+\begin{itemize}
+\tightlist
+\item
+  flask.palletsprojects.com~--- Comprehensive Flask documentation including a quickstart, tutorial, and API reference.
+\end{itemize}
+
+\noindent{}\textbf{Werkzeug Documentation}
+
+\begin{itemize}
+\tightlist
+\item
+  werkzeug.palletsprojects.com~--- Flask's underlying toolkit. Understanding Werkzeug's routing (\texttt{Map}, \texttt{Rule}) and request/response objects gives a deeper understanding of Flask.
+\end{itemize}
+
+\noindent{}\textbf{Miguel Grinberg's Flask Mega-Tutorial}
+
+\begin{itemize}
+\tightlist
+\item
+  blog.miguelgrinberg.com~--- A comprehensive, regularly updated tutorial building a full Flask application with authentication, database migrations, and deployment.
+\end{itemize}
+
+\noindent{}\textbf{Two Scoops of Django} (Greenfeld, Greenfeld)
+
+\begin{itemize}
+\tightlist
+\item
+  A Django book, but its chapters on project structure, settings management, and testing best practices apply equally to Flask.
+\end{itemize}
+
+\unnumberedsection{true}{D.2 Databases and SQL}\label{44-appendices:d2-databases-and-sql}
+
+\textbf{Use The Index, Luke}
+
+\begin{itemize}
+\tightlist
+\item
+  use-the-index-luke.com~--- Free online guide to database indexing. The most accessible explanation of how indexes work and when to use them.
+\end{itemize}
+
+\noindent{}\textbf{PostgreSQL Documentation}
+
+\begin{itemize}
+\tightlist
+\item
+  postgresql.org/docs~--- Comprehensive documentation for PostgreSQL. The chapter on performance tips and the EXPLAIN guide are particularly valuable.
+\end{itemize}
+
+\noindent{}\textbf{Designing Data-Intensive Applications} (Kleppmann)
+
+\begin{itemize}
+\tightlist
+\item
+  O'Reilly, 2017~--- A deep exploration of how databases, message queues, and distributed systems work. The chapters on transactions and replication are relevant to production database use.
+\end{itemize}
+
+\noindent{}\textbf{Database Internals} (Petrov)
+
+\begin{itemize}
+\tightlist
+\item
+  O'Reilly, 2019~--- A detailed exploration of how databases store and retrieve data. More advanced but invaluable for understanding why databases behave the way they do.
+\end{itemize}
+
+\unnumberedsection{true}{D.3 Networking and HTTP}\label{44-appendices:d3-networking-and-http}
+
+\textbf{HTTP: The Definitive Guide} (Gourley, Totty, Sayer, Aggarwal, Reddy)
+
+\begin{itemize}
+\tightlist
+\item
+  O'Reilly, 2002~--- Comprehensive coverage of the HTTP protocol. Despite its age, the fundamental coverage is still accurate.
+\end{itemize}
+
+\noindent{}\textbf{Computer Networking: A Top-Down Approach} (Kurose, Ross)
+
+\begin{itemize}
+\tightlist
+\item
+  Pearson, multiple editions~--- The standard university textbook for networking. Excellent coverage of TCP/IP, DNS, and HTTP.
+\end{itemize}
+
+\noindent{}\textbf{High Performance Browser Networking} (Grigorik)
+
+\begin{itemize}
+\tightlist
+\item
+  O'Reilly, 2013~--- Free at hpbn.co. Deep coverage of network protocols (TCP, TLS, HTTP/1.1, HTTP/2) with performance implications.
+\end{itemize}
+
+\noindent{}\textbf{The Linux Programming Interface} (Kerrisk)
+
+\begin{itemize}
+\tightlist
+\item
+  No Starch Press, 2010~--- Comprehensive guide to Linux system programming, including sockets, processes, and signals. The definitive reference for understanding system calls.
+\end{itemize}
+
+\unnumberedsection{true}{D.4 Production Operations}\label{44-appendices:d4-production-operations}
+
+\textbf{The Site Reliability Engineering Book} (Beyer, Jones, Petoff, Murphy)
+
+\begin{itemize}
+\tightlist
+\item
+  Google's SRE book. Free at sre.google/books. Defines SLOs, error budgets, the four golden signals, and operational best practices at scale.
+\end{itemize}
+
+\noindent{}\textbf{The Site Reliability Workbook} (Beyer, Murphy, Rensin, Kawahara, Thorne)
+
+\begin{itemize}
+\tightlist
+\item
+  Google's follow-up. More practical, with worked examples of SLO implementation.
+\end{itemize}
+
+\noindent{}\textbf{The Art of Monitoring} (Turnbull)
+
+\begin{itemize}
+\tightlist
+\item
+  Leanpub. Practical guide to building a monitoring system including metrics, logging, and alerting.
+\end{itemize}
+
+\noindent{}\textbf{Release It!} (Nygard)
+
+\begin{itemize}
+\tightlist
+\item
+  Pragmatic Bookshelf, second edition 2018. Covers stability patterns (circuit breakers, timeouts, bulkheads) that make distributed systems resilient.
+\end{itemize}
+
+\noindent{}\textbf{The Twelve-Factor App}
+
+\begin{itemize}
+\tightlist
+\item
+  12factor.net~--- Free. A methodology for building software-as-a-service applications with explicit focus on environment parity, configuration, and disposability.
+\end{itemize}
+
+\unnumberedsection{true}{D.5 Security}\label{44-appendices:d5-security}
+
+\textbf{OWASP Top 10}
+
+\begin{itemize}
+\tightlist
+\item
+  owasp.org/www-project-top-ten~--- The definitive list of the most critical web application security risks, with descriptions and mitigations.
+\end{itemize}
+
+\noindent{}\textbf{The Web Application Hacker's Handbook} (Stuttard, Pinto)
+
+\begin{itemize}
+\tightlist
+\item
+  Wiley, 2011~--- A thorough exploration of web application security from an attacker's perspective. Understanding how attacks work helps you defend against them.
+\end{itemize}
+
+\noindent{}\textbf{Hacking: The Art of Exploitation} (Erickson)
+
+\begin{itemize}
+\tightlist
+\item
+  No Starch Press, 2008~--- Focuses on lower-level exploitation (buffer overflows, shellcode), but provides invaluable intuition for why security matters.
+\end{itemize}
+
+\noindent{}\textbf{The Tangled Web} (Zalewski)
+
+\begin{itemize}
+\tightlist
+\item
+  No Starch Press, 2011~--- A thorough exploration of browser security mechanisms (same-origin policy, cookies, CSP). Essential for understanding XSS and CSRF.
+\end{itemize}
+
+\unnumberedsection{true}{D.6 Docker and Containers}\label{44-appendices:d6-docker-and-containers}
+
+\textbf{Docker Documentation}
+
+\begin{itemize}
+\tightlist
+\item
+  docs.docker.com~--- Comprehensive documentation for Docker including Dockerfile reference, networking, and best practices.
+\end{itemize}
+
+\noindent{}\textbf{Container Security} (Rice)
+
+\begin{itemize}
+\tightlist
+\item
+  O'Reilly, 2020~--- Covers container security from image scanning to runtime protection.
+\end{itemize}
+
+\noindent{}\textbf{Kubernetes in Action} (Lukša)
+
+\begin{itemize}
+\tightlist
+\item
+  Manning~--- The next step after Docker Compose. When your application needs to run across multiple servers with automatic scaling and self-healing, Kubernetes is the answer.
+\end{itemize}
+
+\unnumberedsection{true}{D.7 Performance}\label{44-appendices:d7-performance}
+
+\textbf{Systems Performance} (Gregg)
+
+\begin{itemize}
+\tightlist
+\item
+  Addison-Wesley, second edition 2020~--- Comprehensive guide to performance analysis at the system level (CPU, memory, disk, network). The chapter on application performance profiling is especially valuable.
+\end{itemize}
+
+\noindent{}\textbf{Python High Performance} (Lanaro)
+
+\begin{itemize}
+\tightlist
+\item
+  Packt, 2017~--- Profiling Python code, using NumPy for numerical performance, Cython for compiled extensions, and asyncio for concurrent I/O.
+\end{itemize}
+
+\noindent{}\textbf{Brendan Gregg's website} (brendangregg.com)
+
+\begin{itemize}
+\tightlist
+\item
+  Articles, tools, and talks on Linux performance analysis (perf, flame graphs, BPF), by the author of \emph{Systems Performance} and \emph{BPF Performance Tools}. Advanced but irreplaceable for diagnosing production performance problems.
+\end{itemize}
+
+\unnumberedsection{true}{D.8 Command Line and Linux}\label{44-appendices:d8-command-line-and-linux}
+
+\textbf{The Linux Command Line} (Shotts)
+
+\begin{itemize}
+\tightlist
+\item
+  No Starch Press, free at linuxcommand.org~--- Comprehensive introduction to the bash shell and Linux command line. Essential reading for anyone working on Linux servers.
+\end{itemize}
+
+\noindent{}\textbf{UNIX and Linux System Administration Handbook} (Nemeth, Snyder, Hein, Whaley, Mackin)
+
+\begin{itemize}
+\tightlist
+\item
+  Addison-Wesley, fifth edition 2017~--- The comprehensive reference for Linux (and Unix) system administration.
+\end{itemize}
+
+\unnumberedsection{true}{D.9 Online Resources}\label{44-appendices:d9-online-resources}
+
+\textbf{Stack Overflow} (stackoverflow.com)~--- The best resource for specific technical questions. When you encounter a confusing error message, searching Stack Overflow is usually the fastest path to an answer.
+
+\textbf{The Pragmatic Engineer} (newsletter, blog.pragmaticengineer.com)~--- A newsletter covering software engineering practices, career development, and industry trends.
+
+\textbf{Hacker News} (news.ycombinator.com)~--- Technology news aggregator. The comments on system design, production incidents, and technical architecture discussions are often more valuable than the linked articles.
+
+\textbf{DigitalOcean Tutorials} (digitalocean.com/community/tutorials)~--- High-quality tutorials covering all aspects of server administration, Nginx configuration, PostgreSQL setup, and more. Written for the exact infrastructure used in this book.
+
+\textbf{Mozilla Developer Network} (developer.mozilla.org)~--- The authoritative reference for HTTP headers, status codes, and web standards. When in doubt about what an HTTP header does, MDN has the answer.
+
+\unnumberedchapter{Appendix E --- Walking Into an Unfamiliar System}\label{ch:44-appendices-5}
+
+\chapterrule
+
+For most of your career you will \emph{join} systems you did not build~--- switching jobs, teams, or projects, and inheriting code someone else wrote. The instinct to read it top to bottom is a trap; large systems are too big for that, and code shows you \emph{what} without \emph{why}. A faster path is a fixed set of questions~--- the same ones this book answered for the Notes API~--- that recover any system's \emph{shape} quickly. They work on any stack, because every running system, whatever its language or scale, has the same skeleton: a process, a network boundary, a request path, a data store, a deployment, and a way of being observed.
+
+This is that checklist. Ask these, roughly in this order.
+
+\textbf{Orient (first hour)}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{What is it, and why does it exist?} Read the README and any docs. What problem does it solve, and who uses it? (You are reconstructing the problem statement~--- the framing work of Part I, \emph{Product Discovery}.)
+\item
+  \textbf{How does it start as a process?} Find the entry point (\texttt{run.py}, \texttt{main}, a container \texttt{CMD}) and what supervises it~--- systemd, a container runtime, an orchestrator. The start command tells you more than any single file.
+\item
+  \textbf{Can I run it locally?} Get it running on your own machine. Nothing teaches a system faster than booting it; the setup steps reveal its real prerequisites and configuration.
+\end{enumerate}
+
+\noindent{}\textbf{Trace (first day)}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  \textbf{Where is the network boundary?} What port does it listen on, behind what proxy or load balancer, reachable at what public name? (Chapters 3 and 26--28.)
+\item
+  \textbf{What is the request path?} Pick one real request and trace it end to end: routing → handler → data access → response. Find the route table; it is the system's map of what it can do. (Chapters 29--34.)
+\item
+  \textbf{Where is the data?} Which database(s)? Dump and read the schema~--- keys, foreign keys, constraints (\hyperref[ch:06-local-dependencies]{Chapter 6}). Where does the connection config live?
+\item
+  \textbf{What does it depend on, and how is it configured?} Read the dependency manifest and the \texttt{.env.example} / config. What external services does it call, and what changes between local and production? (Chapters 12--14 and 39.)
+\end{enumerate}
+
+\noindent{}\textbf{Operate (first week)}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{7}
+\tightlist
+\item
+  \textbf{How is it deployed?} Find the build and deploy scripts or the CI pipeline. How does a commit become running production? (Chapters 17--25.)
+\item
+  \textbf{How do I see it?} Where are the logs, metrics, dashboards, and health checks? (\hyperref[ch:35-observability]{Chapter 35}.) If you cannot observe it, you cannot operate it.
+\item
+  \textbf{How does it fail, and who is on call?} Look for runbooks, past incidents or postmortems, and alert definitions. (\hyperref[ch:37-reliability]{Chapter 37}.)
+\item
+  \textbf{Why is it the way it is?} Read any decision records (ADRs~--- \hyperref[ch:39-local-vs-production]{Chapter 39}) and skim the git history. The constraints and rejected alternatives explain the odd-looking parts.
+\end{enumerate}
+
+\noindent{}You will not get clean answers to all of these~--- and the \emph{gaps} are themselves information (no runbooks, no decision records, undocumented config). The goal is not mastery on day one; it is to build the skeleton fast, so every new detail has somewhere to attach. Trace one request, run it yourself, and read the schema: those three alone will orient you in almost any system you are ever handed.
+
+\unnumberedchapter{Appendix F --- The Mental-Model Spine}\label{ch:44-appendices-6}
+
+\chapterrule
+
+This is the whole book compressed to its load-bearing ideas~--- dense enough to re-read in one sitting to refresh the model. If a line here does not ring a bell, the part behind it is where to look.
+
+\textbf{The spine, in one breath:} \emph{Code becomes a process; the process binds a port; traffic reaches that port through networks and infrastructure; the program receives input; a code path is selected; logic runs; data is accessed; a response is produced; and the whole system is observed, scaled, secured, and sustained~--- then, under pressure, distributed.}
+
+\textbf{Before the first line of code (Parts I--III of the book):} discover the problem before building a solution~--- talk to users, test the riskiest assumption cheaply, and write down what ``solved'' means (Product Discovery); turn the answer into a plan with a scope, milestones, risks, and an honest estimate (Project Planning); and write code that others can read, test, and change~--- naming, small functions, tests, reviews, and practices that grow with the team (Writing Good Code). The spine below is the rest of the journey, the running system itself, in the eleven stages of Part IV.
+
+\textbf{Stage by stage:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{1~--- Locally:} a command goes shell → \texttt{fork}/\texttt{exec} → a process with memory and file descriptors. The runtime initializes, imports, and builds the app. Network capability is \texttt{socket\ →\ bind\ →\ listen\ →\ accept}. Routes are a table mapping method+path to a handler. A request runs accept → read → parse → route → logic → data → serialize → send. Local dependencies: runtime, libraries (in a venv), a database, env vars.
+\item
+  \textbf{2~--- Why local isn't enough:} ``works on my machine'' hides environment drift, hidden dependencies, hardcoded config, loopback-only networking, and the absence of restart, monitoring, HTTPS, and auth.
+\item
+  \textbf{3~--- Portable:} pin dependencies; externalize config into validated env vars; declare the runtime contract; structure the app (factory + blueprints, high cohesion / low coupling); log structurally and handle errors at a boundary.
+\item
+  \textbf{4~--- Packaged:} a build produces an artifact; a Docker image layers base + deps + code; a registry stores versioned images (tag by git hash, never just \texttt{latest}).
+\item
+  \textbf{5~--- Environment:} a server is CPU/memory/disk + an OS + a network identity; set up users, directories, and a firewall; know public vs private IP.
+\item
+  \textbf{6~--- Deploy \& keep alive:} pull the image, run it with Gunicorn bound to \texttt{0.0.0.0} \emph{inside} the container but published only on the host's \texttt{127.0.0.1} (behind Nginx), and supervise it (Docker's restart policy, with systemd starting Docker), with logs to stdout.
+\item
+  \textbf{7~--- Reachable:} packets hit the NIC → kernel → port-to-process; DNS maps name to IP; a reverse proxy (Nginx) routes and terminates TLS.
+\item
+  \textbf{8~--- Input arrives:} the client builds a request → DNS → TCP handshake → packets → kernel socket → the application's buffer.
+\item
+  \textbf{9~--- In-program:} validate untrusted input; route to the handler; run business logic inside database transactions; build the response (status, headers, JSON).
+\item
+  \textbf{10~--- Production reality:} observe it (logs, metrics, traces; the four golden signals; health checks); scale it (vertical, then horizontal; pooling, caching, rate limiting); make it reliable (failure modes, retries with backoff, circuit breakers, graceful shutdown, tested backups, runbooks, postmortems); secure it (HTTPS, authn/authz, secrets, OWASP, validation); and keep it legible (decisions as ADRs, delivery as versioning + changelog).
+\item
+  \textbf{11~--- Beyond one service:} distribute only under proven pressure (the network is unreliable; partial failure is normal; replication and partitioning; CAP; sagas; idempotency; consensus). Decouple in time with events (queues, at-least-once + idempotent consumers, pub/sub, backpressure). Separate the analytical plane from the operational one (warehouse/lake, ELT, star schemas). Automate fleet operations with orchestration (Kubernetes = desired state + a control loop = systemd for a fleet; infrastructure as code; serverless to own less).
+\end{itemize}
+
+\noindent{}\textbf{The principles that recurred everywhere:}
+
+\begin{itemize}
+\tightlist
+\item
+  Trace it end to end; localize a failure to a \emph{layer} before you debug.
+\item
+  The network is unreliable and partial failure is normal~--- hence timeouts, retries, and \textbf{idempotency} wherever a retry can happen.
+\item
+  High cohesion, low coupling; deep modules; information hiding~--- complexity is the real enemy.
+\item
+  Externalize configuration; keep one source of truth per fact; make the implicit explicit (dependencies, contracts, decisions).
+\item
+  You cannot operate what you cannot see~--- observe before you scale.
+\item
+  Fail fast at the boundaries; handle errors only where you can act.
+\item
+  Simplicity is the default; reach for distribution and orchestration only when a single machine genuinely cannot cope.
+\item
+  Documentation is a deliverable, and the \emph{why} is the most perishable knowledge in a project.
+\end{itemize}
+
+\noindent{}If you can narrate the spine from memory~--- command to process to production and beyond~--- and name the principle behind each move, your mental model is intact. Everything else is detail you can re-derive or look up.
+
+\unnumberedchapter{Appendix G --- Python Essentials Used in This Book}\label{ch:44-appendices-7}
+
+\chapterrule
+
+This book assumes you can already write basic Python: variables, \texttt{if} and \texttt{for}, functions, lists and dictionaries. Its code also uses a set of features that a first course often skips. This appendix collects them, each with a short example and a pointer to where the book uses it. Read it once before Part IV, or come back when a listing uses something unfamiliar.
+
+\unnumberedsection{true}{G.1 Modules, Packages, and Running Code}\label{44-appendices:g1-modules-packages-and-running-code}
+
+A \textbf{module} is one \texttt{.py} file. A \textbf{package} is a directory of modules with an \texttt{\_\_init\_\_.py} file, which Python runs when the package is first imported. The Notes API is the package \texttt{app/} (Chapter 15).
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/notes.py imports from its sibling modules by their full path}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db, sql}
+\ImportTok{from}\NormalTok{ app.validation }\ImportTok{import}\NormalTok{ Validator}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Every module has a variable \texttt{\_\_name\_\_}: the module's import name (\texttt{"app.routes.notes"}), or \texttt{"\_\_main\_\_"} when the file is the program being run. That gives the common guard:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ main() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{int}\NormalTok{:}
+\NormalTok{    ...}
+    \ControlFlowTok{return} \DecValTok{0}
+
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:  }\CommentTok{\# only when run as a program, not when imported}
+\NormalTok{    sys.exit(main())  }\CommentTok{\# the return value becomes the exit status (Chapter 1)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{python\ -m\ app.migrate} runs a module \emph{inside} a package as a program. Because Python starts from the current directory, \texttt{from\ app.x\ import\ y} works, which it would not with \texttt{python\ app/}\allowbreak{}\texttt{migrate.py}.
+
+\unnumberedsection{true}{G.2 Functions: Arguments and Unpacking}\label{44-appendices:g2-functions-arguments-and-unpacking}
+
+\textbf{Keyword-only arguments.} Parameters after a bare \texttt{*} must be named by the caller. The book uses this for options that would be unreadable as bare values:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ \_access(cursor, note\_id: }\BuiltInTok{int}\NormalTok{, }\OperatorTok{*}\NormalTok{, lock: }\BuiltInTok{bool} \OperatorTok{=} \VariableTok{False}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str} \OperatorTok{|} \VariableTok{None}\NormalTok{: ...}
+
+\NormalTok{\_access(cursor, }\DecValTok{42}\NormalTok{, lock}\OperatorTok{=}\VariableTok{True}\NormalTok{)  }\CommentTok{\# clear}
+\NormalTok{\_access(cursor, }\DecValTok{42}\NormalTok{, }\VariableTok{True}\NormalTok{)  }\CommentTok{\# TypeError: lock must be named}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{\texttt{*args} and \texttt{**kwargs}} collect any extra positional and keyword arguments, into a tuple and a dictionary. A decorator uses them to pass arguments through without knowing what they are (G.3).
+
+\textbf{Unpacking} does the reverse: it spreads a sequence or a dictionary out.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{params }\OperatorTok{=}\NormalTok{ [user\_id, after]}
+\NormalTok{cursor.execute(query, (}\OperatorTok{*}\NormalTok{params, limit }\OperatorTok{+} \DecValTok{1}\NormalTok{))  }\CommentTok{\# a tuple: (user\_id, after, 21)}
+
+\NormalTok{defaults }\OperatorTok{=}\NormalTok{ \{}\StringTok{"level"}\NormalTok{: }\StringTok{"INFO"}\NormalTok{, }\StringTok{"format"}\NormalTok{: }\StringTok{"human"}\NormalTok{\}}
+\NormalTok{settings }\OperatorTok{=}\NormalTok{ \{}\OperatorTok{**}\NormalTok{defaults, }\StringTok{"format"}\NormalTok{: }\StringTok{"json"}\NormalTok{\}  }\CommentTok{\# a copy, with one key changed}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Default values are evaluated once}, when the function is defined. Never use a mutable default such as \texttt{def\ f(items={[}{]})}: every call would share one list. Use \texttt{None} and create the list inside.
+
+\textbf{A \texttt{lambda}} is a one-expression function without a name, handy as an argument: \texttt{sorted(notes,}\allowbreak{}\texttt{\ key=}\allowbreak{}\texttt{lambda\ note:}\allowbreak{}\texttt{\ note{[}"id"{]})}.
+
+\textbf{A closure} is a function defined inside another, which remembers the outer function's variables. The book's test fixtures return closures as \emph{factories} (Chapter 17):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ make\_counter():}
+\NormalTok{    count }\OperatorTok{=} \DecValTok{0}
+
+    \KeywordTok{def}\NormalTok{ next\_value() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{int}\NormalTok{:}
+        \KeywordTok{nonlocal}\NormalTok{ count  }\CommentTok{\# assign to the outer variable, not a new local one}
+\NormalTok{        count }\OperatorTok{+=} \DecValTok{1}
+        \ControlFlowTok{return}\NormalTok{ count}
+
+    \ControlFlowTok{return}\NormalTok{ next\_value}
+
+
+\NormalTok{counter }\OperatorTok{=}\NormalTok{ make\_counter()}
+\NormalTok{counter(), counter()  }\CommentTok{\# (1, 2)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{G.3 Decorators}\label{44-appendices:g3-decorators}
+
+A \textbf{decorator} is a function that takes a function and returns a replacement. \texttt{@name} above a \texttt{def} is shorthand for \texttt{func\ =\ name(func)}. Flask's \texttt{@app.route("/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{")} registers the function in the URL map and returns it unchanged (section 32.1). A decorator that \emph{wraps} a function looks like this one from Chapter 38:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ functools }\ImportTok{import}\NormalTok{ wraps}
+
+
+\KeywordTok{def}\NormalTok{ login\_required(view):}
+    \AttributeTok{@wraps}\NormalTok{(view)  }\CommentTok{\# keep the original\textquotesingle{}s name and docstring (Flask needs the name)}
+    \KeywordTok{def}\NormalTok{ wrapped(}\OperatorTok{*}\NormalTok{args, }\OperatorTok{**}\NormalTok{kwargs):}
+        \CommentTok{\# A 401 response if the request has no valid token; otherwise None,}
+        \CommentTok{\# and the view runs with every argument passed through}
+        \ControlFlowTok{return}\NormalTok{ authenticate\_request() }\KeywordTok{or}\NormalTok{ view(}\OperatorTok{*}\NormalTok{args, }\OperatorTok{**}\NormalTok{kwargs)}
+
+    \ControlFlowTok{return}\NormalTok{ wrapped}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{G.4 Type Hints}\label{44-appendices:g4-type-hints}
+
+Type hints describe what a function expects and returns. Python does not check them when the code runs. Tools do: \texttt{mypy} (Chapter 17) reads them and reports mistakes before the code runs.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ to\_iso(value) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{: ...  }\CommentTok{\# returns a string}
+\KeywordTok{def}\NormalTok{ find(note\_id: }\BuiltInTok{int}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict} \OperatorTok{|} \VariableTok{None}\NormalTok{: ...  }\CommentTok{\# a dict, or None}
+\NormalTok{tags: }\BuiltInTok{list}\NormalTok{[}\BuiltInTok{str}\NormalTok{] }\OperatorTok{=}\NormalTok{ []}
+\NormalTok{counts: }\BuiltInTok{dict}\NormalTok{[}\BuiltInTok{str}\NormalTok{, }\BuiltInTok{int}\NormalTok{] }\OperatorTok{=}\NormalTok{ \{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{X\ \textbar{}\ None} (Python 3.10 and later) means ``an \texttt{X} or \texttt{None}''. When a function can return \texttt{None}, the caller must handle that case, and mypy will say so if it does not.
+
+\unnumberedsection{true}{G.5 Strings}\label{44-appendices:g5-strings}
+
+\textbf{f-strings} put values into text: \texttt{f"Note\ \{note\_}\allowbreak{}\texttt{id\}\ not\ found"}. Inside the braces, any expression works, and a format can follow a colon: \texttt{f"\{elapsed\_ms:.1f\}\ ms"}.
+
+\textbf{Triple-quoted strings} span several lines. The book writes SQL in them. Never put \emph{values} into SQL with an f-string: pass them as parameters (\texttt{?} or \texttt{\%s}), so the database driver quotes them safely (Chapters 31 and 38). The book's f-strings in SQL only insert fixed text, such as a list of column names or a number of placeholders.
+
+\textbf{Raw strings}, \texttt{r"..."}, keep backslashes as they are, which regular expressions need: \texttt{re.}\allowbreak{}\texttt{compile(r"{[}a-}\allowbreak{}\texttt{z0-}\allowbreak{}\texttt{9{]}+(?}\allowbreak{}\texttt{:}\allowbreak{}\texttt{-}\allowbreak{}\texttt{{[}a-}\allowbreak{}\texttt{z0-}\allowbreak{}\texttt{9{]}+)*")}.
+
+\textbf{Bytes are not text.} \texttt{"é".encode()} gives the bytes \texttt{b\textquotesingle{}\textbackslash{}xc3\textbackslash{}xa9\textquotesingle{}}, and \texttt{bytes.decode()} turns them back. Hashing, network code and bcrypt work on bytes (Chapter 38).
+
+\unnumberedsection{true}{G.6 Comprehensions and Built-ins}\label{44-appendices:g6-comprehensions-and-built-ins}
+
+A \textbf{comprehension} builds a list, dictionary or set from a loop in one expression:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{names }\OperatorTok{=}\NormalTok{ [row[}\StringTok{"name"}\NormalTok{] }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ rows]}
+\NormalTok{by\_id }\OperatorTok{=}\NormalTok{ \{note[}\StringTok{"id"}\NormalTok{]: note }\ControlFlowTok{for}\NormalTok{ note }\KeywordTok{in}\NormalTok{ notes\}}
+\NormalTok{long\_notes }\OperatorTok{=}\NormalTok{ [note }\ControlFlowTok{for}\NormalTok{ note }\KeywordTok{in}\NormalTok{ notes }\ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(note[}\StringTok{"content"}\NormalTok{]) }\OperatorTok{\textgreater{}} \DecValTok{100}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Built-ins the book uses often:
+
+\Needspace{13\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4020}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4314}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Built-in
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Example
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Note
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{dict.get} & \texttt{data.get("limit",}\allowbreak{}\texttt{\ 20)} & a default instead of a \texttt{KeyError} \\
+\texttt{isinstance} & \texttt{isinstance(value,}\allowbreak{}\texttt{\ str)} & check a type; JSON input can be anything \\
+\texttt{sorted} & \texttt{sorted(names,}\allowbreak{}\texttt{\ key=}\allowbreak{}\texttt{str.}\allowbreak{}\texttt{lower)} & a new sorted list \\
+\texttt{any}, \texttt{all} & \texttt{all(isinstance(t,}\allowbreak{}\texttt{\ str)\ for\ t\ in\ tags)} & stop at the first answer \\
+\texttt{len}, \texttt{min}, \texttt{max} & \texttt{max(1,}\allowbreak{}\texttt{\ min(100,}\allowbreak{}\texttt{\ limit))} & clamp a value into a range \\
+\end{longtable}
+}
+
+The \textbf{walrus operator}, \texttt{:=}, assigns inside an expression. It is handy for a loop that runs until a function returns \texttt{None}, as in the companion repository's tests:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{while}\NormalTok{ (job }\OperatorTok{:=}\NormalTok{ jobs.claim(conn)) }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+\NormalTok{    worker.process(conn, job)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{G.7 Exceptions}\label{44-appendices:g7-exceptions}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{try}\NormalTok{:}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ requests.post(url, json}\OperatorTok{=}\NormalTok{body, timeout}\OperatorTok{=}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{5}\NormalTok{))}
+\ControlFlowTok{except}\NormalTok{ requests.ReadTimeout }\ImportTok{as}\NormalTok{ error:}
+    \ControlFlowTok{raise}\NormalTok{ EmailOutcomeUnknownError(}\StringTok{"no answer in time"}\NormalTok{) }\ImportTok{from}\NormalTok{ error}
+\ControlFlowTok{else}\NormalTok{:}
+\NormalTok{    log\_success(response)  }\CommentTok{\# only when no exception happened}
+\ControlFlowTok{finally}\NormalTok{:}
+\NormalTok{    cleanup()  }\CommentTok{\# always, with or without an exception}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Your own exceptions} are classes that inherit from \texttt{Exception}: \texttt{class\ EmailRejectedError(Exception):}\allowbreak{}\texttt{\ pass}. Their names end in \texttt{Error} by convention.
+\item
+  \textbf{\texttt{raise\ ...\ from\ error}} keeps the original exception attached, so the traceback shows both: what went wrong, and what it meant for your code.
+\item
+  \textbf{Catch only what you can handle}, and only where you can act on it. Everything else goes up to one handling boundary, which logs it once (section 16.5).
+\end{itemize}
+
+\unnumberedsection{true}{\texorpdfstring{G.8 Context Managers: \texttt{with}}{G.8 Context Managers: with}}\label{44-appendices:g8-context-managers-with}
+
+A \texttt{with} block guarantees that clean-up happens, even when an exception leaves the block:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{with} \BuiltInTok{open}\NormalTok{(}\StringTok{"config.json"}\NormalTok{) }\ImportTok{as}\NormalTok{ f:  }\CommentTok{\# the file is closed at the end of the block}
+\NormalTok{    config }\OperatorTok{=}\NormalTok{ json.load(f)}
+
+\ControlFlowTok{with}\NormalTok{ app.app\_context():  }\CommentTok{\# Flask\textquotesingle{}s application context, in scripts and tests}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+
+\ControlFlowTok{with}\NormalTok{ pytest.raises(}\PreprocessorTok{ValueError}\NormalTok{):  }\CommentTok{\# the test fails unless the block raises}
+\NormalTok{    parse(}\StringTok{"not a number"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{G.9 Classes, Briefly}\label{44-appendices:g9-classes-briefly}
+
+The book's own code is mostly functions. It uses classes where a library expects them, or where an object must carry state:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{class}\NormalTok{ RequestIDFilter(logging.Filter):  }\CommentTok{\# inherits from logging.Filter}
+    \KeywordTok{def} \BuiltInTok{filter}\NormalTok{(}\VariableTok{self}\NormalTok{, record) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{bool}\NormalTok{:  }\CommentTok{\# overrides the method the library calls}
+\NormalTok{        record.request\_id }\OperatorTok{=}\NormalTok{ g.get(}\StringTok{"request\_id"}\NormalTok{)  }\CommentTok{\# (simplified; Chapter 35)}
+        \ControlFlowTok{return} \VariableTok{True}
+
+
+\KeywordTok{class}\NormalTok{ Worker:  }\CommentTok{\# Chapter 41}
+    \KeywordTok{def} \FunctionTok{\_\_init\_\_}\NormalTok{(}\VariableTok{self}\NormalTok{):  }\CommentTok{\# runs when Worker() creates an object}
+        \VariableTok{self}\NormalTok{.stopping }\OperatorTok{=} \VariableTok{False}  \CommentTok{\# self is the object itself}
+
+    \KeywordTok{def}\NormalTok{ stop(}\VariableTok{self}\NormalTok{, signum, frame):  }\CommentTok{\# called on SIGTERM}
+        \VariableTok{self}\NormalTok{.stopping }\OperatorTok{=} \VariableTok{True}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{super().\_\_init\_\_()} calls the parent class's version of a method, when a subclass extends it rather than replacing it.
+
+\unnumberedsection{true}{\texorpdfstring{G.10 Generators and \texttt{yield}}{G.10 Generators and yield}}\label{44-appendices:g10-generators-and-yield}
+
+A function that contains \texttt{yield} is a \textbf{generator}: it pauses at each \texttt{yield} and resumes on the next request for a value. pytest uses this for fixtures that must clean up (Chapter 17):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@pytest.fixture}
+\KeywordTok{def}\NormalTok{ conn():}
+\NormalTok{    connection }\OperatorTok{=}\NormalTok{ open\_db()}
+    \ControlFlowTok{yield}\NormalTok{ connection  }\CommentTok{\# the test runs here}
+\NormalTok{    connection.close()  }\CommentTok{\# then this runs, even if the test failed}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{true}{G.11 The Standard Library the Book Leans On}\label{44-appendices:g11-the-standard-library-the-book-leans-on}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1750}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1750}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Module
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Used for
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Chapters
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{os} & environment variables (\texttt{os.getenv}), files, processes & 1, 13 \\
+\texttt{sys} & the exit status, \texttt{sys.argv}, standard error & 1, 33 \\
+\texttt{pathlib} & paths as objects: \texttt{Path("migrations")\ /}\allowbreak{}\texttt{\ name} & 7, 33 \\
+\texttt{json} & JSON text to Python values and back & 5, 34 \\
+\texttt{logging} & structured, levelled log output & 16, 35 \\
+\texttt{datetime} & times. Always timezone-aware: \texttt{datetime.}\allowbreak{}\texttt{now(timezone.}\allowbreak{}\texttt{utc)} & 16, 38 \\
+\texttt{re} & regular expressions for validation & 31, 33 \\
+\texttt{secrets} & tokens and keys that must be unguessable & 13, 38 \\
+\texttt{hashlib} & SHA-256 of login tokens & 38 \\
+\texttt{uuid} & unique ids: request ids, idempotency keys & 35, 37, 41 \\
+\texttt{time} & measuring durations, waiting (\texttt{time.perf\_counter}, \texttt{time.sleep}) & 16, 41 \\
+\texttt{subprocess} & running another program & 1, 8 \\
+\texttt{signal} & reacting to SIGTERM for a graceful stop & 41 \\
+\texttt{sqlite3} & the embedded database, before PostgreSQL & 2, 12, 33 \\
+\end{longtable}
+}
+
+Two traps worth remembering. A \textbf{naive} \texttt{datetime} (one without a time zone) means a different moment on every server: compare only timezone-aware ones. And \texttt{random} is predictable: anything secret comes from \texttt{secrets}.
+
+\unnumberedsection{true}{G.12 Async, Briefly}\label{44-appendices:g12-async-briefly}
+
+\texttt{async\ def} defines a \textbf{coroutine}, and \texttt{await} pauses it until a slow operation, such as a network call, finishes, while other coroutines run. It lets one process wait on thousands of connections at once. The Notes API does not use it: each Gunicorn worker handles one request at a time with ordinary functions, and the slowest call, sending email, happens in the separate worker process of Chapter 41. Section 36.8 explains when async is worth its extra complexity.
+
+\emph{This book covered the journey from deciding what to build, through planning it and writing it well, to a single Python file becoming a running production system~--- and the thinking that stretches beyond it. The appendices provide the vocabulary to understand what you've built, the commands to operate it, a way to find your feet in any system you inherit, a one-sitting refresher of the whole model, and the Python it was all written in.}
+
+\emph{Good luck building, deploying, and operating your systems.}

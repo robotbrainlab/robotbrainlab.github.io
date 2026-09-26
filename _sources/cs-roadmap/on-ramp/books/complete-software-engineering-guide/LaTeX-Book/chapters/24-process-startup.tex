@@ -1,0 +1,911 @@
+\setcounter{chapter}{23}
+\chapter{Process Startup in Production}\label{ch:24-process-startup}
+
+\chapterrule
+
+Since \hyperref[ch:03-network-capability]{Chapter 3}, the Notes API has run on Flask's built-in development server: one process, bound to \texttt{localhost:5000}, started by \texttt{python\ run.py}. This is fine for development. In production it falls short in three ways:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Not built for production traffic}: the development server (Werkzeug's) handles each request in a new thread, but it is not tuned for performance, has not been hardened against hostile clients, and its documentation says plainly not to use it in production. With \texttt{FLASK\_DEBUG=true} it even offers an interactive debugger that can run arbitrary code.
+\item
+  \textbf{Bound to localhost}: \texttt{app.}\allowbreak{}\texttt{run(host=}\allowbreak{}\texttt{"localhost")} refuses connections from outside the machine. A container needs \texttt{0.0.0.0} to accept traffic forwarded from the host.
+\item
+  \textbf{No process management}: it is a single process. If that process dies~--- out of memory, a crash in a C extension~--- the server is gone, and there is nothing to restart it. Production needs worker processes that are restarted independently.
+\end{enumerate}
+
+\noindent{}The solution is a \textbf{WSGI server}~--- a production-grade server designed specifically for running Python web applications. This chapter explains what WSGI is, how Gunicorn (the WSGI server used in the Docker image) works, how to configure it correctly, and how to ensure the entire container starts automatically and restarts after crashes.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What WSGI is and why Python web applications need a WSGI server
+\item
+  How Gunicorn manages worker processes and handles concurrent requests
+\item
+  How to configure Gunicorn for production: worker count, timeouts, logging
+\item
+  What signals (SIGTERM, SIGKILL) are and how they affect graceful shutdown
+\item
+  How Docker's \texttt{-\/-restart} policy manages container restarts
+\item
+  How systemd can manage Docker containers at the OS level
+\item
+  The difference between worker processes and threads in a Python web application
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{What WSGI Is}\label{24-process-startup:241-what-wsgi-is}
+
+\textbf{WSGI} (Web Server Gateway Interface) is a Python standard defined in PEP 3333. It is a specification~--- an interface definition~--- that describes how a web server should communicate with a Python web application.
+
+Before WSGI (first defined in 2003 in PEP 333, and updated for Python 3 by PEP 3333), every Python web framework had its own way of interfacing with web servers~--- CGI scripts, \texttt{mod\_python}, framework-specific servers such as Zope's~--- and a framework chose your server for you. WSGI standardized the interface: any WSGI-compatible web server can run any WSGI-compatible web application. Flask and Django were built on it from the start.
+
+\subsection*{The WSGI interface}\phantomsection\label{24-process-startup:the-wsgi-interface}
+
+A WSGI application is any Python callable (function or class) that:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Accepts two arguments: \texttt{environ} and \texttt{start\_response}
+\item
+  Returns an iterable of byte strings (the response body)
+\end{enumerate}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# The simplest possible WSGI application}
+\KeywordTok{def}\NormalTok{ simple\_app(environ, start\_response):}
+    \CommentTok{"""}
+\CommentTok{    environ: a dictionary containing the HTTP request information}
+\CommentTok{             (request method, path, headers, body, etc.)}
+\CommentTok{    start\_response: a callable to send the HTTP status and headers}
+\CommentTok{    """}
+\NormalTok{    status }\OperatorTok{=} \StringTok{"200 OK"}
+\NormalTok{    headers }\OperatorTok{=}\NormalTok{ [(}\StringTok{"Content{-}Type"}\NormalTok{, }\StringTok{"text/plain"}\NormalTok{)]}
+\NormalTok{    start\_response(status, headers)}
+    \ControlFlowTok{return}\NormalTok{ [}\StringTok{b"Hello, World!"}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Flask's \texttt{app} object is a WSGI application. When you call \texttt{create\_app()}, the returned \texttt{app} implements the WSGI interface. Any WSGI server~--- Gunicorn, uWSGI, Waitress, mod\_wsgi~--- can take that \texttt{app} and serve it.
+
+\subsection*{WSGI vs ASGI}\phantomsection\label{24-process-startup:wsgi-vs-asgi}
+
+\textbf{ASGI} (Asynchronous Server Gateway Interface) is the modern evolution of WSGI, designed for asynchronous Python frameworks (FastAPI, Starlette, Django with async views). ASGI supports WebSockets and other protocols that WSGI cannot handle.
+
+Flask 2.0 and later support async route handlers, but Flask itself is a WSGI application. For the Notes API, WSGI and Gunicorn are the correct choice. ASGI and servers like Uvicorn or Hypercorn are relevant if you switch to FastAPI or use Flask's async features extensively.
+
+\setcounter{section}{1}
+\section{How Gunicorn Works}\label{24-process-startup:242-how-gunicorn-works}
+
+\textbf{Gunicorn} (Green Unicorn) is a production WSGI server for Python. It follows the pre-fork worker model.
+
+\subsection*{The pre-fork worker model}\phantomsection\label{24-process-startup:the-pre-fork-worker-model}
+
+\begin{diagrambox}[short]{248.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Gunicorn Master Process
+    │
+    │  forks N worker processes at startup
+    │
+    ├── Worker Process 1 (PID 1001)
+    │     imports app, calls create_app()
+    │     listens for requests on the shared socket
+    │
+    ├── Worker Process 2 (PID 1002)
+    │     imports app, calls create_app()
+    │     listens for requests on the shared socket
+    │
+    └── Worker Process N (PID 100N)
+          ...
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}\textbf{Pre-fork} means the master process creates (forks) all worker processes before any requests arrive. Each worker is a complete Python process with its own memory space.
+
+\subsection*{How requests are handled}\phantomsection\label{24-process-startup:how-requests-are-handled}
+
+\begin{diagrambox}[short]{377.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Internet → Nginx → 127.0.0.1:5000 → (Docker) → Gunicorn socket
+                                      │
+                                      │ Kernel delivers to one available worker
+                                      ▼
+                               Worker Process 1
+                               (handles request 1)
+
+                               Worker Process 2
+                               (handles request 2)
+
+                               Worker Process 3
+                               (handles request 3)
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}The kernel's TCP stack accepts connections on the shared socket. When a connection arrives, the kernel delivers it to whichever worker is ready to accept. Multiple workers mean multiple concurrent requests.
+
+\subsection*{Worker lifecycle}\phantomsection\label{24-process-startup:worker-lifecycle}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Master starts
+↓
+Master forks 2 workers
+↓
+Worker 1 calls accept() — waits for a connection
+Worker 2 calls accept() — waits for a connection
+↓
+Request 1 arrives → Worker 1 wakes up, handles it, calls accept() again
+Request 2 arrives → Worker 2 wakes up, handles it, calls accept() again
+↓
+Worker 1 is killed (out of memory, a crash in C code, or a timeout) →
+Master detects worker death →
+Master forks a new Worker 1 →
+New Worker 1 calls accept()
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}If a worker dies, the master notices (because the worker process exits) and forks a replacement. This is \textbf{fault isolation}: one worker's death does not affect the others. (An ordinary exception in a request handler does not kill a worker at all: Flask's error handlers turn it into a 500 response, and the worker carries on.)
+
+\setcounter{section}{2}
+\section{Configuring Gunicorn}\label{24-process-startup:243-configuring-gunicorn}
+
+The Dockerfile in \hyperref[ch:18-containerization]{Chapter 18} used this CMD:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{CMD}\NormalTok{ [}\StringTok{"gunicorn"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"app:create\_app()"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}bind"}\NormalTok{, }\StringTok{"0.0.0.0:5000"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}workers"}\NormalTok{, }\StringTok{"2"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}timeout"}\NormalTok{, }\StringTok{"30"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}access{-}logfile"}\NormalTok{, }\StringTok{"{-}"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}error{-}logfile"}\NormalTok{, }\StringTok{"{-}"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}log{-}level"}\NormalTok{, }\StringTok{"info"}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Let us examine each setting in depth.
+
+\subsection*{\texorpdfstring{\texttt{app:create\_app()}}{app:create\_app()}}\phantomsection\label{24-process-startup:appcreate-app}
+
+This tells Gunicorn where to find the WSGI application:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{app}~--- the Python module (the \texttt{app/} package)
+\item
+  \texttt{create\_app()}~--- call this callable to get the WSGI app
+\end{itemize}
+
+\noindent{}Gunicorn imports the \texttt{app} module and calls \texttt{create\_app()}. The returned Flask application is the WSGI application it serves.
+
+Alternatively: \texttt{"run:app"}~--- import \texttt{run.py} and use the \texttt{app} variable there. The \texttt{create\_app()} form is preferred because it uses the factory pattern.
+
+\subsection*{\texorpdfstring{\texttt{-\/-bind\ 0.0.0.0:5000}}{-\/-bind 0.0.0.0:5000}}\phantomsection\label{24-process-startup:--bind-00005000}
+
+Bind to all network interfaces on port 5000. \texttt{0.0.0.0} means ``accept connections from any network interface.'' Inside a Docker container, this is required: the container has its own network interface, and \texttt{localhost:5000} would be unreachable from outside the container. Which ``outside'' can reach it is decided on the host, by how the port is published: on the server, always \texttt{-p\ 127.0.0.1:5000:5000}, so only Nginx can (\hyperref[ch:21-system-setup]{Chapter 21}).
+
+\subsection*{\texorpdfstring{\texttt{-\/-workers}}{-\/-workers}}\phantomsection\label{24-process-startup:--workers}
+
+The number of worker processes to spawn.
+
+\textbf{How many workers?} The classic formula:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+workers = (2 × CPU_cores) + 1
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}For a server with 1 CPU core: 3 workers.
+For a server with 2 CPU cores: 5 workers.
+
+The reasoning: while one worker is waiting for a database response (I/O), another worker can handle a different request. The \texttt{2\ ×\ CPU\_cores} formula accounts for this I/O concurrency.
+
+However, the formula is a starting point, not a law. For the Notes API on a 1-vCPU server with 1 GB RAM, 3 workers would consume \textasciitilde150 MB (50 MB per worker)~--- affordable~--- but this book keeps \textbf{2 workers}, the number used since \hyperref[ch:18-containerization]{Chapter 18}: the application is tiny and the database does the heavy lifting, and a second vCPU is the moment to revisit the number. On a 512 MB server, 2 workers are the safe maximum.
+
+\textbf{The GIL and worker processes:}
+
+Python has a \textbf{Global Interpreter Lock (GIL)} that prevents multiple threads in the same process from executing Python bytecode simultaneously. This makes Python's threading less effective for CPU-bound parallelism.
+
+Workers are \textbf{processes}, not threads. Each process has its own GIL. With 2 worker processes, 2 Python functions can run simultaneously (on 2 CPU cores).
+
+This is why Gunicorn's default is multiple processes rather than threads~--- processes sidestep the GIL for CPU-bound work. The Notes API, though, is mostly I/O-bound: its requests spend their time waiting for the database, and Python releases the GIL while it waits. For such applications, threads within each worker (\texttt{-\/-threads\ 4}, which switches to the \texttt{gthread} worker class) add concurrency cheaply. (On a 1-vCPU server, nothing runs truly in parallel either way; the gain comes from overlapping the waiting.)
+
+\subsection*{\texorpdfstring{\texttt{-\/-timeout}}{-\/-timeout}}\phantomsection\label{24-process-startup:--timeout}
+
+Kill a worker if it takes longer than this many seconds to handle a single request. Default: 30 seconds.
+
+If a worker is handling a request and the request takes longer than 30 seconds (perhaps due to a slow database query or an infinite loop), Gunicorn kills the worker (recent versions send SIGABRT first, then SIGKILL) and forks a new one.
+
+This prevents ``stuck'' workers from accumulating and exhausting the worker pool.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Timeline:
+  T+0s:  Request arrives, Worker 1 starts handling it
+  T+30s: Gunicorn sends SIGKILL to Worker 1 (timeout)
+  T+30s: Client receives a 502 Bad Gateway (Nginx sees the connection close)
+  T+30s: Gunicorn forks a new Worker 1
+  T+30s: New Worker 1 is ready for the next request
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}For operations that legitimately take longer than 30 seconds (file uploads, complex computations), increase the timeout or, better, use background tasks.
+
+\subsection*{\texorpdfstring{\texttt{-\/-access-logfile\ -} and \texttt{-\/-error-logfile\ -}}{-\/-access-logfile - and -\/-error-logfile -}}\phantomsection\label{24-process-startup:--access-logfile---and---error-logfile--}
+
+Write access logs to stdout and Gunicorn's own messages to stderr (\texttt{-} means ``the standard stream'': stdout for the access log, stderr for the error log). In Docker, both are captured by the container runtime. \texttt{docker\ logs} and log aggregation systems see this output.
+
+Without this: logs go to a file inside the container, which you cannot easily access.
+
+\subsection*{\texorpdfstring{\texttt{-\/-log-level\ info}}{-\/-log-level info}}\phantomsection\label{24-process-startup:--log-level-info}
+
+Gunicorn's own log verbosity. \texttt{info} logs:
+
+\begin{itemize}
+\tightlist
+\item
+  Worker starts and stops
+\item
+  Gunicorn configuration on startup
+\item
+  Unhandled exceptions in workers
+\end{itemize}
+
+\noindent{}Use \texttt{debug} during troubleshooting, \texttt{warning} for a quieter production environment.
+
+\subsection*{Additional useful settings}\phantomsection\label{24-process-startup:additional-useful-settings}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+--workers 2                # Number of worker processes
+--worker-class sync        # Worker type: sync (default), gthread, gevent, eventlet
+--threads 1                # Threads per worker (for thread-based concurrency)
+--worker-connections 1000  # Max simultaneous clients per worker (async workers)
+--max-requests 1000        # Restart workers after handling this many requests
+                           # (prevents memory leaks from accumulating)
+--max-requests-jitter 50   # Add randomness to max-requests to prevent all
+                           # workers restarting simultaneously
+--graceful-timeout 30      # After receiving SIGTERM, wait this long for in-flight
+                           # requests to complete before killing workers
+--preload                  # Load the app in the master before forking workers
+                           # (saves memory via copy-on-write; use with caution
+                           # if the app has state that is not fork-safe)
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{The production Gunicorn configuration file}\phantomsection\label{24-process-startup:the-production-gunicorn-configuration-file}
+
+Instead of long command-line arguments, Gunicorn can read from a configuration file:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 24.1}\enspace gunicorn.conf.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Gunicorn configuration for production.}
+
+\CommentTok{Gunicorn reads this file when started with:}
+\CommentTok{  gunicorn {-}{-}config gunicorn.conf.py "app:create\_app()"}
+\CommentTok{(It also loads ./gunicorn.conf.py automatically; {-}{-}config makes it explicit.)}
+\CommentTok{"""}
+\ImportTok{import}\NormalTok{ os}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Server socket}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\CommentTok{\# Bind to all interfaces inside the container, on port 5000}
+\NormalTok{bind }\OperatorTok{=} \StringTok{"0.0.0.0:5000"}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Worker processes}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\CommentTok{\# Number of worker processes: 2 for the 1{-}vCPU, 1 GB server (see above).}
+\CommentTok{\# Settable per server without rebuilding the image.}
+\CommentTok{\# (Avoid multiprocessing.cpu\_count() here: inside a container it reports}
+\CommentTok{\# the HOST\textquotesingle{}s CPUs and ignores any limit set with docker run {-}{-}cpus.)}
+\NormalTok{workers }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(os.getenv(}\StringTok{"GUNICORN\_WORKERS"}\NormalTok{, }\StringTok{"2"}\NormalTok{))}
+
+\CommentTok{\# Worker class — sync for standard Flask apps}
+\NormalTok{worker\_class }\OperatorTok{=} \StringTok{"sync"}
+
+\CommentTok{\# Threads per worker (optional; 1 = no threading)}
+\CommentTok{\# Use threads \textgreater{} 1 if your application does I/O{-}bound work and you want}
+\CommentTok{\# thread{-}based concurrency within each worker process.}
+\NormalTok{threads }\OperatorTok{=} \DecValTok{1}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Worker lifecycle}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\CommentTok{\# Kill workers that take longer than this to handle a request (seconds)}
+\NormalTok{timeout }\OperatorTok{=} \DecValTok{30}
+
+\CommentTok{\# After receiving SIGTERM, wait this long for in{-}flight requests (seconds)}
+\NormalTok{graceful\_timeout }\OperatorTok{=} \DecValTok{30}
+
+\CommentTok{\# Restart workers after this many requests (prevents memory leak accumulation)}
+\NormalTok{max\_requests }\OperatorTok{=} \DecValTok{1000}
+
+\CommentTok{\# Add jitter to prevent all workers restarting simultaneously}
+\NormalTok{max\_requests\_jitter }\OperatorTok{=} \DecValTok{100}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Logging}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\CommentTok{\# Access log to stdout, Gunicorn\textquotesingle{}s own messages to stderr (Docker captures both)}
+\NormalTok{accesslog }\OperatorTok{=} \StringTok{"{-}"}
+\NormalTok{errorlog }\OperatorTok{=} \StringTok{"{-}"}
+\NormalTok{loglevel }\OperatorTok{=} \StringTok{"info"}
+
+\CommentTok{\# Log format: include timestamp, method, path, status, response time}
+\NormalTok{access\_log\_format }\OperatorTok{=} \StringTok{\textquotesingle{}}\SpecialCharTok{\%(t)s}\StringTok{ "}\SpecialCharTok{\%(r)s}\StringTok{" }\SpecialCharTok{\%(s)s}\StringTok{ }\SpecialCharTok{\%(b)s}\StringTok{ }\SpecialCharTok{\%(D)s}\StringTok{μs\textquotesingle{}}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Process naming}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\CommentTok{\# Prefix for process names (visible in ps/htop)}
+\NormalTok{proc\_name }\OperatorTok{=} \StringTok{"notes{-}api"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Update the end of the Dockerfile (\hyperref[ch:18-containerization]{Listing 18.1}) to use this file. The \texttt{COPY} goes next to the other application files, and the new \texttt{CMD} replaces the old one:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Copy the gunicorn config into the image (with the application code)}
+\KeywordTok{COPY} \OperatorTok{{-}{-}chown=notes:notes}\NormalTok{ gunicorn.conf.py .}
+
+\CommentTok{\# ... USER, EXPOSE, ENV and HEALTHCHECK exactly as before ...}
+
+\KeywordTok{CMD}\NormalTok{ [}\StringTok{"gunicorn"}\NormalTok{, }\StringTok{"{-}{-}config"}\NormalTok{, }\StringTok{"gunicorn.conf.py"}\NormalTok{, }\StringTok{"app:create\_app()"}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{3}
+\section{Signals and Graceful Shutdown}\label{24-process-startup:244-signals-and-graceful-shutdown}
+
+\textbf{Signals} are a Unix mechanism for inter-process communication. A signal is an integer sent to a process by the kernel, by another process, or by a user pressing Ctrl+C.
+
+When a signal arrives, the process's default signal handler runs (or a custom handler, if the process registered one). Different signals have different default behaviors.
+
+\Needspace{24\baselineskip}
+
+\subsection*{Signals relevant to Gunicorn}\phantomsection\label{24-process-startup:signals-relevant-to-gunicorn}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2375}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1125}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Signal
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Value
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Gunicorn behavior
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{SIGTERM} & 15 & Graceful shutdown: stop accepting new requests, wait for in-flight requests to complete \\
+\texttt{SIGKILL} & 9 & Immediate termination~--- cannot be caught or ignored \\
+\texttt{SIGINT}, \texttt{SIGQUIT} & 2, 3 & Quick shutdown: exit immediately, without waiting for in-flight requests (Ctrl+C sends SIGINT) \\
+\texttt{SIGHUP} & 1 & Reload configuration and restart workers gracefully \\
+\texttt{SIGUSR2} & 12 & Upgrade Gunicorn binary in-place (for zero-downtime updates) \\
+\end{longtable}
+}
+
+\subsection*{Why graceful shutdown matters}\phantomsection\label{24-process-startup:why-graceful-shutdown-matters}
+
+When Docker stops a container, it sends \texttt{SIGTERM} to the main process (Gunicorn's master). With proper handling:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+SIGTERM arrives at Gunicorn master
+↓
+Master tells workers: "stop accepting new requests"
+↓
+Workers finish their current in-flight requests
+↓
+Workers exit cleanly
+↓
+Master exits
+↓
+Container exits
+
+Timeline: 0–30 seconds (graceful_timeout)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Without graceful handling:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Container receives SIGTERM → Gunicorn exits immediately
+↓
+Worker processes exit immediately
+↓
+In-flight HTTP requests are dropped (client sees connection reset)
+↓
+Work a request had half done stays half done (the database rolls back an
+uncommitted transaction, but an email already sent stays sent)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}If the processes are still running when the stop timeout expires, Docker sends \texttt{SIGKILL}~--- a signal that cannot be caught, and forcibly terminates the process regardless of what it is doing. Docker's default timeout is only \textbf{10 seconds}, which cuts Gunicorn's 30-second graceful window short unless you change it:
+
+\subsection*{The shutdown sequence in Docker}\phantomsection\label{24-process-startup:the-shutdown-sequence-in-docker}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ stop notes{-}api}
+\CommentTok{\# Docker sends SIGTERM to the container\textquotesingle{}s main process (PID 1)}
+\CommentTok{\# If the process has not exited after {-}{-}time (default 10 seconds),}
+\CommentTok{\# Docker sends SIGKILL}
+
+\CommentTok{\# Increase the timeout for graceful shutdown:}
+\ExtensionTok{docker}\NormalTok{ stop }\AttributeTok{{-}{-}time}\NormalTok{ 35 notes{-}api}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Align the Docker stop timeout with Gunicorn's \texttt{graceful\_timeout}:
+
+\begin{itemize}
+\tightlist
+\item
+  Gunicorn \texttt{graceful\_timeout\ =}\allowbreak{}\texttt{\ 30} seconds
+\item
+  Docker stop timeout = 35 seconds (5 extra seconds for overhead)
+\end{itemize}
+
+\noindent{}Rather than remembering \texttt{-\/-time\ 35} on every \texttt{docker\ stop}, set it once when the container is created: \texttt{docker\ run\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{stop-}\allowbreak{}\texttt{timeout\ 35\ …}. Every \texttt{docker\ run} in the deploy scripts of \hyperref[ch:23-code-transfer]{Chapter 23} does this.
+
+\setcounter{section}{4}
+\section{PID 1 and Signal Handling in Containers}\label{24-process-startup:245-pid-1-and-signal-handling-in-containers}
+
+In a Docker container, the main process has \textbf{PID 1}~--- the init process. PID 1 is special in two ways. Signals sent to the container (\texttt{docker\ stop} sends SIGTERM) go to it. And the kernel protects it: a signal that PID 1 has not installed a handler for is simply \textbf{ignored}, instead of triggering the default action (which, for SIGTERM, is to terminate).
+
+\subsection*{The PID 1 problem}\phantomsection\label{24-process-startup:the-pid-1-problem}
+
+When Gunicorn starts with the CMD:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{CMD}\NormalTok{ [}\StringTok{"gunicorn"}\NormalTok{, }\StringTok{"{-}{-}config"}\NormalTok{, }\StringTok{"gunicorn.conf.py"}\NormalTok{, }\StringTok{"app:create\_app()"}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Gunicorn runs as PID 1. It installs a SIGTERM handler, so when Docker sends SIGTERM, Gunicorn receives it and shuts down gracefully.
+
+Now suppose the container must do something before starting Gunicorn~--- say, wait for the database~--- and the CMD becomes a small shell script:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{CMD}\NormalTok{ [}\StringTok{"/bin/sh"}\NormalTok{, }\StringTok{"{-}c"}\NormalTok{, }\StringTok{"python wait\_for\_db.py \&\& gunicorn {-}{-}config gunicorn.conf.py \textquotesingle{}app:create\_app()\textquotesingle{}"}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The shell runs as PID 1 and starts Gunicorn as its child. When Docker sends SIGTERM:
+
+\begin{itemize}
+\tightlist
+\item
+  SIGTERM goes to the shell (PID 1), which has no handler for it~--- so the kernel ignores it
+\item
+  Gunicorn never hears about it and keeps serving
+\item
+  After the stop timeout, Docker sends SIGKILL to everything
+\item
+  No graceful shutdown~--- and every \texttt{docker\ stop} takes the full timeout
+\end{itemize}
+
+\noindent{}(With a single command, such as \texttt{sh\ -c\ "gunicorn\ …"}, many shells quietly replace themselves with that command, and Gunicorn ends up as PID 1 after all. That is why this bug often appears only when a second command is added.)
+
+Three fixes:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. Exec form (JSON array) with no shell at all — the default choice:}
+\KeywordTok{CMD}\NormalTok{ [}\StringTok{"gunicorn"}\NormalTok{, }\StringTok{"{-}{-}config"}\NormalTok{, }\StringTok{"gunicorn.conf.py"}\NormalTok{, }\StringTok{"app:create\_app()"}\NormalTok{]}
+
+\CommentTok{\# 2. If a shell is needed, make it replace itself with Gunicorn using exec:}
+\KeywordTok{CMD}\NormalTok{ [}\StringTok{"/bin/sh"}\NormalTok{, }\StringTok{"{-}c"}\NormalTok{, }\StringTok{"python wait\_for\_db.py \&\& exec gunicorn {-}{-}config gunicorn.conf.py \textquotesingle{}app:create\_app()\textquotesingle{}"}\NormalTok{]}
+
+\CommentTok{\# 3. Or run a tiny init process as PID 1 that forwards signals and reaps}
+\CommentTok{\#    zombie processes: docker run {-}{-}init (it runs tini as PID 1)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Avoid the \textbf{shell form} of CMD (\texttt{CMD\ gunicorn\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{config\ gunicorn.}\allowbreak{}\texttt{conf.}\allowbreak{}\texttt{py\ …}, without brackets): Docker wraps it in \texttt{/bin/sh\ -c}, recreating the problem.
+
+\setcounter{section}{5}
+\section{Docker Restart Policies}\label{24-process-startup:246-docker-restart-policies}
+
+The container needs to restart automatically if it crashes. Docker provides \textbf{restart policies}:
+
+\Needspace{16\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.2571}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.7429}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Policy
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Behavior
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{no} & Never restart (default) \\
+\texttt{on-failure} & Restart only if the container exited with a non-zero exit code \\
+\texttt{unless-stopped} & Restart whenever the container stops (and when the Docker daemon starts), unless you stopped it with \texttt{docker\ stop} \\
+\texttt{always} & The same~--- except that a container you stopped by hand is started again the next time the Docker daemon starts \\
+\end{longtable}
+}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Run with restart policy (this is how deploy.sh starts the container):}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}name}\NormalTok{ notes{-}api }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}restart}\NormalTok{ unless{-}stopped }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}stop{-}timeout}\NormalTok{ 35 }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}p}\NormalTok{ 127.0.0.1:5000:5000 }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}env{-}file}\NormalTok{ /opt/notes{-}api/config/notes{-}api.env }\DataTypeTok{\textbackslash{}}
+\NormalTok{    ghcr.io/your{-}username/notes{-}api:sha{-}a1b2c3d}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With \texttt{unless-stopped}:
+
+\begin{itemize}
+\tightlist
+\item
+  If the container crashes: Docker restarts it automatically
+\item
+  If the server reboots: Docker starts the container when Docker daemon starts
+\item
+  If you run \texttt{docker\ stop\ notes-api}: Docker does NOT restart it (until next explicit \texttt{docker\ run})
+\end{itemize}
+
+\noindent{}This is the policy for a production container that should always be running~--- and it is \textbf{this book's supervision design}: Docker's restart policy restarts the container, and systemd, which starts Docker itself at boot (\texttt{docker.service} is enabled~--- \hyperref[ch:21-system-setup]{Chapter 21}), brings the whole stack back after a reboot.
+
+\subsection*{Viewing restart history}\phantomsection\label{24-process-startup:viewing-restart-history}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# See how many times a container has been restarted}
+\ExtensionTok{docker}\NormalTok{ inspect notes{-}api }\AttributeTok{{-}{-}format} \DataTypeTok{\textbackslash{}}
+  \StringTok{\textquotesingle{}Status: \{\{.State.Status\}\}  RestartCount: \{\{.RestartCount\}\}  ExitCode: \{\{.State.ExitCode\}\}  StartedAt: \{\{.State.StartedAt\}\}\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}If \texttt{RestartCount} is climbing, the container is crash-looping. Investigate the logs:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}tail}\OperatorTok{=}\NormalTok{100 notes{-}api}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{6}
+\section{systemd Integration (an Alternative)}\label{24-process-startup:247-systemd-integration-an-alternative}
+
+Docker's \texttt{-}\allowbreak{}\texttt{-}\allowbreak{}\texttt{restart\ unless-}\allowbreak{}\texttt{stopped} is sufficient for the Notes API, and it is what this book uses. Some teams prefer to let \textbf{systemd}~--- the Linux service manager~--- own the container instead. This section shows how, so you can recognize and choose it; it is an \textbf{alternative} to the restart policy, never an addition to it.
+
+What systemd offers over Docker restart policies:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{systemctl\ status\ notes-}\allowbreak{}\texttt{api}: the same management interface as every other service on the server
+\item
+  \texttt{journalctl\ -u\ notes-api}: the container's output in the system journal
+\item
+  Dependencies and ordering between services (e.g., ``start after the network is up'')
+\end{itemize}
+
+\noindent{}Why never both: two supervisors for one container fight. \texttt{deploy.sh} removes the container to replace it, and systemd immediately starts one of its own; after a reboot, Docker restarts one container and systemd starts another with the same name. Pick one. If you choose systemd, the deploy script changes too: instead of running \texttt{docker\ run}, it writes the new tag into an environment file and runs \texttt{systemctl\ restart\ notes-}\allowbreak{}\texttt{api}.
+
+\subsection*{Creating a systemd unit file}\phantomsection\label{24-process-startup:creating-a-systemd-unit-file}
+
+The image tag lives in its own small file, so a deployment (or a rollback) edits one line, and a reboot starts exactly the version that was last deployed~--- never whatever \texttt{latest} happens to be:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# /opt/notes{-}api/config/image.env — written by the deploy script}
+\VariableTok{IMAGE}\OperatorTok{=}\NormalTok{ghcr.io/your{-}username/notes{-}api:sha{-}a1b2c3d}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create the systemd service file}
+\FunctionTok{cat} \OperatorTok{\textgreater{}}\NormalTok{ /etc/systemd/system/notes{-}api.service }\OperatorTok{\textless{}\textless{} \textquotesingle{}EOF\textquotesingle{}}
+\StringTok{[Unit]}
+\StringTok{Description=Notes API (Docker container)}
+\StringTok{Documentation=https://github.com/your{-}username/notes{-}api}
+\StringTok{\# Start after Docker is running}
+\StringTok{After=docker.service}
+\StringTok{Requires=docker.service}
+
+\StringTok{[Service]}
+\StringTok{\# The deploy user runs the container (it is in the docker group)}
+\StringTok{User=deploy}
+\StringTok{Group=deploy}
+
+\StringTok{\# Provides $IMAGE: the exact image to run}
+\StringTok{EnvironmentFile=/opt/notes{-}api/config/image.env}
+
+\StringTok{\# Remove any leftover container with the same name before starting}
+\StringTok{ExecStartPre={-}/usr/bin/docker rm {-}f notes{-}api}
+
+\StringTok{\# Start the container in the foreground, so systemd can watch it.}
+\StringTok{\# No {-}{-}restart flag: systemd is the supervisor here.}
+\StringTok{ExecStart=/usr/bin/docker run \textbackslash{}}
+\StringTok{    {-}{-}name notes{-}api \textbackslash{}}
+\StringTok{    {-}{-}stop{-}timeout 35 \textbackslash{}}
+\StringTok{    {-}p 127.0.0.1:5000:5000 \textbackslash{}}
+\StringTok{    {-}{-}env{-}file /opt/notes{-}api/config/notes{-}api.env \textbackslash{}}
+\StringTok{    $\{IMAGE\}}
+
+\StringTok{\# Stop the container gracefully (SIGTERM, then wait up to 35 seconds, then SIGKILL)}
+\StringTok{ExecStop=/usr/bin/docker stop notes{-}api}
+
+\StringTok{\# Restart behavior}
+\StringTok{Restart=always}
+\StringTok{RestartSec=5}
+
+\StringTok{\# Logging}
+\StringTok{StandardOutput=journal}
+\StringTok{StandardError=journal}
+
+\StringTok{[Install]}
+\StringTok{WantedBy=multi{-}user.target}
+\OperatorTok{EOF}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(The container is deliberately \emph{not} started with \texttt{-\/-rm}: after a crash, \texttt{docker\ inspect} and \texttt{docker\ logs} still have something to show you. \texttt{ExecStartPre} removes it before the next start.)
+
+Enable and start the service:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Reload systemd\textquotesingle{}s configuration after creating the unit file}
+\ExtensionTok{systemctl}\NormalTok{ daemon{-}reload}
+
+\CommentTok{\# Enable: start automatically on boot}
+\ExtensionTok{systemctl}\NormalTok{ enable notes{-}api}
+
+\CommentTok{\# Start now}
+\ExtensionTok{systemctl}\NormalTok{ start notes{-}api}
+
+\CommentTok{\# Check status}
+\ExtensionTok{systemctl}\NormalTok{ status notes{-}api}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected status output:
+
+\begin{diagrambox}[short]{349.4pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+● notes-api.service - Notes API (Docker container)
+     Loaded: loaded (/etc/systemd/system/notes-api.service; enabled; ...)
+     Active: active (running) since Mon 2024-01-15 14:00:00 UTC; 2min ago
+   Main PID: 12345 (docker)
+      Tasks: 7 (limit: 1141)
+     Memory: 25.6M
+        CPU: 2.345s
+     CGroup: /system.slice/notes-api.service
+             └─12345 /usr/bin/docker run --name notes-api ...
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Notice what systemd is actually watching: the \texttt{docker\ run} \emph{client} process (PID 12345). The container's processes~--- Gunicorn and its workers~--- are started by Docker's own daemon, under \texttt{containerd}, in a separate cgroup. So \texttt{Memory:\ 25.6M} is the Docker client's memory, not the application's; \texttt{docker\ stats\ notes-api} shows the real figure. systemd learns about a crash because the client exits when the container does.
+
+View logs:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}f}        \CommentTok{\# Follow logs in real time}
+\ExtensionTok{journalctl} \AttributeTok{{-}u}\NormalTok{ notes{-}api }\AttributeTok{{-}{-}since} \StringTok{"1 hour ago"}  \CommentTok{\# Logs from the past hour}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{7}
+\section{The Complete Startup Sequence}\label{24-process-startup:248-the-complete-startup-sequence}
+
+When the server boots:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+1. Linux kernel initializes hardware
+2. systemd starts as PID 1
+3. systemd starts Docker (docker.service, enabled in Chapter 21)
+4. Docker daemon starts containers that have a restart policy:
+   notes-api (--restart unless-stopped)
+5. Container's PID 1 — the Gunicorn master — starts:
+   reads gunicorn.conf.py, binds 0.0.0.0:5000 inside the container
+6. Gunicorn forks 2 worker processes
+7. Each worker imports the app package and calls create_app():
+   - logging configured
+   - startup checks (Python version, SECRET_KEY, database) ✓
+   - "All startup checks passed."
+   - error handlers, middleware and blueprints registered
+   - database schema initialized (CREATE TABLE IF NOT EXISTS)
+8. Each worker calls accept() on the shared socket
+9. Server is ready to handle requests
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Two details are easy to get wrong. The startup checks run inside \texttt{create\_app()}, so they run in every worker (twice, with two workers)~--- and there is no port check here: that one belongs to \texttt{run.py}, which Gunicorn does not use, because Gunicorn binds the port itself. And \texttt{create\_app()} runs \emph{after} the fork, in each worker; only with \texttt{-\/-preload} would the master call it once, before forking.
+
+With the systemd alternative from section 24.7, step 4 becomes: ``systemd starts notes-api.service (After=docker.service), which runs \texttt{docker\ run}''.
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+
+
+## 24.9 Monitoring the Process
+
+After startup, monitor the application's resource usage:
+
+```bash
+# View running containers and their resource usage
+docker stats notes-api
+
+# View the processes inside the container (run on the host: the slim
+# image has no "ps" command, so "docker exec notes-api ps" would fail)
+docker top notes-api
+
+# View the container's PID 1 (Gunicorn master)
+docker exec notes-api cat /proc/1/status | head -5
+
+# Interactive shell inside the container (for debugging)
+docker exec -it notes-api bash
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\texttt{docker\ top} lists Gunicorn's processes with their PIDs \emph{on the host}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+UID    PID     PPID    C  STIME  TTY  TIME      CMD
+1001   23101   23080   0  14:00  ?    00:00:00  /usr/local/bin/python /usr/local/bin/gunicorn --config gunicorn.conf.py app:create_app()
+1001   23130   23101   0  14:00  ?    00:00:01  /usr/local/bin/python /usr/local/bin/gunicorn --config gunicorn.conf.py app:create_app()
+1001   23131   23101   0  14:00  ?    00:00:01  /usr/local/bin/python /usr/local/bin/gunicorn --config gunicorn.conf.py app:create_app()
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The first line is the Gunicorn master (PID 1 inside the container); the other two, its children, are the workers. All run as UID 1001, the \texttt{notes} user. Each worker is a full Python process.
+
+\phantomsection\label{24-process-startup:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{WSGI} is the Python standard interface between web servers and web applications. Flask's \texttt{app} object implements WSGI. Gunicorn is the WSGI server that serves it in production.
+\item
+  \textbf{Gunicorn uses the pre-fork worker model}: the master process forks N worker processes at startup. Each worker is a separate Python process with its own GIL, so on a multi-core server workers run in parallel.
+\item
+  \textbf{Worker count formula}: \texttt{(2\ ×\ CPU\_cores)\ +\ 1} is the classic starting point. The Notes API uses 2 workers on its 1-vCPU server; adjust based on measured memory and load.
+\item
+  \textbf{Graceful shutdown} (\texttt{SIGTERM}) tells Gunicorn to finish in-flight requests before exiting. Docker's default stop timeout is 10 s: set \texttt{-\/-stop-timeout\ 35} on \texttt{docker\ run} to cover Gunicorn's 30-second \texttt{graceful\_timeout}.
+\item
+  \textbf{Make Gunicorn PID 1}: use the exec (JSON array) form of CMD, or \texttt{exec} in a shell wrapper, or \texttt{docker\ run\ -\/-init}. A shell as PID 1 ignores SIGTERM, so shutdown degrades to SIGKILL after the timeout.
+\item
+  \textbf{\texttt{-}\allowbreak{}\texttt{-}\allowbreak{}\texttt{restart\ unless-}\allowbreak{}\texttt{stopped}} ensures Docker restarts the container on crash and on server reboot, until explicitly stopped.
+\item
+  \textbf{systemd} starts Docker at boot. It can also own the container itself (a unit with a pinned image tag)~--- as an \emph{alternative} to the restart policy, never together with it.
+\item
+  The \textbf{complete startup sequence} on boot is: kernel → systemd → Docker → container → Gunicorn master → workers → \texttt{create\_app()} and its startup checks → ready.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{24-process-startup:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Start a request that takes 20 seconds (add \texttt{time.sleep(20)} to a test route), then run \texttt{docker\ stop\ notes-api}. Does the request finish? What if it slept 40 seconds?
+\item
+  \textbf{Break and fix.} Change the Dockerfile's \texttt{CMD} to the shell form (\texttt{CMD\ gunicorn\ ...}). Stop the container and time how long it takes. Explain the result, then restore the exec form.
+\item
+  \textbf{Extend.} Measure memory per Gunicorn worker (\texttt{docker\ stats} for the container, \texttt{docker\ top\ notes-}\allowbreak{}\texttt{api\ -}\allowbreak{}\texttt{o\ pid,}\allowbreak{}\texttt{rss,}\allowbreak{}\texttt{args} for each process), then compute how many workers a 2 GB server can run safely.
+\item
+  \textbf{Explain.} What is the difference between Docker's restart policy and a systemd unit for the container, and why must you not use both?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-24.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{24-process-startup:whats-next}
+
+Gunicorn is running inside the container, starts at boot, and restarts after crashes. Keeping it that way is an ongoing job: knowing what is running, reading its logs, investigating crash loops, and running the work that is not a response to a request~--- scheduled jobs. That is process management, and the next chapter covers the tools: systemd and \texttt{systemctl}, \texttt{journalctl}, and scheduled and background work.
+
+\noindent{}→ \hyperref[ch:25-process-management]{Chapter 25}~--- Process Management

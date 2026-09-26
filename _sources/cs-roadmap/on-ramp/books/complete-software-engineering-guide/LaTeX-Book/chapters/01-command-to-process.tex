@@ -1,0 +1,758 @@
+\setcounter{chapter}{0}
+\chapter{Command → Process}\label{ch:01-command-to-process}
+
+\chaptersubtitle{How Your Program Starts}
+
+\chapterrule
+
+When you open a terminal and type \texttt{python\ app.py}, something happens. The program runs. Output appears. Maybe a server starts listening. It all seems immediate and automatic~--- you type, things happen.
+
+But a great deal happens between the moment you press Enter and the moment your Python code begins executing. The operating system receives your command, locates the Python interpreter, creates a new running process, allocates memory, opens file handles, and transfers control to Python~--- which then has its own startup work to do before a single line of your code is read.
+
+Understanding this sequence is not an academic exercise. It is the foundation of everything that follows in this book. Every server, every deployment, every production failure ultimately traces back to the fact that software runs as a process on an operating system. If you do not understand what a process is, how it starts, and what resources it owns, then concepts like ``the server is running'' or ``the process crashed'' remain permanently vague.
+
+This chapter traces exactly what happens from the moment you type \texttt{python\ app.py} to the moment the Python interpreter is ready to begin reading your code. Each step is concrete, ordered, and connected to the next.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What the shell is and how it interprets your command
+\item
+  How the operating system finds the Python executable
+\item
+  How a new process is created using \texttt{fork} and \texttt{exec}
+\item
+  What a Process Control Block is and why the OS maintains one
+\item
+  How memory is laid out when a program starts
+\item
+  What file descriptors are and why stdin, stdout, and stderr exist
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{The Shell and What It Does with a Command}\label{01-command-to-process:11-the-shell-and-what-it-does-with-a-command}
+
+Before your Python program starts, something else runs first: the \textbf{shell}.
+
+A \textbf{shell} is a program that reads text commands from a terminal and interprets them. When you open a terminal on your computer, you are interacting with a shell. On macOS and most Linux systems, the default shell is \texttt{bash} or \texttt{zsh}. On Windows with WSL, it is typically \texttt{bash}. The shell is itself a running program~--- a process that sits in a loop, waiting for you to type something, and then acting on what you type.
+
+When you type:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+python app.py
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}and press Enter, here is what the shell does:
+
+\textbf{Step 1: Read the line.} The shell reads the string \texttt{python\ app.py} from the terminal.
+
+\textbf{Step 2: Split into tokens.} The shell splits the line into tokens~--- distinct pieces separated by spaces. The first token is \texttt{python}. Everything after it is an argument. So the shell identifies:
+
+\begin{itemize}
+\tightlist
+\item
+  Command: \texttt{python}
+\item
+  Arguments: \texttt{app.py}
+\end{itemize}
+
+\noindent{}\textbf{Step 3: Check for built-in commands.} The shell first checks whether \texttt{python} is a built-in shell command. Built-in commands (like \texttt{cd}, \texttt{echo}, and \texttt{exit}) are handled directly by the shell without starting a new process. \texttt{python} is not a built-in, so the shell moves on.
+
+\textbf{Step 4: Look up the executable.} The shell needs to find the actual file on disk that the word \texttt{python} refers to. This is done by searching a list of directories called \texttt{\$PATH}. More on this in Section 1.2.
+
+\textbf{Step 5: Create a new process.} Once the shell finds the Python executable, it asks the operating system to start a new process running that executable. This is done using two system calls: \texttt{fork} and \texttt{exec}. More on these in Section 1.3.
+
+\textbf{Step 6: Wait (or not).} By default, the shell waits for the new process to finish before showing you the prompt again. If you add \texttt{\&} to the end of the command (\texttt{python\ app.py\ \&}), the shell starts the process and returns immediately without waiting. When you start a Flask server, the shell appears to ``hang''~--- that is actually it waiting for the server process to finish, which only happens when you press Ctrl+C.
+
+This sequence is the same regardless of what program you are running. Whether you type \texttt{python\ app.py}, \texttt{ls}, \texttt{git\ status}, or \texttt{npm\ install}, the shell does the same thing: parse, locate, fork, exec, wait.
+
+\setcounter{section}{1}
+\section{\texorpdfstring{Executable Resolution via \texttt{\$PATH}}{Executable Resolution via \$PATH}}\label{01-command-to-process:12-executable-resolution-via-path}
+
+The shell now knows you want to run \texttt{python}. But where is the Python program stored on disk?
+
+The answer is: somewhere in a directory listed in an environment variable called \textbf{\texttt{\$PATH}}.
+
+\subsection*{\texorpdfstring{What \texttt{\$PATH} is}{What \$PATH is}}\phantomsection\label{01-command-to-process:what-path-is}
+
+\texttt{\$PATH} is a list of directory paths, separated by colons (\texttt{:}), that the shell searches when you type a command. It looks like this:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This means: when you type a command, look for it first in \texttt{/usr/local/bin}, then in \texttt{/usr/bin}, then in \texttt{/bin}, and so on, stopping at the first match.
+
+To see your current \texttt{\$PATH}, type this in your terminal:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{echo} \VariableTok{$PATH}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}You will see something like:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+/home/yourname/.local/bin:/usr/local/bin:/usr/bin:/bin
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{\texorpdfstring{How the shell searches \texttt{\$PATH}}{How the shell searches \$PATH}}\phantomsection\label{01-command-to-process:how-the-shell-searches-path}
+
+When you type \texttt{python}, the shell takes the word \texttt{python} and tries to find a file with that exact name in each directory listed in \texttt{\$PATH}, in order, left to right.
+
+For each directory in \texttt{\$PATH}, it checks: ``Does a file named \texttt{python} exist here, and is it executable?'' If yes, that is the program to run. If no, move to the next directory.
+
+You can ask the shell to show you which \texttt{python} it will find by using the \texttt{which} command:
+
+\begin{notebox}
+
+\textbf{Note:} On current macOS, Debian, and Ubuntu systems the interpreter is installed as \texttt{python3}, and there is no plain \texttt{python} command until you create a virtual environment (→ \hyperref[ch:06-local-dependencies]{Chapter 6}). If \texttt{python} is not found on your machine, type \texttt{python3} wherever this book says \texttt{python}~--- for example, \texttt{python3\ app.py}.
+
+\end{notebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{which}\NormalTok{ python}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+/usr/bin/python3
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}or, if you are using a virtual environment (we cover this in → \hyperref[ch:06-local-dependencies]{Chapter 6}~--- Local Dependencies and Resources):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+/home/yourname/notes-api/venv/bin/python
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This is a critical detail. When you install Python multiple times~--- once from your operating system's package manager, once from python.org, once inside a virtual environment~--- your machine may have several Python executables at different paths. The one that runs when you type \texttt{python} is whichever one appears first in \texttt{\$PATH}. This is the source of a class of bugs that we explore in → \hyperref[ch:07-environment-drift]{Chapter 7}~--- Environment Drift and → \hyperref[ch:08-hidden-dependencies]{Chapter 8}~--- Hidden Dependencies.
+
+\subsection*{What happens if Python is not found}\phantomsection\label{01-command-to-process:what-happens-if-python-is-not-found}
+
+If the shell searches every directory in \texttt{\$PATH} and finds no file named \texttt{python}, it gives you an error:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+bash: python: command not found
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This does not mean Python is not installed. It means Python is not installed anywhere that \texttt{\$PATH} knows to look. This happens frequently on fresh Linux servers, where you may need to install Python explicitly or use \texttt{python3} instead of \texttt{python}. We will deal with this in → \hyperref[ch:21-system-setup]{Chapter 21}~--- System Setup.
+
+\subsection*{The full path alternative}\phantomsection\label{01-command-to-process:the-full-path-alternative}
+
+You can bypass \texttt{\$PATH} entirely by typing the full path to the executable:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{/usr/bin/python3}\NormalTok{ app.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This tells the shell exactly where to find Python, without searching. This is how systemd service files (→ \hyperref[ch:25-process-management]{Chapter 25}~--- Process Management) specify which Python to use, because in a non-interactive system environment, \texttt{\$PATH} may not be configured the way you expect.
+
+\setcounter{section}{2}
+\section{\texorpdfstring{How the Operating System Starts a New Program: \texttt{fork} and
+\texttt{exec}}{How the Operating System Starts a New Program: fork and exec}}\label{01-command-to-process:13-how-the-operating-system-starts-a-new-program-fork-and-exec}
+
+The shell has found the Python executable. Now it needs to start a new process running that executable. This is done in two steps: \textbf{\texttt{fork}} and \textbf{\texttt{exec}}.
+
+These are \textbf{system calls}~--- requests that a program makes to the operating system kernel. The kernel is the core of the operating system; it controls hardware, manages memory, and arbitrates access to resources. Programs do not directly access hardware or create processes~--- they ask the kernel to do it on their behalf through system calls.
+
+\subsection*{\texorpdfstring{What \texttt{fork} does}{What fork does}}\phantomsection\label{01-command-to-process:what-fork-does}
+
+\texttt{fork} creates an exact copy of the current process.
+
+When the shell calls \texttt{fork}, the operating system creates a new process that is an identical copy of the shell process. This new process~--- called the \textbf{child process}~--- gets its own:
+
+\begin{itemize}
+\tightlist
+\item
+  Memory space (initially a copy of the shell's memory)
+\item
+  File descriptors
+\item
+  Program counter (pointing to the same position in the shell's code)
+\end{itemize}
+
+\noindent{}The original shell is the \textbf{parent process}. After \texttt{fork}, there are now two processes: the parent (still the shell) and the child (a new copy of the shell).
+
+Both processes continue executing from the same point in the code~--- right after the \texttt{fork} call returns. The only difference is the return value:
+
+\begin{itemize}
+\tightlist
+\item
+  In the parent process, \texttt{fork} returns the \textbf{process ID (PID)} of the child
+\item
+  In the child process, \texttt{fork} returns \textbf{0}
+\end{itemize}
+
+\noindent{}This return value is how each process knows which role it is playing. The shell's code, simplified, looks like this:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# This is a conceptual illustration, not actual shell code.}
+\CommentTok{\# Real shells are written in C, not Python. This shows the logic.}
+
+\NormalTok{pid }\OperatorTok{=}\NormalTok{ fork()}
+
+\ControlFlowTok{if}\NormalTok{ pid }\OperatorTok{==} \DecValTok{0}\NormalTok{:}
+    \CommentTok{\# We are the child process}
+    \CommentTok{\# Replace ourselves with the Python executable}
+    \BuiltInTok{exec}\NormalTok{(}\StringTok{"python"}\NormalTok{, [}\StringTok{"python"}\NormalTok{, }\StringTok{"app.py"}\NormalTok{])}
+\ControlFlowTok{else}\NormalTok{:}
+    \CommentTok{\# We are the parent (the shell)}
+    \CommentTok{\# Wait for the child to finish}
+\NormalTok{    wait(pid)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{\texorpdfstring{What \texttt{exec} does}{What exec does}}\phantomsection\label{01-command-to-process:what-exec-does}
+
+After \texttt{fork}, the child process is still running shell code. That is not what we want. We want it to run Python.
+
+\textbf{\texttt{exec}} replaces the current process's program with a different program. When the child process calls \texttt{exec("python",}\allowbreak{}\texttt{\ {[}"python",}\allowbreak{}\texttt{\ "app.}\allowbreak{}\texttt{py"{]})}, the operating system:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Loads the Python executable from disk into memory, replacing the existing program code
+\item
+  Sets up the arguments and the environment it was handed (inside Python, \texttt{app.py} becomes \texttt{sys.argv{[}0{]}}~--- the name of the script being run)
+\item
+  Resets the program counter to the entry point of the Python executable
+\item
+  Begins executing Python
+\end{enumerate}
+
+\noindent{}The child process is now a Python process. It has the same PID as before~--- only the program code changed. The shell, still running as the parent, waits for this Python process to exit.
+
+\subsection*{Why fork + exec instead of just launching directly?}\phantomsection\label{01-command-to-process:why-fork--exec-instead-of-just-launching-directly}
+
+You might wonder: why not just launch a new process directly without copying first? The answer is setup and inheritance.
+
+By forking first, the child process starts with a copy of everything the shell has, and much of it survives the \texttt{exec} that follows:
+
+\begin{itemize}
+\tightlist
+\item
+  Open file descriptors (which is how the child inherits stdin, stdout, and stderr)
+\item
+  The current working directory
+\item
+  The user and group it runs as
+\end{itemize}
+
+\noindent{}Environment variables work slightly differently. \texttt{exec} throws away the child's old memory, so the environment cannot simply ``survive'' it; instead, the shell passes its \textbf{exported} variables explicitly as an argument to the \texttt{execve()} system call, and the kernel places them in the new program's memory. That is how \texttt{\$PATH}, \texttt{\$HOME}, and any variable you \texttt{export} reach Python's \texttt{os.environ}, and why a variable you set without \texttt{export} does not.
+
+The split between \texttt{fork} (copy the process) and \texttt{exec} (replace the program) is what lets the shell adjust the child in between~--- redirecting its output to a file, for example~--- before the new program starts.
+
+\subsection*{Viewing the process in action}\phantomsection\label{01-command-to-process:viewing-the-process-in-action}
+
+After you run \texttt{python\ app.py} in one terminal, open a second terminal and run:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ps}\NormalTok{ aux }\KeywordTok{|} \FunctionTok{grep}\NormalTok{ python}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}You will see something like this (columns trimmed; the full output also shows memory, terminal, and start time, and usually a line for the \texttt{grep} command itself):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+yourname  12345  0.1  0.2  python app.py
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The number \texttt{12345} is the \textbf{PID} (Process Identifier) of your Python process. Every running process on the system has a unique PID assigned by the kernel at the moment \texttt{fork} was called.
+
+\setcounter{section}{3}
+\section{The Process Control Block: What the OS Remembers About Your Program}\label{01-command-to-process:14-the-process-control-block-what-the-os-remembers-about-your-program}
+
+The operating system does not just start your process and forget about it. It maintains a detailed record of every running process. This record is called the \textbf{Process Control Block}, often abbreviated \textbf{PCB}.
+
+The PCB is a data structure stored in kernel memory. It contains everything the operating system needs to manage, suspend, resume, and eventually destroy the process. Think of it as the OS's official file on your program.
+
+The PCB contains, among other things:
+
+\Needspace{24\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3659}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6341}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Field
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What it stores
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{PID} & The unique process identifier \\
+\textbf{PPID} & The PID of the parent process (the shell that started Python) \\
+\textbf{State} & Whether the process is running, sleeping, waiting, or stopped \\
+\textbf{Program Counter} & Where in the code the process is currently executing \\
+\textbf{CPU Registers} & The current values of all CPU registers \\
+\textbf{Memory Map} & The memory addresses allocated to this process \\
+\textbf{File Descriptor Table} & Open files and network connections \\
+\textbf{Environment Variables} & The variables inherited from the parent \\
+\textbf{User ID} & Which user this process is running as \\
+\textbf{Priority / Scheduling Info} & How much CPU time the OS gives this process \\
+\textbf{Signal Handlers} & How the process responds to signals like Ctrl+C \\
+\end{longtable}
+}
+
+\subsection*{Why the PCB matters}\phantomsection\label{01-command-to-process:why-the-pcb-matters}
+
+The PCB is what makes \textbf{multitasking} possible. Your computer runs many processes simultaneously~--- your terminal, your text editor, your browser, your Python server, and dozens of system processes. The CPU, however, can only execute one thing at a time (on a single core).
+
+The operating system switches between processes rapidly~--- often thousands of times per second~--- giving each process a slice of CPU time. This is called \textbf{context switching}. When the OS switches away from your Python process to give CPU time to something else, it saves the CPU's state~--- the program counter and the register values~--- \emph{into} the PCB, so it can resume exactly where it left off when Python gets CPU time again.
+
+This is why a Flask server can handle multiple requests: not because it is doing two things at literally the same instant, but because the OS rapidly switches between them (and because, for I/O-bound tasks like waiting for a database query, the process can yield the CPU voluntarily).
+
+\subsection*{Viewing the PCB in practice}\phantomsection\label{01-command-to-process:viewing-the-pcb-in-practice}
+
+You can see a simplified view of process information on any Linux or macOS system:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ps} \AttributeTok{{-}p} \VariableTok{$(}\ExtensionTok{pgrep}\NormalTok{ python}\VariableTok{)} \AttributeTok{{-}o}\NormalTok{ pid,ppid,stat,user,command}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+  PID  PPID STAT USER     COMMAND
+12345  9876 S    yourname python app.py
+\end{Verbatim}
+\end{outputbox}
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{PID}: the Python process
+\item
+  \texttt{PPID}: the parent PID~--- this is the shell that started it
+\item
+  \texttt{STAT}: \texttt{S} means sleeping (waiting for I/O or a timer), which is normal for a server waiting for connections
+\item
+  \texttt{USER}: the user account this process belongs to
+\end{itemize}
+
+\noindent{}On Linux, you can see the full details of a process's state through the \texttt{/proc} filesystem:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{ /proc/12345/status}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This prints dozens of fields from the PCB directly. It is how monitoring tools, debuggers, and system administrators inspect running processes.
+
+\setcounter{section}{4}
+\section{Memory Layout: Stack, Heap, and Why They Exist}\label{01-command-to-process:15-memory-layout-stack-heap-and-why-they-exist}
+
+When the operating system creates a process, it allocates a region of memory for that process to use. This memory is divided into distinct sections, each with a specific purpose. Understanding this layout matters because it explains how Python manages variables, function calls, and objects~--- and why programs can run out of memory in specific ways.
+
+\subsection*{The virtual address space}\phantomsection\label{01-command-to-process:the-virtual-address-space}
+
+Every process gets its own \textbf{virtual address space}~--- a private, isolated range of memory addresses that the process can use. The operating system and the CPU's memory management unit (MMU) ensure that one process cannot read or write another process's memory directly. This isolation is fundamental to security and stability: your Python program cannot accidentally (or deliberately) corrupt another process's data.
+
+The virtual address space looks like this:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+High addresses
++---------------------------+
+|          Stack            |  ← Function calls, local variables
++---------------------------+
+|           ↓               |  (stack grows downward)
+|                           |
+|           ↑               |  (heap grows upward)
++---------------------------+
+|           Heap            |  ← Objects, dynamically allocated data
++---------------------------+
+|    BSS (uninitialized)    |  ← Global variables (uninitialized)
++---------------------------+
+|    Data (initialized)     |  ← Global variables (initialized)
++---------------------------+
+|    Text (code)            |  ← The program's machine code
++---------------------------+
+Low addresses
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{The text segment (code)}\phantomsection\label{01-command-to-process:the-text-segment-code}
+
+The \textbf{text segment} (also called the \textbf{code segment}) contains the actual executable machine code of the program. After \texttt{exec} loads Python from disk, the Python interpreter's machine code lives here. This segment is read-only~--- the program cannot modify its own code while running. (This prevents accidental or malicious self-modification.)
+
+\subsection*{The data and BSS segments}\phantomsection\label{01-command-to-process:the-data-and-bss-segments}
+
+These two segments hold the \textbf{global variables of the program's machine code}~--- for a Python process, that means the C globals of the interpreter itself.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Initialized data segment}: holds C global variables that have an initial value
+\item
+  \textbf{BSS segment}: holds C global variables that have no initial value yet; the OS fills them with zeros
+\end{itemize}
+
+\noindent{}Your own Python module-level variables do \emph{not} live here. A line such as \texttt{MAX\_CONNECTIONS\ =}\allowbreak{}\texttt{\ 100} at the top of your module creates an integer object on the heap and stores a reference to it in the module's namespace (itself a dictionary on the heap). Everything your Python code creates is a heap object.
+
+\subsection*{The heap}\phantomsection\label{01-command-to-process:the-heap}
+
+The \textbf{heap} is where \textbf{dynamically allocated objects} live. In Python, when you create any object~--- a string, a list, a dictionary, a Flask request object, a database connection~--- that object is allocated on the heap. The heap grows upward from low addresses as more objects are created.
+
+Python manages heap allocation automatically. You do not manually allocate and free memory in Python (as you would in C or C++). CPython counts the references to every object and frees it the moment the count drops to zero; a separate \textbf{garbage collector} runs periodically to clean up groups of objects that refer only to each other (reference cycles).
+
+This is why, when you load a large file into memory or create thousands of objects in a loop without releasing references, your program's memory usage grows: the heap is expanding.
+
+\subsection*{The stack}\phantomsection\label{01-command-to-process:the-stack}
+
+The \textbf{stack} is where \textbf{function calls and local variables} live. It grows downward from high addresses.
+
+Every time a function is called, the program pushes a \textbf{stack frame} onto the stack. A stack frame contains:
+
+\begin{itemize}
+\tightlist
+\item
+  The local variables of that function
+\item
+  The function's parameters
+\item
+  The return address (where execution should resume when the function returns)
+\end{itemize}
+
+\noindent{}When the function returns, its stack frame is popped off the stack and that memory is immediately available for reuse.
+
+This is why local variables disappear when a function ends~--- they existed only in a stack frame that has since been removed.
+
+CPython adds one twist: the frames of your \emph{Python} functions (with their local variables) are interpreter objects, but every nested Python call still consumes space on the process's real C stack, because the interpreter calls itself to run it. That is what connects Python recursion to the machine stack.
+
+The stack has a fixed maximum size (typically 8 MB on Linux). If a program makes too many nested function calls~--- a common bug with infinite recursion~--- the stack fills up and the program crashes with a \textbf{stack overflow}. Python protects you from this: it counts the depth of nested calls and raises a \texttt{RecursionError} \emph{before} the real stack can overflow.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 1.1}\enspace Infinite recursion hits Python\textquotesingle s recursion limit}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ count\_down(n):}
+    \CommentTok{\# This function calls itself infinitely if you forget the base case}
+    \BuiltInTok{print}\NormalTok{(n)}
+\NormalTok{    count\_down(n }\OperatorTok{{-}} \DecValTok{1}\NormalTok{)  }\CommentTok{\# No base case — recursion never stops}
+
+\NormalTok{count\_down(}\DecValTok{1000}\NormalTok{)}
+\CommentTok{\# Python will raise: RecursionError: maximum recursion depth exceeded}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Python limits recursion depth to 1000 by default (you can check with \texttt{sys.getrecursionlimit()}). The limit exists specifically to turn a would-be stack overflow~--- which would kill the process~--- into an ordinary exception you can see and handle.
+
+\subsection*{Memory and the Notes API}\phantomsection\label{01-command-to-process:memory-and-the-notes-api}
+
+When you eventually start the Notes API server, here is what happens in memory:
+
+\begin{itemize}
+\tightlist
+\item
+  The Python interpreter's code sits in the text segment
+\item
+  The Flask framework objects and route table sit on the heap, created during initialization
+\item
+  When a request arrives, a stack frame is created for the handler function
+\item
+  The request data (parsed JSON, headers, URL parameters) is allocated on the heap
+\item
+  When the handler function returns, its stack frame is destroyed; heap objects it created are freed as soon as nothing references them any more
+\end{itemize}
+
+\setcounter{section}{5}
+\section{File Descriptors: stdin, stdout, and stderr}\label{01-command-to-process:16-file-descriptors-stdin-stdout-and-stderr}
+
+The process has been created. Memory has been allocated. There is one more set of resources the OS sets up automatically before your program starts: \textbf{file descriptors}.
+
+\subsection*{What a file descriptor is}\phantomsection\label{01-command-to-process:what-a-file-descriptor-is}
+
+A \textbf{file descriptor} is a small integer that represents an open connection to an I/O resource. I/O resources include:
+
+\begin{itemize}
+\tightlist
+\item
+  Files on disk
+\item
+  Network sockets (connections to other computers)
+\item
+  Pipes (channels between processes)
+\item
+  Terminals (the screen and keyboard)
+\end{itemize}
+
+\noindent{}When a process wants to read from or write to any of these resources, it refers to them by file descriptor number, not by name. The operating system maintains a \textbf{file descriptor table} for each process~--- a list that maps descriptor numbers to actual I/O resources.
+
+When you open a file in Python:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 1.2}\enspace Opening a file and observing its file descriptor}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{f }\OperatorTok{=} \BuiltInTok{open}\NormalTok{(}\StringTok{"notes.txt"}\NormalTok{, }\StringTok{"w"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(f.fileno())  }\CommentTok{\# Prints the file descriptor number, e.g., 3}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The \texttt{fileno()} method shows you the underlying file descriptor number. File descriptor 3 means: ``the kernel's record of this open connection is at index 3 in this process's descriptor table.''
+
+\subsection*{The three standard file descriptors}\phantomsection\label{01-command-to-process:the-three-standard-file-descriptors}
+
+Every new process starts with three file descriptors already open, inherited from the parent (the shell):
+
+\Needspace{9\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+Number & Name & Direction & Default connection \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{0} & \textbf{stdin} & Input & Keyboard (terminal) \\
+\textbf{1} & \textbf{stdout} & Output & Screen (terminal) \\
+\textbf{2} & \textbf{stderr} & Output (errors) & Screen (terminal) \\
+\end{longtable}
+}
+
+These are called the \textbf{standard streams}. They exist by convention~--- every Unix-like operating system guarantees that a new process will have these three descriptors ready to use.
+
+\textbf{stdin (file descriptor 0)} is where input comes from. When you use Python's \texttt{input()} function, it reads from stdin. When you pipe data into a program (\texttt{echo\ "hello"\ \textbar{}\ python\ app.}\allowbreak{}\texttt{py}), that data arrives through stdin.
+
+\textbf{stdout (file descriptor 1)} is where normal output goes. When you call \texttt{print("hello")} in Python, Python writes the string to file descriptor 1, which is connected to the terminal. The text appears on your screen.
+
+\textbf{stderr (file descriptor 2)} is where error output goes. Python writes tracebacks and interpreter errors to stderr, not stdout. This distinction matters: stdout is for data, stderr is for diagnostics. In production, these are typically written to separate log streams so that error messages do not pollute the data output. When Flask logs a request or an error, it writes to stderr by default.
+
+\subsection*{Why the distinction between stdout and stderr matters}\phantomsection\label{01-command-to-process:why-the-distinction-between-stdout-and-stderr-matters}
+
+Consider this scenario: your program is writing JSON data to stdout, and you want to capture that data with shell redirection:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python}\NormalTok{ app.py }\OperatorTok{\textgreater{}}\NormalTok{ output.json}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This redirects stdout to a file. If errors were mixed into stdout, your JSON file would be corrupted with error messages. Because errors go to stderr, the redirection above captures only the clean JSON output. Error messages still appear on the terminal because stderr is untouched.
+
+You can see this behavior explicitly:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 1.3}\enspace Writing to stdout and stderr explicitly}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ sys}
+
+\BuiltInTok{print}\NormalTok{(}\StringTok{"This is normal output"}\NormalTok{)               }\CommentTok{\# Goes to stdout (fd 1)}
+\BuiltInTok{print}\NormalTok{(}\StringTok{"This is an error"}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)   }\CommentTok{\# Goes to stderr (fd 2)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Run this, then run it with redirection:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python}\NormalTok{ listing\_1\_3.py }\OperatorTok{\textgreater{}}\NormalTok{ output.txt}
+\CommentTok{\# "This is an error" still appears on the terminal}
+\CommentTok{\# output.txt contains only "This is normal output"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{File descriptors for network connections}\phantomsection\label{01-command-to-process:file-descriptors-for-network-connections}
+
+When your Flask server later accepts a network connection from a client (→ \hyperref[ch:03-network-capability]{Chapter 3}~--- Creating Network Capability, → \hyperref[ch:05-internal-request-execution]{Chapter 5}~--- Internal Request Execution), that connection will also be represented as a file descriptor. The kernel assigns the next available number (typically 4 or 5, since 0, 1, 2 are taken, and 3 might be used by Python internally).
+
+This is the elegant unification that Unix provides: files, terminals, and network sockets all look the same to a program~--- they are all just integers that you can \texttt{read()} and \texttt{write()}. Flask's ability to receive an HTTP request and read its contents uses the same underlying mechanism as reading a file.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 1.4}\enspace Inspecting the current process\textquotesingle s open file descriptors}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+
+\CommentTok{\# List all open file descriptors for this process}
+\NormalTok{fd\_dir }\OperatorTok{=} \SpecialStringTok{f"/proc/}\SpecialCharTok{\{}\NormalTok{os}\SpecialCharTok{.}\NormalTok{getpid()}\SpecialCharTok{\}}\SpecialStringTok{/fd"}
+\ControlFlowTok{try}\NormalTok{:}
+    \ControlFlowTok{for}\NormalTok{ fd }\KeywordTok{in}\NormalTok{ os.listdir(fd\_dir):}
+        \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{            target }\OperatorTok{=}\NormalTok{ os.readlink(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{fd\_dir}\SpecialCharTok{\}}\SpecialStringTok{/}\SpecialCharTok{\{}\NormalTok{fd}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+            \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"fd }\SpecialCharTok{\{}\NormalTok{fd}\SpecialCharTok{\}}\SpecialStringTok{ {-}\textgreater{} }\SpecialCharTok{\{}\NormalTok{target}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{except} \PreprocessorTok{OSError}\NormalTok{:}
+            \ControlFlowTok{pass}
+\ControlFlowTok{except} \PreprocessorTok{FileNotFoundError}\NormalTok{:}
+    \CommentTok{\# /proc is Linux{-}specific; this won\textquotesingle{}t work on macOS}
+    \BuiltInTok{print}\NormalTok{(}\StringTok{"Run this on Linux to see file descriptors"}\NormalTok{)}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Current process PID: }\SpecialCharTok{\{}\NormalTok{os}\SpecialCharTok{.}\NormalTok{getpid()}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}On Linux, this will show you stdin, stdout, and stderr mapped to \texttt{/dev/pts/0} (the terminal), and possibly additional file descriptors used by Python internally.
+
+\unnumberedsection{false}{Putting It Together: The Complete Startup Sequence}\label{01-command-to-process:putting-it-together-the-complete-startup-sequence}
+
+Let us trace the full sequence from command to running process one more time, now with all the pieces connected:
+
+\begin{diagrambox}[short]{294.1pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+You type:  python app.py
+           │
+           ▼
+     Shell reads "python app.py"
+     Splits into: command="python", args=["app.py"]
+           │
+           ▼
+     Shell searches $PATH for "python"
+     Finds: /usr/bin/python3
+           │
+           ▼
+     Shell calls fork()
+     ┌─────────────────────────────────┐
+     │  OS creates child process       │
+     │  New PID and PCB are created    │
+     │  Child inherits:                │
+     │  - File descriptors (0,1,2)     │
+     │  - Working directory            │
+     └─────────────────────────────────┘
+           │
+           ▼
+     Child process calls exec("python", ["python", "app.py"])
+     ┌─────────────────────────────────┐
+     │  OS loads Python executable     │
+     │  Text segment: Python's code    │
+     │  Stack: empty (fresh start)     │
+     │  Heap: empty (will fill up)     │
+     │  FDs: 0(stdin), 1(stdout),      │
+     │       2(stderr) already open    │
+     │  Environment passed via execve  │
+     │  Same PID, same PCB             │
+     └─────────────────────────────────┘
+           │
+           ▼
+     Python interpreter begins executing
+     (→ Chapter 2 — Runtime Initialization)
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}This sequence~--- shell parse, PATH lookup, fork (new PID and PCB), exec, memory layout, file descriptor inheritance~--- is the foundation. Every Flask server, every containerized application, every systemd-managed service begins with exactly these steps.
+
+\phantomsection\label{01-command-to-process:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  The \textbf{shell} is a program that reads commands from the terminal, locates the corresponding executable, and asks the OS to run it.
+\item
+  The \textbf{\texttt{\$PATH}} variable is a list of directories the shell searches when you type a command. The first match wins. Multiple Python installations can coexist; which one runs depends entirely on \texttt{\$PATH}.
+\item
+  \textbf{\texttt{fork}} creates an exact copy of the current process. \textbf{\texttt{exec}} replaces the child process's code with the program you actually want to run. Together, they start every new process on a Unix-like system.
+\item
+  The \textbf{Process Control Block (PCB)} is the OS's record for each running process. It stores the PID, memory map, file descriptors, CPU state, and everything else needed to manage the process.
+\item
+  A process's \textbf{memory} is divided into the text segment (code), data segments (the program's C globals), heap (dynamic objects~--- which includes every Python object, even module-level variables), and stack (function calls). The heap grows when you create objects; the stack grows when you call functions.
+\item
+  \textbf{File descriptors} are integers that represent open I/O connections. Every process starts with three: stdin (0), stdout (1), and stderr (2). Network connections are also file descriptors~--- sockets are treated the same as files.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{01-command-to-process:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Run \texttt{which\ -a\ python3} and write down which executable a plain \texttt{python3} will start. Now create a new directory containing an executable script called \texttt{python3} that prints \texttt{fake} (remember \texttt{chmod\ +x}), and put that directory first in your \texttt{PATH}. What does \texttt{python3\ -\/-version} print now, and why?
+\item
+  \textbf{Break and fix.} Start a long-running server, \texttt{python3\ -}\allowbreak{}\texttt{m\ http.}\allowbreak{}\texttt{server\ 8000}, in one terminal, find its PID with \texttt{ps}, and kill it with \texttt{kill\ -9}. What exit status does the shell report? Then start it again and stop it with \texttt{kill} (SIGTERM) instead. What is the difference?
+\item
+  \textbf{Extend.} Write a ten-line Python program that prints its own PID, its parent's PID and its open file descriptors (\texttt{os.}\allowbreak{}\texttt{listdir(\textquotesingle{}/}\allowbreak{}\texttt{proc/}\allowbreak{}\texttt{self/}\allowbreak{}\texttt{fd\textquotesingle{})} on Linux, or \texttt{lsof\ -p} on macOS). Run it from the shell, then from inside another Python program with \texttt{subprocess.run}. Which numbers change?
+\item
+  \textbf{Explain.} In two or three sentences, explain to a colleague why a network connection and a file are both ``file descriptors'', and what that makes possible.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-01.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{01-command-to-process:whats-next}
+
+The operating system has created the Python process and set up its memory and file descriptors. Now Python itself has work to do. Before any of your code runs, the interpreter must start up, load your source file, compile it to bytecode, import your dependencies, and initialize the Flask framework.
+
+\noindent{}→ \hyperref[ch:02-runtime-initialization]{Chapter 2}~--- Runtime Initialization: Python Wakes Up

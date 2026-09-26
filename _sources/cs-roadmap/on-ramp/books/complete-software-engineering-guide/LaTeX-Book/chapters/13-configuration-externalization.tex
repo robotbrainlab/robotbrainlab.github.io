@@ -1,0 +1,826 @@
+\setcounter{chapter}{12}
+\chapter{Configuration Externalization}\label{ch:13-configuration-externalization}
+
+\chapterrule
+
+In \hyperref[ch:09-configuration-coupling]{Chapter 9}, we identified four dangerous forms of configuration coupling: hardcoded secrets, local database references, debug configurations, and environment-specific logic in code. In \hyperref[ch:06-local-dependencies]{Chapter 6}, we introduced environment variables as the mechanism for injecting configuration. This chapter builds the complete, practical system for managing configuration correctly across all environments~--- not just noting that environment variables should be used, but showing exactly how to structure, validate, load, and use them in a real Flask application.
+
+Configuration externalization means that the application's behavior is determined by its environment, not by its source code. The same \texttt{app.py} runs in development, staging, and production. What changes is the environment's variables. The database URL, the debug flag, the API keys, the port number~--- all of these come from the environment, not from the code.
+
+This chapter also introduces PostgreSQL as the database for the Notes API from this point forward. SQLite is appropriate for local development, but a production system requires a proper database server. The code has to learn to talk to both databases once; after that, which database the application uses is purely a configuration choice~--- switching means changing the database URL, not the code.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  How to identify all configuration values that need to be externalized
+\item
+  How to move each value into an environment variable
+\item
+  How to load configuration at runtime using \texttt{os.getenv}
+\item
+  How to validate that required configuration is present at startup
+\item
+  How to manage different configurations for different environments (development, staging, production)
+\item
+  How to prepare the Notes API to run on SQLite or PostgreSQL, so that switching between them is a configuration change
+\item
+  Why a configured dependency is an \textbf{integration contract}, and the five dimensions every contract has
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Identifying What Needs to Be Configurable}\label{13-configuration-externalization:131-identifying-what-needs-to-be-configurable}
+
+The first step is auditing the application for values that are environment-specific. Ask: ``If I ran this application on a different machine, or in a different context, would this value need to change?''
+
+Go through \texttt{app.py} systematically:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 13.1}\enspace Audit of the Notes API for configuration values}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ dotenv }\ImportTok{import}\NormalTok{ load\_dotenv}
+\NormalTok{load\_dotenv()}
+
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, request, jsonify, g}
+\ImportTok{import}\NormalTok{ sqlite3}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ time}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\CommentTok{\# ── Candidate 1: Database path ─────────────────────────────────────────────}
+\NormalTok{DATABASE\_PATH }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_PATH"}\NormalTok{, }\StringTok{"notes.db"}\NormalTok{)}
+\CommentTok{\# ✓ Already externalized. Good. But the default "notes.db" is still SQLite{-}specific.}
+\CommentTok{\# This needs to become a full database URL when we switch to PostgreSQL.}
+
+\CommentTok{\# ── Candidate 2: Debug mode ────────────────────────────────────────────────}
+\CommentTok{\# Currently: hardcoded in app.run(debug=True) at the bottom of the file}
+\CommentTok{\# Needs to be: controlled by environment variable FLASK\_DEBUG}
+
+\CommentTok{\# ── Candidate 3: Port ──────────────────────────────────────────────────────}
+\CommentTok{\# Currently: hardcoded as 5000 in app.run(port=5000)}
+\CommentTok{\# Needs to be: PORT environment variable (default 5000)}
+
+\CommentTok{\# ── Candidate 4: Host ──────────────────────────────────────────────────────}
+\CommentTok{\# Currently: hardcoded as "localhost"}
+\CommentTok{\# Needs to be: HOST environment variable (localhost in dev, 0.0.0.0 in production)}
+
+\CommentTok{\# ── Candidate 5: Secret key ────────────────────────────────────────────────}
+\CommentTok{\# Currently: not set (Flask\textquotesingle{}s default is None — anything that signs data,}
+\CommentTok{\# such as sessions, would fail; the API does not use sessions yet)}
+\CommentTok{\# Needs to be: SECRET\_KEY environment variable (required — no default)}
+
+\CommentTok{\# ── Candidate 6: API key for authentication ────────────────────────────────}
+\CommentTok{\# Currently: only in Listing 5.10\textquotesingle{}s example middleware}
+\CommentTok{\# Will need: API\_KEY environment variable while authentication is one shared}
+\CommentTok{\# key (Chapter 38 later replaces it with users and login tokens in the database)}
+
+\CommentTok{\# ── Not a configuration candidate: ────────────────────────────────────────}
+\CommentTok{\# {-} Route definitions (/notes, /notes/\textless{}id\textgreater{}) — these are code, not config}
+\CommentTok{\# {-} SQL queries — these are code, not config}
+\CommentTok{\# {-} HTTP status codes — these are code, not config}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The complete list of configuration values for the Notes API:
+
+\Needspace{18\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1954}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3452}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1509}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3085}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Required?
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Default
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{DATABASE\_URL} & Yes & --- & Full database connection URL \\
+\texttt{SECRET\_KEY} & Yes & --- & Flask's secret key for session signing \\
+\texttt{FLASK\_DEBUG} & No & \texttt{false} & Enable debug mode (dev only) \\
+\texttt{PORT} & No & \texttt{5000} & Port to bind to \\
+\texttt{HOST} & No & \texttt{127.0.0.1} & IP address to bind to \\
+\texttt{API\_KEY} & Yes, while authentication is one shared key & --- & Authentication key \\
+\end{longtable}
+}
+
+\subsection*{From ``where'' to ``what'': configuration points at other systems}\phantomsection\label{13-configuration-externalization:from-where-to-what-configuration-points-at-other-systems}
+
+Look at two entries in that table. \texttt{DATABASE\_URL} points at another system (a database). \texttt{API\_KEY} is proof of identity \emph{to} another system. Externalizing them answers \emph{where} a dependency is and \emph{how you authenticate} to it~--- but it quietly raises a much harder, longer-lived question: \textbf{what is the agreement between you and that system?}
+
+That agreement is a \textbf{contract}, and an integration contract is harder to change than almost any code you will write, because changing it breaks \emph{everyone on the other side}~--- and you cannot deploy the other side. This cuts both ways. The Notes API is a \emph{consumer} of a contract (the database's) and a \emph{provider} of one (the REST interface it offers its own clients, \texttt{GET\ /notes}, \texttt{POST\ /notes}, and the rest). The same dimensions govern both directions. This chapter only names them, here at the boundary where configuration meets the systems around it; \hyperref[ch:34-response-handling]{Chapter 34} (section 34.10) looks at each in depth, once the API's own requests and responses have been built.
+
+\subsection*{The five dimensions of every integration}\phantomsection\label{13-configuration-externalization:the-five-dimensions-of-every-integration}
+
+Any integration, in either direction, pins down five things. If you can answer these for a dependency, you understand it; if you cannot, you have a production surprise waiting:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Shape}~--- the protocol and data format: REST/JSON, GraphQL, gRPC, or asynchronous events. How requests and responses are structured.
+\item
+  \textbf{Versioning}~--- how the contract is allowed to change over time without breaking existing callers.
+\item
+  \textbf{Identity}~--- who is calling: API keys, OAuth tokens, mTLS, service accounts. (\texttt{API\_KEY} in the table above \emph{is} this dimension~--- a credential that proves identity to a contract.)
+\item
+  \textbf{Authorization}~--- what that identity is permitted to do once authenticated.
+\item
+  \textbf{Failure semantics}~--- what happens when it goes wrong: error formats, timeouts, retries, and crucially what a failure \emph{means} (did my write happen, or not?).
+\end{enumerate}
+
+\noindent{}For the configuration in this chapter, the lesson is simple: every value that points at another system~--- a URL, a credential~--- is one end of such a contract, and changing it is never \emph{only} a configuration change.
+
+\setcounter{section}{1}
+\section{Moving Values into Environment Variables}\label{13-configuration-externalization:132-moving-values-into-environment-variables}
+
+With the configuration inventory complete, the next step is removing all hardcoded values and replacing them with \texttt{os.getenv()} calls.
+
+\subsection*{The pattern for required configuration}\phantomsection\label{13-configuration-externalization:the-pattern-for-required-configuration}
+
+For values that must be present~--- the application cannot function without them~--- use \texttt{os.environ{[}key{]}}. This raises \texttt{KeyError} if the variable is not set, causing an immediate startup failure with a clear error:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 13.2}\enspace Reading required configuration}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+
+\CommentTok{\# Raises KeyError if DATABASE\_URL is not set}
+\NormalTok{DATABASE\_URL }\OperatorTok{=}\NormalTok{ os.environ[}\StringTok{"DATABASE\_URL"}\NormalTok{]}
+
+\CommentTok{\# Raises KeyError if SECRET\_KEY is not set}
+\NormalTok{SECRET\_KEY }\OperatorTok{=}\NormalTok{ os.environ[}\StringTok{"SECRET\_KEY"}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{os.environ{[}"KEY"{]}} versus \texttt{os.getenv("KEY")}:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{os.environ{[}"KEY"{]}} raises \texttt{KeyError} if the key is missing~--- good for required config
+\item
+  \texttt{os.getenv("KEY")} returns \texttt{None} if the key is missing~--- good for optional config with explicit None handling
+\item
+  \texttt{os.}\allowbreak{}\texttt{getenv("KEY",}\allowbreak{}\texttt{\ "default")} returns the default if the key is missing~--- good for optional config with a default value
+\end{itemize}
+
+\subsection*{The pattern for optional configuration}\phantomsection\label{13-configuration-externalization:the-pattern-for-optional-configuration}
+
+For values that have a sensible default, use \texttt{os.getenv(key,}\allowbreak{}\texttt{\ default)}:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 13.3}\enspace Reading optional configuration with defaults}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{DEBUG }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"FLASK\_DEBUG"}\NormalTok{, }\StringTok{"false"}\NormalTok{).lower() }\OperatorTok{==} \StringTok{"true"}
+\NormalTok{PORT }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(os.getenv(}\StringTok{"PORT"}\NormalTok{, }\StringTok{"5000"}\NormalTok{))}
+\NormalTok{HOST }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"HOST"}\NormalTok{, }\StringTok{"127.0.0.1"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Note the \texttt{.lower()\ =}\allowbreak{}\texttt{=}\allowbreak{}\texttt{\ "true"} pattern for boolean environment variables. Environment variables are always strings. \texttt{"true"}, \texttt{"True"}, \texttt{"TRUE"}, \texttt{"1"}, \texttt{"yes"} might all mean ``true'' depending on convention. By normalizing to lowercase and comparing to \texttt{"true"}, you accept \texttt{"true"} and \texttt{"True"} but not \texttt{"1"}. Choose a convention and document it.
+
+\setcounter{section}{2}
+\section{\texorpdfstring{Runtime Config Loading with \texttt{os.getenv}}{Runtime Config Loading with os.getenv}}\label{13-configuration-externalization:133-runtime-config-loading-with-osgetenv}
+
+The configuration should be loaded at \textbf{module import time}~--- the top of \texttt{app.py}, before any routes or database code. This way, the application fails immediately at startup if configuration is missing, rather than failing on the first request that uses the missing value.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 13.4}\enspace Complete configuration loading at the top of app.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ dotenv }\ImportTok{import}\NormalTok{ load\_dotenv}
+\NormalTok{load\_dotenv()  }\CommentTok{\# Load .env file BEFORE reading os.environ}
+
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ sys}
+
+\CommentTok{\# ── Required configuration (fail loudly if missing) ────────────────────────}
+
+\KeywordTok{def}\NormalTok{ \_require\_env(key: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""Read a required environment variable. Exit cleanly if missing."""}
+\NormalTok{    value }\OperatorTok{=}\NormalTok{ os.getenv(key)}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ value:}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Error: Required environment variable \textquotesingle{}}\SpecialCharTok{\{}\NormalTok{key}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} is not set."}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+        \BuiltInTok{print}\NormalTok{(}\StringTok{"Set it in your .env file or environment."}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+\NormalTok{        sys.exit(}\DecValTok{1}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ value}
+
+\NormalTok{DATABASE\_URL }\OperatorTok{=}\NormalTok{ \_require\_env(}\StringTok{"DATABASE\_URL"}\NormalTok{)}
+\NormalTok{SECRET\_KEY   }\OperatorTok{=}\NormalTok{ \_require\_env(}\StringTok{"SECRET\_KEY"}\NormalTok{)}
+
+\CommentTok{\# ── Optional configuration with defaults ───────────────────────────────────}
+
+\NormalTok{DEBUG }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"FLASK\_DEBUG"}\NormalTok{, }\StringTok{"false"}\NormalTok{).lower() }\OperatorTok{==} \StringTok{"true"}
+\NormalTok{PORT  }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(os.getenv(}\StringTok{"PORT"}\NormalTok{, }\StringTok{"5000"}\NormalTok{))}
+\NormalTok{HOST  }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"HOST"}\NormalTok{, }\StringTok{"127.0.0.1"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{\_require\_env()} is a small helper that reads a variable and calls \texttt{sys.exit(1)} if it is missing, printing a clear error message. This is more user-friendly than a raw \texttt{KeyError} from \texttt{os.environ{[}"KEY"{]}}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# Bad (confusing):
+KeyError: 'DATABASE_URL'
+
+# Good (actionable):
+Error: Required environment variable 'DATABASE_URL' is not set.
+Set it in your .env file or environment.
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{3}
+\section{Validation of Required Configuration on Startup}\label{13-configuration-externalization:134-validation-of-required-configuration-on-startup}
+
+Beyond simple presence checks, configuration values may need to be validated for correctness before the application begins accepting requests. A missing variable is one kind of failure; a malformed value is another.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 13.5}\enspace Comprehensive startup configuration validation}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ sys}
+\ImportTok{import}\NormalTok{ re}
+
+\KeywordTok{def}\NormalTok{ validate\_config() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Load and validate all configuration. Returns the config dict on success.}
+\CommentTok{    Exits with a clear error message on failure.}
+\CommentTok{    """}
+\NormalTok{    errors }\OperatorTok{=}\NormalTok{ []}
+\NormalTok{    config }\OperatorTok{=}\NormalTok{ \{\}}
+
+    \CommentTok{\# ── DATABASE\_URL ────────────────────────────────────────────────────────}
+\NormalTok{    db\_url }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_URL"}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ db\_url:}
+\NormalTok{        errors.append(}\StringTok{"DATABASE\_URL is required"}\NormalTok{)}
+    \ControlFlowTok{elif} \KeywordTok{not}\NormalTok{ (db\_url.startswith(}\StringTok{"postgresql://"}\NormalTok{) }\KeywordTok{or}
+\NormalTok{              db\_url.startswith(}\StringTok{"sqlite:///"}\NormalTok{)):}
+\NormalTok{        errors.append(}\StringTok{"DATABASE\_URL must start with postgresql:// or sqlite:///"}\NormalTok{)}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        config[}\StringTok{"DATABASE\_URL"}\NormalTok{] }\OperatorTok{=}\NormalTok{ db\_url}
+
+    \CommentTok{\# ── SECRET\_KEY ──────────────────────────────────────────────────────────}
+\NormalTok{    secret\_key }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"SECRET\_KEY"}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ secret\_key:}
+\NormalTok{        errors.append(}\StringTok{"SECRET\_KEY is required"}\NormalTok{)}
+    \ControlFlowTok{elif} \BuiltInTok{len}\NormalTok{(secret\_key) }\OperatorTok{\textless{}} \DecValTok{24}\NormalTok{:}
+\NormalTok{        errors.append(}\StringTok{"SECRET\_KEY must be at least 24 characters long"}\NormalTok{)}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        config[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=}\NormalTok{ secret\_key}
+
+    \CommentTok{\# ── PORT ────────────────────────────────────────────────────────────────}
+\NormalTok{    port\_str }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"PORT"}\NormalTok{, }\StringTok{"5000"}\NormalTok{)}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        port }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(port\_str)}
+        \CommentTok{\# Ports below 1024 need root privileges (Chapter 3); the app runs as a normal user}
+        \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ (}\DecValTok{1024} \OperatorTok{\textless{}=}\NormalTok{ port }\OperatorTok{\textless{}=} \DecValTok{65535}\NormalTok{):}
+\NormalTok{            errors.append(}\SpecialStringTok{f"PORT must be between 1024 and 65535, got: }\SpecialCharTok{\{}\NormalTok{port}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{            config[}\StringTok{"PORT"}\NormalTok{] }\OperatorTok{=}\NormalTok{ port}
+    \ControlFlowTok{except} \PreprocessorTok{ValueError}\NormalTok{:}
+\NormalTok{        errors.append(}\SpecialStringTok{f"PORT must be an integer, got: \textquotesingle{}}\SpecialCharTok{\{}\NormalTok{port\_str}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{}"}\NormalTok{)}
+
+    \CommentTok{\# ── FLASK\_DEBUG ─────────────────────────────────────────────────────────}
+\NormalTok{    debug\_str }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"FLASK\_DEBUG"}\NormalTok{, }\StringTok{"false"}\NormalTok{).lower()}
+    \ControlFlowTok{if}\NormalTok{ debug\_str }\KeywordTok{not} \KeywordTok{in}\NormalTok{ (}\StringTok{"true"}\NormalTok{, }\StringTok{"false"}\NormalTok{):}
+\NormalTok{        errors.append(}\SpecialStringTok{f"FLASK\_DEBUG must be \textquotesingle{}true\textquotesingle{} or \textquotesingle{}false\textquotesingle{}, got: \textquotesingle{}}\SpecialCharTok{\{}\NormalTok{debug\_str}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{}"}\NormalTok{)}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        config[}\StringTok{"DEBUG"}\NormalTok{] }\OperatorTok{=}\NormalTok{ debug\_str }\OperatorTok{==} \StringTok{"true"}
+
+    \CommentTok{\# ── Report errors ───────────────────────────────────────────────────────}
+    \ControlFlowTok{if}\NormalTok{ errors:}
+        \BuiltInTok{print}\NormalTok{(}\StringTok{"Configuration errors:"}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+        \ControlFlowTok{for}\NormalTok{ err }\KeywordTok{in}\NormalTok{ errors:}
+            \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"  ✗ }\SpecialCharTok{\{}\NormalTok{err}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+        \BuiltInTok{print}\NormalTok{(}\StringTok{"}\CharTok{\textbackslash{}n}\StringTok{Check your .env file or environment variables."}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+\NormalTok{        sys.exit(}\DecValTok{1}\NormalTok{)}
+
+    \ControlFlowTok{return}\NormalTok{ config}
+
+\CommentTok{\# Load and validate at module import time}
+\NormalTok{CONFIG }\OperatorTok{=}\NormalTok{ validate\_config()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}With this validation, the application starts or fails immediately with a complete list of all configuration problems. Not just the first one~--- all of them. This saves the debugging cycle of fixing one problem, restarting, finding the next, and so on.
+
+\setcounter{section}{4}
+\section{Switching from SQLite to PostgreSQL Through Configuration}\label{13-configuration-externalization:135-switching-from-sqlite-to-postgresql-through-configuration}
+
+This is where configuration externalization becomes tangible: by changing one environment variable (\texttt{DATABASE\_URL}), the Notes API will switch from SQLite (local development) to PostgreSQL (production).
+
+That takes one piece of preparation first. The two databases are not interchangeable: they use different Python drivers (\texttt{sqlite3} and \texttt{psycopg2}), different parameter placeholders (\texttt{?} and \texttt{\%s}), and slightly different SQL for creating tables. So the code must learn to speak both~--- once, in a few small, well-contained helpers. After that, choosing a database is purely a configuration decision. Start with opening a connection, selecting the driver based on the URL:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 13.6}\enspace Database abstraction layer that works with both SQLite and PostgreSQL}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ g}
+
+\KeywordTok{def}\NormalTok{ get\_db\_connection(database\_url: }\BuiltInTok{str}\NormalTok{):}
+    \CommentTok{"""Open a database connection appropriate for the configured URL."""}
+    \ControlFlowTok{if}\NormalTok{ database\_url.startswith(}\StringTok{"sqlite:///"}\NormalTok{):}
+        \ImportTok{import}\NormalTok{ sqlite3}
+\NormalTok{        db\_path }\OperatorTok{=}\NormalTok{ database\_url[}\BuiltInTok{len}\NormalTok{(}\StringTok{"sqlite:///"}\NormalTok{):]}
+\NormalTok{        conn }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(db\_path)}
+\NormalTok{        conn.row\_factory }\OperatorTok{=}\NormalTok{ sqlite3.Row}
+        \ControlFlowTok{return}\NormalTok{ conn}
+
+    \ControlFlowTok{elif}\NormalTok{ database\_url.startswith(}\StringTok{"postgresql://"}\NormalTok{):}
+        \ImportTok{import}\NormalTok{ psycopg2}
+        \ImportTok{import}\NormalTok{ psycopg2.extras}
+\NormalTok{        conn }\OperatorTok{=}\NormalTok{ psycopg2.}\ExtensionTok{connect}\NormalTok{(database\_url)}
+\NormalTok{        conn.autocommit }\OperatorTok{=} \VariableTok{False}
+        \ControlFlowTok{return}\NormalTok{ conn}
+
+    \ControlFlowTok{else}\NormalTok{:}
+        \ControlFlowTok{raise} \PreprocessorTok{ValueError}\NormalTok{(}\SpecialStringTok{f"Unsupported database URL scheme: }\SpecialCharTok{\{}\NormalTok{database\_url}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{Installing the PostgreSQL driver}\phantomsection\label{13-configuration-externalization:installing-the-postgresql-driver}
+
+Add \texttt{psycopg2-binary} to \texttt{requirements.txt}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# requirements.txt (updated)
+blinker==1.7.0
+click==8.1.7
+Flask==3.0.2
+itsdangerous==2.1.2
+Jinja2==3.1.3
+MarkupSafe==2.1.5
+psycopg2-binary==2.9.9
+python-dotenv==1.0.1
+Werkzeug==3.0.1
+\end{Verbatim}
+\end{outputbox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install psycopg2{-}binary}
+\ExtensionTok{pip}\NormalTok{ freeze }\OperatorTok{\textgreater{}}\NormalTok{ requirements.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{psycopg2-binary} is a prebuilt wheel with the PostgreSQL client library (\texttt{libpq}) bundled inside, so it needs no compiler and no system packages. The psycopg2 maintainers suggest building the plain \texttt{psycopg2} package from source for demanding production use; this book uses \texttt{psycopg2-binary} throughout because it keeps the build simple, and it is widely used in production for applications of this size. (Its successor, \texttt{psycopg} version 3, offers the same choice as \texttt{psycopg{[}binary{]}}.)
+
+\subsection*{Running PostgreSQL locally for development}\phantomsection\label{13-configuration-externalization:running-postgresql-locally-for-development}
+
+For development, install PostgreSQL locally or use Docker to run it:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Using Docker (simplest approach — no local PostgreSQL installation needed)}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}{-}name}\NormalTok{ notes{-}postgres }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}e}\NormalTok{ POSTGRES\_USER=notesuser }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}e}\NormalTok{ POSTGRES\_PASSWORD=notespass }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}e}\NormalTok{ POSTGRES\_DB=notesdb }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}p}\NormalTok{ 5432:5432 }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}d}\NormalTok{ postgres:16{-}alpine}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This starts a PostgreSQL server accessible at \texttt{localhost:5432} with:
+
+\begin{itemize}
+\tightlist
+\item
+  Username: \texttt{notesuser}
+\item
+  Password: \texttt{notespass}
+\item
+  Database: \texttt{notesdb}
+\end{itemize}
+
+\noindent{}Update the development \texttt{.env}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# .env (development with PostgreSQL)
+DATABASE_URL=postgresql://notesuser:notespass@localhost:5432/notesdb
+SECRET_KEY=dev-secret-key-at-least-24-chars
+FLASK_DEBUG=true
+PORT=5000
+HOST=127.0.0.1
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}With this \texttt{.env}, the application uses PostgreSQL locally. The same code with a different \texttt{.env} (or no \texttt{.env} and environment variables set by the server) uses a production PostgreSQL instance.
+
+\subsection*{PostgreSQL-compatible schema initialization}\phantomsection\label{13-configuration-externalization:postgresql-compatible-schema-initialization}
+
+The \texttt{init\_db()} function needs a small adjustment for PostgreSQL~--- it uses \texttt{SERIAL} instead of SQLite's \texttt{INTEGER\ PRIMARY\ KEY\ AUTOINCREMENT}, and it has a real timezone-aware timestamp type, \texttt{TIMESTAMPTZ} (← \hyperref[ch:06-local-dependencies]{Chapter 6}: store UTC, with a type that knows it):
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 13.7}\enspace Database-agnostic schema initialization}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ init\_db(database\_url: }\BuiltInTok{str}\NormalTok{):}
+    \CommentTok{"""Create the notes table if it does not exist."""}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ get\_db\_connection(database\_url)}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ conn.cursor()}
+
+    \ControlFlowTok{if}\NormalTok{ database\_url.startswith(}\StringTok{"sqlite:///"}\NormalTok{):}
+\NormalTok{        cursor.execute(}\StringTok{"""}
+\StringTok{            CREATE TABLE IF NOT EXISTS notes (}
+\StringTok{                id INTEGER PRIMARY KEY AUTOINCREMENT,}
+\StringTok{                content TEXT NOT NULL,}
+\StringTok{                created\_at TIMESTAMP DEFAULT CURRENT\_TIMESTAMP}
+\StringTok{            )}
+\StringTok{        """}\NormalTok{)}
+    \ControlFlowTok{else}\NormalTok{:}
+        \CommentTok{\# PostgreSQL syntax}
+\NormalTok{        cursor.execute(}\StringTok{"""}
+\StringTok{            CREATE TABLE IF NOT EXISTS notes (}
+\StringTok{                id SERIAL PRIMARY KEY,}
+\StringTok{                content TEXT NOT NULL,}
+\StringTok{                created\_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT\_TIMESTAMP}
+\StringTok{            )}
+\StringTok{        """}\NormalTok{)}
+
+\NormalTok{    conn.commit()}
+\NormalTok{    conn.close()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\setcounter{section}{5}
+\section{\texorpdfstring{The Full Updated \texttt{app.py} with Complete Configuration
+Externalization}{The Full Updated app.py with Complete Configuration Externalization}}\label{13-configuration-externalization:136-the-full-updated-apppy-with-complete-configuration-externalization}
+
+Here is the complete Notes API with all configuration externalized. Two small helpers keep the SQLite/PostgreSQL differences in one place instead of scattering them through every handler: \texttt{sql()} lets the queries be written once with \texttt{?} placeholders, and \texttt{to\_iso()} makes timestamps look the same whichever database produced them.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 13.8}\enspace app.py with complete configuration externalization}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Notes API — a simple Flask API for creating and retrieving notes.}
+\CommentTok{All configuration comes from environment variables (or .env file).}
+\CommentTok{"""}
+\ImportTok{from}\NormalTok{ dotenv }\ImportTok{import}\NormalTok{ load\_dotenv}
+\NormalTok{load\_dotenv()}
+
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, request, jsonify, g}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ sys}
+\ImportTok{import}\NormalTok{ time}
+
+\CommentTok{\# ── Configuration ──────────────────────────────────────────────────────────}
+
+\KeywordTok{def}\NormalTok{ validate\_config() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict}\NormalTok{:}
+\NormalTok{    errors }\OperatorTok{=}\NormalTok{ []}
+\NormalTok{    config }\OperatorTok{=}\NormalTok{ \{\}}
+
+\NormalTok{    db\_url }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_URL"}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ db\_url:}
+\NormalTok{        errors.append(}\StringTok{"DATABASE\_URL is required"}\NormalTok{)}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        config[}\StringTok{"DATABASE\_URL"}\NormalTok{] }\OperatorTok{=}\NormalTok{ db\_url}
+
+\NormalTok{    secret\_key }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"SECRET\_KEY"}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ secret\_key }\KeywordTok{or} \BuiltInTok{len}\NormalTok{(secret\_key) }\OperatorTok{\textless{}} \DecValTok{24}\NormalTok{:}
+\NormalTok{        errors.append(}\StringTok{"SECRET\_KEY is required and must be at least 24 characters"}\NormalTok{)}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        config[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=}\NormalTok{ secret\_key}
+
+\NormalTok{    config[}\StringTok{"DEBUG"}\NormalTok{] }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"FLASK\_DEBUG"}\NormalTok{, }\StringTok{"false"}\NormalTok{).lower() }\OperatorTok{==} \StringTok{"true"}
+\NormalTok{    config[}\StringTok{"PORT"}\NormalTok{]  }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(os.getenv(}\StringTok{"PORT"}\NormalTok{, }\StringTok{"5000"}\NormalTok{))}
+\NormalTok{    config[}\StringTok{"HOST"}\NormalTok{]  }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"HOST"}\NormalTok{, }\StringTok{"127.0.0.1"}\NormalTok{)}
+
+    \ControlFlowTok{if}\NormalTok{ errors:}
+        \ControlFlowTok{for}\NormalTok{ err }\KeywordTok{in}\NormalTok{ errors:}
+            \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Config error: }\SpecialCharTok{\{}\NormalTok{err}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+\NormalTok{        sys.exit(}\DecValTok{1}\NormalTok{)}
+
+    \ControlFlowTok{return}\NormalTok{ config}
+
+\NormalTok{CONFIG }\OperatorTok{=}\NormalTok{ validate\_config()}
+
+\CommentTok{\# ── Application ────────────────────────────────────────────────────────────}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\NormalTok{app.config[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=}\NormalTok{ CONFIG[}\StringTok{"SECRET\_KEY"}\NormalTok{]}
+\NormalTok{app.config[}\StringTok{"DEBUG"}\NormalTok{]      }\OperatorTok{=}\NormalTok{ CONFIG[}\StringTok{"DEBUG"}\NormalTok{]}
+
+\CommentTok{\# ── Database ────────────────────────────────────────────────────────────────}
+
+\KeywordTok{def}\NormalTok{ open\_db():}
+    \CommentTok{"""Open a database connection for the current request."""}
+\NormalTok{    db\_url }\OperatorTok{=}\NormalTok{ CONFIG[}\StringTok{"DATABASE\_URL"}\NormalTok{]}
+    \ControlFlowTok{if}\NormalTok{ db\_url.startswith(}\StringTok{"sqlite:///"}\NormalTok{):}
+        \ImportTok{import}\NormalTok{ sqlite3}
+\NormalTok{        conn }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(db\_url[}\BuiltInTok{len}\NormalTok{(}\StringTok{"sqlite:///"}\NormalTok{):])}
+\NormalTok{        conn.row\_factory }\OperatorTok{=}\NormalTok{ sqlite3.Row}
+        \ControlFlowTok{return}\NormalTok{ conn}
+    \ControlFlowTok{else}\NormalTok{:}
+        \ImportTok{import}\NormalTok{ psycopg2}
+        \ImportTok{import}\NormalTok{ psycopg2.extras}
+\NormalTok{        conn }\OperatorTok{=}\NormalTok{ psycopg2.}\ExtensionTok{connect}\NormalTok{(db\_url)}
+        \CommentTok{\# Return rows as dicts}
+\NormalTok{        conn.cursor\_factory }\OperatorTok{=}\NormalTok{ psycopg2.extras.RealDictCursor}
+        \ControlFlowTok{return}\NormalTok{ conn}
+
+\KeywordTok{def}\NormalTok{ get\_db():}
+    \ControlFlowTok{if} \StringTok{"db"} \KeywordTok{not} \KeywordTok{in}\NormalTok{ g:}
+\NormalTok{        g.db }\OperatorTok{=}\NormalTok{ open\_db()}
+    \ControlFlowTok{return}\NormalTok{ g.db}
+
+\NormalTok{IS\_SQLITE }\OperatorTok{=}\NormalTok{ CONFIG[}\StringTok{"DATABASE\_URL"}\NormalTok{].startswith(}\StringTok{"sqlite:///"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ sql(query: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""Queries are written with ? placeholders; psycopg2 expects \%s."""}
+    \ControlFlowTok{return}\NormalTok{ query }\ControlFlowTok{if}\NormalTok{ IS\_SQLITE }\ControlFlowTok{else}\NormalTok{ query.replace(}\StringTok{"?"}\NormalTok{, }\StringTok{"}\SpecialCharTok{\%s}\StringTok{"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ to\_iso(value) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""A timestamp as ISO 8601 in UTC, whichever database produced it."""}
+    \ControlFlowTok{if} \BuiltInTok{isinstance}\NormalTok{(value, }\BuiltInTok{str}\NormalTok{):                    }\CommentTok{\# SQLite: "2024{-}01{-}15 14:00:05" (UTC)}
+        \ControlFlowTok{return}\NormalTok{ value.replace(}\StringTok{" "}\NormalTok{, }\StringTok{"T"}\NormalTok{) }\OperatorTok{+} \StringTok{"+00:00"}
+    \ControlFlowTok{return}\NormalTok{ value.isoformat()                      }\CommentTok{\# PostgreSQL: a timezone{-}aware datetime}
+
+\KeywordTok{def}\NormalTok{ note\_to\_dict(row) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict}\NormalTok{:}
+\NormalTok{    note }\OperatorTok{=} \BuiltInTok{dict}\NormalTok{(row)}
+\NormalTok{    note[}\StringTok{"created\_at"}\NormalTok{] }\OperatorTok{=}\NormalTok{ to\_iso(note[}\StringTok{"created\_at"}\NormalTok{])}
+    \ControlFlowTok{return}\NormalTok{ note}
+
+\KeywordTok{def}\NormalTok{ init\_db():}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ open\_db()}
+\NormalTok{    cur }\OperatorTok{=}\NormalTok{ conn.cursor()}
+    \ControlFlowTok{if}\NormalTok{ IS\_SQLITE:}
+\NormalTok{        cur.execute(}\StringTok{"""}
+\StringTok{            CREATE TABLE IF NOT EXISTS notes (}
+\StringTok{                id INTEGER PRIMARY KEY AUTOINCREMENT,}
+\StringTok{                content TEXT NOT NULL,}
+\StringTok{                created\_at TIMESTAMP DEFAULT CURRENT\_TIMESTAMP}
+\StringTok{            )}
+\StringTok{        """}\NormalTok{)}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        cur.execute(}\StringTok{"""}
+\StringTok{            CREATE TABLE IF NOT EXISTS notes (}
+\StringTok{                id SERIAL PRIMARY KEY,}
+\StringTok{                content TEXT NOT NULL,}
+\StringTok{                created\_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT\_TIMESTAMP}
+\StringTok{            )}
+\StringTok{        """}\NormalTok{)}
+\NormalTok{    conn.commit()}
+\NormalTok{    conn.close()}
+
+\NormalTok{init\_db()  }\CommentTok{\# At startup — also when a production server imports this module}
+
+\CommentTok{\# ── Middleware ─────────────────────────────────────────────────────────────}
+
+\AttributeTok{@app.before\_request}
+\KeywordTok{def}\NormalTok{ start\_timer():}
+\NormalTok{    g.start\_time }\OperatorTok{=}\NormalTok{ time.time()}
+
+\AttributeTok{@app.before\_request}
+\KeywordTok{def}\NormalTok{ require\_json\_for\_writes():}
+    \ControlFlowTok{if}\NormalTok{ request.method }\KeywordTok{in}\NormalTok{ (}\StringTok{"POST"}\NormalTok{, }\StringTok{"PUT"}\NormalTok{, }\StringTok{"PATCH"}\NormalTok{) }\KeywordTok{and} \KeywordTok{not}\NormalTok{ request.is\_json:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Content{-}Type must be application/json"}\NormalTok{\}), }\DecValTok{415}
+
+\AttributeTok{@app.after\_request}
+\KeywordTok{def}\NormalTok{ add\_timing\_header(response):}
+\NormalTok{    duration\_ms }\OperatorTok{=}\NormalTok{ (time.time() }\OperatorTok{{-}}\NormalTok{ g.start\_time) }\OperatorTok{*} \DecValTok{1000}
+\NormalTok{    response.headers[}\StringTok{"X{-}Response{-}Time{-}Ms"}\NormalTok{] }\OperatorTok{=} \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{duration\_ms}\SpecialCharTok{:.1f\}}\SpecialStringTok{"}
+    \ControlFlowTok{return}\NormalTok{ response}
+
+\AttributeTok{@app.teardown\_request}
+\KeywordTok{def}\NormalTok{ close\_db(exception):}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ g.pop(}\StringTok{"db"}\NormalTok{, }\VariableTok{None}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ db }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+\NormalTok{        db.close()}
+
+\CommentTok{\# ── Error handlers ─────────────────────────────────────────────────────────}
+
+\AttributeTok{@app.errorhandler}\NormalTok{(}\DecValTok{404}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ not\_found(error):}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Not found"}\NormalTok{\}), }\DecValTok{404}
+
+\AttributeTok{@app.errorhandler}\NormalTok{(}\DecValTok{405}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ method\_not\_allowed(error):}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Method not allowed"}\NormalTok{\}), }\DecValTok{405}
+
+\AttributeTok{@app.errorhandler}\NormalTok{(}\DecValTok{500}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ internal\_error(error):}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Internal server error"}\NormalTok{\}), }\DecValTok{500}
+
+\CommentTok{\# ── Routes ─────────────────────────────────────────────────────────────────}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/health"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ health\_check():}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"status"}\NormalTok{: }\StringTok{"ok"}\NormalTok{, }\StringTok{"debug"}\NormalTok{: CONFIG[}\StringTok{"DEBUG"}\NormalTok{]\})}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(}\StringTok{"SELECT id, content, created\_at FROM notes ORDER BY id DESC"}\NormalTok{)}
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [note\_to\_dict(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: notes, }\StringTok{"count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(notes)\})}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(data, }\BuiltInTok{dict}\NormalTok{):}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Request body must be a JSON object"}\NormalTok{\}), }\DecValTok{400}
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ data.get(}\StringTok{"content"}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(content, }\BuiltInTok{str}\NormalTok{) }\KeywordTok{or} \KeywordTok{not}\NormalTok{ content.strip():}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"content is required and cannot be empty"}\NormalTok{\}), }\DecValTok{400}
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ content.strip()}
+
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+    \ControlFlowTok{if}\NormalTok{ IS\_SQLITE:}
+\NormalTok{        cursor.execute(}\StringTok{"INSERT INTO notes (content) VALUES (?)"}\NormalTok{, (content,))}
+\NormalTok{        note\_id }\OperatorTok{=}\NormalTok{ cursor.lastrowid}
+    \ControlFlowTok{else}\NormalTok{:}
+        \CommentTok{\# PostgreSQL has no lastrowid; RETURNING hands back the new id}
+\NormalTok{        cursor.execute(}\StringTok{"INSERT INTO notes (content) VALUES (}\SpecialCharTok{\%s}\StringTok{) RETURNING id"}\NormalTok{, (content,))}
+\NormalTok{        note\_id }\OperatorTok{=}\NormalTok{ cursor.fetchone()[}\StringTok{"id"}\NormalTok{]}
+\NormalTok{    db.commit()}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"id"}\NormalTok{: note\_id, }\StringTok{"content"}\NormalTok{: content\}), }\DecValTok{201}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+    \ControlFlowTok{return}\NormalTok{ jsonify(note\_to\_dict(row))}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ delete\_note(note\_id):}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"DELETE FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    db.commit()}
+    \ControlFlowTok{if}\NormalTok{ cursor.rowcount }\OperatorTok{==} \DecValTok{0}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"message"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ deleted"}\NormalTok{\})}
+
+\CommentTok{\# ── Entry point ────────────────────────────────────────────────────────────}
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    app.run(}
+\NormalTok{        host}\OperatorTok{=}\NormalTok{CONFIG[}\StringTok{"HOST"}\NormalTok{],}
+\NormalTok{        port}\OperatorTok{=}\NormalTok{CONFIG[}\StringTok{"PORT"}\NormalTok{],}
+\NormalTok{        debug}\OperatorTok{=}\NormalTok{CONFIG[}\StringTok{"DEBUG"}\NormalTok{]}
+\NormalTok{    )}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{\texorpdfstring{The \texttt{.env.example} file}{The .env.example file}}\phantomsection\label{13-configuration-externalization:the-envexample-file}
+
+Commit this file to document required configuration without exposing real values:
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# .env.example — copy to .env and fill in values
+# Do not commit .env to version control
+
+# Required: database connection URL
+# For local development with SQLite:
+#   DATABASE_URL=sqlite:///notes.db
+# For local development with Docker PostgreSQL:
+#   DATABASE_URL=postgresql://notesuser:notespass@localhost:5432/notesdb
+DATABASE_URL=
+
+# Required: secret key for Flask session signing (at least 24 characters)
+# Generate with: python -c "import secrets; print(secrets.token_hex(32))"
+SECRET_KEY=
+
+# Optional: enable debug mode (true/false, default: false)
+FLASK_DEBUG=false
+
+# Optional: server port (default: 5000)
+PORT=5000
+
+# Optional: server host (127.0.0.1 for local, 0.0.0.0 for all interfaces)
+HOST=127.0.0.1
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{Generating a secure secret key}\phantomsection\label{13-configuration-externalization:generating-a-secure-secret-key}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 13.9}\enspace Generating a cryptographically secure secret key}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ secrets}
+
+\CommentTok{\# Run this once to generate a key, copy into .env}
+\BuiltInTok{print}\NormalTok{(secrets.token\_hex(}\DecValTok{32}\NormalTok{))}
+\CommentTok{\# Output: a64f3b8c2e7d1a5f9b0c4d6e3f8a2b5c7d1e4f0a3b6c9d2e5f8a1b4c7d0e3f6}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\unnumberedsection{false}{Managing Configurations Across Environments}\label{13-configuration-externalization:managing-configurations-across-environments}
+
+Here is how the same application is configured in three environments with different \texttt{.env} values (or environment variables set at the system level):
+
+\begin{diagrambox}[short]{403.3pt}
+\begin{Verbatim}[fontsize=\fontsize{7.7}{7.31}\selectfont]
+DEVELOPMENT (.env)                   STAGING (env vars)               PRODUCTION (env vars)
+──────────────────────────────────   ──────────────────────────────   ─────────────────────────────
+DATABASE_URL=sqlite:///notes.db      DATABASE_URL=postgresql://...    DATABASE_URL=postgresql://...
+SECRET_KEY=dev-only-key-0123456789   SECRET_KEY=<generated-key>       SECRET_KEY=<generated-key>
+FLASK_DEBUG=true                     FLASK_DEBUG=false                FLASK_DEBUG=false
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}The source code (\texttt{app.py}) is identical in all three environments. No if-else on environment name. No hardcoded values. The behavior differs because the environment differs. (\texttt{HOST} and \texttt{PORT} only matter when the app runs its built-in development server. In staging and production it runs under Gunicorn inside a container, whose listening address is set where the container is built and run~--- → \hyperref[ch:18-containerization]{Chapter 18} and → \hyperref[ch:23-code-transfer]{Chapter 23}.)
+
+\phantomsection\label{13-configuration-externalization:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Configuration externalization} means removing all environment-specific values from source code and reading them from environment variables at runtime.
+\item
+  Use \texttt{os.getenv("KEY")} for optional config (returns None if missing), \texttt{os.}\allowbreak{}\texttt{getenv("KEY",}\allowbreak{}\texttt{\ "default")} for config with defaults, and \texttt{os.environ{[}"KEY"{]}} or a validation function for required config.
+\item
+  \textbf{Validate all configuration at startup} with a clear error message for every problem. The application should either start correctly or fail immediately with a complete list of what is wrong.
+\item
+  \texttt{load\_dotenv()} from \texttt{python-dotenv} loads a \texttt{.env} file into \texttt{os.environ}. It must be called before any \texttt{os.getenv()} calls. The \texttt{.env} file is not committed to version control; \texttt{.env.example} is.
+\item
+  \textbf{Switching databases through configuration} (SQLite for development, PostgreSQL for production) works once the code can speak both~--- a one-time investment kept in a few small helpers. After that, the same code runs everywhere and the environment decides.
+\item
+  Commit \texttt{.env.example} to document required variables. Never commit \texttt{.env}. Treat any accidentally committed secret as fully compromised and immediately rotate it.
+\item
+  A configured dependency is a \textbf{contract}, and contracts are harder to change than code because you break everyone on the other side. Every integration~--- one you call or one you offer~--- has five dimensions: \textbf{shape, versioning, identity, authorization, and failure semantics}.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{13-configuration-externalization:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Start the application with \texttt{DATABASE\_URL} unset, then with it set to an unreachable PostgreSQL host. What does each attempt print, and when?
+\item
+  \textbf{Break and fix.} Set \texttt{SECRET\_KEY} to \texttt{changeme}. Does the application start? Which check should stop it, and in which chapter does that check appear?
+\item
+  \textbf{Extend.} Add a \texttt{REQUEST\_TIMEOUT\_SECONDS} setting: optional, an integer between 1 and 120, default 30, validated at start-up with a clear message for each kind of bad value.
+\item
+  \textbf{Explain.} Which of the five integration-contract dimensions does \texttt{DATABASE\_URL} touch, and which does \texttt{SECRET\_KEY} touch?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-13.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{13-configuration-externalization:whats-next}
+
+Dependencies are declared. Configuration is externalized. The next chapter defines the application's runtime contract~--- a formal statement of what the application requires from its execution environment before it can start.
+
+\noindent{}→ \hyperref[ch:14-runtime-contract]{Chapter 14}~--- Runtime Contract Definition

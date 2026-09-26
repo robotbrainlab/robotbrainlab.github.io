@@ -1,0 +1,1194 @@
+\setcounter{chapter}{35}
+\chapter{Scaling and Load Handling}\label{ch:36-scaling-load}
+
+\chapterrule
+
+The Notes API runs on a single server with a fixed number of Gunicorn workers. This works for low to moderate traffic. But what happens when traffic grows~--- when the number of requests per second exceeds what a single server can handle? Or when traffic spikes temporarily during a product launch?
+
+This chapter covers the concepts and techniques for handling load: understanding capacity, identifying bottlenecks, and the strategies for scaling when you hit limits. The goal is not to prematurely optimize~--- premature optimization wastes engineering time on problems that may never materialize~--- but to understand the levers available and recognize when to use them.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  How to determine the current capacity of the Notes API
+\item
+  Where bottlenecks typically appear in web applications, and how a profiler (\texttt{cProfile}, py-spy) finds the slow code
+\item
+  How to scale vertically (bigger server) and horizontally (more servers)
+\item
+  What a load balancer is and how it distributes requests
+\item
+  How connection pooling helps database throughput
+\item
+  What caching is and when it helps
+\item
+  How rate limiting protects the system from abuse
+\item
+  How async Python (\texttt{async}/\texttt{await}) achieves concurrency, and why the Notes API does not need it
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Understanding Capacity}\label{36-scaling-load:361-understanding-capacity}
+
+\textbf{Capacity} is the maximum load the system can handle while still meeting performance requirements (e.g., p99 latency \textless{} 500ms).
+
+Before optimizing, measure. You need to know:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  How much traffic are you handling now?
+\item
+  How fast is traffic growing?
+\item
+  What is the current capacity limit?
+\end{enumerate}
+
+\subsection*{Measuring current throughput}\phantomsection\label{36-scaling-load:measuring-current-throughput}
+
+From the Nginx access log (Nginx runs on the host, \hyperref[ch:28-traffic-routing]{Chapter 28}):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Requests per minute, for the last five minutes in the log}
+\FunctionTok{sudo}\NormalTok{ tail }\AttributeTok{{-}n}\NormalTok{ 10000 /var/log/nginx/notes{-}api{-}access.log }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
+  \FunctionTok{awk} \StringTok{\textquotesingle{}\{print $4\}\textquotesingle{}} \KeywordTok{|} \FunctionTok{cut} \AttributeTok{{-}c1{-}18} \KeywordTok{|} \FunctionTok{sort} \KeywordTok{|} \FunctionTok{uniq} \AttributeTok{{-}c} \KeywordTok{|} \FunctionTok{tail} \AttributeTok{{-}5}
+\CommentTok{\#   583 [15/Jan/2024:14:01}
+\CommentTok{\#   611 [15/Jan/2024:14:02}
+\CommentTok{\#   ...}
+\CommentTok{\# 600 requests in a minute = 10 requests per second}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(Count within a time window, as here: the log file as a whole covers everything since its last rotation, usually a day.)
+
+From Prometheus (if configured, \hyperref[ch:35-observability]{Chapter 35}):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# Requests per second averaged over 5 minutes:
+sum(rate(flask_http_request_total[5m]))
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{Load testing: finding the limit}\phantomsection\label{36-scaling-load:load-testing-finding-the-limit}
+
+\textbf{Load testing} sends artificial traffic to find the breaking point. The tools:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\texttt{locust}}: Python-based, web UI, write scenarios in Python
+\item
+  \textbf{\texttt{k6}}: JavaScript, runs in CI pipelines, excellent reporting
+\item
+  \textbf{\texttt{wrk}}: lightweight C tool for raw throughput testing
+\item
+  \textbf{\texttt{ab}} (Apache Bench): simple, built into many systems
+\end{itemize}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# locustfile.py — a simple load test for the Notes API}
+\ImportTok{import}\NormalTok{ random}
+\ImportTok{from}\NormalTok{ locust }\ImportTok{import}\NormalTok{ HttpUser, task, between}
+
+\KeywordTok{class}\NormalTok{ NotesAPIUser(HttpUser):}
+    \CommentTok{\# Simulated user waits between 1 and 3 seconds between requests}
+\NormalTok{    wait\_time }\OperatorTok{=}\NormalTok{ between(}\DecValTok{1}\NormalTok{, }\DecValTok{3}\NormalTok{)}
+
+    \AttributeTok{@task}\NormalTok{(}\DecValTok{3}\NormalTok{)  }\CommentTok{\# Weight 3: list\_notes runs 3x more often than create\_note}
+    \KeywordTok{def}\NormalTok{ list\_notes(}\VariableTok{self}\NormalTok{):}
+        \VariableTok{self}\NormalTok{.client.get(}\StringTok{"/notes/"}\NormalTok{)}
+
+    \AttributeTok{@task}\NormalTok{(}\DecValTok{1}\NormalTok{)  }\CommentTok{\# Weight 1}
+    \KeywordTok{def}\NormalTok{ create\_note(}\VariableTok{self}\NormalTok{):}
+        \CommentTok{\# json= also sets the Content{-}Type header}
+\NormalTok{        response }\OperatorTok{=} \VariableTok{self}\NormalTok{.client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Load test note"}\NormalTok{\})}
+        \ControlFlowTok{if}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{201}\NormalTok{:}
+            \VariableTok{self}\NormalTok{.note\_ids.append(response.json()[}\StringTok{"id"}\NormalTok{])}
+
+    \AttributeTok{@task}\NormalTok{(}\DecValTok{2}\NormalTok{)  }\CommentTok{\# Weight 2}
+    \KeywordTok{def}\NormalTok{ get\_note(}\VariableTok{self}\NormalTok{):}
+        \CommentTok{\# Read notes this user created — not the same note over and over,}
+        \CommentTok{\# which would measure one cached row, not a realistic workload}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.note\_ids:}
+            \VariableTok{self}\NormalTok{.client.get(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{random}\SpecialCharTok{.}\NormalTok{choice(}\VariableTok{self}\NormalTok{.note\_ids)}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, name}\OperatorTok{=}\StringTok{"/notes/[id]"}\NormalTok{)}
+
+    \KeywordTok{def}\NormalTok{ on\_start(}\VariableTok{self}\NormalTok{):}
+        \VariableTok{self}\NormalTok{.note\_ids }\OperatorTok{=}\NormalTok{ []}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Run the load test — against a staging copy of the system, not production}
+\ExtensionTok{locust} \AttributeTok{{-}f}\NormalTok{ locustfile.py }\AttributeTok{{-}{-}host}\NormalTok{ https://staging.notes.example.com }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}users}\NormalTok{ 100 }\AttributeTok{{-}{-}spawn{-}rate}\NormalTok{ 10 }\AttributeTok{{-}{-}run{-}time}\NormalTok{ 60s }\AttributeTok{{-}{-}headless}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This run ramps up to 100 simulated users and holds them for a minute. To find the limit, repeat it with more users each time (or use Locust's web UI to raise the count while watching the charts) until response times start degrading: the point where p99 latency exceeds your threshold is your capacity limit. Remember that the test comes from one IP address~--- Nginx's per-IP rate limit (Chapter 28) will throttle it long before the application is stressed, so raise the limit on the staging server, or you will measure Nginx's 429s instead of the application.
+
+\subsection*{What the results tell you}\phantomsection\label{36-scaling-load:what-the-results-tell-you}
+
+A typical capacity curve:
+
+\begin{diagrambox}[short]{321.7pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+p99 latency (ms)
+  │
+  │                                          *
+500 ┤ - - - - - - - - - - - - - - - - - - - * - - - ← threshold
+  │                                     *
+  │                                *
+  │                          *   ← degradation starts
+  │   *    *    *    *    *
+ 50 ┤
+  └──┬────┬────┬────┬────┬────┬────┬────┬────┬──── concurrent users
+     10   20   30   40   50   60   70   80   90
+                                        ↑
+                      capacity limit (~75 users in this example)
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}If your Notes API handles 75 concurrent users before latency crosses the threshold, and your current peak is 15 concurrent users, you have \textasciitilde5x headroom~--- you don't need to scale yet.
+
+\setcounter{section}{1}
+\section{Identifying Bottlenecks}\label{36-scaling-load:362-identifying-bottlenecks}
+
+The bottleneck is the part of the system that limits throughput. Scaling other parts won't help until the bottleneck is addressed.
+
+\subsection*{Finding the bottleneck}\phantomsection\label{36-scaling-load:finding-the-bottleneck}
+
+\textbf{CPU-bound}: the application is spending most of its time doing computation.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# During a load test (the slim image has no top or ps, so look from the host):}
+\ExtensionTok{docker}\NormalTok{ stats notes{-}api}
+\CommentTok{\# CONTAINER ID   NAME        CPU \%    MEM USAGE / LIMIT   ...}
+\CommentTok{\# 3f2a1b...      notes{-}api   98.7\%    142MiB / 957MiB}
+\CommentTok{\# CPU near 100\% per core (100\% on 1 vCPU, 200\% on 2) → CPU{-}bound}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}For Python web applications, CPU-bound behavior is uncommon because most time is spent waiting for I/O (network, database). If you see it, look for: JSON parsing of very large payloads, complex string operations, or heavy computation in request handlers.
+
+\textbf{I/O-bound (database)}: the application is waiting for the database.
+The application does not log how long each query takes, but PostgreSQL can. On a managed database, enable the \texttt{pg\_stat\_statements} extension, then ask for the slowest queries:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} Once per database (managed PostgreSQL providers support this extension)}
+\KeywordTok{CREATE}\NormalTok{ EXTENSION }\ControlFlowTok{IF} \KeywordTok{NOT} \KeywordTok{EXISTS}\NormalTok{ pg\_stat\_statements;}
+
+\CommentTok{{-}{-} The queries that take the most time in total}
+\KeywordTok{SELECT} \KeywordTok{query}\NormalTok{, calls, }\FunctionTok{round}\NormalTok{(mean\_exec\_time:}\CharTok{:numeric}\NormalTok{, }\DecValTok{2}\NormalTok{) }\KeywordTok{AS}\NormalTok{ mean\_ms}
+\KeywordTok{FROM}\NormalTok{ pg\_stat\_statements}
+\KeywordTok{ORDER} \KeywordTok{BY}\NormalTok{ total\_exec\_time }\KeywordTok{DESC}
+\KeywordTok{LIMIT} \DecValTok{10}\NormalTok{;}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(Alternatively, the \texttt{log\_}\allowbreak{}\texttt{min\_}\allowbreak{}\texttt{duration\_}\allowbreak{}\texttt{statement} setting makes PostgreSQL log every query slower than a threshold.)
+
+If database query times are high (\textgreater{} 50ms for simple queries), look for:
+
+\begin{itemize}
+\tightlist
+\item
+  Missing indexes
+\item
+  Slow queries (use \texttt{EXPLAIN\ ANALYZE} in PostgreSQL)
+\item
+  Too many database queries per request (N+1 problem)
+\item
+  Database server under-resourced (needs more RAM for caching)
+\end{itemize}
+
+\noindent{}\textbf{I/O-bound (network)}: the application is waiting for network responses to external services.
+
+\textbf{Worker starvation}: all Gunicorn workers are busy and new requests queue up.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Check Gunicorn\textquotesingle{}s accept queue. It lives in the container\textquotesingle{}s network}
+\CommentTok{\# namespace — ss on the host would show docker{-}proxy\textquotesingle{}s socket instead.}
+\FunctionTok{sudo}\NormalTok{ nsenter }\AttributeTok{{-}t} \VariableTok{$(}\ExtensionTok{docker}\NormalTok{ inspect }\AttributeTok{{-}f} \StringTok{\textquotesingle{}\{\{.State.Pid\}\}\textquotesingle{}}\NormalTok{ notes{-}api}\VariableTok{)} \AttributeTok{{-}n}\NormalTok{ ss }\AttributeTok{{-}tln}
+\CommentTok{\# State   Recv{-}Q  Send{-}Q  Local Address:Port}
+\CommentTok{\# LISTEN  12      2048    0.0.0.0:5000}
+\CommentTok{\# A Recv{-}Q that stays above zero means requests are waiting for a free}
+\CommentTok{\# worker: increase the worker count or scale horizontally}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Memory exhausted}: the server is using swap (virtual memory on disk, which is slow).
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{free} \AttributeTok{{-}h}
+\CommentTok{\# If "used" under "Swap" is significant, you\textquotesingle{}re swapping → scale up server RAM}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Profiling: where does the time go inside the code?}\phantomsection\label{36-scaling-load:profiling-where-does-the-time-go-inside-the-code}
+
+The checks above tell you \emph{which resource} is the bottleneck. When the answer is ``the application itself is slow'', a \textbf{profiler} tells you \emph{which code}. It records every function call, how often it happened, and how long it took, so you stop guessing.
+
+Python ships with one, \texttt{cProfile}. It is simplest to run it around the code in question, in a script or a test, on your own machine. Here it measures the two ways of listing notes with their tags from section 33.12: the N+1 loop, and the batched version. The setup is 200 notes, and the whole list is fetched 10 times, against a local PostgreSQL:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ cProfile}
+\ImportTok{import}\NormalTok{ pstats}
+
+\ControlFlowTok{with}\NormalTok{ cProfile.Profile() }\ImportTok{as}\NormalTok{ profiler:}
+    \ControlFlowTok{for}\NormalTok{ \_ }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{10}\NormalTok{):}
+\NormalTok{        list\_with\_tags\_n\_plus\_1(cursor)}
+
+\NormalTok{pstats.Stats(profiler).sort\_stats(}\StringTok{"cumulative"}\NormalTok{).print\_stats(}\DecValTok{4}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+         67142 function calls in 0.511 seconds
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       10    0.002    0.000    0.511    0.051 prof.py:12(list_with_tags_n_plus_1)
+     2010    0.001    0.000    0.492    0.000 psycopg2/extras.py:233(execute)
+     2010    0.490    0.000    0.491    0.000 {function RealDictCursor.execute}
+     2010    0.001    0.000    0.013    0.000 psycopg2/extras.py:98(fetchall)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Read it by the columns that matter. \textbf{\texttt{cumtime}} is the time spent in a function including everything it called, and \textbf{\texttt{ncalls}} is how many times it ran. Almost all of the 0.51 seconds went into \texttt{execute}, called 2,010 times: 201 queries per listing. The same measurement for the batched version shows 20 calls to \texttt{execute} and 0.042 seconds in total, twelve times faster, with the database on the same machine. Across a real network, where each round trip costs a millisecond or more, the gap grows much wider. The profile turned ``listing is slow'' into ``listing makes 201 queries'', and the fix follows directly.
+
+\texttt{cProfile} slows the code it measures and must be started around it. For a process that is \emph{already running}, such as a Gunicorn worker that is slow in production right now, use a \textbf{sampling profiler}. \textbf{py-spy} reads the stack of a running Python process many times a second from the outside, without restarting it and with little overhead:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install py{-}spy}
+
+\CommentTok{\# A live, top{-}like view of where a process spends its time}
+\FunctionTok{sudo}\NormalTok{ py{-}spy top }\AttributeTok{{-}{-}pid} \OperatorTok{\textless{}}\NormalTok{PID}\OperatorTok{\textgreater{}}
+
+\CommentTok{\# Record 30 seconds and write a flame graph (open the SVG in a browser)}
+\FunctionTok{sudo}\NormalTok{ py{-}spy record }\AttributeTok{{-}{-}pid} \OperatorTok{\textless{}}\NormalTok{PID}\OperatorTok{\textgreater{}}\NormalTok{ {-}{-}duration 30 }\AttributeTok{{-}o}\NormalTok{ profile.svg}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}For a process inside a container, find its host PID with \texttt{docker\ inspect\ -}\allowbreak{}\texttt{f\ \textquotesingle{}\{\{.}\allowbreak{}\texttt{State.}\allowbreak{}\texttt{Pid\}\}\textquotesingle{}\ notes-}\allowbreak{}\texttt{api} and run py-spy on the host. It needs root, or a container started with \texttt{-\/-cap-add\ SYS\_PTRACE}, because reading another process's memory is exactly what the kernel normally forbids.
+
+A \textbf{flame graph} draws the sampled stacks as nested bars: the wider a bar, the more time was spent there. You look for the widest bars that belong to your code. And whatever the tool, measure \emph{before} optimizing. The slow part is rarely where intuition says it is.
+
+\subsection*{Database indexes: the first optimization}\phantomsection\label{36-scaling-load:database-indexes-the-first-optimization}
+
+The most common bottleneck for a simple CRUD API is missing database indexes. Without an index, PostgreSQL must scan every row to find matching rows.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} Without an index on created\_at: PostgreSQL reads every row}
+\KeywordTok{EXPLAIN} \KeywordTok{ANALYZE}
+\KeywordTok{SELECT} \OperatorTok{*} \KeywordTok{FROM}\NormalTok{ notes }\KeywordTok{WHERE}\NormalTok{ created\_at }\OperatorTok{\textgreater{}}\NormalTok{ now() }\OperatorTok{{-}} \DataTypeTok{interval} \StringTok{\textquotesingle{}1 day\textquotesingle{}}\NormalTok{;}
+\CommentTok{{-}{-} Seq Scan on notes (cost=0.00..2137.00 rows=412 ...) (actual time=0.015..15.234 rows=398 ...)}
+
+\KeywordTok{CREATE} \KeywordTok{INDEX}\NormalTok{ idx\_notes\_created\_at }\KeywordTok{ON}\NormalTok{ notes (created\_at);}
+
+\CommentTok{{-}{-} With the index:}
+\KeywordTok{EXPLAIN} \KeywordTok{ANALYZE}
+\KeywordTok{SELECT} \OperatorTok{*} \KeywordTok{FROM}\NormalTok{ notes }\KeywordTok{WHERE}\NormalTok{ created\_at }\OperatorTok{\textgreater{}}\NormalTok{ now() }\OperatorTok{{-}} \DataTypeTok{interval} \StringTok{\textquotesingle{}1 day\textquotesingle{}}\NormalTok{;}
+\CommentTok{{-}{-} Index Scan using idx\_notes\_created\_at on notes (...) (actual time=0.021..0.310 rows=398 ...)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The index makes this query about 50x faster on a table of 100,000 notes, and the gap grows with the table. (Lookups by \texttt{id} are fast already: a PRIMARY KEY always comes with an index.)
+
+For the Notes API's search (\texttt{?search=}, \hyperref[ch:33-logic-execution]{Chapter 33}), the index must match the query. \texttt{content\ ILIKE\ \textquotesingle{}\%term\%\textquotesingle{}} starts with a wildcard, which an ordinary B-tree index cannot serve~--- not even one on \texttt{LOWER(content)}. A \textbf{trigram} index can:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} Trigram index: serves LIKE/ILIKE with wildcards anywhere}
+\KeywordTok{CREATE}\NormalTok{ EXTENSION }\ControlFlowTok{IF} \KeywordTok{NOT} \KeywordTok{EXISTS}\NormalTok{ pg\_trgm;}
+\KeywordTok{CREATE} \KeywordTok{INDEX}\NormalTok{ idx\_notes\_content\_trgm }\KeywordTok{ON}\NormalTok{ notes }\KeywordTok{USING}\NormalTok{ GIN (content gin\_trgm\_ops);}
+
+\CommentTok{{-}{-} Full{-}text search index: serves only queries written with to\_tsvector(...)}
+\CommentTok{{-}{-} @@ to\_tsquery(...), i.e. word search rather than substring search}
+\KeywordTok{CREATE} \KeywordTok{INDEX}\NormalTok{ idx\_notes\_content\_fts }\KeywordTok{ON}\NormalTok{ notes }\KeywordTok{USING}\NormalTok{ GIN (to\_tsvector(}\StringTok{\textquotesingle{}english\textquotesingle{}}\NormalTok{, content));}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{2}
+\section{Vertical Scaling}\label{36-scaling-load:363-vertical-scaling}
+
+\textbf{Vertical scaling} (scaling up) means moving to a larger server with more CPU, RAM, or faster storage.
+
+As a rough order of magnitude~--- measure your own~--- the Notes API on a 1 vCPU, 1 GB RAM server (DigitalOcean Droplet: \$6/month) can handle:
+
+\begin{itemize}
+\tightlist
+\item
+  25--75 concurrent users
+\item
+  50--150 requests per second for simple GET requests, fewer while every request opens its own TLS connection to the database (section 36.5 removes that cost)
+\item
+  20--60 requests per second for POST requests with database writes
+\end{itemize}
+
+\noindent{}Upgrading to a 2 vCPU, 4 GB RAM server (\$24/month):
+
+\begin{itemize}
+\tightlist
+\item
+  \textasciitilde2x concurrent users (more Gunicorn workers due to more CPUs)
+\item
+  \textasciitilde2x requests per second
+\item
+  Slower per-request latency improvement (the bottleneck shifts to the database, not the application)
+\end{itemize}
+
+\noindent{}\textbf{Gunicorn worker count}: Gunicorn's documentation suggests \texttt{2\ ×\ cores\ +\ 1} as a starting point~--- a number that already assumes workers spend much of their time waiting for I/O. (For truly CPU-bound work, about one worker per core is enough.) The upper limit is not CPUs but memory and database connections: each worker is a full Python process (\textasciitilde50 MB), and each may hold a database connection. The \texttt{gunicorn.conf.py} from \hyperref[ch:24-process-startup]{Chapter 24} reads the count from \texttt{GUNICORN\_WORKERS}, so a bigger server gets more workers without rebuilding the image:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On a 2 vCPU, 4 GB server: add to the docker run in deploy.sh}
+\ExtensionTok{{-}e}\NormalTok{ GUNICORN\_WORKERS=5}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Vertical scaling is simple~--- no architecture change required. Its limit is the largest server available (or affordable).
+
+\setcounter{section}{3}
+\section{Horizontal Scaling}\label{36-scaling-load:364-horizontal-scaling}
+
+\textbf{Horizontal scaling} (scaling out) means adding more servers and distributing load across them with a \textbf{load balancer}.
+
+\begin{diagrambox}[short]{312.5pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Internet
+    │
+    ▼
+Load Balancer (single public IP, distributes to multiple servers)
+    │
+    ├── Server 1: Nginx → Docker → Gunicorn → PostgreSQL (shared)
+    ├── Server 2: Nginx → Docker → Gunicorn → PostgreSQL (shared)
+    └── Server 3: Nginx → Docker → Gunicorn → PostgreSQL (shared)
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}All application servers share the same PostgreSQL database (typically a managed service). The database is a shared state; the application servers are stateless replicas.
+
+\subsection*{Prerequisites for horizontal scaling}\phantomsection\label{36-scaling-load:prerequisites-for-horizontal-scaling}
+
+The application must be \textbf{stateless}~--- no local state that persists between requests.
+
+Stateless ✓:
+
+\begin{itemize}
+\tightlist
+\item
+  All state is in the database (PostgreSQL)
+\item
+  No local file storage
+\item
+  No in-memory session state
+\item
+  No local caches that must be consistent across servers
+\end{itemize}
+
+\noindent{}Stateful ✗ (requires changes before horizontal scaling):
+
+\begin{itemize}
+\tightlist
+\item
+  Flask sessions stored in server memory (instead of database or encrypted cookie)
+\item
+  File uploads written to local disk (instead of object storage like S3)
+\item
+  Rate limiting counted in server memory (instead of Redis)~--- including Nginx's own \texttt{limit\_req}: with three servers, each enforces its limit separately, so a client effectively gets three times the limit
+\end{itemize}
+
+\noindent{}The Notes API is naturally stateless~--- all application state is in the database. It can be horizontally scaled without code changes. (Operational data~--- logs, metrics, rate-limit counters~--- stays per server, and needs aggregating: \hyperref[ch:35-observability]{Chapter 35}.)
+
+\subsection*{Load balancing strategies}\phantomsection\label{36-scaling-load:load-balancing-strategies}
+
+\textbf{Round-robin}: requests distributed sequentially across servers. Simple, works when all requests have similar duration.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Request 1 → Server 1
+Request 2 → Server 2
+Request 3 → Server 3
+Request 4 → Server 1
+...
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\textbf{Least connections}: new requests go to the server with the fewest active connections. Better when request durations vary.
+
+\textbf{IP hash}: requests from the same client IP always go to the same server. Useful if you have server-local caches (but avoid this if possible~--- prefer statelessness).
+
+\textbf{Weighted round-robin}: different servers handle different fractions of traffic. Useful if servers have different capacities.
+
+\subsection*{Load balancing with DigitalOcean}\phantomsection\label{36-scaling-load:load-balancing-with-digitalocean}
+
+DigitalOcean's Load Balancer service sits in front of your Droplets:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Create a DigitalOcean Load Balancer (priced per node~--- about \$12/month per node at the time of writing)
+\item
+  Add your Droplets as targets
+\item
+  Configure health check: \texttt{GET\ /health} must return 200
+\item
+  The Load Balancer's IP becomes the public IP for the domain
+\item
+  Update the DNS A record to point to the Load Balancer's IP
+\end{enumerate}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+api.notes.example.com → Load Balancer IP
+Load Balancer → healthy Droplets only (if a Droplet's /health fails, it's removed from rotation)
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{Nginx as a load balancer}\phantomsection\label{36-scaling-load:nginx-as-a-load-balancer}
+
+For smaller setups, Nginx can act as a load balancer:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{upstream notes\_api \{}
+\NormalTok{    \# Least connections — better for variable{-}duration requests}
+\NormalTok{    least\_conn;}
+
+\NormalTok{    \# Passive health checks (built into open{-}source Nginx): after 3 failed}
+\NormalTok{    \# requests within 30 seconds, stop using a server for 30 seconds.}
+\NormalTok{    \# (Active checks that probe /health on a schedule need NGINX Plus.)}
+\NormalTok{    server 10.0.0.1:5000 max\_fails=3 fail\_timeout=30s;  \# Server 1}
+\NormalTok{    server 10.0.0.2:5000 max\_fails=3 fail\_timeout=30s;  \# Server 2}
+\NormalTok{    server 10.0.0.3:5000 max\_fails=3 fail\_timeout=30s;  \# Server 3}
+\NormalTok{\}}
+
+\NormalTok{server \{}
+\NormalTok{    listen 443 ssl;}
+\NormalTok{    \# ssl\_certificate and the other TLS settings as in Chapter 28}
+\NormalTok{    location / \{}
+\NormalTok{        proxy\_pass http://notes\_api;}
+\NormalTok{    \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Note what this changes on the application servers. Until now, each container was published on \texttt{127.0.0.1} only, because Nginx ran on the same machine. Here Nginx reaches the containers over the VPC, so each server publishes on its \emph{private} address instead~--- \texttt{-p\ 10.0.0.1:5000:5000}~--- and a cloud firewall rule allows port 5000 only from the load balancer's private address.
+
+\setcounter{section}{4}
+\section{Connection Pooling}\label{36-scaling-load:365-connection-pooling}
+
+Each Gunicorn worker opens a database connection when a request needs one and closes it when the request ends. At 100 requests per second, that is about 100 connection setups (and 100 teardowns) per second, however many workers share the load.
+
+Opening a PostgreSQL connection costs a TCP handshake, a TLS handshake (managed databases require TLS), and authentication~--- typically 10--30 ms over a VPC. At high request rates, this overhead dominates the cost of the queries themselves.
+
+\textbf{Connection pooling} pre-opens connections and keeps them open, checking them out for a request and returning them afterward.
+
+\subsection*{PgBouncer: external connection pooler}\phantomsection\label{36-scaling-load:pgbouncer-external-connection-pooler}
+
+\textbf{PgBouncer} is a lightweight connection pool that sits between the application and PostgreSQL:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Gunicorn workers → PgBouncer → PostgreSQL
+ (on 5 app servers)  (manages)   (20 connections)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Picture the horizontally scaled setup: 5 servers × 5 workers = 25 processes, each wanting its own connection~--- more than the smallest managed PostgreSQL plans allow (around 25 connections). With PgBouncer, they share a pool of 20.
+
+PostgreSQL's maximum connections (the \texttt{max\_connections} setting) is a resource limit. PgBouncer allows many more application-side connections than the database can handle natively.
+
+With a \textbf{managed} database~--- this book's setup~--- you do not install anything: DigitalOcean's managed PostgreSQL has PgBouncer built in, as \textbf{connection pools} you create in the control panel. Each pool gets its own connection string (a different port, and the pool's name as the database name); point \texttt{DATABASE\_URL} at it.
+
+On a database server you run yourself, PgBouncer runs next to PostgreSQL:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{; /etc/pgbouncer/pgbouncer.ini  (apt{-}get install pgbouncer)}
+\KeywordTok{[databases]}
+\DataTypeTok{notesdb }\OtherTok{=}\StringTok{ host=127.0.0.1 port=5432 dbname=notesdb}
+
+\KeywordTok{[pgbouncer]}
+\DataTypeTok{listen\_addr }\OtherTok{=}\StringTok{ 10.0.0.10          ; the database server\textquotesingle{}s private address}
+\DataTypeTok{listen\_port }\OtherTok{=}\StringTok{ 6432               ; PgBouncer\textquotesingle{}s usual port — PostgreSQL has 5432}
+\DataTypeTok{auth\_type }\OtherTok{=}\StringTok{ scram{-}sha{-}256}
+\DataTypeTok{auth\_file }\OtherTok{=}\StringTok{ /etc/pgbouncer/userlist.txt   ; users and password hashes}
+\DataTypeTok{pool\_mode }\OtherTok{=}\StringTok{ transaction          ; a server connection per transaction}
+\DataTypeTok{max\_client\_conn }\OtherTok{=}\StringTok{ }\DecValTok{1000}
+\DataTypeTok{default\_pool\_size }\OtherTok{=}\StringTok{ }\DecValTok{20}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The application's connection string changes only in host and port:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+postgresql://user:pass@db-host:5432/notesdb        → directly to PostgreSQL
+postgresql://user:pass@db-host:6432/notesdb        → through PgBouncer
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Transaction pooling has one catch: consecutive transactions from the same client may run on \emph{different} server connections, so anything tied to a session~--- \texttt{SET} commands, session-level advisory locks, server-side prepared statements~--- does not carry over. The Notes API uses none of these.
+
+\subsection*{psycopg2's built-in pool}\phantomsection\label{36-scaling-load:psycopg2s-built-in-pool}
+
+For simpler setups, \texttt{psycopg2} has a built-in connection pool. Two details make or break it. The pool must be created \emph{in each worker process}~--- a connection opened before Gunicorn forks (with \texttt{-\/-preload}, for example) would be shared by several processes at once, corrupting its protocol stream. And its connections must use the same \texttt{RealDictCursor} as before, or every \texttt{row{[}"id"{]}} in the handlers breaks:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/database.py — the PostgreSQL branch, with a pool}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ psycopg2.extras}
+\ImportTok{import}\NormalTok{ psycopg2.pool}
+
+\NormalTok{\_pool }\OperatorTok{=} \VariableTok{None}
+\NormalTok{\_pool\_pid }\OperatorTok{=} \VariableTok{None}
+
+\KeywordTok{def}\NormalTok{ \_get\_pool():}
+    \CommentTok{"""One pool per process, created on first use — never before the fork."""}
+    \KeywordTok{global}\NormalTok{ \_pool, \_pool\_pid}
+    \ControlFlowTok{if}\NormalTok{ \_pool }\KeywordTok{is} \VariableTok{None} \KeywordTok{or}\NormalTok{ \_pool\_pid }\OperatorTok{!=}\NormalTok{ os.getpid():}
+\NormalTok{        \_pool }\OperatorTok{=}\NormalTok{ psycopg2.pool.SimpleConnectionPool(}
+\NormalTok{            minconn}\OperatorTok{=}\DecValTok{1}\NormalTok{,}
+\NormalTok{            maxconn}\OperatorTok{=}\DecValTok{4}\NormalTok{,   }\CommentTok{\# workers × maxconn must stay below the database\textquotesingle{}s limit}
+\NormalTok{            dsn}\OperatorTok{=}\NormalTok{DATABASE\_URL,}
+\NormalTok{            cursor\_factory}\OperatorTok{=}\NormalTok{psycopg2.extras.RealDictCursor,}
+\NormalTok{        )}
+\NormalTok{        \_pool\_pid }\OperatorTok{=}\NormalTok{ os.getpid()}
+    \ControlFlowTok{return}\NormalTok{ \_pool}
+
+\KeywordTok{def}\NormalTok{ get\_db():}
+    \ControlFlowTok{if} \StringTok{"db"} \KeywordTok{not} \KeywordTok{in}\NormalTok{ g:}
+\NormalTok{        g.db }\OperatorTok{=}\NormalTok{ \_get\_pool().getconn()}
+    \ControlFlowTok{return}\NormalTok{ g.db}
+
+\KeywordTok{def}\NormalTok{ close\_db(error}\OperatorTok{=}\VariableTok{None}\NormalTok{):}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ g.pop(}\StringTok{"db"}\NormalTok{, }\VariableTok{None}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ db }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+\NormalTok{        db.rollback()             }\CommentTok{\# handlers already committed; discard the rest}
+\NormalTok{        \_get\_pool().putconn(db)   }\CommentTok{\# return to the pool instead of closing}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{SimpleConnectionPool} is enough here: a sync worker handles one request at a time. (\texttt{ThreadedConnectionPool} is for workers that run several threads.) Size it deliberately: 5 workers × 4 connections = 20, which must fit under the database's connection limit together with everything else that connects to it. And know one new failure mode a pool brings: a connection that sat idle in the pool may have died~--- the database restarted, a network device dropped it~--- and the next request to borrow it fails. \hyperref[ch:37-reliability]{Chapter 37} returns to this.
+
+\setcounter{section}{5}
+\section{Caching}\label{36-scaling-load:366-caching}
+
+\textbf{Caching} stores computed results and returns the cached version for subsequent identical requests, avoiding redundant computation or database queries.
+
+\subsection*{What to cache}\phantomsection\label{36-scaling-load:what-to-cache}
+
+Good candidates for caching:
+
+\begin{itemize}
+\tightlist
+\item
+  Expensive database queries whose results change infrequently
+\item
+  API responses for resources that are read much more often than written
+\item
+  Computed values (markdown rendering, image resizing)
+\end{itemize}
+
+\noindent{}Poor candidates:
+
+\begin{itemize}
+\tightlist
+\item
+  Write operations (POST, PUT, DELETE)
+\item
+  User-specific data (unless the cache is per-user)
+\item
+  Data that must always be fresh (account balances, real-time status)
+\end{itemize}
+
+\noindent{}For the Notes API: list\_notes and get\_note are read-heavy. If most clients are reading the same notes repeatedly, caching could reduce database load significantly.
+
+\subsection*{Response caching with HTTP headers}\phantomsection\label{36-scaling-load:response-caching-with-http-headers}
+
+The simplest caching is client-side caching via HTTP headers:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ jsonify(row\_to\_note(row))}
+
+    \CommentTok{\# Let the client itself (never a shared cache) reuse this for 60 seconds}
+\NormalTok{    response.headers[}\StringTok{"Cache{-}Control"}\NormalTok{] }\OperatorTok{=} \StringTok{"private, max{-}age=60"}
+
+    \CommentTok{\# ETag: a fingerprint of the body (Werkzeug hashes it for us)}
+\NormalTok{    response.add\_etag()}
+
+    \CommentTok{\# If the request\textquotesingle{}s If{-}None{-}Match matches the ETag, this turns the}
+    \CommentTok{\# response into a bodiless 304 Not Modified — keeping the ETag and}
+    \CommentTok{\# Cache{-}Control headers, as a 304 should}
+    \ControlFlowTok{return}\NormalTok{ response.make\_conditional(request)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With \texttt{max-age=60}, the client reuses the response for 60 seconds without asking the server at all. After that, it asks with \texttt{If-None-Match}, and an unchanged note costs a small 304 instead of the full body. Note what this saves: \emph{bandwidth} and client time. The server still ran the query to compute the ETag; reducing database load is the job of a server-side cache, next.
+
+\subsection*{Server-side caching with Redis}\phantomsection\label{36-scaling-load:server-side-caching-with-redis}
+
+For shared caching across multiple application servers, use \textbf{Redis} (a fast in-memory key-value store):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install redis   }\CommentTok{\# and pin it in requirements.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Redis is a new service to run, secure, and monitor~--- on the server as a container (published on \texttt{127.0.0.1} only), or as a managed service. None of the deployment chapters provisioned it; it arrives only when measurements show the database needs relief.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/cache.py}
+\ImportTok{import}\NormalTok{ json}
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{from}\NormalTok{ typing }\ImportTok{import}\NormalTok{ Optional}
+
+\ImportTok{import}\NormalTok{ redis}
+
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ REDIS\_URL   }\CommentTok{\# a new setting in config.py, like all others}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\CommentTok{\# Create the Redis client lazily (one client per process)}
+\NormalTok{\_redis: Optional[redis.Redis] }\OperatorTok{=} \VariableTok{None}
+
+\KeywordTok{def}\NormalTok{ get\_cache() }\OperatorTok{{-}\textgreater{}}\NormalTok{ redis.Redis:}
+    \KeywordTok{global}\NormalTok{ \_redis}
+    \ControlFlowTok{if}\NormalTok{ \_redis }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{        \_redis }\OperatorTok{=}\NormalTok{ redis.from\_url(REDIS\_URL, socket\_timeout}\OperatorTok{=}\FloatTok{0.5}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ \_redis}
+
+\CommentTok{\# A cache must "fail open": if Redis is down, the API gets slower (every}
+\CommentTok{\# read goes to the database), but it must not start answering 500.}
+\CommentTok{\# So every operation below swallows Redis errors — narrowly, and logged.}
+
+\KeywordTok{def}\NormalTok{ cache\_get(key: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}}\NormalTok{ Optional[}\BuiltInTok{dict}\NormalTok{]:}
+    \CommentTok{"""Retrieve a cached value. Returns None if not found, expired, or unavailable."""}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ get\_cache().get(key)}
+    \ControlFlowTok{except}\NormalTok{ redis.RedisError:}
+\NormalTok{        logger.warning(}\StringTok{"Cache unavailable (get }\SpecialCharTok{\%s}\StringTok{)"}\NormalTok{, key)}
+        \ControlFlowTok{return} \VariableTok{None}
+    \ControlFlowTok{return} \VariableTok{None} \ControlFlowTok{if}\NormalTok{ data }\KeywordTok{is} \VariableTok{None} \ControlFlowTok{else}\NormalTok{ json.loads(data)}
+
+\KeywordTok{def}\NormalTok{ cache\_set(key: }\BuiltInTok{str}\NormalTok{, value: }\BuiltInTok{dict}\NormalTok{, ttl\_seconds: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{60}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""Store a value in the cache with an expiration time."""}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        get\_cache().setex(key, ttl\_seconds, json.dumps(value))}
+    \ControlFlowTok{except}\NormalTok{ redis.RedisError:}
+\NormalTok{        logger.warning(}\StringTok{"Cache unavailable (set }\SpecialCharTok{\%s}\StringTok{)"}\NormalTok{, key)}
+
+\KeywordTok{def}\NormalTok{ cache\_delete(key: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""Remove a value from the cache."""}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        get\_cache().delete(key)}
+    \ControlFlowTok{except}\NormalTok{ redis.RedisError:}
+\NormalTok{        logger.warning(}\StringTok{"Cache unavailable (delete }\SpecialCharTok{\%s}\StringTok{)"}\NormalTok{, key)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Using the cache in the handler:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+\NormalTok{    cache\_key }\OperatorTok{=} \SpecialStringTok{f"note:}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}
+
+    \CommentTok{\# Try the cache first}
+\NormalTok{    cached }\OperatorTok{=}\NormalTok{ cache\_get(cache\_key)}
+    \ControlFlowTok{if}\NormalTok{ cached }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(cached), }\DecValTok{200}  \CommentTok{\# Cache hit — no database query!}
+
+    \CommentTok{\# Cache miss — query the database}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+
+\NormalTok{    note }\OperatorTok{=}\NormalTok{ row\_to\_note(row)   }\CommentTok{\# plain strings and numbers: JSON{-}serializable}
+
+    \CommentTok{\# Store in cache for 60 seconds}
+\NormalTok{    cache\_set(cache\_key, note, ttl\_seconds}\OperatorTok{=}\DecValTok{60}\NormalTok{)}
+
+    \ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{200}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"PUT"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ update\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{\# ... update logic, ending with db.commit() (Chapter 33) ...}
+
+    \CommentTok{\# Invalidate the cache after update}
+\NormalTok{    cache\_delete(}\SpecialStringTok{f"note:}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+    \ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{200}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ delete\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{\# ... delete logic, ending with db.commit() ...}
+
+    \CommentTok{\# Invalidate the cache after delete}
+\NormalTok{    cache\_delete(}\SpecialStringTok{f"note:}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+    \ControlFlowTok{return} \StringTok{""}\NormalTok{, }\DecValTok{204}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Cache invalidation}~--- removing stale entries when data changes~--- is the hard part of caching. The rule: whenever data changes (PUT, DELETE), immediately invalidate the corresponding cache entries. Even that leaves a small race: a \texttt{GET} that read the old row just before the update committed can write it into the cache just \emph{after} the update deleted the key, and the stale copy then lives until its TTL expires. The 60-second TTL is what bounds such mistakes~--- which is why every cache entry should have one.
+
+The famous quip by Phil Karlton: ``There are only two hard things in Computer Science: cache invalidation and naming things.''
+
+\setcounter{section}{6}
+\section{Rate Limiting}\label{36-scaling-load:367-rate-limiting}
+
+\textbf{Rate limiting} prevents any single client from sending too many requests, protecting the server from intentional or accidental abuse.
+
+\hyperref[ch:28-traffic-routing]{Chapter 28} configured Nginx-level rate limiting:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{limit\_req\_zone $binary\_remote\_addr zone=api:10m rate=10r/s;   \# conf.d/ratelimit.conf}
+\NormalTok{limit\_req zone=api burst=20 nodelay;                          \# in location /}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This limits each IP address to 10 requests per second, with a burst of 20.
+
+\subsection*{Application-level rate limiting with Redis}\phantomsection\label{36-scaling-load:application-level-rate-limiting-with-redis}
+
+For more sophisticated rate limiting (per API key, per user, with different limits for different endpoints):
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/rate\_limit.py}
+\ImportTok{import}\NormalTok{ time}
+\ImportTok{import}\NormalTok{ uuid}
+\ImportTok{from}\NormalTok{ functools }\ImportTok{import}\NormalTok{ wraps}
+
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ jsonify, request}
+
+\ImportTok{from}\NormalTok{ app.cache }\ImportTok{import}\NormalTok{ get\_cache}
+
+\KeywordTok{def}\NormalTok{ check\_rate\_limit(key: }\BuiltInTok{str}\NormalTok{, max\_requests: }\BuiltInTok{int}\NormalTok{, window\_seconds: }\BuiltInTok{int}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{bool}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Check if the rate limit has been exceeded.}
+
+\CommentTok{    Uses a sliding window algorithm with Redis: a sorted set holds one}
+\CommentTok{    member per request, scored by its time. Returns True if the request}
+\CommentTok{    is allowed, False if rate limited.}
+\CommentTok{    """}
+\NormalTok{    r }\OperatorTok{=}\NormalTok{ get\_cache()}
+\NormalTok{    now }\OperatorTok{=}\NormalTok{ time.time()}
+\NormalTok{    window\_start }\OperatorTok{=}\NormalTok{ now }\OperatorTok{{-}}\NormalTok{ window\_seconds}
+
+\NormalTok{    pipe }\OperatorTok{=}\NormalTok{ r.pipeline()}
+\NormalTok{    pipe.zremrangebyscore(key, }\DecValTok{0}\NormalTok{, window\_start)           }\CommentTok{\# Remove old requests}
+    \CommentTok{\# A unique member per request: two requests in the same instant (from}
+    \CommentTok{\# different workers, say) must count twice, not once}
+\NormalTok{    pipe.zadd(key, \{}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{now}\SpecialCharTok{\}}\SpecialStringTok{{-}}\SpecialCharTok{\{}\NormalTok{uuid}\SpecialCharTok{.}\NormalTok{uuid4()}\SpecialCharTok{.}\BuiltInTok{hex}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{: now\})     }\CommentTok{\# Record this request}
+\NormalTok{    pipe.zcard(key)                                         }\CommentTok{\# Count requests in window}
+\NormalTok{    pipe.expire(key, window\_seconds }\OperatorTok{+} \DecValTok{1}\NormalTok{)                   }\CommentTok{\# Auto{-}expire the key}
+\NormalTok{    \_, \_, count, \_ }\OperatorTok{=}\NormalTok{ pipe.execute()}
+
+    \CommentTok{\# Rejected requests are recorded too, so a client that keeps hammering}
+    \CommentTok{\# stays limited until it slows down}
+    \ControlFlowTok{return}\NormalTok{ count }\OperatorTok{\textless{}=}\NormalTok{ max\_requests}
+
+\KeywordTok{def}\NormalTok{ rate\_limit(max\_requests: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{60}\NormalTok{, window\_seconds: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{60}\NormalTok{):}
+    \CommentTok{"""}
+\CommentTok{    Decorator to apply a per{-}client{-}IP rate limit to a view function.}
+
+\CommentTok{    Usage:}
+\CommentTok{        @notes\_bp.route("/", methods=["POST"])}
+\CommentTok{        @rate\_limit(max\_requests=10, window\_seconds=60)  \# 10 per minute}
+\CommentTok{        def create\_note():}
+\CommentTok{            ...}
+
+\CommentTok{    request.remote\_addr is the real client IP only with ProxyFix configured}
+\CommentTok{    (Chapter 28). Without it, every client appears as the proxy\textquotesingle{}s address}
+\CommentTok{    and the whole world shares one bucket.}
+\CommentTok{    """}
+    \KeywordTok{def}\NormalTok{ decorator(f):}
+        \AttributeTok{@wraps}\NormalTok{(f)}
+        \KeywordTok{def}\NormalTok{ decorated\_function(}\OperatorTok{*}\NormalTok{args, }\OperatorTok{**}\NormalTok{kwargs):}
+\NormalTok{            key }\OperatorTok{=} \SpecialStringTok{f"rate:}\SpecialCharTok{\{}\NormalTok{request}\SpecialCharTok{.}\NormalTok{remote\_addr}\SpecialCharTok{\}}\SpecialStringTok{:}\SpecialCharTok{\{}\NormalTok{f}\SpecialCharTok{.}\VariableTok{\_\_name\_\_}\SpecialCharTok{\}}\SpecialStringTok{"}
+            \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ check\_rate\_limit(key, max\_requests, window\_seconds):}
+                \ControlFlowTok{return}\NormalTok{ (}
+\NormalTok{                    jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Rate limit exceeded"}\NormalTok{\}),}
+                    \DecValTok{429}\NormalTok{,}
+\NormalTok{                    \{}\StringTok{"Retry{-}After"}\NormalTok{: }\BuiltInTok{str}\NormalTok{(window\_seconds)\},}
+\NormalTok{                )}
+            \ControlFlowTok{return}\NormalTok{ f(}\OperatorTok{*}\NormalTok{args, }\OperatorTok{**}\NormalTok{kwargs)}
+
+        \ControlFlowTok{return}\NormalTok{ decorated\_function}
+    \ControlFlowTok{return}\NormalTok{ decorator}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Usage:}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\AttributeTok{@rate\_limit}\NormalTok{(max\_requests}\OperatorTok{=}\DecValTok{10}\NormalTok{, window\_seconds}\OperatorTok{=}\DecValTok{60}\NormalTok{)  }\CommentTok{\# Max 10 POSTs per minute per IP}
+\KeywordTok{def}\NormalTok{ create\_note():}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(A limit per \emph{user} or per API key follows the same pattern, with the user's ID in the key~--- once the API has users.)
+
+\setcounter{section}{7}
+\section{Gunicorn Worker Types for Higher Concurrency}\label{36-scaling-load:368-gunicorn-worker-types-for-higher-concurrency}
+
+\hyperref[ch:24-process-startup]{Chapter 24} used Gunicorn's default \textbf{sync} workers (one request per worker at a time). For high-concurrency I/O-bound applications, \textbf{async workers} can handle more concurrent requests with the same number of workers.
+
+\subsection*{Sync workers (default)}\phantomsection\label{36-scaling-load:sync-workers-default}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Worker 1: handles Request A → waits for database (idle) → receives result → sends response
+Worker 2: handles Request B → waits for database (idle) → ...
+Worker 3: handles Request C → waits for database (idle) → ...
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}While waiting for the database, the worker is idle~--- it can't handle other requests. More workers = more concurrency, but also more memory.
+
+\subsection*{Gevent workers (async)}\phantomsection\label{36-scaling-load:gevent-workers-async}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Worker 1: starts Request A → starts Request B → starts Request C
+          (while A waits for DB, B and C start)
+          → A receives DB result → sends response
+          → B receives DB result → sends response
+          → C receives DB result → sends response
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}A single gevent worker can handle hundreds of concurrent I/O-waiting requests.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install }\StringTok{"gunicorn[gevent]"}\NormalTok{ psycogreen   }\CommentTok{\# quoted: zsh treats [ ] as a pattern}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# gunicorn.conf.py}
+\NormalTok{worker\_class }\OperatorTok{=} \StringTok{"gevent"}
+\NormalTok{workers }\OperatorTok{=} \DecValTok{2}          \CommentTok{\# Fewer workers needed (each can handle many concurrent requests)}
+\NormalTok{worker\_connections }\OperatorTok{=} \DecValTok{100}   \CommentTok{\# Max concurrent requests per worker}
+
+\KeywordTok{def}\NormalTok{ post\_fork(server, worker):}
+    \CommentTok{\# psycopg2 is a C extension: gevent\textquotesingle{}s monkey{-}patching cannot make its}
+    \CommentTok{\# socket I/O cooperative. psycogreen installs a "wait callback" that}
+    \CommentTok{\# does — without it, every database call blocks the whole worker.}
+    \ImportTok{from}\NormalTok{ psycogreen.gevent }\ImportTok{import}\NormalTok{ patch\_psycopg}
+\NormalTok{    patch\_psycopg()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{warnbox}
+
+\textbf{Warning}: gevent uses \textbf{cooperative multitasking}~--- code must explicitly yield control (via I/O operations) for other greenlets to run. Code that blocks without yielding (CPU-intensive code, C libraries that gevent cannot patch~--- psycopg2 without psycogreen is the classic example) blocks all concurrent requests in that worker. And each concurrent request that opens a database connection holds one: 2 workers × 100 connections would overwhelm a small database, so gevent workers need a connection pool (or PgBouncer) in front of it.
+
+\end{warnbox}
+
+\noindent{}For the Notes API, a simpler step comes first: \textbf{thread workers}, \texttt{worker\_}\allowbreak{}\texttt{class\ =}\allowbreak{}\texttt{\ "gthread"} with \texttt{threads\ =\ 4}. psycopg2 releases Python's GIL while it waits for the database, so threads overlap that waiting without any patching. Reach for gevent when you need hundreds of concurrent requests per worker. For CPU-intensive applications, use process-based concurrency (more sync workers).
+
+\subsection*{\texorpdfstring{\texttt{async} and \texttt{await}: the other road to concurrency}{async and await: the other road to concurrency}}\phantomsection\label{36-scaling-load:async-and-await-the-other-road-to-concurrency}
+
+gevent makes ordinary code concurrent \emph{behind its back}, by patching the libraries it calls. Python's own \textbf{asyncio} does it \emph{in the open}. Functions declared \texttt{async\ def} are \textbf{coroutines}, and \texttt{await} marks each point where one may pause, typically while it waits for the network, so that an \textbf{event loop} can run another coroutine in the meantime:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ asyncio}
+\ImportTok{import}\NormalTok{ time}
+
+
+\ControlFlowTok{async} \KeywordTok{def}\NormalTok{ fetch(name: }\BuiltInTok{str}\NormalTok{, seconds: }\BuiltInTok{float}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \ControlFlowTok{await}\NormalTok{ asyncio.sleep(seconds)  }\CommentTok{\# stands in for a network call}
+    \ControlFlowTok{return}\NormalTok{ name}
+
+
+\ControlFlowTok{async} \KeywordTok{def}\NormalTok{ main() }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+\NormalTok{    started }\OperatorTok{=}\NormalTok{ time.perf\_counter()}
+\NormalTok{    results }\OperatorTok{=} \ControlFlowTok{await}\NormalTok{ asyncio.gather(}
+\NormalTok{        fetch(}\StringTok{"profile"}\NormalTok{, }\FloatTok{1.0}\NormalTok{), fetch(}\StringTok{"notes"}\NormalTok{, }\FloatTok{1.0}\NormalTok{), fetch(}\StringTok{"settings"}\NormalTok{, }\FloatTok{1.0}\NormalTok{)}
+\NormalTok{    )}
+    \BuiltInTok{print}\NormalTok{(results, }\SpecialStringTok{f"in }\SpecialCharTok{\{}\NormalTok{time}\SpecialCharTok{.}\NormalTok{perf\_counter() }\OperatorTok{{-}}\NormalTok{ started}\SpecialCharTok{:.2f\}}\SpecialStringTok{ s"}\NormalTok{)}
+
+
+\NormalTok{asyncio.run(main())}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+['profile', 'notes', 'settings'] in 1.00 s
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Three one-second waits finished in one second, because all three waited \emph{at the same time}, on one thread. Now replace \texttt{await\ asyncio.}\allowbreak{}\texttt{sleep(seconds)} with an ordinary blocking call, \texttt{time.sleep(1.0)}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+['profile', 'notes', 'settings'] in 3.03 s
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}It takes three seconds. The blocking call never gave the event loop a chance to switch, so the ``concurrent'' code ran one piece after another. That is the rule that shapes everything about async Python: \textbf{concurrency works only if every slow operation in the chain is itself async.} One blocking call, such as a psycopg2 query, a \texttt{requests.post()} or a slow computation, stalls \emph{every} request that the loop is serving.
+
+That is why async is a whole-stack decision, not a keyword you add:
+
+\Needspace{11\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1942}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3010}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5049}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Layer
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Synchronous (the Notes API)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Asynchronous
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Web framework & Flask & FastAPI, Quart, Starlette \\
+Server interface & WSGI (Gunicorn) & ASGI (Uvicorn, or Gunicorn with Uvicorn workers) \\
+Database driver & psycopg2 & psycopg 3 (async mode), asyncpg \\
+HTTP client & requests & httpx (async), aiohttp \\
+\end{longtable}
+}
+
+The payoff is large for services that spend almost all their time waiting on many slow network calls at once: a chat server holding thousands of open connections, an API gateway, or a service that calls five other services per request. It is small, or even negative, for a service like the Notes API. There, each request makes one or two fast database queries, and throughput is limited by the database, not by threads waiting. Async also does nothing for CPU-bound work, which still needs processes.
+
+So the Notes API stays synchronous, and it has everything it needs without async. Thread workers overlap database waits. More workers and servers add capacity (section 36.4). And the one genuinely slow call the API will gain, to an email service (\hyperref[ch:37-reliability]{Chapter 37}), will move out of the request entirely, into a background worker (\hyperref[ch:41-event-driven-architecture]{Chapter 41}). When you do meet an async codebase, the vocabulary is the same: an event loop, coroutines that \texttt{await}, and the one sin, a blocking call inside an \texttt{async\ def}.
+
+\setcounter{section}{8}
+\section{Capacity Planning Summary}\label{36-scaling-load:369-capacity-planning-summary}
+
+A practical approach to scaling the Notes API:
+
+\begin{diagrambox}[short]{377.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Traffic level        Approach (rough guide — your measurements decide)
+─────────────────────────────────────────────────────────────────────
+< 20 req/sec        Single server, 2-3 sync workers. No scaling needed.
+                    $6/month DigitalOcean Droplet.
+
+20-100 req/sec      Single server: optimize queries, add database indexes,
+                    connection pooling (the managed database's pools),
+                    tune worker count, gthread workers. Check for N+1
+                    queries. $12-24/month Droplet.
+
+100-500 req/sec     Bigger server or 2-3 servers behind a load balancer.
+                    Redis for caching frequently-read notes.
+                    A larger database plan.
+
+500-5000 req/sec    Horizontal scaling: several application servers + load
+                    balancer. PostgreSQL read replica for read-heavy endpoints.
+                    Redis for rate limiting and caching.
+
+Beyond              Careful profiling, a CDN, more replicas. A single
+                    well-tuned PostgreSQL serves many thousands of simple
+                    queries per second; sharding is a last resort, far
+                    beyond this — and by then this is a real business with
+                    real engineering resources.
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}The vast majority of web applications never reach the need for horizontal scaling. Optimize first (indexes, queries, caching), then scale vertically, then horizontally.
+
+\phantomsection\label{36-scaling-load:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Measure before optimizing.} Load test to find the actual bottleneck; don't guess.
+\item
+  \textbf{The bottleneck} is usually the database (missing indexes, slow queries) or worker count (all workers busy). Fix the bottleneck; scaling other parts won't help.
+\item
+  \textbf{Vertical scaling} (bigger server, more workers) is simple and handles most cases. Try this first.
+\item
+  \textbf{Horizontal scaling} (multiple servers + load balancer) requires a stateless application. The Notes API is stateless (all state in the database) and horizontally scalable without code changes.
+\item
+  \textbf{Connection pooling} (PgBouncer~--- built into managed databases~--- or a per-process psycopg2 pool) reduces the overhead of database connection setup and keeps the number of connections under the database's limit.
+\item
+  \textbf{Caching} reduces database queries for frequently-read, infrequently-changing data. Cache invalidation (removing stale entries on write) is the hard part.
+\item
+  \textbf{Rate limiting} in Nginx (10 req/s per IP, enabled in Chapter 28) protects the server from abuse. Application-level rate limiting with Redis enables per-user, per-endpoint limits, shared across servers.
+\item
+  \textbf{Profile before optimizing code}: \texttt{cProfile} around the code in question (read \texttt{cumtime} and \texttt{ncalls}), py-spy against a running process, flame graphs to see where the time goes.
+\item
+  \textbf{\texttt{async}/\texttt{await}} gives many concurrent I/O waits on one thread, but only if \emph{every} slow call in the chain is async (framework, server, database driver, HTTP client). One blocking call stalls the whole event loop. It suits services that wait on many network calls at once, not a database-bound API like the Notes API.
+\item
+  \textbf{Thread and gevent workers} let one Gunicorn worker handle several I/O-waiting requests at once. Threads work with psycopg2 as it is; gevent needs psycogreen, and both need the database connection count kept in check. Neither helps CPU-bound work.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{36-scaling-load:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Before running it, guess the requests per second your Notes API sustains on its current server. Run the Locust test from section 36.1 and compare.
+\item
+  \textbf{Break and fix.} Drop the index on \texttt{note\_tags(tag\_id)}, fill the table with 100,000 links, and run the query behind \texttt{GET\ /}\allowbreak{}\texttt{tags/}\allowbreak{}\texttt{work/}\allowbreak{}\texttt{notes} under \texttt{EXPLAIN\ ANALYZE} in \texttt{psql}. Recreate the index and run it again.
+\item
+  \textbf{Extend.} Profile \texttt{GET\ /notes/} with \texttt{cProfile} over 100 calls and report the three functions with the highest cumulative time.
+\item
+  \textbf{Explain.} Why must the application be stateless before you can scale it horizontally? Give one example of state that would break.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-36.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{36-scaling-load:whats-next}
+
+Scaling handles the load problem. But what about reliability~--- ensuring the system stays up even when individual components fail? The next chapter covers failure modes and reliability patterns.
+
+\noindent{}→ \hyperref[ch:37-reliability]{Chapter 37}~--- Reliability

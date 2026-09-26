@@ -1,0 +1,538 @@
+\setcounter{chapter}{29}
+\chapter{Kernel to Application Handoff}\label{ch:30-kernel-application-handoff}
+
+\chapterrule
+
+\hyperref[ch:26-network-stack-flow]{Chapter 26} traced how packets travel from the internet to the server's socket receive buffer. \hyperref[ch:29-client-server-journey]{Chapter 29} traced the complete request journey. This chapter zooms in on the specific moment of the \textbf{kernel-to-application handoff}: how the kernel delivers received bytes to the Gunicorn worker process, and what the worker does with those bytes before Flask sees them.
+
+This handoff is mediated by system calls~--- the interface between user-space code (Python, Gunicorn, Werkzeug) and the kernel. Understanding system calls, and the overhead they impose, is foundational for understanding and optimizing web application performance.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What a system call is and why there is a boundary between user space and kernel space
+\item
+  Which system calls mediate the kernel-to-application handoff (\texttt{accept}, \texttt{recv}, \texttt{read})
+\item
+  How the kernel notifies the application that data is available (\texttt{epoll}, \texttt{select})
+\item
+  What buffering occurs between the NIC and the application
+\item
+  How Werkzeug converts raw bytes to the Flask \texttt{request} object
+\item
+  What happens when the accept queue fills up (connection backlog)
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{User Space vs Kernel Space}\label{30-kernel-application-handoff:301-user-space-vs-kernel-space}
+
+Linux divides memory into two regions:
+
+\textbf{Kernel space}: where the operating system kernel runs. Code in kernel space has full access to all hardware (memory, CPU registers, I/O devices). Only trusted kernel code runs here.
+
+\textbf{User space}: where application code runs. Python, Gunicorn, Nginx, and your Flask code run here. User-space code cannot directly access hardware~--- it must ask the kernel.
+
+\begin{diagrambox}[short]{363.2pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+┌──────────────────────────────────┐
+│        USER SPACE                │
+│                                  │
+│  Python process (Gunicorn)       │
+│  C program (Nginx)               │
+│  Any application                 │
+│                                  │
+│  Cannot: access hardware         │
+│  Cannot: modify memory mappings  │
+│  Cannot: manage processes        │
+├──────────────────────────────────┤  ← Boundary enforced by CPU ring levels
+│        KERNEL SPACE              │
+│                                  │
+│  TCP/IP stack                    │
+│  File system                     │
+│  Device drivers                  │
+│  Process scheduler               │
+│                                  │
+│  Can: everything                 │
+└──────────────────────────────────┘
+\end{Verbatim}
+\end{diagrambox}
+
+\subsection*{System calls}\phantomsection\label{30-kernel-application-handoff:system-calls}
+
+A \textbf{system call} is the mechanism for user-space code to request kernel services. Every time Python reads from a file, writes to a socket, creates a process, or grows its memory, it makes a system call. (Most individual allocations do not: Python's allocator hands out memory from larger blocks it has already obtained from the kernel.)
+
+System calls are expensive compared to regular function calls:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  User-space code calls a system call (e.g., \texttt{read(fd,}\allowbreak{}\texttt{\ buf,}\allowbreak{}\texttt{\ count)})
+\item
+  CPU switches to kernel mode (a mode switch~--- roughly 100 ns, more with some CPU-vulnerability mitigations)
+\item
+  Kernel executes the requested operation
+\item
+  CPU switches back to user mode
+\item
+  Return value is in a CPU register
+\end{enumerate}
+
+\noindent{}The mode switch is the overhead~--- not the operation itself. For a web server making thousands of \texttt{read()} and \texttt{write()} calls per second, this adds up.
+
+\setcounter{section}{1}
+\section{The Accept System Call}\label{30-kernel-application-handoff:302-the-accept-system-call}
+
+\hyperref[ch:03-network-capability]{Chapter 3} showed the server socket lifecycle: \texttt{socket()} → \texttt{bind()} → \texttt{listen()} → \texttt{accept()} in a loop.
+
+\texttt{accept()} is the system call that hands a new connection from the kernel to the application.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{// C{-}level system call signature:}
+\DataTypeTok{int}\NormalTok{ accept}\OperatorTok{(}\DataTypeTok{int}\NormalTok{ sockfd}\OperatorTok{,} \KeywordTok{struct}\NormalTok{ sockaddr }\OperatorTok{*}\NormalTok{addr}\OperatorTok{,}\NormalTok{ socklen\_t }\OperatorTok{*}\NormalTok{addrlen}\OperatorTok{);}
+
+\CommentTok{// Returns: a new file descriptor for the connected client socket}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}In Python (via the \texttt{socket} module):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{client\_sock, client\_addr }\OperatorTok{=}\NormalTok{ server\_sock.accept()}
+\CommentTok{\# client\_sock: a new socket object; its file descriptor (e.g., 7)}
+\CommentTok{\#              is client\_sock.fileno()}
+\CommentTok{\# client\_addr: a tuple (\textquotesingle{}172.17.0.1\textquotesingle{}, 54832)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{What happens inside accept()}\phantomsection\label{30-kernel-application-handoff:what-happens-inside-accept}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+1. Gunicorn worker calls accept(server_fd, ...)
+
+2. Kernel checks: is there a connection in the accept queue?
+   - YES → take it off the queue, give it a file descriptor, return that fd
+   - NO → block the worker (put it to sleep) until a connection arrives
+
+3. When a new connection arrives (from the TCP three-way handshake):
+   Kernel wakes up the sleeping worker
+   accept() takes the connection's socket off the queue
+   and returns a new file descriptor for it
+
+The worker is now executing with a file descriptor that represents
+an established TCP connection to the client.
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{The accept queue}\phantomsection\label{30-kernel-application-handoff:the-accept-queue}
+
+The \textbf{accept queue} (also called the completed connections queue) holds TCP connections that have completed the three-way handshake but have not yet been returned by \texttt{accept()}. The maximum size of this queue is the \texttt{backlog} parameter passed to \texttt{listen()}.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{server\_sock.listen(}\DecValTok{128}\NormalTok{)   }\CommentTok{\# Accept queue can hold up to 128 connections}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}If the accept queue fills up (because Gunicorn's workers are all busy and not calling \texttt{accept()}), the kernel stops completing new connections. By default Linux silently \textbf{drops} the new handshake packets, and clients retry~--- so an overflowing queue shows up as slow or timed-out connections, not as errors. (Only with \texttt{net.}\allowbreak{}\texttt{ipv4.}\allowbreak{}\texttt{tcp\_}\allowbreak{}\texttt{abort\_}\allowbreak{}\texttt{on\_}\allowbreak{}\texttt{overflow\ =}\allowbreak{}\texttt{\ 1} does the kernel answer with a reset, ``connection refused''.)
+
+This is visible with \texttt{ss}, run inside the container's network namespace (Gunicorn's listening socket lives there; its default backlog is 2048):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On the server: run ss in the container\textquotesingle{}s network namespace}
+\FunctionTok{sudo}\NormalTok{ nsenter }\AttributeTok{{-}t} \VariableTok{$(}\ExtensionTok{docker}\NormalTok{ inspect }\AttributeTok{{-}f} \StringTok{\textquotesingle{}\{\{.State.Pid\}\}\textquotesingle{}}\NormalTok{ notes{-}api}\VariableTok{)} \AttributeTok{{-}n}\NormalTok{ ss }\AttributeTok{{-}tln}
+\CommentTok{\# State   Recv{-}Q  Send{-}Q  Local Address:Port}
+\CommentTok{\# LISTEN  3       2048    0.0.0.0:5000}
+\CommentTok{\#         ↑       ↑}
+\CommentTok{\#         │       └─ the queue\textquotesingle{}s maximum size (the backlog)}
+\CommentTok{\#         └─ connections waiting to be accept()ed right now;}
+\CommentTok{\#            if this reaches Send{-}Q, new connections are being dropped}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{2}
+\section{\texorpdfstring{Reading Data: \texttt{recv()} and \texttt{read()}}{Reading Data: recv() and read()}}\label{30-kernel-application-handoff:303-reading-data-recv-and-read}
+
+After \texttt{accept()} returns the client socket, Gunicorn reads the HTTP request bytes using \texttt{recv()} or \texttt{read()}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Python equivalent of what Gunicorn\textquotesingle{}s HTTP parser does (simplified):}
+\NormalTok{raw\_data }\OperatorTok{=} \StringTok{b""}
+\ControlFlowTok{while} \VariableTok{True}\NormalTok{:}
+\NormalTok{    chunk }\OperatorTok{=}\NormalTok{ client\_sock.recv(}\DecValTok{4096}\NormalTok{)  }\CommentTok{\# Read up to 4096 bytes}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ chunk:}
+        \ControlFlowTok{break}  \CommentTok{\# Connection closed}
+\NormalTok{    raw\_data }\OperatorTok{+=}\NormalTok{ chunk}
+    \ControlFlowTok{if} \StringTok{b"}\CharTok{\textbackslash{}r\textbackslash{}n\textbackslash{}r\textbackslash{}n}\StringTok{"} \KeywordTok{in}\NormalTok{ raw\_data:}
+        \ControlFlowTok{break}  \CommentTok{\# Found end of HTTP headers}
+\CommentTok{\# Then: parse Content{-}Length from the headers, and keep reading until}
+\CommentTok{\# that many bytes of body have arrived.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Blocking vs non-blocking sockets}\phantomsection\label{30-kernel-application-handoff:blocking-vs-non-blocking-sockets}
+
+By default, sockets are \textbf{blocking}: \texttt{recv()} blocks the calling thread/process until data is available. While blocked, the process is sleeping~--- using no CPU.
+
+\textbf{Non-blocking} sockets return immediately with an \texttt{EAGAIN} error if no data is available. The application must then check back later (via \texttt{select}/\texttt{epoll}). Non-blocking I/O allows a single process to manage many connections simultaneously~--- the basis of async frameworks.
+
+Gunicorn with \texttt{sync} workers (the default) uses blocking sockets. Each worker handles one connection at a time. While waiting for data, the worker is blocked and unavailable for other requests. This is why multiple workers are needed for concurrent requests~--- and why Nginx's request buffering (\hyperref[ch:26-network-stack-flow]{Chapter 26}, section 26.6) matters: Nginx waits for a slow client, so a worker never has to.
+
+\subsection*{\texorpdfstring{\texttt{epoll}: efficient I/O notification}{epoll: efficient I/O notification}}\phantomsection\label{30-kernel-application-handoff:epoll-efficient-io-notification}
+
+The kernel provides a mechanism for efficiently monitoring many file descriptors for I/O readiness: \textbf{\texttt{epoll}} (Linux) or \texttt{kqueue} (macOS/BSD).
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Conceptual Python illustration of epoll usage (Linux only)}
+\ImportTok{import}\NormalTok{ select}
+
+\NormalTok{server\_sock.setblocking(}\VariableTok{False}\NormalTok{)   }\CommentTok{\# never let accept() block the loop}
+
+\CommentTok{\# Create an epoll object}
+\NormalTok{ep }\OperatorTok{=}\NormalTok{ select.epoll()}
+
+\CommentTok{\# Register the server socket for incoming connections}
+\NormalTok{ep.register(server\_sock.fileno(), select.EPOLLIN)}
+
+\CommentTok{\# Keep every client socket object alive, keyed by its fd. (If only the fd}
+\CommentTok{\# number were kept, Python would garbage{-}collect the socket object and}
+\CommentTok{\# close the connection behind the loop\textquotesingle{}s back.)}
+\NormalTok{clients }\OperatorTok{=}\NormalTok{ \{\}}
+
+\CommentTok{\# Event loop}
+\ControlFlowTok{while} \VariableTok{True}\NormalTok{:}
+\NormalTok{    events }\OperatorTok{=}\NormalTok{ ep.poll(timeout}\OperatorTok{=}\FloatTok{1.0}\NormalTok{)  }\CommentTok{\# Wait for up to 1 second}
+    \ControlFlowTok{for}\NormalTok{ fd, event }\KeywordTok{in}\NormalTok{ events:}
+        \ControlFlowTok{if}\NormalTok{ fd }\OperatorTok{==}\NormalTok{ server\_sock.fileno():}
+            \CommentTok{\# New connection available}
+\NormalTok{            client\_sock, addr }\OperatorTok{=}\NormalTok{ server\_sock.accept()}
+\NormalTok{            client\_sock.setblocking(}\VariableTok{False}\NormalTok{)}
+\NormalTok{            clients[client\_sock.fileno()] }\OperatorTok{=}\NormalTok{ client\_sock}
+\NormalTok{            ep.register(client\_sock.fileno(), select.EPOLLIN)}
+        \ControlFlowTok{elif}\NormalTok{ event }\OperatorTok{\&}\NormalTok{ select.EPOLLIN:}
+            \CommentTok{\# Data available on a client socket}
+\NormalTok{            data }\OperatorTok{=}\NormalTok{ clients[fd].recv(}\DecValTok{4096}\NormalTok{)}
+            \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ data:                      }\CommentTok{\# client closed the connection}
+\NormalTok{                ep.unregister(fd)}
+\NormalTok{                clients.pop(fd).close()}
+            \CommentTok{\# ... otherwise handle data ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Nginx uses \texttt{epoll} internally to handle thousands of concurrent connections with a small number of worker processes. Gunicorn's \texttt{gevent} or \texttt{eventlet} workers also use \texttt{epoll} for async request handling.
+
+\setcounter{section}{3}
+\section{From Bytes to Request Object}\label{30-kernel-application-handoff:304-from-bytes-to-request-object}
+
+Gunicorn reads raw bytes from the socket. These bytes are a raw HTTP/1.1 message:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+POST /notes/ HTTP/1.1\r\n
+Host: api.notes.example.com\r\n
+Content-Type: application/json\r\n
+Content-Length: 28\r\n
+\r\n
+{"content": "Buy groceries"}
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}In production, \textbf{Gunicorn} parses these bytes~--- its HTTP parser is Python code, and the first Python code that runs for each request. It turns the request into the structure the WSGI standard defines: the \texttt{environ} dictionary. (Werkzeug, Flask's underlying HTTP library, has its own parser too, but it is only used by the development server, \texttt{python\ run.py}.)
+
+\subsection*{The environ dictionary}\phantomsection\label{30-kernel-application-handoff:the-environ-dictionary}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# What Gunicorn builds from the request (simplified):}
+\ImportTok{from}\NormalTok{ io }\ImportTok{import}\NormalTok{ BytesIO}
+
+\NormalTok{environ }\OperatorTok{=}\NormalTok{ \{}
+    \CommentTok{\# Server information (the address the request arrived at, inside}
+    \CommentTok{\# the container)}
+    \StringTok{"SERVER\_NAME"}\NormalTok{: }\StringTok{"0.0.0.0"}\NormalTok{,}
+    \StringTok{"SERVER\_PORT"}\NormalTok{: }\StringTok{"5000"}\NormalTok{,}
+    \StringTok{"SERVER\_PROTOCOL"}\NormalTok{: }\StringTok{"HTTP/1.1"}\NormalTok{,}
+
+    \CommentTok{\# Request information}
+    \StringTok{"REQUEST\_METHOD"}\NormalTok{: }\StringTok{"POST"}\NormalTok{,}
+    \StringTok{"PATH\_INFO"}\NormalTok{: }\StringTok{"/notes/"}\NormalTok{,}
+    \StringTok{"QUERY\_STRING"}\NormalTok{: }\StringTok{""}\NormalTok{,}
+
+    \CommentTok{\# Headers (HTTP\_ prefix, uppercase, hyphens → underscores) — except}
+    \CommentTok{\# Content{-}Type and Content{-}Length, which PEP 3333 gives without the prefix}
+    \StringTok{"HTTP\_HOST"}\NormalTok{: }\StringTok{"api.notes.example.com"}\NormalTok{,}
+    \StringTok{"CONTENT\_TYPE"}\NormalTok{: }\StringTok{"application/json"}\NormalTok{,}
+    \StringTok{"CONTENT\_LENGTH"}\NormalTok{: }\StringTok{"28"}\NormalTok{,}
+
+    \CommentTok{\# Proxy headers}
+    \StringTok{"HTTP\_X\_REAL\_IP"}\NormalTok{: }\StringTok{"89.100.200.50"}\NormalTok{,}
+    \StringTok{"HTTP\_X\_FORWARDED\_FOR"}\NormalTok{: }\StringTok{"89.100.200.50"}\NormalTok{,}
+    \StringTok{"HTTP\_X\_FORWARDED\_PROTO"}\NormalTok{: }\StringTok{"https"}\NormalTok{,}
+
+    \CommentTok{\# Body}
+    \StringTok{"wsgi.input"}\NormalTok{: BytesIO(}\StringTok{b\textquotesingle{}\{"content": "Buy groceries"\}\textquotesingle{}}\NormalTok{),}
+
+    \CommentTok{\# WSGI specifics}
+    \StringTok{"wsgi.url\_scheme"}\NormalTok{: }\StringTok{"http"}\NormalTok{,  }\CommentTok{\# Inside container, Nginx handles HTTPS}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Flask's Request object}\phantomsection\label{30-kernel-application-handoff:flasks-request-object}
+
+Flask (using Werkzeug's classes) wraps the \texttt{environ} dict in a \texttt{Request} object that provides a clean Python interface:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Request}
+
+\NormalTok{request }\OperatorTok{=}\NormalTok{ Request(environ)}
+
+\CommentTok{\# Accessing request data:}
+\NormalTok{request.method         }\CommentTok{\# "POST"}
+\NormalTok{request.path           }\CommentTok{\# "/notes/"}
+\NormalTok{request.headers        }\CommentTok{\# Headers dict{-}like object}
+\NormalTok{request.headers.get(}\StringTok{"Content{-}Type"}\NormalTok{)  }\CommentTok{\# "application/json"}
+\NormalTok{request.get\_json()     }\CommentTok{\# \{"content": "Buy groceries"\} (parsed JSON)}
+\NormalTok{request.remote\_addr    }\CommentTok{\# "89.100.200.50" (after ProxyFix)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{The WSGI call}\phantomsection\label{30-kernel-application-handoff:the-wsgi-call}
+
+Flask's app object is callable. Gunicorn calls it with the environ dict:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# What Gunicorn does (simplified):}
+\KeywordTok{def}\NormalTok{ handle\_request(environ, client\_socket):}
+\NormalTok{    response\_started }\OperatorTok{=} \VariableTok{False}
+\NormalTok{    status\_code }\OperatorTok{=} \VariableTok{None}
+\NormalTok{    headers }\OperatorTok{=} \VariableTok{None}
+
+    \KeywordTok{def}\NormalTok{ start\_response(status, response\_headers, exc\_info}\OperatorTok{=}\VariableTok{None}\NormalTok{):}
+        \KeywordTok{nonlocal}\NormalTok{ response\_started, status\_code, headers}
+\NormalTok{        response\_started }\OperatorTok{=} \VariableTok{True}
+\NormalTok{        status\_code }\OperatorTok{=}\NormalTok{ status}
+\NormalTok{        headers }\OperatorTok{=}\NormalTok{ response\_headers}
+
+    \CommentTok{\# Call the Flask app — this runs all of Flask\textquotesingle{}s request handling}
+\NormalTok{    response\_body\_iterable }\OperatorTok{=}\NormalTok{ flask\_app(environ, start\_response)}
+
+    \CommentTok{\# Send the response back to the client}
+\NormalTok{    write\_http\_response(client\_socket, status\_code, headers, response\_body\_iterable)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Flask's \texttt{\_\_call\_\_} method:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Creates the Request object from \texttt{environ}
+\item
+  Pushes a request context (makes \texttt{request}, \texttt{g} available)
+\item
+  Runs before-request hooks
+\item
+  Routes the request to the correct handler
+\item
+  Runs after-request hooks (which may still change the response)
+\item
+  Calls \texttt{start\_response} with the status and headers
+\item
+  Returns the response body as an iterable
+\item
+  Runs teardown hooks when the request context is popped
+\end{enumerate}
+
+\setcounter{section}{4}
+\section{The Buffer Chain}\label{30-kernel-application-handoff:305-the-buffer-chain}
+
+Data travels through multiple buffers between the NIC and the application:
+
+\begin{diagrambox}[short]{289.5pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+NIC hardware ring buffer
+        │ (DMA transfer)
+        ▼
+Kernel socket receive buffer (sk_buff chain)
+        │ (system call: read/recv)
+        ▼
+User-space buffer (Gunicorn's read buffer, e.g., 4096 bytes)
+        │ (Gunicorn's HTTP parsing)
+        ▼
+Python string/bytes objects (request body)
+        │ (json.loads)
+        ▼
+Python dict {"content": "Buy groceries"}
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}At each stage, there is potential for copying. The kernel tries to minimize copies (using zero-copy techniques in some paths), but Python code always works with its own copies of data.
+
+\subsection*{Buffer sizing}\phantomsection\label{30-kernel-application-handoff:buffer-sizing}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Gunicorn reads in chunks:}
+\NormalTok{CHUNK\_SIZE }\OperatorTok{=} \DecValTok{4096}  \CommentTok{\# bytes per read() call}
+
+\CommentTok{\# If the HTTP request body is larger than 4096 bytes,}
+\CommentTok{\# multiple read() calls are needed.}
+
+\CommentTok{\# For a 100{-}byte JSON body: 1 read() call}
+\CommentTok{\# For a 10KB JSON body: 3 read() calls}
+\CommentTok{\# For a 1MB upload: 256 read() calls}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is one more reason for \texttt{client\_max\_body\_size} in Nginx. The main one is protection~--- an oversized body is rejected before it can consume memory or disk, or reach the application at all~--- but it also bounds the work of reading it.
+
+\setcounter{section}{5}
+\section{System Call Tracing}\label{30-kernel-application-handoff:306-system-call-tracing}
+
+You can observe the actual system calls a running process makes using \texttt{strace}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Find a Gunicorn worker\textquotesingle{}s PID *on the host*. (Inside the container the}
+\CommentTok{\# PIDs are different — and the slim image has no ps command anyway.)}
+\ExtensionTok{docker}\NormalTok{ top notes{-}api}
+\CommentTok{\# UID    PID     PPID    ...  CMD}
+\CommentTok{\# 1001   23101   23080   ...  ... gunicorn ...   ← master}
+\CommentTok{\# 1001   23130   23101   ...  ... gunicorn ...   ← worker}
+
+\CommentTok{\# Trace network system calls on that worker (install with: apt{-}get install strace)}
+\FunctionTok{sudo}\NormalTok{ strace }\AttributeTok{{-}p}\NormalTok{ 23130 }\AttributeTok{{-}e}\NormalTok{ trace=network }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{|} \FunctionTok{head} \AttributeTok{{-}30}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}While making a request to the API, you would see something like this (abbreviated; with two workers, the request may go to the other one):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+accept4(5, {sa_family=AF_INET, sin_port=htons(54832), sin_addr=inet_addr("172.17.0.1")}, [16], SOCK_CLOEXEC) = 7
+recvfrom(7, "POST /notes/ HTTP/1.1\r\nHost: api"..., 8192, 0, NULL, NULL) = 255
+sendto(7, "HTTP/1.1 201 Created\r\nServer: gu"..., 176, 0, NULL, 0) = 176
+sendto(7, "{\"content\":\"Buy groceries\",\"cre"..., 84, 0, NULL, 0) = 84
+close(7)                                 = 0
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Each line is a system call:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{accept4(5,\ ...)} → accepts connection on server socket fd=5, returns client socket fd=7
+\item
+  \texttt{recvfrom(7,\ ...)} → reads the request from the client socket: 227 bytes of headers and the 28-byte body arrived together, 255 bytes in one call
+\item
+  \texttt{sendto(7,\ ...)} → sends the response: first the 176 bytes of status line and headers, then the 84-byte JSON body
+\item
+  \texttt{close(7)} → closes the client connection
+\end{itemize}
+
+\phantomsection\label{30-kernel-application-handoff:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{User space and kernel space} are separate memory regions. System calls are the controlled bridge between them. Every \texttt{read()}, \texttt{write()}, \texttt{accept()} is a system call with a mode-switch overhead (\textasciitilde100ns).
+\item
+  \textbf{\texttt{accept()}} retrieves a connection from the kernel's accept queue and returns a new file descriptor for that connection. If the queue is empty, the calling process blocks.
+\item
+  \textbf{The accept queue} holds fully-connected TCP sessions waiting to be \texttt{accept()}ed. If it fills (workers too busy), Linux silently drops new connection attempts~--- clients see slowness and timeouts.
+\item
+  \textbf{Blocking sockets} (Gunicorn's default) block the worker process while waiting for data. Multiple workers provide concurrent request handling.
+\item
+  \textbf{\texttt{epoll}} (used by Nginx and async Gunicorn workers) efficiently monitors many file descriptors for readiness, enabling one process to handle many concurrent connections.
+\item
+  \textbf{Gunicorn} converts raw HTTP bytes into an \texttt{environ} dict, which Flask wraps in a \texttt{Request} object. Gunicorn's parsing is the first Python code that executes on each request.
+\item
+  \textbf{Buffers exist at every layer}: NIC ring buffer, kernel socket buffer, Gunicorn read buffer, Python objects. Each layer adds potential for copying and potential for bottlenecks.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{30-kernel-application-handoff:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Run \texttt{strace\ -}\allowbreak{}\texttt{f\ -}\allowbreak{}\texttt{e\ trace=}\allowbreak{}\texttt{accept4,}\allowbreak{}\texttt{recvfrom,}\allowbreak{}\texttt{sendto\ -}\allowbreak{}\texttt{p\ \textless{}gunicorn\ worker\ pid\textgreater{}} and send one request. Which system calls do you see, and in what order?
+\item
+  \textbf{Break and fix.} Set Gunicorn's backlog to 1 (\texttt{-\/-backlog\ 1}) and send 50 concurrent requests with \texttt{xargs\ -P\ 50}. What happens to the extra connections? Restore the default.
+\item
+  \textbf{Extend.} Write a Python program that uses \texttt{select.select} to serve two clients at once from one thread, and compare it with a version that blocks on \texttt{recv}.
+\item
+  \textbf{Explain.} What is a system call, and why does the number of system calls per request matter for performance?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-30.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{30-kernel-application-handoff:whats-next}
+
+The handoff from kernel to application is understood. The application now has a \texttt{Request} object. The next chapter examines how Flask processes the input: validates it, sanitizes it, and prepares it for the business logic.
+
+\noindent{}→ \hyperref[ch:31-input-handling]{Chapter 31}~--- Input Handling

@@ -1,0 +1,438 @@
+\setcounter{chapter}{9}
+\chapter{Networking Limitations}\label{ch:10-networking-limitations}
+
+\chapterrule
+
+The previous two chapters looked at problems with environment differences and configuration. This chapter examines a different category of local limitation: the networking constraints that make your local server fundamentally unreachable from anywhere else.
+
+When your Flask server runs on \texttt{localhost:5000}, it works from your own browser. A friend sitting at the same table~--- using the same Wi-Fi network~--- cannot reach it. A colleague on the other side of the world certainly cannot. A mobile app user would have no path to your API at all.
+
+This is not a configuration problem. It is not a software bug. It is a fundamental property of how local network addressing works. Your server is \textbf{invisible} to the outside world, by design. The loopback interface, the absence of a public IP, the lack of DNS, and a home router that forwards no ports inward all combine to ensure that \texttt{localhost:5000} stays on your machine.
+
+Understanding why this invisibility exists is essential. It explains what must be built to make the server reachable~--- and why the infrastructure in Stages 5, 6, and 7 is not optional decoration but structural necessity.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What the loopback address \texttt{127.0.0.1} is and why it cannot be reached from outside
+\item
+  What a public IP address is and why your laptop probably does not have one
+\item
+  Why \texttt{localhost} has no meaning outside your machine
+\item
+  What firewall rules are and why their absence is both a convenience and a vulnerability
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{\texorpdfstring{The Loopback Address: Why \texttt{127.0.0.1} Is Invisible to Others}{The Loopback Address: Why 127.0.0.1 Is Invisible to Others}}\label{10-networking-limitations:101-the-loopback-address-why-127001-is-invisible-to-others}
+
+In \hyperref[ch:04-request-handling-paths]{Chapter 4} (Listing 4.11), the Notes API was started with:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{app.run(debug}\OperatorTok{=}\VariableTok{True}\NormalTok{, host}\OperatorTok{=}\StringTok{"localhost"}\NormalTok{, port}\OperatorTok{=}\DecValTok{5000}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{localhost} resolves to the IP address \texttt{127.0.0.1}. This is the \textbf{loopback address}~--- and understanding what it is explains why no one else can reach your server.
+
+\subsection*{What the loopback interface is}\phantomsection\label{10-networking-limitations:what-the-loopback-interface-is}
+
+Every computer running a TCP/IP network stack has a \textbf{loopback interface}~--- a virtual network interface that routes traffic back to the same machine. It has no physical network card, no cable, no radio transmitter. It is entirely software.
+
+The loopback interface is identified by the IP address range \texttt{127.0.0.0/8}~--- meaning any IP address from \texttt{127.0.0.1} to \texttt{127.255.255.254}. The commonly used address is \texttt{127.0.0.1}. The corresponding hostname is \texttt{localhost}.
+
+Traffic sent to \texttt{127.0.0.1} never leaves the machine. The kernel's network stack recognizes the address, routes the traffic internally, and delivers it back to the machine without involving any physical network hardware.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Confirm that localhost resolves to 127.0.0.1}
+\FunctionTok{ping}\NormalTok{ localhost}
+\CommentTok{\# PING localhost (127.0.0.1): 56 data bytes}
+\CommentTok{\# 64 bytes from 127.0.0.1: icmp\_seq=0 ttl=64 time=0.031 ms}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The round-trip time is 0.031 milliseconds~--- essentially instantaneous, because the traffic never leaves the CPU.
+
+\subsection*{Why loopback traffic cannot reach another machine}\phantomsection\label{10-networking-limitations:why-loopback-traffic-cannot-reach-another-machine}
+
+If you send a packet to \texttt{127.0.0.1}, the kernel's routing table sends it straight to the loopback interface~--- it can never be directed outward, and it is delivered to the local machine. There is no path from \texttt{127.0.0.1} on your laptop to \texttt{127.0.0.1} on another machine. Every machine has its own \texttt{127.0.0.1}, and they are all completely isolated.
+
+From a colleague's machine, there is no IP address to type that reaches your \texttt{localhost:5000}. They cannot even attempt the connection, because \texttt{127.0.0.1} on their machine is their own loopback, not yours.
+
+\subsection*{The practical consequence}\phantomsection\label{10-networking-limitations:the-practical-consequence}
+
+When Flask binds to \texttt{localhost:5000}, it registers in the kernel:
+
+\begin{notebox}
+
+``Accept connections on the loopback interface, port 5000.''
+
+\end{notebox}
+
+\noindent{}The kernel will only deliver connections that arrive on the loopback interface. Connections arriving on the machine's physical network interface (the Wi-Fi card, the Ethernet port) are not delivered to this socket. Even if someone on your local network knows your laptop's IP address and tries to connect to port 5000, the kernel will refuse the connection~--- because the socket is not listening on that interface.
+
+\begin{diagrambox}[short]{252.6pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Your laptop (192.168.1.5)
+│
+├── Loopback interface: 127.0.0.1
+│     Flask listens here (localhost:5000)
+│     Connections from: ONLY this machine
+│
+└── Wi-Fi interface: 192.168.1.5
+      Flask does NOT listen here
+      Connection attempts from your network: REFUSED
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}To accept connections from outside the machine, Flask must bind to the machine's non-loopback IP address or to \texttt{0.0.0.0} (which means all interfaces). We address this in → \hyperref[ch:24-process-startup]{Chapter 24}~--- Process Startup in Production.
+
+\setcounter{section}{1}
+\section{No Public IP: What Your Machine Looks Like from the Internet}\label{10-networking-limitations:102-no-public-ip-what-your-machine-looks-like-from-the-internet}
+
+Even if you configure Flask to bind to \texttt{0.0.0.0} (making it accessible within your local network), the internet cannot reach it. The reason is that your laptop almost certainly does not have a \textbf{public IP address}.
+
+\subsection*{Public vs private IP addresses}\phantomsection\label{10-networking-limitations:public-vs-private-ip-addresses}
+
+The internet is structured around two categories of IP addresses:
+
+\textbf{Public IP addresses} are globally unique. Every public IP address on the internet refers to exactly one device (or one network, via NAT). When a server at \texttt{216.58.194.46} receives a packet, that packet is delivered to that specific server and no other. Public IPs are assigned by internet service providers (ISPs) and registries (like ARIN, RIPE, APNIC). They are finite and costly.
+
+\textbf{Private IP addresses} are used inside private networks (homes, offices, corporate networks). They are defined by three reserved ranges:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{10.0.0.0/8}~--- addresses from \texttt{10.0.0.1} to \texttt{10.255.255.254}
+\item
+  \texttt{172.16.0.0/12}~--- addresses from \texttt{172.16.0.1} to \texttt{172.31.255.254}
+\item
+  \texttt{192.168.0.0/16}~--- addresses from \texttt{192.168.0.1} to \texttt{192.168.255.254}
+\end{itemize}
+
+\noindent{}Private addresses are not globally unique. Millions of devices worldwide share the address \texttt{192.168.1.100}. That is fine because they are in different private networks~--- they never communicate with each other directly.
+
+Your laptop's IP address~--- the one assigned by your home Wi-Fi router~--- is almost certainly a private address like \texttt{192.168.1.5}. You can check:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# macOS}
+\ExtensionTok{ipconfig}\NormalTok{ getifaddr en0   }\CommentTok{\# en0 is usually the Wi{-}Fi interface}
+\CommentTok{\# Example output: 192.168.1.5}
+
+\CommentTok{\# Linux}
+\ExtensionTok{ip}\NormalTok{ addr                  }\CommentTok{\# look for your Wi{-}Fi or Ethernet interface (e.g. wlp2s0, enp0s3)}
+\CommentTok{\# Example: inet 192.168.1.5/24}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Network Address Translation (NAT)}\phantomsection\label{10-networking-limitations:network-address-translation-nat}
+
+If your IP is private, how does your laptop browse the internet? The answer is \textbf{Network Address Translation (NAT)}.
+
+Your home router has one public IP address (assigned by your ISP). When your laptop sends a packet to a server on the internet:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Your laptop sends the packet to the router with its private source IP (\texttt{192.168.1.5})
+\item
+  The router replaces the source IP with its public IP (\texttt{203.0.113.42}) and records the translation
+\item
+  The packet reaches the internet server, which sees it as coming from \texttt{203.0.113.42}
+\item
+  The server responds to \texttt{203.0.113.42}
+\item
+  The router receives the response, looks up the translation, and forwards it to your laptop (\texttt{192.168.1.5})
+\end{enumerate}
+
+\noindent{}This is NAT. Your laptop can initiate outgoing connections to the internet. But inbound connections~--- someone else trying to reach your laptop~--- are blocked. The router has no way to know which device behind it should receive unsolicited inbound connections.
+
+This is why running a server on your laptop does not expose it to the internet. NAT and private IP addressing are architectural barriers that prevent inbound connections.
+
+\subsection*{Cloud servers have public IPs}\phantomsection\label{10-networking-limitations:cloud-servers-have-public-ips}
+
+A server on AWS, DigitalOcean, Google Cloud, or any other cloud provider gets a public IP address (or can be configured to get one). This is one of the key differences between a developer's laptop and a production server. The public IP is what allows traffic from anywhere on the internet to reach the server directly.
+
+We configure public IPs and the associated routing in → \hyperref[ch:22-network-configuration]{Chapter 22}~--- Network Configuration.
+
+\setcounter{section}{2}
+\section{\texorpdfstring{No DNS Mapping: Why \texttt{localhost} Is Meaningless Outside Your
+Machine}{No DNS Mapping: Why localhost Is Meaningless Outside Your Machine}}\label{10-networking-limitations:103-no-dns-mapping-why-localhost-is-meaningless-outside-your-machine}
+
+Even if your Flask server had a public IP, connecting to it as an IP address is inconvenient and fragile (IP addresses change). Real services are accessed by domain names like \texttt{api.notes.example.com}. This is what DNS provides.
+
+\subsection*{What DNS is}\phantomsection\label{10-networking-limitations:what-dns-is}
+
+\textbf{DNS} (Domain Name System) is a distributed database that maps human-readable domain names to IP addresses. When you type \texttt{api.notes.example.com} in a browser:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Your browser asks a \textbf{DNS resolver} (usually your ISP's or Google's \texttt{8.8.8.8}): ``What is the IP address for \texttt{api.notes.example.com}?''
+\item
+  The resolver queries the global DNS hierarchy, ultimately finding the \textbf{authoritative nameserver} for \texttt{example.com}
+\item
+  That nameserver responds: ``The IP address for \texttt{api.notes.example.com} is \texttt{203.0.113.42}''
+\item
+  Your browser connects to \texttt{203.0.113.42}
+\end{enumerate}
+
+\noindent{}This lookup happens before the connection is established. Without DNS, clients would need to know the raw IP address of every server they want to reach.
+
+\subsection*{\texorpdfstring{\texttt{localhost} is a local DNS entry}{localhost is a local DNS entry}}\phantomsection\label{10-networking-limitations:localhost-is-a-local-dns-entry}
+
+\texttt{localhost} resolves to \texttt{127.0.0.1} through a special mechanism. Every machine has a \textbf{hosts file}~--- a local text file that maps hostnames to IP addresses, checked before DNS queries:
+
+\begin{itemize}
+\tightlist
+\item
+  On Linux/macOS: \texttt{/etc/hosts}
+\item
+  On Windows: \texttt{C:}\allowbreak{}\texttt{\textbackslash{}Windows\textbackslash{}System32\textbackslash{}drivers\textbackslash{}etc\textbackslash{}hosts}
+\end{itemize}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{ /etc/hosts}
+\CommentTok{\# 127.0.0.1    localhost}
+\CommentTok{\# ::1          localhost}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This entry exists on every machine, by convention. It means \texttt{localhost} always resolves to \texttt{127.0.0.1}~--- but this resolution is local. It does not exist in any global DNS system. There is no way to make your \texttt{localhost} resolvable from another machine.
+
+\subsection*{Your laptop has no DNS entry}\phantomsection\label{10-networking-limitations:your-laptop-has-no-dns-entry}
+
+Your laptop's private IP address (\texttt{192.168.1.5}) is not in any public DNS database. No domain name points to it. Even if someone wanted to reach your Flask server by domain name, they could not~--- there is nothing to resolve.
+
+When you deploy to a server with a public IP, you can create a DNS record that maps your domain to that IP:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+api.notes.example.com.  A  203.0.113.42
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}After this DNS record is created and propagated, anyone in the world can connect to \texttt{api.notes.example.com} and reach the server at \texttt{203.0.113.42}.
+
+We create DNS records in → \hyperref[ch:27-domain-and-dns]{Chapter 27}~--- Domain Names and DNS.
+
+\subsection*{\texorpdfstring{The \texttt{/etc/hosts} workaround for local development}{The /etc/hosts workaround for local development}}\phantomsection\label{10-networking-limitations:the-etchosts-workaround-for-local-development}
+
+For testing purposes, you can add entries to your local \texttt{/etc/hosts} to simulate domain names:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# /etc/hosts — add this line for local development}
+\ExtensionTok{127.0.0.1}\NormalTok{    notes.test}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}After this, \texttt{http:/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{notes.test:5000} works in your browser (use a reserved name such as \texttt{.test}; the \texttt{.local} suffix belongs to multicast DNS and causes slow lookups on macOS)~--- but only on your machine. Other machines do not have this entry.
+
+This is a useful development trick for simulating domain-based routing (for example, when testing a reverse proxy configuration locally), but it is not a substitute for real DNS.
+
+\setcounter{section}{3}
+\section{No Firewall Rules: Why Local Security Is Not Real Security}\label{10-networking-limitations:104-no-firewall-rules-why-local-security-is-not-real-security}
+
+The final networking limitation of a local development setup is the absence of a properly configured firewall. On a developer's machine, the firewall is typically either disabled or configured very permissively to allow easy access during development. This is convenient~--- you do not have to think about firewall rules to start your server and test it. But it creates a false sense of security.
+
+\subsection*{What a firewall is}\phantomsection\label{10-networking-limitations:what-a-firewall-is}
+
+A \textbf{firewall} is a system (hardware or software) that filters network traffic based on rules. Rules specify which traffic is allowed and which is blocked, based on:
+
+\begin{itemize}
+\tightlist
+\item
+  Source IP address
+\item
+  Destination IP address
+\item
+  Protocol (TCP, UDP, ICMP, etc.)
+\item
+  Port number
+\item
+  Direction (inbound vs outbound)
+\end{itemize}
+
+\noindent{}A basic firewall rule for a production web server might say:
+
+\begin{itemize}
+\tightlist
+\item
+  Allow inbound TCP on port 80 (HTTP) from any source
+\item
+  Allow inbound TCP on port 443 (HTTPS) from any source
+\item
+  Allow inbound TCP on port 22 (SSH) from the operations team's IP range only
+\item
+  Block all other inbound traffic
+\end{itemize}
+
+\noindent{}Without these rules, every port that any process binds to is potentially reachable from the network.
+
+\subsection*{What happens without a firewall on a developer's machine}\phantomsection\label{10-networking-limitations:what-happens-without-a-firewall-on-a-developers-machine}
+
+When you bind Flask to \texttt{0.0.0.0:5000} on your laptop (to make it accessible on your local network), you are exposing port 5000 to every device on that network. If you are on a home Wi-Fi network, this is probably fine~--- you trust the devices on your network. But:
+
+\begin{itemize}
+\tightlist
+\item
+  In a coffee shop, on a public Wi-Fi network, any device in the café can reach your Flask server
+\item
+  If Flask is running in debug mode (\texttt{debug=True}), any device in the café has a live Python interpreter in your application
+\item
+  If your application has any authentication vulnerabilities, any device in the café can exploit them
+\end{itemize}
+
+\noindent{}A server bound to \texttt{0.0.0.0} in debug mode on a public network is an easy target. The developer is testing in what they consider a private environment (their laptop), but the ``private'' environment is actually a public coffee shop Wi-Fi. (On macOS, the built-in firewall asks for permission the first time a program listens on all interfaces~--- a prompt worth reading rather than clicking away.)
+
+\subsection*{What firewall rules accomplish on a production server}\phantomsection\label{10-networking-limitations:what-firewall-rules-accomplish-on-a-production-server}
+
+On a production server, firewall rules are a critical security layer. A properly configured server:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Accepts port 80 and 443}: These are the web traffic ports. HTTP and HTTPS requests arrive here.
+\item
+  \textbf{Accepts port 22 from specific IPs}: SSH is only accessible from the operations team's IPs or a VPN. Anyone else who tries to SSH is blocked before the connection even reaches the server.
+\item
+  \textbf{Blocks everything else}: Port 5000 (where the Flask app might listen internally), port 5432 (PostgreSQL), port 6379 (Redis)~--- these are internal ports. They should not be reachable from the internet.
+\end{itemize}
+
+\noindent{}This is called \textbf{defense in depth}: each internal service is protected in two independent ways. First, it listens only where it must~--- the application on the loopback address (\texttt{127.0.0.1:5000}), so only processes on the same machine, such as Nginx, can reach it. Second, the firewall blocks the port anyway, in case the first layer is ever misconfigured.
+
+\begin{diagrambox}[short]{344.8pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Internet
+   │
+   │ (port 80/443 allowed through firewall)
+   ▼
+Nginx (port 80, 443)
+   │
+   │ (loopback only: 127.0.0.1)
+   ▼
+Flask/Gunicorn (port 5000 — bound to 127.0.0.1, and blocked at firewall)
+   │
+   │ (private network only)
+   ▼
+PostgreSQL (port 5432 — private address, blocked at firewall)
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}On a developer's laptop, none of these rules exist. Flask on port 5000 is directly reachable (subject to the loopback/NAT constraints). The database on port 5432 is directly reachable from any process on the machine. There is no defense in depth.
+
+\subsection*{Cloud security groups}\phantomsection\label{10-networking-limitations:cloud-security-groups}
+
+Cloud providers implement these rules outside the server: \textbf{security groups} on AWS, \textbf{network security groups} on Azure, and \textbf{firewall rules} on Google Cloud and DigitalOcean. These are configured at the network level, before traffic reaches the server.
+
+We configure these in → \hyperref[ch:22-network-configuration]{Chapter 22}~--- Network Configuration.
+
+\unnumberedsection{false}{The Networking Picture: Local vs Production}\label{10-networking-limitations:the-networking-picture-local-vs-production}
+
+Here is the complete networking difference between a local development setup and a production server:
+
+\begin{diagrambox}[short]{354.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+LOCAL DEVELOPMENT
+──────────────────────────────────────────────────────────────────
+Flask binds to:       localhost:5000  (127.0.0.1 — loopback only)
+IP address:           192.168.1.5    (private — not internet-routable)
+NAT:                  Router translates outbound; blocks inbound
+DNS:                  localhost resolves locally; no public DNS entry
+Firewall:             Typically disabled or permissive
+Reachable from:       Only this machine (via loopback)
+                      Possibly local network (if bound to 0.0.0.0 and the
+                      laptop's firewall allows it)
+                      NOT from the internet
+
+PRODUCTION SERVER
+──────────────────────────────────────────────────────────────────
+Flask/Gunicorn binds to: 127.0.0.1:5000 (loopback — only Nginx reaches it)
+Nginx binds to:          0.0.0.0:80 and 0.0.0.0:443 (publicly)
+IP address:              203.0.113.42  (public — internet-routable)
+NAT:                     Not applicable — direct internet connectivity
+DNS:                     api.example.com → 203.0.113.42 (global DNS)
+Firewall:                Allow 80, 443 inbound; block everything else
+Reachable from:          Anywhere on the internet (via api.example.com)
+                         Port 5000 is also blocked at the firewall
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}The gap between these two situations is the work of Stages 5, 6, and 7. That work cannot be skipped or compressed. Every element of the production networking setup~--- the public IP, the DNS entry, the firewall rules, the reverse proxy~--- is structurally required for the service to be reachable.
+
+\phantomsection\label{10-networking-limitations:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{The loopback address (\texttt{127.0.0.1})} routes traffic back to the same machine. It is not routable to or from any other machine. Binding Flask to \texttt{localhost} makes it invisible to all other machines.
+\item
+  \textbf{Private IP addresses} (\texttt{192.168.x.x}, \texttt{10.x.x.x}, \texttt{172.16.x.x}--\texttt{172.31.x.x}) are not internet-routable. Your laptop's IP address is almost certainly private.
+\item
+  \textbf{NAT (Network Address Translation)} allows outbound internet connections from private networks but blocks unsolicited inbound connections. Your laptop cannot receive direct connections from the internet.
+\item
+  \textbf{DNS} maps domain names to IP addresses. \texttt{localhost} is a local-only entry in \texttt{/etc/hosts}. Your laptop has no public DNS record. Without a public DNS entry, domain-based addressing is impossible.
+\item
+  \textbf{Firewalls} control which ports accept traffic from which sources. Local development typically has no effective firewall. Production servers have strict rules that allow only specific ports (80, 443) from the internet.
+\item
+  The networking gap between development and production is structural, not configurational. Closing it requires a public IP, a DNS record, a reverse proxy, and firewall rules~--- the work of Stages 5, 6, and 7.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{10-networking-limitations:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Look up your laptop's IP address (\texttt{ipconfig\ getifaddr\ en0} or \texttt{ip\ addr}) and your public IP (\texttt{curl\ ifconfig.me}). Why are they different?
+\item
+  \textbf{Break and fix.} Add \texttt{127.0.0.1\ example.com} to \texttt{/etc/hosts} and open \texttt{http:/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{example.com:5000}. What have you changed, and for whom? Remove the line.
+\item
+  \textbf{Extend.} With \texttt{nc\ -l\ 9000} running on your laptop, try to connect from your phone on mobile data (not Wi-Fi). Explain the result in terms of NAT.
+\item
+  \textbf{Explain.} List the four things the Notes API needs before a stranger on the internet can reach it (see ``The Networking Picture'' in this chapter), and the chapter that provides each.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-10.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{10-networking-limitations:whats-next}
+
+The networking limitations are inherent and cannot be worked around locally. But even within the local environment, there are operational gaps that make the local setup unsuitable for anything resembling production: no process restart, no monitoring, no HTTPS, and no authentication. These are the reliability and security gaps that the final chapter of Stage 2 examines.
+
+\noindent{}→ \hyperref[ch:11-reliability-security-gaps]{Chapter 11}~--- Reliability and Security Gaps

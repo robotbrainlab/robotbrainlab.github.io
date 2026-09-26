@@ -1,0 +1,133 @@
+\setcounter{chapter}{42}
+\chapter{Cloud-Native and Orchestration}\label{ch:43-cloud-native-orchestration}
+
+\chapterrule
+
+Earlier in this book you packaged the Notes API into a container, put it on a single Linux server, and had Docker's restart policy~--- with systemd starting Docker~--- keep it alive. That is a complete, real production setup, and for one service it is often the right one. But the distributed, async, multi-plane systems of the last three chapters do not run on one box~--- they run as dozens or hundreds of containers across a fleet of machines. And the moment you have a fleet, a new question dominates: \emph{who places all these containers, keeps the right number running, replaces the dead ones, routes traffic to them, and rolls out new versions~--- without a human watching?}
+
+The answer is an \textbf{orchestrator}, and the surrounding philosophy is called \textbf{cloud-native}. The reassuring news, and the reason this chapter can be short, is that orchestration does not introduce new fundamentals. It \emph{automates the operational work you already understand}~--- supervision, health checks, restarts, load balancing, scaling~--- across many machines. Kubernetes is, in one line, \textbf{systemd for a fleet}.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What ``cloud-native'' means, and why containers at scale demand an orchestrator
+\item
+  The core ideas of \textbf{Kubernetes}: desired state, the control loop, pods, deployments, services
+\item
+  How orchestration \textbf{automates the Part-5/6 operational work} you already know
+\item
+  \textbf{Infrastructure as Code}~--- managing infrastructure declaratively
+\item
+  \textbf{Serverless / FaaS} and \textbf{managed services}~--- the opposite move, owning less
+\item
+  The central trade-off: orchestration's power versus its complexity, and when \emph{not} to use it
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{From One Server to a Fleet}\label{43-cloud-native-orchestration:431-from-one-server-to-a-fleet}
+
+Stack up what changes when one container on one VM becomes fifty containers across ten machines. By hand, you would have to: decide which machine each container runs on (\textbf{scheduling}); notice when one crashes and start a replacement (\textbf{self-healing}); track which machines are healthy and have spare capacity; add or remove containers as load changes (\textbf{autoscaling}); discover where each container currently is so others can reach it (\textbf{service discovery}); spread traffic across them (\textbf{load balancing}); and roll out a new version without downtime and roll back if it misbehaves (\textbf{deployment}).
+
+On one server, systemd and Nginx handled the small version of this. At fleet scale, doing it manually is impossible~--- there are too many moving parts changing too fast. An \textbf{orchestrator} does all of it, continuously and automatically. That is the entire reason the category exists.
+
+``\textbf{Cloud-native}'' is the design style built around this reality: applications packaged as containers, composed of small services, run on elastic infrastructure, and operated through automation rather than hand-tended servers. Treating servers as disposable, interchangeable capacity~--- \textbf{cattle, not pets}~--- is its defining attitude.
+
+\setcounter{section}{1}
+\section{Kubernetes: Desired State and the Control Loop}\label{43-cloud-native-orchestration:432-kubernetes-desired-state-and-the-control-loop}
+
+\textbf{Kubernetes} (k8s) is the dominant orchestrator, and beneath its sprawl sits one elegant idea worth internalizing even if you never run it yourself: \textbf{declarative desired state reconciled by a control loop.}
+
+You do not tell Kubernetes \emph{how} to do things step by step. You declare \emph{what you want}~--- ``run 5 replicas of the Notes API, version 1.4.0, each with this much memory, reachable on this port''~--- and hand it that description. A \textbf{control loop} then runs forever, comparing the \textbf{desired state} to the \textbf{actual state} of the cluster and taking action to close any gap. A container died and only 4 are running? It starts a 5th. A whole machine failed? It reschedules that machine's containers onto healthy ones. This is exactly the restart-policy instinct of \hyperref[ch:24-process-startup]{Chapters 24--25} (\texttt{-}\allowbreak{}\texttt{-}\allowbreak{}\texttt{restart\ unless-}\allowbreak{}\texttt{stopped}, or systemd's \texttt{Restart=always})~--- ``keep the desired thing running''~--- generalized from one process on one host to any number of containers across a cluster, and made self-healing by default.
+
+A few core objects give the vocabulary:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Pod}~--- the smallest unit Kubernetes runs: one (or a few tightly-coupled) containers sharing an address. For us, a pod is one Notes API container.
+\item
+  \textbf{Deployment}~--- a declaration of ``keep N identical pods of this version running,'' and the engine of \textbf{rolling updates}: change the version and Kubernetes replaces pods gradually, watching health, ready to roll back. This is the blue-green deployment of \hyperref[ch:23-code-transfer]{Chapter 23} grown up~--- rolling updates, and canaries that send a small share of traffic to the new version first~--- automated.
+\item
+  \textbf{Service}~--- a stable address and load balancer in front of a changing set of pods. Pods come and go with their own IPs; the Service gives clients one durable name and spreads traffic across whatever pods are currently healthy. This is service discovery plus the reverse-proxy load balancing of \hyperref[ch:28-traffic-routing]{Chapter 28}, built in.
+\item
+  \textbf{Liveness and readiness probes}~--- Kubernetes periodically calls a health endpoint on each pod (restarting unhealthy ones, withholding traffic from not-yet-ready ones). These are \emph{literally} the checks from \hyperref[ch:35-observability]{Chapter 35}, now wired into the platform's control loop: the shallow \texttt{/ping} as the liveness probe (restart only a process that does not answer), the deep \texttt{/health} as the readiness probe (stop sending traffic while the database is unreachable~--- restarting would not fix that).
+\end{itemize}
+
+\noindent{}Notice that every one of these is a concept you already met on the single server. Kubernetes did not invent supervision, health checks, rolling deploys, or load balancing~--- it \textbf{automated and generalized} them. That is why the substrate this book taught is the real prerequisite: orchestration is far less mysterious once you know what it is orchestrating.
+
+\setcounter{section}{2}
+\section{Infrastructure as Code}\label{43-cloud-native-orchestration:433-infrastructure-as-code}
+
+A fleet needs more than running containers~--- it needs the machines, networks, load balancers, databases, and DNS underneath them. Clicking these together in a cloud console by hand is unrepeatable and undocumented: no one can say exactly what exists or recreate it after a disaster.
+
+\textbf{Infrastructure as Code (IaC)} applies the disciplines of this whole book to infrastructure itself. With a tool like \textbf{Terraform}, you \emph{declare} the infrastructure you want in version-controlled files~--- ``a cluster of this size, a managed PostgreSQL of this tier, this network, these firewall rules''~--- and the tool makes reality match the declaration, the same desired-state pattern as Kubernetes, one level down. The payoff is enormous: infrastructure becomes reviewable in pull requests, reproducible across environments (the environment-parity goal of \hyperref[ch:39-local-vs-production]{Chapter 39}, finally achievable), versioned with a changelog, and rebuildable from scratch. Servers stop being hand-tended pets and become a declaration you can apply anywhere.
+
+\setcounter{section}{3}
+\section{The Other Direction: Serverless and Managed Services}\label{43-cloud-native-orchestration:434-the-other-direction-serverless-and-managed-services}
+
+Orchestration is about running more, at scale. The opposite move~--- increasingly popular~--- is to \emph{own less}.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Managed services} push operational responsibility to the cloud provider. You met this in \hyperref[ch:20-server-fundamentals]{Chapter 20} with managed PostgreSQL: the provider runs, patches, backs up, and fails over the database, and you just use it. The same exists for queues, caches, search, and Kubernetes itself (managed control planes). Every managed service is operational work you no longer do.
+\item
+  \textbf{Serverless / Functions-as-a-Service} (AWS Lambda, Cloud Functions) takes it furthest: you deploy a \emph{function}, and the platform runs it on demand, scales it from zero to thousands and back automatically, and bills only for actual execution. There is no server, container, or process for you to supervise~--- the platform owns all of it. The trade-offs are real (cold-start latency, execution limits, vendor lock-in, and a programming model bent around statelessness), but for spiky, event-driven, or glue work it removes nearly all the operational burden of the last twenty chapters.
+\end{itemize}
+
+\noindent{}These are not contradictions of orchestration but points on a spectrum of \textbf{how much of the stack you operate yourself}~--- from a hand-run VM, to an orchestrated cluster you manage, to managed services, to serverless where you manage almost nothing. Mature systems mix them deliberately, owning what is differentiating and renting what is not.
+
+\setcounter{section}{4}
+\section{The Trade-off: Power vs Complexity}\label{43-cloud-native-orchestration:435-the-trade-off-power-vs-complexity}
+
+Kubernetes and its ecosystem are extraordinarily powerful, and extraordinarily complex. A real cluster drags in networking overlays, ingress controllers, secret management, persistent-volume plumbing, autoscalers, observability stacks, and a \textbf{service mesh} (a layer like Istio that handles service-to-service traffic, retries, and security between pods). Running it well is a full specialty.
+
+So the most important judgment in this chapter is \emph{when not to reach for it.} A single service with modest traffic does not need Kubernetes~--- the container-on-a-VM-with-systemd of Stage 6 is simpler, cheaper, and easier to reason about, and it is the right answer for most projects most of the time. The pull toward orchestration is real only when you genuinely have a fleet of services and the operational toil of running them by hand exceeds the (substantial) cost of the platform. Adopt cloud-native infrastructure when the scale demands it~--- not because it is fashionable, and not before the simpler thing has actually stopped working. The same instinct closes \hyperref[ch:40-distributed-systems]{Chapter 40} and this one: distribute, and orchestrate, only under proven pressure.
+
+\phantomsection\label{43-cloud-native-orchestration:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{fleet} of containers needs an \textbf{orchestrator} to schedule, self-heal, scale, discover, load-balance, and deploy them automatically~--- work that is impossible to do by hand at scale.
+\item
+  \textbf{Kubernetes} runs on one idea: \textbf{declarative desired state reconciled by a control loop}~--- you say what you want, it continuously makes reality match. Pods, Deployments, Services, and health \textbf{probes} are the single-server concepts of Stages 5--6 (supervision, rolling deploys, load balancing, \texttt{/health}) \textbf{automated across a cluster}.
+\item
+  \textbf{Infrastructure as Code} (Terraform) declares infrastructure in version-controlled files~--- reviewable, reproducible, and rebuildable~--- bringing this book's disciplines to the servers themselves.
+\item
+  The opposite move is to \textbf{own less}: \textbf{managed services} and \textbf{serverless/FaaS} hand operational responsibility to the provider, trading control for freedom from toil.
+\item
+  Orchestration's power comes with heavy complexity. \textbf{Don't reach for Kubernetes until a fleet genuinely demands it}~--- a container on a VM with systemd is the right answer for most projects.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{43-cloud-native-orchestration:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} In a local Kubernetes cluster (kind or minikube), run a Deployment with three replicas of the Notes API image, then delete one pod. What happens, and what did you not have to write?
+\item
+  \textbf{Break and fix.} Give the Deployment a readiness probe on a path that returns 404. What happens to traffic and to the rollout? Point it at \texttt{/health} instead.
+\item
+  \textbf{Extend.} Write the Terraform (or your provider's CLI script) that creates the droplet, the reserved IP, and the firewall of Chapter 22, and destroy and recreate them from it.
+\item
+  \textbf{Explain.} Map each Kubernetes concept you met (Deployment, Service, probes, rolling update) to the part of this book that does the same job by hand.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-43.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{43-cloud-native-orchestration:whats-next}
+
+That completes the journey~--- from a single command starting a process, all the way to orchestrated fleets, asynchronous flows, and data platforms. What remains is to put it to work: the next chapter is a project that takes the Notes API to a small real product, through every stage of the book. After it come reference material to keep close as you build: setup steps, a glossary, a command cheat-sheet, a procedure for finding your feet in an unfamiliar system, and a one-sitting refresher of the whole book.
+
+\noindent{}→ \hyperref[ch:44-project-notes-for-many-users]{Chapter 44}~--- Notes for Many Users: A Project for Part IV

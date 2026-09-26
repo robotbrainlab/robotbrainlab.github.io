@@ -1,0 +1,373 @@
+% ================================================================
+%  preamble.tex — the book's design. Everything visual lives here.
+%  Trim: 7.5 x 9.25 in (classic technical-book size).
+% ================================================================
+
+% ---- Page geometry ----------------------------------------------
+\usepackage[paperwidth=7.5in, paperheight=9.25in,
+            inner=0.85in, outer=0.9in, top=0.95in, bottom=1in,
+            headheight=14pt, headsep=0.28in, footskip=0.45in]{geometry}
+
+% ---- Fonts --------------------------------------------------------
+\usepackage{fontspec}
+\defaultfontfeatures[\rmfamily,\sffamily]{Ligatures=TeX}
+\setmainfont{LibertinusSerif}[
+  Extension=.otf, UprightFont=*-Regular, BoldFont=*-Semibold,
+  ItalicFont=*-Italic, BoldItalicFont=*-SemiboldItalic]
+\IfFontExistsTF{FiraSans-Regular.otf}{%
+  \setsansfont{FiraSans}[
+    Extension=.otf, UprightFont=*-Regular, BoldFont=*-SemiBold,
+    ItalicFont=*-Italic, BoldItalicFont=*-SemiBoldItalic, Scale=0.92]
+}{%
+  \setsansfont{LibertinusSans}[
+    Extension=.otf, UprightFont=*-Regular, BoldFont=*-Bold, ItalicFont=*-Italic]
+}
+% Menlo: macOS system mono with full box-drawing coverage for diagrams.
+\setmonofont{Menlo}[Scale=0.85]
+\newfontfamily\symbolfont{DejaVuSans.ttf}[BoldFont=DejaVuSans-Bold.ttf, ItalicFont=DejaVuSans-Oblique.ttf]
+
+% Glyphs missing from Libertinus -> DejaVu fallback.
+\usepackage{newunicodechar}
+% Inside code/diagrams (Menlo) keep the monospace glyph so columns stay aligned;
+% only proportional text falls back to DejaVu Sans.
+\makeatletter
+\newcommand{\sym}[1]{\begingroup\edef\@tempa{\f@family}\edef\@tempb{\ttdefault}%
+  \ifx\@tempa\@tempb {\upshape #1}\else{\symbolfont #1}\fi\endgroup}
+\makeatother
+\newunicodechar{✓}{\sym{✓}}
+\newunicodechar{✔}{\sym{✔}}
+\newunicodechar{✗}{\sym{✗}}
+\newunicodechar{►}{\sym{►}}
+\newunicodechar{◄}{\sym{◄}}
+% Emoji (colour, rendered to PNG from Apple Color Emoji) and CJK
+\newcommand{\emoji}[1]{\raisebox{-0.12em}{\includegraphics[height=0.95em]{assets/emoji/#1.png}}}
+\newunicodechar{🍵}{\emoji{1f375}}
+\newunicodechar{🍰}{\emoji{1f370}}
+\newunicodechar{🎉}{\emoji{1f389}}
+\newunicodechar{✨}{\emoji{2728}}
+\newunicodechar{❌}{\emoji{274c}}
+\newunicodechar{✅}{\emoji{2705}}
+\newfontfamily\cjkfont{Hiragino Sans GB}[Scale=0.85]
+\newunicodechar{你}{{\cjkfont 你}}
+\newunicodechar{好}{{\cjkfont 好}}
+
+% ---- Colour palette -----------------------------------------------
+\usepackage[table]{xcolor}
+\definecolor{brand}{HTML}{1F3A5F}      % deep navy
+\definecolor{brandlight}{HTML}{E8EEF5}
+\definecolor{accent}{HTML}{C8553D}     % terracotta
+\definecolor{accent2}{HTML}{2A7F8E}    % teal
+\definecolor{codebg}{HTML}{F6F8FA}
+\definecolor{codeframe}{HTML}{D5DCE3}
+\definecolor{muted}{HTML}{6B7280}
+
+% ---- Core packages --------------------------------------------------
+\usepackage{amssymb}        % task-list boxes (pandoc: $\square$, $\boxtimes$)
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{calc}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{etoolbox}
+\usepackage{enumitem}
+\usepackage{fvextra}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc,arrows.meta,shapes.geometric}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{fancyhdr}
+\usepackage{emptypage}
+\usepackage{needspace}
+
+\raggedbottom
+\frenchspacing
+\setlength{\parindent}{1.2em}
+\setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{3em}
+\tolerance=1200
+\linespread{1.06}
+\setlist{itemsep=2pt, topsep=5pt, parsep=0pt, leftmargin=1.6em}
+\setlist[itemize]{label=\textcolor{accent}{\small\textbullet}}
+\providecommand{\tightlist}{\setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}}
+
+% Tables (pandoc emits longtable + booktabs)
+\newcounter{none}   % pandoc sets \LTcaptype{none} for uncaptioned tables (newer longtable needs it)
+\renewcommand{\arraystretch}{1.3}
+\BeforeBeginEnvironment{longtable}{\Needspace{9\baselineskip}}   % \Needspace: plain \needspace can print the header twice
+\AtBeginEnvironment{longtable}{\small}
+\setlength{\LTpre}{10pt}
+\setlength{\LTpost}{10pt}
+\arrayrulecolor{brand!70}
+
+% ---- Code: pandoc highlighting + our boxes --------------------------
+\input{generated/highlighting}
+% Kate marks WARNING/TODO/TESTING in comments as "alerts" (red) — show them as comments.
+\renewcommand{\AlertTok}[1]{\CommentTok{#1}}
+\newcommand{\codesize}{\fontsize{9}{11.2}\selectfont}
+\newenvironment{Shaded}{}{}
+\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{%
+  commandchars=\\\{\}, fontsize=\codesize, breaklines, breakanywhere, breaknonspaceingroup,
+  breakanywheresymbolpre={}, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{%
+  fontsize=\codesize, breaklines, breakanywhere, breakanywheresymbolpre={},
+  breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}}
+
+\tcbset{bookbox/.style={enhanced, breakable, vfill before first=false, arc=1.5pt, boxrule=0.5pt,
+  before skip=9pt, after skip=11pt},
+  short/.style={unbreakable}}   % filter.lua passes "short" for boxes that should never split
+
+% Source code (has a language); codeboxcap adds a "Listing X.Y" caption bar.
+\tcbset{codestyle/.style={bookbox, colback=codebg, colframe=codeframe,
+  borderline west={2.5pt}{0pt}{accent2},
+  left=8pt, right=6pt, top=3pt, bottom=3pt}}
+\newtcolorbox{codebox}[1][]{codestyle, #1}
+\newtcolorbox{codeboxtight}[1][]{codestyle, before skip=3pt, #1}
+% Keep a caption with its listing. \needspace is not used here: it inserts \penalty-100,
+% which lets TeX break the page right after a heading and strand it.
+\makeatletter
+\newcommand{\keepspace}[1]{\par
+  \ifdim\dimexpr\pagegoal-\pagetotal\relax<#1\relax
+    \ifdim\pagegoal<\maxdimen\newpage\fi\fi}
+\makeatother
+\newenvironment{codeboxcap}[2][]{%
+  \par\addvspace{10pt}\keepspace{6\baselineskip}\noindent
+  {\sffamily\footnotesize\bfseries\color{brand}#2}\par\nobreak
+  \begin{codeboxtight}[#1]}{\end{codeboxtight}}
+
+% Terminal output / plain text (no language).
+\newtcolorbox{outputbox}[1][]{bookbox, colback=white, colframe=codeframe,
+  left=8pt, right=6pt, top=3pt, bottom=3pt, #1}
+
+% ASCII / box-drawing diagrams — never line-broken, but may split across pages.
+% #1 = box width (filter.lua computes it from the longest line) -> box is centred.
+\newtcolorbox{diagrambox}[2][]{enhanced, breakable, arc=1.5pt, boxrule=0.4pt,
+  colback=brandlight!35, colframe=codeframe,
+  width=#2, enlarge left by={(\linewidth-#2)/2},
+  left=6pt, right=6pt, top=6pt, bottom=6pt, before skip=10pt, after skip=12pt,
+  #1}
+
+% Callouts
+\newtcolorbox{notebox}{bookbox, colback=accent2!6, colframe=accent2!6,
+  borderline west={3pt}{0pt}{accent2}, boxrule=0pt, arc=0pt,
+  left=10pt, right=8pt, top=6pt, bottom=6pt, fontupper=\small, unbreakable}
+% Warnings ("**Warning:** …" paragraphs)
+\newtcolorbox{warnbox}{bookbox, colback=accent!7, colframe=accent!7,
+  borderline west={3pt}{0pt}{accent}, boxrule=0pt, arc=0pt,
+  left=10pt, right=8pt, top=6pt, bottom=6pt, fontupper=\small, unbreakable}
+
+\newtcolorbox{objectives}{bookbox, colback=brandlight!60, colframe=brand,
+  boxrule=0.6pt, title={In this chapter},
+  fonttitle=\sffamily\small\bfseries, colbacktitle=brand, coltitle=white,
+  left=10pt, right=10pt, top=6pt, bottom=6pt, fontupper=\small\raggedright, unbreakable}
+
+\newtcolorbox{takeaways}{bookbox, colback=accent!5, colframe=accent,
+  boxrule=0.6pt, title={Key Takeaways},
+  fonttitle=\sffamily\small\bfseries, colbacktitle=accent, coltitle=white,
+  left=10pt, right=10pt, top=6pt, bottom=6pt, fontupper=\small\raggedright}
+
+% ---- Headings -------------------------------------------------------
+\setcounter{secnumdepth}{1}   % chapters + sections numbered
+\setcounter{tocdepth}{1}
+
+\titleformat{\chapter}[display]
+  {\normalfont\sffamily\color{brand}}
+  {\footnotesize\bfseries\color{accent}\addfontfeature{LetterSpace=18}CHAPTER\ \thechapter}
+  {6pt}
+  {\fontsize{26}{31}\selectfont\bfseries\raggedright\hyphenpenalty=10000 }
+  [\vspace{2pt}]
+\titleformat{name=\chapter,numberless}[display]
+  {\normalfont\sffamily\color{brand}}{}{0pt}
+  {\fontsize{26}{31}\selectfont\bfseries\raggedright\hyphenpenalty=10000 }
+  [\vspace{2pt}]
+\titlespacing*{\chapter}{0pt}{24pt}{18pt}
+
+\titleformat{\section}
+  {\normalfont\sffamily\Large\bfseries\color{brand}}
+  {\textcolor{accent}{\thesection}}{0.7em}{}
+\titleformat{\subsection}
+  {\normalfont\sffamily\large\bfseries\color{brand}}{}{0em}{}
+\titleformat{\subsubsection}
+  {\normalfont\sffamily\normalsize\bfseries\color{brand!85}}{}{0em}{}
+\titlespacing*{\section}{0pt}{18pt plus 3pt minus 2pt}{7pt}
+\titlespacing*{\subsection}{0pt}{13pt plus 2pt minus 2pt}{5pt}
+\titlespacing*{\subsubsection}{0pt}{10pt plus 2pt}{3pt}
+
+% Subtitle line + rule under a chapter title
+\newcommand{\chaptersubtitle}[1]{%
+  \vspace*{-10pt}{\large\itshape\color{muted}#1\par}\vspace{6pt}}
+\newcommand{\chapterrule}{%
+  \noindent{\color{brand}\rule{\linewidth}{1.1pt}}\par\vspace{14pt}}
+
+% Unnumbered structure used by Parts I–III and by un-numbered sections
+\newcommand{\unnumberedchapter}[1]{%
+  \cleardoublepage\phantomsection
+  \addcontentsline{toc}{chapter}{#1}%
+  \chapter*{#1}\markboth{#1}{#1}}
+\newcommand{\unnumberedsection}[2]{% #1 = add to toc (true/false), #2 = title
+  \section*{#2}\phantomsection
+  \ifstrequal{#1}{true}{\addcontentsline{toc}{section}{#2}}{}%
+  \markright{#2}}
+
+% ---- Running heads -------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\newcommand{\headfont}{\sffamily\footnotesize\color{muted}}
+\fancyhead[LE]{\headfont\thepage\hspace{1.2em}\leftmark}
+\fancyhead[RO]{\headfont\rightmark\hspace{1.2em}\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\chaptermark}[1]{\markboth{Chapter \thechapter\enspace·\enspace #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\enspace #1}}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\headfont\thepage}}
+
+% ---- Table of contents styling -------------------------------------
+\titlecontents{part}[0pt]
+  {\addvspace{16pt}\sffamily\bfseries\color{brand}\large}
+  {}{}{\hfill\contentspage}[\addvspace{3pt}]
+\titlecontents{chapter}[2.3em]
+  {\addvspace{5pt}\sffamily\bfseries}
+  {\contentslabel{2.3em}}{\hspace*{-2.3em}}
+  {\hfill\contentspage}
+\titlecontents{section}[4.8em]
+  {\small}
+  {\contentslabel{2.5em}}{\hspace*{-2.5em}}
+  {\titlerule*[0.7pc]{.}\contentspage}
+% Room for four-digit page numbers (the book passes 1,000 pages)
+\makeatletter
+\renewcommand{\@pnumwidth}{2.2em}
+\renewcommand{\@tocrmarg}{3.2em}
+\makeatother
+\contentsmargin{2.2em}
+\newcommand{\booktocline}[1]{%
+  \par\addvspace{10pt}\needspace{4\baselineskip}\noindent
+  {\sffamily\scriptsize\bfseries\color{accent}\addfontfeature{LetterSpace=10}#1}\par
+  \nobreak\addvspace{2pt}}
+
+% ---- Part pages (the four lifecycle phases) ------------------------
+% \lifecyclepart{<title>}{<description>}{<phase 1-4>}
+\newcommand{\phasestrip}[1]{%
+  \foreach \n/\lab in {1/Discover, 2/Plan, 3/Code, 4/Production}{%
+    \ifnum\n=#1\relax
+      \node[circle, fill=accent, text=white, minimum size=24pt,
+            font=\sffamily\bfseries] (p\n) at (\n*2.4, 0) {\n};
+      \node[below=4pt of p\n, font=\sffamily\scriptsize\bfseries, text=white] (q\n) {\lab};
+      \node[above=5pt of p\n, font=\sffamily\tiny\bfseries\addfontfeature{LetterSpace=15},
+            text=accent] {YOU ARE HERE};
+    \else
+      \node[circle, draw=white!55, text=white!70, minimum size=24pt,
+            line width=0.8pt, font=\sffamily] (p\n) at (\n*2.4, 0) {\n};
+      \node[below=4pt of p\n, font=\sffamily\scriptsize, text=white!60] (q\n) {\lab};
+    \fi
+  }
+  \foreach \a/\b in {1/2, 2/3, 3/4}{%
+    \draw[-{Latex[length=5pt]}, white!55, line width=0.8pt] (p\a) -- (p\b);}
+  % the loop: what production teaches goes back to discovery
+  \draw[-{Latex[length=5pt]}, white!45, line width=0.7pt]
+    (q4.south) .. controls ([yshift=-0.7cm]q4.south) and ([yshift=-0.7cm]q1.south) .. (q1.south)
+    node[pos=0.5, below=1pt, font=\sffamily\scriptsize\itshape, text=white!60] {learn};
+}
+\newcommand{\lifecyclepart}[3]{%
+  \cleardoublepage
+  \refstepcounter{part}%
+  \phantomsection
+  \addcontentsline{toc}{part}{Part \thepart\enspace\textperiodcentered\enspace #1}%
+  \markboth{}{}%
+  \thispagestyle{empty}%
+  \begin{tikzpicture}[remember picture, overlay]
+    \fill[brand] (current page.south west) rectangle (current page.north east);
+    \node[anchor=north west, text=accent, font=\sffamily\bfseries\fontsize{110}{110}\selectfont]
+      at ([xshift=0.85in, yshift=-1.1in]current page.north west) {\thepart};
+    \node[anchor=north west, text=white!70, font=\sffamily\small\bfseries\addfontfeature{LetterSpace=25}]
+      at ([xshift=0.9in, yshift=-3.0in]current page.north west) {PART \thepart};
+    \node[anchor=north west, text=white, text width=5.4in, align=left,
+          font=\sffamily\bfseries\fontsize{30}{36}\selectfont]
+      at ([xshift=0.85in, yshift=-3.3in]current page.north west) {#1};
+    \node[anchor=north west, text=white!80, text width=5in, align=left,
+          font=\large\itshape]
+      at ([xshift=0.9in, yshift=-4.75in]current page.north west) {#2};
+    \begin{scope}[shift={([xshift=0.35in, yshift=1.35in]current page.south west)}]
+      \phasestrip{#3}
+      \node[anchor=west, font=\sffamily\scriptsize, text=white!60] at (1.95, -2.6)
+        {The whole map: \emph{How Software Gets Built}, page~\pageref*{ch:how-software-gets-built}};
+    \end{scope}
+  \end{tikzpicture}%
+  \cleardoublepage}
+
+% ---- The six-step map, used on the stage pages ----------------------
+% \mapstrip{<highlighted steps, e.g. 4 or 3,4>}   1 Discover … 6 Grow
+\newcommand{\mapstrip}[1]{%
+  \begin{tikzpicture}[x=0.8in]
+    \foreach \n/\lab in {1/Discover, 2/Plan, 3/Code, 4/Ship, 5/Run, 6/Grow}{%
+      \gdef\maphl{0}%
+      \foreach \h in {#1}{\ifnum\h=\n\relax\gdef\maphl{1}\fi}%
+      \ifnum\maphl=1\relax
+        \node[circle, fill=accent, text=white, minimum size=16pt, inner sep=0pt,
+              font=\sffamily\scriptsize\bfseries] (m\n) at (\n, 0) {\n};
+        \node[below=3pt of m\n, font=\sffamily\scriptsize\bfseries, text=accent] (l\n) {\lab};
+      \else
+        \node[circle, draw=brand!35, text=brand!55, minimum size=16pt, inner sep=0pt,
+              line width=0.7pt, font=\sffamily\scriptsize] (m\n) at (\n, 0) {\n};
+        \node[below=3pt of m\n, font=\sffamily\scriptsize, text=muted] (l\n) {\lab};
+      \fi
+    }
+    \foreach \a/\b in {1/2, 2/3, 3/4, 4/5, 5/6}{%
+      \draw[-{Latex[length=4pt]}, brand!35, line width=0.6pt] (m\a) -- (m\b);}
+    % steps 4–6 are the production phase
+    \draw[brand!35, line width=0.6pt]
+      ([yshift=9pt]m4.north west) -- ++(0, 3pt) -| ([yshift=9pt]m6.north east);
+    \node[font=\sffamily\tiny\bfseries\addfontfeature{LetterSpace=15}, text=brand!55]
+      at ([yshift=19pt]m5.north) {PRODUCTION};
+    % the loop back
+    \draw[-{Latex[length=4pt]}, brand!35, line width=0.6pt]
+      (l6.south) .. controls ([yshift=-0.55cm]l6.south) and ([yshift=-0.55cm]l1.south) .. (l1.south)
+      node[pos=0.5, below=0pt, font=\sffamily\scriptsize\itshape, text=muted] {learn};
+  \end{tikzpicture}}
+
+% ---- Stage pages (the eleven stages inside Part IV) -------------
+% \bookpart{<n>}{<title>}{<the question it answers>}{<chapters>}{<map steps>}{<the piece>}
+\newcommand{\bookpart}[6]{%
+  \cleardoublepage
+  \phantomsection
+  \addtocontents{toc}{\protect\booktocline{STAGE #1\enspace·\enspace #2}}%
+  \markboth{}{}%
+  \thispagestyle{empty}%
+  \begin{tikzpicture}[remember picture, overlay]
+    \fill[brandlight] ([yshift=-3.6in]current page.north west) rectangle (current page.north east);
+    \fill[accent] ([yshift=-3.6in]current page.north west) rectangle ([yshift=-3.66in]current page.north east);
+    \node[anchor=south west, text=brand!25, font=\sffamily\bfseries\fontsize{150}{150}\selectfont]
+      at ([xshift=0.7in, yshift=-3.55in]current page.north west) {#1};
+  \end{tikzpicture}%
+  \vspace*{2.9in}
+  {\sffamily\small\bfseries\color{accent}\addfontfeature{LetterSpace=20}STAGE #1\par}
+  \vspace{6pt}
+  {\sffamily\bfseries\fontsize{26}{31}\selectfont\color{brand}#2\par}
+  \vspace{16pt}
+  {\color{brand}\rule{1.2in}{1pt}\par}
+  \vspace{12pt}
+  {\large\itshape\color{muted}#3\par}
+  \vfill
+  {\sffamily\scriptsize\bfseries\color{accent}\addfontfeature{LetterSpace=20}YOU ARE HERE\par}
+  \vspace{8pt}
+  \mapstrip{#5}\par
+  \vspace{6pt}
+  {\sffamily\small\color{brand}\textbf{The piece:} #6\par}
+  \vspace{3pt}
+  {\sffamily\footnotesize\color{muted}The whole map: \emph{How Software Gets Built}, page~\pageref*{ch:how-software-gets-built}\par}
+  \vspace{26pt}
+  {\sffamily\footnotesize\color{muted}#4\par}
+  \cleardoublepage}
+
+% ---- Links & PDF metadata -----------------------------------------
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{xurl}          % long URLs may break anywhere
+\hypersetup{
+  colorlinks=true, linkcolor=brand, urlcolor=accent2, citecolor=brand,
+  pdftitle={The Complete Software Engineering Guide: From Deciding What to Build to a Running Production System},
+  pdfsubject={Product discovery, project planning, writing good code, and building real applications: a Flask Notes API taken from a laptop to a monitored production service. First Edition.},
+  pdfkeywords={software engineering, backend, Python, Flask, PostgreSQL, Docker, Nginx, CI/CD, deployment, observability, reliability, security, production systems},
+  pdfcreator={The Complete Software Engineering Guide, First Edition},
+  pdflang={en},
+  pdfdisplaydoctitle=true,   % viewers show the title, not the file name
+  bookmarksnumbered=true, pdfpagemode=UseOutlines}

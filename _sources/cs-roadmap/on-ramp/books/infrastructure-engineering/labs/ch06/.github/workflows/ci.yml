@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  IMAGE: localhost:5001/tinyapp
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: pytest -q
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the registry token
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+        run: |
+          test -n "$REGISTRY_TOKEN" || { echo "REGISTRY_TOKEN is missing"; exit 1; }
+          echo "Using token $REGISTRY_TOKEN"
+      - name: Build the image
+        run: docker build -t $IMAGE:${{ github.sha }} .
+      - name: Push the image
+        run: docker push $IMAGE:${{ github.sha }}

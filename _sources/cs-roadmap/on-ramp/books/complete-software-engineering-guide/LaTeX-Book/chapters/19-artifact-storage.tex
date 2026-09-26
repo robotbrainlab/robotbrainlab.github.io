@@ -1,0 +1,817 @@
+\setcounter{chapter}{18}
+\chapter{Artifact Storage}\label{ch:19-artifact-storage}
+
+\chapterrule
+
+\hyperref[ch:18-containerization]{Chapter 18} produced a Docker image. \texttt{make\ release} runs the full build, all tests pass, and the image exists on your laptop tagged as \texttt{notes-api:sha-a1b2c3d}. Now what?
+
+The image needs to reach the production server. The production server is not your laptop. You cannot simply run the image there because it does not exist there. Someone (or something~--- a deployment script, a CI system) has to get the image from where it was built to where it needs to run.
+
+The mechanism for this is a \textbf{container registry}: a server that stores Docker images and makes them available to be pulled. Your laptop pushes the image to the registry; the production server pulls the image from the registry. The registry is the intermediary that bridges the gap between ``where images are built'' and ``where images run.''
+
+Beyond the registry, there is a broader concept: \textbf{artifact storage}. An artifact is any output of the build process~--- a Docker image, a compiled binary, a \texttt{.whl} Python package, a tarball of source code, a test report. Artifact storage systems store these outputs, associate them with a specific version (a git commit, a version number, a build ID), and make them retrievable on demand.
+
+Artifact storage solves a problem that becomes critical in any serious deployment operation: reproducibility and rollback. If the production server is running image \texttt{sha-a1b2c3d} and something goes wrong, you need to be able to roll back to the previous image \texttt{sha-9f8e7d6}. If the images are not stored anywhere, rollback is impossible~--- you would have to rebuild the previous version (which requires the previous source code and a working build system). With artifact storage, rollback is one command: pull and run the previous image.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What a container registry is and how it works
+\item
+  The difference between public registries (Docker Hub) and private registries
+\item
+  How to push images to and pull images from a registry
+\item
+  How to tag images systematically so you can find any historical version
+\item
+  How the registry fits into the complete build-to-deployment pipeline
+\item
+  What other types of artifacts beyond Docker images need to be stored
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{What a Container Registry Is}\label{19-artifact-storage:191-what-a-container-registry-is}
+
+A \textbf{container registry} is a server that stores Docker images and serves them over the Docker registry protocol. At its core, it is a specialized object store with an API designed specifically for Docker images.
+
+The interaction model is simple:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+PUSH (build machine → registry)
+  docker push myregistry.io/notes-api:sha-a1b2c3d
+
+PULL (production server → registry)
+  docker pull myregistry.io/notes-api:sha-a1b2c3d
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Every Docker image has a \textbf{fully qualified name} that specifies where it lives:
+
+\begin{diagrambox}[short]{349.4pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+registry-host / repository-name : tag
+    │                  │           │
+    │                  │           └─ Version identifier
+    │                  └─────────── Repository (often org/project)
+    └────────────────────────────── Registry server (omit for Docker Hub)
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Examples:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+docker.io/library/python:3.11-slim
+    ← Python official image on Docker Hub
+ghcr.io/myorg/notes-api:sha-a1b2c3d
+    ← GitHub Container Registry
+123456789.dkr.ecr.us-east-1.amazonaws.com/notes-api:sha-a1b2c3d
+    ← AWS ECR
+us-docker.pkg.dev/my-project/apps/notes-api:sha-a1b2c3d
+    ← Google Artifact Registry
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{How image layers are stored}\phantomsection\label{19-artifact-storage:how-image-layers-are-stored}
+
+Docker images are not stored as single files. They are stored as individual layers, each identified by its SHA-256 hash (a cryptographic fingerprint of the layer's contents). The registry stores each layer once, regardless of how many images reference it.
+
+When you push \texttt{notes-api:sha-a1b2c3d} and then push \texttt{notes-api:sha-b2c3d4e} (built from mostly the same layers), Docker only uploads the layers that changed. The \texttt{python:3.11-slim} base layers, the user-creation layer, and the installed-packages layer are already in the registry from the previous push~--- only the new application code layers are uploaded.
+
+This is called \textbf{layer deduplication} and it dramatically reduces the bandwidth and storage required for a registry serving many image versions.
+
+\setcounter{section}{1}
+\section{Registry Options}\label{19-artifact-storage:192-registry-options}
+
+\subsection*{Docker Hub (docker.io)}\phantomsection\label{19-artifact-storage:docker-hub-dockerio}
+
+The default public registry. Every image name without a registry hostname refers to Docker Hub:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ pull python:3.11   }\CommentTok{\# Actually: docker.io/library/python:3.11}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Docker Hub offers:
+
+\begin{itemize}
+\tightlist
+\item
+  Free public repositories (publicly accessible)
+\item
+  A limited number of private repositories on the free plan
+\item
+  Paid plans for more private repositories and higher limits
+\end{itemize}
+
+\noindent{}Docker Hub rate-limits pulls, most strictly for anonymous clients, and the limits have been tightened more than once. A busy CI system that pulls base images anonymously can hit them, so log CI in to Docker Hub even for public images. (Check Docker's current pricing page for the exact numbers.) Most teams keep their own images in a private registry.
+
+\subsection*{GitHub Container Registry (GHCR)}\phantomsection\label{19-artifact-storage:github-container-registry-ghcr}
+
+If your code is on GitHub, GHCR is the natural choice:
+
+\begin{itemize}
+\tightlist
+\item
+  Integrated with GitHub permissions (repo access = registry access)
+\item
+  Free for public repositories
+\item
+  Private images count against your account's GitHub Packages storage and transfer quotas
+\item
+  Images at \texttt{ghcr.}\allowbreak{}\texttt{io/}\allowbreak{}\texttt{YOUR-}\allowbreak{}\texttt{USERNAME/}\allowbreak{}\texttt{IMAGE-}\allowbreak{}\texttt{NAME}
+\end{itemize}
+
+\subsection*{AWS Elastic Container Registry (ECR)}\phantomsection\label{19-artifact-storage:aws-elastic-container-registry-ecr}
+
+If your application runs on AWS:
+
+\begin{itemize}
+\tightlist
+\item
+  Each AWS account has its own private registry
+\item
+  Authentication uses IAM (AWS's identity system)~--- EC2 instances can pull images without managing credentials
+\item
+  Pay per storage and data transfer (500 MB/month of storage is free for the first 12 months, on the AWS Free Tier)
+\item
+  Images at \texttt{123456789.}\allowbreak{}\texttt{dkr.}\allowbreak{}\texttt{ecr.}\allowbreak{}\texttt{REGION.}\allowbreak{}\texttt{amazonaws.}\allowbreak{}\texttt{com/}\allowbreak{}\texttt{IMAGE-}\allowbreak{}\texttt{NAME}
+\end{itemize}
+
+\subsection*{Google Artifact Registry}\phantomsection\label{19-artifact-storage:google-artifact-registry}
+
+If your application runs on Google Cloud:
+
+\begin{itemize}
+\tightlist
+\item
+  Similar to AWS ECR~--- tightly integrated with Google Cloud IAM
+\item
+  Supports Docker images, Python packages, npm packages, and more (it is a general artifact store, not just for Docker)
+\item
+  Images at \texttt{REGION-}\allowbreak{}\texttt{docker.}\allowbreak{}\texttt{pkg.}\allowbreak{}\texttt{dev/}\allowbreak{}\texttt{PROJECT-}\allowbreak{}\texttt{ID/}\allowbreak{}\texttt{REPOSITORY/}\allowbreak{}\texttt{IMAGE-}\allowbreak{}\texttt{NAME}
+\end{itemize}
+
+\subsection*{Running a private registry locally}\phantomsection\label{19-artifact-storage:running-a-private-registry-locally}
+
+For development and testing, you can run a registry on your own machine:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Start a local registry on port 5001}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}p}\NormalTok{ 5001:5000 }\AttributeTok{{-}{-}name}\NormalTok{ local{-}registry registry:2}
+
+\CommentTok{\# Push to it}
+\ExtensionTok{docker}\NormalTok{ tag notes{-}api:latest localhost:5001/notes{-}api:latest}
+\ExtensionTok{docker}\NormalTok{ push localhost:5001/notes{-}api:latest}
+
+\CommentTok{\# Pull from it}
+\ExtensionTok{docker}\NormalTok{ pull localhost:5001/notes{-}api:latest}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is useful for testing the push/pull workflow without a cloud account.
+
+\setcounter{section}{2}
+\section{Pushing to GitHub Container Registry}\label{19-artifact-storage:193-pushing-to-github-container-registry}
+
+GHCR is the easiest option if your code is already on GitHub. Here is the complete workflow.
+
+\subsection*{Step 1: Authenticate}\phantomsection\label{19-artifact-storage:step-1-authenticate}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Log in to GHCR using a GitHub Personal Access Token (PAT)}
+\CommentTok{\# Create a PAT at: https://github.com/settings/tokens}
+\CommentTok{\# Required scope: write:packages (it includes read:packages).}
+\CommentTok{\# Do not grant delete:packages: pushing never needs it.}
+
+\BuiltInTok{echo} \VariableTok{$GITHUB\_TOKEN} \KeywordTok{|} \ExtensionTok{docker}\NormalTok{ login ghcr.io }\AttributeTok{{-}u}\NormalTok{ YOUR{-}GITHUB{-}USERNAME }\AttributeTok{{-}{-}password{-}stdin}
+\CommentTok{\# Login Succeeded}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Step 2: Tag the image with the full GHCR address}\phantomsection\label{19-artifact-storage:step-2-tag-the-image-with-the-full-ghcr-address}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Your image must be tagged with the full registry address before pushing.}
+\CommentTok{\# Format: ghcr.io/GITHUB{-}USERNAME/IMAGE{-}NAME:TAG}
+\CommentTok{\# GHCR names must be all lowercase: write your username in lowercase}
+\CommentTok{\# even if it has capitals on GitHub, or the push is rejected.}
+
+\VariableTok{GIT\_HASH}\OperatorTok{=}\VariableTok{$(}\FunctionTok{git}\NormalTok{ rev{-}parse }\AttributeTok{{-}{-}short}\NormalTok{ HEAD}\VariableTok{)}
+
+\ExtensionTok{docker}\NormalTok{ tag notes{-}api:sha{-}}\VariableTok{$\{GIT\_HASH\}}\NormalTok{ ghcr.io/your{-}username/notes{-}api:sha{-}}\VariableTok{$\{GIT\_HASH\}}
+\ExtensionTok{docker}\NormalTok{ tag notes{-}api:sha{-}}\VariableTok{$\{GIT\_HASH\}}\NormalTok{ ghcr.io/your{-}username/notes{-}api:latest}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Step 3: Push}\phantomsection\label{19-artifact-storage:step-3-push}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ push ghcr.io/your{-}username/notes{-}api:sha{-}}\VariableTok{$\{GIT\_HASH\}}
+\ExtensionTok{docker}\NormalTok{ push ghcr.io/your{-}username/notes{-}api:latest}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+The push refers to repository [ghcr.io/your-username/notes-api]
+7f3e21c9d0aa: Pushed
+5bd08e4f1c62: Pushed
+0e9a4d7b3f15: Layer already exists   ← python:3.11-slim base layers
+91c6f2e8a4d3: Layer already exists
+c47b1a0e5f28: Layer already exists
+sha-a1b2c3d: digest: sha256:4f0c9e… size: 2847
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}``Layer already exists'' confirms layer deduplication: the unchanged layers from the base image are already in the registry. (The hexadecimal names on the left are layer digests, unrelated to git commit hashes.)
+
+\subsection*{Step 4: Pull (on any machine)}\phantomsection\label{19-artifact-storage:step-4-pull-on-any-machine}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On the production server — no build required, just pull and run}
+\ExtensionTok{docker}\NormalTok{ pull ghcr.io/your{-}username/notes{-}api:sha{-}a1b2c3d}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}p}\NormalTok{ 127.0.0.1:5000:5000 }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}e}\NormalTok{ DATABASE\_URL=postgresql://... }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}e}\NormalTok{ SECRET\_KEY=... }\DataTypeTok{\textbackslash{}}
+\NormalTok{  ghcr.io/your{-}username/notes{-}api:sha{-}a1b2c3d}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{3}
+\section{Integrating Registry Push into CI}\label{19-artifact-storage:194-integrating-registry-push-into-ci}
+
+\hyperref[ch:18-containerization]{Chapter 18} added a Docker build and a smoke test to CI. Now extend the pipeline to push the image to the registry automatically when code is merged to main.
+
+Replace \texttt{.}\allowbreak{}\texttt{github/}\allowbreak{}\texttt{workflows/}\allowbreak{}\texttt{build.}\allowbreak{}\texttt{yml} with the workflow below. It keeps the ideas of Chapters 17 and 18 but reorganizes them: tests run on the production Python version only (add the Chapter 17 matrix back if you support several), and the Docker smoke test moves into the publish job, so the image that is pushed is the image that was just tested.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 19.1}\enspace Updated GitHub Actions workflow with registry push}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Build, Test, and Publish}
+
+\FunctionTok{on}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{push}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{branches}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"main"}\KeywordTok{]}\CommentTok{      \# Full pipeline (including push) on main}
+\AttributeTok{  }\FunctionTok{pull\_request}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{branches}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"main"}\KeywordTok{]}\CommentTok{      \# Tests only (no push) on pull requests}
+
+\CommentTok{\# Required for pushing to GHCR}
+\FunctionTok{permissions}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{contents}\KeywordTok{:}\AttributeTok{ read}
+\AttributeTok{  }\FunctionTok{packages}\KeywordTok{:}\AttributeTok{ write}
+
+\FunctionTok{env}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{REGISTRY}\KeywordTok{:}\AttributeTok{ ghcr.io}
+\AttributeTok{  }\FunctionTok{IMAGE\_NAME}\KeywordTok{:}\AttributeTok{ $\{\{ github.repository \}\}}\CommentTok{  \# e.g., "your{-}username/notes{-}api"}
+\CommentTok{  \# (GHCR requires lowercase names; metadata{-}action lowercases this for you)}
+
+\FunctionTok{jobs}\KeywordTok{:}
+
+\AttributeTok{  }\FunctionTok{build{-}and{-}test}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Build and Test}
+\AttributeTok{    }\FunctionTok{runs{-}on}\KeywordTok{:}\AttributeTok{ ubuntu{-}latest}
+
+\AttributeTok{    }\FunctionTok{steps}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Check out repository}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/checkout@v4}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Set up Python 3.11}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/setup{-}python@v5}
+\AttributeTok{        }\FunctionTok{with}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{python{-}version}\KeywordTok{:}\AttributeTok{ }\StringTok{"3.11"}
+\AttributeTok{          }\FunctionTok{cache}\KeywordTok{:}\AttributeTok{ }\StringTok{"pip"}
+\FunctionTok{          cache{-}dependency{-}path}\KeywordTok{: }\CharTok{|}
+\NormalTok{            requirements.txt}
+\NormalTok{            requirements{-}dev.txt}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Install dependencies}
+\AttributeTok{        }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ pip install {-}r requirements{-}dev.txt}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Run build (lint + typecheck + test + security)}
+\AttributeTok{        }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ make build}
+
+\AttributeTok{  }\FunctionTok{publish}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Build and Push Docker Image}
+\AttributeTok{    }\FunctionTok{runs{-}on}\KeywordTok{:}\AttributeTok{ ubuntu{-}latest}
+\AttributeTok{    }\FunctionTok{needs}\KeywordTok{:}\AttributeTok{ build{-}and{-}test}\CommentTok{        \# Only publish if tests pass}
+\CommentTok{    \# Only push on pushes to main (not pull requests)}
+\AttributeTok{    }\FunctionTok{if}\KeywordTok{:}\AttributeTok{ github.event\_name == \textquotesingle{}push\textquotesingle{} \&\& github.ref == \textquotesingle{}refs/heads/main\textquotesingle{}}
+
+\AttributeTok{    }\FunctionTok{steps}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Check out repository}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/checkout@v4}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Extract metadata for Docker}
+\AttributeTok{        }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ meta}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ docker/metadata{-}action@v5}
+\AttributeTok{        }\FunctionTok{with}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{images}\KeywordTok{:}\AttributeTok{ $\{\{ env.REGISTRY \}\}/$\{\{ env.IMAGE\_NAME \}\}}
+\FunctionTok{          tags}\KeywordTok{: }\CharTok{|}
+\NormalTok{            \# Tag with the short git SHA (e.g., sha{-}a1b2c3d)}
+\NormalTok{            type=sha,prefix=sha{-}}
+\NormalTok{            \# Tag with \textquotesingle{}latest\textquotesingle{} on the main branch}
+\NormalTok{            type=raw,value=latest,enable=\{\{is\_default\_branch\}\}}
+\CommentTok{          \# The generated labels include org.opencontainers.image.revision}
+\CommentTok{          \# (the full commit SHA) and .created (the build time); they}
+\CommentTok{          \# override the LABEL defaults in the Dockerfile.}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Build the image for testing}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ docker/build{-}push{-}action@v5}
+\AttributeTok{        }\FunctionTok{with}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{context}\KeywordTok{:}\AttributeTok{ .}
+\AttributeTok{          }\FunctionTok{load}\KeywordTok{:}\AttributeTok{ }\CharTok{true}\CommentTok{               \# Keep the image in the local Docker, don\textquotesingle{}t push}
+\AttributeTok{          }\FunctionTok{tags}\KeywordTok{:}\AttributeTok{ notes{-}api:ci{-}test}
+\AttributeTok{          }\FunctionTok{cache{-}from}\KeywordTok{:}\AttributeTok{ type=gha}
+\AttributeTok{          }\FunctionTok{cache{-}to}\KeywordTok{:}\AttributeTok{ type=gha,mode=max}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Smoke{-}test the image}
+\FunctionTok{        run}\KeywordTok{: }\CharTok{|}
+\NormalTok{          docker run {-}d {-}{-}name smoke {-}p 5000:5000 \textbackslash{}}
+\NormalTok{            {-}e DATABASE\_URL="sqlite:///notes.db" \textbackslash{}}
+\NormalTok{            {-}e SECRET\_KEY="ci{-}test{-}secret{-}key{-}not{-}for{-}production{-}1234" \textbackslash{}}
+\NormalTok{            notes{-}api:ci{-}test}
+\NormalTok{          curl {-}{-}fail {-}{-}retry 10 {-}{-}retry{-}delay 1 {-}{-}retry{-}connrefused \textbackslash{}}
+\NormalTok{            http://localhost:5000/health}
+\NormalTok{          docker rm {-}f smoke}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Log in to GitHub Container Registry}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ docker/login{-}action@v3}
+\AttributeTok{        }\FunctionTok{with}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{registry}\KeywordTok{:}\AttributeTok{ $\{\{ env.REGISTRY \}\}}
+\AttributeTok{          }\FunctionTok{username}\KeywordTok{:}\AttributeTok{ $\{\{ github.actor \}\}}
+\AttributeTok{          }\FunctionTok{password}\KeywordTok{:}\AttributeTok{ $\{\{ secrets.GITHUB\_TOKEN \}\}}
+\CommentTok{          \# GITHUB\_TOKEN is automatically available in Actions — no setup needed}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Build and push Docker image}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ docker/build{-}push{-}action@v5}
+\AttributeTok{        }\FunctionTok{with}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{context}\KeywordTok{:}\AttributeTok{ .}
+\AttributeTok{          }\FunctionTok{push}\KeywordTok{:}\AttributeTok{ }\CharTok{true}
+\AttributeTok{          }\FunctionTok{tags}\KeywordTok{:}\AttributeTok{ $\{\{ steps.meta.outputs.tags \}\}}
+\AttributeTok{          }\FunctionTok{labels}\KeywordTok{:}\AttributeTok{ $\{\{ steps.meta.outputs.labels \}\}}
+\CommentTok{          \# Every layer comes from the cache filled by the test build above,}
+\CommentTok{          \# so the pushed image contains exactly what was smoke{-}tested}
+\AttributeTok{          }\FunctionTok{cache{-}from}\KeywordTok{:}\AttributeTok{ type=gha}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\textbf{The complete flow when you merge to main:}
+
+\begin{diagrambox}[short]{335.6pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+git push origin main
+         │
+         ▼
+GitHub Actions triggers
+         │
+         ├── Job: build-and-test
+         │     pip install + make build
+         │     All tests pass ✓
+         │
+         └── Job: publish (runs after build-and-test)
+               docker login to ghcr.io
+               docker build, then smoke-test the image (/health)
+               docker push ghcr.io/your-username/notes-api:sha-a1b2c3d
+               docker push ghcr.io/your-username/notes-api:latest
+               ✓ Image available in registry
+\end{Verbatim}
+\end{diagrambox}
+
+\setcounter{section}{4}
+\section{The Tagging Strategy}\label{19-artifact-storage:195-the-tagging-strategy}
+
+Image tags determine how you identify and deploy specific versions. A consistent tagging strategy is critical.
+
+\subsection*{\texorpdfstring{What NOT to do: \texttt{latest} only}{What NOT to do: latest only}}\phantomsection\label{19-artifact-storage:what-not-to-do-latest-only}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Bad: every build overwrites latest}
+\ExtensionTok{docker}\NormalTok{ build }\AttributeTok{{-}t}\NormalTok{ ghcr.io/org/notes{-}api:latest .}
+\ExtensionTok{docker}\NormalTok{ push ghcr.io/org/notes{-}api:latest}
+
+\CommentTok{\# On the server}
+\ExtensionTok{docker}\NormalTok{ pull ghcr.io/org/notes{-}api:latest}
+\ExtensionTok{docker}\NormalTok{ run ghcr.io/org/notes{-}api:latest}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Problem: if you run \texttt{docker\ pull\ notes-}\allowbreak{}\texttt{api:}\allowbreak{}\texttt{latest} two weeks apart, you might get different images. You cannot tell which code is running. Rollback means ``pull the old latest''~--- but latest no longer refers to the old version.
+
+\subsection*{What to do: commit hash + latest}\phantomsection\label{19-artifact-storage:what-to-do-commit-hash--latest}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Good: each build gets a unique tag, named after its commit}
+\VariableTok{SHORT\_HASH}\OperatorTok{=}\VariableTok{$(}\FunctionTok{git}\NormalTok{ rev{-}parse }\AttributeTok{{-}{-}short}\NormalTok{ HEAD}\VariableTok{)}  \CommentTok{\# 7{-}character abbreviation}
+\VariableTok{IMAGE}\OperatorTok{=}\NormalTok{ghcr.io/org/notes{-}api               }\CommentTok{\# always include the registry}
+
+\ExtensionTok{docker}\NormalTok{ build }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}t} \VariableTok{$\{IMAGE\}}\NormalTok{:sha{-}}\VariableTok{$\{SHORT\_HASH\}} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}t} \VariableTok{$\{IMAGE\}}\NormalTok{:latest }\DataTypeTok{\textbackslash{}}
+\NormalTok{  .}
+
+\ExtensionTok{docker}\NormalTok{ push }\VariableTok{$\{IMAGE\}}\NormalTok{:sha{-}}\VariableTok{$\{SHORT\_HASH\}}
+\ExtensionTok{docker}\NormalTok{ push }\VariableTok{$\{IMAGE\}}\NormalTok{:latest}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(Without the registry prefix, \texttt{docker\ push\ notes-api:…} would try to push to Docker Hub's \texttt{library/} namespace, which is reserved for official images, and fail.)
+
+Rules:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\texttt{notes-api:sha-a1b2c3d}}: refers to the image built from commit \texttt{a1b2c3d}. Treat it as immutable: never re-point it. Registries do not enforce this by default~--- a tag is just a movable name~--- so turn on tag immutability where the registry offers it (ECR does), or deploy by \textbf{digest} (\texttt{notes-}\allowbreak{}\texttt{api@sha256:}\allowbreak{}\texttt{4f0c9e…}), which can never refer to anything else.
+\item
+  \textbf{\texttt{notes-api:latest}}: mutable. Always refers to the most recently built image from the main branch.
+\end{itemize}
+
+\noindent{}Deploy by specific hash, not \texttt{latest}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Deploy the specific version — predictable and auditable}
+\ExtensionTok{docker}\NormalTok{ run ghcr.io/org/notes{-}api:sha{-}a1b2c3d}
+
+\CommentTok{\# Rollback: deploy the previous version}
+\ExtensionTok{docker}\NormalTok{ run ghcr.io/org/notes{-}api:sha{-}9f8e7d6}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Semantic versioning (for released versions)}\phantomsection\label{19-artifact-storage:semantic-versioning-for-released-versions}
+
+For projects that have explicit releases, add semantic version tags:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# For release v1.2.3:}
+\ExtensionTok{docker}\NormalTok{ build }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}t}\NormalTok{ notes{-}api:1.2.3 }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}t}\NormalTok{ notes{-}api:1.2 }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}t}\NormalTok{ notes{-}api:1 }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}t}\NormalTok{ notes{-}api:latest }\DataTypeTok{\textbackslash{}}
+\NormalTok{  .}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{notes-api:1.2.3}~--- immutable, this exact patch release
+\item
+  \texttt{notes-api:1.2}~--- points to the latest patch of 1.2 (mutable as patches are released)
+\item
+  \texttt{notes-api:1}~--- points to the latest minor release of major version 1 (mutable)
+\item
+  \texttt{notes-api:latest}~--- the most recent build from \texttt{main}, as in the rest of this chapter (projects with formal releases often point it at the newest stable release instead; decide once, and write it down)
+\end{itemize}
+
+\noindent{}This is the strategy used by the official Python image: \texttt{python:3.11.8} is pinned to one patch release, \texttt{python:3.11} moves with each patch, and \texttt{python:3} moves with each minor release.
+
+\setcounter{section}{5}
+\section{Beyond Docker Images: Other Artifacts}\label{19-artifact-storage:196-beyond-docker-images-other-artifacts}
+
+Docker images are the primary artifact for containerized applications, but the concept of artifact storage applies broadly.
+
+\subsection*{\texorpdfstring{Python package artifacts (\texttt{.whl} files)}{Python package artifacts (.whl files)}}\phantomsection\label{19-artifact-storage:python-package-artifacts-whl-files}
+
+If the Notes API were a library that other Python projects import, the build would produce a \textbf{wheel} (\texttt{.whl}) file. (This is illustrative: the Notes API is an application, and its \texttt{pyproject.toml} is not set up for packaging.)
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Build a wheel}
+\ExtensionTok{pip}\NormalTok{ install build}
+\ExtensionTok{python} \AttributeTok{{-}m}\NormalTok{ build}
+\CommentTok{\# Output: dist/notes\_api{-}0.1.0{-}py3{-}none{-}any.whl}
+
+\CommentTok{\# Upload to a package index}
+\ExtensionTok{pip}\NormalTok{ install twine}
+\ExtensionTok{twine}\NormalTok{ upload dist/}\PreprocessorTok{*}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Public packages go to \textbf{PyPI} (pypi.org). Private packages go to private package indexes: \textbf{Nexus}, \textbf{Artifactory}, \textbf{AWS CodeArtifact}, or \textbf{Google Artifact Registry} (which handles Python packages as well as Docker images).
+
+\subsection*{Database migrations as artifacts}\phantomsection\label{19-artifact-storage:database-migrations-as-artifacts}
+
+When the database schema changes, the change is described in a \textbf{migration file}:
+
+\begin{diagrambox}[short]{137.4pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+migrations/
+├── 0001_initial_schema.sql
+└── 0002_add_updated_at.sql
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Migration files are stored in the git repository (they are source code, not build outputs), but the record of which migrations have been applied to which database is stored in the database itself. Tools like \textbf{Alembic} (for projects that use SQLAlchemy) or \textbf{Flyway} (for any SQL database) manage this automatically. The Notes API does not have migrations yet: \texttt{init\_db()} creates the table with \texttt{CREATE\ TABLE\ IF\ NOT\ EXISTS}, which cannot change a table that already exists. Its first real schema change~--- the \texttt{updated\_at} column in \hyperref[ch:33-logic-execution]{Chapter 33}~--- is where that approach runs out, and where Chapter 33 builds a small migration runner of its own.
+
+\subsection*{Build logs and test reports as artifacts}\phantomsection\label{19-artifact-storage:build-logs-and-test-reports-as-artifacts}
+
+CI systems store build logs and test reports so you can diagnose failures after the fact:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In GitHub Actions — produce the reports, then store them for 30 days}
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Run tests with reports}
+\AttributeTok{  }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ pytest {-}{-}junitxml=test{-}results.xml {-}{-}cov=app {-}{-}cov{-}report=xml}
+
+\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Upload test report}
+\AttributeTok{  }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/upload{-}artifact@v4}
+\AttributeTok{  }\FunctionTok{with}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ test{-}report}
+\FunctionTok{    path}\KeywordTok{: }\CharTok{|}
+\NormalTok{      test{-}results.xml}
+\NormalTok{      coverage.xml}
+\AttributeTok{    }\FunctionTok{retention{-}days}\KeywordTok{:}\AttributeTok{ }\DecValTok{30}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{6}
+\section{Image Lifecycle Management}\label{19-artifact-storage:197-image-lifecycle-management}
+
+Images accumulate. Every build produces a new image. Without lifecycle management, the registry fills up with thousands of images, most of which will never be used.
+
+\subsection*{Retention policies}\phantomsection\label{19-artifact-storage:retention-policies}
+
+Most registries support \textbf{retention policies}~--- rules that automatically delete old images:
+
+\textbf{Rule examples:}
+
+\begin{itemize}
+\tightlist
+\item
+  Delete any image older than 90 days that is not tagged \texttt{latest}
+\item
+  Keep only the 10 most recent images per repository
+\item
+  Delete untagged images (leftover from failed builds) after 1 day
+\end{itemize}
+
+\noindent{}GitHub Container Registry has no built-in retention rules; teams run a scheduled workflow that deletes old image versions (for example with the \texttt{actions/}\allowbreak{}\texttt{delete-}\allowbreak{}\texttt{package-}\allowbreak{}\texttt{versions} action).
+
+In AWS ECR, a lifecycle policy expresses the rules directly. Rules are checked in priority order, and an image matched by a higher-priority rule is never expired by a lower-priority one~--- which is how the first rule below protects production images (see the next section):
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}
+  \DataTypeTok{"rules"}\FunctionTok{:} \OtherTok{[}
+    \FunctionTok{\{}
+      \DataTypeTok{"rulePriority"}\FunctionTok{:} \DecValTok{1}\FunctionTok{,}
+      \DataTypeTok{"description"}\FunctionTok{:} \StringTok{"Keep images deployed to production"}\FunctionTok{,}
+      \DataTypeTok{"selection"}\FunctionTok{:} \FunctionTok{\{}
+        \DataTypeTok{"tagStatus"}\FunctionTok{:} \StringTok{"tagged"}\FunctionTok{,}
+        \DataTypeTok{"tagPrefixList"}\FunctionTok{:} \OtherTok{[}\StringTok{"prod{-}"}\OtherTok{]}\FunctionTok{,}
+        \DataTypeTok{"countType"}\FunctionTok{:} \StringTok{"imageCountMoreThan"}\FunctionTok{,}
+        \DataTypeTok{"countNumber"}\FunctionTok{:} \DecValTok{1000}
+      \FunctionTok{\},}
+      \DataTypeTok{"action"}\FunctionTok{:} \FunctionTok{\{}
+        \DataTypeTok{"type"}\FunctionTok{:} \StringTok{"expire"}
+      \FunctionTok{\}}
+    \FunctionTok{\}}\OtherTok{,}
+    \FunctionTok{\{}
+      \DataTypeTok{"rulePriority"}\FunctionTok{:} \DecValTok{2}\FunctionTok{,}
+      \DataTypeTok{"description"}\FunctionTok{:} \StringTok{"Keep last 10 images"}\FunctionTok{,}
+      \DataTypeTok{"selection"}\FunctionTok{:} \FunctionTok{\{}
+        \DataTypeTok{"tagStatus"}\FunctionTok{:} \StringTok{"tagged"}\FunctionTok{,}
+        \DataTypeTok{"tagPrefixList"}\FunctionTok{:} \OtherTok{[}\StringTok{"sha{-}"}\OtherTok{]}\FunctionTok{,}
+        \DataTypeTok{"countType"}\FunctionTok{:} \StringTok{"imageCountMoreThan"}\FunctionTok{,}
+        \DataTypeTok{"countNumber"}\FunctionTok{:} \DecValTok{10}
+      \FunctionTok{\},}
+      \DataTypeTok{"action"}\FunctionTok{:} \FunctionTok{\{}
+        \DataTypeTok{"type"}\FunctionTok{:} \StringTok{"expire"}
+      \FunctionTok{\}}
+    \FunctionTok{\}}
+  \OtherTok{]}
+\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Images that should never be deleted}\phantomsection\label{19-artifact-storage:images-that-should-never-be-deleted}
+
+Production-deployed images must never be deleted by retention policies. Before deleting any image, check that it is not currently running anywhere.
+
+One pattern: tag production-deployed images with a \texttt{prod-YYYYMMDD} tag that the retention policy excludes:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# When deploying to production:}
+\ExtensionTok{docker}\NormalTok{ tag ghcr.io/org/notes{-}api:sha{-}a1b2c3d ghcr.io/org/notes{-}api:prod{-}20240115}
+\ExtensionTok{docker}\NormalTok{ push ghcr.io/org/notes{-}api:prod{-}20240115}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The image now carries both tags. In ECR, the higher-priority \texttt{prod-} rule above claims it, so the \texttt{sha-} rule can no longer expire it. With GHCR, the cleanup workflow must be told to skip versions that have a \texttt{prod-} tag.
+
+\setcounter{section}{7}
+\section{The Complete Artifact Flow}\label{19-artifact-storage:198-the-complete-artifact-flow}
+
+Bringing together everything from \hyperref[ch:17-build-process]{Chapter 17} through 19:
+
+\begin{diagrambox}[short]{248.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Developer's laptop
+│
+├── Write code
+├── git push origin main
+│
+▼
+GitHub Actions (CI)
+│
+├── Checkout code
+├── pip install -r requirements-dev.txt
+├── make build
+│     ├── ruff check (linting)
+│     ├── black --check (formatting)
+│     ├── mypy (type checking)
+│     ├── pytest (tests)
+│     └── pip-audit (security)
+│
+├── Build Docker image and smoke-test it
+│     docker build -t notes-api:sha-a1b2c3d .
+│     docker run … ; curl --fail …/health
+│
+├── Push to registry
+│     docker push ghcr.io/org/notes-api:sha-a1b2c3d
+│     docker push ghcr.io/org/notes-api:latest
+│
+└── ✓ Artifact available in registry
+          │
+          │ (deploy trigger — Chapter 23)
+          ▼
+Production server
+│
+├── docker pull ghcr.io/org/notes-api:sha-a1b2c3d
+└── docker run ghcr.io/org/notes-api:sha-a1b2c3d
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}The critical property of this flow: \textbf{the artifact that runs in production is the same artifact CI built and checked}. The code is tested, the image is built from that same commit and smoke-tested, pushed to the registry, and then pulled and run in production. No rebuilding. No ``build it on the production server.'' As long as nobody re-points the \texttt{sha-a1b2c3d} tag (section 19.5), it always refers to the same image.
+
+\setcounter{section}{8}
+\section{The Updated Makefile}\label{19-artifact-storage:199-the-updated-makefile}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Additions to Makefile — registry operations}
+\CommentTok{\# (Replace the release target from Chapter 18 with the one below;}
+\CommentTok{\# defining a target\textquotesingle{}s recipe twice makes make warn and use the last one.)}
+
+\DataTypeTok{REGISTRY} \CharTok{:=}\StringTok{ ghcr.io}
+\CommentTok{\# Replace with your GitHub username, in lowercase. (Keep the comment on its}
+\CommentTok{\# own line: make would include the spaces before an inline comment in the value.)}
+\DataTypeTok{GITHUB\_USERNAME} \CharTok{:=}\StringTok{ your{-}username}
+
+\DataTypeTok{FULL\_IMAGE\_NAME} \CharTok{:=}\StringTok{ }\CharTok{$(}\DataTypeTok{REGISTRY}\CharTok{)}\StringTok{/}\CharTok{$(}\DataTypeTok{GITHUB\_USERNAME}\CharTok{)}\StringTok{/}\CharTok{$(}\DataTypeTok{IMAGE\_NAME}\CharTok{)}
+
+\OtherTok{.PHONY:}\DataTypeTok{ docker{-}push}
+
+\CommentTok{\# Push to registry (requires docker login first)}
+\DecValTok{docker{-}push:}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{"→ Pushing }\CharTok{$(}\DataTypeTok{FULL\_IMAGE\_NAME}\CharTok{)}\StringTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)}\StringTok{..."}
+\NormalTok{    docker tag }\CharTok{$(}\DataTypeTok{IMAGE\_NAME}\CharTok{)}\NormalTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)} \CharTok{$(}\DataTypeTok{FULL\_IMAGE\_NAME}\CharTok{)}\NormalTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)}
+\NormalTok{    docker tag }\CharTok{$(}\DataTypeTok{IMAGE\_NAME}\CharTok{)}\NormalTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)} \CharTok{$(}\DataTypeTok{FULL\_IMAGE\_NAME}\CharTok{)}\NormalTok{:latest}
+\NormalTok{    docker push }\CharTok{$(}\DataTypeTok{FULL\_IMAGE\_NAME}\CharTok{)}\NormalTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)}
+\NormalTok{    docker push }\CharTok{$(}\DataTypeTok{FULL\_IMAGE\_NAME}\CharTok{)}\NormalTok{:latest}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Pushed: }\CharTok{$(}\DataTypeTok{FULL\_IMAGE\_NAME}\CharTok{)}\StringTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)}\StringTok{"}
+
+\CommentTok{\# Complete release: build, test, docker build, push}
+\DecValTok{release:}\DataTypeTok{ build docker{-}build docker{-}push}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{""}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Release complete."}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"  Image: }\CharTok{$(}\DataTypeTok{FULL\_IMAGE\_NAME}\CharTok{)}\StringTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)}\StringTok{"}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"  Pull:  docker pull }\CharTok{$(}\DataTypeTok{FULL\_IMAGE\_NAME}\CharTok{)}\StringTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)}\StringTok{"}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\phantomsection\label{19-artifact-storage:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{container registry} is a server that stores Docker images and makes them retrievable by \texttt{docker\ pull}. It is the intermediary between where images are built (CI) and where they run (production).
+\item
+  \textbf{Layer deduplication} means the registry stores each layer once. Pushing a new image version only uploads the layers that changed~--- base image layers are already there.
+\item
+  \textbf{Registry options}: Docker Hub (public/default), GitHub Container Registry (integrated with GitHub), AWS ECR (integrated with AWS IAM), Google Artifact Registry (multi-format). The choice depends on where the application runs.
+\item
+  \textbf{Tag every image with its git commit hash} (e.g., \texttt{notes-api:sha-a1b2c3d}). This creates an auditable link between a running container and the exact code it contains~--- as long as the tag is never moved, which registry tag immutability or deploying by digest can guarantee. \texttt{latest} is a convenience alias, not a deployment strategy.
+\item
+  \textbf{Never deploy by pulling \texttt{latest}}. Deploy a specific immutable tag. Rollback by deploying the previous immutable tag.
+\item
+  \textbf{The CI-to-registry-to-production flow} ensures that the image CI built and smoke-tested is the exact image running in production: build once, test once, deploy the same artifact.
+\item
+  \textbf{Retention policies} prevent registries from filling with unused images. Protect production-deployed images from deletion.
+\item
+  \textbf{Artifact storage extends beyond Docker images}: Python wheel files, database migrations, test reports, and build logs are also artifacts that need storage and lifecycle management.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{19-artifact-storage:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Push the same image twice with the same tag. How much data is uploaded the second time, and why?
+\item
+  \textbf{Break and fix.} Tag an image \texttt{latest}, deploy it, then push a new \texttt{latest}. What is now running, and what will a restart run? Why does the book deploy \texttt{sha-...} tags only?
+\item
+  \textbf{Extend.} Write a retention rule for your registry: keep the last 20 images and anything deployed in the last 30 days. How would you enforce ``never delete what production runs''?
+\item
+  \textbf{Explain.} Explain ``build once, deploy the same artifact'' and what it protects against.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-19.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{19-artifact-storage:whats-next}
+
+The artifact (Docker image) is built, tested, and stored in a registry. The infrastructure to run it~--- a server~--- still needs to be established. What is a production server? How is it different from a laptop? What decisions must be made when selecting and configuring one?
+
+\noindent{}→ \hyperref[ch:20-server-fundamentals]{Chapter 20}~--- Server Fundamentals

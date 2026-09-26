@@ -1,0 +1,610 @@
+\setcounter{chapter}{13}
+\chapter{Runtime Contract Definition}\label{ch:14-runtime-contract}
+
+\chapterrule
+
+Every piece of software makes demands on its execution environment. It needs a particular version of the language runtime. It needs certain operating system capabilities. It needs certain ports to be available. It needs certain environment variables to be set.
+
+When these demands are undocumented~--- implicit~--- they become sources of failure. The application works in the developer's environment because the developer's environment happens to satisfy them all. It fails in a new environment because no one knew what those demands were, and no one could verify that the new environment satisfied them.
+
+A \textbf{runtime contract} is the explicit, documented statement of what an application requires from its execution environment before it can start and operate correctly. It is not part of the application's code~--- it is documentation \emph{about} the code, written for the people (or systems) that will be responsible for creating and managing the execution environment.
+
+Writing a runtime contract is a discipline that forces clarity. It asks: ``What exactly does this application need?'' The answer, written down, becomes a specification that a server setup (→ \hyperref[ch:21-system-setup]{Chapter 21}), a Dockerfile (→ \hyperref[ch:18-containerization]{Chapter 18}), a deployment checklist (→ \hyperref[ch:23-code-transfer]{Chapter 23}), and a monitoring system (→ \hyperref[ch:35-observability]{Chapter 35}) can all be measured against.
+
+This chapter defines the runtime contract for the Notes API and explains each category in detail.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What a runtime contract is and why it matters
+\item
+  How to declare the required Python version and enforce it at startup
+\item
+  What OS-level capabilities an application might require
+\item
+  How to document and validate required ports
+\item
+  How to formally document required environment variables
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Required Python Version}\label{14-runtime-contract:141-required-python-version}
+
+The Notes API is developed and tested on Python 3.11 and supports Python 3.10 and later. Declaring a minimum version is a promise about what you test against~--- later chapters use the \texttt{X\ \textbar{}\ None} type syntax, which needs Python 3.10.
+
+Declaring this is the first element of the runtime contract.
+
+\subsection*{\texorpdfstring{Declaring the version requirement in \texttt{pyproject.toml}}{Declaring the version requirement in pyproject.toml}}\phantomsection\label{14-runtime-contract:declaring-the-version-requirement-in-pyprojecttoml}
+
+If the project uses \texttt{pyproject.toml}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# pyproject.toml}
+\KeywordTok{[project]}
+\DataTypeTok{name} \OperatorTok{=} \StringTok{"notes{-}api"}
+\DataTypeTok{requires{-}python} \OperatorTok{=} \StringTok{"\textgreater{}=3.10"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}When someone tries to install the project with an older Python:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On Python 3.9:}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}e}\NormalTok{ .}
+\CommentTok{\# ERROR: Package \textquotesingle{}notes{-}api\textquotesingle{} requires a different Python:}
+\CommentTok{\# 3.9.x not in \textquotesingle{}\textgreater{}=3.10\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}pip refuses to install with an incompatible Python version.
+
+\subsection*{\texorpdfstring{Declaring the version requirement without \texttt{pyproject.toml}}{Declaring the version requirement without pyproject.toml}}\phantomsection\label{14-runtime-contract:declaring-the-version-requirement-without-pyprojecttoml}
+
+For projects using only \texttt{requirements.txt}, add a \texttt{.python-version} file~--- a simple text file containing the target Python version. Tools like \texttt{pyenv} and \texttt{asdf} read this file and activate the correct Python version automatically:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# .python-version
+3.11
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Some CI/CD tools can read this file too (GitHub Actions' \texttt{setup-python}, for example, when you point its \texttt{python-version-file} option at it).
+
+\subsection*{Enforcing the version at runtime}\phantomsection\label{14-runtime-contract:enforcing-the-version-at-runtime}
+
+Add a version check at the top of \texttt{app.py}, before anything else:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 14.1}\enspace Enforcing the minimum Python version at startup}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ sys}
+
+\NormalTok{REQUIRED\_PYTHON }\OperatorTok{=}\NormalTok{ (}\DecValTok{3}\NormalTok{, }\DecValTok{10}\NormalTok{)}
+
+\ControlFlowTok{if}\NormalTok{ sys.version\_info }\OperatorTok{\textless{}}\NormalTok{ REQUIRED\_PYTHON:}
+    \BuiltInTok{print}\NormalTok{(}
+        \SpecialStringTok{f"Error: This application requires Python "}
+        \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{REQUIRED\_PYTHON[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{.}\SpecialCharTok{\{}\NormalTok{REQUIRED\_PYTHON[}\DecValTok{1}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{ or later.}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+        \SpecialStringTok{f"You are running Python "}
+        \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{sys}\SpecialCharTok{.}\NormalTok{version\_info}\SpecialCharTok{.}\NormalTok{major}\SpecialCharTok{\}}\SpecialStringTok{.}\SpecialCharTok{\{}\NormalTok{sys}\SpecialCharTok{.}\NormalTok{version\_info}\SpecialCharTok{.}\NormalTok{minor}\SpecialCharTok{\}}\SpecialStringTok{.}\SpecialCharTok{\{}\NormalTok{sys}\SpecialCharTok{.}\NormalTok{version\_info}\SpecialCharTok{.}\NormalTok{micro}\SpecialCharTok{\}}\SpecialStringTok{.}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+        \SpecialStringTok{f"Please install the correct Python version and try again."}\NormalTok{,}
+        \BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr,}
+\NormalTok{    )}
+\NormalTok{    sys.exit(}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This check runs before anything else. If the Python version is wrong, the application exits immediately with a clear, actionable error message instead of an obscure failure later.
+
+There is one limit. Python compiles a whole file before running any of it, so if the \emph{same file} uses syntax an old interpreter cannot parse (a \texttt{match} statement, for example), the old interpreter reports a \texttt{SyntaxError} before the check ever runs. The check protects you only if it lives in a small entry-point module written in old-compatible syntax, which runs before the rest of the application is imported.
+
+\setcounter{section}{1}
+\section{Required Operating System Features}\label{14-runtime-contract:142-required-operating-system-features}
+
+The Notes API requires several OS-level features. Some are always present on standard Linux installations; others might be absent in minimal or restricted environments.
+
+\subsection*{Network socket support}\phantomsection\label{14-runtime-contract:network-socket-support}
+
+The application binds to a TCP socket (← \hyperref[ch:03-network-capability]{Chapter 3}). Socket support is available on all general-purpose operating systems, but some hardened environments or containers with security profiles (like certain seccomp configurations) restrict socket system calls.
+
+This is typically not something to check at startup, but it is worth noting in the runtime contract.
+
+\subsection*{File system write access}\phantomsection\label{14-runtime-contract:file-system-write-access}
+
+The application needs to write to:
+
+\begin{itemize}
+\tightlist
+\item
+  The directory specified in \texttt{DATABASE\_URL} (for SQLite) or has access to a PostgreSQL server
+\item
+  A log directory (after production logging is configured in → \hyperref[ch:16-logging-error-handling]{Chapter 16})
+\end{itemize}
+
+\noindent{}Verify at startup:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 14.2}\enspace Checking filesystem write access at startup}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ sys}
+
+\KeywordTok{def}\NormalTok{ check\_file\_access():}
+    \CommentTok{"""Verify required filesystem access."""}
+\NormalTok{    db\_url }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_URL"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+
+    \ControlFlowTok{if}\NormalTok{ db\_url.startswith(}\StringTok{"sqlite:///"}\NormalTok{):}
+\NormalTok{        db\_path }\OperatorTok{=}\NormalTok{ db\_url[}\BuiltInTok{len}\NormalTok{(}\StringTok{"sqlite:///"}\NormalTok{):]}
+\NormalTok{        db\_dir }\OperatorTok{=}\NormalTok{ os.path.dirname(os.path.abspath(db\_path)) }\KeywordTok{or} \StringTok{"."}
+        \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ os.access(db\_dir, os.W\_OK):}
+            \BuiltInTok{print}\NormalTok{(}
+                \SpecialStringTok{f"Error: Cannot write to database directory: }\SpecialCharTok{\{}\NormalTok{db\_dir}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{,}
+                \BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr}
+\NormalTok{            )}
+\NormalTok{            sys.exit(}\DecValTok{1}\NormalTok{)}
+
+\NormalTok{    log\_dir }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"LOG\_DIR"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ log\_dir }\KeywordTok{and} \KeywordTok{not}\NormalTok{ os.access(log\_dir, os.W\_OK):}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Error: Cannot write to log directory: }\SpecialCharTok{\{}\NormalTok{log\_dir}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+\NormalTok{        sys.exit(}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{Network connectivity to external services}\phantomsection\label{14-runtime-contract:network-connectivity-to-external-services}
+
+The application connects to a PostgreSQL database server. That server must be reachable from the application's network. For production deployments on cloud platforms, this means the database and application must be in the same Virtual Private Cloud (VPC), or the network rules must permit the connection.
+
+You can verify database connectivity at startup:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 14.3}\enspace Verifying database connectivity at startup}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ sys}
+
+\KeywordTok{def}\NormalTok{ check\_database\_connectivity(database\_url: }\BuiltInTok{str}\NormalTok{):}
+    \CommentTok{"""Verify the database is reachable before accepting requests."""}
+    \ControlFlowTok{if}\NormalTok{ database\_url.startswith(}\StringTok{"sqlite:///"}\NormalTok{):}
+        \CommentTok{\# SQLite is a local file — no network connectivity needed}
+        \ControlFlowTok{return}
+
+    \ControlFlowTok{try}\NormalTok{:}
+        \ImportTok{import}\NormalTok{ psycopg2}
+\NormalTok{        conn }\OperatorTok{=}\NormalTok{ psycopg2.}\ExtensionTok{connect}\NormalTok{(database\_url, connect\_timeout}\OperatorTok{=}\DecValTok{5}\NormalTok{)}
+\NormalTok{        conn.close()}
+        \BuiltInTok{print}\NormalTok{(}\StringTok{"Database connectivity: OK"}\NormalTok{, flush}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+    \ControlFlowTok{except} \PreprocessorTok{Exception} \ImportTok{as}\NormalTok{ e:}
+        \BuiltInTok{print}\NormalTok{(}
+            \SpecialStringTok{f"Error: Cannot connect to database.}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+            \SpecialStringTok{f"DATABASE\_URL: }\SpecialCharTok{\{}\NormalTok{mask\_password(database\_url)}\SpecialCharTok{\}}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+            \SpecialStringTok{f"Error: }\SpecialCharTok{\{}\NormalTok{e}\SpecialCharTok{\}}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+            \SpecialStringTok{f"Ensure the database server is running and accessible."}\NormalTok{,}
+            \BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr,}
+\NormalTok{        )}
+\NormalTok{        sys.exit(}\DecValTok{1}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ mask\_password(url: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""Hide the password in a database URL before printing it."""}
+    \ImportTok{from}\NormalTok{ urllib.parse }\ImportTok{import}\NormalTok{ urlsplit}
+\NormalTok{    parts }\OperatorTok{=}\NormalTok{ urlsplit(url)}
+    \ControlFlowTok{if}\NormalTok{ parts.password:}
+        \ControlFlowTok{return}\NormalTok{ url.replace(}\SpecialStringTok{f":}\SpecialCharTok{\{}\NormalTok{parts}\SpecialCharTok{.}\NormalTok{password}\SpecialCharTok{\}}\SpecialStringTok{@"}\NormalTok{, }\StringTok{":****@"}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ url}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Notice \texttt{mask\_password()}: the URL contains the database password, and an error message ends up in terminal scrollback and log files~--- exactly where secrets must never go (← \hyperref[ch:09-configuration-coupling]{Chapter 9}).
+
+Failing fast on database connectivity prevents the application from starting and serving traffic when the database is unreachable~--- which would cause every request to fail with an opaque error. Better to not start at all with a clear reason than to start and fail on every request.
+
+\setcounter{section}{2}
+\section{Required Ports}\label{14-runtime-contract:143-required-ports}
+
+The application needs one port available: the port it will bind to (default 5000, or whatever \texttt{PORT} is set to).
+
+There is a secondary concern: if a firewall, container, or security group blocks the port, the application can start but be unreachable. The application itself cannot detect this at startup~--- it can only verify the port is not already in use.
+
+\subsection*{Checking port availability at startup}\phantomsection\label{14-runtime-contract:checking-port-availability-at-startup}
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 14.4}\enspace Checking that the required port is available}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ errno}
+\ImportTok{import}\NormalTok{ socket}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ sys}
+
+\KeywordTok{def}\NormalTok{ check\_port\_available(host: }\BuiltInTok{str}\NormalTok{, port: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""Check that the port is not already in use."""}
+    \ControlFlowTok{with}\NormalTok{ socket.socket(socket.AF\_INET, socket.SOCK\_STREAM) }\ImportTok{as}\NormalTok{ s:}
+\NormalTok{        s.setsockopt(socket.SOL\_SOCKET, socket.SO\_REUSEADDR, }\DecValTok{1}\NormalTok{)}
+        \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{            s.bind((host, port))}
+            \CommentTok{\# Bind succeeded — port is available}
+        \ControlFlowTok{except} \PreprocessorTok{OSError} \ImportTok{as}\NormalTok{ e:}
+            \ControlFlowTok{if}\NormalTok{ e.errno }\OperatorTok{==}\NormalTok{ errno.EADDRINUSE:  }\CommentTok{\# 98 on Linux, 48 on macOS}
+                \BuiltInTok{print}\NormalTok{(}
+                    \SpecialStringTok{f"Error: Port }\SpecialCharTok{\{}\NormalTok{port}\SpecialCharTok{\}}\SpecialStringTok{ on }\SpecialCharTok{\{}\NormalTok{host}\SpecialCharTok{\}}\SpecialStringTok{ is already in use.}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+                    \SpecialStringTok{f"Either another process is using it, or a previous server "}
+                    \SpecialStringTok{f"instance did not shut down cleanly.}\CharTok{\textbackslash{}n}\SpecialStringTok{"}
+                    \SpecialStringTok{f"Use: lsof {-}i :}\SpecialCharTok{\{}\NormalTok{port}\SpecialCharTok{\}}\SpecialStringTok{ to find the process."}\NormalTok{,}
+                    \BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr,}
+\NormalTok{                )}
+\NormalTok{                sys.exit(}\DecValTok{1}\NormalTok{)}
+            \ControlFlowTok{raise}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This check replaces the bare \texttt{OSError:}\allowbreak{}\texttt{\ {[}Errno\ 98{]}\ Address\ already\ in\ use} (errno 48 on macOS) from the socket layer with an explanation of what to do. Two cautions: the port could still be taken in the instant between this check and the real \texttt{bind()}, and this check only makes sense when \emph{your own code} is about to bind the port~--- for the development server started with \texttt{python\ app.py}. A production server such as Gunicorn binds the port itself before it imports your application, so running this check there would find the port ``in use'' by the very server that is starting.
+
+\subsection*{Documenting the port requirement}\phantomsection\label{14-runtime-contract:documenting-the-port-requirement}
+
+The runtime contract document should state:
+
+\begin{notebox}
+
+\textbf{Required port}: The application requires that the TCP port specified by \texttt{PORT} (default: 5000) be available on the host specified by \texttt{HOST}. If clients connect from other machines, firewall rules and security groups must allow inbound TCP traffic on this port from them. If the only client is a reverse proxy on the same machine~--- the setup this book builds~--- the application should listen on \texttt{127.0.0.1} and the port should stay \emph{closed} to the outside.
+
+\end{notebox}
+
+\setcounter{section}{3}
+\section{Required Environment Variables}\label{14-runtime-contract:144-required-environment-variables}
+
+All required environment variables have already been established in \hyperref[ch:13-configuration-externalization]{Chapter 13}. The runtime contract consolidates them into a single reference.
+
+\subsection*{The formal environment variable specification}\phantomsection\label{14-runtime-contract:the-formal-environment-variable-specification}
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 14.5}\enspace Formal environment variable specification as code}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ dataclasses }\ImportTok{import}\NormalTok{ dataclass}
+\ImportTok{from}\NormalTok{ typing }\ImportTok{import}\NormalTok{ Callable}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ sys}
+
+\AttributeTok{@dataclass}
+\KeywordTok{class}\NormalTok{ EnvVar:}
+    \CommentTok{"""Specification for a single environment variable."""}
+\NormalTok{    name: }\BuiltInTok{str}
+\NormalTok{    required: }\BuiltInTok{bool}
+\NormalTok{    description: }\BuiltInTok{str}
+\NormalTok{    example: }\BuiltInTok{str}
+\NormalTok{    default: }\BuiltInTok{str} \OperatorTok{|} \VariableTok{None} \OperatorTok{=} \VariableTok{None}
+\NormalTok{    validator: Callable[[}\BuiltInTok{str}\NormalTok{], }\BuiltInTok{bool}\NormalTok{] }\OperatorTok{|} \VariableTok{None} \OperatorTok{=} \VariableTok{None}
+
+\NormalTok{ENVIRONMENT\_SPEC }\OperatorTok{=}\NormalTok{ [}
+\NormalTok{    EnvVar(}
+\NormalTok{        name}\OperatorTok{=}\StringTok{"DATABASE\_URL"}\NormalTok{,}
+\NormalTok{        required}\OperatorTok{=}\VariableTok{True}\NormalTok{,}
+\NormalTok{        description}\OperatorTok{=}\StringTok{"Database connection URL. SQLite or PostgreSQL."}\NormalTok{,}
+\NormalTok{        example}\OperatorTok{=}\StringTok{"postgresql://user:pass@localhost:5432/notesdb"}\NormalTok{,}
+\NormalTok{        validator}\OperatorTok{=}\KeywordTok{lambda}\NormalTok{ v: v.startswith((}\StringTok{"sqlite:///"}\NormalTok{, }\StringTok{"postgresql://"}\NormalTok{)),}
+\NormalTok{    ),}
+\NormalTok{    EnvVar(}
+\NormalTok{        name}\OperatorTok{=}\StringTok{"SECRET\_KEY"}\NormalTok{,}
+\NormalTok{        required}\OperatorTok{=}\VariableTok{True}\NormalTok{,}
+\NormalTok{        description}\OperatorTok{=}\StringTok{"Secret key for Flask session signing. Must be random and at least 24 characters."}\NormalTok{,}
+\NormalTok{        example}\OperatorTok{=}\StringTok{"\textless{}generate with: python {-}c }\CharTok{\textbackslash{}"}\StringTok{import secrets; print(secrets.token\_hex(32))}\CharTok{\textbackslash{}"}\StringTok{\textgreater{}"}\NormalTok{,}
+\NormalTok{        validator}\OperatorTok{=}\KeywordTok{lambda}\NormalTok{ v: }\BuiltInTok{len}\NormalTok{(v) }\OperatorTok{\textgreater{}=} \DecValTok{24}\NormalTok{,}
+\NormalTok{    ),}
+\NormalTok{    EnvVar(}
+\NormalTok{        name}\OperatorTok{=}\StringTok{"FLASK\_DEBUG"}\NormalTok{,}
+\NormalTok{        required}\OperatorTok{=}\VariableTok{False}\NormalTok{,}
+\NormalTok{        default}\OperatorTok{=}\StringTok{"false"}\NormalTok{,}
+\NormalTok{        description}\OperatorTok{=}\StringTok{"Enable Flask debug mode. Must be \textquotesingle{}false\textquotesingle{} in production."}\NormalTok{,}
+\NormalTok{        example}\OperatorTok{=}\StringTok{"false"}\NormalTok{,}
+\NormalTok{        validator}\OperatorTok{=}\KeywordTok{lambda}\NormalTok{ v: v.lower() }\KeywordTok{in}\NormalTok{ (}\StringTok{"true"}\NormalTok{, }\StringTok{"false"}\NormalTok{),}
+\NormalTok{    ),}
+\NormalTok{    EnvVar(}
+\NormalTok{        name}\OperatorTok{=}\StringTok{"PORT"}\NormalTok{,}
+\NormalTok{        required}\OperatorTok{=}\VariableTok{False}\NormalTok{,}
+\NormalTok{        default}\OperatorTok{=}\StringTok{"5000"}\NormalTok{,}
+\NormalTok{        description}\OperatorTok{=}\StringTok{"Port number to bind to. Must be between 1024 and 65535."}\NormalTok{,}
+\NormalTok{        example}\OperatorTok{=}\StringTok{"5000"}\NormalTok{,}
+\NormalTok{        validator}\OperatorTok{=}\KeywordTok{lambda}\NormalTok{ v: }\DecValTok{1024} \OperatorTok{\textless{}=} \BuiltInTok{int}\NormalTok{(v) }\OperatorTok{\textless{}=} \DecValTok{65535}\NormalTok{,}
+\NormalTok{    ),}
+\NormalTok{    EnvVar(}
+\NormalTok{        name}\OperatorTok{=}\StringTok{"HOST"}\NormalTok{,}
+\NormalTok{        required}\OperatorTok{=}\VariableTok{False}\NormalTok{,}
+\NormalTok{        default}\OperatorTok{=}\StringTok{"127.0.0.1"}\NormalTok{,}
+\NormalTok{        description}\OperatorTok{=}\StringTok{"IP address to bind to. Use 127.0.0.1 for local, 0.0.0.0 for all interfaces."}\NormalTok{,}
+\NormalTok{        example}\OperatorTok{=}\StringTok{"0.0.0.0"}\NormalTok{,}
+\NormalTok{    ),}
+\NormalTok{]}
+
+\KeywordTok{def}\NormalTok{ load\_and\_validate\_environment() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Load and validate all environment variables per specification.}
+\CommentTok{    Prints a formatted report and exits on failure.}
+\CommentTok{    """}
+\NormalTok{    config }\OperatorTok{=}\NormalTok{ \{\}}
+\NormalTok{    errors }\OperatorTok{=}\NormalTok{ []}
+
+    \ControlFlowTok{for}\NormalTok{ spec }\KeywordTok{in}\NormalTok{ ENVIRONMENT\_SPEC:}
+\NormalTok{        raw }\OperatorTok{=}\NormalTok{ os.getenv(spec.name, spec.default)}
+
+        \ControlFlowTok{if}\NormalTok{ spec.required }\KeywordTok{and} \KeywordTok{not}\NormalTok{ raw:}
+\NormalTok{            errors.append(}\SpecialStringTok{f"  ✗ }\SpecialCharTok{\{}\NormalTok{spec}\SpecialCharTok{.}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{: MISSING (required)"}\NormalTok{)}
+\NormalTok{            errors.append(}\SpecialStringTok{f"      }\SpecialCharTok{\{}\NormalTok{spec}\SpecialCharTok{.}\NormalTok{description}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\NormalTok{            errors.append(}\SpecialStringTok{f"      Example: }\SpecialCharTok{\{}\NormalTok{spec}\SpecialCharTok{.}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{=}\SpecialCharTok{\{}\NormalTok{spec}\SpecialCharTok{.}\NormalTok{example}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+            \ControlFlowTok{continue}
+
+        \ControlFlowTok{if}\NormalTok{ raw }\KeywordTok{and}\NormalTok{ spec.validator:}
+            \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{                valid }\OperatorTok{=}\NormalTok{ spec.validator(raw)}
+            \ControlFlowTok{except}\NormalTok{ (}\PreprocessorTok{ValueError}\NormalTok{, }\PreprocessorTok{TypeError}\NormalTok{):}
+\NormalTok{                valid }\OperatorTok{=} \VariableTok{False}
+            \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ valid:}
+\NormalTok{                errors.append(}\SpecialStringTok{f"  ✗ }\SpecialCharTok{\{}\NormalTok{spec}\SpecialCharTok{.}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{: INVALID value \textquotesingle{}}\SpecialCharTok{\{}\NormalTok{raw}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{}"}\NormalTok{)}
+\NormalTok{                errors.append(}\SpecialStringTok{f"      }\SpecialCharTok{\{}\NormalTok{spec}\SpecialCharTok{.}\NormalTok{description}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+                \ControlFlowTok{continue}
+
+\NormalTok{        config[spec.name] }\OperatorTok{=}\NormalTok{ raw}
+
+    \ControlFlowTok{if}\NormalTok{ errors:}
+        \BuiltInTok{print}\NormalTok{(}\StringTok{"Environment validation failed:"}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+        \ControlFlowTok{for}\NormalTok{ line }\KeywordTok{in}\NormalTok{ errors:}
+            \BuiltInTok{print}\NormalTok{(line, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+\NormalTok{        sys.exit(}\DecValTok{1}\NormalTok{)}
+
+    \ControlFlowTok{return}\NormalTok{ config}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This specification serves two purposes:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Documentation}: the spec is the authoritative statement of what the application needs
+\item
+  \textbf{Validation}: the spec drives the startup checks that enforce the contract
+\end{enumerate}
+
+\unnumberedsection{false}{The Complete Runtime Contract Document}\label{14-runtime-contract:the-complete-runtime-contract-document}
+
+The runtime contract is also valuable as human-readable documentation. For the Notes API, it looks like this:
+
+\begin{diagrambox}{377.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+NOTES API — RUNTIME CONTRACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PYTHON VERSION
+  Required: Python 3.10 or later
+  Recommended: Python 3.11 or later
+  Check: python3 --version
+
+OPERATING SYSTEM
+  Target: Linux (Ubuntu 22.04 LTS or later, Debian 12 or later)
+  Also supported: macOS 13+ (development only)
+  Not supported: Python on Windows without WSL
+
+SYSTEM PACKAGES (required before pip install)
+  None — psycopg2-binary bundles the PostgreSQL client library.
+  (Building plain psycopg2 from source would need libpq-dev,
+   build-essential, and python3-dev.)
+
+PYTHON PACKAGES
+  Install: pip install -r requirements.txt
+  (All transitive dependencies are pinned in requirements.txt)
+
+REQUIRED PORTS
+  PORT (default: 5000) must be available on HOST (default: 127.0.0.1)
+  With a reverse proxy on the same machine, keep PORT closed to the outside
+
+REQUIRED ENVIRONMENT VARIABLES
+  ┌─────────────────┬──────────┬──────────────────────────────────────────────┐
+  │ Variable        │ Required │ Description                                  │
+  ├─────────────────┼──────────┼──────────────────────────────────────────────┤
+  │ DATABASE_URL    │ Yes      │ PostgreSQL or SQLite connection URL          │
+  │ SECRET_KEY      │ Yes      │ ≥24 char random string for session signing   │
+  │ FLASK_DEBUG     │ No       │ 'true' or 'false' (default: 'false')         │
+  │ PORT            │ No       │ TCP port to bind (default: 5000)             │
+  │ HOST            │ No       │ IP to bind (default: 127.0.0.1)              │
+  └─────────────────┴──────────┴──────────────────────────────────────────────┘
+
+CONNECTIVITY
+  DATABASE: The server must be able to reach the host in DATABASE_URL on
+            PostgreSQL port 5432 (or whatever port the DB uses).
+  OUTBOUND: No other outbound connections required by default.
+
+FILESYSTEM
+  Write access required to:
+    - Database directory (if using SQLite)
+    - Log directory (if LOG_DIR is set)
+
+STARTUP SEQUENCE
+  1. Python version check
+  2. Environment variable validation
+  3. Port availability check (development server only)
+  4. Database connectivity check
+  5. Application created; routes registered
+  6. Database schema initialization (CREATE TABLE IF NOT EXISTS)
+  7. Server starts accepting connections
+
+ON FAILURE
+  All checks fail fast with a descriptive error message and exit code 1.
+  No partial startup. No silent degradation.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}This document lives in the repository (commonly as \texttt{RUNTIME.md}, or as a section of the project's \texttt{README.md}). It is the answer to: ``What does this application need to run?''
+
+\unnumberedsection{false}{The Consolidated Startup Sequence}\label{14-runtime-contract:the-consolidated-startup-sequence}
+
+Here is a \texttt{startup.py} module that runs all contract checks before handing control to Flask:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 14.6}\enspace Consolidated startup checks (startup.py)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Startup checks for the Notes API.}
+\CommentTok{Import and call startup.run() before app.run() to enforce the runtime contract.}
+\CommentTok{"""}
+\ImportTok{import}\NormalTok{ sys}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ socket}
+\ImportTok{from}\NormalTok{ urllib.parse }\ImportTok{import}\NormalTok{ urlsplit}
+
+\KeywordTok{def}\NormalTok{ check\_python\_version():}
+    \ControlFlowTok{if}\NormalTok{ sys.version\_info }\OperatorTok{\textless{}}\NormalTok{ (}\DecValTok{3}\NormalTok{, }\DecValTok{10}\NormalTok{):}
+\NormalTok{        \_fail(}
+            \SpecialStringTok{f"Python 3.10+ required. Running }\SpecialCharTok{\{}\NormalTok{sys}\SpecialCharTok{.}\NormalTok{version\_info}\SpecialCharTok{.}\NormalTok{major}\SpecialCharTok{\}}\SpecialStringTok{."}
+            \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{sys}\SpecialCharTok{.}\NormalTok{version\_info}\SpecialCharTok{.}\NormalTok{minor}\SpecialCharTok{\}}\SpecialStringTok{."}
+\NormalTok{        )}
+
+\KeywordTok{def}\NormalTok{ check\_env\_vars():}
+\NormalTok{    required }\OperatorTok{=}\NormalTok{ [}\StringTok{"DATABASE\_URL"}\NormalTok{, }\StringTok{"SECRET\_KEY"}\NormalTok{]}
+\NormalTok{    missing }\OperatorTok{=}\NormalTok{ [v }\ControlFlowTok{for}\NormalTok{ v }\KeywordTok{in}\NormalTok{ required }\ControlFlowTok{if} \KeywordTok{not}\NormalTok{ os.getenv(v)]}
+    \ControlFlowTok{if}\NormalTok{ missing:}
+\NormalTok{        \_fail(}\SpecialStringTok{f"Missing required environment variables: }\SpecialCharTok{\{}\StringTok{\textquotesingle{}, \textquotesingle{}}\SpecialCharTok{.}\NormalTok{join(missing)}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+\NormalTok{    secret }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"SECRET\_KEY"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+    \ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(secret) }\OperatorTok{\textless{}} \DecValTok{24}\NormalTok{:}
+\NormalTok{        \_fail(}\StringTok{"SECRET\_KEY must be at least 24 characters long."}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ check\_port():}
+    \CommentTok{\# With FLASK\_DEBUG=true, Flask\textquotesingle{}s reloader runs this file a second time in a child}
+    \CommentTok{\# process while the parent already holds the port — skip the check there.}
+    \ControlFlowTok{if}\NormalTok{ os.getenv(}\StringTok{"WERKZEUG\_RUN\_MAIN"}\NormalTok{) }\OperatorTok{==} \StringTok{"true"}\NormalTok{:}
+        \ControlFlowTok{return}
+\NormalTok{    host }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"HOST"}\NormalTok{, }\StringTok{"127.0.0.1"}\NormalTok{)}
+\NormalTok{    port }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(os.getenv(}\StringTok{"PORT"}\NormalTok{, }\StringTok{"5000"}\NormalTok{))}
+    \ControlFlowTok{with}\NormalTok{ socket.socket(socket.AF\_INET, socket.SOCK\_STREAM) }\ImportTok{as}\NormalTok{ s:}
+\NormalTok{        s.setsockopt(socket.SOL\_SOCKET, socket.SO\_REUSEADDR, }\DecValTok{1}\NormalTok{)}
+        \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{            s.bind((host, port))}
+        \ControlFlowTok{except} \PreprocessorTok{OSError}\NormalTok{:}
+\NormalTok{            \_fail(}\SpecialStringTok{f"Port }\SpecialCharTok{\{}\NormalTok{port}\SpecialCharTok{\}}\SpecialStringTok{ on }\SpecialCharTok{\{}\NormalTok{host}\SpecialCharTok{\}}\SpecialStringTok{ is already in use."}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ check\_database():}
+\NormalTok{    db\_url }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_URL"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ db\_url.startswith(}\StringTok{"sqlite:///"}\NormalTok{):}
+        \ControlFlowTok{return}  \CommentTok{\# No network connectivity needed}
+
+    \ControlFlowTok{try}\NormalTok{:}
+        \ImportTok{import}\NormalTok{ psycopg2}
+\NormalTok{        conn }\OperatorTok{=}\NormalTok{ psycopg2.}\ExtensionTok{connect}\NormalTok{(db\_url, connect\_timeout}\OperatorTok{=}\DecValTok{5}\NormalTok{)}
+\NormalTok{        conn.close()}
+    \ControlFlowTok{except} \PreprocessorTok{Exception} \ImportTok{as}\NormalTok{ e:}
+\NormalTok{        \_fail(}\SpecialStringTok{f"Cannot connect to database: }\SpecialCharTok{\{}\NormalTok{e}\SpecialCharTok{\}}\CharTok{\textbackslash{}n}\SpecialStringTok{URL: }\SpecialCharTok{\{}\NormalTok{\_mask(db\_url)}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ \_mask(url: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""Never print a password: hide it before the URL reaches a log."""}
+\NormalTok{    password }\OperatorTok{=}\NormalTok{ urlsplit(url).password}
+    \ControlFlowTok{return}\NormalTok{ url.replace(}\SpecialStringTok{f":}\SpecialCharTok{\{}\NormalTok{password}\SpecialCharTok{\}}\SpecialStringTok{@"}\NormalTok{, }\StringTok{":****@"}\NormalTok{, }\DecValTok{1}\NormalTok{) }\ControlFlowTok{if}\NormalTok{ password }\ControlFlowTok{else}\NormalTok{ url}
+
+\KeywordTok{def}\NormalTok{ run():}
+    \CommentTok{"""Run all startup checks. Exits on any failure."""}
+    \BuiltInTok{print}\NormalTok{(}\StringTok{"Running startup checks..."}\NormalTok{, flush}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\NormalTok{    check\_python\_version()}
+\NormalTok{    check\_env\_vars()}
+\NormalTok{    check\_port()}
+\NormalTok{    check\_database()}
+    \BuiltInTok{print}\NormalTok{(}\StringTok{"All startup checks passed."}\NormalTok{, flush}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ \_fail(message: }\BuiltInTok{str}\NormalTok{):}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\CharTok{\textbackslash{}n}\SpecialStringTok{Startup failed: }\SpecialCharTok{\{}\NormalTok{message}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+\NormalTok{    sys.exit(}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Use it in \texttt{app.py}, in the block that starts the development server:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# At the bottom of app.py}
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+    \ImportTok{import}\NormalTok{ startup}
+\NormalTok{    startup.run()          }\CommentTok{\# checks run before the development server binds the port}
+\NormalTok{    app.run(host}\OperatorTok{=}\NormalTok{CONFIG[}\StringTok{"HOST"}\NormalTok{], port}\OperatorTok{=}\NormalTok{CONFIG[}\StringTok{"PORT"}\NormalTok{], debug}\OperatorTok{=}\NormalTok{CONFIG[}\StringTok{"DEBUG"}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Keeping the call inside the \texttt{\_\_main\_\_} block matters. When a production server imports \texttt{app.py} (→ \hyperref[ch:18-containerization]{Chapter 18}), it has already bound the port, so the port check must not run~--- Chapter 15 splits these checks so that the ones that still apply run in production too.
+
+\phantomsection\label{14-runtime-contract:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{runtime contract} is the explicit, documented specification of what an application requires from its execution environment: Python version, OS features, ports, and environment variables.
+\item
+  \textbf{Declare the Python version} in \texttt{pyproject.toml} (\texttt{requires-python}), in \texttt{.python-version}, and enforce it at runtime with a startup check.
+\item
+  \textbf{OS requirements} include filesystem write permissions, network connectivity to databases and external services, and potentially system packages (such as \texttt{libpq-dev} if you build the PostgreSQL driver from source).
+\item
+  \textbf{Required ports} must be available on the specified host. Verify at startup to prevent the cryptic \texttt{Address\ already\ in\ use} error.
+\item
+  \textbf{Required environment variables} should be both documented (for humans) and validated at startup (for automated enforcement). Fail fast with a complete list of problems, not just the first one.
+\item
+  The runtime contract is the bridge between the application and its infrastructure. Everything in Stages 5--7 (infrastructure, deployment, networking) is the work of satisfying this contract in a real environment.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{14-runtime-contract:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Run the application with a Python version older than the one in \texttt{requires-python}. What stops it, and where is that check?
+\item
+  \textbf{Break and fix.} Occupy port 5000 with another program (\texttt{python3\ -}\allowbreak{}\texttt{m\ http.}\allowbreak{}\texttt{server\ 5000\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{bind\ 127.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{1}) and start \texttt{python\ app.py}. Compare the message with the raw \texttt{Address\ already\ in\ use} error you saw in Chapter 3.
+\item
+  \textbf{Extend.} Write \texttt{.python-version} and add a CI step that fails if the Python in CI differs from it.
+\item
+  \textbf{Explain.} Explain why a runtime contract should be both documented for people and enforced by code.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-14.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{14-runtime-contract:whats-next}
+
+Dependencies are declared. Configuration is externalized. The runtime contract is defined. The next step is giving the application a proper structure~--- organizing its files, defining a clear entry point, and standardizing how it is started.
+
+\noindent{}→ \hyperref[ch:15-structuring-the-application]{Chapter 15}~--- Structuring the Application

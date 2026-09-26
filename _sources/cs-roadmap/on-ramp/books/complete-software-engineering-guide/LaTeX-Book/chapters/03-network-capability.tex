@@ -1,0 +1,702 @@
+\setcounter{chapter}{2}
+\chapter{Creating Network Capability}\label{ch:03-network-capability}
+
+\chapterrule
+
+At the end of \hyperref[ch:02-runtime-initialization]{Chapter 2}, the Notes API had finished its initialization sequence. Flask's route table was populated. The database schema was in place. The application object was ready. The last line of code that ran was \texttt{app.run(debug=}\allowbreak{}\texttt{True)}.
+
+That call~--- \texttt{app.run()}~--- is where the application stops being a batch program and becomes a server.
+
+A \textbf{server} is a program that waits for connections. Unlike a script that runs from top to bottom and exits, a server sits in a loop, continuously accepting incoming connections, handling them, and waiting for the next one. It does not exit until you tell it to.
+
+To become a server, a program must acquire \textbf{network capability}~--- the ability to accept connections from other programs, whether those other programs are a browser on your laptop, a mobile app on the other side of the world, or an automated test suite running on a CI server.
+
+Network capability does not come automatically. A Python program with no networking code is completely invisible to the network. It cannot receive requests, cannot send responses, and cannot be reached by any other machine or program. Network capability must be explicitly created, step by step, through a series of system calls that configure the operating system's networking subsystem.
+
+Those steps~--- creating a socket, binding it to an address, entering the listening state, and waiting for connections~--- are what this chapter explains.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What a socket is, and what problem it solves
+\item
+  How to create a socket using Python's \texttt{socket} module
+\item
+  What it means to bind a socket to an address and port
+\item
+  What the listening state is and how connection queuing works
+\item
+  How the kernel maps incoming connections to the correct process
+\item
+  What the connection queue is and why it exists
+\end{itemize}
+
+\end{objectives}
+
+\noindent{}This chapter uses Python's \texttt{socket} module directly to show you exactly what Flask does under the hood. Flask hides these calls, but they happen~--- and understanding them changes how you think about web servers permanently.
+
+\setcounter{section}{0}
+\section{What a Socket Is and Why It Exists}\label{03-network-capability:31-what-a-socket-is-and-why-it-exists}
+
+Before a program can send or receive data over a network, it needs an \textbf{endpoint}~--- a specific, addressable point through which communication flows. In networking, that endpoint is called a \textbf{socket}.
+
+A socket is an abstraction provided by the operating system. It represents one end of a communication channel. The other end is another socket~--- either on the same machine or on a different machine anywhere in the world.
+
+Think of a socket like a telephone. Before you can make or receive calls, you need a phone (the socket). The phone has a number (the address and port). When someone calls you (a connection arrives), you pick up (accept the connection). Until you pick up, the call waits (the connection queue). The conversation (data exchange) flows through the phone once it is connected.
+
+\subsection*{Why the operating system provides sockets}\phantomsection\label{03-network-capability:why-the-operating-system-provides-sockets}
+
+The operating system provides sockets because network communication is complex and hardware-dependent. Sending data over a network requires:
+
+\begin{itemize}
+\tightlist
+\item
+  Formatting data into packets according to protocols (TCP/IP)
+\item
+  Routing packets through network interfaces and routers
+\item
+  Managing transmission reliability (retransmitting lost packets)
+\item
+  Handling congestion control
+\item
+  Managing the kernel's network buffers
+\end{itemize}
+
+\noindent{}If your program had to do all of this directly, network programming would be extraordinarily difficult. The operating system's \textbf{networking stack} handles all of this complexity. Your program interacts with the networking stack through sockets~--- a clean, simple interface that lets you treat a network connection almost like a file.
+
+This is the same unification we saw in \hyperref[ch:01-command-to-process]{Chapter 1}: file descriptors represent all I/O resources uniformly. Network sockets are file descriptors. The same \texttt{read()} and \texttt{write()} system calls that work on a file also work on a network connection. Sockets add a few calls of their own~--- \texttt{recv()} and \texttt{send()} are socket-specific versions with extra options~--- but underneath, a connection is just another file descriptor.
+
+\subsection*{Socket types}\phantomsection\label{03-network-capability:socket-types}
+
+Not all sockets are the same. The two most important types are:
+
+\textbf{SOCK\_STREAM}~--- a connection-oriented socket using the \textbf{TCP} protocol. TCP guarantees that data arrives in order and without loss. It requires a connection to be established before data can be sent. This is the type Flask uses. HTTP (and therefore Flask) runs over TCP.
+
+\textbf{SOCK\_DGRAM}~--- a connectionless socket using the \textbf{UDP} protocol. UDP sends individual packets without a connection. Packets may arrive out of order or not at all. UDP is used for things like DNS lookups, voice and video calls, and online games, where speed matters more than perfect reliability.
+
+Flask uses TCP (SOCK\_STREAM) exclusively.
+
+\setcounter{section}{1}
+\section{\texorpdfstring{Creating a Socket: The \texttt{socket()} Call}{Creating a Socket: The socket() Call}}\label{03-network-capability:32-creating-a-socket-the-socket-call}
+
+The first step in creating network capability is calling \texttt{socket()}. This is a system call that asks the kernel to create a new socket and return a file descriptor for it.
+
+In Python, \texttt{socket()} is exposed through the \texttt{socket} module:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 3.1}\enspace Creating a TCP socket}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ socket}
+
+\CommentTok{\# socket.AF\_INET    = use IPv4 addresses}
+\CommentTok{\# socket.SOCK\_STREAM = use TCP (reliable, connection{-}oriented)}
+\NormalTok{server\_socket }\OperatorTok{=}\NormalTok{ socket.socket(socket.AF\_INET, socket.SOCK\_STREAM)}
+
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Socket created. File descriptor: }\SpecialCharTok{\{}\NormalTok{server\_socket}\SpecialCharTok{.}\NormalTok{fileno()}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\CommentTok{\# Output: Socket created. File descriptor: 3}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The two arguments to \texttt{socket()} specify:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Address family} (\texttt{AF\_INET}): We are using IPv4 addresses. IPv4 addresses look like \texttt{127.0.0.1} or \texttt{192.168.1.100}. The modern alternative is \texttt{AF\_INET6} for IPv6, but IPv4 is what most services use today.
+\item
+  \textbf{Socket type} (\texttt{SOCK\_STREAM}): We want a TCP socket.
+\end{itemize}
+
+\noindent{}When this call returns, the kernel has:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Allocated a socket data structure in kernel memory
+\item
+  Created a file descriptor (an integer like \texttt{3}) in this process's file descriptor table
+\item
+  Associated the socket data structure with that file descriptor
+\end{enumerate}
+
+\noindent{}At this point, the socket exists but is not connected to anything. It has no address. It is not listening. It is like having a phone with no phone number.
+
+\subsection*{The socket option: SO\_REUSEADDR}\phantomsection\label{03-network-capability:the-socket-option-so-reuseaddr}
+
+Before binding (the next step), there is an important socket option to set:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 3.2}\enspace Setting SO\_REUSEADDR before binding}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ socket}
+
+\NormalTok{server\_socket }\OperatorTok{=}\NormalTok{ socket.socket(socket.AF\_INET, socket.SOCK\_STREAM)}
+
+\CommentTok{\# Allow reuse of the address immediately after the process exits}
+\NormalTok{server\_socket.setsockopt(socket.SOL\_SOCKET, socket.SO\_REUSEADDR, }\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}When a server process exits, the kernel keeps its port in a \texttt{TIME\_WAIT} state for a short period (60 seconds on Linux) to handle any delayed packets still in transit. During this period, if you try to restart the server, you will get:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+OSError: [Errno 98] Address already in use
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\texttt{SO\_REUSEADDR} tells the kernel to allow reuse of the port immediately, even if it is in \texttt{TIME\_WAIT}. Flask sets this option automatically, which is why you can stop and restart your development server quickly without waiting.
+
+\setcounter{section}{2}
+\section{\texorpdfstring{Binding to an Address: \texttt{bind()} and \texttt{localhost:5000}}{Binding to an Address: bind() and localhost:5000}}\label{03-network-capability:33-binding-to-an-address-bind-and-localhost5000}
+
+A socket without an address is like a phone without a number. To receive connections, the socket needs to be associated with a specific \textbf{IP address} and \textbf{port number}. This association is called \textbf{binding}.
+
+\subsection*{What IP addresses and ports are}\phantomsection\label{03-network-capability:what-ip-addresses-and-ports-are}
+
+An \textbf{IP address} identifies a machine on a network. Every device connected to a network~--- your laptop, your phone, a server in a data center~--- has an IP address. IPv4 addresses are written as four numbers separated by dots: \texttt{192.168.1.100}.
+
+A \textbf{port number} is a 16-bit integer (0 to 65535) that identifies a specific communication endpoint on a machine. A single machine can run many programs, each listening on a different port. Port numbers allow the kernel to route incoming connections to the correct process.
+
+Some port numbers are reserved by convention:
+
+\begin{itemize}
+\tightlist
+\item
+  Port 80: HTTP
+\item
+  Port 443: HTTPS
+\item
+  Port 22: SSH
+\item
+  Port 5432: PostgreSQL
+\item
+  Port 5000: Flask's default development port
+\end{itemize}
+
+\begin{notebox}
+
+\textbf{Note:} On macOS 12 and later, port 5000 is used by the AirPlay Receiver. If Flask reports ``Address already in use'' on a Mac, either turn off AirPlay Receiver (System Settings → General → AirDrop \& Handoff) or run Flask on another port, such as \texttt{5001}.
+
+\end{notebox}
+
+\noindent{}Ports below 1024 are \textbf{privileged ports}~--- binding to them requires root (administrator) privileges on most Linux systems. This is why Nginx (running as root or with special capabilities) can listen on port 80 and 443, while your Flask app (running as a normal user) listens on port 5000 or 8000.
+
+\subsection*{\texorpdfstring{The \texttt{bind()} call}{The bind() call}}\phantomsection\label{03-network-capability:the-bind-call}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 3.3}\enspace Binding the socket to an address}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ socket}
+
+\NormalTok{server\_socket }\OperatorTok{=}\NormalTok{ socket.socket(socket.AF\_INET, socket.SOCK\_STREAM)}
+\NormalTok{server\_socket.setsockopt(socket.SOL\_SOCKET, socket.SO\_REUSEADDR, }\DecValTok{1}\NormalTok{)}
+
+\CommentTok{\# Bind to localhost, port 5000}
+\CommentTok{\# "localhost" resolves to 127.0.0.1 — the loopback address}
+\NormalTok{server\_socket.bind((}\StringTok{"localhost"}\NormalTok{, }\DecValTok{5000}\NormalTok{))}
+
+\BuiltInTok{print}\NormalTok{(}\StringTok{"Socket bound to localhost:5000"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{bind()} takes a tuple of \texttt{(host,\ port)}. After this call:
+
+\begin{itemize}
+\tightlist
+\item
+  The kernel has recorded that this socket is associated with IP address \texttt{127.0.0.1} and port \texttt{5000}
+\item
+  No other socket on this machine can bind to \texttt{127.0.0.1:5000} until this one is closed
+\item
+  The socket is still not listening~--- it cannot accept connections yet
+\end{itemize}
+
+\subsection*{\texorpdfstring{The loopback address: \texttt{127.0.0.1}}{The loopback address: 127.0.0.1}}\phantomsection\label{03-network-capability:the-loopback-address-127001}
+
+\texttt{localhost} resolves to the IP address \texttt{127.0.0.1}. This is the \textbf{loopback address}~--- a special IP address that refers to the machine itself. Traffic sent to \texttt{127.0.0.1} never leaves the machine. It travels through the network stack internally and arrives back at the same machine.
+
+This is why, when you run Flask on your laptop and open \texttt{http:/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{localhost:5000} in your browser, the request works~--- the browser sends to \texttt{127.0.0.1}, the kernel routes it to the Flask process, and Flask responds. The network packet never touches your Wi-Fi card or any external network.
+
+This is also why your server is invisible to other machines on the network. \texttt{127.0.0.1} is not a routable address. Traffic from another computer cannot reach it. We examine this limitation in detail in → \hyperref[ch:10-networking-limitations]{Chapter 10}~--- Networking Limitations, and we fix it in → \hyperref[ch:24-process-startup]{Chapter 24}~--- Process Startup in Production (by binding to \texttt{0.0.0.0} instead).
+
+\subsection*{\texorpdfstring{Binding to \texttt{0.0.0.0}}{Binding to 0.0.0.0}}\phantomsection\label{03-network-capability:binding-to-0000}
+
+The address \texttt{0.0.0.0} has a special meaning in the context of \texttt{bind()}. It means: ``listen on all available network interfaces.'' If your server has multiple IP addresses (a common scenario for cloud servers with both public and private IPs), binding to \texttt{0.0.0.0} accepts connections arriving on any of them.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 3.4}\enspace Binding to all interfaces (used in production)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{server\_socket.bind((}\StringTok{"0.0.0.0"}\NormalTok{, }\DecValTok{5000}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}When a server must accept connections from other machines directly, it binds to \texttt{0.0.0.0}. In the production setup this book builds, the application sits behind a reverse proxy on the same machine, so it only needs to be reachable locally~--- the proxy is what faces the outside world (→ \hyperref[ch:22-network-configuration]{Chapter 22} and → \hyperref[ch:28-traffic-routing]{Chapter 28}). On your local machine, you bind to \texttt{localhost} so the server is not accidentally exposed to your local network.
+
+Flask's \texttt{app.run()} binds to \texttt{127.0.0.1} by default. To change this:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 3.5}\enspace Running Flask bound to all interfaces}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    app.run(host}\OperatorTok{=}\StringTok{"0.0.0.0"}\NormalTok{, port}\OperatorTok{=}\DecValTok{5000}\NormalTok{, debug}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\begin{warnbox}
+
+\textbf{Warning:} Never run Flask in debug mode (\texttt{debug=True}) bound to \texttt{0.0.0.0} on a public network. The debug server's interactive debugger would be accessible to anyone who can reach your machine~--- a severe security risk. In production, Gunicorn or another production-grade server handles network binding; Flask's development server is never exposed directly.
+
+\end{warnbox}
+
+\setcounter{section}{3}
+\section{\texorpdfstring{Entering the Listening State: \texttt{listen()}}{Entering the Listening State: listen()}}\label{03-network-capability:34-entering-the-listening-state-listen}
+
+The socket is now bound to an address. The next step is telling the kernel to start queuing incoming connections. This is done with \texttt{listen()}.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 3.6}\enspace Entering the listening state}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ socket}
+
+\NormalTok{server\_socket }\OperatorTok{=}\NormalTok{ socket.socket(socket.AF\_INET, socket.SOCK\_STREAM)}
+\NormalTok{server\_socket.setsockopt(socket.SOL\_SOCKET, socket.SO\_REUSEADDR, }\DecValTok{1}\NormalTok{)}
+\NormalTok{server\_socket.bind((}\StringTok{"localhost"}\NormalTok{, }\DecValTok{5000}\NormalTok{))}
+
+\CommentTok{\# Begin listening. The argument is the backlog — see Section 3.6.}
+\NormalTok{server\_socket.listen(}\DecValTok{5}\NormalTok{)}
+
+\BuiltInTok{print}\NormalTok{(}\StringTok{"Server is listening on localhost:5000"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}After \texttt{listen()}:
+
+\begin{itemize}
+\tightlist
+\item
+  The kernel marks this socket as a ``listening socket''
+\item
+  The kernel begins accepting TCP connection requests from clients, storing them in a queue
+\item
+  Your program is not yet involved in individual connections~--- it just said ``I'm ready to receive connections''
+\end{itemize}
+
+\noindent{}The socket's state has changed from ``bound but passive'' to ``listening.'' This state change is reflected in the kernel's network tables. You can see it with the \texttt{ss} command on Linux:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{ss} \AttributeTok{{-}tlnp}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+State    Recv-Q  Send-Q  Local Address:Port   Peer Address:Port  Process
+LISTEN   0       5       127.0.0.1:5000       0.0.0.0:*          python
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The \texttt{LISTEN} state and the \texttt{127.0.0.1:5000} address confirm that the socket is ready. No connections have arrived yet.
+
+\setcounter{section}{4}
+\section{How the Kernel Registers Port-to-Process Mappings}\label{03-network-capability:35-how-the-kernel-registers-port-to-process-mappings}
+
+When \texttt{listen()} is called, the kernel makes an internal record:
+
+\begin{notebox}
+
+``If a TCP connection arrives destined for IP 127.0.0.1 and port 5000, deliver it to the process with PID 12345, which has the listening socket with file descriptor 3.''
+
+\end{notebox}
+
+\noindent{}This record is maintained in the kernel's network tables. It is why multiple programs cannot listen on the same port simultaneously~--- by default there can only be one listening socket per \texttt{(IP\ address,}\allowbreak{}\texttt{\ port)} combination. (The \texttt{SO\_REUSEPORT} option relaxes this so several processes can share a port~--- a feature some servers use to spread load.)
+
+\subsection*{How the kernel routes an incoming connection}\phantomsection\label{03-network-capability:how-the-kernel-routes-an-incoming-connection}
+
+When a client (say, your browser) sends a connection request to \texttt{127.0.0.1:5000}, the following sequence occurs inside the kernel:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+1. The packet arrives on a network interface — for 127.0.0.1, the virtual loopback interface (`lo`)
+2. Kernel's TCP/IP stack processes the packet
+3. TCP/IP stack reads the destination IP (127.0.0.1) and port (5000)
+4. Kernel looks up (127.0.0.1, 5000) in the socket table
+5. Finds: "this belongs to file descriptor 3 in process 12345"
+6. Kernel completes the TCP handshake with the client
+7. Kernel places the completed connection in the socket's accept queue
+8. When the process calls accept(), the kernel delivers the connection
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Your Python code is not involved in steps 1 through 7. The kernel handles all of that. Your code only participates starting at step 8, when you call \texttt{accept()}. This is the separation between kernel-space networking (which is fast, runs in privileged mode, and handles the protocol machinery) and user-space networking (your program, which works with already-established connections).
+
+\subsection*{Checking the kernel's socket table}\phantomsection\label{03-network-capability:checking-the-kernels-socket-table}
+
+On Linux, the kernel's socket table is accessible through \texttt{/proc}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{ /proc/net/tcp}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Or more readably:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{ss} \AttributeTok{{-}tlnp} \KeywordTok{|} \FunctionTok{grep}\NormalTok{ 5000}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Both commands show you which processes own which sockets. When debugging ``why isn't my server reachable?'', these commands are the first thing to check.
+
+On macOS:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{lsof} \AttributeTok{{-}i}\NormalTok{ :5000}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This lists all processes with an open socket on port 5000.
+
+\setcounter{section}{5}
+\section{\texorpdfstring{The Connection Queue: What Happens Before \texttt{accept()}}{The Connection Queue: What Happens Before accept()}}\label{03-network-capability:36-the-connection-queue-what-happens-before-accept}
+
+When a client connects to your server, the kernel does not immediately hand the connection to your program. Instead, it stores the connection in a \textbf{queue}~--- a waiting list of connections that are ready to be handled but have not yet been picked up by the program.
+
+This queue is called the \textbf{accept queue} (or backlog queue). Its maximum size is specified by the argument to \texttt{listen()}. In Listing 3.6, \texttt{server\_socket.listen(5)} creates a queue that holds up to 5 pending connections.
+
+\subsection*{Why the queue exists}\phantomsection\label{03-network-capability:why-the-queue-exists}
+
+Consider what happens when two connections arrive at almost the same moment, but your program can only handle one at a time. Without a queue:
+
+\begin{itemize}
+\tightlist
+\item
+  Connection 1 arrives: your program handles it
+\item
+  Connection 2 arrives while Connection 1 is being handled: Connection 2 is rejected because your program is busy
+\end{itemize}
+
+\noindent{}With a queue:
+
+\begin{itemize}
+\tightlist
+\item
+  Connection 1 arrives: kernel puts it in the queue
+\item
+  Connection 2 arrives: kernel puts it in the queue too
+\item
+  Your program calls \texttt{accept()}: retrieves Connection 1 from the queue, handles it
+\item
+  Your program calls \texttt{accept()} again: retrieves Connection 2, handles it
+\end{itemize}
+
+\noindent{}The queue allows the kernel to absorb brief bursts of connections even when the program is temporarily busy.
+
+\subsection*{What happens when the queue is full}\phantomsection\label{03-network-capability:what-happens-when-the-queue-is-full}
+
+If connections arrive faster than the program calls \texttt{accept()}, and the queue fills up, the kernel starts rejecting new connection attempts. From the client's perspective, the connection times out. This is why a server under heavy load that cannot keep up with incoming connections eventually starts dropping requests.
+
+The backlog value (\texttt{5} in our example) is deliberately small for a development server. Production deployments (using Gunicorn or similar) set this much higher. Modern Linux kernels also have kernel-level tuning parameters (\texttt{net.core.somaxconn}, \texttt{net.}\allowbreak{}\texttt{ipv4.}\allowbreak{}\texttt{tcp\_}\allowbreak{}\texttt{max\_}\allowbreak{}\texttt{syn\_}\allowbreak{}\texttt{backlog}) that cap the backlog independently of what your program requests.
+
+\subsection*{The two queues in TCP}\phantomsection\label{03-network-capability:the-two-queues-in-tcp}
+
+Technically, Linux maintains two queues for incoming TCP connections:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{SYN queue (incomplete connections)}: Holds connections where the TCP three-way handshake is still in progress (SYN received, SYN-ACK sent, waiting for ACK).
+\item
+  \textbf{Accept queue (completed connections)}: Holds connections where the handshake is complete and the connection is ready for \texttt{accept()}.
+\end{enumerate}
+
+\noindent{}The \texttt{listen()} argument controls the accept queue. This distinction matters in the context of SYN flood attacks (→ \hyperref[ch:38-security]{Chapter 38}~--- Security), where attackers send many half-open connections to fill the SYN queue.
+
+\unnumberedsection{false}{A Raw Socket Server: Seeing the Full Picture}\label{03-network-capability:a-raw-socket-server-seeing-the-full-picture}
+
+Before Flask hides all of this, here is a complete, raw TCP server written with Python's \texttt{socket} module directly. This is what a web server looks like at its core, without any framework:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 3.7}\enspace A minimal raw TCP server showing the full socket lifecycle}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ socket}
+
+\KeywordTok{def}\NormalTok{ run\_raw\_server():}
+    \CommentTok{\# Step 1: Create the socket}
+\NormalTok{    server\_socket }\OperatorTok{=}\NormalTok{ socket.socket(socket.AF\_INET, socket.SOCK\_STREAM)}
+\NormalTok{    server\_socket.setsockopt(socket.SOL\_SOCKET, socket.SO\_REUSEADDR, }\DecValTok{1}\NormalTok{)}
+
+    \CommentTok{\# Step 2: Bind to an address}
+\NormalTok{    server\_socket.bind((}\StringTok{"localhost"}\NormalTok{, }\DecValTok{5000}\NormalTok{))}
+
+    \CommentTok{\# Step 3: Start listening}
+\NormalTok{    server\_socket.listen(}\DecValTok{5}\NormalTok{)}
+    \BuiltInTok{print}\NormalTok{(}\StringTok{"Listening on localhost:5000 — connect with: curl http://localhost:5000"}\NormalTok{)}
+
+    \CommentTok{\# Step 4: Accept connections in a loop}
+    \ControlFlowTok{while} \VariableTok{True}\NormalTok{:}
+        \CommentTok{\# accept() blocks until a connection arrives}
+        \CommentTok{\# It returns a NEW socket for this specific connection,}
+        \CommentTok{\# and the address of the connecting client}
+\NormalTok{        client\_socket, client\_address }\OperatorTok{=}\NormalTok{ server\_socket.accept()}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Connection from }\SpecialCharTok{\{}\NormalTok{client\_address}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+        \CommentTok{\# Step 5: Read the request (raw bytes)}
+\NormalTok{        request\_bytes }\OperatorTok{=}\NormalTok{ client\_socket.recv(}\DecValTok{4096}\NormalTok{)}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Received }\SpecialCharTok{\{}\BuiltInTok{len}\NormalTok{(request\_bytes)}\SpecialCharTok{\}}\SpecialStringTok{ bytes"}\NormalTok{)}
+        \BuiltInTok{print}\NormalTok{(request\_bytes.decode(}\StringTok{"utf{-}8"}\NormalTok{, errors}\OperatorTok{=}\StringTok{"replace"}\NormalTok{))}
+
+        \CommentTok{\# Step 6: Send an HTTP response}
+\NormalTok{        response }\OperatorTok{=}\NormalTok{ (}
+            \StringTok{"HTTP/1.1 200 OK}\CharTok{\textbackslash{}r\textbackslash{}n}\StringTok{"}
+            \StringTok{"Content{-}Type: text/plain}\CharTok{\textbackslash{}r\textbackslash{}n}\StringTok{"}
+            \StringTok{"Content{-}Length: 13}\CharTok{\textbackslash{}r\textbackslash{}n}\StringTok{"}
+            \StringTok{"Connection: close}\CharTok{\textbackslash{}r\textbackslash{}n}\StringTok{"}
+            \StringTok{"}\CharTok{\textbackslash{}r\textbackslash{}n}\StringTok{"}
+            \StringTok{"Hello, world!"}
+\NormalTok{        )}
+\NormalTok{        client\_socket.sendall(response.encode(}\StringTok{"utf{-}8"}\NormalTok{))}
+
+        \CommentTok{\# Step 7: Close this connection\textquotesingle{}s socket}
+\NormalTok{        client\_socket.close()}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Connection from }\SpecialCharTok{\{}\NormalTok{client\_address}\SpecialCharTok{\}}\SpecialStringTok{ closed."}\NormalTok{)}
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    run\_raw\_server()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Run this program in one terminal:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python}\NormalTok{ listing\_3\_7.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Then in another terminal, send a request:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ http://localhost:5000}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}You will see:
+
+\textbf{In the server terminal:}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Listening on localhost:5000 — connect with: curl http://localhost:5000
+Connection from ('127.0.0.1', 54321)
+Received 78 bytes
+GET / HTTP/1.1
+Host: localhost:5000
+User-Agent: curl/7.88.1
+Accept: */*
+
+Connection from ('127.0.0.1', 54321) closed.
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\textbf{In the curl terminal:}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Hello, world!
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This program~--- 40 lines of Python~--- is the core of every web server. Everything Flask does is built on top of this pattern. The framework adds:
+
+\begin{itemize}
+\tightlist
+\item
+  HTTP parsing (turning raw bytes into structured request objects)
+\item
+  Route matching (deciding which function handles each URL)
+\item
+  Response construction (turning Python return values into properly formatted HTTP responses)
+\item
+  Error handling, middleware, and everything else
+\end{itemize}
+
+\noindent{}But the socket lifecycle is identical. \texttt{socket()} → \texttt{setsockopt()} → \texttt{bind()} → \texttt{listen()} → loop(\texttt{accept()} → \texttt{recv()} → \texttt{send()} → \texttt{close()}).
+
+\subsection*{\texorpdfstring{Note on \texttt{accept()} and the two sockets}{Note on accept() and the two sockets}}\phantomsection\label{03-network-capability:note-on-accept-and-the-two-sockets}
+
+Notice in Listing 3.7 that \texttt{accept()} returns a \textbf{new socket} (\texttt{client\_socket}). This is important.
+
+The \textbf{server socket} (created with \texttt{socket()}, bound and listening) is a permanent fixture. It exists for the lifetime of the server and is never used to directly communicate with clients. It is a ``listening socket'' only~--- its job is to accept incoming connections.
+
+When \texttt{accept()} is called, the kernel takes the next connection from the accept queue and creates a \textbf{new socket} specifically for that connection. This client socket is the one you use for \texttt{recv()} and \texttt{send()}. When the request is done, you close the client socket. The server socket remains open, ready to accept the next connection.
+
+This design allows a server to handle many simultaneous connections: one listening socket, many client sockets~--- one per active connection.
+
+\begin{diagrambox}[short]{344.8pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Server socket (fd 3)
+  LISTEN on 127.0.0.1:5000
+       │
+       │ accept() ──────────────────────────────────┐
+       │                                            │
+       │                               Client socket (fd 4)
+       │                               Connected to 127.0.0.1:54321
+       │                               Used for: recv(), send(), close()
+       │
+       │ accept() (next connection) ────────────────┐
+                                                    │
+                                       Client socket (fd 5)
+                                       Connected to 127.0.0.1:54322
+                                       Used for: recv(), send(), close()
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Flask (and Werkzeug under the hood) manages this socket lifecycle automatically. But the sockets are there. They exist. When Flask's development server is running and you see it printed in the terminal, there is a real socket bound to a real port with a real accept queue, and every \texttt{curl} or browser request is a real TCP connection being accepted from that queue.
+
+\unnumberedsection{false}{The Socket Lifecycle: Full State Diagram}\label{03-network-capability:the-socket-lifecycle-full-state-diagram}
+
+\begin{diagrambox}[short]{280.3pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+socket()
+   │
+   ▼
+[UNBOUND]
+   │
+   ├── setsockopt() (optional, configure options)
+   │
+   ▼
+bind(address, port)
+   │
+   ▼
+[BOUND, NOT LISTENING]
+   │
+   ▼
+listen(backlog)
+   │
+   ▼
+[LISTENING] ◄────────────────────────────────────────────┐
+   │                                                     │
+   │  (connection arrives from client)                   │
+   │  kernel completes TCP handshake                     │
+   │  connection placed in accept queue                  │
+   │                                                     │
+   ▼                                                     │
+accept()  →  returns (client_socket, client_address)     │
+   │                                                     │
+   │  [new client_socket is now CONNECTED]               │
+   │                                                     │
+   ├── recv()   ← read request data                      │
+   ├── send()   ← write response data                    │
+   ├── close()  ← close this connection                  │
+   │                                                     │
+   └─────────────────────────────────────────────────────┘
+       (loop back to waiting for next accept())
+\end{Verbatim}
+\end{diagrambox}
+
+\phantomsection\label{03-network-capability:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{socket} is an OS abstraction representing one end of a network communication channel. It is represented as a file descriptor~--- an integer~--- like any other I/O resource.
+\item
+  \textbf{\texttt{socket(AF\_}\allowbreak{}\texttt{INET,}\allowbreak{}\texttt{\ SOCK\_}\allowbreak{}\texttt{STREAM)}} creates a TCP socket. TCP provides reliable, ordered data delivery, which is what HTTP requires.
+\item
+  \textbf{\texttt{bind(address,}\allowbreak{}\texttt{\ port)}} associates the socket with a specific IP address and port number. \texttt{localhost} (127.0.0.1) means ``only accept connections from this machine.'' \texttt{0.0.0.0} means ``accept connections on all network interfaces.''
+\item
+  \textbf{\texttt{listen(backlog)}} tells the kernel to start queuing incoming connections. The kernel completes TCP handshakes and places ready connections in the accept queue.
+\item
+  The kernel maintains a \textbf{socket table} mapping (IP, port) pairs to processes. Incoming packets are routed to the correct process using this table.
+\item
+  The \textbf{accept queue} holds completed connections waiting for \texttt{accept()} to be called. If the queue fills up, new connections are rejected.
+\item
+  \textbf{\texttt{accept()}} removes the next connection from the accept queue and returns a \textbf{new socket} specific to that connection. The listening socket remains open and ready for the next connection.
+\item
+  Flask (via Werkzeug) performs all of these steps internally when you call \texttt{app.run()}. The socket lifecycle is real~--- it happens even though Flask hides it.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{03-network-capability:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Start the Notes API bound to \texttt{127.0.0.1:5001}. From a second machine on the same Wi-Fi, request \texttt{http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{\textless{}your-}\allowbreak{}\texttt{laptop-}\allowbreak{}\texttt{ip\textgreater{}:}\allowbreak{}\texttt{5001/}. What happens, and what would you change so that it works? (Port 5001, because on macOS the AirPlay Receiver usually holds 5000.)
+\item
+  \textbf{Break and fix.} Start two copies of the application on the same port. Read the exact error message. Then find which process holds the port with \texttt{lsof\ -i\ :5000} and stop it.
+\item
+  \textbf{Extend.} Write a twenty-line TCP server with the \texttt{socket} module that accepts one connection, reads the request, and answers \texttt{HTTP/1.1\ 200\ OK} with a short body. Call it with \texttt{curl\ -v}.
+\item
+  \textbf{Explain.} What is the difference between the listening socket and the socket \texttt{accept()} returns, and why does a server need both?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-03.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{03-network-capability:whats-next}
+
+The server socket is bound and listening. Connections can arrive and be queued. But connections arriving at the right port are not enough~--- the server must know what to do with them. In the next chapter, we define the request-handling paths: the routes, methods, and handler functions that give each incoming request its meaning.
+
+\noindent{}→ \hyperref[ch:04-request-handling-paths]{Chapter 4}~--- Defining Request Handling Paths: The API Is Created Here

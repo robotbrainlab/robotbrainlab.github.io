@@ -1,0 +1,642 @@
+\setcounter{chapter}{11}
+\chapter{Dependency Declaration}\label{ch:12-dependency-declaration}
+
+\chapterrule
+
+In \hyperref[ch:06-local-dependencies]{Chapter 6}, we identified the layers the Notes API relies on: system libraries, the Python runtime, Python packages, and application configuration (plus its data). In \hyperref[ch:08-hidden-dependencies]{Chapter 8}, we saw how hidden dependencies~--- packages installed globally or tools assumed to be present~--- cause failures that are impossible to diagnose without the right mental model.
+
+The first and most important step toward portability is making the Python package dependencies explicit. Explicit means written down in a file that travels with the source code. When someone (or something~--- a deployment system, a Docker build, a CI pipeline) needs to recreate the application's package environment from scratch, that file is the only instruction they need.
+
+In Python, that file is \texttt{requirements.txt}.
+
+\texttt{requirements.txt} is not glamorous. It is a plain text file with package names and version numbers. But it is the difference between a project that anyone can reproduce and a project that only works on the original developer's machine. It is the foundational document of Python project portability.
+
+This chapter explains exactly what \texttt{requirements.txt} is, how to generate it, what version locking means and why it matters, and how pip uses it to recreate an environment. It also introduces \texttt{pyproject.toml}~--- the modern alternative~--- and explains when each is appropriate.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What \texttt{requirements.txt} is and how it is structured
+\item
+  How to generate it from an active virtual environment
+\item
+  What version locking is, why it matters, and the difference between direct and transitive dependencies
+\item
+  How \texttt{pip\ install\ -}\allowbreak{}\texttt{r\ requirements.}\allowbreak{}\texttt{txt} recreates an environment
+\item
+  What \texttt{pip\ freeze} does and when to use it vs \texttt{pip\ list}
+\item
+  The difference between \texttt{requirements.txt} and \texttt{pyproject.toml} and when to use each
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{\texorpdfstring{\texttt{requirements.txt}: The Manifest of What Your Program Needs}{requirements.txt: The Manifest of What Your Program Needs}}\label{12-dependency-declaration:121-requirementstxt-the-manifest-of-what-your-program-needs}
+
+A \texttt{requirements.txt} file is a plain text list of Python packages and their version requirements. Here is a minimal one for the Notes API at this stage:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# requirements.txt
+flask==3.0.2
+python-dotenv==1.0.1
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Each line specifies a package. The \texttt{==} operator specifies the exact version to install. This file travels with the source code in the repository. When someone sets up the project for the first time:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ venv venv}
+\BuiltInTok{source}\NormalTok{ venv/bin/activate}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}They get these two packages at exactly these versions. They also get Flask's own dependencies~--- Werkzeug, Jinja2, and the rest~--- but those are \emph{not} pinned yet, so they may be different versions from yours. Section 12.2 explains why that matters, and how to pin them too.
+
+\subsection*{\texorpdfstring{The structure of \texttt{requirements.txt}}{The structure of requirements.txt}}\phantomsection\label{12-dependency-declaration:the-structure-of-requirementstxt}
+
+Each line in \texttt{requirements.txt} is a \textbf{requirement specifier}. The syntax supports several forms:
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# Exact version (recommended for deployment)
+flask==3.0.2
+
+# Minimum version (allows newer versions)
+flask>=3.0.0
+
+# Compatible release (allows minor updates, ~= 3.0 means >= 3.0, < 4.0)
+flask~=3.0
+
+# Range constraint
+flask>=3.0.0,<4.0.0
+
+# No version constraint (get the latest — not recommended for production)
+flask
+
+# Comments (lines starting with #)
+# This is a comment
+
+# Include another file (typically used in requirements-dev.txt to pull in the base list)
+-r requirements.txt
+
+# Install from a local path
+-e ./local-package
+
+# Install from a git repository
+git+https://github.com/org/repo.git@main
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}For production deployments, exact versions (\texttt{==}) are strongly recommended. We explain why in Section 12.2.
+
+\subsection*{\texorpdfstring{What goes in \texttt{requirements.txt}}{What goes in requirements.txt}}\phantomsection\label{12-dependency-declaration:what-goes-in-requirementstxt}
+
+\texttt{requirements.txt} should list every package that \texttt{import} statements in your code rely on. These are your \textbf{direct dependencies}~--- the packages you explicitly use.
+
+For the Notes API:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{flask}: the web framework (direct dependency)
+\item
+  \texttt{python-dotenv}: for loading \texttt{.env} files (direct dependency)
+\end{itemize}
+
+\noindent{}What does not go in \texttt{requirements.txt}:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{venv} or \texttt{pip} themselves (these are tools, not dependencies)
+\item
+  Packages that are part of Python's standard library (\texttt{sqlite3}, \texttt{os}, \texttt{json}, \texttt{sys}~--- these come with Python)
+\item
+  \texttt{\_\_pycache\_\_} or \texttt{.pyc} files (these are build artifacts, not dependencies)
+\end{itemize}
+
+\setcounter{section}{1}
+\section{Version Locking: Why Exact Versions Matter}\label{12-dependency-declaration:122-version-locking-why-exact-versions-matter}
+
+The \texttt{==} operator in \texttt{flask==3.0.2} specifies an exact version. This is called \textbf{version pinning} or \textbf{version locking}. It ensures that every time \texttt{pip\ install\ -}\allowbreak{}\texttt{r\ requirements.}\allowbreak{}\texttt{txt} runs, it installs exactly Flask 3.0.2~--- not 3.0.3, not 3.1.0, not 4.0.0. Always and only 3.0.2.
+
+Why is this important?
+
+\subsection*{Packages change between versions}\phantomsection\label{12-dependency-declaration:packages-change-between-versions}
+
+Flask 3.0.2 and Flask 3.0.3 are very similar~--- 3.0.3 fixes bugs or makes small improvements. But even a patch release might:
+
+\begin{itemize}
+\tightlist
+\item
+  Change the default behavior of a feature you rely on
+\item
+  Deprecate an argument your code uses
+\item
+  Fix a bug that your code accidentally depended on
+\end{itemize}
+
+\noindent{}Without version pinning:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# Without pinning, this might install Flask 3.0.2 today and a newer 3.x release tomorrow:
+flask>=3.0.0
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}When a colleague sets up the project a week later, they get a different version of Flask than you used. Their environment differs from yours. The ``but it worked on my machine'' problem returns, but now at the package version level.
+
+\subsection*{Real-world consequences of unpinned versions}\phantomsection\label{12-dependency-declaration:real-world-consequences-of-unpinned-versions}
+
+Consider this (hypothetical) scenario:
+
+\begin{itemize}
+\tightlist
+\item
+  Monday: Developer A installs Flask 3.0.2, builds and tests the API, everything works
+\item
+  Tuesday: a new patch release of Flask appears, fixing a security issue but also changing how \texttt{request.get\_json()} treats a malformed body
+\item
+  Wednesday: The CI/CD pipeline runs \texttt{pip\ install\ flask}, gets the new release, and tests the exact same code~--- but some tests now fail because \texttt{request.get\_json()} behavior changed
+\end{itemize}
+
+\noindent{}Now the CI is failing but the developer's machine passes. The versions are different. The investigation takes hours.
+
+With pinned versions, Monday's \texttt{flask==3.0.2} is what everyone gets. The CI and the developer's machine behave identically.
+
+\subsection*{Security updates and version pinning}\phantomsection\label{12-dependency-declaration:security-updates-and-version-pinning}
+
+There is a tension here. Pinning versions prevents automatic updates, including security updates. If a newer release fixes a security vulnerability in 3.0.2, your pinned application continues to use the vulnerable version.
+
+The resolution is: pin versions for stability, but periodically update your pins deliberately. This is a manual process (or automated with tools like \textbf{Dependabot} or \textbf{Renovate}): update \texttt{requirements.txt}, re-run tests, verify everything works, then deploy the update.
+
+This is better than unpinned versions because the update is a conscious decision that goes through testing. Automatic unpinned updates can introduce breaking changes at any time.
+
+\setcounter{section}{2}
+\section{How pip Resolves and Installs Dependencies}\label{12-dependency-declaration:123-how-pip-resolves-and-installs-dependencies}
+
+When you run \texttt{pip\ install\ flask}, pip does not just install Flask. Flask itself has dependencies, and those dependencies have dependencies. pip resolves the entire tree.
+
+\subsection*{The dependency resolution process}\phantomsection\label{12-dependency-declaration:the-dependency-resolution-process}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install flask}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}pip's internal resolver does the following:
+
+\textbf{Step 1: Fetch Flask's metadata.} pip queries PyPI for Flask's metadata, which includes Flask's list of dependencies (specified in Flask's own \texttt{pyproject.toml}):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Flask 3.0.2 requires:
+  Werkzeug >= 3.0.0
+  Jinja2 >= 3.1.2
+  itsdangerous >= 2.1.2
+  click >= 8.1.3
+  blinker >= 1.6.2
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\textbf{Step 2: Fetch each dependency's metadata.} pip fetches the metadata for Werkzeug, Jinja2, etc. Each of those has its own dependencies (Jinja2 requires MarkupSafe, etc.).
+
+\textbf{Step 3: Resolve conflicts.} If two packages require different versions of the same dependency, pip finds a version that satisfies both requirements. If no such version exists, pip reports a dependency conflict error.
+
+\textbf{Step 4: Download wheel files.} pip downloads a compatible wheel for each package. Pure-Python packages (Flask, Jinja2, Werkzeug) have a single universal wheel (\texttt{py3-none-any}); packages with compiled code have one wheel per platform, and pip picks the one that matches your Python version, operating system, and CPU architecture.
+
+\textbf{Step 5: Install.} pip extracts each wheel into the virtual environment's \texttt{site-packages}.
+
+\subsection*{Direct vs transitive dependencies}\phantomsection\label{12-dependency-declaration:direct-vs-transitive-dependencies}
+
+Your \texttt{requirements.txt} lists your \textbf{direct dependencies}~--- packages you explicitly import.
+
+But when pip installs Flask, it also installs Flask's dependencies: Werkzeug, Jinja2, itsdangerous, click, blinker, and MarkupSafe. These are \textbf{transitive dependencies}~--- packages your code uses indirectly, through Flask.
+
+Transitive dependencies are not listed in your \texttt{requirements.txt} (usually~--- see ``complete lockfiles'' below). They are discovered and installed automatically during the resolution process.
+
+This creates a subtle problem: if you do not list transitive dependencies with their exact versions, they can change independently. Werkzeug 3.0.1 might be installed today and Werkzeug 3.0.3 a month from now~--- even though your \texttt{requirements.txt} only pins Flask.
+
+\subsection*{\texorpdfstring{Generating a complete lockfile with \texttt{pip\ freeze}}{Generating a complete lockfile with pip freeze}}\phantomsection\label{12-dependency-declaration:generating-a-complete-lockfile-with-pip-freeze}
+
+\textbf{\texttt{pip\ freeze}} prints the exact versions of every installed package~--- both direct and transitive:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ freeze}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Output (after \texttt{pip\ install\ flask\ python-}\allowbreak{}\texttt{dotenv}):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+blinker==1.7.0
+click==8.1.7
+Flask==3.0.2
+itsdangerous==2.1.2
+Jinja2==3.1.3
+MarkupSafe==2.1.5
+python-dotenv==1.0.1
+Werkzeug==3.0.1
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Saving this output to \texttt{requirements.txt} gives you a \textbf{complete lockfile}~--- every package at an exact version:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ freeze }\OperatorTok{\textgreater{}}\NormalTok{ requirements.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is the most reproducible form of \texttt{requirements.txt}. Every package~--- direct and transitive~--- is pinned. Anyone who runs \texttt{pip\ install\ -}\allowbreak{}\texttt{r\ requirements.}\allowbreak{}\texttt{txt} gets an identical environment.
+
+\subsection*{The two-file pattern}\phantomsection\label{12-dependency-declaration:the-two-file-pattern}
+
+Many projects use two files:
+
+\textbf{\texttt{requirements.txt}}: the complete lockfile from \texttt{pip\ freeze}, used for deployment. Every version is pinned.
+
+\textbf{\texttt{requirements.in}} (or \texttt{requirements-base.txt}): only the direct dependencies, without pinning:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# requirements.in
+flask
+python-dotenv
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Tools like \textbf{pip-tools} generate \texttt{requirements.txt} from \texttt{requirements.in}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install pip{-}tools}
+\ExtensionTok{pip{-}compile}\NormalTok{ requirements.in  }\CommentTok{\# Generates requirements.txt with all transitive deps pinned}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The advantage: you maintain the short list of direct dependencies (\texttt{requirements.in}), and pip-tools generates the complete reproducible lockfile (\texttt{requirements.txt}). Updating a package means changing \texttt{requirements.in} and regenerating \texttt{requirements.txt} with \texttt{pip-compile}.
+
+\setcounter{section}{3}
+\section{\texorpdfstring{Installing from \texttt{requirements.txt}}{Installing from requirements.txt}}\label{12-dependency-declaration:124-installing-from-requirementstxt}
+
+To reproduce the environment from scratch on a new machine:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. Create and activate a virtual environment}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ venv venv}
+\BuiltInTok{source}\NormalTok{ venv/bin/activate   }\CommentTok{\# macOS/Linux}
+
+\CommentTok{\# 2. Install exactly what is listed}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{pip\ install\ -}\allowbreak{}\texttt{r\ requirements.}\allowbreak{}\texttt{txt} reads the file and installs every listed package at the specified version. It does nothing for packages already installed at the correct version~--- and it does not \emph{remove} packages that are installed but no longer listed (tools such as \texttt{pip-sync} from pip-tools do that).
+
+\subsection*{\texorpdfstring{What \texttt{-r} means}{What -r means}}\phantomsection\label{12-dependency-declaration:what--r-means}
+
+\texttt{-r} means ``requirements file''. It is the flag that tells pip to read a file rather than a single package name. You can combine multiple \texttt{-r} flags:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt }\AttributeTok{{-}r}\NormalTok{ requirements{-}dev.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Verifying the installation}\phantomsection\label{12-dependency-declaration:verifying-the-installation}
+
+After installing, verify the environment matches expectations:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ list}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Or check specific packages:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 12.1}\enspace Verifying installed versions programmatically}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ importlib.metadata}
+
+\NormalTok{packages }\OperatorTok{=}\NormalTok{ [}\StringTok{"flask"}\NormalTok{, }\StringTok{"werkzeug"}\NormalTok{, }\StringTok{"python{-}dotenv"}\NormalTok{]}
+\ControlFlowTok{for}\NormalTok{ pkg }\KeywordTok{in}\NormalTok{ packages:}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        version }\OperatorTok{=}\NormalTok{ importlib.metadata.version(pkg)}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{pkg}\SpecialCharTok{\}}\SpecialStringTok{: }\SpecialCharTok{\{}\NormalTok{version}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+    \ControlFlowTok{except}\NormalTok{ importlib.metadata.PackageNotFoundError:}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{pkg}\SpecialCharTok{\}}\SpecialStringTok{: NOT INSTALLED"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+flask: 3.0.2
+werkzeug: 3.0.1
+python-dotenv: 1.0.1
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{4}
+\section{\texorpdfstring{The Complete \texttt{requirements.txt} for the Notes API}{The Complete requirements.txt for the Notes API}}\label{12-dependency-declaration:125-the-complete-requirementstxt-for-the-notes-api}
+
+At this stage of the book, the Notes API uses:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Direct imports in app.py:}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, request, jsonify, g   }\CommentTok{\# → flask}
+\ImportTok{from}\NormalTok{ dotenv }\ImportTok{import}\NormalTok{ load\_dotenv                  }\CommentTok{\# → python{-}dotenv}
+\ImportTok{import}\NormalTok{ sqlite3                                  }\CommentTok{\# standard library — no pip package}
+\ImportTok{import}\NormalTok{ os                                       }\CommentTok{\# standard library}
+\ImportTok{import}\NormalTok{ time                                     }\CommentTok{\# standard library}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The direct dependencies are Flask and python-dotenv. After installing them in a fresh virtual environment and running \texttt{pip\ freeze}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# requirements.txt (generated by pip freeze after pip install flask python-dotenv)
+blinker==1.7.0
+click==8.1.7
+Flask==3.0.2
+itsdangerous==2.1.2
+Jinja2==3.1.3
+MarkupSafe==2.1.5
+python-dotenv==1.0.1
+Werkzeug==3.0.1
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Save this file at the root of the project, alongside \texttt{app.py}.
+
+The complete project structure is now:
+
+\begin{diagrambox}[short]{266.4pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+├── app.py
+├── requirements.txt
+├── .env                   ← NOT committed
+├── .env.example           ← committed (no real values)
+├── .gitignore
+└── venv/                  ← NOT committed
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}\texttt{.gitignore} should contain:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# .gitignore
+venv/
+__pycache__/
+*.pyc
+*.db
+.env
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}With \texttt{requirements.txt} committed and \texttt{venv/} excluded, a collaborator can:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ clone https://github.com/yourname/notes{-}api.git}
+\BuiltInTok{cd}\NormalTok{ notes{-}api}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ venv venv}
+\BuiltInTok{source}\NormalTok{ venv/bin/activate}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
+\FunctionTok{cp}\NormalTok{ .env.example .env}
+\CommentTok{\# Edit .env with local values}
+\ExtensionTok{python}\NormalTok{ app.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This workflow is reproducible. No hidden global dependencies. No assumptions about what the collaborator has installed.
+
+\setcounter{section}{5}
+\section{\texorpdfstring{\texttt{pyproject.toml}: The Modern Alternative}{pyproject.toml: The Modern Alternative}}\label{12-dependency-declaration:126-pyprojecttoml-the-modern-alternative}
+
+Python has a modern package configuration standard defined in \textbf{PEP 517}, \textbf{PEP 518}, and \textbf{PEP 621}, centered on a file called \texttt{pyproject.toml}. \texttt{pyproject.toml} is now the recommended way to declare Python project metadata, including dependencies.
+
+For a simple application (as opposed to a library meant to be distributed), \texttt{requirements.txt} remains the most common and straightforward choice. But understanding \texttt{pyproject.toml} is valuable because it is increasingly seen in modern Python projects.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# pyproject.toml}
+\KeywordTok{[project]}
+\DataTypeTok{name} \OperatorTok{=} \StringTok{"notes{-}api"}
+\DataTypeTok{version} \OperatorTok{=} \StringTok{"0.1.0"}
+\DataTypeTok{description} \OperatorTok{=} \StringTok{"A simple notes API"}
+\DataTypeTok{requires{-}python} \OperatorTok{=} \StringTok{"\textgreater{}=3.10"}
+
+\DataTypeTok{dependencies} \OperatorTok{=} \OperatorTok{[}
+    \StringTok{"flask\textgreater{}=3.0.0"}\OperatorTok{,}
+    \StringTok{"python{-}dotenv\textgreater{}=1.0.0"}\OperatorTok{,}
+\OperatorTok{]}
+
+\KeywordTok{[project.optional{-}dependencies]}
+\DataTypeTok{dev} \OperatorTok{=} \OperatorTok{[}
+    \StringTok{"pytest"}\OperatorTok{,}
+    \StringTok{"black"}\OperatorTok{,}
+    \StringTok{"ruff"}\OperatorTok{,}
+\OperatorTok{]}
+
+\KeywordTok{[build{-}system]}
+\DataTypeTok{requires} \OperatorTok{=} \OperatorTok{[}\StringTok{"hatchling"}\OperatorTok{]}
+\DataTypeTok{build{-}backend} \OperatorTok{=} \StringTok{"hatchling.build"}
+
+\KeywordTok{[tool.hatch.build.targets.wheel]}
+\DataTypeTok{only{-}include} \OperatorTok{=} \OperatorTok{[}\StringTok{"app.py"}\OperatorTok{]}   \CommentTok{\# the project is still a single module (Chapter 15 makes it a package)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With \texttt{pyproject.toml}, you install the project with:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}e}\NormalTok{ .          }\CommentTok{\# Installs the project and its dependencies}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}e} \StringTok{".[dev]"}   \CommentTok{\# Includes development dependencies too}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \texttt{-e} flag installs in \textbf{editable mode}~--- the source code is used directly, so changes to \texttt{app.py} take effect without reinstalling.
+
+\Needspace{16\baselineskip}
+
+\subsection*{\texorpdfstring{When to use \texttt{pyproject.toml} vs \texttt{requirements.txt}}{When to use pyproject.toml vs requirements.txt}}\phantomsection\label{12-dependency-declaration:when-to-use-pyprojecttoml-vs-requirementstxt}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Use case
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Recommendation
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Simple application (not a library) & \texttt{requirements.txt} with \texttt{pip\ freeze} \\
+Application with dev/test/prod dependency groups & \texttt{pyproject.toml} + a lockfile tool (pip-tools, Poetry, uv) \\
+A library that others will install & \texttt{pyproject.toml} is required \\
+Modern project following current Python standards & \texttt{pyproject.toml} + lockfile \\
+\end{longtable}
+}
+
+For the Notes API, we continue with \texttt{requirements.txt} for clarity. The concepts (exact version pinning, separating direct from transitive dependencies) are identical regardless of the file format.
+
+\unnumberedsection{false}{The Updated Development Workflow}\label{12-dependency-declaration:the-updated-development-workflow}
+
+With \texttt{requirements.txt} in place, the correct development workflow is:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Setting up (first time on a machine)}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ venv venv}
+\BuiltInTok{source}\NormalTok{ venv/bin/activate}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
+
+\CommentTok{\# Adding a new package}
+\ExtensionTok{pip}\NormalTok{ install gunicorn}
+\ExtensionTok{pip}\NormalTok{ freeze }\OperatorTok{\textgreater{}}\NormalTok{ requirements.txt  }\CommentTok{\# Update the lockfile}
+\FunctionTok{git}\NormalTok{ add requirements.txt}
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}m} \StringTok{"Add gunicorn to requirements"}
+
+\CommentTok{\# After pulling changes that updated requirements.txt}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt  }\CommentTok{\# Update the environment to match}
+
+\CommentTok{\# Updating a package deliberately}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}{-}upgrade}\NormalTok{ flask}
+\ExtensionTok{pip}\NormalTok{ freeze }\OperatorTok{\textgreater{}}\NormalTok{ requirements.txt}
+\CommentTok{\# Run tests to verify nothing broke}
+\FunctionTok{git}\NormalTok{ add requirements.txt}
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}m} \StringTok{"Update Flask to 3.0.3"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The key habit: any time \texttt{requirements.txt} changes (because you added, removed, or updated a package), regenerate it with \texttt{pip\ freeze} and commit the result. The file should always reflect the actual installed state of the project's virtual environment.
+
+This works only while the virtual environment contains \emph{nothing but} the application's runtime packages. As soon as you install development tools into it~--- a test runner, a linter (→ \hyperref[ch:17-build-process]{Chapter 17})~--- \texttt{pip\ freeze} would record them as production dependencies too. From that point on, keep development tools in a separate \texttt{requirements-dev.txt}, and maintain \texttt{requirements.txt} deliberately: edit it by hand, or generate it with a lock tool such as \texttt{pip-tools} (\texttt{pip-compile}) or \texttt{uv}.
+
+\phantomsection\label{12-dependency-declaration:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\texttt{requirements.txt}} is a text file that lists Python package dependencies and their versions. It makes the dependency environment reproducible by anyone, on any machine.
+\item
+  \textbf{Version pinning} (\texttt{flask==3.0.2}) ensures that \texttt{pip\ install\ -}\allowbreak{}\texttt{r\ requirements.}\allowbreak{}\texttt{txt} installs the same version every time, not whatever the latest version happens to be. Use \texttt{==} for production requirements.
+\item
+  Python packages have their own dependencies (\textbf{transitive dependencies}). \texttt{pip\ freeze} captures both direct and transitive dependencies at their exact versions. This is the most reproducible form of \texttt{requirements.txt}.
+\item
+  \texttt{pip\ install\ -}\allowbreak{}\texttt{r\ requirements.}\allowbreak{}\texttt{txt} installs every listed package at the specified version into the active virtual environment.
+\item
+  The \textbf{two-file pattern} (\texttt{requirements.in} for direct deps + \texttt{requirements.txt} for the full lockfile, generated by pip-tools) is a clean way to separate ``what I directly need'' from ``the full reproducible environment''.
+\item
+  \texttt{pyproject.toml} is the modern standard for project metadata and dependency declaration, especially for libraries. \texttt{requirements.txt} remains common for applications.
+\item
+  Add \texttt{requirements.txt} to version control. Never add \texttt{venv/}, \texttt{\_\_pycache\_\_/}, \texttt{.env}, or \texttt{.db} files.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{12-dependency-declaration:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Compare \texttt{pip\ freeze} in your project environment with \texttt{requirements.txt}. Which packages appear in one and not the other, and why?
+\item
+  \textbf{Break and fix.} Replace \texttt{flask==3.0.2} with \texttt{flask} (unpinned), build a fresh environment, and note the version you get. Explain what could break six months from now, then pin it again.
+\item
+  \textbf{Extend.} Set up \texttt{pip-tools}: move the direct dependencies into \texttt{requirements.in}, generate \texttt{requirements.txt} with \texttt{pip-compile}, and read the comments it writes.
+\item
+  \textbf{Explain.} What is a transitive dependency, and why must it be pinned too?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-12.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{12-dependency-declaration:whats-next}
+
+Dependencies are declared. The next step is handling the configuration values that the application reads at runtime~--- moving every environment-specific value out of the source code and into a properly structured, environment-controlled configuration system.
+
+\noindent{}→ \hyperref[ch:13-configuration-externalization]{Chapter 13}~--- Configuration Externalization

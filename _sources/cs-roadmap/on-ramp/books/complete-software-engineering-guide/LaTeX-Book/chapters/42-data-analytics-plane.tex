@@ -1,0 +1,169 @@
+\setcounter{chapter}{41}
+\chapter{The Data and Analytics Plane}\label{ch:42-data-analytics-plane}
+
+\chapterrule
+
+Everything the Notes API does with data so far is \textbf{operational}: store a note, fetch a note, update a note~--- small, fast reads and writes that keep the application running. That is the \textbf{transactional plane}, and PostgreSQL is built for it.
+
+Then a different kind of question arrives, and it does not come from a user. It comes from the business: \emph{How many notes are created per day, and is that growing? What fraction of users who sign up are still active after a month? Which features correlate with retention?} These are \textbf{analytical} questions~--- they sweep across millions of rows, span months of history, and aggregate rather than fetch. Answer them by running big queries against your production database and you will slow or crash the very system serving your users. So real systems grow a second, separate \textbf{data plane} for analytics. This chapter is the map of it.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  The difference between \textbf{OLTP} (operational) and \textbf{OLAP} (analytical) workloads, and why one database cannot serve both well
+\item
+  Why analytics needs \textbf{columnar} storage and a separate system
+\item
+  \textbf{Data warehouses}, \textbf{data lakes}, and the \textbf{lakehouse}~--- what each is for
+\item
+  \textbf{ETL vs ELT}, and \textbf{batch vs streaming} pipelines
+\item
+  The shape of a modern data platform: ingest → store → transform → serve
+\item
+  Analytical data modeling~--- \textbf{facts and dimensions} (the star schema)
+\item
+  Why \textbf{data quality, lineage, and governance} become first-class concerns
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Two Workloads That Pull in Opposite Directions}\label{42-data-analytics-plane:421-two-workloads-that-pull-in-opposite-directions}
+
+The split has a name on each side:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{OLTP~--- Online Transaction Processing.} Many small, concurrent operations, each touching a few rows: insert a note, read a note by id. It wants low latency per operation, high concurrency, and strong consistency. It is optimized to find and change \emph{individual records} fast. This is the Notes API's PostgreSQL.
+\item
+  \textbf{OLAP~--- Online Analytical Processing.} Few, large queries, each scanning vast numbers of rows to aggregate: ``average notes per user per week for the last year.'' It wants high \emph{throughput} over huge scans, and it does not care about millisecond latency or row-level writes.
+\end{itemize}
+
+\noindent{}These wants conflict at the storage level. Operational databases store data \textbf{row by row}, because to serve ``give me note 42'' you want every column of that one row together. Analytical systems store data \textbf{column by column}, because to compute ``average length of all notes'' you want to read just the \texttt{content} column across millions of rows~--- and skip every other column entirely. \textbf{Columnar storage} also compresses far better (a column holds values of one kind) and lets the engine scan only the columns a query touches. The same data, laid out for the opposite access pattern.
+
+It is hard to serve both access patterns well from one layout, which is the technical reason the planes separate. (Some ``HTAP'' databases keep both a row store and a column store; they are the exception.) The operational reason reinforces it: a runaway analytical query must never be able to starve the database your users depend on. Keep analytics off the production database~--- the usual first step is a \textbf{read replica}, a copy that analysts can query without touching the primary, and the next is a separate warehouse.
+
+\setcounter{section}{1}
+\section{Where Analytical Data Lives}\label{42-data-analytics-plane:422-where-analytical-data-lives}
+
+Three storage ideas, often combined:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Data warehouse}~--- a columnar analytical database (Snowflake, BigQuery, Amazon Redshift) holding \emph{structured, cleaned} data modeled for querying. This is where analysts and dashboards run SQL. It is the polished, query-ready store.
+\item
+  \textbf{Data lake}~--- cheap object storage (S3 and friends) holding \emph{raw} data in its original form: structured, semi-structured, or unstructured (logs, JSON, events, images), kept because storage is cheap and you may want it later. It is schema-on-\emph{read}~--- you impose structure when you query, not when you store.
+\item
+  \textbf{Lakehouse}~--- the modern convergence: warehouse-style querying and management (tables, transactions, schemas) directly over lake storage, so you get the lake's cheap scale and the warehouse's query discipline without copying data between two systems.
+\end{itemize}
+
+\noindent{}The mental model: the \textbf{lake} is the cheap, raw, keep-everything tier; the \textbf{warehouse} is the curated, query-ready tier; the \textbf{lakehouse} tries to be both. Each is the analytical-plane counterpart to ideas you already met~--- the storage \emph{tiers} of \hyperref[ch:37-reliability]{Chapter 37} (hot/warm/cold), now organized around \emph{use} rather than age.
+
+\setcounter{section}{2}
+\section{Getting Data There: Pipelines}\label{42-data-analytics-plane:423-getting-data-there-pipelines}
+
+Operational data starts in the OLTP database (and in event streams, and in third-party APIs). Getting it into the analytical plane is the job of \textbf{data pipelines}, and two distinctions describe most of them.
+
+\textbf{ETL vs ELT}~--- the order of two steps:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{ETL} (Extract, \emph{Transform}, Load)~--- pull the data out, clean and reshape it, \emph{then} load the finished result into the warehouse. The classic approach when storage and compute were expensive.
+\item
+  \textbf{ELT} (Extract, Load, \emph{Transform})~--- pull the data out, load it raw into the cheap warehouse/lake \emph{first}, then transform it \emph{in place} using the warehouse's own power. The modern default, because cloud warehouses make in-place transformation cheap and flexible, and you keep the raw data for re-processing.
+\end{itemize}
+
+\noindent{}\textbf{Batch vs streaming}~--- the cadence:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Batch}~--- process data in scheduled chunks: every night, recompute yesterday's metrics. Simple, efficient, and fine when ``yesterday's numbers this morning'' is good enough. This is the cleanup-job and scheduled-work discipline of \hyperref[ch:25-process-management]{Chapter 25}, scaled up to data.
+\item
+  \textbf{Streaming}~--- process events continuously as they arrive (often off a Kafka log from \hyperref[ch:41-event-driven-architecture]{Chapter 41}), so dashboards update within seconds. Necessary for real-time needs (fraud detection, live operations), heavier to build and operate.
+\end{itemize}
+
+\noindent{}A common, healthy architecture: stream raw events into the lake continuously, then run batch transformations to build curated warehouse tables. Most businesses need fresh-enough, not instant; reach for streaming only where latency genuinely earns its cost.
+
+\setcounter{section}{3}
+\section{Modeling Data for Analysis}\label{42-data-analytics-plane:424-modeling-data-for-analysis}
+
+The schema-design discipline of \hyperref[ch:06-local-dependencies]{Chapter 6} still applies, but the goals invert. Operational schemas \textbf{normalize} to keep writes correct and anomaly-free. Analytical schemas deliberately \textbf{denormalize} to make reads simple and fast, because there are few writes and the priority is straightforward aggregation.
+
+The dominant pattern is the \textbf{star schema}, built from two kinds of table:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Fact tables}~--- the measurable events, one row per occurrence: a \texttt{note\_created} fact with a timestamp, a user reference, and measures like note length. Facts are numerous and append-only.
+\item
+  \textbf{Dimension tables}~--- the descriptive context you slice facts \emph{by}: a \texttt{users} dimension, a \texttt{dates} dimension, a \texttt{features} dimension. Dimensions are fewer and richer.
+\end{itemize}
+
+\noindent{}A query like ``notes created per week by country'' then becomes: scan the fact table, join to the date and user dimensions, group, aggregate. The shape~--- a central fact table surrounded by dimensions~--- is what gives the star schema its name, and it maps cleanly onto how people actually ask analytical questions: \emph{some measure, sliced by some attributes, over some time range.}
+
+\setcounter{section}{4}
+\section{Trust: Quality, Lineage, and Governance}\label{42-data-analytics-plane:425-trust-quality-lineage-and-governance}
+
+An analytical plane is only as valuable as it is \emph{trusted}, and at scale trust must be engineered, not assumed:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Data quality}~--- automated checks that catch nulls where there should be none, duplicates, impossible values, sudden volume drops. A dashboard quietly fed bad data is worse than no dashboard, because people \emph{act} on it.
+\item
+  \textbf{Lineage}~--- knowing where each number came from: which source tables and transformations produced this dashboard figure. When a metric looks wrong, lineage is how you trace it back to the cause.
+\item
+  \textbf{Governance and privacy}~--- the data plane copies operational data, including PII, into more systems and more hands, which multiplies the obligations from \hyperref[ch:37-reliability]{Chapter 37}. Retention, access control, the right to be forgotten, and ``what are we even allowed to compute on this data'' all extend into the warehouse and lake. A user's deletion request must reach the analytical plane too, or you have not honored it.
+\end{itemize}
+
+\noindent{}The throughline: the analytical plane is a \emph{second} system with its own storage, pipelines, modeling, and governance~--- built so the business can learn from its data without ever endangering the operational system that produces it.
+
+\phantomsection\label{42-data-analytics-plane:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{OLTP} (small, fast, row-oriented, operational) and \textbf{OLAP} (large scans, columnar, analytical) are opposite workloads. One database rarely serves both well~--- \textbf{keep analytics off your production database} (a read replica first, a warehouse later).
+\item
+  Analytical data lives in a \textbf{warehouse} (curated, query-ready, columnar), a \textbf{data lake} (cheap raw object storage, schema-on-read), or a \textbf{lakehouse} (both at once).
+\item
+  \textbf{Pipelines} move data across: \textbf{ELT} (load raw first, transform in the warehouse) is the modern default; choose \textbf{batch} by default and \textbf{streaming} only where real-time latency truly pays.
+\item
+  Model analytics with \textbf{star schemas}~--- append-only \textbf{fact} tables of events, surrounded by descriptive \textbf{dimension} tables~--- and denormalize for fast reads (the inverse of operational normalization).
+\item
+  At scale, \textbf{data quality, lineage, and governance} are first-class: an untrusted or non-compliant data plane is a liability, and \textbf{PII obligations follow the data} into the warehouse.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{42-data-analytics-plane:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Run a report query that scans all notes (counts per user per month) on a \emph{staging} database while a load test runs against it. What happens to the API's latency?
+\item
+  \textbf{Break and fix.} Load one day of notes into a local DuckDB file (or a separate PostgreSQL schema) as a star schema: a fact table with one row per note created, and dimensions for user and date.
+\item
+  \textbf{Extend.} Write an ELT job, as a queue job run nightly, that copies yesterday's new notes into the fact table of exercise 2, and that is idempotent if it runs twice.
+\item
+  \textbf{Explain.} Why do analytical and operational workloads want different storage layouts?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-42.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{42-data-analytics-plane:whats-next}
+
+The transactional plane, the async plane, and the analytical plane all have to \emph{run somewhere}. The final capstone returns to infrastructure~--- but at fleet scale, where the single VM of Stage 5 becomes a cluster managed by an orchestrator, and the operational ideas you already know are automated.
+
+\noindent{}→ \hyperref[ch:43-cloud-native-orchestration]{Chapter 43}~--- Cloud-Native and Orchestration

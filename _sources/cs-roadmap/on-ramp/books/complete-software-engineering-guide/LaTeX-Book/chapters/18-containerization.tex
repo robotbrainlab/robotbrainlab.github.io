@@ -1,0 +1,1155 @@
+\setcounter{chapter}{17}
+\chapter{Containerization}\label{ch:18-containerization}
+
+\chapterrule
+
+The Notes API now has pinned dependencies, externalized configuration, a runtime contract, a clean directory structure, structured logging, and a build process with automated tests. But it still runs as a raw Python process, directly on whatever machine it happens to be installed on. The environment~--- the Python version, the operating system libraries, the directory layout~--- is assumed but not guaranteed.
+
+This assumption is the root cause of environment drift (\hyperref[ch:07-environment-drift]{Chapter 7}), hidden dependencies (\hyperref[ch:08-hidden-dependencies]{Chapter 8}), and the ``it works on my machine'' problem (\hyperref[ch:09-configuration-coupling]{Chapter 9}). Even with careful management, the gap between a developer's laptop running macOS 14 with Python 3.11.8 and a production server running Debian 12 with Python 3.11.2 can cause subtle failures.
+
+\textbf{Containerization} eliminates this gap by packaging the application together with its complete execution environment into a single, self-contained unit called a \textbf{container image}. The image includes:
+
+\begin{itemize}
+\tightlist
+\item
+  The operating system libraries
+\item
+  The exact Python version
+\item
+  All installed Python packages at their exact versions
+\item
+  The application code
+\item
+  The startup command
+\end{itemize}
+
+\noindent{}When this image runs~--- on a developer's laptop, on a CI server, on a production server in Singapore~--- it runs identically. The execution environment is identical because it travels with the code. The ``it works on my machine'' problem disappears because ``my machine'' and ``the server'' are now running exactly the same image. (One gap remains: CPU architecture. An image built on an Apple Silicon laptop is \texttt{arm64}, while most servers are \texttt{x86-64}; \texttt{docker\ build\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{platform\ linux/}\allowbreak{}\texttt{amd64} builds for the server's architecture.)
+
+\textbf{Docker} is the dominant tool for building and running container images. This chapter explains what containers actually are at the operating system level, builds a production-quality Docker image for the Notes API, and establishes the \texttt{docker\ build} + \texttt{docker\ run} workflow.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What a Linux container is and how it differs from a virtual machine
+\item
+  What a Dockerfile is and how Docker uses it to build an image
+\item
+  How to write a production-quality Dockerfile for the Notes API
+\item
+  How Docker layers work and why they matter for build speed
+\item
+  How to run the containerized application with environment variables
+\item
+  How \texttt{docker\ compose} simplifies multi-container development (application + database)
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{What a Container Is}\label{18-containerization:181-what-a-container-is}
+
+Before writing any Docker files, it is important to understand what a container actually is. Many explanations describe containers with analogies (``like a lightweight VM''), but the accurate explanation is more precise and more useful.
+
+\subsection*{The three Linux kernel mechanisms}\phantomsection\label{18-containerization:the-three-linux-kernel-mechanisms}
+
+A Linux container is an ordinary operating system process with three specific kernel mechanisms applied:
+
+\textbf{1. Namespaces~--- isolation}
+
+A Linux \textbf{namespace} restricts what a process can see. There are different types:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{PID namespace}: the container process sees its own isolated process ID tree. Inside the container, the first process has PID 1. From outside, it has a different PID.
+\item
+  \textbf{Network namespace}: the container has its own network interfaces, IP addresses, and routing table. Traffic is isolated from the host network and from other containers.
+\item
+  \textbf{Mount namespace}: the container sees its own filesystem. The root (\texttt{/}) inside the container is not the same as the root on the host.
+\item
+  \textbf{UTS namespace}: the container has its own hostname, different from the host's hostname.
+\end{itemize}
+
+\noindent{}Namespaces restrict visibility. A process inside a namespace cannot see processes outside it. (The host, in the parent namespace, can still see every container's processes~--- which is how \texttt{ps} on the server shows them.)
+
+\textbf{2. cgroups~--- resource limits}
+
+\textbf{Control groups (cgroups)} limit how much of a resource a process can consume:
+
+\begin{itemize}
+\tightlist
+\item
+  CPU: this container can use at most 0.5 CPU cores
+\item
+  Memory: this container can use at most 512 MB RAM
+\item
+  Disk I/O: this container can read/write at most 100 MB/s
+\end{itemize}
+
+\noindent{}Without cgroups, one container could consume all available memory and starve other containers. With cgroups, each container's consumption is bounded.
+
+\textbf{3. A layered filesystem (overlayfs)}
+
+The container's filesystem is built from \textbf{layers}, stacked on top of each other. Each layer is read-only. When a process writes a file, the write goes to a writable layer on top of the read-only layers. The read-only layers are shared between all containers running the same image~--- only the writable layer is unique per container.
+
+\subsection*{Containers vs virtual machines}\phantomsection\label{18-containerization:containers-vs-virtual-machines}
+
+A \textbf{virtual machine (VM)} virtualizes complete hardware: a \textbf{hypervisor}, helped by the CPU's virtualization features, gives each VM its own virtual CPUs, RAM, and disk. A full operating system (kernel + userspace) runs inside the VM. The overhead is noticeable: each VM runs its own kernel and system services, typically costing hundreds of megabytes of RAM before any application starts.
+
+A \textbf{container} shares the host's kernel. No hardware emulation. No separate OS kernel. The container's ``OS'' is just userspace files (libraries, binaries)~--- not a running kernel. The overhead is minimal: a container starts in milliseconds and uses only the RAM that the application itself needs.
+
+\begin{diagrambox}[short]{344.8pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+VIRTUAL MACHINE                         CONTAINER
+┌─────────────────────────────┐         ┌─────────────────────────────┐
+│  Application                │         │  Application                │
+│  Python + dependencies      │         │  Python + dependencies      │
+│  OS userspace (glibc, etc.) │         │  OS userspace (glibc, etc.) │
+│  Guest OS kernel            │         └─────────────────────────────┘
+└─────────────────────────────┘         ┌─────────────────────────────┐
+┌─────────────────────────────┐         │  HOST KERNEL (shared)       │
+│  Hypervisor                 │         └─────────────────────────────┘
+│  Host kernel and hardware   │         (no hypervisor, no guest kernel)
+└─────────────────────────────┘
+
+Startup time: seconds to a minute       Startup time: 100ms–1 second
+Memory overhead: hundreds of MB         Memory overhead: a few MB
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Containers are faster, lighter, and more portable than VMs. They are not more secure (sharing the kernel means a kernel vulnerability can escape the isolation), but for most application deployment purposes, containers provide adequate isolation with dramatically lower overhead.
+
+\setcounter{section}{1}
+\section{Docker: The Container Toolchain}\label{18-containerization:182-docker-the-container-toolchain}
+
+\textbf{Docker} is the toolchain that makes containers practical for developers. It provides:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Docker daemon}: the background service that manages containers and images
+\item
+  \textbf{Docker CLI}: the \texttt{docker} command you use in your terminal
+\item
+  \textbf{Dockerfile}: a text file that describes how to build an image
+\item
+  \textbf{Docker Hub}: a public registry where images are stored and shared
+\item
+  \textbf{Docker Compose}: a tool for running multiple containers together
+\end{itemize}
+
+\subsection*{Installing Docker}\phantomsection\label{18-containerization:installing-docker}
+
+On macOS and Windows, install \textbf{Docker Desktop} from \href{https://docker.com}{docker.com}. Docker Desktop includes the daemon, CLI, and Docker Compose.
+
+On Linux, install Docker Engine:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Ubuntu/Debian}
+\FunctionTok{sudo}\NormalTok{ apt{-}get update}
+\FunctionTok{sudo}\NormalTok{ apt{-}get install docker.io docker{-}compose{-}v2}
+\FunctionTok{sudo}\NormalTok{ usermod }\AttributeTok{{-}aG}\NormalTok{ docker }\VariableTok{$USER}  \CommentTok{\# Allow running docker without sudo}
+\CommentTok{\# Log out and back in for group membership to take effect}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Verify the installation:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker} \AttributeTok{{-}{-}version}
+\CommentTok{\# Docker version 25.0.3, build 4debf41}
+
+\ExtensionTok{docker}\NormalTok{ run hello{-}world}
+\CommentTok{\# Hello from Docker! ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{2}
+\section{The Dockerfile}\label{18-containerization:183-the-dockerfile}
+
+A \textbf{Dockerfile} is a text file containing a sequence of instructions that Docker executes, one by one, to build an image. Each instruction that changes files (\texttt{RUN}, \texttt{COPY}, \texttt{ADD}) adds a layer to the image; the others (\texttt{WORKDIR}, \texttt{ENV}, \texttt{CMD}, \ldots) only record settings.
+
+\subsection*{A minimal Dockerfile (what NOT to use in production)}\phantomsection\label{18-containerization:a-minimal-dockerfile-what-not-to-use-in-production}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# DO NOT USE — this is a bad Dockerfile for illustration purposes}
+\KeywordTok{FROM}\NormalTok{ python:3.11}
+\KeywordTok{WORKDIR}\NormalTok{ /app}
+\KeywordTok{COPY}\NormalTok{ . .}
+\KeywordTok{RUN} \ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
+\KeywordTok{CMD}\NormalTok{ [}\StringTok{"python"}\NormalTok{, }\StringTok{"run.py"}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This works but has serious problems:
+
+\begin{itemize}
+\tightlist
+\item
+  The \texttt{python:3.11} base image is enormous (\textasciitilde1 GB)~--- it includes compilers and build tools that the application does not need at runtime
+\item
+  Copying \texttt{.} includes \texttt{.env}, \texttt{venv/}, \texttt{.git/}, and other files that should not be in the image
+\item
+  No non-root user~--- the application runs as root inside the container, which is a security risk
+\item
+  No separation between dependency installation and code copying~--- every code change rebuilds all layers including pip install
+\end{itemize}
+
+\subsection*{The production-quality Dockerfile}\phantomsection\label{18-containerization:the-production-quality-dockerfile}
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 18.1}\enspace Dockerfile (production-quality)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# =============================================================================}
+\CommentTok{\# Multi{-}stage build for the Notes API}
+\CommentTok{\#}
+\CommentTok{\# A multi{-}stage build uses multiple FROM instructions. The first stage (builder)}
+\CommentTok{\# installs the Python dependencies. The second stage (final) copies only what}
+\CommentTok{\# is needed at runtime. Anything the builder needed only to *install* things}
+\CommentTok{\# (compilers, headers, pip\textquotesingle{}s temporary files) never reaches the final image.}
+\CommentTok{\# =============================================================================}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Stage 1: builder}
+\CommentTok{\# Install the Python dependencies into a separate directory.}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\KeywordTok{FROM}\NormalTok{ python:3.11{-}slim }\KeywordTok{AS}\NormalTok{ builder}
+
+\CommentTok{\# No system packages are needed here: every dependency in requirements.txt}
+\CommentTok{\# ships as a prebuilt wheel (psycopg2{-}binary bundles its own copy of libpq).}
+\CommentTok{\# If a dependency ever has to be compiled from source (plain psycopg2, for}
+\CommentTok{\# example), its build tools are installed in THIS stage:}
+\CommentTok{\#   RUN apt{-}get update \&\& apt{-}get install {-}y {-}{-}no{-}install{-}recommends \textbackslash{}}
+\CommentTok{\#       gcc libpq{-}dev \&\& rm {-}rf /var/lib/apt/lists/*}
+\CommentTok{\# and the final stage then needs only the runtime library (libpq5).}
+
+\CommentTok{\# Set the working directory for subsequent instructions in this stage.}
+\CommentTok{\# Nothing in /build is copied to the final image, so it does not appear there.}
+\KeywordTok{WORKDIR}\NormalTok{ /build}
+
+\CommentTok{\# Copy ONLY the requirements file first.}
+\CommentTok{\# Docker caches each layer. If requirements.txt has not changed,}
+\CommentTok{\# Docker reuses the cached pip install layer from the previous build.}
+\CommentTok{\# This means code changes (which are copied later) do not trigger}
+\CommentTok{\# a full pip reinstall — only dependency changes do.}
+\KeywordTok{COPY}\NormalTok{ requirements.txt .}
+
+\CommentTok{\# Install Python dependencies into a known location.}
+\CommentTok{\# {-}{-}no{-}cache{-}dir: do not cache downloaded packages (saves space)}
+\CommentTok{\# {-}{-}prefix=/install: install into /install instead of system site{-}packages}
+\CommentTok{\#   This makes it easy to copy just the packages to the final image.}
+\KeywordTok{RUN} \ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}{-}no{-}cache{-}dir} \AttributeTok{{-}{-}prefix}\OperatorTok{=}\NormalTok{/install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Stage 2: final}
+\CommentTok{\# The actual container image that will run in production.}
+\CommentTok{\# It contains the packages from stage 1, but none of stage 1\textquotesingle{}s leftovers.}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\KeywordTok{FROM}\NormalTok{ python:3.11{-}slim }\KeywordTok{AS}\NormalTok{ final}
+
+\CommentTok{\# Create a non{-}root user for running the application.}
+\CommentTok{\# Running as root inside a container is a security risk:}
+\CommentTok{\# if the application is compromised, the attacker has root access}
+\CommentTok{\# inside the container (and potentially on the host in some configurations).}
+\CommentTok{\#}
+\CommentTok{\# useradd options:}
+\CommentTok{\#   {-}{-}create{-}home: create a home directory for the user}
+\CommentTok{\#   {-}{-}shell /bin/bash: set the login shell}
+\CommentTok{\#   {-}{-}uid 1001: set a specific UID (avoids conflicts with host UIDs)}
+\CommentTok{\#   notes: the username}
+\KeywordTok{RUN} \ExtensionTok{useradd} \AttributeTok{{-}{-}create{-}home} \AttributeTok{{-}{-}shell}\NormalTok{ /bin/bash }\AttributeTok{{-}{-}uid}\NormalTok{ 1001 notes}
+
+\CommentTok{\# Copy the installed Python packages from the builder stage.}
+\CommentTok{\# COPY {-}{-}from=builder copies files from the named stage.}
+\CommentTok{\# /install contains all the packages installed by pip in stage 1.}
+\CommentTok{\# /usr/local is where Python looks for packages by default.}
+\KeywordTok{COPY} \OperatorTok{{-}{-}from=builder}\NormalTok{ /install /usr/local}
+
+\CommentTok{\# Set the working directory for the application.}
+\CommentTok{\# This is where the application code will live inside the container.}
+\KeywordTok{WORKDIR}\NormalTok{ /app}
+
+\CommentTok{\# WORKDIR creates /app owned by root. Hand the directory itself to \textquotesingle{}notes\textquotesingle{}}
+\CommentTok{\# so the application can create files in it (a SQLite database, say).}
+\CommentTok{\# This runs before the code is copied, so it stays cached.}
+\KeywordTok{RUN} \FunctionTok{chown}\NormalTok{ notes:notes /app}
+
+\CommentTok{\# Copy the application code, owned by the non{-}root user.}
+\CommentTok{\# Note: this is after copying requirements/installing packages.}
+\CommentTok{\# Changing application code only invalidates these layers,}
+\CommentTok{\# not the pip install layer above — builds are fast.}
+\CommentTok{\#}
+\CommentTok{\# {-}{-}chown sets the owner as the files are copied. (A separate}
+\CommentTok{\# "RUN chown {-}R notes:notes /app" afterwards would re{-}run on every code}
+\CommentTok{\# change and store a second copy of every file in a new layer.)}
+\CommentTok{\#}
+\CommentTok{\# We use .dockerignore (below) to exclude files that should not be in the image.}
+\KeywordTok{COPY} \OperatorTok{{-}{-}chown=notes:notes}\NormalTok{ app/ ./app/}
+\KeywordTok{COPY} \OperatorTok{{-}{-}chown=notes:notes}\NormalTok{ run.py .}
+
+\CommentTok{\# Switch to the non{-}root user.}
+\CommentTok{\# All subsequent instructions and the running container use this user.}
+\KeywordTok{USER}\NormalTok{ notes}
+
+\CommentTok{\# Document which port the application listens on.}
+\CommentTok{\# EXPOSE does not actually publish the port — it is documentation.}
+\CommentTok{\# The port is published when running the container with {-}p or in docker{-}compose.}
+\KeywordTok{EXPOSE}\NormalTok{ 5000}
+
+\CommentTok{\# Set default environment variables.}
+\CommentTok{\# These are the defaults; they can be overridden at runtime with {-}e flags.}
+\CommentTok{\# Do NOT set SECRET\_KEY or DATABASE\_URL here — those are secrets and must}
+\CommentTok{\# be provided at runtime, not baked into the image.}
+\CommentTok{\# (HOST and PORT are not set: they are read only by run.py, and in the}
+\CommentTok{\# container Gunicorn\textquotesingle{}s {-}{-}bind, below, decides the address and port.)}
+\KeywordTok{ENV}\NormalTok{ FLASK\_DEBUG=false }\OperatorTok{\textbackslash{}}
+\NormalTok{    LOG\_FORMAT=json }\OperatorTok{\textbackslash{}}
+\NormalTok{    LOG\_LEVEL=INFO }\OperatorTok{\textbackslash{}}
+\NormalTok{    PYTHONUNBUFFERED=1 }\OperatorTok{\textbackslash{}}
+\NormalTok{    PYTHONDONTWRITEBYTECODE=1}
+
+\CommentTok{\# PYTHONUNBUFFERED=1: Python outputs are sent straight to the terminal}
+\CommentTok{\#   without buffering. Without this, log output might not appear until}
+\CommentTok{\#   a buffer fills — which means last log entries before a crash might}
+\CommentTok{\#   never appear.}
+\CommentTok{\#}
+\CommentTok{\# PYTHONDONTWRITEBYTECODE=1: Python does not write .pyc files inside the}
+\CommentTok{\#   container. These are unnecessary in a container (the image is immutable)}
+\CommentTok{\#   and waste space and inode counts.}
+
+\CommentTok{\# Health check: Docker periodically runs this command to determine}
+\CommentTok{\# if the container is healthy. If it fails repeatedly, Docker marks}
+\CommentTok{\# the container as "unhealthy". Plain Docker only reports that status}
+\CommentTok{\# (in docker ps); orchestrators such as Docker Swarm or Kubernetes act}
+\CommentTok{\# on it by replacing the container.}
+\CommentTok{\#}
+\CommentTok{\# The slim image has no curl, so the check uses Python itself:}
+\CommentTok{\# urlopen() raises an exception, and python exits non{-}zero, if the}
+\CommentTok{\# request fails, times out, or returns an HTTP error status.}
+\CommentTok{\# interval=30s: check every 30 seconds}
+\CommentTok{\# timeout=5s: the command must complete within 5 seconds}
+\CommentTok{\# retries=3: after 3 consecutive failures, mark as unhealthy}
+\CommentTok{\# start{-}period=10s: give the container 10 seconds to start before checking}
+\KeywordTok{HEALTHCHECK} \OperatorTok{{-}{-}interval=30s} \OperatorTok{{-}{-}timeout=5s} \OperatorTok{{-}{-}retries=3} \OperatorTok{{-}{-}start{-}period=10s}\NormalTok{ \textbackslash{}}
+    \KeywordTok{CMD} \ExtensionTok{python} \AttributeTok{{-}c} \StringTok{"import urllib.request; urllib.request.urlopen(\textquotesingle{}http://localhost:5000/health\textquotesingle{}, timeout=3)"} \KeywordTok{||} \BuiltInTok{exit}\NormalTok{ 1}
+
+\CommentTok{\# The command that runs when the container starts.}
+\CommentTok{\#}
+\CommentTok{\# We use Gunicorn instead of Flask\textquotesingle{}s built{-}in development server.}
+\CommentTok{\# Gunicorn is a production WSGI server (Chapter 24) that:}
+\CommentTok{\# {-} Runs several worker processes to serve requests in parallel}
+\CommentTok{\#   (Flask\textquotesingle{}s development server is not built for production traffic)}
+\CommentTok{\# {-} Restarts workers that crash or hang}
+\CommentTok{\# {-} Handles graceful shutdown correctly}
+\CommentTok{\#}
+\CommentTok{\# Gunicorn imports the app package and calls create\_app() itself, so run.py}
+\CommentTok{\# is not used here. The startup checks still run, because create\_app() runs}
+\CommentTok{\# them; only the port check (run.py\textquotesingle{}s job) is skipped: Gunicorn binds the port.}
+\CommentTok{\#}
+\CommentTok{\# gunicorn arguments:}
+\CommentTok{\#   "app:create\_app()"    — import \textquotesingle{}app\textquotesingle{}, call \textquotesingle{}create\_app()\textquotesingle{} to get the Flask app}
+\CommentTok{\#   {-}{-}bind 0.0.0.0:5000   — listen on all interfaces (required in containers)}
+\CommentTok{\#   {-}{-}workers 2           — 2 worker processes (handles 2 concurrent requests)}
+\CommentTok{\#   {-}{-}timeout 30          — kill workers that take longer than 30 seconds}
+\CommentTok{\#   {-}{-}access{-}logfile {-}    — write access logs to stdout (captured by Docker)}
+\CommentTok{\#   {-}{-}error{-}logfile {-}     — write Gunicorn\textquotesingle{}s own messages to stderr (captured by Docker)}
+\CommentTok{\#   {-}{-}log{-}level info      — log level for Gunicorn\textquotesingle{}s own messages}
+\KeywordTok{CMD}\NormalTok{ [}\StringTok{"gunicorn"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"app:create\_app()"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}bind"}\NormalTok{, }\StringTok{"0.0.0.0:5000"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}workers"}\NormalTok{, }\StringTok{"2"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}timeout"}\NormalTok{, }\StringTok{"30"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}access{-}logfile"}\NormalTok{, }\StringTok{"{-}"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}error{-}logfile"}\NormalTok{, }\StringTok{"{-}"}\NormalTok{, }\OperatorTok{\textbackslash{}}
+     \StringTok{"{-}{-}log{-}level"}\NormalTok{, }\StringTok{"info"}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Add \texttt{gunicorn} to \texttt{requirements.txt} by hand, pinned like everything else:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+gunicorn==22.0.0
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Do not use \texttt{pip\ freeze\ \textgreater{}\ requirements.}\allowbreak{}\texttt{txt} here: your virtual environment now also contains the development tools from \hyperref[ch:17-build-process]{Chapter 17}, and freezing it would write pytest, black, ruff, and the rest into the production requirements~--- and into the image.
+
+\subsection*{\texorpdfstring{The \texttt{.dockerignore} file}{The .dockerignore file}}\phantomsection\label{18-containerization:the-dockerignore-file}
+
+\texttt{.dockerignore} tells Docker which files to exclude from the build context (the files sent to the Docker daemon). Without it, every file in the project~--- including \texttt{.git/}, \texttt{venv/}, \texttt{.env}, test files, and documentation~--- is included in the build context, slowing down builds and potentially including sensitive files in the image.
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# .dockerignore
+# Files and directories to exclude from the Docker build context.
+# Syntax is the same as .gitignore.
+
+# Python artifacts
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Environment files — NEVER include in the image
+.env
+.env.*
+!.env.example
+
+# Version control
+.git/
+.gitignore
+
+# Development files
+requirements-dev.txt
+tests/
+Makefile
+
+# Documentation
+*.md
+
+# Editor and OS files
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{3}
+\section{How Docker Layers Work}\label{18-containerization:184-how-docker-layers-work}
+
+Understanding Docker layers is important for writing efficient Dockerfiles. Every Dockerfile instruction that produces filesystem changes creates a new \textbf{layer}. Layers are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Cached}: Docker caches each layer. If a layer's instruction has not changed and all preceding layers are also unchanged, Docker reuses the cached layer~--- it does not re-run the instruction.
+\item
+  \textbf{Immutable}: once created, layers are read-only. They are shared between images and containers.
+\item
+  \textbf{Stacked}: the filesystem a container sees is all layers stacked together (using overlayfs).
+\end{itemize}
+
+\subsection*{Layer caching in practice}\phantomsection\label{18-containerization:layer-caching-in-practice}
+
+A simplified, single-stage version of Listing 18.1 shows the principle:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Layer 1 — base image (cached after first pull)}
+\KeywordTok{FROM}\NormalTok{ python:3.11{-}slim}
+
+\CommentTok{\# Layer 2 — create the user (cached until the RUN command changes)}
+\KeywordTok{RUN} \ExtensionTok{useradd} \AttributeTok{{-}{-}create{-}home} \AttributeTok{{-}{-}uid}\NormalTok{ 1001 notes}
+
+\CommentTok{\# Layer 3 — requirements.txt copy (cached until requirements.txt changes)}
+\KeywordTok{COPY}\NormalTok{ requirements.txt .}
+
+\CommentTok{\# Layer 4 — pip install (cached until requirements.txt changes)}
+\KeywordTok{RUN} \ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements.txt}
+
+\CommentTok{\# Layer 5 — application code (cached until any app/ file changes)}
+\KeywordTok{COPY}\NormalTok{ app/ ./app/}
+\KeywordTok{COPY}\NormalTok{ run.py .}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}When you change only \texttt{app/}\allowbreak{}\texttt{routes/}\allowbreak{}\texttt{notes.py}:
+
+\begin{itemize}
+\tightlist
+\item
+  Layers 1--4: \textbf{cache hit} (reused, no re-execution)
+\item
+  Layer 5: \textbf{cache miss} (COPY app/ sees changed files, re-executes)
+\end{itemize}
+
+\noindent{}Build time: fraction of a second (only layer 5 is re-built).
+
+If you had placed \texttt{COPY\ .\ .} before \texttt{pip\ install\ -}\allowbreak{}\texttt{r\ requirements.}\allowbreak{}\texttt{txt}:
+
+\begin{itemize}
+\tightlist
+\item
+  Any code change would invalidate the COPY layer
+\item
+  The pip install layer follows the COPY layer and is also invalidated
+\item
+  Build time: minutes (pip reinstalls all packages on every code change)
+\end{itemize}
+
+\noindent{}\textbf{The order of Dockerfile instructions matters enormously for build speed.} Always put things that change infrequently (base image, system packages, dependency files) before things that change frequently (application code).
+
+\setcounter{section}{4}
+\section{Building and Running the Image}\label{18-containerization:185-building-and-running-the-image}
+
+\subsection*{Building the image}\phantomsection\label{18-containerization:building-the-image}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# From the notes{-}api/ root directory}
+\ExtensionTok{docker}\NormalTok{ build }\AttributeTok{{-}t}\NormalTok{ notes{-}api:latest .}
+
+\CommentTok{\# {-}t notes{-}api:latest : tag the image with the name "notes{-}api" and version "latest"}
+\CommentTok{\# .                   : use the current directory as the build context}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}First build output (no cache):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+[+] Building 21.4s (15/15) FINISHED
+ => [internal] load build definition from Dockerfile
+ => [internal] load .dockerignore
+ => [builder 1/4] FROM python:3.11-slim
+ => [builder 2/4] WORKDIR /build
+ => [builder 3/4] COPY requirements.txt .
+ => [builder 4/4] RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+ => [final 1/7] FROM python:3.11-slim
+ => [final 2/7] RUN useradd --create-home --shell /bin/bash --uid 1001 notes
+ => [final 3/7] COPY --from=builder /install /usr/local
+ => [final 4/7] WORKDIR /app
+ => [final 5/7] RUN chown notes:notes /app
+ => [final 6/7] COPY --chown=notes:notes app/ ./app/
+ => [final 7/7] COPY --chown=notes:notes run.py .
+ => exporting to image
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Second build (only code changed):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+[+] Building 1.3s (15/15) FINISHED
+ => CACHED [builder 4/4] RUN pip install --no-cache-dir
+ => CACHED [final 3/7] COPY --from=builder /install /usr/local
+ => CACHED [final 5/7] RUN chown notes:notes /app
+ => [final 6/7] COPY --chown=notes:notes app/ ./app/   ← only this layer re-ran
+ => [final 7/7] COPY --chown=notes:notes run.py .      ← and this one
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}1.3 seconds instead of 21. Layer caching is working.
+
+\subsection*{Running the container with SQLite}\phantomsection\label{18-containerization:running-the-container-with-sqlite}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ run }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}{-}name}\NormalTok{ notes{-}api }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}{-}rm} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}p}\NormalTok{ 5000:5000 }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}e}\NormalTok{ DATABASE\_URL=}\StringTok{"sqlite:///notes.db"} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}e}\NormalTok{ SECRET\_KEY=}\StringTok{"your{-}secret{-}key{-}here{-}at{-}least{-}24{-}chars"} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}e}\NormalTok{ LOG\_FORMAT=human }\DataTypeTok{\textbackslash{}}
+\NormalTok{  notes{-}api:latest}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(\texttt{-e\ LOG\_FORMAT=}\allowbreak{}\texttt{human} overrides the image's JSON default, so the output below is easy to read.)
+
+\textbf{Breaking down the \texttt{docker\ run} command:}
+
+\Needspace{18\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3067}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6933}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Flag
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{-\/-name\ notes-api} & Name the container ``notes-api'' (instead of a random name) \\
+\texttt{-\/-rm} & Remove the container when it stops (cleanup) \\
+\texttt{-p\ 5000:5000} & Map host port 5000 to container port 5000 (\texttt{host:container}) \\
+\texttt{-e\ DATABASE\_URL=}\allowbreak{}\texttt{...} & Set environment variable inside the container \\
+\texttt{-e\ SECRET\_KEY=...} & Set another environment variable \\
+\texttt{-e\ LOG\_FORMAT=}\allowbreak{}\texttt{human} & Override a default set by \texttt{ENV} in the Dockerfile \\
+\texttt{notes-api:latest} & The image to run \\
+\end{longtable}
+}
+
+After the container starts:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+[2024-01-15 14:00:00 +0000] [1] [INFO] Starting gunicorn 22.0.0
+[2024-01-15 14:00:00 +0000] [1] [INFO] Listening at: http://0.0.0.0:5000 (1)
+[2024-01-15 14:00:00 +0000] [1] [INFO] Using worker: sync
+[2024-01-15 14:00:00 +0000] [7] [INFO] Booting worker with pid: 7
+[2024-01-15 14:00:00 +0000] [8] [INFO] Booting worker with pid: 8
+2024-01-15 14:00:00.412 INFO     app.logging_config | Logging configured. level=INFO format=human log_dir=(console only)
+2024-01-15 14:00:00.413 INFO     app.startup        | Running startup checks...
+2024-01-15 14:00:00.413 INFO     app.startup        | All startup checks passed.
+2024-01-15 14:00:00.414 INFO     app                | Creating Flask application...
+2024-01-15 14:00:00.431 INFO     app.database       | Database initialized.
+2024-01-15 14:00:00.432 INFO     app                | Flask application created successfully.
+... (the same six lines again, from the second worker)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Gunicorn's master process (PID 1 in the container) starts first and binds the port. Each worker then imports the application and calls \texttt{create\_app()} itself~--- so the startup checks and \texttt{init\_db()} run once per worker, and every application line appears twice. (\texttt{CREATE\ TABLE\ IF\ NOT\ EXISTS} makes the repeat harmless. Gunicorn's \texttt{-\/-preload} option would create the app once, in the master, instead.)
+
+Test it:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ http://localhost:5000/health}
+\CommentTok{\# \{"status":"ok"\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{The port mapping explained}\phantomsection\label{18-containerization:the-port-mapping-explained}
+
+\begin{diagrambox}[short]{197.3pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Your laptop             Container
+┌──────────────┐        ┌──────────────┐
+│              │        │              │
+│  localhost   │        │  0.0.0.0     │
+│  port 5000   │◄──────►│  port 5000   │
+│              │  -p    │              │
+│  (host)      │ 5000:  │  (container) │
+│              │ 5000   │              │
+└──────────────┘        └──────────────┘
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}The \texttt{-p\ 5000:5000} flag tells Docker to forward traffic arriving at the host's port 5000 to the container's port 5000. Without this flag, the container's port is not accessible from outside the container.
+
+Inside the container, Gunicorn binds to \texttt{0.0.0.0:5000} (all interfaces). The \texttt{-\/-bind\ 0.0.0.0:5000} argument in the Dockerfile's \texttt{CMD} is what causes this~--- not \texttt{127.0.0.1} (loopback only, which inside a container means \emph{the container's own} loopback), but \texttt{0.0.0.0} (all interfaces, so Docker's port forwarding can reach it).
+
+\setcounter{section}{5}
+\section{Docker Compose: Running Multiple Containers Together}\label{18-containerization:186-docker-compose-running-multiple-containers-together}
+
+The Notes API depends on a database. In development, it uses SQLite (a local file). In production, it uses PostgreSQL. Running both the application and PostgreSQL in Docker containers~--- and making them communicate~--- requires Docker Compose.
+
+\textbf{Docker Compose} is a tool for defining and running multi-container applications using a YAML file.
+
+\subsection*{\texorpdfstring{\texttt{docker-compose.yml}}{docker-compose.yml}}\phantomsection\label{18-containerization:docker-composeyml}
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 18.2}\enspace docker-compose.yml}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Define the multi{-}container development environment for the Notes API.}
+\CommentTok{\#}
+\CommentTok{\# Usage:}
+\CommentTok{\#   docker compose up        — start all services}
+\CommentTok{\#   docker compose up {-}d     — start in background (detached mode)}
+\CommentTok{\#   docker compose down      — stop and remove containers}
+\CommentTok{\#   docker compose logs {-}f   — follow logs from all services}
+\CommentTok{\#   docker compose exec app bash  — open a shell inside the app container}
+\CommentTok{\#}
+\CommentTok{\# (Older Compose files start with a "version:" line. Compose v2 ignores it}
+\CommentTok{\# and prints a warning, so it is left out.)}
+
+\FunctionTok{services}\KeywordTok{:}
+
+\CommentTok{  \# ───────────────────────────────────────────────────────────────────────────}
+\CommentTok{  \# The PostgreSQL database service}
+\CommentTok{  \# ───────────────────────────────────────────────────────────────────────────}
+\AttributeTok{  }\FunctionTok{db}\KeywordTok{:}
+\CommentTok{    \# Use the official PostgreSQL 15 image from Docker Hub}
+\AttributeTok{    }\FunctionTok{image}\KeywordTok{:}\AttributeTok{ postgres:15{-}alpine}
+\CommentTok{    \# \textquotesingle{}alpine\textquotesingle{} is a minimal Linux distribution — the image is roughly half the size}
+
+\CommentTok{    \# Named volume for persistent storage.}
+\CommentTok{    \# Without this, the database contents are lost when the container is}
+\CommentTok{    \# removed or recreated (docker compose down, then up).}
+\CommentTok{    \# With this, data persists in a Docker{-}managed volume.}
+\AttributeTok{    }\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ postgres\_data:/var/lib/postgresql/data}
+
+\CommentTok{    \# Environment variables for the PostgreSQL container.}
+\CommentTok{    \# POSTGRES\_USER: the database user to create}
+\CommentTok{    \# POSTGRES\_PASSWORD: the password for that user}
+\CommentTok{    \# POSTGRES\_DB: the database to create}
+\AttributeTok{    }\FunctionTok{environment}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{POSTGRES\_USER}\KeywordTok{:}\AttributeTok{ notes\_user}
+\AttributeTok{      }\FunctionTok{POSTGRES\_PASSWORD}\KeywordTok{:}\AttributeTok{ notes\_password}
+\AttributeTok{      }\FunctionTok{POSTGRES\_DB}\KeywordTok{:}\AttributeTok{ notesdb}
+
+\CommentTok{    \# Health check for PostgreSQL.}
+\CommentTok{    \# \textquotesingle{}pg\_isready\textquotesingle{} is a PostgreSQL utility that checks if the server is}
+\CommentTok{    \# accepting connections. The app service will not start until this passes.}
+\AttributeTok{    }\FunctionTok{healthcheck}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{test}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"CMD{-}SHELL"}\KeywordTok{,}\AttributeTok{ }\StringTok{"pg\_isready {-}U notes\_user {-}d notesdb"}\KeywordTok{]}
+\AttributeTok{      }\FunctionTok{interval}\KeywordTok{:}\AttributeTok{ 5s}
+\AttributeTok{      }\FunctionTok{timeout}\KeywordTok{:}\AttributeTok{ 5s}
+\AttributeTok{      }\FunctionTok{retries}\KeywordTok{:}\AttributeTok{ }\DecValTok{5}
+
+\CommentTok{    \# Expose PostgreSQL\textquotesingle{}s port only to other containers in this compose file.}
+\CommentTok{    \# Do NOT use ports: here (which would expose it to the host) unless you}
+\CommentTok{    \# need to connect with a local psql client.}
+\AttributeTok{    }\FunctionTok{expose}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\StringTok{"5432"}
+
+\CommentTok{  \# ───────────────────────────────────────────────────────────────────────────}
+\CommentTok{  \# The Notes API application service}
+\CommentTok{  \# ───────────────────────────────────────────────────────────────────────────}
+\AttributeTok{  }\FunctionTok{app}\KeywordTok{:}
+\CommentTok{    \# Build the image from the Dockerfile in the current directory.}
+\CommentTok{    \# \textquotesingle{}context: .\textquotesingle{} means use the current directory as the build context.}
+\AttributeTok{    }\FunctionTok{build}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{context}\KeywordTok{:}\AttributeTok{ .}
+\AttributeTok{      }\FunctionTok{dockerfile}\KeywordTok{:}\AttributeTok{ Dockerfile}
+
+\CommentTok{    \# Port mapping: host port 5000 → container port 5000}
+\AttributeTok{    }\FunctionTok{ports}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\StringTok{"5000:5000"}
+
+\CommentTok{    \# Environment variables for the application.}
+\CommentTok{    \# These override the ENV defaults set in the Dockerfile.}
+\AttributeTok{    }\FunctionTok{environment}\KeywordTok{:}
+\CommentTok{      \# Construct the DATABASE\_URL using the \textquotesingle{}db\textquotesingle{} service name as the hostname.}
+\CommentTok{      \# Docker Compose creates a shared network where services can reach each}
+\CommentTok{      \# other by their service name. \textquotesingle{}db\textquotesingle{} resolves to the PostgreSQL container\textquotesingle{}s}
+\CommentTok{      \# IP address inside the Docker network.}
+\AttributeTok{      }\FunctionTok{DATABASE\_URL}\KeywordTok{:}\AttributeTok{ postgresql://notes\_user:notes\_password@db:5432/notesdb}
+
+\CommentTok{      \# In a real project, SECRET\_KEY would come from a secrets manager,}
+\CommentTok{      \# not be hardcoded here. For development, this is acceptable.}
+\AttributeTok{      }\FunctionTok{SECRET\_KEY}\KeywordTok{:}\AttributeTok{ dev{-}secret{-}key{-}change{-}in{-}production{-}12345}
+
+\AttributeTok{      }\FunctionTok{FLASK\_DEBUG}\KeywordTok{:}\AttributeTok{ }\StringTok{"false"}
+\AttributeTok{      }\FunctionTok{LOG\_FORMAT}\KeywordTok{:}\AttributeTok{ human}
+\AttributeTok{      }\FunctionTok{LOG\_LEVEL}\KeywordTok{:}\AttributeTok{ INFO}
+
+\CommentTok{    \# Wait for the database to be healthy before starting.}
+\CommentTok{    \# \textquotesingle{}depends\_on\textquotesingle{} with \textquotesingle{}condition: service\_healthy\textquotesingle{} ensures Docker waits}
+\CommentTok{    \# until the db healthcheck passes before starting the app.}
+\AttributeTok{    }\FunctionTok{depends\_on}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{db}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{condition}\KeywordTok{:}\AttributeTok{ service\_healthy}
+
+\CommentTok{    \# Restart policy: if the container crashes, restart it.}
+\CommentTok{    \# \textquotesingle{}on{-}failure\textquotesingle{} restarts only if the container exits with a non{-}zero code.}
+\AttributeTok{    }\FunctionTok{restart}\KeywordTok{:}\AttributeTok{ on{-}failure}
+
+\CommentTok{\# Named volumes: Docker manages these on disk.}
+\CommentTok{\# They persist between \textquotesingle{}docker compose down\textquotesingle{} and \textquotesingle{}docker compose up\textquotesingle{}.}
+\CommentTok{\# To delete them: docker compose down {-}v}
+\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{postgres\_data}\KeywordTok{:}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{Running with Docker Compose}\phantomsection\label{18-containerization:running-with-docker-compose}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Start both services}
+\ExtensionTok{docker}\NormalTok{ compose up}
+
+\CommentTok{\# Expected output (abridged):}
+\CommentTok{\# [+] Running 2/2}
+\CommentTok{\#  ✔ Container notes{-}api{-}db{-}1   Started}
+\CommentTok{\#  ✔ Container notes{-}api{-}app{-}1  Started}
+\CommentTok{\#}
+\CommentTok{\# notes{-}api{-}db{-}1   | ... database system is ready to accept connections}
+\CommentTok{\# notes{-}api{-}app{-}1  | [...] [1] [INFO] Starting gunicorn 22.0.0}
+\CommentTok{\# notes{-}api{-}app{-}1  | [...] [7] [INFO] Booting worker with pid: 7}
+\CommentTok{\# notes{-}api{-}app{-}1  | [...] [8] [INFO] Booting worker with pid: 8}
+\CommentTok{\# notes{-}api{-}app{-}1  | ... INFO     app.startup        | Running startup checks...}
+\CommentTok{\# notes{-}api{-}app{-}1  | ... INFO     app.startup        | Database connectivity: OK}
+\CommentTok{\# notes{-}api{-}app{-}1  | ... INFO     app.startup        | All startup checks passed.}
+\CommentTok{\# notes{-}api{-}app{-}1  | ... INFO     app.database       | Database initialized.}
+\CommentTok{\# (each application line appears once per worker)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Test it:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create a note}
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ POST http://localhost:5000/notes/ }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"content": "Running in a container!"\}\textquotesingle{}}
+
+\CommentTok{\# \{"content":"Running in a container!","created\_at":"2024{-}01{-}15T14:00:05.123456+00:00","id":1\}}
+
+\CommentTok{\# Retrieve it}
+\ExtensionTok{curl}\NormalTok{ http://localhost:5000/notes/}
+\CommentTok{\# \{"count":1,"notes":[\{"content":"Running in a container!","created\_at":"2024{-}01{-}15T14:00:05.123456+00:00","id":1\}]\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Stop:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ compose down}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The data persists in the \texttt{postgres\_data} volume. Running \texttt{docker\ compose\ up} again brings it back. (Flask's \texttt{jsonify} sorts keys alphabetically, which is why \texttt{content} comes before \texttt{id}; PostgreSQL's timestamps carry microseconds, SQLite's do not.)
+
+\setcounter{section}{6}
+\section{Image Tagging and Versioning}\label{18-containerization:187-image-tagging-and-versioning}
+
+The tag \texttt{latest} is convenient but dangerous for deployment: it changes on every build, making it impossible to know which exact version is running on a server.
+
+For production, tag images with a specific version identifier:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Tag with git commit hash — uniquely identifies the exact code version}
+\VariableTok{GIT\_HASH}\OperatorTok{=}\VariableTok{$(}\FunctionTok{git}\NormalTok{ rev{-}parse }\AttributeTok{{-}{-}short}\NormalTok{ HEAD}\VariableTok{)}
+\ExtensionTok{docker}\NormalTok{ build }\AttributeTok{{-}t}\NormalTok{ notes{-}api:sha{-}}\VariableTok{$\{GIT\_HASH\}} \AttributeTok{{-}t}\NormalTok{ notes{-}api:latest .}
+
+\CommentTok{\# Example: notes{-}api:sha{-}a1b2c3d}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Using the git commit hash as the image tag creates an unambiguous link between the running container and the exact commit it was built from. When a production incident occurs, you know the exact code version running. The \texttt{sha-} prefix is the convention this book uses everywhere (it is also what the CI tooling in \hyperref[ch:19-artifact-storage]{Chapter 19} produces), and it keeps a tag like \texttt{sha-1234567} from being mistaken for a version number. Tags are always lowercase. Deploy only these commit tags~--- never \texttt{latest}.
+
+\subsection*{Adding version info to the image}\phantomsection\label{18-containerization:adding-version-info-to-the-image}
+
+Record build metadata in the image using labels:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Add to Dockerfile, near the top of the final stage}
+\KeywordTok{ARG}\NormalTok{ GIT\_HASH=unknown}
+\KeywordTok{ARG}\NormalTok{ BUILD\_DATE=unknown}
+
+\KeywordTok{LABEL}\NormalTok{ org.opencontainers.image.revision=}\StringTok{"$\{GIT\_HASH\}"} \OperatorTok{\textbackslash{}}
+\NormalTok{      org.opencontainers.image.created=}\StringTok{"$\{BUILD\_DATE\}"} \OperatorTok{\textbackslash{}}
+\NormalTok{      org.opencontainers.image.title=}\StringTok{"notes{-}api"} \OperatorTok{\textbackslash{}}
+\NormalTok{      org.opencontainers.image.description=}\StringTok{"Notes REST API"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Build with the metadata:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\VariableTok{GIT\_HASH}\OperatorTok{=}\VariableTok{$(}\FunctionTok{git}\NormalTok{ rev{-}parse }\AttributeTok{{-}{-}short}\NormalTok{ HEAD}\VariableTok{)}
+\VariableTok{BUILD\_DATE}\OperatorTok{=}\VariableTok{$(}\FunctionTok{date} \AttributeTok{{-}u}\NormalTok{ +}\StringTok{"\%Y{-}\%m{-}\%dT\%H:\%M:\%SZ"}\VariableTok{)}
+
+\ExtensionTok{docker}\NormalTok{ build }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}{-}build{-}arg}\NormalTok{ GIT\_HASH=}\VariableTok{$\{GIT\_HASH\}} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}{-}build{-}arg}\NormalTok{ BUILD\_DATE=}\VariableTok{$\{BUILD\_DATE\}} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}t}\NormalTok{ notes{-}api:sha{-}}\VariableTok{$\{GIT\_HASH\}} \DataTypeTok{\textbackslash{}}
+\NormalTok{  .}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Inspect the metadata later:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ inspect }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}\{\{json .Config.Labels\}\}\textquotesingle{}}\NormalTok{ notes{-}api:sha{-}a1b2c3d}
+\CommentTok{\# \{"org.opencontainers.image.created":"2024{-}01{-}15T14:00:00Z",}
+\CommentTok{\#  "org.opencontainers.image.description":"Notes REST API",}
+\CommentTok{\#  "org.opencontainers.image.revision":"a1b2c3d",}
+\CommentTok{\#  "org.opencontainers.image.title":"notes{-}api"\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{7}
+\section{Integrating Docker into the Build Process}\label{18-containerization:188-integrating-docker-into-the-build-process}
+
+Add Docker build targets to the \texttt{Makefile}:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Additions to Makefile — Docker targets}
+
+\DataTypeTok{GIT\_HASH} \CharTok{:=}\StringTok{ }\CharTok{$(}\KeywordTok{shell}\StringTok{ git rev{-}parse {-}{-}short HEAD 2\textgreater{}/dev/null || echo "unknown"}\CharTok{)}
+\DataTypeTok{BUILD\_DATE} \CharTok{:=}\StringTok{ }\CharTok{$(}\KeywordTok{shell}\StringTok{ date {-}u +"\%Y{-}\%m{-}\%dT\%H:\%M:\%SZ"}\CharTok{)}
+\DataTypeTok{IMAGE\_NAME} \CharTok{:=}\StringTok{ notes{-}api}
+\DataTypeTok{IMAGE\_TAG} \CharTok{:=}\StringTok{ sha{-}}\CharTok{$(}\DataTypeTok{GIT\_HASH}\CharTok{)}
+
+\OtherTok{.PHONY:}\DataTypeTok{ docker{-}build docker{-}run docker{-}compose{-}up docker{-}compose{-}down docker{-}clean release}
+
+\CommentTok{\# Build the Docker image}
+\DecValTok{docker{-}build:}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{"→ Building Docker image }\CharTok{$(}\DataTypeTok{IMAGE\_NAME}\CharTok{)}\StringTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)}\StringTok{..."}
+\NormalTok{    docker build \textbackslash{}}
+        \CharTok{{-}}\FunctionTok{{-}build{-}arg GIT\_HASH=}\CharTok{$(}\DataTypeTok{GIT\_HASH}\CharTok{)}\FunctionTok{ }\CharTok{\textbackslash{}}
+\FunctionTok{        {-}{-}build{-}arg BUILD\_DATE=}\CharTok{$(}\DataTypeTok{BUILD\_DATE}\CharTok{)}\FunctionTok{ }\CharTok{\textbackslash{}}
+\FunctionTok{        {-}t }\CharTok{$(}\DataTypeTok{IMAGE\_NAME}\CharTok{)}\FunctionTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)}\FunctionTok{ }\CharTok{\textbackslash{}}
+\FunctionTok{        {-}t }\CharTok{$(}\DataTypeTok{IMAGE\_NAME}\CharTok{)}\FunctionTok{:latest }\CharTok{\textbackslash{}}
+\FunctionTok{        .}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Image built: }\CharTok{$(}\DataTypeTok{IMAGE\_NAME}\CharTok{)}\StringTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)}\StringTok{"}
+
+\CommentTok{\# Run the container with SQLite (quick local test)}
+\DecValTok{docker{-}run:}
+\ErrorTok{    }\NormalTok{docker run {-}{-}rm \textbackslash{}}
+        \CharTok{{-}}\FunctionTok{p 5000:5000 }\CharTok{\textbackslash{}}
+\FunctionTok{        {-}e DATABASE\_URL=}\StringTok{"sqlite:///notes.db"}\FunctionTok{ }\CharTok{\textbackslash{}}
+\FunctionTok{        {-}e SECRET\_KEY=}\StringTok{"docker{-}test{-}secret{-}key{-}1234"}\FunctionTok{ }\CharTok{\textbackslash{}}
+\FunctionTok{        }\CharTok{$(}\DataTypeTok{IMAGE\_NAME}\CharTok{)}\FunctionTok{:latest}
+
+\CommentTok{\# Start the full stack (app + PostgreSQL)}
+\DecValTok{docker{-}compose{-}up:}
+\ErrorTok{    }\NormalTok{docker compose up {-}d}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Stack started. API available at http://localhost:5000"}
+
+\CommentTok{\# Stop the full stack}
+\DecValTok{docker{-}compose{-}down:}
+\ErrorTok{    }\NormalTok{docker compose down}
+
+\CommentTok{\# Complete release build: run all checks, then build the Docker image}
+\DecValTok{release:}\DataTypeTok{ build docker{-}build}
+\ErrorTok{    }\CharTok{@}\FunctionTok{echo }\StringTok{""}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Release build complete."}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"  Image: }\CharTok{$(}\DataTypeTok{IMAGE\_NAME}\CharTok{)}\StringTok{:}\CharTok{$(}\DataTypeTok{IMAGE\_TAG}\CharTok{)}\StringTok{"}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+
+\CommentTok{\# Remove all Docker images for this project (every tag, not just latest)}
+\DecValTok{docker{-}clean:}
+\ErrorTok{    }\NormalTok{docker rmi {-}f }\CharTok{$$}\NormalTok{(docker images {-}q }\CharTok{$(}\DataTypeTok{IMAGE\_NAME}\CharTok{)}\NormalTok{) 2\textgreater{}/dev/null || true}
+    \CharTok{@}\FunctionTok{echo }\StringTok{"✓ Docker images removed."}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Now:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{make}\NormalTok{ release}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Runs the complete pipeline: lint → typecheck → test → security → docker build. The output is a Docker image built from code that passed every check, tagged with the current git commit hash.
+
+\setcounter{section}{8}
+\section{Adding Docker Tests to CI}\label{18-containerization:189-adding-docker-tests-to-ci}
+
+Update the GitHub Actions workflow to also test the Docker build:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Additions to .github/workflows/build.yml}
+
+\AttributeTok{  }\FunctionTok{docker}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Docker Build Test}
+\AttributeTok{    }\FunctionTok{runs{-}on}\KeywordTok{:}\AttributeTok{ ubuntu{-}latest}
+\AttributeTok{    }\FunctionTok{needs}\KeywordTok{:}\AttributeTok{ build}\CommentTok{  \# Only run if the build job passes}
+
+\AttributeTok{    }\FunctionTok{steps}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Check out repository}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/checkout@v4}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Build Docker image}
+\FunctionTok{        run}\KeywordTok{: }\CharTok{|}
+\NormalTok{          docker build \textbackslash{}}
+\NormalTok{            {-}{-}build{-}arg GIT\_HASH=$(git rev{-}parse {-}{-}short HEAD) \textbackslash{}}
+\NormalTok{            {-}{-}build{-}arg BUILD\_DATE=$(date {-}u +"\%Y{-}\%m{-}\%dT\%H:\%M:\%SZ") \textbackslash{}}
+\NormalTok{            {-}t notes{-}api:ci{-}test \textbackslash{}}
+\NormalTok{            .}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Test Docker image starts correctly}
+\FunctionTok{        run}\KeywordTok{: }\CharTok{|}
+\NormalTok{          \# Start the container in the background}
+\NormalTok{          docker run {-}d \textbackslash{}}
+\NormalTok{            {-}{-}name notes{-}api{-}test \textbackslash{}}
+\NormalTok{            {-}p 5000:5000 \textbackslash{}}
+\NormalTok{            {-}e DATABASE\_URL="sqlite:///notes.db" \textbackslash{}}
+\NormalTok{            {-}e SECRET\_KEY="ci{-}test{-}secret{-}key{-}not{-}for{-}production{-}1234" \textbackslash{}}
+\NormalTok{            notes{-}api:ci{-}test}
+
+\NormalTok{          \# Test the health endpoint, retrying while the container starts}
+\NormalTok{          \# (a fixed "sleep 5" is flaky on a slow runner)}
+\NormalTok{          curl {-}{-}fail {-}{-}retry 10 {-}{-}retry{-}delay 1 {-}{-}retry{-}connrefused \textbackslash{}}
+\NormalTok{            http://localhost:5000/health}
+
+\NormalTok{          \# Stop and remove the container}
+\NormalTok{          docker stop notes{-}api{-}test}
+\NormalTok{          docker rm notes{-}api{-}test}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{9}
+\section{The Complete Updated Project Structure}\label{18-containerization:1810-the-complete-updated-project-structure}
+
+\begin{diagrambox}[short]{377.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+├── .github/
+│   └── workflows/
+│       └── build.yml          ← CI (updated with Docker job)
+├── app/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── database.py
+│   ├── errors.py
+│   ├── logging_config.py
+│   ├── middleware.py
+│   ├── startup.py
+│   └── routes/
+│       ├── __init__.py
+│       ├── health.py
+│       └── notes.py
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_errors.py
+│   ├── test_health.py
+│   └── test_notes.py
+├── Dockerfile                 ← Multi-stage Docker image definition (NEW)
+├── .dockerignore              ← Files excluded from Docker build (NEW)
+├── docker-compose.yml         ← Multi-container development setup (NEW)
+├── Makefile                   ← Build automation (updated with Docker targets)
+├── pyproject.toml
+├── requirements.txt           ← Updated with gunicorn
+├── requirements-dev.txt
+├── run.py
+├── .env
+├── .env.example
+├── .python-version
+└── .gitignore
+\end{Verbatim}
+\end{diagrambox}
+
+\phantomsection\label{18-containerization:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{container} is a Linux process with three kernel mechanisms: namespaces (isolation), cgroups (resource limits), and a layered filesystem (shared, immutable layers). Containers share the host kernel~--- they are not virtual machines.
+\item
+  \textbf{Docker} is the toolchain for building and running containers. A \textbf{Dockerfile} describes how to build an image. A \textbf{Docker image} is the immutable artifact. A \textbf{container} is a running instance of an image.
+\item
+  \textbf{Multi-stage builds} keep the final image small and secure: a builder stage installs (and, if necessary, compiles) dependencies; the final stage copies only what is needed at runtime. Build tools such as a compiler never appear in the production image.
+\item
+  \textbf{Layer caching} makes builds fast. Copy \texttt{requirements.txt} and run \texttt{pip\ install} \emph{before} copying application code~--- then code changes do not trigger a full pip reinstall.
+\item
+  \textbf{Never run as root} inside a container. Create a dedicated non-root user, give it the application files with \texttt{COPY\ -\/-chown}, and switch to it with \texttt{USER}.
+\item
+  \textbf{\texttt{PYTHONUNBUFFERED=}\allowbreak{}\texttt{1}} ensures log output appears immediately, not when a buffer fills. Critical for seeing the last log line before a crash.
+\item
+  \textbf{Use Gunicorn} (not \texttt{app.run()}) as the container's CMD. Gunicorn is a production WSGI server that handles concurrent requests and manages workers.
+\item
+  \textbf{Docker Compose} defines multi-container setups (application + database) in a single YAML file. Services reach each other by service name (\texttt{db} resolves to the PostgreSQL container's IP).
+\item
+  \textbf{Tag images with the git commit hash} (e.g., \texttt{notes-api:sha-a1b2c3d}) so you always know exactly which code is running in any environment.
+\item
+  \textbf{\texttt{make\ release}} is the complete pipeline: tests pass → Docker image built → artifact ready to deploy.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{18-containerization:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Change one line of \texttt{app/}\allowbreak{}\texttt{routes/}\allowbreak{}\texttt{notes.py} and rebuild the image. Which layers are rebuilt, and which come from the cache? Now change \texttt{requirements.txt} instead.
+\item
+  \textbf{Break and fix.} Remove \texttt{USER\ notes} from the Dockerfile, build, and run \texttt{docker\ exec\ notes-}\allowbreak{}\texttt{api\ id}. Why is this dangerous? Restore it.
+\item
+  \textbf{Extend.} Measure the image size with \texttt{docker\ images}, then try \texttt{python:3.11-alpine} as the base. Did it get smaller? Did everything still work?
+\item
+  \textbf{Explain.} What exactly is shared between two containers started from the same image, and what is not?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-18.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{18-containerization:whats-next}
+
+The Notes API is now packaged in a Docker image that runs the same way everywhere. But the image exists only on the machine that built it. How does it get from your laptop~--- or from CI~--- to the server that will run it? Where are images kept, how are they named, and how do you know which image is which a month from now?
+
+\noindent{}→ \hyperref[ch:19-artifact-storage]{Chapter 19}~--- Artifact Storage

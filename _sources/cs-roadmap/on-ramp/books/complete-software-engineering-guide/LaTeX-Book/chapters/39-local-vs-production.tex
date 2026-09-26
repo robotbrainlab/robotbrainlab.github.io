@@ -1,0 +1,1177 @@
+\setcounter{chapter}{38}
+\chapter{Local vs Production}\label{ch:39-local-vs-production}
+
+\chapterrule
+
+Every developer has experienced the frustration: ``It works on my machine.'' The code runs perfectly locally, passes all the tests, and then behaves differently~--- or fails entirely~--- in production. This is not a coincidence or bad luck. The local development environment and the production environment are fundamentally different systems, and those differences cause real problems.
+
+This chapter catalogs the specific ways in which local and production environments differ, explains why each difference exists, and provides concrete strategies for reducing the gap between them. The goal is not to make local and production identical (which is impossible), but to make their differences explicit and manageable.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  The specific differences between local and production that cause ``works on my machine'' failures
+\item
+  Why running the database locally vs. PostgreSQL remotely causes different behavior
+\item
+  How environment variables work differently across environments
+\item
+  What Docker does and does not guarantee about environment consistency
+\item
+  How to use staging environments to catch production-specific bugs before deployment
+\item
+  Practical techniques: environment parity, feature flags, and local production simulation
+\item
+  How to record significant decisions as \textbf{Architecture Decision Records (ADRs)} so the \emph{why} behind the system survives staff turnover
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{The Differences That Matter}\label{39-local-vs-production:391-the-differences-that-matter}
+
+The Notes API runs in two environments:
+
+\textbf{Local development}:
+
+\begin{itemize}
+\tightlist
+\item
+  Developer's laptop (macOS or Linux, 16-32 GB RAM, fast SSD)
+\item
+  Python installed directly or in a virtualenv
+\item
+  SQLite database (a local file; the tests use a temporary one)
+\item
+  The Flask development server (\texttt{python\ run.py})
+\item
+  Debug mode enabled, auto-reload enabled
+\item
+  Secrets in \texttt{.env} file or shell environment
+\item
+  Network requests go through localhost
+\end{itemize}
+
+\noindent{}\textbf{Production}:
+
+\begin{itemize}
+\tightlist
+\item
+  DigitalOcean Droplet (1 vCPU, 1 GB RAM, 25 GB SSD)
+\item
+  Python in a Docker container
+\item
+  PostgreSQL on a managed database service
+\item
+  Gunicorn WSGI server (multiple workers, no auto-reload)
+\item
+  Debug mode disabled
+\item
+  Secrets in \texttt{/}\allowbreak{}\texttt{opt/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api/}\allowbreak{}\texttt{config/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api.}\allowbreak{}\texttt{env}
+\item
+  Network requests traverse the internet, Nginx, Docker networking
+\end{itemize}
+
+\noindent{}These differences are not failures of engineering~--- they reflect different purposes. Development must be fast to iterate on; production must be stable and secure. But unmanaged, the differences cause bugs that are hard to diagnose because they only appear in production.
+
+\subsection*{Every difference above was a decision --- record the ones that matter}\phantomsection\label{39-local-vs-production:every-difference-above-was-a-decision--record-the-ones-that-matter}
+
+Many of these differences are revisited here with everything the book has built since Stage 2 first catalogued them (environment drift, \hyperref[ch:07-environment-drift]{Chapter 7}; configuration coupling, \hyperref[ch:09-configuration-coupling]{Chapter 9}; the reliability and security gaps, \hyperref[ch:11-reliability-security-gaps]{Chapter 11}).
+
+Read that list again and notice what it really is: a list of \emph{decisions}. SQLite locally but PostgreSQL in production. Gunicorn instead of the development server. Docker. Nginx in front. Each was chosen for reasons that felt obvious at the time~--- and six months from now those reasons will be gone, while the decision remains. Someone will look at it and ask ``why is this like this?'' The code answers \emph{what} the system does; it almost never answers \emph{why} it is the way it is. That \emph{why} is the most valuable and most perishable knowledge in any project, and capturing it is its own small discipline.
+
+\textbf{Decisions are the most perishable knowledge in a project.} Without a record, a team does one of two things with a forgotten decision, both bad: it re-litigates the question from scratch every time it resurfaces, or~--- worse~--- someone ``cleans up'' the odd-looking thing and removes the very safeguard the decision put there. The cure is to write the decision down at the moment it is made.
+
+\subsection*{What an Architecture Decision Record is}\phantomsection\label{39-local-vs-production:what-an-architecture-decision-record-is}
+
+An \textbf{Architecture Decision Record (ADR)} is a short document that captures one significant decision: the \emph{context} that forced it, the \emph{decision} made, the \emph{alternatives} considered, and the \emph{consequences} accepted. It is deliberately not a design document (a proposal for how to build something) and not an RFC (a request for comment \emph{before} deciding). It is a \emph{record}, written when the decision is made and then left immutable. One decision, one file.
+
+Not every decision earns one. A decision deserves an ADR when it is \textbf{hard or expensive to reverse}, when it \textbf{affects many parts of the system}, or when someone will reasonably ask ``why?'' later. Adopting the application factory pattern, choosing PostgreSQL, putting Nginx in front of the app~--- yes. Naming a variable or ordering two functions~--- no.
+
+\subsection*{The Nygard template}\phantomsection\label{39-local-vs-production:the-nygard-template}
+
+The widely used lightweight format, from Michael Nygard, has just five parts:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Title}~--- numbered and sequential, stating the decision in one line: \texttt{ADR-}\allowbreak{}\texttt{0007:}\allowbreak{}\texttt{\ Use\ PostgreSQL\ in\ production\ instead\ of\ SQLite}.
+\item
+  \textbf{Status}~--- \texttt{Proposed} → \texttt{Accepted} → \texttt{Deprecated} → \texttt{Superseded\ by\ ADR-XXXX}. The decision's place in its lifecycle.
+\item
+  \textbf{Context}~--- the forces that made the decision necessary, written so it still makes sense in two years (assume the reader does \emph{not} remember today's situation). This is the most important section.
+\item
+  \textbf{Decision}~--- the choice itself, stated in active voice: ``We will\ldots{}''.
+\item
+  \textbf{Consequences}~--- what becomes easier \emph{and} what becomes harder. The honest downsides you are knowingly accepting, plus the \textbf{alternatives considered and why they lost}~--- often the single most valuable lines in the whole record, because they stop a future engineer from re-proposing a path you already rejected for good reason.
+\end{itemize}
+
+\subsection*{A worked ADR for a decision this book actually made}\phantomsection\label{39-local-vs-production:a-worked-adr-for-a-decision-this-book-actually-made}
+
+Here is the SQLite-versus-PostgreSQL decision the book has been living with since \hyperref[ch:13-configuration-externalization]{Chapter 13}, written up as an ADR:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\# ADR{-}0007: PostgreSQL in production, SQLite in local development}
+
+\NormalTok{Status: Superseded by ADR{-}0012 (was: Accepted, 2024{-}03{-}10)}
+
+\FunctionTok{\#\# Context}
+
+\NormalTok{The Notes API uses SQLite, a file{-}based database with no server process}
+\NormalTok{(Chapter 6) — ideal for local development: zero setup, no network. But}
+\NormalTok{production needs concurrent writes from multiple Gunicorn workers, network}
+\NormalTok{access from a separate app server, managed backups, and features SQLite}
+\NormalTok{lacks (concurrent writers, time{-}zone{-}aware timestamps, ILIKE). SQLite\textquotesingle{}s}
+\NormalTok{single{-}writer lock would serialize our workers under load.}
+
+\FunctionTok{\#\# Decision}
+
+\NormalTok{We will run PostgreSQL in production and keep SQLite for local development,}
+\NormalTok{selecting between them at runtime via the DATABASE\_URL environment variable}
+\NormalTok{(Chapter 13). Application code stays database{-}agnostic.}
+
+\FunctionTok{\#\# Consequences}
+
+\SpecialStringTok{+ }\NormalTok{Production gets real concurrency, managed backups, and richer SQL.}
+\SpecialStringTok{+ }\NormalTok{Local development stays zero{-}setup and fast.}
+\SpecialStringTok{{-} }\NormalTok{We now maintain two code paths and must test against PostgreSQL, not just}
+\NormalTok{  SQLite, or we get "works on my machine" bugs (this chapter, §39.2).}
+\SpecialStringTok{{-} }\NormalTok{Developers must run PostgreSQL locally to reproduce production exactly.}
+
+\FunctionTok{\#\# Alternatives considered}
+
+\SpecialStringTok{{-} }\NormalTok{PostgreSQL everywhere, including local: rejected — heavier local setup and}
+\NormalTok{  slower onboarding for little benefit on a laptop.}
+\SpecialStringTok{{-} }\NormalTok{SQLite everywhere, including production: rejected — cannot handle}
+\NormalTok{  concurrent writes from multiple workers; no managed backups.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}That one short file answers, permanently, the exact question §39.2 is about to raise~--- and it answers it for a colleague who joins two years from now and was never in the room. Notice its status line: §39.2 is about to change the decision, and the record that changes it looks like this:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\# ADR{-}0012: PostgreSQL everywhere, including local development and tests}
+
+\NormalTok{Status: Accepted (2024{-}04{-}02). Supersedes ADR{-}0007.}
+
+\FunctionTok{\#\# Context}
+
+\NormalTok{ADR{-}0007 predicted it: code that only PostgreSQL runs (the ILIKE search}
+\NormalTok{added to GET /notes/, Chapter 33) was never exercised by the test suite,}
+\NormalTok{which ran on SQLite. Meanwhile Docker made a local PostgreSQL a one{-}line}
+\NormalTok{command, removing ADR{-}0007\textquotesingle{}s main reason for SQLite.}
+
+\FunctionTok{\#\# Decision}
+
+\NormalTok{Tests, CI, and local development run against PostgreSQL, the same major}
+\NormalTok{version as production, in a container. SQLite is no longer supported.}
+
+\FunctionTok{\#\# Consequences}
+
+\SpecialStringTok{+ }\NormalTok{The code that runs in production is the code that is tested.}
+\SpecialStringTok{+ }\NormalTok{One database dialect: the IS\_SQLITE branches can be deleted.}
+\SpecialStringTok{{-} }\NormalTok{Running the tests needs Docker (or a local PostgreSQL).}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Status, lifecycle, and project archaeology}\phantomsection\label{39-local-vs-production:status-lifecycle-and-project-archaeology}
+
+You never edit an accepted ADR's decision. When the thinking changes, you write a \emph{new} ADR that supersedes it and mark the old one \texttt{Superseded\ by\ ADR-0021}. The trail of superseded records becomes the project's intellectual history~--- you can read not just where the design landed but \emph{how the thinking evolved to get there}. This is why, when you join an unfamiliar project, reading its ADRs in order is the fastest way to understand why the system looks the way it does. It is archaeology with the reasons still attached.
+
+\subsection*{Where ADRs live, and how they fail}\phantomsection\label{39-local-vs-production:where-adrs-live-and-how-they-fail}
+
+ADRs live \textbf{in the repository}, beside the code (commonly \texttt{docs/}\allowbreak{}\texttt{adr/}\allowbreak{}\texttt{0001-*.md}), numbered sequentially, so they version alongside what they describe and travel with the project. The common failure modes are all variations on neglect: written too \emph{late} (after everyone forgot the context), too \emph{vague} (no alternatives, no honest consequences), too \emph{grand} (a ten-page essay nobody finds time to write or read), or simply \emph{ignored}. The cure for every one of them is the same~--- small, immediate, honest, one decision per file.
+
+\setcounter{section}{1}
+\section{The Database Difference}\label{39-local-vs-production:392-the-database-difference}
+
+The most common source of ``works locally but fails in production'' is the \textbf{database}.
+
+\subsection*{SQLite vs PostgreSQL}\phantomsection\label{39-local-vs-production:sqlite-vs-postgresql}
+
+\hyperref[ch:17-build-process]{Chapter 17} configured the test suite to use SQLite (a temporary file). Local development uses SQLite too, for convenience. PostgreSQL is used in production.
+
+SQLite and PostgreSQL are both SQL databases, but they are not identical:
+
+\Needspace{18\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1806}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4097}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4097}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Feature
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+SQLite
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+PostgreSQL
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Case sensitivity & \texttt{LIKE} is case-insensitive (for ASCII letters only) & \texttt{LIKE} is case-sensitive; use \texttt{ILIKE} for insensitive \\
+Date functions & Limited & Full \texttt{DATE\_TRUNC}, \texttt{INTERVAL}, timezone support \\
+JSON operations & Limited & Full \texttt{jsonb} operators \\
+Concurrent writes & Single writer at a time & Full MVCC concurrent writes \\
+\texttt{RETURNING} clause & Supported since 3.35 (2021) & Full support \\
+\texttt{SERIAL} type & Equivalent: \texttt{INTEGER\ PRIMARY\ KEY} & Auto-increment via sequence \\
+Full-text search & Limited & \texttt{GIN} indexes, \texttt{tsvector} \\
+Custom types & Not supported & Extensible \\
+\end{longtable}
+}
+
+If your code uses any PostgreSQL-specific feature, it will fail against SQLite.
+
+\textbf{Example failure}~--- the Notes API's own search (\hyperref[ch:33-logic-execution]{Chapter 33}):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# This works on PostgreSQL (ILIKE is case{-}insensitive):}
+\NormalTok{cursor.execute(}\StringTok{"SELECT * FROM notes WHERE content ILIKE }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, (}\SpecialStringTok{f"\%}\SpecialCharTok{\{}\NormalTok{search}\SpecialCharTok{\}}\SpecialStringTok{\%"}\NormalTok{,))}
+
+\CommentTok{\# On SQLite, the same query cannot even be parsed (and sqlite3 would}
+\CommentTok{\# first reject the \%s placeholder, which it writes as ?):}
+\CommentTok{\# sqlite3.OperationalError: near "ILIKE": syntax error}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}So the test suite, running on SQLite, simply never calls \texttt{?search=}~--- it could not. The search code is tested for the first time by users in production. Any bug in it, from a typo to a wrong escape, is a production-only bug.
+
+\subsection*{The fix: test against the same database}\phantomsection\label{39-local-vs-production:the-fix-test-against-the-same-database}
+
+The most reliable solution is to use PostgreSQL everywhere:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/conftest.py (PostgreSQL version)}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{from}\NormalTok{ urllib.parse }\ImportTok{import}\NormalTok{ urlsplit}
+
+\ImportTok{import}\NormalTok{ pytest}
+
+\CommentTok{\# As in Chapter 17: the settings must be in place BEFORE the app package}
+\CommentTok{\# is imported, because app/config.py reads the environment at import time.}
+\NormalTok{os.environ[}\StringTok{"DATABASE\_URL"}\NormalTok{] }\OperatorTok{=}\NormalTok{ os.environ.get(}
+    \StringTok{"TEST\_DATABASE\_URL"}\NormalTok{,}
+    \StringTok{"postgresql://notes\_user:test\_password@localhost:5432/notes\_test"}\NormalTok{,}
+\NormalTok{)}
+\NormalTok{os.environ[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=} \StringTok{"test{-}secret{-}key{-}not{-}for{-}production{-}1234"}
+\NormalTok{os.environ[}\StringTok{"BCRYPT\_ROUNDS"}\NormalTok{] }\OperatorTok{=} \StringTok{"4"}  \CommentTok{\# fast password hashing, as in Chapter 38}
+
+\CommentTok{\# The fixtures below delete every note. Refuse to run against anything}
+\CommentTok{\# that is not obviously a test database.}
+\ControlFlowTok{assert}\NormalTok{ urlsplit(os.environ[}\StringTok{"DATABASE\_URL"}\NormalTok{]).path.endswith(}\StringTok{"\_test"}\NormalTok{), }\OperatorTok{\textbackslash{}}
+    \StringTok{"Refusing to run the tests against a database whose name does not end in \_test"}
+
+\ImportTok{from}\NormalTok{ app }\ImportTok{import}\NormalTok{ create\_app  }\CommentTok{\# noqa: E402  (must come after the settings above)}
+\ImportTok{from}\NormalTok{ app.migrate }\ImportTok{import}\NormalTok{ migrate  }\CommentTok{\# noqa: E402}
+
+\AttributeTok{@pytest.fixture}\NormalTok{(scope}\OperatorTok{=}\StringTok{"session"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ app():}
+\NormalTok{    migrate()  }\CommentTok{\# builds the schema on a new database; a no{-}op on one already up to date}
+\NormalTok{    application }\OperatorTok{=}\NormalTok{ create\_app()}
+\NormalTok{    application.config.update(\{}\StringTok{"TESTING"}\NormalTok{: }\VariableTok{True}\NormalTok{\})}
+    \ControlFlowTok{yield}\NormalTok{ application}
+
+\AttributeTok{@pytest.fixture}\NormalTok{(scope}\OperatorTok{=}\StringTok{"function"}\NormalTok{, autouse}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ clean\_database(app):}
+    \CommentTok{"""Empty the data tables (and reset their id sequences) before each test."""}
+    \ControlFlowTok{with}\NormalTok{ app.app\_context():}
+        \ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db}
+\NormalTok{        db }\OperatorTok{=}\NormalTok{ get\_db()}
+        \CommentTok{\# CASCADE: the tables that refer to these (note\_tags, sessions) are}
+        \CommentTok{\# emptied too}
+\NormalTok{        db.cursor().execute(}\StringTok{"TRUNCATE notes, tags, users RESTART IDENTITY CASCADE"}\NormalTok{)}
+\NormalTok{        db.commit()}
+    \ControlFlowTok{yield}
+
+\CommentTok{\# The client, anon\_client, login\_as and create\_note fixtures are unchanged}
+\CommentTok{\# from Chapters 17 and 38.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Run PostgreSQL locally for testing using Docker:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Start a local PostgreSQL for testing — the same major version as the}
+\CommentTok{\# production database (check it in the provider\textquotesingle{}s control panel)}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}name}\NormalTok{ postgres{-}test }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}e}\NormalTok{ POSTGRES\_USER=notes\_user }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}e}\NormalTok{ POSTGRES\_PASSWORD=test\_password }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}e}\NormalTok{ POSTGRES\_DB=notes\_test }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}p}\NormalTok{ 127.0.0.1:5432:5432 }\DataTypeTok{\textbackslash{}}
+\NormalTok{    postgres:16{-}alpine}
+
+\CommentTok{\# Run tests with the PostgreSQL database}
+\VariableTok{TEST\_DATABASE\_URL}\OperatorTok{=}\NormalTok{postgresql://notes\_user:test\_password@localhost/notes\_test }\ExtensionTok{pytest}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}In CI, GitHub Actions starts the same database as a \textbf{service container} next to the job. Add to the test job of \texttt{.}\allowbreak{}\texttt{github/}\allowbreak{}\texttt{workflows/}\allowbreak{}\texttt{build.}\allowbreak{}\texttt{yml} (\hyperref[ch:19-artifact-storage]{Chapter 19}):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{    }\FunctionTok{services}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{postgres}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{image}\KeywordTok{:}\AttributeTok{ postgres:16{-}alpine}
+\AttributeTok{        }\FunctionTok{env}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{POSTGRES\_USER}\KeywordTok{:}\AttributeTok{ notes\_user}
+\AttributeTok{          }\FunctionTok{POSTGRES\_PASSWORD}\KeywordTok{:}\AttributeTok{ test\_password}
+\AttributeTok{          }\FunctionTok{POSTGRES\_DB}\KeywordTok{:}\AttributeTok{ notes\_test}
+\AttributeTok{        }\FunctionTok{ports}\KeywordTok{:}
+\AttributeTok{          }\KeywordTok{{-}}\AttributeTok{ }\StringTok{"5432:5432"}
+\CommentTok{        \# Wait until PostgreSQL accepts connections before running steps}
+\FunctionTok{        options}\KeywordTok{: }\CharTok{\textgreater{}{-}}
+\NormalTok{          {-}{-}health{-}cmd pg\_isready}
+\NormalTok{          {-}{-}health{-}interval 5s}
+\NormalTok{          {-}{-}health{-}timeout 5s}
+\NormalTok{          {-}{-}health{-}retries 10}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(The conftest's default \texttt{TEST\_DATABASE\_URL} already points at \texttt{localhost:}\allowbreak{}\texttt{5432/}\allowbreak{}\texttt{notes\_}\allowbreak{}\texttt{test}, so the test step needs no extra settings.) And now that nothing runs on SQLite any more, the \texttt{IS\_SQLITE} branches in \texttt{app/database.py} can go, and \texttt{sql()} shrinks to one job, turning \texttt{?} into PostgreSQL's \texttt{\%s}: the code has one dialect, and the search query can use \texttt{sql()}'s \texttt{?} like every other query. The \texttt{migrations/}\allowbreak{}\texttt{sqlite/} folder goes too, and with it the chore of writing every migration twice. And the concurrency of Chapter 33's section 33.13, which SQLite made impossible to test, can now be tested at last.
+
+Or in \texttt{docker-compose.yml} for local development:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# docker{-}compose.yml (for local development, not production)}
+\FunctionTok{services}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{db}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{image}\KeywordTok{:}\AttributeTok{ postgres:16{-}alpine}\CommentTok{          \# same major version as production}
+\AttributeTok{    }\FunctionTok{environment}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{POSTGRES\_USER}\KeywordTok{:}\AttributeTok{ notes\_user}
+\AttributeTok{      }\FunctionTok{POSTGRES\_PASSWORD}\KeywordTok{:}\AttributeTok{ dev\_password}
+\AttributeTok{      }\FunctionTok{POSTGRES\_DB}\KeywordTok{:}\AttributeTok{ notesdb}
+\AttributeTok{    }\FunctionTok{ports}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\StringTok{"127.0.0.1:5432:5432"}\CommentTok{          \# for psql on the laptop; loopback only}
+\AttributeTok{    }\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ postgres{-}data:/var/lib/postgresql/data}
+\CommentTok{    \# Required by "condition: service\_healthy" below}
+\AttributeTok{    }\FunctionTok{healthcheck}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{test}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"CMD{-}SHELL"}\KeywordTok{,}\AttributeTok{ }\StringTok{"pg\_isready {-}U notes\_user {-}d notesdb"}\KeywordTok{]}
+\AttributeTok{      }\FunctionTok{interval}\KeywordTok{:}\AttributeTok{ 5s}
+\AttributeTok{      }\FunctionTok{timeout}\KeywordTok{:}\AttributeTok{ 5s}
+\AttributeTok{      }\FunctionTok{retries}\KeywordTok{:}\AttributeTok{ }\DecValTok{5}
+
+\AttributeTok{  }\FunctionTok{api}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{build}\KeywordTok{:}\AttributeTok{ .}
+\AttributeTok{    }\FunctionTok{depends\_on}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{db}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{condition}\KeywordTok{:}\AttributeTok{ service\_healthy}
+\AttributeTok{    }\FunctionTok{environment}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{DATABASE\_URL}\KeywordTok{:}\AttributeTok{ postgresql://notes\_user:dev\_password@db/notesdb}
+\AttributeTok{      }\FunctionTok{SECRET\_KEY}\KeywordTok{:}\AttributeTok{ dev{-}secret{-}key{-}not{-}for{-}production{-}1234}
+\AttributeTok{      }\FunctionTok{FLASK\_DEBUG}\KeywordTok{:}\AttributeTok{ }\StringTok{"true"}
+\AttributeTok{      }\FunctionTok{LOG\_FORMAT}\KeywordTok{:}\AttributeTok{ human}
+\AttributeTok{    }\FunctionTok{ports}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\StringTok{"127.0.0.1:5000:5000"}
+\AttributeTok{    }\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ .:/app}\CommentTok{  \# Mount source code for live reloading in development}
+\CommentTok{    \# The development server with auto{-}reload, instead of the image\textquotesingle{}s Gunicorn}
+\CommentTok{    \# (after bringing the schema up to date; the app refuses to start otherwise)}
+\AttributeTok{    }\FunctionTok{command}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"sh"}\KeywordTok{,}\AttributeTok{ }\StringTok{"{-}c"}\KeywordTok{,}\AttributeTok{ }\StringTok{"python {-}m app.migrate \&\& exec flask {-}{-}app \textquotesingle{}app:create\_app()\textquotesingle{} run {-}{-}host=0.0.0.0 {-}{-}debug"}\KeywordTok{]}
+
+\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{postgres{-}data}\KeywordTok{:}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}With this setup, local development uses the same PostgreSQL version as production. The only difference is that local uses a volume (persistent across container restarts) and production uses a managed service. (One Linux-specific wrinkle: the container runs as UID 1001, and the bind-mounted source directory belongs to your own user; if Python cannot write \texttt{\_\_pycache\_\_} there, it simply runs without it. macOS's Docker Desktop maps the ownership for you.)
+
+\setcounter{section}{2}
+\section{The Environment Variable Difference}\label{39-local-vs-production:393-the-environment-variable-difference}
+
+Local development typically uses a \texttt{.env} file or environment variables set in the terminal. Production uses environment variables from \texttt{/}\allowbreak{}\texttt{opt/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api/}\allowbreak{}\texttt{config/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api.}\allowbreak{}\texttt{env}.
+
+\subsection*{Problems with different environment variable values}\phantomsection\label{39-local-vs-production:problems-with-different-environment-variable-values}
+
+\textbf{Unset variables that are required}: if a required environment variable is not set locally, the startup check (\hyperref[ch:14-runtime-contract]{Chapter 14}) catches it. But what if the variable is set to a valid value locally but an \emph{incorrect} value in production?
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Local .env:}
+\VariableTok{DATABASE\_URL}\OperatorTok{=}\NormalTok{sqlite:///./dev.db}
+
+\CommentTok{\# Production:}
+\VariableTok{DATABASE\_URL}\OperatorTok{=}\NormalTok{postgresql://user:pass@private{-}db{-}….db.ondigitalocean.com:25060/notesdb}\PreprocessorTok{?}\NormalTok{sslmode=require}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The application runs locally with SQLite and fails with PostgreSQL-specific queries in production.
+
+\textbf{Different secret values}: \texttt{SECRET\_KEY} \emph{should} differ between environments~--- a production secret must never sit on a laptop. Flask uses it to sign session cookies, so a cookie issued in one environment is not accepted in another; for this JSON API, which issues none, that changes nothing.
+
+\subsection*{\texorpdfstring{The \texttt{.env.example} file}{The .env.example file}}\phantomsection\label{39-local-vs-production:the-envexample-file}
+
+Document all required environment variables in a \texttt{.env.example} file that is committed to the repository:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# .env.example}
+\CommentTok{\# Copy this file to .env and fill in the values.}
+\CommentTok{\# Never commit .env to the repository.}
+
+\CommentTok{\# Required: Database connection string (the local PostgreSQL from §39.2)}
+\VariableTok{DATABASE\_URL}\OperatorTok{=}\NormalTok{postgresql://notes\_user:dev\_password@localhost:5432/notesdb}
+
+\CommentTok{\# Required — generate a value with:}
+\CommentTok{\#   python {-}c "import secrets; print(secrets.token\_hex(32))"}
+\VariableTok{SECRET\_KEY}\OperatorTok{=}
+
+\CommentTok{\# Development server settings (python run.py)}
+\VariableTok{FLASK\_DEBUG}\OperatorTok{=}\NormalTok{false}
+\VariableTok{PORT}\OperatorTok{=}\NormalTok{5000}
+\VariableTok{HOST}\OperatorTok{=}\NormalTok{127.0.0.1}
+
+\CommentTok{\# Logging (Chapter 16)}
+\VariableTok{LOG\_LEVEL}\OperatorTok{=}\NormalTok{INFO}
+\VariableTok{LOG\_FORMAT}\OperatorTok{=}\NormalTok{human}
+\VariableTok{LOG\_DIR}\OperatorTok{=}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is the same file as in \hyperref[ch:16-logging-error-handling]{Chapter 16}, with PostgreSQL in place of SQLite. \texttt{SECRET\_KEY} stays empty on purpose: a copied \texttt{.env} without a real key fails at startup instead of running with a placeholder.
+
+Any developer joining the project:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Copies \texttt{.env.example} to \texttt{.env}
+\item
+  Fills in real values
+\item
+  Has the correct environment
+\end{enumerate}
+
+\noindent{}Any missing or misconfigured variable is explicitly documented.
+
+\subsection*{Validating environment variables at startup}\phantomsection\label{39-local-vs-production:validating-environment-variables-at-startup}
+
+\hyperref[ch:14-runtime-contract]{Chapter 14} introduced startup validation, and it is the single most effective tool for catching environment variable problems. The Notes API already has all of it~--- there is nothing new to write here, only to know where each check lives:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{app/config.py} (Chapter 15): \texttt{\_require()} stops the process if \texttt{DATABASE\_URL} or \texttt{SECRET\_KEY} is missing.
+\item
+  \texttt{app/startup.py} (Chapters 14--16): the Python version, \texttt{SECRET\_KEY}'s length, and database connectivity, checked by \texttt{create\_app()} before the first request.
+\item
+  The security check from \hyperref[ch:38-security]{Chapter 38}: warns if \texttt{SECRET\_KEY} looks like a placeholder, if debug mode is on, or if production points at SQLite.
+\end{itemize}
+
+\noindent{}A misconfigured deployment therefore fails loudly, in the logs, before it serves anything:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+... CRITICAL app.startup | Startup failed: Cannot connect to the database.
+DATABASE_URL: postgresql://notes_user:****@private-db-….db.ondigitalocean.com:25060/notesdb?sslmode=require
+Error: connection to server ... failed: timeout expired
+Ensure the database server is running and reachable.
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This catches environment problems during deployment~--- before the first user request~--- rather than during a user's request at an unpredictable time.
+
+\setcounter{section}{3}
+\section{The Network Difference}\label{39-local-vs-production:394-the-network-difference}
+
+In local development, all services run on \texttt{localhost}. In production, services are on different hosts connected over a network:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Local:
+  Flask → localhost:5432 (PostgreSQL)
+  Flask → localhost:6379 (Redis, if you added it in Chapter 36)
+  Client → localhost:5000 (Flask)
+
+Production:
+  Flask → private-db-….ondigitalocean.com:25060 (managed PostgreSQL, over the VPC, TLS)
+  Flask → 10.0.0.11:6379 (Redis on its own server, if you added it)
+  Client → 203.0.113.42 (Nginx, which proxies to Docker)
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{Network-related bugs}\phantomsection\label{39-local-vs-production:network-related-bugs}
+
+\textbf{Latency}: local database queries run in \textless1ms (loopback). Production database queries run in 2-10ms (VPC network). Code that makes 100 database queries per request (N+1 problem) might be acceptable locally but unbearably slow in production.
+
+With the tags from \hyperref[ch:33-logic-execution]{Chapter 33}~--- the \texttt{tags} table and the \texttt{note\_tags} join table:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# N+1 query problem — runs fine locally, very slow in production}
+\KeywordTok{def}\NormalTok{ list\_notes\_with\_tags():}
+\NormalTok{    cursor.execute(}\StringTok{"SELECT id, content FROM notes"}\NormalTok{)}
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [}\BuiltInTok{dict}\NormalTok{(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+    \ControlFlowTok{for}\NormalTok{ note }\KeywordTok{in}\NormalTok{ notes:}
+        \CommentTok{\# This executes N additional queries — one per note!}
+\NormalTok{        cursor.execute(}
+            \StringTok{"""SELECT t.name FROM tags t}
+\StringTok{               JOIN note\_tags nt ON nt.tag\_id = t.id}
+\StringTok{               WHERE nt.note\_id = }\SpecialCharTok{\%s}\StringTok{"""}\NormalTok{,}
+\NormalTok{            (note[}\StringTok{"id"}\NormalTok{],),}
+\NormalTok{        )}
+\NormalTok{        note[}\StringTok{"tags"}\NormalTok{] }\OperatorTok{=}\NormalTok{ [row[}\StringTok{"name"}\NormalTok{] }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+    \ControlFlowTok{return}\NormalTok{ notes}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Fix: fetch the related rows for all notes at once. Section 33.12 did it with a second query that works on both databases; on PostgreSQL alone, one query can do everything:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ list\_notes\_with\_tags():}
+\NormalTok{    cursor.execute(}\StringTok{"""}
+\StringTok{        SELECT n.id, n.content,}
+\StringTok{               {-}{-} FILTER drops the NULL a note without tags would contribute;}
+\StringTok{               {-}{-} COALESCE turns "no tags" into an empty array, not NULL}
+\StringTok{               COALESCE(ARRAY\_AGG(t.name) FILTER (WHERE t.name IS NOT NULL), \textquotesingle{}}\SpecialCharTok{\{\}}\StringTok{\textquotesingle{}) AS tags}
+\StringTok{        FROM notes n}
+\StringTok{        LEFT JOIN note\_tags nt ON nt.note\_id = n.id}
+\StringTok{        LEFT JOIN tags t ON t.id = nt.tag\_id}
+\StringTok{        GROUP BY n.id, n.content}
+\StringTok{    """}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ cursor.fetchall()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{DNS resolution}: locally, \texttt{localhost} always resolves instantly. In production, \texttt{api.notes.example.com} is looked up via DNS, which takes 0-100ms for the first lookup. If the application makes outbound HTTP requests to its own API (an anti-pattern, but it happens), the latency difference is significant.
+
+\textbf{Connection timeouts}: local connections never time out (they're on the same machine). Production connections across a VPN or the internet can time out. Always set explicit timeout values:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Without timeout: hangs indefinitely if remote service is unresponsive}
+\NormalTok{requests.get(}\StringTok{"https://external{-}api.example.com/data"}\NormalTok{)}
+
+\CommentTok{\# With timeout: raises requests.exceptions.Timeout after 5 seconds}
+\NormalTok{requests.get(}\StringTok{"https://external{-}api.example.com/data"}\NormalTok{, timeout}\OperatorTok{=}\DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Firewall rules}: local development has no firewall. Production has a cloud firewall (\hyperref[ch:22-network-configuration]{Chapter 22}). If a required port is blocked by the firewall, the connection silently hangs in production but works locally.
+
+\setcounter{section}{4}
+\section{The Performance Difference}\label{39-local-vs-production:395-the-performance-difference}
+
+The developer's laptop has more RAM, faster CPU, and faster storage than the production Droplet. Code that runs fast locally may be too slow in production.
+
+\subsection*{Memory}\phantomsection\label{39-local-vs-production:memory}
+
+The developer's laptop: 16-32 GB RAM.
+The production Droplet: 1 GB RAM.
+
+If the application loads a large file into memory, or builds a large Python object, it may work locally (plenty of RAM) and crash the production server with an OOM kill.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Dangerous: loads entire file into memory}
+\ControlFlowTok{with} \BuiltInTok{open}\NormalTok{(}\StringTok{"large\_file.csv"}\NormalTok{, }\StringTok{"r"}\NormalTok{) }\ImportTok{as}\NormalTok{ f:}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ f.read()  }\CommentTok{\# Might be 500MB — fine on laptop, kills 1GB Droplet}
+
+\CommentTok{\# Better: process in chunks}
+\ControlFlowTok{with} \BuiltInTok{open}\NormalTok{(}\StringTok{"large\_file.csv"}\NormalTok{, }\StringTok{"r"}\NormalTok{) }\ImportTok{as}\NormalTok{ f:}
+    \ControlFlowTok{for}\NormalTok{ chunk }\KeywordTok{in} \BuiltInTok{iter}\NormalTok{(}\KeywordTok{lambda}\NormalTok{: f.read(}\DecValTok{8192}\NormalTok{), }\StringTok{""}\NormalTok{):}
+\NormalTok{        process(chunk)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{CPU}\phantomsection\label{39-local-vs-production:cpu}
+
+Python's Global Interpreter Lock (GIL) means one Python process runs Python code on only one CPU core at a time (threads still overlap their \emph{waiting}, for the database for example). The laptop might have 8 cores; the production Droplet has 1. With several Gunicorn workers~--- separate processes~--- the laptop can run requests truly in parallel, while the Droplet only interleaves them. A load test on the laptop can therefore promise several times the throughput the server will deliver.
+
+\subsection*{Disk I/O}\phantomsection\label{39-local-vs-production:disk-io}
+
+The laptop's NVMe SSD reads at several gigabytes per second. The Droplet's disk is also an SSD, but a virtualized one, shared with other customers and throttled by the provider~--- often an order of magnitude slower. If the application writes or reads large files, this difference matters.
+
+\setcounter{section}{5}
+\section{The Concurrency Difference}\label{39-local-vs-production:396-the-concurrency-difference}
+
+Local development typically sees one request at a time~--- from one developer~--- even though Flask's development server could handle several at once in threads. Production runs multiple Gunicorn workers handling truly concurrent requests from many clients.
+
+\subsection*{Race conditions}\phantomsection\label{39-local-vs-production:race-conditions}
+
+A \textbf{race condition} is a bug that occurs only when two operations happen simultaneously. They don't appear in local testing (single process, sequential requests) but appear under production load (concurrent requests).
+
+\textbf{Example} (for a hypothetical version of the Notes API whose notes have a \texttt{title} that must be unique): two concurrent requests both try to create a note with the same title.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Dangerous: check{-}then{-}set is a race condition}
+\NormalTok{cursor.execute(}\StringTok{"SELECT id FROM notes WHERE title = }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, (title,))}
+\ControlFlowTok{if}\NormalTok{ cursor.fetchone() }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Note with this title already exists"}\NormalTok{\}), }\DecValTok{409}
+
+\CommentTok{\# If two concurrent requests both reach here, both see no existing note,}
+\CommentTok{\# and both proceed to insert — creating a duplicate.}
+\NormalTok{cursor.execute(}\StringTok{"INSERT INTO notes (title, ...) VALUES (}\SpecialCharTok{\%s}\StringTok{, ...)"}\NormalTok{, (title, ...))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Fix: use a database UNIQUE constraint, which enforces uniqueness atomically:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ALTER} \KeywordTok{TABLE}\NormalTok{ notes }\KeywordTok{ADD} \KeywordTok{CONSTRAINT}\NormalTok{ notes\_title\_unique }\KeywordTok{UNIQUE}\NormalTok{ (title);}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{try}\NormalTok{:}
+\NormalTok{    cursor.execute(}\StringTok{"INSERT INTO notes (title, ...) VALUES (}\SpecialCharTok{\%s}\StringTok{, ...)"}\NormalTok{, (title, ...))}
+\NormalTok{    db.commit()}
+\ControlFlowTok{except}\NormalTok{ psycopg2.errors.UniqueViolation:}
+    \CommentTok{\# The failed statement aborted the transaction: end it, so the}
+    \CommentTok{\# connection is usable again}
+\NormalTok{    db.rollback()}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Note with this title already exists"}\NormalTok{\}), }\DecValTok{409}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The database handles the race condition correctly; the application doesn't need to.
+
+\subsection*{Global state}\phantomsection\label{39-local-vs-production:global-state}
+
+Variables at module level persist across requests in the same Gunicorn worker. This is intentional for things like logging configuration. But accidental global state causes bugs:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Dangerous: global list that accumulates across requests}
+\NormalTok{\_pending\_emails }\OperatorTok{=}\NormalTok{ []}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/subscribe"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ subscribe():}
+\NormalTok{    email }\OperatorTok{=}\NormalTok{ request.json[}\StringTok{"email"}\NormalTok{]}
+\NormalTok{    \_pending\_emails.append(email)  }\CommentTok{\# }\AlertTok{BUG}\CommentTok{: never cleared; grows forever}
+    \ControlFlowTok{return} \StringTok{""}\NormalTok{, }\DecValTok{204}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}In local development (sequential single-process testing), this might not appear as a problem. In production, \texttt{\_pending\_emails} grows without bound across all requests in the worker, consuming memory.
+
+Fix: use the database or a message queue for any state that persists across requests.
+
+\setcounter{section}{6}
+\section{What Docker Guarantees (and What It Doesn't)}\label{39-local-vs-production:397-what-docker-guarantees-and-what-it-doesnt}
+
+Docker containers were introduced in \hyperref[ch:18-containerization]{Chapter 18} specifically to reduce the ``works on my machine'' problem. A Docker image captures:
+
+\begin{itemize}
+\tightlist
+\item
+  The Python version
+\item
+  Installed Python packages (with pinned versions)
+\item
+  The operating system user and directory structure
+\item
+  Environment variable defaults (not secrets)
+\end{itemize}
+
+\noindent{}Docker does \textbf{not} guarantee:
+
+\begin{itemize}
+\tightlist
+\item
+  The database schema (migrations must be applied separately)
+\item
+  The database content (data differs between environments)
+\item
+  The runtime configuration (environment variables with secrets)
+\item
+  The underlying host hardware (different CPU, different I/O speed)
+\item
+  Network topology (localhost vs. VPC networking)
+\end{itemize}
+
+\noindent{}Docker dramatically reduces environment drift~--- but it does not eliminate it. The remaining differences (database, network, configuration, scale) must be managed explicitly.
+
+\setcounter{section}{7}
+\section{The Staging Environment}\label{39-local-vs-production:398-the-staging-environment}
+
+A \textbf{staging environment} is a production-like environment where code is deployed and tested before going to production. It sits between local development and production:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Local → CI (automated tests) → Staging → Production
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Staging characteristics:
+
+\begin{itemize}
+\tightlist
+\item
+  Same Docker image as production (identical code and dependencies)
+\item
+  Same database type (PostgreSQL) but with different data (test data, not real user data)
+\item
+  Same Nginx configuration
+\item
+  Same supervision (Docker restart policy, deploy scripts)
+\item
+  Different secrets (staging uses staging secrets, not production secrets)
+\item
+  Public access (so developers can manually test)
+\item
+  May run on a smaller server (cost optimization)
+\end{itemize}
+
+\noindent{}Staging catches the bugs that don't appear locally or in CI:
+
+\begin{itemize}
+\tightlist
+\item
+  PostgreSQL-specific behavior that SQLite doesn't catch
+\item
+  Configuration that works locally but fails in the production Docker environment
+\item
+  Network timeouts and latency that don't appear on localhost
+\item
+  Performance issues that only appear under realistic load
+\end{itemize}
+
+\subsection*{Promoting through environments}\phantomsection\label{39-local-vs-production:promoting-through-environments}
+
+A deployment pipeline:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+git push → CI runs tests → Docker image built → image tagged
+
+Manual trigger:
+1. Deploy image to Staging
+2. Run smoke tests against Staging
+3. Manually verify functionality on Staging
+4. Deploy same image to Production
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The \textbf{same image} is promoted through environments. This is critical: rebuilding from source for each environment risks introducing differences (dependency versions, build-time environment). The exact same bytes that were tested in staging reach production~--- guaranteed if you deploy by digest (\texttt{notes-api@sha256:…}), and by convention if you deploy by an unchanging \texttt{sha-} tag (\hyperref[ch:19-artifact-storage]{Chapter 19}).
+
+The server-side \texttt{deploy.sh} from \hyperref[ch:23-code-transfer]{Chapter 23} needs no change for this: staging is simply another server with its own copy of the script and its own environment file. A small script on your laptop (or a CI job) chooses the target:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#!/bin/bash}
+\CommentTok{\# deploy{-}to.sh — run from a laptop or CI: deploy{-}to.sh staging sha{-}a1b2c3d}
+\BuiltInTok{set} \AttributeTok{{-}euo}\NormalTok{ pipefail}
+\VariableTok{ENVIRONMENT}\OperatorTok{=}\StringTok{"}\VariableTok{$\{1}\OperatorTok{:?}\NormalTok{Usage: deploy{-}to.sh staging|production sha{-}\textless{}commit\textgreater{}}\VariableTok{\}}\StringTok{"}
+\VariableTok{IMAGE\_TAG}\OperatorTok{=}\StringTok{"}\VariableTok{$\{2}\OperatorTok{:?}\NormalTok{Usage: deploy{-}to.sh staging|production sha{-}\textless{}commit\textgreater{}}\VariableTok{\}}\StringTok{"}
+
+\ControlFlowTok{case} \StringTok{"}\VariableTok{$ENVIRONMENT}\StringTok{"} \KeywordTok{in}
+    \SpecialStringTok{staging}\KeywordTok{)}    \VariableTok{SSH\_HOST}\OperatorTok{=}\StringTok{"staging.notes.example.com"} \ControlFlowTok{;;}
+    \SpecialStringTok{production}\KeywordTok{)} \VariableTok{SSH\_HOST}\OperatorTok{=}\StringTok{"api.notes.example.com"} \ControlFlowTok{;;}
+    \PreprocessorTok{*}\KeywordTok{)} \BuiltInTok{echo} \StringTok{"Unknown environment: }\VariableTok{$ENVIRONMENT}\StringTok{"}\KeywordTok{;} \BuiltInTok{exit}\NormalTok{ 1 }\ControlFlowTok{;;}
+\ControlFlowTok{esac}
+
+\CommentTok{\# Same image tag, same script, different server}
+\FunctionTok{ssh} \StringTok{"deploy@}\VariableTok{$\{SSH\_HOST\}}\StringTok{"} \StringTok{"/opt/notes{-}api/deploy.sh }\VariableTok{$\{IMAGE\_TAG\}}\StringTok{"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{8}
+\section{Simulating Production Locally}\label{39-local-vs-production:399-simulating-production-locally}
+
+When you need to debug a production-specific issue locally, simulate the production environment:
+
+\subsection*{\texorpdfstring{Run with Gunicorn instead of \texttt{flask\ run}}{Run with Gunicorn instead of flask run}}\phantomsection\label{39-local-vs-production:run-with-gunicorn-instead-of-flask-run}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Instead of:}
+\ExtensionTok{python}\NormalTok{ run.py}
+
+\CommentTok{\# Run as it runs in production:}
+\ExtensionTok{gunicorn} \AttributeTok{{-}{-}config}\NormalTok{ gunicorn.conf.py }\StringTok{"app:create\_app()"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Differences:
+
+\begin{itemize}
+\tightlist
+\item
+  Multiple workers (production-like concurrency)
+\item
+  No auto-reload (production behavior)
+\item
+  Timeout enforcement
+\end{itemize}
+
+\subsection*{Run with PostgreSQL}\phantomsection\label{39-local-vs-production:run-with-postgresql}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Start a local PostgreSQL container:}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}name}\NormalTok{ postgres{-}local }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}e}\NormalTok{ POSTGRES\_USER=notes\_user }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}e}\NormalTok{ POSTGRES\_PASSWORD=dev\_password }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}e}\NormalTok{ POSTGRES\_DB=notesdb }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}p}\NormalTok{ 127.0.0.1:5432:5432 }\DataTypeTok{\textbackslash{}}
+\NormalTok{    postgres:16{-}alpine}
+
+\CommentTok{\# Build the schema: every migration, from 0001 (Chapter 33)}
+\VariableTok{DATABASE\_URL}\OperatorTok{=}\NormalTok{postgresql://notes\_user:dev\_password@localhost/notesdb }\DataTypeTok{\textbackslash{}}
+    \ExtensionTok{python} \AttributeTok{{-}m}\NormalTok{ app.migrate}
+
+\CommentTok{\# Run the application against it:}
+\VariableTok{DATABASE\_URL}\OperatorTok{=}\NormalTok{postgresql://notes\_user:dev\_password@localhost/notesdb }\DataTypeTok{\textbackslash{}}
+    \ExtensionTok{gunicorn} \AttributeTok{{-}{-}config}\NormalTok{ gunicorn.conf.py }\StringTok{"app:create\_app()"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Run the full Docker stack}\phantomsection\label{39-local-vs-production:run-the-full-docker-stack}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Build the production image:}
+\ExtensionTok{docker}\NormalTok{ build }\AttributeTok{{-}t}\NormalTok{ notes{-}api:local .}
+
+\CommentTok{\# Run the full stack (Nginx + Gunicorn + PostgreSQL):}
+\ExtensionTok{docker}\NormalTok{ compose }\AttributeTok{{-}f}\NormalTok{ docker{-}compose.prod{-}local.yml up}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# docker{-}compose.prod{-}local.yml}
+\FunctionTok{services}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{db}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{image}\KeywordTok{:}\AttributeTok{ postgres:16{-}alpine}
+\AttributeTok{    }\FunctionTok{environment}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{POSTGRES\_USER}\KeywordTok{:}\AttributeTok{ notes\_user}
+\AttributeTok{      }\FunctionTok{POSTGRES\_PASSWORD}\KeywordTok{:}\AttributeTok{ dev\_password\_not\_for\_real\_production}
+\AttributeTok{      }\FunctionTok{POSTGRES\_DB}\KeywordTok{:}\AttributeTok{ notesdb}
+\AttributeTok{    }\FunctionTok{healthcheck}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{test}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"CMD{-}SHELL"}\KeywordTok{,}\AttributeTok{ }\StringTok{"pg\_isready {-}U notes\_user {-}d notesdb"}\KeywordTok{]}
+\AttributeTok{      }\FunctionTok{interval}\KeywordTok{:}\AttributeTok{ 5s}
+\AttributeTok{      }\FunctionTok{timeout}\KeywordTok{:}\AttributeTok{ 5s}
+\AttributeTok{      }\FunctionTok{retries}\KeywordTok{:}\AttributeTok{ }\DecValTok{5}
+
+\AttributeTok{  }\FunctionTok{api}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{image}\KeywordTok{:}\AttributeTok{ notes{-}api:local}
+\AttributeTok{    }\FunctionTok{depends\_on}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{db}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{condition}\KeywordTok{:}\AttributeTok{ service\_healthy}
+\AttributeTok{    }\FunctionTok{environment}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{DATABASE\_URL}\KeywordTok{:}\AttributeTok{ postgresql://notes\_user:dev\_password\_not\_for\_real\_production@db/notesdb}
+\AttributeTok{      }\FunctionTok{SECRET\_KEY}\KeywordTok{:}\AttributeTok{ local{-}test{-}secret{-}key{-}also{-}not{-}for{-}production}
+\CommentTok{    \# Bring the schema up to date first: the app refuses to start otherwise}
+\AttributeTok{    }\FunctionTok{command}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"sh"}\KeywordTok{,}\AttributeTok{ }\StringTok{"{-}c"}\KeywordTok{,}\AttributeTok{ }\StringTok{"python {-}m app.migrate \&\& exec gunicorn {-}{-}config gunicorn.conf.py \textquotesingle{}app:create\_app()\textquotesingle{}"}\KeywordTok{]}
+
+\AttributeTok{  }\FunctionTok{nginx}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{image}\KeywordTok{:}\AttributeTok{ nginx:1.24{-}alpine}
+\AttributeTok{    }\FunctionTok{ports}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\StringTok{"127.0.0.1:8080:80"}
+\AttributeTok{    }\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ ./nginx/local.conf:/etc/nginx/conf.d/default.conf:ro}
+\AttributeTok{    }\FunctionTok{depends\_on}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ api}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The production site configuration from Chapter 28 cannot be reused as it is: it listens on 443 with Let's Encrypt certificates that do not exist here, and its upstream is \texttt{127.0.0.1:5000}~--- which, \emph{inside the Nginx container}, is the Nginx container itself. A small local configuration proxies to the \texttt{api} service by its Compose name instead:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# nginx/local.conf}
+\NormalTok{server \{}
+\NormalTok{    listen 80;}
+\NormalTok{    client\_max\_body\_size 64k;}
+\NormalTok{    location / \{}
+\NormalTok{        proxy\_pass http://api:5000;}
+\NormalTok{        proxy\_set\_header Host $host;}
+\NormalTok{        proxy\_set\_header X{-}Forwarded{-}For $proxy\_add\_x\_forwarded\_for;}
+\NormalTok{        proxy\_set\_header X{-}Forwarded{-}Proto $scheme;}
+\NormalTok{    \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Now \texttt{http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{localhost:}\allowbreak{}\texttt{8080/}\allowbreak{}\texttt{notes/} behaves like production (Nginx proxy → Docker → Gunicorn → PostgreSQL), without HTTPS (which requires a real domain and certificate).
+
+\setcounter{section}{9}
+\section{Environment Parity Principles}\label{39-local-vs-production:3910-environment-parity-principles}
+
+\textbf{12-Factor App} (12factor.net) is a methodology for building software-as-a-service applications. Its principle on development/production parity:
+
+\begin{notebox}
+
+``Keep development, staging, and production as similar as possible.''
+
+\end{notebox}
+
+\noindent{}This means:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{The time gap}: deploy often. Code deployed hours after writing is more likely to be in sync with the developer's mental model than code deployed weeks later.
+\item
+  \textbf{The personnel gap}: developers who wrote the code should be involved in deploying it. Separation between ``Dev'' and ``Ops'' creates communication gaps that amplify environment differences.
+\item
+  \textbf{The tools gap}: use the same services in all environments. Don't use SQLite locally and PostgreSQL in production. Don't use the Python \texttt{logging} module locally and a different logging system in production.
+\end{enumerate}
+
+\subsection*{The environment variable matrix}\phantomsection\label{39-local-vs-production:the-environment-variable-matrix}
+
+Document all environment variables and their values across environments:
+
+\Needspace{16\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1954}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2084}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2251}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1779}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1931}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Local
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+CI
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Staging
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Production
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{DATABASE\_URL} & local container (\texttt{…@localhost/}\allowbreak{}\texttt{notesdb}) & CI service (\texttt{…@localhost/}\allowbreak{}\texttt{notes\_test}) & staging database (private host) & production database (private host) \\
+\texttt{SECRET\_KEY} & (any long value) & (test value) & (staging secret) & (production secret) \\
+\texttt{LOG\_LEVEL} & \texttt{DEBUG} & \texttt{WARNING} & \texttt{INFO} & \texttt{INFO} \\
+\texttt{LOG\_FORMAT} & \texttt{human} & \texttt{human} & \texttt{json} & \texttt{json} \\
+\texttt{FLASK\_DEBUG} & \texttt{true} & \texttt{false} & \texttt{false} & \texttt{false} \\
+\texttt{REDIS\_URL} (if used) & local container & CI service & staging Redis & production Redis \\
+\end{longtable}
+}
+
+(Older Flask guides also set \texttt{FLASK\_ENV}; it was removed in Flask 2.3~--- \texttt{FLASK\_DEBUG} replaced it. And note the Redis row: if the cache from Chapter 36 is in the code, every environment needs a Redis, or the cache must be optional. ``Not set locally'' is exactly the kind of difference that hides bugs.)
+
+Differences between columns are potential bugs. The fewer differences, the fewer production-specific bugs.
+
+\setcounter{section}{10}
+\section{Delivering and Tracking the System Over Time}\label{39-local-vs-production:3911-delivering-and-tracking-the-system-over-time}
+
+The pipeline in §39.8 promotes one image to production. But a real system is not deployed once~--- it is \emph{delivered continuously}, over years, as a stream of changes. That stream has to be tracked, or no one can answer the questions every team eventually faces: \textbf{What is actually running in production right now? What changed since last week? Why is this broken~--- was it broken before? What are we doing next?} The engineering is finished; this is the project hygiene that keeps a shipped system legible to the humans who operate and depend on it. It is less glamorous than sockets and schemas, but every team that ships well has practices for it.
+
+\subsection*{Deploy vs. release: not the same event}\phantomsection\label{39-local-vs-production:deploy-vs-release-not-the-same-event}
+
+A \textbf{deploy} is a \emph{technical} event~--- new code reaches production. A \textbf{release} is a \emph{product} event~--- a change becomes visible to users. They often happen together, but separating them is a superpower. A \textbf{feature flag} (a simple configuration switch) lets you \emph{deploy} code ``dark''~--- present in production but switched off~--- and \emph{release} it later by flipping the flag, with no redeploy, and roll it back instantly if it misbehaves. Decoupling deploy from release turns a risky big-bang launch into a calm, reversible toggle.
+
+\subsection*{Versioning: naming what you ship}\phantomsection\label{39-local-vs-production:versioning-naming-what-you-ship}
+
+Every release needs a name you can point at, and the standard is \textbf{semantic versioning}: \texttt{MAJOR.MINOR.PATCH}. Bump \textbf{PATCH} (\texttt{1.4.2\ →\ 1.4.3}) for backward-compatible bug fixes; \textbf{MINOR} (\texttt{1.4.3\ →\ 1.5.0}) for backward-compatible new features; \textbf{MAJOR} (\texttt{1.5.0\ →\ 2.0.0}) for a breaking change. The version is a promise to everyone who depends on you: \emph{upgrading within the same MAJOR will not break you.} It is the same breaking-versus-non-breaking distinction you applied to API contracts (\hyperref[ch:34-response-handling]{Chapter 34}) and database schemas (\hyperref[ch:06-local-dependencies]{Chapter 6}), now applied to the release as a whole. Internally you also tag the built artifact by git hash (\hyperref[ch:19-artifact-storage]{Chapter 19}), so every deploy traces to exact source~--- the semantic version is the \emph{human} name for a release, the git hash is its \emph{machine} name.
+
+\subsection*{The changelog: what changed, for humans}\phantomsection\label{39-local-vs-production:the-changelog-what-changed-for-humans}
+
+A \textbf{changelog} is a human-readable, chronological record of notable changes, newest first. The widely used \emph{Keep a Changelog} convention groups each version's entries under fixed headings~--- \textbf{Added, Changed, Deprecated, Removed, Fixed, Security}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\FunctionTok{\#\# [1.2.0] — 2024{-}04{-}01}
+
+\FunctionTok{\#\#\# Added}
+\SpecialStringTok{{-} }\NormalTok{PUT /notes/}\DataTypeTok{\textless{}}\KeywordTok{id}\DataTypeTok{\textgreater{}}\NormalTok{ updates a note; notes now have an updated\_at timestamp.}
+\SpecialStringTok{{-} }\NormalTok{Case{-}insensitive search on GET /notes/ (?search=).}
+\FunctionTok{\#\#\# Fixed}
+\SpecialStringTok{{-} }\NormalTok{A request body that was valid JSON but not an object (e.g. a list)}
+\NormalTok{  caused a 500; it now returns 400.}
+\FunctionTok{\#\#\# Security}
+\SpecialStringTok{{-} }\NormalTok{Nginx now answers oversized request bodies with a JSON 413.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}A changelog is written for \emph{people}~--- users and teammates~--- which is what distinguishes it from the git log, written by and for tooling. Distinguish \textbf{release notes} (curated, stakeholder-facing~--- ``what's new for you'') from the \textbf{developer changelog} (complete, technical). Disciplined commit messages (the \textbf{Conventional Commits} convention) let much of the changelog be generated automatically.
+
+\subsection*{Knowing what is live: current state}\phantomsection\label{39-local-vs-production:knowing-what-is-live-current-state}
+
+The most basic operational question~--- \emph{what version is in production right now?}~--- is astonishingly often unanswerable on teams that do not deliberately track it. Keep one source of truth: the deployed version (a release tag or git hash, surfaced by the \texttt{/health} endpoint or a status page), the date of the last change, and any known limitations or active workarounds. ``Everything is \texttt{latest}''~--- the anti-pattern \hyperref[ch:19-artifact-storage]{Chapter 19} warned about~--- is exactly how a team ends up unable to say what is actually running. If a colleague cannot answer ``what's in production?'' without SSHing into a server, that is a gap worth closing.
+
+\subsection*{Known issues and technical debt}\phantomsection\label{39-local-vs-production:known-issues-and-technical-debt}
+
+Every real system carries \textbf{technical debt}~--- shortcuts taken to ship, code that works but is hard to change. Debt is not inherently bad; \emph{untracked} debt is. The useful lens is the \textbf{technical-debt quadrant}: debt is either \textbf{deliberate or inadvertent}, and either \textbf{prudent or reckless}. (The quadrant is Martin Fowler's.) ``We shipped without pagination, knowing we would add it before scale'' is deliberate-and-prudent, and entirely fine. ``We don't know why this query is slow'' is inadvertent-and-reckless, and dangerous. Keep a \textbf{debt register}~--- each item with its impact, the current workaround, and the proper fix~--- so debt is paid down strategically against feature work instead of compounding in silence.
+
+\subsection*{The roadmap: what comes next, and why}\phantomsection\label{39-local-vs-production:the-roadmap-what-comes-next-and-why}
+
+A \textbf{roadmap} records what is planned, prioritized (High / Medium / Low), with the \emph{rationale} for each priority and a rough time horizon (this quarter, this year, eventually). Its real job is alignment: it lets the team and stakeholders argue about priorities \emph{once}, in one place, instead of re-arguing them in every meeting. A roadmap is a living document~--- revised whenever reality intervenes, which is a feature, not a failure.
+
+\subsection*{Delivery phases: shipping in stable milestones}\phantomsection\label{39-local-vs-production:delivery-phases-shipping-in-stable-milestones}
+
+Large work is best broken into \textbf{delivery phases}~--- discrete milestones, each with a clear goal and a definition of ``done,'' shipped and stabilized before the next begins. Phases create natural checkpoints and guard against the two classic failure modes: drifting forever, or cramming everything into a rushed finale. A \emph{phase} is a stable milestone; a \emph{task} is one work item inside it. The Notes API of this book was itself delivered in phases~--- local, portable, containerized, deployed, observable, hardened~--- each a working system before the next layer was added. That was not incidental; it is how durable systems get built. (Part III's engineering practices and the planning guide in Part II treat roadmaps and phases in more depth.)
+
+You now have the whole single-server arc~--- from a command that starts a process to a system that is observed, scaled, hardened, \emph{and tracked} across its entire life. The code was never the hard part. Keeping a running system understandable~--- to its users, and to the humans who will maintain it long after you~--- is the real work of engineering.
+
+\phantomsection\label{39-local-vs-production:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{``Works on my machine''} is caused by specific, identifiable differences between local and production environments: database type, network topology, environment variables, concurrency, memory, and disk I/O.
+\item
+  \textbf{Use PostgreSQL everywhere}, including local development and CI tests. Differences between SQLite and PostgreSQL cause bugs that only appear in production.
+\item
+  \textbf{Startup validation} (\hyperref[ch:14-runtime-contract]{Chapter 14}) catches environment variable problems during deployment, not during user requests.
+\item
+  \textbf{Network latency} (2-10ms to the database) in production vs. near-zero locally reveals N+1 query problems and missing indexes. Load-test in an environment that matches production network topology.
+\item
+  \textbf{Concurrency bugs} (race conditions, unintended global state) don't appear in sequential local testing but do appear under production load with multiple Gunicorn workers. Use database constraints for atomicity.
+\item
+  \textbf{Docker} guarantees the Python version, installed packages, and OS environment~--- but not the database schema, configuration, network, or hardware.
+\item
+  \textbf{Staging environments} catch production-specific bugs by running the same Docker image against a PostgreSQL database with the same Nginx configuration as production.
+\item
+  \textbf{Environment parity}~--- keeping all environments as similar as possible~--- is the most effective long-term strategy for reducing production-specific bugs.
+\item
+  Record significant, hard-to-reverse decisions as \textbf{Architecture Decision Records} (Nygard template: context, decision, alternatives, consequences)~--- one immutable file per decision, numbered, living in the repo. They capture the \emph{why}, which is the most valuable and most perishable knowledge in a project; reading them in order is the fastest way to understand an inherited system.
+\item
+  A system is \textbf{delivered continuously, not deployed once.} Separate \textbf{deploy} (technical) from \textbf{release} (user-visible) using feature flags; name releases with \textbf{semantic versioning}; keep a human-readable \textbf{changelog}; and always know what version is live.
+\item
+  Track \textbf{technical debt} deliberately (the deliberate/inadvertent × prudent/reckless quadrant), maintain a prioritized \textbf{roadmap}, and ship in \textbf{delivery phases}~--- discrete, stabilized milestones, the way the Notes API itself was built.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{39-local-vs-production:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Before switching the tests to PostgreSQL, run the suite of Chapter 38 twice: as it is, on SQLite, and then with \texttt{DATABASE\_URL} pointing at a PostgreSQL database. Which parts of the application behave differently, and why?
+\item
+  \textbf{Break and fix.} Write a query using \texttt{ILIKE} and run the tests on SQLite. Read the error, then explain why tests on SQLite could never catch this in the first place.
+\item
+  \textbf{Extend.} Set up a staging environment: a second droplet or Docker Compose stack, the same image, a separate database, and a subdomain. Deploy the same tag to staging and then to production.
+\item
+  \textbf{Explain.} Name three things Docker guarantees between laptop and production, and three it does not.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-39.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{39-local-vs-production:whats-next}
+
+The Notes API is complete as a single service on a single server. The final chapters look beyond that boundary: what changes when one service becomes several, talking to each other over a network~--- starting with the problems every distributed system inherits.
+
+\noindent{}→ \hyperref[ch:40-distributed-systems]{Chapter 40}~--- Distributed Systems

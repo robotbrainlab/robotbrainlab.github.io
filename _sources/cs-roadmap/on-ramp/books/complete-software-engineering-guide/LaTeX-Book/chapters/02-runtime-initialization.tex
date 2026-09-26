@@ -1,0 +1,768 @@
+\setcounter{chapter}{1}
+\chapter{Runtime Initialization}\label{ch:02-runtime-initialization}
+
+\chaptersubtitle{Python Wakes Up}
+
+\chapterrule
+
+In the previous chapter, the operating system did its work: it parsed the command, located the Python executable, created a new process through \texttt{fork} and \texttt{exec}, allocated memory, and set up file descriptors. The process exists. It has a PID. It has memory. It has stdin, stdout, and stderr open.
+
+But the Python interpreter itself has not done anything yet.
+
+\texttt{exec} placed the Python interpreter's machine code into the process's text segment and jumped to its entry point~--- the first instruction of the Python interpreter. From that moment, Python begins its own initialization sequence. This sequence happens entirely before your first line of \texttt{app.py} is read.
+
+This matters because a great deal of the system's behavior is determined during this initialization phase. The import system is set up here. The standard library becomes available here. Flask's routing table~--- the data structure that connects URL paths to handler functions~--- is populated here, before any request ever arrives. If anything goes wrong during initialization (a missing dependency, an import error, a bad configuration value), the program fails here, at startup, before it ever serves a single request.
+
+Understanding initialization also explains why production servers are often structured the way they are. Web servers like Gunicorn (which we introduce in → \hyperref[ch:24-process-startup]{Chapter 24}~--- Process Startup in Production) start multiple worker processes, and each worker imports and initializes your application. The cost of that initialization is paid once per worker, not once per request. This design is efficient only if you understand what initialization actually does.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What the Python interpreter is and what it does before running your code
+\item
+  How Python loads your source file into memory
+\item
+  What bytecode is and why Python compiles your code before running it
+\item
+  What the \texttt{import} statement actually does at the machine level
+\item
+  How Flask initializes itself and builds its route table
+\item
+  What global state is and what it means for your application
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{What the Python Interpreter Is and Why It Exists}\label{02-runtime-initialization:21-what-the-python-interpreter-is-and-why-it-exists}
+
+When you write \texttt{print("Hello")} in Python and run it, you are not running a program that the CPU can execute directly. The CPU executes machine code~--- sequences of binary instructions specific to the CPU's architecture (x86, ARM, etc.). Python source code is not machine code. It is high-level text that humans can read.
+
+The \textbf{Python interpreter} is the program that bridges the gap. It reads your Python source code, translates it into a compact intermediate form, and then carries out that form step by step on your behalf.
+
+More precisely, Python uses a \textbf{virtual machine} approach:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Python source code is first compiled into an intermediate representation called \textbf{bytecode}
+\item
+  The bytecode is executed by the \textbf{CPython virtual machine} (or CPython VM), which is written in C
+\item
+  The CPython VM is a loop of compiled C code: it reads each bytecode instruction and runs the piece of C code that implements it. Your program is never translated into machine code of its own (CPython 3.13 added an experimental JIT compiler, off by default)
+\end{enumerate}
+
+\noindent{}This design provides portability: the same Python source code runs on any machine that has a Python interpreter installed, regardless of whether that machine uses x86, ARM, or another CPU architecture. Only the interpreter itself is compiled for a specific CPU; the bytecode it executes is the same on every machine running the same Python version.
+
+\textbf{CPython} is the name for the reference implementation of Python~--- the one you download from python.org and the one used in this book. When we say ``the Python interpreter,'' we mean CPython.
+
+\subsection*{The interpreter's job in brief}\phantomsection\label{02-runtime-initialization:the-interpreters-job-in-brief}
+
+The Python interpreter's initialization sequence, before your code runs, involves:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Setting up the interpreter's own internal state
+\item
+  Initializing the memory allocator and garbage collector
+\item
+  Setting up the module system (so \texttt{import} works)
+\item
+  Importing a handful of core modules (such as \texttt{encodings} and \texttt{site}); the rest of the standard library is imported only when your code asks for it
+\item
+  Processing command-line arguments
+\item
+  Loading and compiling your source file
+\item
+  Executing your code top to bottom
+\end{enumerate}
+
+\noindent{}Steps 1 through 5 happen invisibly every time you run any Python program. They are fast but not instantaneous. On a modern machine, a \texttt{python\ -c\ "pass"} (which runs an empty program) still takes 30--100 milliseconds. That time is the interpreter's startup cost~--- unavoidable, and something to be aware of when designing systems that restart frequently.
+
+\setcounter{section}{1}
+\section{Loading Source Code into Memory}\label{02-runtime-initialization:22-loading-source-code-into-memory}
+
+After the interpreter initializes its own internal state, it turns its attention to your file: \texttt{app.py}.
+
+The interpreter asks the operating system to open \texttt{app.py} as a file. The OS performs a file system lookup~--- it traverses the directory tree, finds \texttt{app.py} in the current working directory, and opens it, returning a file descriptor. Python then reads the raw bytes of the file through that file descriptor.
+
+At this point, Python has the contents of \texttt{app.py} in memory as a sequence of raw bytes. It decodes them as UTF-8 (the default encoding for Python source files) into text~--- characters that are not yet understood as a program.
+
+\subsection*{The current working directory}\phantomsection\label{02-runtime-initialization:the-current-working-directory}
+
+There is a subtlety here worth noting. Python opens \texttt{app.py} relative to the \textbf{current working directory (CWD)}~--- the directory your terminal was in when you typed \texttt{python\ app.py}. This is inherited from the shell through \texttt{fork} (← \hyperref[01-command-to-process:13-how-the-operating-system-starts-a-new-program-fork-and-exec]{Section 1.3}).
+
+If you type:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ /home/yourname/notes{-}api}
+\ExtensionTok{python}\NormalTok{ app.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Then Python looks for \texttt{app.py} in \texttt{/}\allowbreak{}\texttt{home/}\allowbreak{}\texttt{yourname/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api}. If you type:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python}\NormalTok{ /home/yourname/notes{-}api/app.py}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}from a different directory, Python still runs \texttt{app.py}, but the CWD is whatever directory you were in. This distinction affects how your code handles relative file paths~--- for example, \texttt{open("notes.db")} in your code will look for \texttt{notes.db} in the CWD, which may or may not be where you expect it.
+
+This is a source of bugs that we examine more carefully in → \hyperref[ch:07-environment-drift]{Chapter 7}~--- Environment Drift and → \hyperref[ch:15-structuring-the-application]{Chapter 15}~--- Structuring the Application.
+
+\subsection*{Parsing: from text to a syntax tree}\phantomsection\label{02-runtime-initialization:parsing-from-text-to-a-syntax-tree}
+
+After reading the file's bytes, Python \textbf{parses} the source code. Parsing means reading the text and building an internal tree structure that represents the program's grammar.
+
+This tree is called the \textbf{Abstract Syntax Tree}, or \textbf{AST}. The AST is not something you normally interact with directly, but it is the form in which Python's compiler understands your program. Every \texttt{if}, \texttt{for}, \texttt{def}, \texttt{class}, \texttt{import}, and expression becomes a node in this tree.
+
+You can actually inspect the AST of any Python code using the built-in \texttt{ast} module:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 2.1}\enspace Inspecting the Abstract Syntax Tree of a simple program}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ ast}
+
+\NormalTok{source\_code }\OperatorTok{=} \StringTok{"""}
+\StringTok{x = 10}
+\StringTok{print(x)}
+\StringTok{"""}
+
+\NormalTok{tree }\OperatorTok{=}\NormalTok{ ast.parse(source\_code)}
+\BuiltInTok{print}\NormalTok{(ast.dump(tree, indent}\OperatorTok{=}\DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Running this prints the tree structure Python built from those two lines of code. It is verbose, but it shows you exactly how Python understood the program~--- which nodes are assignments, which are function calls, which are names.
+
+If your source code has a \textbf{syntax error}~--- for example, a missing colon after a \texttt{def} statement~--- parsing fails here, during this phase, before any code is executed. This is why syntax errors look different from runtime errors:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 2.2}\enspace A syntax error is caught during parsing, not during execution}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ greet(name)    }\CommentTok{\# Missing colon}
+    \BuiltInTok{print}\NormalTok{(name)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+  File "app.py", line 1
+    def greet(name)
+                   ^
+SyntaxError: expected ':'
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The error is found and reported before the program runs a single instruction.
+
+\setcounter{section}{2}
+\section{\texorpdfstring{Compilation to Bytecode: What \texttt{.pyc} Files Really Are}{Compilation to Bytecode: What .pyc Files Really Are}}\label{02-runtime-initialization:23-compilation-to-bytecode-what-pyc-files-really-are}
+
+After parsing, Python \textbf{compiles} the AST into \textbf{bytecode}. Bytecode is a compact, lower-level set of instructions designed for the CPython virtual machine. It is not machine code~--- the CPU cannot execute bytecode directly. But it is much faster for the Python VM to interpret than raw source code text.
+
+\subsection*{What bytecode looks like}\phantomsection\label{02-runtime-initialization:what-bytecode-looks-like}
+
+You can inspect the bytecode of any Python function using the built-in \texttt{dis} module (short for ``disassembler''):
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 2.3}\enspace Inspecting bytecode with the dis module}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ dis}
+
+\KeywordTok{def}\NormalTok{ add(a, b):}
+    \ControlFlowTok{return}\NormalTok{ a }\OperatorTok{+}\NormalTok{ b}
+
+\NormalTok{dis.dis(add)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+  3           0 RESUME                   0
+
+  4           2 LOAD_FAST                0 (a)
+              4 LOAD_FAST                1 (b)
+              6 BINARY_OP                0 (+)
+             10 RETURN_VALUE
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Each line is one bytecode instruction:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{LOAD\_FAST\ 0} means ``push the local variable at index 0 (which is \texttt{a}) onto the evaluation stack''
+\item
+  \texttt{LOAD\_FAST\ 1} means ``push the local variable at index 1 (which is \texttt{b}) onto the evaluation stack''
+\item
+  \texttt{BINARY\_OP\ (+)} means ``pop the top two items from the stack, add them, push the result''
+\item
+  \texttt{RETURN\_VALUE} means ``pop the top of the stack and return it as this function's result''
+\end{itemize}
+
+\noindent{}The CPython virtual machine executes these instructions one at a time, in order. The CPU runs C code that implements each instruction. Your Python code never runs directly on the CPU~--- it is always mediated by the interpreter.
+
+\subsection*{\texorpdfstring{The \texttt{.pyc} cache}{The .pyc cache}}\phantomsection\label{02-runtime-initialization:the-pyc-cache}
+
+Parsing and compilation take time. If Python had to parse and compile every file every time it was imported, startup would be slow for programs with many files.
+
+To avoid this, Python \textbf{caches} the bytecode of every \emph{imported} module in a \texttt{.pyc} file, stored in a \texttt{\_\_pycache\_\_} directory next to the source file. (The script you run directly~--- \texttt{app.py} in \texttt{python\ app.py}~--- is compiled fresh every time and never cached; only the modules it imports are.)
+
+\begin{diagrambox}[short]{340.2pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+├── app.py
+├── notes_store.py
+├── __pycache__/
+│   └── notes_store.cpython-311.pyc   ← cached bytecode for Python 3.11
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}When you import a module, Python checks:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Does a \texttt{.pyc} file exist for this source file?
+\item
+  Does the \texttt{.pyc} file record the same modification time and size as the current source file (or, optionally, the same hash of its contents)?
+\item
+  Was it compiled by the same Python version?
+\end{enumerate}
+
+\noindent{}If all three are yes, Python skips parsing and compilation and loads the cached bytecode directly. If any check fails, Python recompiles the source file and updates the \texttt{.pyc} cache.
+
+This is why you sometimes see a \texttt{\_\_pycache\_\_} directory appear after running a Python program. It is not a problem~--- it is a performance optimization. You can safely add \texttt{\_\_pycache\_\_/} to your \texttt{.gitignore} file; it will be regenerated automatically.
+
+\begin{notebox}
+
+\textbf{Note:} The \texttt{.pyc} files are version-specific. A \texttt{.pyc} file compiled by Python 3.11 cannot be used by Python 3.9. The filename includes the Python version (\texttt{cpython-311}) to prevent cross-version confusion.
+
+\end{notebox}
+
+\setcounter{section}{3}
+\section{\texorpdfstring{Importing Dependencies: What \texttt{import} Actually Does}{Importing Dependencies: What import Actually Does}}\label{02-runtime-initialization:24-importing-dependencies-what-import-actually-does}
+
+After compiling your source file to bytecode, Python begins executing it from the top. One of the first things a typical Flask application does is import its dependencies:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 2.4}\enspace The imports at the top of a typical Flask app}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+\ImportTok{import}\NormalTok{ sqlite3}
+\ImportTok{import}\NormalTok{ os}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}To most beginners, \texttt{import} looks like a simple instruction~--- ``make this module available.'' In reality, \texttt{import} triggers a significant chain of work.
+
+\subsection*{The module system}\phantomsection\label{02-runtime-initialization:the-module-system}
+
+Python's \textbf{module system} is the mechanism that finds, loads, and caches code from other files and packages. Every \texttt{import} statement goes through this system.
+
+When Python encounters \texttt{from\ flask\ import\ Flask}, it does the following:
+
+\textbf{Step 1: Check \texttt{sys.modules} (the import cache).} \texttt{sys.modules} is a dictionary that maps module names to already-loaded module objects. If \texttt{flask} is already there, Python uses the cached version and does not re-read any files. This is why importing the same module in multiple files is cheap~--- it is loaded once and cached.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 2.5}\enspace Inspecting the module cache after importing Flask}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ sys}
+\ImportTok{import}\NormalTok{ flask}
+
+\BuiltInTok{print}\NormalTok{(}\StringTok{"flask"} \KeywordTok{in}\NormalTok{ sys.modules)       }\CommentTok{\# True}
+\BuiltInTok{print}\NormalTok{(}\BuiltInTok{type}\NormalTok{(sys.modules[}\StringTok{"flask"}\NormalTok{]))   }\CommentTok{\# \textless{}class \textquotesingle{}module\textquotesingle{}\textgreater{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\textbf{Step 2: Find the module.} If \texttt{flask} is not in \texttt{sys.modules}, Python searches for it. The search path is stored in \texttt{sys.path}~--- a list of directories Python checks in order. It looks like this:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 2.6}\enspace Inspecting the module search path}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ sys}
+\ControlFlowTok{for}\NormalTok{ path }\KeywordTok{in}\NormalTok{ sys.path:}
+    \BuiltInTok{print}\NormalTok{(path)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Output (varies by installation):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+/home/yourname/notes-api
+/usr/lib/python311.zip
+/usr/lib/python3.11
+/usr/lib/python3.11/lib-dynload
+/home/yourname/notes-api/venv/lib/python3.11/site-packages
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Python checks each directory in order:
+
+\begin{itemize}
+\tightlist
+\item
+  The first entry is usually the directory containing your script (or an empty string meaning the current directory)
+\item
+  The standard library directories come next, so installed packages cannot accidentally shadow standard modules
+\item
+  The \texttt{site-packages} directory comes last~--- this is where \texttt{pip\ install} puts packages. When a virtual environment is active, it is the environment's own \texttt{site-packages} (→ \hyperref[ch:06-local-dependencies]{Chapter 6}~--- Local Dependencies and Resources)
+\end{itemize}
+
+\noindent{}\textbf{Step 3: Load the module.} Once found, Python reads and executes the module's source file (or loads its \texttt{.pyc} cache). ``Executes'' is the key word here~--- when Python imports Flask, it literally runs Flask's \texttt{\_\_init\_\_.py} file from top to bottom. Any code at the module level runs immediately.
+
+\textbf{Step 4: Cache the result.} The loaded module object is stored in \texttt{sys.modules} under the module's name. Future \texttt{import\ flask} statements in any file will use this cached object.
+
+\textbf{Step 5: Bind the name.} \texttt{from\ flask\ import\ Flask} extracts the \texttt{Flask} attribute from the loaded module object and binds it to the name \texttt{Flask} in the current module's namespace. After this, \texttt{Flask} refers to the \texttt{Flask} class defined inside the Flask library.
+
+\subsection*{Import errors}\phantomsection\label{02-runtime-initialization:import-errors}
+
+If Python cannot find a module anywhere in \texttt{sys.path}, you get an error:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+ModuleNotFoundError: No module named 'flask'
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This means Flask is not installed in the Python environment currently active. It does not mean Flask does not exist. It means \texttt{pip\ install\ flask} has not been run in the right environment. We cover this in detail in → \hyperref[ch:06-local-dependencies]{Chapter 6}~--- Local Dependencies and Resources and the solution to this class of problems in → \hyperref[ch:12-dependency-declaration]{Chapter 12}~--- Dependency Declaration.
+
+\subsection*{What happens during Flask's import}\phantomsection\label{02-runtime-initialization:what-happens-during-flasks-import}
+
+When Python imports Flask, Flask's code runs. Specifically, Flask's \texttt{\_\_init\_\_.py} and several supporting modules execute. During this execution, Flask:
+
+\begin{itemize}
+\tightlist
+\item
+  Defines the \texttt{Flask} class
+\item
+  Defines the \texttt{Blueprint} class
+\item
+  Sets up the Jinja2 templating system
+\item
+  Sets up the Werkzeug HTTP library (which Flask uses internally for request/response handling)
+\item
+  Registers default error handlers
+\item
+  Sets up signal support (for request started/ended events)
+\end{itemize}
+
+\noindent{}None of this is your code~--- it is Flask setting up its own internals. But it runs during your application's startup, and any error here (for example, if Werkzeug is not installed) will prevent your application from starting.
+
+\setcounter{section}{4}
+\section{Framework Initialization: How Flask Starts Up}\label{02-runtime-initialization:25-framework-initialization-how-flask-starts-up}
+
+After imports, your \texttt{app.py} continues executing. The next significant step is creating the Flask application object:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 2.7}\enspace Creating the Flask application object}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This single line does a surprising amount of work.
+
+\subsection*{\texorpdfstring{What \texttt{Flask(\_\_name\_\_)} does}{What Flask(\_\_name\_\_) does}}\phantomsection\label{02-runtime-initialization:what-flask--name---does}
+
+\texttt{Flask(\_\_name\_\_)} calls the \texttt{Flask} class constructor with one argument: \texttt{\_\_name\_\_}.
+
+\texttt{\_\_name\_\_} is a special Python variable that contains the name of the current module. When the file being run directly is \texttt{app.py}, \texttt{\_\_name\_\_} has the value \texttt{"\_\_main\_\_"}. When \texttt{app.py} is imported by another module, \texttt{\_\_name\_\_} has the value \texttt{"app"}. Flask uses \texttt{\_\_name\_\_} to:
+
+\begin{itemize}
+\tightlist
+\item
+  Locate the root directory of your application (for finding templates and static files)
+\item
+  Set up proper logging with the correct module name
+\end{itemize}
+
+\noindent{}Inside \texttt{Flask.\_\_init\_\_()}, Flask does the following:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Records the application root path}~--- the directory where \texttt{\_\_name\_\_}'s file lives. This becomes the base directory for finding templates, static files, and instance folders.
+\item
+  \textbf{Creates the route table}~--- an empty data structure (a \texttt{Map} object from Werkzeug) that will store URL patterns and their corresponding handler functions. At this point, the table is empty.
+\item
+  \textbf{Creates the error handler registry}~--- a dictionary mapping error codes (like 404, 500) to handler functions. Flask starts with empty registries; your code will add to them.
+\item
+  \textbf{Creates the before/after request handler lists}~--- lists of functions to be called before and after every request. These are empty initially.
+\item
+  \textbf{Sets up configuration}~--- a \texttt{Config} object with Flask's defaults (debug mode off, testing mode off, etc.).
+\item
+  \textbf{Prepares the logger}~--- \texttt{app.logger}, a Python \texttt{logging.Logger} for this application, is created the first time your code uses it.
+\end{enumerate}
+
+\noindent{}After \texttt{Flask(\_\_name\_\_)} returns, you have an application object (\texttt{app}) that is a fully initialized Flask application with no routes and no handlers.
+
+\subsection*{Routes are registered next}\phantomsection\label{02-runtime-initialization:routes-are-registered-next}
+
+After the \texttt{app} object is created, your code registers routes using decorators:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 2.8}\enspace Registering routes with Flask decorators}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, jsonify}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ index():}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"message"}\NormalTok{: }\StringTok{"Notes API is running"}\NormalTok{\})}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: []\})}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}When Python executes the \texttt{@app.route("/")} decorator on the \texttt{index} function, Flask calls \texttt{app.}\allowbreak{}\texttt{add\_}\allowbreak{}\texttt{url\_}\allowbreak{}\texttt{rule("/}\allowbreak{}\texttt{",}\allowbreak{}\texttt{\ "index",}\allowbreak{}\texttt{\ index)}. This adds an entry to the route table mapping the URL pattern \texttt{"/"} and the HTTP method \texttt{GET} to the \texttt{index} function.
+
+This happens at \textbf{import time}~--- the moment Python reads those lines from top to bottom during initialization, not when a request arrives. By the time Python finishes executing \texttt{app.py}, Flask's route table is fully populated and ready to handle incoming requests.
+
+This is a crucial distinction: the route table is built once, during startup, and then consulted on every request. Building it is not cheap~--- it involves compiling URL patterns into a matcher structure~--- but it is done once. Lookups are fast.
+
+We examine the route table in detail in → \hyperref[ch:04-request-handling-paths]{Chapter 4}~--- Defining Request Handling Paths and → \hyperref[ch:32-routing]{Chapter 32}~--- Routing.
+
+\setcounter{section}{5}
+\section{Global State Setup: What Happens Before the First Request}\label{02-runtime-initialization:26-global-state-setup-what-happens-before-the-first-request}
+
+As Python executes your \texttt{app.py} from top to bottom, it may encounter other forms of global initialization beyond route registration.
+
+\subsection*{Module-level code}\phantomsection\label{02-runtime-initialization:module-level-code}
+
+Any code at the module level~--- code that is not inside a function or class~--- runs during initialization. This includes:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 2.9}\enspace Module-level code that runs at startup}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+\ImportTok{import}\NormalTok{ sqlite3}
+\ImportTok{import}\NormalTok{ os}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\CommentTok{\# This runs at startup, not per{-}request}
+\NormalTok{DATABASE\_PATH }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_PATH"}\NormalTok{, }\StringTok{"notes.db"}\NormalTok{)}
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Database path: }\SpecialCharTok{\{}\NormalTok{DATABASE\_PATH}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+\CommentTok{\# This function definition runs at startup (registers the route)}
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \CommentTok{\# This code runs only when a request arrives}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_PATH)}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}In Listing 2.9:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{DATABASE\_}\allowbreak{}\texttt{PATH\ =}\allowbreak{}\texttt{\ os.}\allowbreak{}\texttt{getenv(.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{)} runs once, at startup. The environment variable is read once.
+\item
+  \texttt{print(f"Database\ path:}\allowbreak{}\texttt{\ .}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{")} runs once, at startup. The output appears in the terminal when the server starts.
+\item
+  The \texttt{list\_notes} function body does NOT run at startup. It runs only when a request arrives at \texttt{/notes}.
+\end{itemize}
+
+\noindent{}This distinction matters for performance and correctness. If you put database connection setup at the module level, the connection is made once at startup. If you put it inside the handler function, a new connection is made on every request. Both patterns have valid use cases, but you must know which one you have chosen.
+
+\subsection*{Database initialization at startup}\phantomsection\label{02-runtime-initialization:database-initialization-at-startup}
+
+A common pattern is to initialize the database schema at startup:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 2.10}\enspace Early version of the Notes API with startup initialization}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, jsonify, request}
+\ImportTok{import}\NormalTok{ sqlite3}
+\ImportTok{import}\NormalTok{ os}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\NormalTok{DATABASE\_PATH }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATABASE\_PATH"}\NormalTok{, }\StringTok{"notes.db"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ init\_db():}
+    \CommentTok{"""Create the notes table if it does not already exist."""}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_PATH)}
+\NormalTok{    conn.execute(}\StringTok{"""}
+\StringTok{        CREATE TABLE IF NOT EXISTS notes (}
+\StringTok{            id INTEGER PRIMARY KEY AUTOINCREMENT,}
+\StringTok{            content TEXT NOT NULL,}
+\StringTok{            created\_at TIMESTAMP DEFAULT CURRENT\_TIMESTAMP}
+\StringTok{        )}
+\StringTok{    """}\NormalTok{)}
+\NormalTok{    conn.commit()}
+\NormalTok{    conn.close()}
+
+\CommentTok{\# This runs at startup, before any request is handled}
+\NormalTok{init\_db()}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_PATH)}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ conn.execute(}\StringTok{"SELECT id, content, created\_at FROM notes"}\NormalTok{)}
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [}
+\NormalTok{        \{}\StringTok{"id"}\NormalTok{: row[}\DecValTok{0}\NormalTok{], }\StringTok{"content"}\NormalTok{: row[}\DecValTok{1}\NormalTok{], }\StringTok{"created\_at"}\NormalTok{: row[}\DecValTok{2}\NormalTok{]\}}
+        \ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()}
+\NormalTok{    ]}
+\NormalTok{    conn.close()}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: notes\})}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json()}
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ data.get(}\StringTok{"content"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_PATH)}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ conn.execute(}
+        \StringTok{"INSERT INTO notes (content) VALUES (?)"}\NormalTok{, (content,)}
+\NormalTok{    )}
+\NormalTok{    conn.commit()}
+\NormalTok{    note\_id }\OperatorTok{=}\NormalTok{ cursor.lastrowid}
+\NormalTok{    conn.close()}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"id"}\NormalTok{: note\_id, }\StringTok{"content"}\NormalTok{: content\}), }\DecValTok{201}
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    app.run(debug}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}This is the first real version of the Notes API. It is small~--- about 40 lines~--- but it is a complete, working web service. It does not validate its input yet: a request without a JSON body, or without \texttt{content}, is not handled gracefully. Chapters 4, 5, and 31 add that. The database is initialized when the program starts (\texttt{init\_db()} runs at the module level). The routes are registered as Python reads through the decorators. By the time \texttt{app.run()} is called, the server is fully configured and ready to accept connections.
+
+\subsection*{\texorpdfstring{The
+\texttt{if\ \_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{name\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{\ =}\allowbreak{}\texttt{=}\allowbreak{}\texttt{\ "\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{main\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{":}
+guard}{The  guard}}\phantomsection\label{02-runtime-initialization:the-if---name------main---guard}
+
+The final two lines of Listing 2.10 use a pattern you will see in almost every Python program:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    app.run(debug}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This condition is \texttt{True} only when the file is run directly (\texttt{python\ app.py}). It is \texttt{False} when the file is imported by another module.
+
+Why does this matter? When you use a production server like Gunicorn (→ \hyperref[ch:24-process-startup]{Chapter 24}), Gunicorn imports your \texttt{app.py} file as a module rather than running it directly. It does this to access the \texttt{app} object without starting Flask's built-in development server. The \texttt{if\ \_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{name\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{\ =}\allowbreak{}\texttt{=}\allowbreak{}\texttt{\ "\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{main\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{":} guard ensures that \texttt{app.run()} is called only when you run the file directly~--- not when it is imported by Gunicorn.
+
+Without this guard, importing \texttt{app.py} would immediately start a server, which is not what production deployment tools expect.
+
+\subsection*{\texorpdfstring{What \texttt{app.run(debug=}\allowbreak{}\texttt{True)} does}{What  does}}\phantomsection\label{02-runtime-initialization:what-apprundebugtrue-does}
+
+When called, \texttt{app.run()}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Creates a socket and binds it to \texttt{localhost:5000} (by default)
+\item
+  Starts listening for connections
+\item
+  Enters the request-handling loop
+\end{enumerate}
+
+\noindent{}In debug mode (\texttt{debug=True}), Flask also:
+
+\begin{itemize}
+\tightlist
+\item
+  Enables the interactive debugger (shows a detailed error page in the browser when exceptions occur)
+\item
+  Enables the automatic reloader (restarts the server when you save changes to source files)
+\end{itemize}
+
+\begin{warnbox}
+
+\textbf{Warning:} \texttt{debug=True} must never be used in production. The interactive debugger allows arbitrary Python code execution from the browser~--- a critical security vulnerability. We address this in → \hyperref[ch:09-configuration-coupling]{Chapter 9}~--- Configuration Coupling and → \hyperref[ch:38-security]{Chapter 38}~--- Security.
+
+\end{warnbox}
+
+\unnumberedsection{false}{The Complete Initialization Timeline}\label{02-runtime-initialization:the-complete-initialization-timeline}
+
+Here is the full sequence from \texttt{exec} to ``ready to accept connections,'' with everything from this chapter included:
+
+\begin{diagrambox}{340.2pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+exec() loads Python interpreter
+         │
+         ▼
+Python interpreter self-initialization
+  - Memory allocator setup
+  - Garbage collector setup
+  - Built-in types registered (int, str, list, dict...)
+  - sys, builtins modules loaded
+         │
+         ▼
+Python processes command-line arguments
+  - The C-level argv is ["python", "app.py"]
+  - Python's sys.argv becomes ["app.py"]
+         │
+         ▼
+Python reads app.py from disk
+  - Opens file via OS file descriptor
+  - Reads bytes from disk
+         │
+         ▼
+Parser: bytes → Abstract Syntax Tree (AST)
+  - Syntax errors caught here
+         │
+         ▼
+Compiler: AST → Bytecode
+  - (imported modules use the .pyc cache;
+     the main script is compiled fresh)
+         │
+         ▼
+Python executes app.py bytecode, top to bottom:
+  │
+  ├─ "from flask import Flask"
+  │    └─ sys.modules check → not found
+  │    └─ Search sys.path → found in site-packages
+  │    └─ Load flask/__init__.py (recursive import of its dependencies)
+  │    └─ Cache in sys.modules["flask"]
+  │    └─ Bind name "Flask" in this module's namespace
+  │
+  ├─ "import sqlite3, os"
+  │    └─ Same process: check cache, find, load, cache, bind
+  │
+  ├─ "app = Flask(__name__)"
+  │    └─ Flask.__init__() runs
+  │    └─ Route table created (empty)
+  │    └─ Error handler registry created (empty)
+  │    └─ Configuration loaded with defaults
+  │
+  ├─ "DATABASE_PATH = os.getenv(...)"
+  │    └─ Environment variable read from process environment
+  │    └─ Value bound to module-level name DATABASE_PATH
+  │
+  ├─ "init_db()"
+  │    └─ Function executes immediately
+  │    └─ SQLite connection opened
+  │    └─ CREATE TABLE IF NOT EXISTS runs
+  │    └─ Connection closed
+  │
+  ├─ "@app.route('/notes', methods=['GET'])"
+  │    └─ Route table updated: GET /notes → list_notes
+  │
+  ├─ "@app.route('/notes', methods=['POST'])"
+  │    └─ Route table updated: POST /notes → create_note
+  │
+  └─ "if __name__ == '__main__': app.run(debug=True)"
+       └─ Creates socket
+       └─ Binds to localhost:5000
+       └─ Begins listening for connections
+       └─ (→ Chapter 3 — Creating Network Capability)
+\end{Verbatim}
+\end{diagrambox}
+
+\phantomsection\label{02-runtime-initialization:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  The \textbf{Python interpreter} (CPython) is the program that runs your Python code. It compiles source code to bytecode and then executes the bytecode on the CPython virtual machine.
+\item
+  Python \textbf{reads and parses} your source file before executing it. Syntax errors are detected during parsing, before any code runs.
+\item
+  Python \textbf{compiles} your code to bytecode and caches the bytecode of imported modules in \texttt{.pyc} files inside \texttt{\_\_pycache\_\_/}. This speeds up subsequent runs.
+\item
+  The \textbf{\texttt{import} statement} searches \texttt{sys.path} for the module, loads and executes it, caches the result in \texttt{sys.modules}, and binds the requested names in the current namespace.
+\item
+  \textbf{Flask initialization}~--- creating the \texttt{Flask} object and registering routes with decorators~--- happens during startup, not per request. The route table is fully built before the first connection is accepted.
+\item
+  \textbf{Module-level code} (code not inside a function) runs during startup. This includes \texttt{init\_db()}, reading environment variables, and registering routes.
+\item
+  The \texttt{if\ \_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{name\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{\ =}\allowbreak{}\texttt{=}\allowbreak{}\texttt{\ "\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{main\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{":} guard ensures that \texttt{app.run()} is only called when the script is run directly, not when it is imported by a production server like Gunicorn.
+\item
+  \texttt{debug=True} enables the interactive debugger and auto-reloader. It must \textbf{never} be used in production.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{02-runtime-initialization:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Add \texttt{print("module\ loaded")} at the top level of \texttt{app.py}, and start the application both with \texttt{python\ app.py} and with a WSGI server (\texttt{pip\ install\ gunicorn}, then \texttt{gunicorn\ -w\ 2\ app:app}). How many times is the line printed in each case, and why?
+\item
+  \textbf{Break and fix.} Introduce a syntax error on the last line of \texttt{app.py} and run it. Does any line before it execute? Then instead make the last line raise a \texttt{NameError} (a misspelled variable at module level). What runs this time?
+\item
+  \textbf{Extend.} Use \texttt{python\ -}\allowbreak{}\texttt{X\ importtime\ -}\allowbreak{}\texttt{c\ "import\ flask"} to find the three slowest imports Flask triggers. What does this tell you about start-up time?
+\item
+  \textbf{Explain.} Explain why \texttt{if\ \_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{name\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{\ =}\allowbreak{}\texttt{=}\allowbreak{}\texttt{\ "\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{main\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{":} matters for a program that a production server will import rather than run.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-02.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{02-runtime-initialization:whats-next}
+
+Python has initialized. Flask has built its route table. The application is calling \texttt{app.run()}. The next step is everything that happens inside \texttt{app.run()} at the network level: creating a socket, binding it to a port, and entering the listening state.
+
+\noindent{}→ \hyperref[ch:03-network-capability]{Chapter 3}~--- Creating Network Capability

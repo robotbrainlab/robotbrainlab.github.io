@@ -1,0 +1,292 @@
+\unnumberedchapter{Product Discovery}\label{ch:product-discovery}
+
+\chaptersubtitle{Deciding what is worth building --- before you build it}
+
+\chapterrule
+
+The most expensive mistake in software is not bad code. It is building the wrong thing \emph{well}~---
+pouring months of careful engineering into a product, feature, or system that nobody actually
+needs. Slow or buggy code can be fixed; a beautifully built solution to a problem no one has is
+simply waste.
+
+\textbf{Product discovery} is the work that happens \emph{before} planning and code: figuring out what is
+worth building, for whom, and why~--- and validating that cheaply, before committing to expensive
+engineering. It is the most commonly skipped phase of building software, and the one that decides
+whether everything downstream even matters. You can plan, code, and operate flawlessly and still
+fail completely if discovery was skipped.
+
+This part is about answering one question well: \textbf{should we build this at all~--- and if so, what
+exactly?}
+
+\unnumberedsection{true}{Why Discovery Exists: The Cost of Building the Wrong Thing}\label{product-discovery:why-discovery-exists-the-cost-of-building-the-wrong-thing}
+
+Engineering effort is expensive and largely irreversible: once a team has spent three months
+building something, the sunk cost makes it hard to admit it was the wrong thing. Discovery exists
+because the cost of \emph{finding out you were wrong} should be paid in days of conversation and cheap
+experiments, not months of code.
+
+Two ideas frame the whole discipline:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Outputs are not outcomes.} An \emph{output} is something you ship (a feature, a screen, an API). An
+  \emph{outcome} is a change in the world (a user succeeds at something, a metric moves, a problem goes
+  away). Shipping is easy; creating an outcome is the actual job. A team can ship constantly and
+  create no value at all.
+\item
+  \textbf{The build trap.} Most teams measure themselves by how much they ship, and slide into being a
+  ``feature factory''~--- busy, productive-looking, and disconnected from whether any of it matters.
+  Discovery is the discipline that keeps effort tied to outcomes instead of motion.
+\end{itemize}
+
+\noindent{}The mindset shift discovery asks for: fall in love with the \textbf{problem}, not your solution. Your
+first idea is a guess. Discovery is how you find out~--- cheaply~--- whether it's a good one.
+
+\unnumberedsection{true}{The Four Risks Every Idea Must Survive}\label{product-discovery:the-four-risks-every-idea-must-survive}
+
+A useful way to think about discovery (from Marty Cagan) is that every idea carries four risks, and
+discovery is the work of \emph{retiring} them before you build:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Value risk}~--- will anyone actually want this? Will they use it, switch to it, pay for it? This
+  is the biggest risk and the most often ignored, because it's the easiest to assume away.
+\item
+  \textbf{Usability risk}~--- can users figure out how to use it? A valuable thing nobody can operate
+  fails just as surely as one nobody wants.
+\item
+  \textbf{Feasibility risk}~--- can \emph{we} actually build it, with our time, technology, data, and skills?
+  (This is the one engineers naturally focus on~--- and often the \emph{least} risky of the four.)
+\item
+  \textbf{Business viability risk}~--- does it work for \emph{our} business? Legal, financial, brand, sales,
+  support, and ethical constraints can all kill an otherwise good idea.
+\end{itemize}
+
+\noindent{}The trap is to spend all your energy on feasibility (``can we build it?'') while assuming value
+(``they'll want it''). Discovery deliberately attacks the \emph{value} risk first, because it's both the
+largest and the cheapest to test before any code exists.
+
+\unnumberedsection{true}{Understanding the Problem and the User}\label{product-discovery:understanding-the-problem-and-the-user}
+
+You cannot validate a solution to a problem you don't understand. Discovery starts with the people
+you're building for.
+
+\subsection*{Talk to users --- but listen, don't pitch}\phantomsection\label{product-discovery:talk-to-users--but-listen-dont-pitch}
+
+The single highest-leverage discovery activity is talking to real users~--- and the single most
+common way to do it badly is to pitch your idea and collect compliments. People are polite; they
+will tell you your idea is ``interesting,'' and you will learn nothing.
+
+The discipline (captured well in Rob Fitzpatrick's \emph{The Mom Test}): \textbf{ask about their life and their past behavior,
+not your idea.} Good questions are concrete and backward-looking~--- ``Walk me through the last time
+you ran into this''~--- because what people \emph{actually did} is data, while what they \emph{say they would do}
+is a guess. Avoid leading questions, avoid hypotheticals, and treat compliments as a warning that
+you've started pitching.
+
+\subsection*{Find the problem beneath the solution}\phantomsection\label{product-discovery:find-the-problem-beneath-the-solution}
+
+Users almost always arrive with a \emph{solution}, not a problem: ``I need a faster horse,'' ``just add an
+export button.'' Your job is to dig past the requested solution to the underlying need~--- the ``five
+whys'' is a blunt but effective tool here. The export button might really be ``I need to share this
+with my boss, who lives in spreadsheets,'' which a dozen better solutions could serve. Solving the
+stated solution literally is how you build features no one uses.
+
+\subsection*{Jobs To Be Done}\phantomsection\label{product-discovery:jobs-to-be-done}
+
+A sharp lens for ``what is the user really trying to do'' is \textbf{Jobs To Be Done}: people ``hire'' a
+product to make progress in a particular situation. They don't buy a drill because they want a
+drill; they hire it to get a hole~--- and really, to hang a picture. Focusing on the \emph{job} (the
+progress someone is trying to make) rather than the demographic or the feature keeps you anchored to
+the outcome the user cares about.
+
+\unnumberedsection{true}{Validating That It's Worth Solving}\label{product-discovery:validating-that-its-worth-solving}
+
+Understanding a problem isn't enough~--- plenty of real problems aren't worth solving. A problem is
+worth building for when it is \textbf{real, frequent, painful, and something people will change behavior
+(or pay) to fix.} A rare, mild annoyance is not a business.
+
+Two practical tools:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{The Riskiest Assumption Test.} List the assumptions your idea depends on, find the one that~---
+  if false~--- kills the whole thing, and test \emph{that} first, as cheaply as possible. Usually it's a
+  value assumption (``people will pay for this''), not a feasibility one. Spending your first effort
+  anywhere else is motion, not progress.
+\item
+  \textbf{Demand before build.} You can measure demand before writing the product: a landing page that
+  describes the offer and counts sign-ups, a ``fake door'' (a button for a feature that doesn't exist
+  yet, measuring who clicks), or a pre-sell. Real behavior~--- a click, an email, a pre-order~--- is far
+  stronger evidence than any survey.
+\end{itemize}
+
+\unnumberedsection{true}{Shaping and Testing the Solution Cheaply}\label{product-discovery:shaping-and-testing-the-solution-cheaply}
+
+Once the problem is validated, discovery shifts to the solution~--- and the goal is to learn the most
+while building the least.
+
+\subsection*{Define success as an outcome, not an output}\phantomsection\label{product-discovery:define-success-as-an-outcome-not-an-output}
+
+Before designing anything, state what success \emph{is}~--- and state it as an outcome. ``Ship a
+recommendations feature'' is an output and tells you nothing about whether it worked. ``Increase the
+share of users who find a relevant item in their first session'' is an outcome you can actually test
+a solution against. Outcome-framing is what keeps the rest of discovery honest.
+
+\subsection*{Prototype and test before building}\phantomsection\label{product-discovery:prototype-and-test-before-building}
+
+You can test a solution long before you build it, with experiments that cost hours instead of
+months:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Prototypes}~--- paper sketches or clickable mockups put in front of real users to test usability
+  and desirability.
+\item
+  \textbf{Wizard of Oz}~--- the interface looks real, but a human does the work behind the curtain, so you
+  test the experience without building the engine.
+\item
+  \textbf{Concierge}~--- you deliver the outcome manually for a few real users (no product at all) to learn
+  whether it's wanted and what it really takes.
+\item
+  \textbf{Fake door / landing page}~--- measure interest in a thing that doesn't exist yet.
+\end{itemize}
+
+\noindent{}Each retires a specific risk (usability, value, feasibility) for a fraction of the cost of building.
+
+\subsection*{The MVP, correctly understood}\phantomsection\label{product-discovery:the-mvp-correctly-understood}
+
+The \textbf{Minimum Viable Product} is the most misunderstood term in software. It is \textbf{not} a
+low-quality first version of your product. It is the \emph{smallest thing that lets you test your core
+hypothesis with real users}~--- an experiment, not a deliverable. The ``viable'' means \emph{viable as a
+test of the idea}, not \emph{viable as a product to live with}. If you can learn what you need from a
+landing page or a concierge run, that is your MVP, and you've saved months.
+
+\unnumberedsection{true}{Prioritization: Deciding What to Pursue}\label{product-discovery:prioritization-deciding-what-to-pursue}
+
+Discovery surfaces more opportunities than you can pursue, so you need a way to choose. A few
+frameworks, used as thinking aids rather than oracles:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Value vs effort}~--- the simplest: plot ideas by expected value against cost, and start in the
+  high-value / low-effort corner. Crude, but it filters out a lot.
+\item
+  \textbf{RICE}~--- score by \textbf{R}each × \textbf{I}mpact × \textbf{C}onfidence ÷ \textbf{E}ffort, to compare opportunities
+  on a consistent (if rough) basis.
+\item
+  \textbf{MoSCoW}~--- sort into Must-have / Should-have / Could-have / Won't-have to force explicit
+  trade-offs and an explicit ``not now.''
+\item
+  \textbf{Kano model}~--- distinguishes \emph{basic} expectations (their absence angers, their presence is
+  unnoticed), \emph{performance} features (more is better), and \emph{delighters} (unexpected joys). Useful for
+  deciding where effort actually changes how users feel.
+\item
+  \textbf{Opportunity Solution Trees} (Teresa Torres, \emph{Continuous Discovery Habits})~--- map a desired \textbf{outcome}
+  to the \textbf{opportunities} (user needs / pain points) that could move it, then to candidate
+  \textbf{solutions}, then to \textbf{experiments}. It keeps a whole team's ideas tied back to the outcome
+  instead of to a feature wish-list.
+\end{itemize}
+
+\noindent{}The point of any of these is not the number they produce; it's that they force the conversation and
+make the reasoning behind a choice explicit.
+
+\unnumberedsection{true}{A Worked Example: Discovery for a Notes Service}\label{product-discovery:a-worked-example-discovery-for-a-notes-service}
+
+Suppose a team wants to build a small notes service~--- the same Notes API that Part IV of this book
+takes all the way to production. Discovery for it might look like this:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Problem, not solution.} Interviews with a dozen developers reveal the real pain is not ``I need
+  a notes app'' but ``the snippets and decisions I jot down during the day are scattered across chat,
+  sticky notes, and scratch files, and I cannot find them a week later.''
+\item
+  \textbf{Riskiest assumption.} \emph{Value risk}: will people actually send notes to an API from their own
+  tools, or will they keep using whatever is already open on their screen?
+\item
+  \textbf{Smallest test.} Before writing a server, give five developers a two-line shell alias that
+  appends a note to a shared file, and watch for two weeks: do they use it daily, and do they
+  come back to search it?
+\item
+  \textbf{Outcome.} Success is ``developers retrieve a note they saved at least once a week,'' not ``we
+  shipped create, read, update, and delete endpoints.''
+\item
+  \textbf{Decision.} If usage stalls after the first days, stop~--- the evidence says the problem is not
+  painful enough. If it holds, the validated problem, the target users, and the success measure
+  become the input to project planning.
+\end{itemize}
+
+\noindent{}Notice that nothing here required the API to exist. Discovery retires the biggest risk with the
+cheapest possible experiment, and only then does building begin.
+
+\unnumberedsection{true}{Common Traps}\label{product-discovery:common-traps}
+
+Discovery fails in predictable ways. Watch for:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Solution-first thinking}~--- falling in love with an answer and reverse-justifying the problem.
+\item
+  \textbf{The feature factory}~--- measuring success by shipping volume, never by outcomes.
+\item
+  \textbf{Confirmation bias}~--- running ``tests'' designed to hear yes; talking only to people who already
+  agree; counting compliments as validation.
+\item
+  \textbf{Building because you can}~--- technical excitement (``we could use this new model / framework'')
+  masquerading as user value.
+\item
+  \textbf{Skipping discovery under deadline pressure}~--- the most expensive shortcut there is, because it
+  trades a few days of cheap learning for months of possibly wasted building.
+\item
+  \textbf{Mistaking activity for progress}~--- interviews, decks, and experiments that never actually
+  retire a real risk.
+\end{itemize}
+
+\noindent{}The antidote to all of them is the same: tie every step to a real, falsifiable question about value,
+and be willing to hear ``no.''
+
+\unnumberedsection{true}{The Handoff to Project Planning}\label{product-discovery:the-handoff-to-project-planning}
+
+Discovery is done when you can answer, with evidence rather than hope: \emph{who} this is for, \emph{what}
+problem it solves, \emph{why} it's worth solving, what \emph{outcome} defines success, and which \emph{riskiest
+assumptions} you've retired. At that point the question flips from ``should we build this?'' to ``what
+exactly are we building, and how will we document and plan it?''
+
+That is precisely where \textbf{\hyperref[ch:project-planning-guide]{Project Planning}}
+(Part II) picks up: it turns a validated, well-understood problem into a problem statement,
+architecture, and the set of documents a real project keeps. Discovery decides \emph{whether and what};
+planning decides \emph{exactly what and how}. Skip discovery and you plan beautifully for the wrong
+thing; skip planning and you build the right thing chaotically.
+
+\unnumberedsection{true}{A Discovery Checklist}\label{product-discovery:a-discovery-checklist}
+
+Before committing engineering effort, you should be able to answer:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Problem}~--- what real, frequent, painful problem am I solving, and for whom? (Stated as a
+  problem, not a solution.)
+\item
+  \textbf{Evidence}~--- have I talked to real users about their actual behavior, not pitched my idea?
+\item
+  \textbf{Value}~--- is there evidence people will \emph{change behavior} (use, switch, pay) to get this?
+\item
+  \textbf{Outcome}~--- what observable outcome defines success, and how will I measure it?
+\item
+  \textbf{Riskiest assumption}~--- what single assumption, if wrong, kills this~--- and have I tested it
+  cheaply?
+\item
+  \textbf{Smallest test}~--- what is the least I can build or fake to learn whether this works?
+\item
+  \textbf{Decision}~--- am I prepared to \emph{not build it} if the evidence says no?
+\end{itemize}
+
+\noindent{}If you can answer these honestly, you've done the work that makes everything downstream worth doing.

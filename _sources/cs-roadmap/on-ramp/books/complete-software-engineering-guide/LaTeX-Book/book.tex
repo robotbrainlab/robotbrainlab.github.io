@@ -1,0 +1,159 @@
+% ================================================================
+%  The Complete Software Engineering Guide — master file
+%  Build:  make        (Markdown -> chapters/*.tex -> book.pdf)
+% ================================================================
+\documentclass[11pt, twoside, openright]{book}
+\input{preamble}
+
+\begin{document}
+
+\input{front/cover}
+
+\frontmatter
+\input{front/titlepage}
+\input{front/copyright}
+\input{front/dedication}
+\tableofcontents
+\input{front/preface}
+
+\mainmatter
+
+% ================================================================ The map (book-only chapter)
+\input{chapters/how-software-gets-built}
+
+% ================================================================ Part I
+\lifecyclepart{Product Discovery}
+  {Deciding what is worth building, before you build it.}{1}
+\input{chapters/product-discovery}
+
+% ================================================================ Part II
+\lifecyclepart{Project Planning}
+  {Turning a chosen problem into a plan, and the living documents a well-run project keeps.}{2}
+\input{chapters/project-planning-guide}
+
+% ================================================================ Part III
+\lifecyclepart{Writing Good Code}
+  {The craft of code that is correct, clear, and changeable, and the practices that keep a
+   codebase good.}{3}
+\input{chapters/writing-good-code}
+
+% ================================================================ Part IV
+\lifecyclepart{Building Real Applications}
+  {From writing code to a running production system: one Notes API, followed from a command in
+   a terminal to a monitored production service, and beyond.}{4}
+\input{chapters/part4-introduction}
+
+\bookpart{1}{Creating a Running Program}
+  {What is the system on the developer's machine?}
+  {Chapters 1–6}
+  {3}{The program, on your own machine}
+\input{chapters/01-command-to-process}
+\input{chapters/02-runtime-initialization}
+\input{chapters/03-network-capability}
+\input{chapters/04-request-handling-paths}
+\input{chapters/05-internal-request-execution}
+\input{chapters/06-local-dependencies}
+
+\bookpart{2}{Breaking the Local Illusion}
+  {Why is the local system not enough?}
+  {Chapters 7–11}
+  {3,4}{The gap between your laptop and a real server}
+\input{chapters/07-environment-drift}
+\input{chapters/08-hidden-dependencies}
+\input{chapters/09-configuration-coupling}
+\input{chapters/10-networking-limitations}
+\input{chapters/11-reliability-security-gaps}
+
+\bookpart{3}{Making the Program Portable}
+  {How is the system made portable?}
+  {Chapters 12–16}
+  {4}{The program, made ready to run anywhere}
+\input{chapters/12-dependency-declaration}
+\input{chapters/13-configuration-externalization}
+\input{chapters/14-runtime-contract}
+\input{chapters/15-structuring-the-application}
+\input{chapters/16-logging-error-handling}
+
+\bookpart{4}{Build and Packaging}
+  {How is that portable system packaged?}
+  {Chapters 17–19}
+  {4}{The workshop: automatic checks and the package store}
+\input{chapters/17-build-process}
+\input{chapters/18-containerization}
+\input{chapters/19-artifact-storage}
+
+\bookpart{5}{Infrastructure and Environment}
+  {What environment will actually run it?}
+  {Chapters 20–22}
+  {4}{The machine}
+\input{chapters/20-server-fundamentals}
+\input{chapters/21-system-setup}
+\input{chapters/22-network-configuration}
+
+\bookpart{6}{Deployment}
+  {How is it deployed and kept alive?}
+  {Chapters 23–25}
+  {4}{The program, placed on the machine and kept running}
+\input{chapters/23-code-transfer}
+\input{chapters/24-process-startup}
+\input{chapters/25-process-management}
+
+\bookpart{7}{Making It Reachable}
+  {How does it become reachable from outside?}
+  {Chapters 26–28}
+  {4}{The path: a name, and the front door}
+\input{chapters/26-network-stack-flow}
+\input{chapters/27-domain-and-dns}
+\input{chapters/28-traffic-routing}
+
+\bookpart{8}{Request Flow: External to Program}
+  {How does external input arrive at the program?}
+  {Chapters 29–30}
+  {5}{The path, followed by one request from the user to the program}
+\input{chapters/29-client-server-journey}
+\input{chapters/30-kernel-application-handoff}
+
+\bookpart{9}{Inside the Running Program}
+  {What does the program do with that input?}
+  {Chapters 31–34}
+  {3,5}{The program and its data, under real traffic}
+\input{chapters/31-input-handling}
+\input{chapters/32-routing}
+\input{chapters/33-logic-execution}
+\input{chapters/34-response-handling}
+
+\bookpart{10}{Production Reality}
+  {What changes when the system must survive reality?}
+  {Chapters 35–39}
+  {5}{The whole running system}
+\input{chapters/35-observability}
+\input{chapters/36-scaling-load}
+\input{chapters/37-reliability}
+\input{chapters/38-security}
+\input{chapters/39-local-vs-production}
+
+\bookpart{11}{Beyond a Single Service}
+  {How does the model stretch to distributed, asynchronous, data-heavy, and orchestrated systems?}
+  {Chapters 40–43}
+  {6}{Many programs, on many machines}
+\input{chapters/40-distributed-systems}
+\input{chapters/41-event-driven-architecture}
+\input{chapters/42-data-analytics-plane}
+\input{chapters/43-cloud-native-orchestration}
+
+% ================================================================ The project
+\addtocontents{toc}{\protect\booktocline{THE PROJECT}}
+\input{chapters/44-project-notes-for-many-users}
+
+% ================================================================ Closing (book-only chapter)
+\addtocontents{toc}{\protect\booktocline{CLOSING}}
+\input{chapters/the-same-process-in-a-team}
+
+% ================================================================ Appendices
+\backmatter
+\addtocontents{toc}{\protect\booktocline{APPENDICES}}
+\input{chapters/44-appendices}
+
+\input{front/backcover}
+
+\end{document}

@@ -1,0 +1,549 @@
+\setcounter{chapter}{28}
+\chapter{Client-to-Server Journey}\label{ch:29-client-server-journey}
+
+\chapterrule
+
+The previous chapters built each component of the production system in isolation. This chapter synthesizes them by tracing a single request~--- \texttt{POST\ /notes/}~--- from the moment a user presses Enter to the moment they see the response, touching every layer that has been built.
+
+This end-to-end trace serves two purposes. First, it confirms that the complete system is coherent~--- that all the pieces fit together as described. Second, it provides a mental model for diagnosing production problems. When something breaks, you need to know which layer it broke in, and that requires knowing what each layer does.
+
+By the end of this chapter, you will have a complete, detailed understanding of the path a single HTTP request travels through the production Notes API system.
+
+\setcounter{section}{0}
+\section{\texorpdfstring{The Request: \texttt{POST\ /notes/}}{The Request: POST /notes/}}\label{29-client-server-journey:291-the-request-post-notes}
+
+A user runs:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ POST https://api.notes.example.com/notes/ }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"content": "Buy groceries"\}\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This single command triggers the following sequence.
+
+\setcounter{section}{1}
+\section{Phase 1: DNS Resolution (Client)}\label{29-client-server-journey:292-phase-1-dns-resolution-client}
+
+\textbf{Location}: Client machine (the laptop running curl)
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+curl needs the IP for api.notes.example.com
+
+1. Check local DNS cache → not found (or expired)
+2. Ask configured resolver (1.1.1.1 — Cloudflare)
+3. Resolver checks its cache → found! (TTL: 237 seconds remaining)
+4. Resolver returns: api.notes.example.com → 203.0.113.42
+
+Time: ~0 ms (cached) or ~20 ms (fresh lookup)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\textbf{What could fail here:}
+
+\begin{itemize}
+\tightlist
+\item
+  DNS record doesn't exist → \texttt{curl:}\allowbreak{}\texttt{\ (6)\ Could\ not\ resolve\ host}
+\item
+  DNS record points to wrong IP → the connection goes to the wrong server; usually TLS then fails first, because that server's certificate does not match the name
+\item
+  Resolver unreachable → timeout
+\end{itemize}
+
+\setcounter{section}{2}
+\section{Phase 2: TCP Connection (Client → Server)}\label{29-client-server-journey:293-phase-2-tcp-connection-client--server}
+
+\textbf{Location}: Client and server TCP stacks, internet routing
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+curl opens a TCP connection to 203.0.113.42:443
+
+Client (laptop):
+  1. OS allocates an ephemeral port (e.g., 54832)
+  2. OS sends SYN packet:
+     src: 192.168.1.5:54832 (client private IP)
+     dst: 203.0.113.42:443
+
+Internet routing:
+  3. Client's router NATs the packet:
+     src: 89.100.200.50:54832 (client's public IP)
+     dst: 203.0.113.42:443
+  4. Packet routes through ISP backbone, internet exchange, hosting provider
+
+Server (cloud provider network):
+  5. Cloud firewall: dst port 443 allowed? → yes
+  6. Reserved IP (203.0.113.42) routed to the server, via its anchor IP
+  7. UFW (the server's firewall) checks port 443 → allowed
+
+Server kernel:
+  7. NIC receives Ethernet frame → NAPI interrupt
+  8. IP layer: 203.0.113.42 = us → pass up
+  9. TCP layer: port 443, in LISTEN state
+  10. TCP layer: SYN received → allocate half-open connection
+  11. TCP layer: send SYN-ACK
+  12. ACK received → connection established
+  13. Connection placed in accept queue
+
+Time: 1 RTT (round-trip time) ≈ 10–100ms depending on client location
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\textbf{What could fail here:}
+
+\begin{itemize}
+\tightlist
+\item
+  Cloud firewall blocks port 443 → timeout (firewalls drop packets; ``Connection refused'' means nothing is listening)
+\item
+  UFW blocks port 443 → timeout
+\item
+  Server not listening on 443 → \texttt{Connection\ refused}
+\end{itemize}
+
+\setcounter{section}{3}
+\section{Phase 3: TLS Handshake (Client ↔ Nginx)}\label{29-client-server-journey:294-phase-3-tls-handshake-client--nginx}
+
+\textbf{Location}: Client TLS stack ↔ Nginx TLS stack
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Nginx's accept() returns the client socket.
+Nginx starts TLS negotiation.
+
+1. Client sends ClientHello:
+   - TLS 1.3 preferred
+   - Supported cipher suites
+   - Random bytes for key derivation
+
+2. Nginx sends ServerHello:
+   - Chosen: TLS 1.3
+   - Chosen cipher: TLS_AES_256_GCM_SHA384
+   - Server's certificate (issued by Let's Encrypt for api.notes.example.com)
+   - Random bytes
+
+3. Client verifies the certificate:
+   - Is it for api.notes.example.com? → yes
+   - Is it signed by a trusted CA? → Let's Encrypt → ISRG Root X1 → trusted
+   - Is it expired? → no (valid until 90 days from issuance)
+   - Is the server in possession of the private key? → prove it
+
+4. Key exchange (Diffie-Hellman):
+   - Client and server exchange key material
+   - Both derive the same session encryption key
+   - The private key never leaves the server
+
+5. Handshake complete:
+   - All subsequent data is encrypted with the session key
+   - The channel is: authenticated (server identity proven) + encrypted
+
+Time: 1 RTT for TLS 1.3 (2 RTTs for TLS 1.2)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\textbf{What could fail here:}
+
+\begin{itemize}
+\tightlist
+\item
+  Certificate expired → \texttt{curl:}\allowbreak{}\texttt{\ (60)\ SSL\ certificate\ problem:}\allowbreak{}\texttt{\ certificate\ has\ expired}
+\item
+  Wrong domain in certificate → same error
+\item
+  Certificate not trusted → same error
+\item
+  TLS version mismatch → \texttt{SSL\ handshake\ failure}
+\end{itemize}
+
+\setcounter{section}{4}
+\section{Phase 4: HTTP Request (Client → Nginx)}\label{29-client-server-journey:295-phase-4-http-request-client--nginx}
+
+\textbf{Location}: Client → Nginx
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+curl sends the HTTP request over the encrypted TLS channel.
+
+The raw bytes (before encryption):
+POST /notes/ HTTP/1.1\r\n
+Host: api.notes.example.com\r\n
+User-Agent: curl/8.1.2\r\n
+Accept: */*\r\n
+Content-Type: application/json\r\n
+Content-Length: 28\r\n
+\r\n
+{"content": "Buy groceries"}
+
+Nginx receives these bytes:
+1. TLS layer decrypts the bytes
+2. HTTP parser reads request line: POST /notes/ HTTP/1.1
+3. HTTP parser reads headers (Host, Content-Type, Content-Length)
+4. HTTP parser reads body (28 bytes of JSON)
+5. Complete request buffered in Nginx
+
+Time: < 1 ms (local processing)
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{5}
+\section{Phase 5: Nginx → Gunicorn Proxy}\label{29-client-server-journey:296-phase-5-nginx--gunicorn-proxy}
+
+\textbf{Location}: Nginx → TCP → Docker port mapping → Gunicorn
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Nginx opens a connection to 127.0.0.1:5000 (the notes_api upstream)
+and forwards the HTTP request.
+
+Nginx modifies the request:
+- Adds headers:
+  X-Real-IP: 89.100.200.50        (client's actual public IP)
+  X-Forwarded-For: 89.100.200.50  (same for single-proxy setup)
+  X-Forwarded-Proto: https        (original scheme was HTTPS)
+  Host: api.notes.example.com     (original Host header)
+
+Nginx sends to 127.0.0.1:5000:
+POST /notes/ HTTP/1.1\r\n
+Host: api.notes.example.com\r\n
+X-Real-IP: 89.100.200.50\r\n
+X-Forwarded-For: 89.100.200.50\r\n
+X-Forwarded-Proto: https\r\n
+Content-Type: application/json\r\n
+Content-Length: 28\r\n
+\r\n
+{"content": "Buy groceries"}
+
+Docker port mapping (docker-proxy, listening on 127.0.0.1:5000):
+  accepts Nginx's connection and opens its own connection from
+  172.17.0.1 (the bridge gateway) to 172.17.0.2:5000 (container IP)
+
+Container network namespace:
+  Packet crosses the veth pair: host namespace → container namespace
+
+Gunicorn worker calls accept() on the listening socket:
+  Returns: (client_socket, ('172.17.0.1', ephemeral_port))
+
+Time: < 1 ms (local network, no encryption)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\textbf{What could fail here:}
+
+\begin{itemize}
+\tightlist
+\item
+  Container not running → Nginx returns 502 Bad Gateway
+\item
+  Gunicorn worker timeout → Nginx returns 504 Gateway Timeout
+\item
+  All workers busy → requests wait in the accept queue; if none frees up in time, Nginx gives up at proxy\_read\_timeout (504)
+\end{itemize}
+
+\setcounter{section}{6}
+\section{Phase 6: Flask Request Processing}\label{29-client-server-journey:297-phase-6-flask-request-processing}
+
+\textbf{Location}: Inside the Docker container
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Gunicorn worker reads HTTP bytes from socket.
+Gunicorn parses the HTTP request and builds the WSGI environ;
+Flask (with Werkzeug) wraps the environ in a Request object.
+
+1. Request object created:
+   request.method = "POST"
+   request.path = "/notes/"
+   request.headers = {
+       "Host": "api.notes.example.com",
+       "X-Real-IP": "89.100.200.50",
+       "X-Forwarded-For": "89.100.200.50",
+       "X-Forwarded-Proto": "https",
+       "Content-Type": "application/json",
+       "Content-Length": "28",
+       ...
+   }
+   request.data = b'{"content": "Buy groceries"}'
+
+2. ProxyFix middleware runs:
+   request.remote_addr = "89.100.200.50"  (from X-Forwarded-For)
+   request.scheme = "https"               (from X-Forwarded-Proto)
+
+3. Before-request hooks:
+   - log_request_start() runs:
+     g.request_start_time = perf_counter()
+     logs: "→ POST /notes/ (from 89.100.200.50)"
+
+4. URL routing:
+   Werkzeug's Map matches POST + /notes/ → create_note handler
+   (No URL variable extraction for /notes/)
+
+5. create_note() handler executes:
+   a. data = request.get_json(silent=True)
+      → {"content": "Buy groceries"}
+
+   b. Validation:
+      - data is a JSON object? ✓
+      - content present? ✓ "Buy groceries"
+      - content is a string? ✓
+      - content after strip? "Buy groceries" (non-empty)
+      - content length <= 10,000? ✓ (13 chars)
+
+   c. Database interaction (next phase)
+
+Time: < 1 ms (just parsing and validation)
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{7}
+\section{Phase 7: Database Query}\label{29-client-server-journey:298-phase-7-database-query}
+
+\textbf{Location}: Container → Managed PostgreSQL
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+get_db() is called inside create_note().
+
+First call in this request? g has no "db" key yet.
+→ open_db() creates a new connection (the app opens one per request):
+  psycopg2.connect("postgresql://notes_user:pass@private-db-….db.ondigitalocean.com:25060/notesdb?sslmode=require")
+
+TCP connection to the database's private VPC address:
+  - TLS handshake (managed databases require it: sslmode=require)
+  - PostgreSQL authentication (SCRAM-SHA-256)
+  - Connection established — several network round trips before any SQL
+
+SQL execution:
+  cursor.execute(
+    "INSERT INTO notes (content) VALUES (%s) RETURNING id, content, created_at",
+    ("Buy groceries",)
+  )
+
+PostgreSQL processes the INSERT:
+  1. Begin implicit transaction
+  2. Acquire row lock on new row
+  3. Write to WAL (Write-Ahead Log) — durable
+  4. Insert into heap
+  5. Return: id=42, content="Buy groceries",
+             created_at=datetime(2024, 1, 15, 14, 0, 0, 123456, tzinfo=UTC)
+
+The handler (running in a Gunicorn worker) receives the row:
+  note = row_to_note(cursor.fetchone())
+  → {"id": 42, "content": "Buy groceries",
+     "created_at": "2024-01-15T14:00:00.123456+00:00"}   (to_iso)
+  db.commit()   — before the response is built: a 201 means "saved"
+
+Time: 1–5 ms for the query itself — plus 5–20 ms to open the connection
+(TCP, TLS and authentication), paid again on every request because the
+app has no connection pool. Chapter 36 removes that cost.
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{8}
+\section{Phase 8: Response Construction}\label{29-client-server-journey:299-phase-8-response-construction}
+
+\textbf{Location}: Flask application
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+create_note() returns the note data.
+
+1. jsonify(note) serializes to JSON:
+   b'{"content":"Buy groceries","created_at":"2024-01-15T14:00:00.123456+00:00","id":42}'
+
+2. Flask wraps in a Response object:
+   status_code = 201
+   headers = {
+     "Content-Type": "application/json",
+     "Content-Length": "84",
+   }
+
+3. After-request hooks:
+   - log_request_end() runs:
+     elapsed = perf_counter() - g.request_start_time = 14.3 ms
+     logs: "← 201 in 14.3ms"
+
+4. Teardown hooks:
+   - close_db() runs:
+     db.rollback()  (a no-op: the handler already committed)
+     db.close()     (close the connection's socket)
+
+5. Gunicorn receives the Response object.
+   Serializes to HTTP/1.1 response bytes:
+
+HTTP/1.1 201 Created\r\n
+Server: gunicorn\r\n
+Date: Mon, 15 Jan 2024 14:00:00 GMT\r\n
+Connection: close\r\n
+Content-Type: application/json\r\n
+Content-Length: 84\r\n
+\r\n
+{"content":"Buy groceries","created_at":"2024-01-15T14:00:00.123456+00:00","id":42}
+
+Gunicorn writes these bytes to the client socket (which leads to Nginx).
+(Gunicorn's sync workers close the connection after each response — hence
+"Connection: close". Keep-alive to the client is Nginx's job.)
+
+Time: < 1 ms
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{9}
+\section{Phase 9: Response Path (Gunicorn → Client)}\label{29-client-server-journey:2910-phase-9-response-path-gunicorn--client}
+
+\textbf{Location}: Gunicorn → Nginx → Internet → Client
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Nginx receives response from Gunicorn.
+Nginx adds security headers:
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  ...
+
+Nginx encrypts the response using the TLS session key.
+Nginx writes encrypted bytes to the client's TLS socket.
+
+Internet routing (reverse of request path):
+  Bytes travel from server → hosting provider → ISP → client
+
+Client TLS stack decrypts the bytes.
+Client HTTP parser receives:
+  HTTP/2 201 Created
+  content-type: application/json
+  strict-transport-security: ...
+  content-length: 84
+
+  {"content":"Buy groceries","created_at":"2024-01-15T14:00:00.123456+00:00","id":42}
+
+curl displays the response:
+  {"content":"Buy groceries","created_at":"2024-01-15T14:00:00.123456+00:00","id":42}
+
+The client's connection to Nginx remains open (HTTP keep-alive).
+Subsequent requests reuse it (no new TCP or TLS handshakes).
+
+Time: 1 RTT
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{10}
+\section{The Complete Timeline}\label{29-client-server-journey:2911-the-complete-timeline}
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+T+0ms     DNS lookup (cache hit)
+T+0ms     TCP SYN sent
+T+10ms    TCP ACK received (10ms RTT assumed)
+T+10ms    TLS ClientHello sent
+T+20ms    TLS ServerHello received (another RTT)
+T+20ms    TLS handshake complete
+T+20ms    HTTP POST sent
+T+20ms    Nginx receives and buffers request
+T+20ms    Nginx forwards to Gunicorn
+T+20ms    Flask receives request
+T+21ms    Validation complete
+T+21ms    Database connection opened (TCP + TLS + auth)
+T+31ms    INSERT executed
+T+34ms    Database response received (3ms DB round-trip), committed
+T+34ms    JSON serialized
+T+34ms    Response sent to Nginx
+T+34ms    Nginx adds security headers
+T+34ms    Nginx encrypts and sends to client
+T+44ms    Client receives response (10ms RTT back)
+
+Total: ~44ms (10ms RTT, ~10ms opening the DB connection, 3ms DB, rest is processing)
+
+For a client in the same datacenter: ~15ms total
+For a client on the other side of the world: ~200ms total
+(The dominant factor is network latency, not server processing)
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{11}
+\section{Log Output for This Request}\label{29-client-server-journey:2912-log-output-for-this-request}
+
+During this request, the following log entries were written:
+
+\textbf{Nginx access log} (\texttt{/}\allowbreak{}\texttt{var/}\allowbreak{}\texttt{log/}\allowbreak{}\texttt{nginx/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api-}\allowbreak{}\texttt{access.}\allowbreak{}\texttt{log}):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+89.100.200.50 - - [15/Jan/2024:14:00:00 +0000] "POST /notes/ HTTP/2.0" 201 84 "-" "curl/8.1.2"
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\textbf{Application log} (via journalctl or docker logs):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+{"timestamp":"2024-01-15T14:00:00.020Z","level":"INFO","logger":"app.middleware","message":"→ POST /notes/ (from 89.100.200.50)","function":"log_request_start","line":44}
+{"timestamp":"2024-01-15T14:00:00.034Z","level":"INFO","logger":"app.routes.notes","message":"Created note id=42.","function":"create_note","line":54}
+{"timestamp":"2024-01-15T14:00:00.034Z","level":"INFO","logger":"app.middleware","message":"← 201 in 14.3ms","function":"log_request_end","line":83}
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}These logs, combined, tell the complete story:
+
+\begin{itemize}
+\tightlist
+\item
+  Who made the request (IP, user agent)
+\item
+  What they requested (method, path)
+\item
+  What happened (note created, id=42)
+\item
+  How long it took (14.3ms server time, request logged by Nginx)
+\end{itemize}
+
+\phantomsection\label{29-client-server-journey:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  A single \texttt{POST\ /notes/} traverses: DNS → TCP → TLS → Nginx → Docker → Gunicorn → Flask → PostgreSQL → response path back.
+\item
+  \textbf{Network latency dominates} total request time. Server processing is typically 2--10ms; network round-trip can be 10--200ms.
+\item
+  \textbf{Each layer can fail independently.} DNS failure looks different from TCP failure, which looks different from TLS failure, which looks different from a 500 response.
+\item
+  \textbf{The database} is the most expensive server-side cost: 1--5 ms per query over the VPC, plus the connection setup (TCP, TLS, authentication) that this app pays on every request because it opens a new connection each time~--- the case for connection pooling (\hyperref[ch:36-scaling-load]{Chapter 36}).
+\item
+  \textbf{HTTP keep-alive} means subsequent requests to the same server reuse the TCP and TLS connections, avoiding the handshake overhead.
+\item
+  \textbf{The log entries} across Nginx and the application together provide complete visibility into what happened during a request.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{29-client-server-journey:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Time a request with \texttt{curl\ -}\allowbreak{}\texttt{w\ "\%\{time\_}\allowbreak{}\texttt{namelookup\}\ \%\{time\_}\allowbreak{}\texttt{connect\}\ \%\{time\_}\allowbreak{}\texttt{appconnect\}\ \%\{time\_}\allowbreak{}\texttt{starttransfer\}\ \%\{time\_}\allowbreak{}\texttt{total\}\textbackslash{}n"\ -}\allowbreak{}\texttt{o\ /}\allowbreak{}\texttt{dev/}\allowbreak{}\texttt{null\ -}\allowbreak{}\texttt{s}. Which phase takes longest from your location, and why?
+\item
+  \textbf{Break and fix.} Send two requests with \texttt{curl} in one command (\texttt{curl\ URL\ URL}), then as two separate commands, and compare their timings. What does connection reuse save?
+\item
+  \textbf{Extend.} Find the same request in the Nginx access log and the application log, and match them up by time and path. (After Chapter 35, ask what it would take to match them by request ID.)
+\item
+  \textbf{Explain.} Why does network latency usually dominate a request's total time, and what does that suggest about where to optimize first?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-29.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{29-client-server-journey:whats-next}
+
+The complete request journey is understood. Now examine what happens after the request is received by the kernel but before Flask sees it~--- the kernel-to-application handoff.
+
+\noindent{}→ \hyperref[ch:30-kernel-application-handoff]{Chapter 30}~--- Kernel to Application Handoff

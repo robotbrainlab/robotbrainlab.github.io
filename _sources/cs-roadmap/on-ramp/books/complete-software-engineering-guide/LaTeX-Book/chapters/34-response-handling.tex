@@ -1,0 +1,1483 @@
+\setcounter{chapter}{33}
+\chapter{Response Handling}\label{ch:34-response-handling}
+
+\chapterrule
+
+The business logic has run. The handler has a result: a new note, a list of notes, a validation error, a ``not found'' condition. Now that result must become an HTTP response~--- a byte stream with a status code, headers, and a body~--- that travels back through Gunicorn, Nginx, and the network to the client.
+
+This chapter covers how Flask constructs HTTP responses from the return values of handler functions, what the HTTP status codes mean and when to use each one, how headers control client behavior, and how JSON serialization works.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  How Flask converts handler return values into \texttt{Response} objects
+\item
+  What HTTP status codes mean and the correct codes for common situations
+\item
+  Which response headers matter and what they communicate
+\item
+  How JSON serialization works in Flask and what \texttt{jsonify()} does
+\item
+  How to handle the datetime serialization problem
+\item
+  How error responses differ from success responses (and how they should be structured)
+\item
+  How Nginx adds headers to Flask's responses before the client sees them
+\item
+  How to treat the API as a \textbf{contract}: idempotency, versioning, pagination, error design, webhooks, and a written OpenAPI specification that CI keeps honest with a validator and contract tests
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{From Handler Return Value to HTTP Response}\label{34-response-handling:341-from-handler-return-value-to-http-response}
+
+Flask handler functions can return values in several forms. Flask normalizes all of them into a \texttt{Response} object.
+
+\subsection*{\texorpdfstring{Form 1: A tuple \texttt{(body,}\allowbreak{}\texttt{\ status\_code)}}{Form 1: A tuple}}\phantomsection\label{34-response-handling:form-1-a-tuple-body-status-code}
+
+The most common form used in the Notes API:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{201}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Flask sees a tuple where the first element is a body (or Response) and the second is a status code. If the first element is already a \texttt{Response} object (which \texttt{jsonify()} produces), Flask uses it as-is but overrides the status code.
+
+\subsection*{\texorpdfstring{Form 2: A tuple
+\texttt{(body,}\allowbreak{}\texttt{\ status\_}\allowbreak{}\texttt{code,}\allowbreak{}\texttt{\ headers)}}{Form 2: A tuple}}\phantomsection\label{34-response-handling:form-2-a-tuple-body-status-code-headers}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ (}
+\NormalTok{    jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Rate limit exceeded"}\NormalTok{\}),}
+    \DecValTok{429}\NormalTok{,}
+\NormalTok{    \{}\StringTok{"Retry{-}After"}\NormalTok{: }\StringTok{"60"}\NormalTok{\},}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The third element adds or overrides headers in the response.
+
+\subsection*{Form 3: Just a body}\phantomsection\label{34-response-handling:form-3-just-a-body}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"status"}\NormalTok{: }\StringTok{"ok"}\NormalTok{\})}
+\CommentTok{\# Status defaults to 200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Form 4: A dict (or a list)}\phantomsection\label{34-response-handling:form-4-a-dict-or-a-list}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ \{}\StringTok{"status"}\NormalTok{: }\StringTok{"ok"}\NormalTok{\}}
+\CommentTok{\# Flask converts a returned dict or list to JSON, exactly as jsonify() would}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{\texorpdfstring{Form 5: A \texttt{Response} object directly}{Form 5: A Response object directly}}\phantomsection\label{34-response-handling:form-5-a-response-object-directly}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Response}
+\ImportTok{import}\NormalTok{ json}
+
+\NormalTok{response }\OperatorTok{=}\NormalTok{ Response(}
+\NormalTok{    response}\OperatorTok{=}\NormalTok{json.dumps(\{}\StringTok{"id"}\NormalTok{: }\DecValTok{42}\NormalTok{\}),}
+\NormalTok{    status}\OperatorTok{=}\DecValTok{201}\NormalTok{,}
+\NormalTok{    mimetype}\OperatorTok{=}\StringTok{"application/json"}\NormalTok{,}
+\NormalTok{)}
+\ControlFlowTok{return}\NormalTok{ response}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is verbose and rarely necessary~--- \texttt{jsonify()} creates the \texttt{Response} object for you.
+
+\subsection*{Form 6: An empty response}\phantomsection\label{34-response-handling:form-6-an-empty-response}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return} \StringTok{""}\NormalTok{, }\DecValTok{204}
+\CommentTok{\# Body is empty, status is 204 No Content}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{\texorpdfstring{Flask's \texttt{make\_response()} function}{Flask's make\_response() function}}\phantomsection\label{34-response-handling:flasks-make-response-function}
+
+If you need to modify a response object before returning it (for example, to set a cookie), use \texttt{make\_response()}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ make\_response, jsonify}
+
+\NormalTok{response }\OperatorTok{=}\NormalTok{ make\_response(jsonify(\{}\StringTok{"id"}\NormalTok{: note\_id\}), }\DecValTok{201}\NormalTok{)}
+\NormalTok{response.headers[}\StringTok{"X{-}Custom{-}Header"}\NormalTok{] }\OperatorTok{=} \StringTok{"value"}
+\NormalTok{response.set\_cookie(}\StringTok{"session\_id"}\NormalTok{, value}\OperatorTok{=}\StringTok{"abc123"}\NormalTok{, httponly}\OperatorTok{=}\VariableTok{True}\NormalTok{, secure}\OperatorTok{=}\VariableTok{True}\NormalTok{, samesite}\OperatorTok{=}\StringTok{"Lax"}\NormalTok{)}
+\ControlFlowTok{return}\NormalTok{ response}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{What Flask does with the return value}\phantomsection\label{34-response-handling:what-flask-does-with-the-return-value}
+
+Flask's \texttt{finalize\_request()} method handles the conversion:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Flask internals (simplified):}
+\KeywordTok{def}\NormalTok{ finalize\_request(}\VariableTok{self}\NormalTok{, rv, from\_error\_handler}\OperatorTok{=}\VariableTok{False}\NormalTok{):}
+\NormalTok{    response }\OperatorTok{=} \VariableTok{self}\NormalTok{.make\_response(rv)}
+    \CommentTok{\# ...apply after\_request hooks...}
+    \ControlFlowTok{return}\NormalTok{ response}
+
+\KeywordTok{def}\NormalTok{ make\_response(}\VariableTok{self}\NormalTok{, rv):}
+    \CommentTok{\# None → TypeError: "The view function did not return a valid response"}
+    \CommentTok{\#   (every view must return something, even if it is "", 204)}
+    \CommentTok{\# Handle (body, status) tuples}
+    \CommentTok{\# Handle (body, status, headers) tuples}
+    \CommentTok{\# Handle Response objects directly}
+    \CommentTok{\# Wrap plain strings/bytes in a Response}
+    \CommentTok{\# ... (many cases)}
+    \ControlFlowTok{return}\NormalTok{ response  }\CommentTok{\# Always a Response object}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}After \texttt{make\_response()}, the \texttt{Response} object is passed through \texttt{after\_request} hooks, then handed to Gunicorn's WSGI layer, which serializes it to HTTP/1.1 bytes and sends them to Nginx.
+
+\setcounter{section}{1}
+\section{HTTP Status Codes}\label{34-response-handling:342-http-status-codes}
+
+HTTP status codes are three-digit numbers that tell the client what happened with its request. They are divided into five classes:
+
+\Needspace{18\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Class & Range & Meaning \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1xx & 100--199 & Informational~--- request received, continuing \\
+2xx & 200--299 & Success~--- request received, understood, accepted \\
+3xx & 300--399 & Redirection~--- further action needed \\
+4xx & 400--499 & Client error~--- request has a problem \\
+5xx & 500--599 & Server error~--- server failed to fulfill a valid request \\
+\end{longtable}
+}
+
+\subsection*{Status codes used by the Notes API}\phantomsection\label{34-response-handling:status-codes-used-by-the-notes-api}
+
+\textbf{200 OK}
+The standard success response for GET requests and PUT/PATCH requests that return the updated resource.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{201 Created}
+The resource was successfully created. Used for POST requests that create a new resource.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{201}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \texttt{Location} header conventionally points to the new resource's URL. It is optional, and the Notes API's \texttt{create\_note} returns the whole note instead (its \texttt{id} is enough to build the URL); adding it is one line:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{201}\NormalTok{, \{}\StringTok{"Location"}\NormalTok{: url\_for(}\StringTok{"notes.get\_note"}\NormalTok{, note\_id}\OperatorTok{=}\NormalTok{note[}\StringTok{"id"}\NormalTok{])\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{204 No Content}
+Success, but no response body. Used for DELETE operations where there is nothing meaningful to return.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return} \StringTok{""}\NormalTok{, }\DecValTok{204}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{301 Moved Permanently} / \textbf{308 Permanent Redirect}
+The resource has moved to a new URL permanently. Clients should update their bookmarks. Used for HTTP → HTTPS redirects and URL canonicalization. The difference matters for APIs: after a 301, many clients repeat a \texttt{POST} as a \texttt{GET} (dropping the body); a 308 requires them to repeat the same method and body. Werkzeug's trailing-slash redirect is a 308 (\hyperref[ch:32-routing]{Chapter 32}).
+
+\textbf{302 Found} / \textbf{307 Temporary Redirect}
+The resource is temporarily at a different URL. Clients should continue using the original URL for future requests. Used for login redirects. 307 is the method-preserving version of 302.
+
+\textbf{400 Bad Request}
+The request is malformed or invalid~--- the body is not valid JSON, or its data fails validation. The Notes API uses 400 for every validation failure.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Request body must be a JSON object"}\NormalTok{\}), }\DecValTok{400}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{415 Unsupported Media Type}
+The body is in a format the server does not accept~--- for the Notes API, anything not declared as \texttt{application/json} (the middleware check from \hyperref[ch:16-logging-error-handling]{Chapter 16}).
+
+\textbf{401 Unauthorized} (actually means ``unauthenticated'')
+The client is not authenticated. It must provide credentials. Used when an API requires authentication and the client has not sent a token.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Authentication required"}\NormalTok{\}), }\DecValTok{401}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{403 Forbidden}
+The client is authenticated but not authorized for this action. The server understood the request but refuses it.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"You do not have permission to delete this note"}\NormalTok{\}), }\DecValTok{403}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{404 Not Found}
+The requested resource does not exist.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{405 Method Not Allowed}
+The URL exists but does not support the HTTP method used. Flask generates this automatically, with an \texttt{Allow} header listing the methods that work.
+
+\textbf{409 Conflict}
+The request conflicts with the current state of the resource~--- for example, trying to create a resource that already exists (unique constraint violation).
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"A note with this content already exists"}\NormalTok{\}), }\DecValTok{409}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{422 Unprocessable Content} (called ``Unprocessable Entity'' before RFC 9110)
+The request is well-formed (valid JSON, correct Content-Type) but its data fails validation. Some APIs use 422 for that case and keep 400 for malformed requests; others, like the Notes API, use 400 for both. Either is defensible~--- what matters is choosing one and using it everywhere.
+
+\textbf{429 Too Many Requests}
+The client has exceeded the rate limit. Include a \texttt{Retry-After} header.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Rate limit exceeded"}\NormalTok{\}), }\DecValTok{429}\NormalTok{, \{}\StringTok{"Retry{-}After"}\NormalTok{: }\StringTok{"60"}\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{500 Internal Server Error}
+An unexpected error occurred on the server. This is the catch-all for server bugs. The client should not retry without waiting.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"An unexpected error occurred"}\NormalTok{\}), }\DecValTok{500}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{503 Service Unavailable}
+The server is temporarily unable to handle requests (overloaded, database down, maintenance). Include a \texttt{Retry-After} header if possible.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Service temporarily unavailable"}\NormalTok{\}), }\DecValTok{503}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Choosing the right status code}\phantomsection\label{34-response-handling:choosing-the-right-status-code}
+
+The most common mistakes:
+
+\begin{itemize}
+\tightlist
+\item
+  Using 200 for errors (always use a 4xx or 5xx for errors)
+\item
+  Mixing 400 and 422 for the same kind of validation failure (pick one)
+\item
+  Using 500 for resource-not-found (use 404)
+\item
+  Using 404 for authentication failures (use 401)
+\item
+  Using 401 for authorization failures (use 403)
+\end{itemize}
+
+\noindent{}The distinction between 401 and 403 matters for security. A 401 says ``tell me who you are.'' A 403 says ``I know who you are, and you can't do this.'' But a 403 also confirms that the resource \emph{exists}. When its existence is itself private~--- another user's note, a private repository~--- return \textbf{404} instead, as if it did not exist (GitHub does exactly this). Use 403 when existence is no secret and the client simply lacks permission.
+
+\setcounter{section}{2}
+\section{Response Headers}\label{34-response-handling:343-response-headers}
+
+HTTP response headers communicate metadata about the response to the client.
+
+\subsection*{Headers Flask sets automatically}\phantomsection\label{34-response-handling:headers-flask-sets-automatically}
+
+Flask's \texttt{jsonify()} function produces a \texttt{Response} that automatically includes:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Content-Type: application/json
+Content-Length: <length of the response body in bytes>
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The \texttt{Content-Type} tells the client how to interpret the body. \texttt{application/json} means ``this is JSON-encoded data.'' Without this header, a client might not know how to parse the body.
+
+Flask itself does not add a \texttt{Server} header~--- the server running it does. The development server adds \texttt{Server:}\allowbreak{}\texttt{\ Werkzeug/}\allowbreak{}\texttt{3.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{1\ Python/}\allowbreak{}\texttt{3.}\allowbreak{}\texttt{11.}\allowbreak{}\texttt{8}; Gunicorn adds \texttt{Server:\ gunicorn}. In production, Nginx replaces it with its own \texttt{Server:\ nginx} (and \texttt{server\_tokens\ off;} in Nginx hides its version number).
+
+\subsection*{Headers Nginx adds}\phantomsection\label{34-response-handling:headers-nginx-adds}
+
+\hyperref[ch:28-traffic-routing]{Chapter 28} configured Nginx to add security headers to every response:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Strict-Transport-Security: max-age=63072000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: geolocation=(), microphone=(), camera=()
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}These headers instruct browsers on security policy. Flask doesn't need to set them~--- Nginx adds them uniformly to all responses.
+
+\subsection*{Headers you should set in Flask}\phantomsection\label{34-response-handling:headers-you-should-set-in-flask}
+
+\textbf{\texttt{Cache-Control}}: Tell clients and proxies how long to cache responses.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# For resources that change frequently (like a note list):}
+\NormalTok{response.headers[}\StringTok{"Cache{-}Control"}\NormalTok{] }\OperatorTok{=} \StringTok{"no{-}store"}
+
+\CommentTok{\# For data that may be cached by the client itself, but never by shared}
+\CommentTok{\# caches (proxies, CDNs) — anything that belongs to one user:}
+\NormalTok{response.headers[}\StringTok{"Cache{-}Control"}\NormalTok{] }\OperatorTok{=} \StringTok{"private, max{-}age=60"}
+
+\CommentTok{\# "public, max{-}age=3600" is only for data that is the same for everyone}
+\CommentTok{\# and never changes, such as a versioned static file}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{\texttt{Location}}: After a 201 Created, point to the new resource's URL.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{response.headers[}\StringTok{"Location"}\NormalTok{] }\OperatorTok{=}\NormalTok{ url\_for(}\StringTok{"notes.get\_note"}\NormalTok{, note\_id}\OperatorTok{=}\NormalTok{note\_id, \_external}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{\texttt{Retry-After}}: For 429 and 503, tell the client when to retry.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{response.headers[}\StringTok{"Retry{-}After"}\NormalTok{] }\OperatorTok{=} \StringTok{"60"}  \CommentTok{\# Seconds to wait}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{\texttt{ETag} and \texttt{Last-Modified}}: For cache validation (conditional requests). Not implemented in the basic Notes API, but worth knowing:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Client\textquotesingle{}s first request:}
+\CommentTok{\# Server response: ETag: "abc123"}
+
+\CommentTok{\# Client\textquotesingle{}s second request:}
+\CommentTok{\# Client sends: If{-}None{-}Match: "abc123"}
+\CommentTok{\# Server checks: has the note changed?}
+\CommentTok{\# No → return 304 Not Modified (empty body, client uses cached copy)}
+\CommentTok{\# Yes → return 200 OK with new ETag}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{\texorpdfstring{\texttt{Content-Type} for different response types}{Content-Type for different response types}}\phantomsection\label{34-response-handling:content-type-for-different-response-types}
+
+Most Notes API responses return JSON. But the \texttt{Content-Type} must match the actual body:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# JSON response}
+\ControlFlowTok{return}\NormalTok{ jsonify(data), }\DecValTok{200}
+\CommentTok{\# Content{-}Type: application/json}
+
+\CommentTok{\# Plain text response}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Response}
+\ControlFlowTok{return}\NormalTok{ Response(}\StringTok{"pong"}\NormalTok{, mimetype}\OperatorTok{=}\StringTok{"text/plain"}\NormalTok{), }\DecValTok{200}
+\CommentTok{\# Content{-}Type: text/plain}
+
+\CommentTok{\# HTML response}
+\ControlFlowTok{return}\NormalTok{ render\_template(}\StringTok{"index.html"}\NormalTok{), }\DecValTok{200}
+\CommentTok{\# Content{-}Type: text/html; charset=utf{-}8}
+
+\CommentTok{\# CSV export — use the csv module: note content may contain commas,}
+\CommentTok{\# quotes, and newlines, which hand{-}built CSV would get wrong}
+\ImportTok{import}\NormalTok{ csv}
+\ImportTok{import}\NormalTok{ io}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Response}
+
+\BuiltInTok{buffer} \OperatorTok{=}\NormalTok{ io.StringIO()}
+\NormalTok{writer }\OperatorTok{=}\NormalTok{ csv.writer(}\BuiltInTok{buffer}\NormalTok{)}
+\NormalTok{writer.writerow([}\StringTok{"id"}\NormalTok{, }\StringTok{"content"}\NormalTok{, }\StringTok{"created\_at"}\NormalTok{])}
+\ControlFlowTok{for}\NormalTok{ note }\KeywordTok{in}\NormalTok{ notes:}
+\NormalTok{    writer.writerow([note[}\StringTok{"id"}\NormalTok{], note[}\StringTok{"content"}\NormalTok{], note[}\StringTok{"created\_at"}\NormalTok{]])}
+\CommentTok{\# (Spreadsheet programs treat cells starting with =, +, {-} or @ as formulas;}
+\CommentTok{\# prefix such values with \textquotesingle{} if the file will be opened in one.)}
+\ControlFlowTok{return}\NormalTok{ Response(}
+    \BuiltInTok{buffer}\NormalTok{.getvalue(),}
+\NormalTok{    mimetype}\OperatorTok{=}\StringTok{"text/csv"}\NormalTok{,}
+\NormalTok{    headers}\OperatorTok{=}\NormalTok{\{}\StringTok{"Content{-}Disposition"}\NormalTok{: }\StringTok{"attachment; filename=notes.csv"}\NormalTok{\},}
+\NormalTok{), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{3}
+\section{JSON Serialization}\label{34-response-handling:344-json-serialization}
+
+\texttt{jsonify()} serializes through Flask's \textbf{JSON provider} (\texttt{DefaultJSONProvider}), which builds on Python's \texttt{json} module. The \texttt{json} module handles:
+
+\begin{itemize}
+\tightlist
+\item
+  Dicts → JSON objects \texttt{\{\}}
+\item
+  Lists → JSON arrays \texttt{{[}{]}}
+\item
+  Strings → JSON strings \texttt{""}
+\item
+  Integers and floats → JSON numbers
+\item
+  \texttt{True}/\texttt{False} → \texttt{true}/\texttt{false}
+\item
+  \texttt{None} → \texttt{null}
+\end{itemize}
+
+\noindent{}Flask's provider adds a few types plain \texttt{json.dumps()} rejects: \texttt{datetime} and \texttt{date} objects (as HTTP-date strings), \texttt{Decimal} and \texttt{UUID} (as strings), and dataclasses (as objects). Anything else~--- your own classes, for example~--- raises \texttt{TypeError}.
+
+\subsection*{The datetime problem}\phantomsection\label{34-response-handling:the-datetime-problem}
+
+PostgreSQL returns \texttt{datetime} objects for timestamp columns:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{row[}\StringTok{"created\_at"}\NormalTok{]  }\CommentTok{\# datetime(2024, 1, 15, 14, 0, 0, tzinfo=timezone.utc)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}If you pass this directly to \texttt{jsonify()}, it does not fail~--- but the format is not the one an API wants:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"created\_at"}\NormalTok{: row[}\StringTok{"created\_at"}\NormalTok{]\}), }\DecValTok{200}
+\CommentTok{\# \{"created\_at": "Mon, 15 Jan 2024 14:00:00 GMT"\}}
+\CommentTok{\# (An HTTP{-}date string: no fractional seconds, awkward for clients to parse.}
+\CommentTok{\#  Plain json.dumps() would raise TypeError instead.)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Solution 1: Convert to ISO 8601 string in the handler}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}
+    \StringTok{"created\_at"}\NormalTok{: row[}\StringTok{"created\_at"}\NormalTok{].isoformat(),}
+\NormalTok{\}), }\DecValTok{200}
+\CommentTok{\# "created\_at": "2024{-}01{-}15T14:00:00.123456+00:00"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The Notes API does this in one place: \texttt{row\_to\_note()} in \texttt{app/database.py}, through \texttt{to\_iso()} (\hyperref[ch:15-structuring-the-application]{Chapter 15}).
+
+ISO 8601 (\texttt{YYYY-}\allowbreak{}\texttt{MM-}\allowbreak{}\texttt{DDTHH:}\allowbreak{}\texttt{MM:}\allowbreak{}\texttt{SS+HH:}\allowbreak{}\texttt{MM}) is the standard format for representing timestamps in JSON APIs. The \texttt{+00:00} suffix indicates UTC. Most programming languages and HTTP clients can parse this format.
+
+\textbf{Solution 2: Custom JSON provider}
+
+For a consistent approach across all responses, define a custom JSON provider. Flask 2.3+ replaced the old \texttt{JSONEncoder} API with a \texttt{JSONProvider} system that is more composable:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/json\_provider.py}
+\ImportTok{from}\NormalTok{ datetime }\ImportTok{import}\NormalTok{ date, datetime}
+\ImportTok{from}\NormalTok{ flask.json.provider }\ImportTok{import}\NormalTok{ DefaultJSONProvider}
+
+\KeywordTok{class}\NormalTok{ APIJSONProvider(DefaultJSONProvider):}
+    \CommentTok{"""}
+\CommentTok{    JSON provider that writes dates and times as ISO 8601.}
+\CommentTok{    Registered once at app creation; applies to every jsonify() call automatically.}
+\CommentTok{    """}
+    \KeywordTok{def}\NormalTok{ default(}\VariableTok{self}\NormalTok{, obj):}
+        \ControlFlowTok{if} \BuiltInTok{isinstance}\NormalTok{(obj, (datetime, date)):}
+            \ControlFlowTok{return}\NormalTok{ obj.isoformat()          }\CommentTok{\# "2024{-}01{-}15T14:00:00.123456+00:00"}
+        \CommentTok{\# Everything else as before: Decimal and UUID become strings,}
+        \CommentTok{\# unsupported types raise TypeError}
+        \ControlFlowTok{return} \BuiltInTok{super}\NormalTok{().default(obj)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Register it with the Flask app during creation:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/\_\_init\_\_.py}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+\ImportTok{from}\NormalTok{ app.json\_provider }\ImportTok{import}\NormalTok{ APIJSONProvider}
+
+\KeywordTok{def}\NormalTok{ create\_app():}
+\NormalTok{    app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\NormalTok{    app.json }\OperatorTok{=}\NormalTok{ APIJSONProvider(app)   }\CommentTok{\# replaces the default provider}
+    \CommentTok{\# ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Now \texttt{datetime} objects serialize as ISO 8601 everywhere:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"created\_at"}\NormalTok{: row[}\StringTok{"created\_at"}\NormalTok{]\}), }\DecValTok{200}
+\CommentTok{\# \{"created\_at": "2024{-}01{-}15T14:00:00.123456+00:00"\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Historical note (Flask ≤ 2.2)}: Older Flask versions used \texttt{app.json\_encoder}. If you maintain a legacy codebase you may encounter this pattern~--- it was deprecated in Flask 2.2 and removed in 2.3. On Flask 3.x the assignment below still runs, but nothing reads the attribute, so the encoder is \textbf{silently ignored}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# LEGACY — do not use in Flask 2.3+}
+\ImportTok{import}\NormalTok{ json}
+\ImportTok{from}\NormalTok{ datetime }\ImportTok{import}\NormalTok{ datetime}
+
+\KeywordTok{class}\NormalTok{ APIJSONEncoder(json.JSONEncoder):}
+    \KeywordTok{def}\NormalTok{ default(}\VariableTok{self}\NormalTok{, obj):}
+        \ControlFlowTok{if} \BuiltInTok{isinstance}\NormalTok{(obj, datetime):}
+            \ControlFlowTok{return}\NormalTok{ obj.isoformat()}
+        \ControlFlowTok{return} \BuiltInTok{super}\NormalTok{().default(obj)}
+
+\NormalTok{app.json\_encoder }\OperatorTok{=}\NormalTok{ APIJSONEncoder  }\CommentTok{\# ignored on Flask 2.3+}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Timezone awareness}\phantomsection\label{34-response-handling:timezone-awareness}
+
+PostgreSQL timestamps can be:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{With timezone} (TIMESTAMPTZ): stored as UTC, returned in the session's \texttt{TimeZone} setting~--- UTC on managed databases by default; set it explicitly if in doubt~--- \texttt{2024-}\allowbreak{}\texttt{01-}\allowbreak{}\texttt{15T14:}\allowbreak{}\texttt{00:}\allowbreak{}\texttt{00+00:}\allowbreak{}\texttt{00}
+\item
+  \textbf{Without timezone} (TIMESTAMP): stored as-is, no UTC conversion~--- \texttt{2024-01-15T14:00:00}
+\end{itemize}
+
+\noindent{}Always use \texttt{TIMESTAMPTZ} for API-facing timestamps. Clients in different timezones need to know the reference timezone.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} The notes table after migrations 0001 and 0002 (Chapter 33)}
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ notes (}
+    \KeywordTok{id}\NormalTok{          SERIAL }\KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{,}
+\NormalTok{    content     TEXT }\KeywordTok{NOT} \KeywordTok{NULL}\NormalTok{,}
+\NormalTok{    created\_at  TIMESTAMPTZ }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{DEFAULT} \FunctionTok{CURRENT\_TIMESTAMP}\NormalTok{,}
+\NormalTok{    updated\_at  TIMESTAMPTZ}
+\NormalTok{);}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{4}
+\section{Error Response Structure}\label{34-response-handling:345-error-response-structure}
+
+Error responses need a consistent structure so that API clients can handle errors programmatically.
+
+\subsection*{Inconsistent error responses (bad)}\phantomsection\label{34-response-handling:inconsistent-error-responses-bad}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{404 response:  \{"error": "Note not found"\}}
+\NormalTok{422 response:  \{"errors": ["content is required"]\}}
+\NormalTok{400 response:  "Bad request"}
+\NormalTok{500 response:  \{"message": "Something went wrong"\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}These four responses use different keys (\texttt{error}, \texttt{errors}, no key, \texttt{message}) and different value types (string, list of strings, plain string). A client cannot write consistent error handling code for these. It is an easy trap to fall into: an application grows one handler at a time, and each new piece of code invents a shape. Early drafts of this book's own Notes API did exactly this before Chapter 16 settled on one.
+
+\subsection*{Consistent error responses (good)}\phantomsection\label{34-response-handling:consistent-error-responses-good}
+
+Choose one structure and use it everywhere:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}
+    \DataTypeTok{"error"}\FunctionTok{:} \FunctionTok{\{}
+        \DataTypeTok{"code"}\FunctionTok{:} \StringTok{"NOT\_FOUND"}\FunctionTok{,}
+        \DataTypeTok{"message"}\FunctionTok{:} \StringTok{"Note not found"}\FunctionTok{,}
+        \DataTypeTok{"details"}\FunctionTok{:} \OtherTok{[]}
+    \FunctionTok{\}}
+\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Or a simpler flat structure:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}
+    \DataTypeTok{"error"}\FunctionTok{:} \StringTok{"Note not found"}
+\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Or the flat structure, extended with an optional list for requests that fail in several ways at once:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Single error:               \{"error": "Note 42 not found"\}}
+\NormalTok{Several validation errors:  \{"error": "Invalid request",}
+\NormalTok{                             "details": ["\textquotesingle{}content\textquotesingle{} is required",}
+\NormalTok{                                         "\textquotesingle{}priority\textquotesingle{} is required"]\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The Notes API uses this last structure: every error response has an \texttt{"error"} string, so a client can always show \emph{something}, and \texttt{"details"} appears only when there is more to say. Whatever you choose, be consistent.
+
+\subsection*{Defining error helpers}\phantomsection\label{34-response-handling:defining-error-helpers}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/responses.py}
+
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ jsonify}
+
+\KeywordTok{def}\NormalTok{ error\_response(message: }\BuiltInTok{str}\NormalTok{, status\_code: }\BuiltInTok{int}\NormalTok{, details: }\BuiltInTok{list}\NormalTok{[}\BuiltInTok{str}\NormalTok{] }\OperatorTok{|} \VariableTok{None} \OperatorTok{=} \VariableTok{None}\NormalTok{):}
+    \CommentTok{"""Return an error response in the API\textquotesingle{}s one error shape."""}
+\NormalTok{    body }\OperatorTok{=}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: message\}}
+    \ControlFlowTok{if}\NormalTok{ details:}
+\NormalTok{        body[}\StringTok{"details"}\NormalTok{] }\OperatorTok{=}\NormalTok{ details}
+    \ControlFlowTok{return}\NormalTok{ jsonify(body), status\_code}
+
+\KeywordTok{def}\NormalTok{ not\_found\_response(resource: }\BuiltInTok{str}\NormalTok{, resource\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""Return a standard 404 response, e.g. \{"error": "Note 42 not found"\}."""}
+    \ControlFlowTok{return}\NormalTok{ error\_response(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{resource}\SpecialCharTok{\}}\SpecialStringTok{ }\SpecialCharTok{\{}\NormalTok{resource\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{, }\DecValTok{404}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(The \texttt{Validator} from \hyperref[ch:31-input-handling]{Chapter 31} builds its 400 responses in the same shape.) Using the helper:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ app.responses }\ImportTok{import}\NormalTok{ not\_found\_response}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ not\_found\_response(}\StringTok{"Note"}\NormalTok{, note\_id)}
+    \ControlFlowTok{return}\NormalTok{ jsonify(row\_to\_note(row)), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{5}
+\section{Content Negotiation}\label{34-response-handling:346-content-negotiation}
+
+\textbf{Content negotiation} is the mechanism where the client tells the server what content formats it can accept, and the server chooses the best match.
+
+The client sends an \texttt{Accept} header:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Accept: application/json, text/html;q=0.9, */*;q=0.8
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This says: ``I prefer \texttt{application/json} (quality=1.0, the default). I'll also accept \texttt{text/html} (quality=0.9). I'll accept anything else (quality=0.8).''
+
+Flask provides \texttt{request.}\allowbreak{}\texttt{accept\_}\allowbreak{}\texttt{mimetypes} to read this:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ render\_template, request}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ not\_found\_response(}\StringTok{"Note"}\NormalTok{, note\_id)}
+
+\NormalTok{    note }\OperatorTok{=}\NormalTok{ row\_to\_note(row)}
+
+    \CommentTok{\# Content negotiation}
+\NormalTok{    best }\OperatorTok{=}\NormalTok{ request.accept\_mimetypes.best\_match([}\StringTok{"application/json"}\NormalTok{, }\StringTok{"text/html"}\NormalTok{])}
+    \ControlFlowTok{if}\NormalTok{ best }\OperatorTok{==} \StringTok{"text/html"}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ render\_template(}\StringTok{"note.html"}\NormalTok{, note}\OperatorTok{=}\NormalTok{note), }\DecValTok{200}
+    \ControlFlowTok{else}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}For a pure API (no HTML), content negotiation is simple: always return JSON, and document that in your API specification. The Notes API is a pure JSON API, so \texttt{jsonify()} is always appropriate.
+
+\setcounter{section}{6}
+\section{After-Request Hooks}\label{34-response-handling:347-after-request-hooks}
+
+After the handler returns, Flask runs \texttt{after\_request} hooks before sending the response. These hooks can inspect and modify the response:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/middleware.py — inside register\_middleware(app), next to Chapter 16\textquotesingle{}s hooks}
+
+\AttributeTok{@app.after\_request}
+\KeywordTok{def}\NormalTok{ add\_common\_headers(response):}
+    \CommentTok{"""Add headers that should appear on every response."""}
+    \CommentTok{\# Disable caching for API responses by default}
+    \ControlFlowTok{if} \StringTok{"Cache{-}Control"} \KeywordTok{not} \KeywordTok{in}\NormalTok{ response.headers:}
+\NormalTok{        response.headers[}\StringTok{"Cache{-}Control"}\NormalTok{] }\OperatorTok{=} \StringTok{"no{-}store"}
+    \ControlFlowTok{return}\NormalTok{ response}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The other \texttt{after\_request} hook in the Notes API is Chapter 16's \texttt{log\_request\_end}, which adds the \texttt{X-Response-Time-Ms} header and logs the status and duration. (Register each hook once: a second copy of \texttt{log\_request\_end} elsewhere would log every request twice.)
+
+\textbf{Important}: \texttt{after\_request} hooks must return the \texttt{response} object. If they don't, Flask raises an error. The hook can return a modified version of the response, or the original, but it must return \emph{something}.
+
+\texttt{after\_request} hooks run in reverse registration order (last registered runs first).
+
+\subsection*{Teardown vs after\_request}\phantomsection\label{34-response-handling:teardown-vs-after-request}
+
+\texttt{teardown\_appcontext} (which calls \texttt{close\_db}) runs \textbf{after} \texttt{after\_request} hooks, and it always runs. \texttt{after\_request} hooks run for every response Flask produces~--- including the ones built by error handlers. They are skipped only when an exception escapes \emph{all} error handlers; in the Notes API, with its catch-all handler, that does not happen.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Request arrives
+    ↓
+before_request hooks
+    ↓
+Handler executes → returns response
+    ↓
+after_request hooks  ← modifies response
+    ↓
+Response sent to client
+    ↓
+teardown_appcontext  ← closes DB, releases resources
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}If the handler raises an unhandled exception:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Request arrives
+    ↓
+before_request hooks
+    ↓
+Handler executes → raises Exception
+    ↓
+Flask catches exception → calls error handler → returns error response
+    ↓
+after_request hooks (run with the error response)
+    ↓
+Response sent to client
+    ↓
+teardown_appcontext (error is None — an error handler dealt with the
+                     exception; it is set only for exceptions no handler
+                     caught. This is why close_db() must never decide
+                     between commit and rollback based on it.)
+\end{Verbatim}
+\end{outputbox}
+
+\setcounter{section}{7}
+\section{The Complete Response Journey}\label{34-response-handling:348-the-complete-response-journey}
+
+Let's trace the complete response for a successful \texttt{POST\ /notes/} request:
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+1. Handler returns:
+   return jsonify(note), 201
+   where note = {"id": 42, "content": "Buy groceries",
+                 "created_at": "2024-01-15T14:00:00.123456+00:00"}
+
+2. Flask's make_response() wraps this into a Response object:
+   status:  201 Created
+   headers: Content-Type: application/json
+            Content-Length: 84
+   body:    b'{"content":"Buy groceries","created_at":"2024-01-15T14:00:00.123456+00:00","id":42}\n'
+   (jsonify sorts the keys, and ends the body with a newline: 83 + 1 bytes)
+
+3. after_request hooks run:
+   add_common_headers() adds:
+     Cache-Control: no-store
+   log_request_end() (Chapter 16) adds X-Response-Time-Ms and logs:
+     "← 201 in 14.3ms"
+
+4. Flask returns the Response object to Gunicorn's WSGI wrapper.
+
+5. Gunicorn serializes the Response to HTTP/1.1 bytes:
+   HTTP/1.1 201 Created\r\n
+   Server: gunicorn\r\n
+   Date: Mon, 15 Jan 2024 14:00:00 GMT\r\n
+   Connection: close\r\n
+   Content-Type: application/json\r\n
+   Content-Length: 84\r\n
+   X-Response-Time-Ms: 14.3\r\n
+   Cache-Control: no-store\r\n
+   \r\n
+   {"content":"Buy groceries","created_at":"2024-01-15T14:00:00.123456+00:00","id":42}
+
+6. Gunicorn writes these bytes to the socket connected to Nginx.
+
+7. Nginx receives the bytes.
+   Nginx adds security headers:
+     Strict-Transport-Security: max-age=63072000; includeSubDomains
+     X-Content-Type-Options: nosniff
+     X-Frame-Options: DENY
+   Nginx removes: Server: gunicorn (Nginx hides upstream server identity)
+   Nginx adds: Server: nginx
+
+8. Nginx encrypts the response using the TLS session key.
+
+9. Nginx sends the encrypted bytes to the client's TCP socket.
+
+10. Client decrypts and receives (security headers abbreviated):
+    HTTP/2 201 Created
+    server: nginx
+    date: Mon, 15 Jan 2024 14:00:00 GMT
+    content-type: application/json
+    content-length: 84
+    x-response-time-ms: 14.3
+    cache-control: no-store
+    strict-transport-security: max-age=63072000; includeSubDomains
+    x-content-type-options: nosniff
+    x-frame-options: DENY
+
+    {"content":"Buy groceries","created_at":"2024-01-15T14:00:00.123456+00:00","id":42}
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The response the client sees has contributions from three layers:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Flask}: Content-Type, Content-Length, Cache-Control and X-Response-Time-Ms (via after\_request), the JSON body
+\item
+  \textbf{Gunicorn}: Server: gunicorn (before Nginx removes it), Date, Connection (HTTP/2 has no Connection header, so Nginx drops it)
+\item
+  \textbf{Nginx}: Strict-Transport-Security, X-Content-Type-Options, X-Frame-Options, Server: nginx
+\end{itemize}
+
+\setcounter{section}{8}
+\section{Pagination for List Endpoints}\label{34-response-handling:349-pagination-for-list-endpoints}
+
+The \texttt{list\_notes} handler returns all notes at once. For large datasets, this is impractical~--- a database with 100,000 notes should not return all 100,000 in one response.
+
+\textbf{Pagination} breaks large result sets into pages. The two common approaches: \textbf{offset-based} (``page 3, 20 per page'') and \textbf{cursor-based} (``the 20 notes after note 1234'').
+
+Both keep the list response's envelope from \hyperref[ch:15-structuring-the-application]{Chapter 15}~--- \texttt{\{"notes":}\allowbreak{}\texttt{\ {[}.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{{]},}\allowbreak{}\texttt{\ "count":}\allowbreak{}\texttt{\ n\}}~--- and only add fields to it, so existing clients can still \emph{parse} the response. They do not get the same \emph{data}, though: a client that expected every note now receives only the first page. That is acceptable here only because the Notes API has no outside clients yet (section 34.10 comes back to this). Both listings also leave out the \texttt{?search=} filter of section 33.8, to keep them short; it combines with either style as one more \texttt{WHERE} condition.
+
+\subsection*{Offset-based pagination}\phantomsection\label{34-response-handling:offset-based-pagination}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \CommentTok{\# Read pagination parameters from the query string.}
+    \CommentTok{\# (type=int falls back to the default on bad input, such as page=abc;}
+    \CommentTok{\# to answer 400 instead, validate as in Chapter 31, section 31.4.)}
+\NormalTok{    page }\OperatorTok{=}\NormalTok{ request.args.get(}\StringTok{"page"}\NormalTok{, }\DecValTok{1}\NormalTok{, }\BuiltInTok{type}\OperatorTok{=}\BuiltInTok{int}\NormalTok{)}
+\NormalTok{    per\_page }\OperatorTok{=}\NormalTok{ request.args.get(}\StringTok{"per\_page"}\NormalTok{, }\DecValTok{20}\NormalTok{, }\BuiltInTok{type}\OperatorTok{=}\BuiltInTok{int}\NormalTok{)}
+
+    \CommentTok{\# Validate and clamp}
+\NormalTok{    page }\OperatorTok{=} \BuiltInTok{max}\NormalTok{(}\DecValTok{1}\NormalTok{, page)}
+\NormalTok{    per\_page }\OperatorTok{=} \BuiltInTok{max}\NormalTok{(}\DecValTok{1}\NormalTok{, }\BuiltInTok{min}\NormalTok{(}\DecValTok{100}\NormalTok{, per\_page))  }\CommentTok{\# Between 1 and 100}
+
+\NormalTok{    offset }\OperatorTok{=}\NormalTok{ (page }\OperatorTok{{-}} \DecValTok{1}\NormalTok{) }\OperatorTok{*}\NormalTok{ per\_page}
+
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+
+    \CommentTok{\# Total count (for the client to know how many pages there are)}
+\NormalTok{    cursor.execute(}\StringTok{"SELECT COUNT(*) AS total FROM notes"}\NormalTok{)}
+\NormalTok{    total }\OperatorTok{=}\NormalTok{ cursor.fetchone()[}\StringTok{"total"}\NormalTok{]}
+
+    \CommentTok{\# Paginated results}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"SELECT id, content, created\_at FROM notes ORDER BY id DESC LIMIT ? OFFSET ?"}\NormalTok{),}
+\NormalTok{        (per\_page, offset),}
+\NormalTok{    )}
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [row\_to\_note(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+
+\NormalTok{    total\_pages }\OperatorTok{=} \BuiltInTok{max}\NormalTok{(}\DecValTok{1}\NormalTok{, (total }\OperatorTok{+}\NormalTok{ per\_page }\OperatorTok{{-}} \DecValTok{1}\NormalTok{) }\OperatorTok{//}\NormalTok{ per\_page)  }\CommentTok{\# Ceiling division}
+
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}
+        \StringTok{"notes"}\NormalTok{: notes,}
+        \StringTok{"count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(notes),}
+        \StringTok{"pagination"}\NormalTok{: \{}
+            \StringTok{"page"}\NormalTok{: page,}
+            \StringTok{"per\_page"}\NormalTok{: per\_page,}
+            \StringTok{"total"}\NormalTok{: total,}
+            \StringTok{"total\_pages"}\NormalTok{: total\_pages,}
+            \StringTok{"has\_next"}\NormalTok{: page }\OperatorTok{\textless{}}\NormalTok{ total\_pages,}
+            \StringTok{"has\_prev"}\NormalTok{: page }\OperatorTok{\textgreater{}} \DecValTok{1}\NormalTok{,}
+\NormalTok{        \},}
+\NormalTok{    \}), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \texttt{Link} header (RFC 8288, which replaced RFC 5988) is a standard way to communicate pagination links:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{response }\OperatorTok{=}\NormalTok{ make\_response(jsonify(\{...\}), }\DecValTok{200}\NormalTok{)}
+
+\NormalTok{links }\OperatorTok{=}\NormalTok{ []}
+\ControlFlowTok{if}\NormalTok{ page }\OperatorTok{\textgreater{}} \DecValTok{1}\NormalTok{:}
+\NormalTok{    links.append(}\SpecialStringTok{f\textquotesingle{}\textless{}}\SpecialCharTok{\{}\NormalTok{url\_for(}\StringTok{"notes.list\_notes"}\NormalTok{, page}\OperatorTok{=}\NormalTok{page}\OperatorTok{{-}}\DecValTok{1}\NormalTok{, per\_page}\OperatorTok{=}\NormalTok{per\_page, \_external}\OperatorTok{=}\VariableTok{True}\NormalTok{)}\SpecialCharTok{\}}\SpecialStringTok{\textgreater{}; rel="prev"\textquotesingle{}}\NormalTok{)}
+\ControlFlowTok{if}\NormalTok{ page }\OperatorTok{\textless{}}\NormalTok{ total\_pages:}
+\NormalTok{    links.append(}\SpecialStringTok{f\textquotesingle{}\textless{}}\SpecialCharTok{\{}\NormalTok{url\_for(}\StringTok{"notes.list\_notes"}\NormalTok{, page}\OperatorTok{=}\NormalTok{page}\OperatorTok{+}\DecValTok{1}\NormalTok{, per\_page}\OperatorTok{=}\NormalTok{per\_page, \_external}\OperatorTok{=}\VariableTok{True}\NormalTok{)}\SpecialCharTok{\}}\SpecialStringTok{\textgreater{}; rel="next"\textquotesingle{}}\NormalTok{)}
+\NormalTok{links.append(}\SpecialStringTok{f\textquotesingle{}\textless{}}\SpecialCharTok{\{}\NormalTok{url\_for(}\StringTok{"notes.list\_notes"}\NormalTok{, page}\OperatorTok{=}\DecValTok{1}\NormalTok{, per\_page}\OperatorTok{=}\NormalTok{per\_page, \_external}\OperatorTok{=}\VariableTok{True}\NormalTok{)}\SpecialCharTok{\}}\SpecialStringTok{\textgreater{}; rel="first"\textquotesingle{}}\NormalTok{)}
+\NormalTok{links.append(}\SpecialStringTok{f\textquotesingle{}\textless{}}\SpecialCharTok{\{}\NormalTok{url\_for(}\StringTok{"notes.list\_notes"}\NormalTok{, page}\OperatorTok{=}\NormalTok{total\_pages, per\_page}\OperatorTok{=}\NormalTok{per\_page, \_external}\OperatorTok{=}\VariableTok{True}\NormalTok{)}\SpecialCharTok{\}}\SpecialStringTok{\textgreater{}; rel="last"\textquotesingle{}}\NormalTok{)}
+
+\NormalTok{response.headers[}\StringTok{"Link"}\NormalTok{] }\OperatorTok{=} \StringTok{", "}\NormalTok{.join(links)}
+\ControlFlowTok{return}\NormalTok{ response}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Offset pagination is simple and lets a client jump to any page, but it has two weaknesses. The database must still read and discard every skipped row, so page 5,000 is slow. And the pages shift under the client: if a note is created while someone reads page 1, the last note of page 1 appears again at the top of page 2.
+
+\subsection*{Cursor-based pagination}\phantomsection\label{34-response-handling:cursor-based-pagination}
+
+A \textbf{cursor} is a pointer to the last item the client has seen. The client asks for ``the next 20 after this one'', and the query starts exactly there:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+\NormalTok{    limit }\OperatorTok{=} \BuiltInTok{max}\NormalTok{(}\DecValTok{1}\NormalTok{, }\BuiltInTok{min}\NormalTok{(}\DecValTok{100}\NormalTok{, request.args.get(}\StringTok{"limit"}\NormalTok{, }\DecValTok{20}\NormalTok{, }\BuiltInTok{type}\OperatorTok{=}\BuiltInTok{int}\NormalTok{)))}
+\NormalTok{    after }\OperatorTok{=}\NormalTok{ request.args.get(}\StringTok{"after"}\NormalTok{, }\BuiltInTok{type}\OperatorTok{=}\BuiltInTok{int}\NormalTok{)   }\CommentTok{\# id of the last note seen, or None}
+
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+    \ControlFlowTok{if}\NormalTok{ after }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{        cursor.execute(}
+\NormalTok{            sql(}\StringTok{"SELECT id, content, created\_at FROM notes ORDER BY id DESC LIMIT ?"}\NormalTok{),}
+\NormalTok{            (limit }\OperatorTok{+} \DecValTok{1}\NormalTok{,),}
+\NormalTok{        )}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        cursor.execute(}
+\NormalTok{            sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id \textless{} ? "}
+                \StringTok{"ORDER BY id DESC LIMIT ?"}\NormalTok{),}
+\NormalTok{            (after, limit }\OperatorTok{+} \DecValTok{1}\NormalTok{),}
+\NormalTok{        )}
+\NormalTok{    rows }\OperatorTok{=}\NormalTok{ cursor.fetchall()}
+
+    \CommentTok{\# One extra row was requested only to learn whether another page exists}
+\NormalTok{    has\_more }\OperatorTok{=} \BuiltInTok{len}\NormalTok{(rows) }\OperatorTok{\textgreater{}}\NormalTok{ limit}
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [row\_to\_note(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ rows[:limit]]}
+
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}
+        \StringTok{"notes"}\NormalTok{: notes,}
+        \StringTok{"count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(notes),}
+        \StringTok{"next\_cursor"}\NormalTok{: notes[}\OperatorTok{{-}}\DecValTok{1}\NormalTok{][}\StringTok{"id"}\NormalTok{] }\ControlFlowTok{if}\NormalTok{ has\_more }\ControlFlowTok{else} \VariableTok{None}\NormalTok{,}
+\NormalTok{    \}), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+GET /notes/?limit=20                → 20 notes, "next_cursor": 1234
+GET /notes/?limit=20&after=1234     → the next 20, "next_cursor": 1214
+...                                 → the last page has "next_cursor": null
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\texttt{WHERE\ id\ \textless{}\ ?} uses the primary key's index to go straight to the starting point, so every page costs the same however deep the client goes, and new notes cannot shift the pages. What cursor pagination gives up is jumping: there is no ``go to page 37''. For an API whose clients scroll or sync~--- like the Notes API~--- that is usually the right trade. (Real APIs often encode the cursor as an opaque string, so they can change what it contains without breaking clients.)
+
+\setcounter{section}{9}
+\section{The API as a Contract}\label{34-response-handling:3410-the-api-as-a-contract}
+
+Everything in this chapter~--- status codes, headers, the JSON shapes of success and error~--- adds up to something bigger than any one response: the \textbf{contract} the Notes API offers its clients. \hyperref[ch:13-configuration-externalization]{Chapter 13} introduced integration contracts and their five dimensions (shape, versioning, identity, authorization, failure semantics) from the consumer's side. Here is the provider's side, now that the API's own responses exist. Such a contract is harder to change than almost any code, because changing it breaks everyone on the other side~--- and you cannot deploy the other side.
+
+\subsection*{Shape: choosing and reading the protocol}\phantomsection\label{34-response-handling:shape-choosing-and-reading-the-protocol}
+
+REST~--- resources plus HTTP verbs, carrying JSON~--- is what the Notes API speaks, and the right default: simple, cacheable, and universally understood. The alternatives earn their place only with a concrete reason: \textbf{GraphQL} lets the client choose exactly which fields it wants (handy for diverse front-ends, at the cost of server complexity); \textbf{gRPC} is binary, fast, and strongly typed (excellent service-to-service, poor for browsers); \textbf{events/queues} are asynchronous and decoupled in time. Reach for the simplest shape that fits.
+
+Within REST, design URLs that age well: name \textbf{resources (nouns), not actions}~--- \texttt{/notes/41}, never \texttt{/getNote?id=41}. Use plural collections and hierarchy for relationships (\texttt{/users/7/notes}). The Notes API already follows this. URLs are part of the published contract; once clients depend on them, they are very hard to change.
+
+\subsection*{Methods and idempotency: which calls are safe to retry}\phantomsection\label{34-response-handling:methods-and-idempotency-which-calls-are-safe-to-retry}
+
+HTTP methods each carry a promise. \textbf{GET} is \emph{safe}~--- it changes nothing and can be repeated freely. \textbf{PUT} and \textbf{DELETE} are \textbf{idempotent}: performing them twice has the same effect as once (deleting note 41 twice still just leaves note 41 gone~--- the Notes API's second call returns \texttt{404} instead of \texttt{204}, but the \emph{state} is the same, and that is what idempotency is about). \textbf{POST} is \emph{not} idempotent~--- two \texttt{POST\ /notes/} create two notes.
+
+This is not pedantry; it decides what is safe to retry. When a request times out, you frequently \emph{do not know} whether it succeeded, so the natural reaction is to retry~--- and retrying a non-idempotent \texttt{POST} can create a duplicate order or double-charge a customer. The fix is an \textbf{idempotency key}: the client sends a unique key with the request, the server records it, and on a retry with the same key it returns the original result instead of acting again. This is exactly how payment APIs make ``create a charge'' safe to retry, and it is the pattern to reach for whenever a create operation must tolerate retries.
+
+\subsection*{Versioning: changing a contract without breaking callers}\phantomsection\label{34-response-handling:versioning-changing-a-contract-without-breaking-callers}
+
+A contract is a promise to people you cannot redeploy. Once others depend on it, you cannot simply change it~--- you must distinguish \textbf{non-breaking} changes (additive: a new optional field, a new endpoint~--- old clients harmlessly ignore them) from \textbf{breaking} changes (removing or renaming a field, changing a type, adding a required input). Breaking changes require a \textbf{new version}.
+
+The common strategies are \textbf{URI versioning} (\texttt{/v1/notes} → \texttt{/v2/notes})~--- explicit, obvious, and most widely used~--- and \textbf{header / content-negotiation versioning}~--- cleaner URLs, more plumbing. Whichever you choose, \textbf{deprecate gracefully}: run the old and new versions in parallel, announce a timeline, and give clients time to migrate. This is the same expand/contract discipline you met for database schemas in \hyperref[ch:06-local-dependencies]{Chapter 6}, now applied to an API.
+
+\subsection*{Pagination: never return an unbounded list}\phantomsection\label{34-response-handling:pagination-never-return-an-unbounded-list}
+
+A \texttt{GET\ /notes/} that returns \emph{every} note is a latent outage: fine at ten notes, fatal at ten million. Collection endpoints must paginate, and the pagination style is itself part of the contract.
+
+Section 34.9 showed both styles~--- offset/limit, simple but drifting under inserts and slow at depth; cursor/keyset, stable and fast at any depth. The contract point is \emph{when} to decide: before anyone depends on the endpoint. Adding pagination to an endpoint that clients already call as ``returns everything'' is itself a breaking change: old clients still parse the response, but silently receive only the first page. The Notes API could make that change freely only because nobody depended on it yet. It still added its pagination fields to the existing \texttt{\{"notes":}\allowbreak{}\texttt{\ {[}.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{{]},}\allowbreak{}\texttt{\ "count":}\allowbreak{}\texttt{\ n\}} envelope, instead of changing its shape, so that nothing that \emph{parses} the response broke.
+
+\subsection*{Failure semantics and error design}\phantomsection\label{34-response-handling:failure-semantics-and-error-design}
+
+Errors are part of the contract, and they must be \emph{consistent}: one shape for every error (for the Notes API, \texttt{\{"error":\ "..."\}}, plus a \texttt{details} list when a request fails validation for several reasons~--- section 34.5), correct status codes (\textbf{4xx} means the caller's fault, \textbf{5xx} means the server's fault), and never leaking internal details. And as a \emph{consumer} of someone else's contract, assume every external call can be slow or fail: set explicit timeouts, retry only idempotent calls (with backoff), and have a fallback for when the dependency is simply down. (→ \hyperref[ch:37-reliability]{Chapter 37}~--- Reliability covers retries, exponential backoff, and circuit breakers.)
+
+\subsection*{Webhooks: when the other system calls you}\phantomsection\label{34-response-handling:webhooks-when-the-other-system-calls-you}
+
+Sometimes the integration runs in reverse: an external service notifies \emph{you} of an event~--- a payment cleared, a build finished~--- by calling a URL you expose. That is a \textbf{webhook}, and receiving one has its own contract obligations:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Verify authenticity.} The sender signs the payload with a shared secret; you recompute and check the signature. Without this, anyone who learns your webhook URL can forge events.
+\item
+  \textbf{Expect retries, so be idempotent.} Senders re-deliver on any failure or timeout, which means your handler \emph{will} receive the same event more than once and must process it twice safely (the same idempotency idea as above).
+\item
+  \textbf{Respond fast.} Acknowledge receipt immediately and do the real work asynchronously, or the sender will time out and retry a job that is actually still running.
+\end{itemize}
+
+\subsection*{Write the contract down: the API as a first-class artifact}\phantomsection\label{34-response-handling:write-the-contract-down-the-api-as-a-first-class-artifact}
+
+A contract that lives only in code and tribal memory will be misunderstood by the people on the other side. Document it explicitly. For REST, an \textbf{OpenAPI} (formerly Swagger) specification describes every endpoint, parameter, and response shape in a single machine-readable file that can generate documentation, client libraries, and tests~--- and serves as the one source of truth both sides agree to. The discipline is to design and write the contract \emph{before} exposing it publicly, because the moment clients integrate against it, the contract becomes the one thing you can no longer change freely.
+
+\subsection*{The Notes API's contract, written down}\phantomsection\label{34-response-handling:the-notes-apis-contract-written-down}
+
+Here is the Notes API's contract as an OpenAPI 3.1 file at the root of the repository. It covers the notes endpoints, with the cursor pagination of section 34.9. The complete file also describes the tag endpoints of \hyperref[ch:33-logic-execution]{Chapter 33}; they are left out here to save space.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# openapi.yaml: the Notes API\textquotesingle{}s contract, in one machine{-}readable file}
+\FunctionTok{openapi}\KeywordTok{:}\AttributeTok{ }\FloatTok{3.1.0}
+\FunctionTok{info}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{title}\KeywordTok{:}\AttributeTok{ Notes API}
+\AttributeTok{  }\FunctionTok{version}\KeywordTok{:}\AttributeTok{ }\FloatTok{1.4.0}
+\AttributeTok{  }\FunctionTok{description}\KeywordTok{:}\AttributeTok{ Store and retrieve short text notes.}
+
+\FunctionTok{paths}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{/notes/}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{get}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{summary}\KeywordTok{:}\AttributeTok{ List notes, newest first}
+\AttributeTok{      }\FunctionTok{parameters}\KeywordTok{:}
+\AttributeTok{        }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ limit}
+\AttributeTok{          }\FunctionTok{in}\KeywordTok{:}\AttributeTok{ query}
+\AttributeTok{          }\FunctionTok{schema}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ integer}\KeywordTok{,}\AttributeTok{ }\FunctionTok{minimum}\KeywordTok{:}\AttributeTok{ }\DecValTok{1}\KeywordTok{,}\AttributeTok{ }\FunctionTok{maximum}\KeywordTok{:}\AttributeTok{ }\DecValTok{100}\KeywordTok{,}\AttributeTok{ }\FunctionTok{default}\KeywordTok{:}\AttributeTok{ }\DecValTok{20}\KeywordTok{\}}
+\AttributeTok{        }\KeywordTok{{-}}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{name}\KeywordTok{:}\AttributeTok{ after}\KeywordTok{,}\AttributeTok{ }\FunctionTok{in}\KeywordTok{:}\AttributeTok{ query}\KeywordTok{,}\AttributeTok{ }\FunctionTok{description}\KeywordTok{:}\AttributeTok{ id of the last note already seen}\KeywordTok{,}
+\AttributeTok{           }\FunctionTok{schema}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ integer}\KeywordTok{\}\}}
+\AttributeTok{      }\FunctionTok{responses}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{"200"}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{description}\KeywordTok{:}\AttributeTok{ One page of notes}
+\AttributeTok{          }\FunctionTok{content}\KeywordTok{:}
+\AttributeTok{            }\FunctionTok{application/json}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{schema}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/schemas/NoteList"}\KeywordTok{\}\}}
+\AttributeTok{    }\FunctionTok{post}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{summary}\KeywordTok{:}\AttributeTok{ Create a note}
+\AttributeTok{      }\FunctionTok{requestBody}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{required}\KeywordTok{:}\AttributeTok{ }\CharTok{true}
+\AttributeTok{        }\FunctionTok{content}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{application/json}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{schema}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/schemas/NoteInput"}\KeywordTok{\}\}}
+\AttributeTok{      }\FunctionTok{responses}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{"201"}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{description}\KeywordTok{:}\AttributeTok{ The created note}
+\AttributeTok{          }\FunctionTok{content}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{application/json}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{schema}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/schemas/Note"}\KeywordTok{\}\}\}}
+\AttributeTok{        }\FunctionTok{"400"}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/responses/BadRequest"}\KeywordTok{\}}
+\AttributeTok{        }\FunctionTok{"415"}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/responses/BadRequest"}\KeywordTok{\}}
+
+\AttributeTok{  }\FunctionTok{/notes/\{note\_id\}}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{parameters}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{name}\KeywordTok{:}\AttributeTok{ note\_id}\KeywordTok{,}\AttributeTok{ }\FunctionTok{in}\KeywordTok{:}\AttributeTok{ path}\KeywordTok{,}\AttributeTok{ }\FunctionTok{required}\KeywordTok{:}\AttributeTok{ }\CharTok{true}\KeywordTok{,}\AttributeTok{ }\FunctionTok{schema}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ integer}\KeywordTok{\}\}}
+\AttributeTok{    }\FunctionTok{get}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{summary}\KeywordTok{:}\AttributeTok{ Get one note}
+\AttributeTok{      }\FunctionTok{responses}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{"200"}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{description}\KeywordTok{:}\AttributeTok{ The note}
+\AttributeTok{          }\FunctionTok{content}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{application/json}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{schema}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/schemas/Note"}\KeywordTok{\}\}\}}
+\AttributeTok{        }\FunctionTok{"404"}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/responses/NotFound"}\KeywordTok{\}}
+\AttributeTok{    }\FunctionTok{put}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{summary}\KeywordTok{:}\AttributeTok{ Replace a note\textquotesingle{}s content}
+\AttributeTok{      }\FunctionTok{requestBody}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{required}\KeywordTok{:}\AttributeTok{ }\CharTok{true}
+\AttributeTok{        }\FunctionTok{content}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{application/json}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{schema}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/schemas/NoteInput"}\KeywordTok{\}\}}
+\AttributeTok{      }\FunctionTok{responses}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{"200"}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{description}\KeywordTok{:}\AttributeTok{ The updated note}
+\AttributeTok{          }\FunctionTok{content}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{application/json}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{schema}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/schemas/Note"}\KeywordTok{\}\}\}}
+\AttributeTok{        }\FunctionTok{"400"}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/responses/BadRequest"}\KeywordTok{\}}
+\AttributeTok{        }\FunctionTok{"404"}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/responses/NotFound"}\KeywordTok{\}}
+\AttributeTok{    }\FunctionTok{delete}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{summary}\KeywordTok{:}\AttributeTok{ Delete a note}
+\AttributeTok{      }\FunctionTok{responses}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{"204"}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{description}\KeywordTok{:}\AttributeTok{ Deleted; no body}\KeywordTok{\}}
+\AttributeTok{        }\FunctionTok{"404"}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/responses/NotFound"}\KeywordTok{\}}
+
+\FunctionTok{components}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{schemas}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{Note}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ object}
+\AttributeTok{      }\FunctionTok{required}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{id}\KeywordTok{,}\AttributeTok{ content}\KeywordTok{,}\AttributeTok{ created\_at}\KeywordTok{]}
+\AttributeTok{      }\FunctionTok{properties}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ integer}\KeywordTok{\}}
+\AttributeTok{        }\FunctionTok{content}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ string}\KeywordTok{,}\AttributeTok{ }\FunctionTok{minLength}\KeywordTok{:}\AttributeTok{ }\DecValTok{1}\KeywordTok{,}\AttributeTok{ }\FunctionTok{maxLength}\KeywordTok{:}\AttributeTok{ }\DecValTok{10000}\KeywordTok{\}}
+\AttributeTok{        }\FunctionTok{created\_at}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ string}\KeywordTok{,}\AttributeTok{ }\FunctionTok{format}\KeywordTok{:}\AttributeTok{ date{-}time}\KeywordTok{\}}
+\AttributeTok{        }\FunctionTok{updated\_at}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{string}\KeywordTok{,}\AttributeTok{ }\StringTok{"null"}\KeywordTok{],}\AttributeTok{ }\FunctionTok{format}\KeywordTok{:}\AttributeTok{ date{-}time}\KeywordTok{\}}
+\AttributeTok{    }\FunctionTok{NoteInput}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ object}
+\AttributeTok{      }\FunctionTok{required}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{content}\KeywordTok{]}
+\AttributeTok{      }\FunctionTok{properties}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{content}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ string}\KeywordTok{,}\AttributeTok{ }\FunctionTok{minLength}\KeywordTok{:}\AttributeTok{ }\DecValTok{1}\KeywordTok{,}\AttributeTok{ }\FunctionTok{maxLength}\KeywordTok{:}\AttributeTok{ }\DecValTok{10000}\KeywordTok{\}}
+\AttributeTok{    }\FunctionTok{NoteList}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ object}
+\AttributeTok{      }\FunctionTok{required}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{notes}\KeywordTok{,}\AttributeTok{ count}\KeywordTok{]}
+\AttributeTok{      }\FunctionTok{properties}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{notes}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ array}\KeywordTok{,}\AttributeTok{ }\FunctionTok{items}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/schemas/Note"}\KeywordTok{\}\}}
+\AttributeTok{        }\FunctionTok{count}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ integer}\KeywordTok{,}\AttributeTok{ }\FunctionTok{minimum}\KeywordTok{:}\AttributeTok{ }\DecValTok{0}\KeywordTok{\}}
+\AttributeTok{        }\FunctionTok{next\_cursor}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{integer}\KeywordTok{,}\AttributeTok{ }\StringTok{"null"}\KeywordTok{]}
+\AttributeTok{          }\FunctionTok{description}\KeywordTok{:}\AttributeTok{ pass as ?after= for the next page; null on the last page}
+\AttributeTok{    }\FunctionTok{Error}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{type}\KeywordTok{:}\AttributeTok{ object}
+\AttributeTok{      }\FunctionTok{required}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{error}\KeywordTok{]}
+\AttributeTok{      }\FunctionTok{properties}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{error}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ string}\KeywordTok{\}}
+\AttributeTok{        }\FunctionTok{details}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ array}\KeywordTok{,}\AttributeTok{ }\FunctionTok{items}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{type}\KeywordTok{:}\AttributeTok{ string}\KeywordTok{\}\}}
+\AttributeTok{  }\FunctionTok{responses}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{BadRequest}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{description}\KeywordTok{:}\AttributeTok{ The request was invalid}
+\AttributeTok{      }\FunctionTok{content}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{application/json}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{schema}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/schemas/Error"}\KeywordTok{\}\}\}}
+\AttributeTok{    }\FunctionTok{NotFound}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{description}\KeywordTok{:}\AttributeTok{ No such note}
+\AttributeTok{      }\FunctionTok{content}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{application/json}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{schema}\KeywordTok{:}\AttributeTok{ }\KeywordTok{\{}\FunctionTok{$ref}\KeywordTok{:}\AttributeTok{ }\StringTok{"\#/components/schemas/Error"}\KeywordTok{\}\}\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The structure is always the same. \texttt{paths} lists each URL and method with its parameters, request body and possible responses. \texttt{components} defines each shape once, so that responses can refer to it with \texttt{\$ref}. Notice how much of the chapter is in this one file: the status codes of section 34.2, the error shape of section 34.5, the envelope with its optional \texttt{next\_cursor}. Tools read it too. Swagger UI or Redoc turn it into browsable documentation, and generators turn it into client libraries in a dozen languages.
+
+A written contract is only worth something while it is \emph{true}. Two checks keep it that way, and both run in CI.
+
+\textbf{1. The file itself must be valid OpenAPI.} \texttt{openapi-spec-validator} (add it to \texttt{requirements-dev.txt}, with \texttt{PyYAML} for the test below) checks the file against the OpenAPI specification:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{$}\NormalTok{ openapi{-}spec{-}validator openapi.yaml}
+\ExtensionTok{openapi.yaml:}\NormalTok{ OK}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}A response written without its required \texttt{description}, say, fails with \texttt{\textquotesingle{}description\textquotesingle{}\ is\ a\ required\ property} and the path to the mistake. In the workflow of \hyperref[ch:17-build-process]{Chapter 17}, it is one more step, before the tests:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Check the API contract}
+\AttributeTok{        }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ openapi{-}spec{-}validator openapi.yaml}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{2. The API must actually behave as the file says.} A \textbf{contract test} sends real requests through the test client and validates each response body against the schema the file promises. The \texttt{jsonschema} library, which \texttt{openapi-spec-validator} already installs, does the checking:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_contract.py}
+\CommentTok{"""The API\textquotesingle{}s real responses must match what openapi.yaml promises."""}
+
+\ImportTok{from}\NormalTok{ pathlib }\ImportTok{import}\NormalTok{ Path}
+
+\ImportTok{import}\NormalTok{ yaml}
+\ImportTok{from}\NormalTok{ jsonschema }\ImportTok{import}\NormalTok{ Draft202012Validator}
+
+\NormalTok{SPEC }\OperatorTok{=}\NormalTok{ yaml.safe\_load((Path(}\VariableTok{\_\_file\_\_}\NormalTok{).parent.parent }\OperatorTok{/} \StringTok{"openapi.yaml"}\NormalTok{).read\_text())}
+
+
+\KeywordTok{def}\NormalTok{ assert\_matches(schema\_name: }\BuiltInTok{str}\NormalTok{, body) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""Validate a response body against one of the spec\textquotesingle{}s schemas."""}
+    \CommentTok{\# The "$ref" resolves inside this wrapper, which carries the spec\textquotesingle{}s components}
+\NormalTok{    schema }\OperatorTok{=}\NormalTok{ \{}\StringTok{"$ref"}\NormalTok{: }\SpecialStringTok{f"\#/components/schemas/}\SpecialCharTok{\{}\NormalTok{schema\_name}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\OperatorTok{**}\NormalTok{SPEC\}}
+\NormalTok{    Draft202012Validator(schema).validate(body)}
+
+
+\KeywordTok{def}\NormalTok{ test\_a\_created\_note\_matches\_the\_contract(client):}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Buy milk"}\NormalTok{\})}
+\NormalTok{    assert\_matches(}\StringTok{"Note"}\NormalTok{, response.get\_json())}
+
+
+\KeywordTok{def}\NormalTok{ test\_the\_list\_matches\_the\_contract(client, create\_note):}
+\NormalTok{    create\_note(}\StringTok{"First"}\NormalTok{)}
+\NormalTok{    assert\_matches(}\StringTok{"NoteList"}\NormalTok{, client.get(}\StringTok{"/notes/"}\NormalTok{).get\_json())}
+
+
+\KeywordTok{def}\NormalTok{ test\_errors\_match\_the\_contract(client):}
+\NormalTok{    assert\_matches(}\StringTok{"Error"}\NormalTok{, client.get(}\StringTok{"/notes/99999"}\NormalTok{).get\_json())}
+\NormalTok{    assert\_matches(}\StringTok{"Error"}\NormalTok{, client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{\}).get\_json())}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Now suppose someone renames \texttt{created\_at} to \texttt{created} in \texttt{row\_to\_note()}, a ``harmless'' tidy-up. Every existing test that does not look at that field still passes, but the contract test fails:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+E       jsonschema.exceptions.ValidationError: 'created_at' is a required property
+...
+E       On instance:
+E           {'content': 'Buy milk', 'created': '2024-01-15T14:00:05+00:00', 'id': 1}
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}That is a breaking change caught \emph{before} any client saw it. From here on, every change to the API's shape goes into \texttt{openapi.yaml} in the same pull request. That is how \hyperref[ch:37-reliability]{Chapter 37}'s email endpoint and \hyperref[ch:38-security]{Chapter 38}'s login endpoints and bearer-token security scheme join the contract. Reviewers see the contract change next to the code change, and CI proves the two agree.
+
+\phantomsection\label{34-response-handling:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Handler return values} are normalized by Flask into \texttt{Response} objects. The most common forms are \texttt{(jsonify(data),}\allowbreak{}\texttt{\ status\_}\allowbreak{}\texttt{code)} and \texttt{"",\ 204}.
+\item
+  \textbf{HTTP status codes} are semantic. Use 201 for creation, 204 for deletion, 404 for not found, 400 (or 422~--- pick one) for validation failure, 500 for server errors. Never use 200 for errors.
+\item
+  \textbf{\texttt{jsonify()}} serializes a Python dict to JSON, sets \texttt{Content-}\allowbreak{}\texttt{Type:}\allowbreak{}\texttt{\ application/}\allowbreak{}\texttt{json}, and returns a \texttt{Response} object. It converts \texttt{datetime} objects~--- but to HTTP-date strings, not ISO 8601.
+\item
+  \textbf{ISO 8601 strings} are the standard JSON representation for timestamps. Convert \texttt{datetime} objects with \texttt{.isoformat()} (the Notes API's \texttt{row\_to\_note()}) or a custom JSON provider.
+\item
+  \textbf{Consistent error structure} is essential for API clients. Choose one error response format and use it everywhere.
+\item
+  \textbf{\texttt{after\_request} hooks} run after the handler and can modify the response (add headers, log timing). They must return the response object.
+\item
+  \textbf{\texttt{teardown\_appcontext}} runs after \texttt{after\_request} hooks, even if an exception occurred. This is where the Notes API rolls back anything uncommitted and closes the database connection~--- handlers have already committed their work.
+\item
+  \textbf{Nginx adds security headers} (HSTS, X-Content-Type-Options, etc.) to all Flask responses. Flask doesn't need to set them.
+\item
+  \textbf{An API is a contract} with clients you cannot redeploy. \textbf{Idempotency decides what is safe to retry} (GET/PUT/DELETE are idempotent; POST is not~--- an \textbf{idempotency key} makes retried creates safe). \textbf{Version deliberately}: additive changes are non-breaking; removals and type changes need a new version (\texttt{/v1} → \texttt{/v2}) with graceful deprecation. \textbf{Webhooks} (the other system calling you) must verify signatures, be idempotent, and respond fast. Write the contract down (\textbf{OpenAPI}) \emph{before} exposing it, and keep it true: validate the file in CI, and let \textbf{contract tests} check real responses against its schemas, so a renamed field fails the build instead of a client.
+\item
+  \textbf{Pagination} is necessary for list endpoints with potentially large datasets. Offset pagination (\texttt{LIMIT}/\texttt{OFFSET}) allows jumping to any page; cursor pagination (\texttt{WHERE\ id\ \textless{}\ last\_seen}) stays fast at any depth and does not shift when data changes. Add the pagination fields to the existing response envelope.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{34-response-handling:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} What does \texttt{curl\ -}\allowbreak{}\texttt{i\ -}\allowbreak{}\texttt{X\ DELETE\ .}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{/}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{1} return the second time you run it, and is \texttt{DELETE} still idempotent?
+\item
+  \textbf{Break and fix.} Make \texttt{list\_notes} return a bare JSON array instead of \texttt{\{"notes":}\allowbreak{}\texttt{\ {[}.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{{]},}\allowbreak{}\texttt{\ "count":}\allowbreak{}\texttt{\ n\}}. Which contract test fails, and what would it have cost to change this after release?
+\item
+  \textbf{Extend.} Add an \texttt{ETag} to \texttt{GET\ /notes/\textless{}id\textgreater{}} and return \texttt{304} when \texttt{If-None-Match} matches. Test it with \texttt{curl\ -}\allowbreak{}\texttt{H\ \textquotesingle{}If-}\allowbreak{}\texttt{None-}\allowbreak{}\texttt{Match:}\allowbreak{}\texttt{\ ".}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{"\textquotesingle{}}.
+\item
+  \textbf{Explain.} When is \texttt{422} better than \texttt{400}, and why does the Notes API use \texttt{400} for everything that fails validation?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-34.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{34-response-handling:whats-next}
+
+The request has been received, validated, processed, and responded to. The complete request-response cycle is now understood in detail. The next chapter addresses a different dimension of production systems: how you know what is happening \emph{while} the system is running~--- the infrastructure of observation, measurement, and alerting.
+
+\noindent{}→ \hyperref[ch:35-observability]{Chapter 35}~--- Observability

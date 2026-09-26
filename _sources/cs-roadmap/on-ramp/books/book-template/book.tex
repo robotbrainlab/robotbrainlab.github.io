@@ -1,0 +1,55 @@
+% ================================================================
+%  book.tex — master file: the order of the book.
+%  Build:  make        (Markdown -> chapters/*.tex -> book.pdf)
+%
+%  Each Markdown file ../markdown/<stem>.md becomes chapters/<stem>.tex;
+%  include it here with \input{chapters/<stem>}.
+%  Parts:  \bookpart{<roman numeral>}{<title>}{<what to ignore for now, or empty>}
+% ================================================================
+\documentclass[10pt, twoside, openany]{book}
+\input{book-meta}
+\input{preamble}
+
+\begin{document}
+
+\input{front/cover}
+
+\frontmatter
+\input{front/titlepage}
+\input{front/copyright}
+\tableofcontents
+\input{front/preface}                 % includes chapters/00-preface (markdown/00-preface.md)
+
+\mainmatter
+
+% ---------------------------------------------------------------- Part I
+\bookpart{I}{Understand}
+  {what this part deliberately leaves out, in one or two lines.}
+\input{chapters/01-first-chapter}
+\input{chapters/02-second-chapter}
+
+% ---------------------------------------------------------------- Part II
+\bookpart{II}{Use}
+  {what this part deliberately leaves out, in one or two lines.}
+\input{chapters/03-third-chapter}
+
+% ---------------------------------------------------------------- Part III
+\bookpart{III}{Apply}
+  {what this part deliberately leaves out, in one or two lines.}
+\input{chapters/04-fourth-chapter}
+
+% ---------------------------------------------------------------- Part IV
+\bookpart{IV}{What Next}{}
+\input{chapters/05-what-next}
+
+% ---------------------------------------------------------------- Appendices
+\appendix
+\input{chapters/A-cheat-sheet}
+\input{chapters/B-glossary}           % the glossary is the last appendix
+
+\backmatter
+\printindex
+
+\input{front/backcover}
+
+\end{document}

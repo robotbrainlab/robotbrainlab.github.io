@@ -1,0 +1,756 @@
+\setcounter{chapter}{22}
+\chapter{Code Transfer}\label{ch:23-code-transfer}
+
+\chapterrule
+
+The application is built. The Docker image is pushed to the registry. The server is configured and waiting. The final preparation step is getting the image from the registry to the server~--- and establishing the workflow for doing this reliably every time a new version is deployed.
+
+\textbf{Code transfer} is the process of moving a new version of the application from where it was built to where it will run. In a Docker-based deployment, ``code transfer'' primarily means pulling the Docker image from the registry onto the server. But it also includes any configuration files, environment files, and scripts that the server needs but that are not inside the Docker image.
+
+This chapter covers the mechanics of image transfer, the deployment script that orchestrates the update, and the zero-downtime deployment pattern that replaces old containers with new ones without dropping requests.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  Why you pull images rather than copy code files
+\item
+  How \texttt{docker\ pull} works and what it transfers
+\item
+  How to authenticate the server to the registry
+\item
+  How to write a deployment script that updates the running container
+\item
+  What zero-downtime deployment is and how to achieve it with Docker
+\item
+  How to verify a deployment succeeded before declaring it complete
+\item
+  How to roll back a failed deployment
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Why Pull Images, Not Copy Files}\label{23-code-transfer:231-why-pull-images-not-copy-files}
+
+Early in software development history, ``deploying'' meant copying source files to the server and running them. Some projects still do this with \texttt{git\ pull} on the server or \texttt{scp} to copy files. This approach has problems:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Environment differences}: the server might have a different Python version, different system libraries, different pip packages. ``Copy and run'' brings back all the environment drift problems from \hyperref[ch:07-environment-drift]{Chapter 7}.
+\item
+  \textbf{Build on the server}: if you copy source code and install dependencies on the server, you are running \texttt{pip\ install} in production~--- with internet access, with potential version drift (\hyperref[ch:12-dependency-declaration]{Chapter 12}), and with build tools that should not be in production.
+\item
+  \textbf{No atomic deployment}: if the server crashes while files are being copied, it runs partially-updated code.
+\end{itemize}
+
+\noindent{}Pulling a Docker image solves all of these:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{No environment differences}: the image contains the entire environment (Python version, system libraries, packages). It runs the same way on every machine of the same CPU architecture~--- and CI builds it on x86-64 runners, the architecture of the server.
+\item
+  \textbf{No build on the server}: the image was built in CI. The server only runs \texttt{docker\ pull} and \texttt{docker\ run}.
+\item
+  \textbf{Atomic artifact}: a Docker image is an immutable artifact. Either the pull succeeds (complete image) or it fails (old image unchanged). There is no half-copied state. (The \emph{switchover} from the old container to the new one is a separate step, and it still needs care~--- sections 23.4 and 23.5.)
+\end{itemize}
+
+\setcounter{section}{1}
+\section{\texorpdfstring{How \texttt{docker\ pull} Works}{How docker pull Works}}\label{23-code-transfer:232-how-docker-pull-works}
+
+\texttt{docker\ pull} downloads a Docker image from a registry to the local machine:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ pull ghcr.io/your{-}username/notes{-}api:sha{-}a1b2c3d}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}What happens:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Docker contacts the registry at \texttt{ghcr.io}
+\item
+  The registry returns the image's \textbf{manifest}: a list of all layers and their SHA-256 hashes
+\item
+  For each layer, Docker checks if it already exists locally (by hash)
+\item
+  Docker downloads only the layers that are not already present
+\item
+  The image is available locally
+\end{enumerate}
+
+\subsection*{Layer caching on the server}\phantomsection\label{23-code-transfer:layer-caching-on-the-server}
+
+Just as the Docker build caches layers during build (\hyperref[ch:18-containerization]{Chapter 18}), Docker caches pulled layers on the server. The \texttt{python:3.11-slim} base layers and the user-creation layer are the same across all Notes API image versions. Once pulled once, they are never downloaded again.
+
+For a typical code change:
+
+\begin{itemize}
+\tightlist
+\item
+  Base image layers: already cached~--- 0 bytes transferred
+\item
+  pip install layer: already cached (if requirements.txt unchanged)~--- 0 bytes transferred
+\item
+  Application code layer: changed~--- \textasciitilde100 KB transferred
+\end{itemize}
+
+\noindent{}Most deployments transfer only kilobytes, not gigabytes.
+
+\setcounter{section}{2}
+\section{Authenticating the Server to the Registry}\label{23-code-transfer:233-authenticating-the-server-to-the-registry}
+
+The registry at \texttt{ghcr.io} requires authentication to pull images from private repositories. The server needs credentials to pull the image.
+
+\subsection*{GitHub Personal Access Token approach}\phantomsection\label{23-code-transfer:github-personal-access-token-approach}
+
+Create a GitHub Personal Access Token (classic) with only the \texttt{read:packages} scope, just for this server~--- so it can pull images and nothing else, and you can revoke it without affecting anything else. Then log in once, as the \texttt{deploy} user:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On the server, as deploy. read {-}s keeps the token out of your}
+\CommentTok{\# shell history and off the screen.}
+\BuiltInTok{read} \AttributeTok{{-}rsp} \StringTok{"GitHub token: "} \VariableTok{GITHUB\_TOKEN}\KeywordTok{;} \BuiltInTok{echo}
+\BuiltInTok{echo} \StringTok{"}\VariableTok{$GITHUB\_TOKEN}\StringTok{"} \KeywordTok{|} \ExtensionTok{docker}\NormalTok{ login ghcr.io }\AttributeTok{{-}u}\NormalTok{ your{-}username }\AttributeTok{{-}{-}password{-}stdin}
+\BuiltInTok{unset} \VariableTok{GITHUB\_TOKEN}
+\CommentTok{\# }\AlertTok{WARNING}\CommentTok{! Your password will be stored unencrypted in /home/deploy/.docker/config.json.}
+\CommentTok{\# Login Succeeded}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The login persists: Docker saves the credentials in \texttt{\textasciitilde{}/}\allowbreak{}\texttt{.docker/}\allowbreak{}\texttt{config.json}, and every later \texttt{docker\ pull} by \texttt{deploy} uses them, so the deployment script does not need the token at all. Take the warning seriously, though. Without a \textbf{credential helper} (a program that keeps secrets in an OS keychain), the token is stored base64-encoded, which is encoding, not encryption. The file is readable only by \texttt{deploy}~--- check with \texttt{ls\ -}\allowbreak{}\texttt{l\ \textasciitilde{}/}\allowbreak{}\texttt{.}\allowbreak{}\texttt{docker/}\allowbreak{}\texttt{config.}\allowbreak{}\texttt{json}~--- and that, plus the token's narrow scope, is the protection. Do not keep a second copy of the token in a script file.
+
+\subsection*{AWS ECR authentication}\phantomsection\label{23-code-transfer:aws-ecr-authentication}
+
+AWS ECR uses IAM roles for authentication. If the server is an EC2 instance with an appropriate IAM role:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Get authentication token and log in to ECR}
+\ExtensionTok{aws}\NormalTok{ ecr get{-}login{-}password }\AttributeTok{{-}{-}region}\NormalTok{ us{-}east{-}1 }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
+    \ExtensionTok{docker}\NormalTok{ login }\AttributeTok{{-}{-}username}\NormalTok{ AWS }\AttributeTok{{-}{-}password{-}stdin} \DataTypeTok{\textbackslash{}}
+\NormalTok{    123456789.dkr.ecr.us{-}east{-}1.amazonaws.com}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is more secure than PATs: the EC2 instance's IAM role automatically grants pull access, with no long-lived credentials to manage or rotate. The login token it produces expires after 12 hours, though, so a deployment script must run this command each time (or use the ECR credential helper, which does it automatically).
+
+\setcounter{section}{3}
+\section{The Deployment Script}\label{23-code-transfer:234-the-deployment-script}
+
+A deployment script is an executable script that performs all steps of a deployment in the correct order. It should be:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Idempotent}: running it twice produces the same result as running it once
+\item
+  \textbf{Safe on failure}: either the new version ends up running and healthy, or the previous version is put back
+\item
+  \textbf{Verified}: the script checks that the new version is actually working before declaring success
+\item
+  \textbf{Logged}: every step writes to the log so you can diagnose failures
+\end{itemize}
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 23.1}\enspace /opt/notes-api/deploy.sh}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#!/bin/bash}
+\CommentTok{\# Deployment script for the Notes API.}
+\CommentTok{\#}
+\CommentTok{\# Usage:}
+\CommentTok{\#   ./deploy.sh sha{-}a1b2c3d    Deploy a specific image version}
+\CommentTok{\#}
+\CommentTok{\# There is deliberately no "latest" default: a deployment names the exact}
+\CommentTok{\# image it installs, so it can be audited and rolled back (Chapter 19).}
+\CommentTok{\#}
+\CommentTok{\# This script:}
+\CommentTok{\#   1. Records the running version (for rollback)}
+\CommentTok{\#   2. Pulls the new Docker image}
+\CommentTok{\#   3. Stops and removes the old container}
+\CommentTok{\#   4. Starts the new container}
+\CommentTok{\#   5. Waits for the health check to pass}
+\CommentTok{\#   6. If it does not pass, rolls back to the previous version}
+
+\BuiltInTok{set} \AttributeTok{{-}euo}\NormalTok{ pipefail}
+\CommentTok{\# set {-}e: exit immediately if any command fails}
+\CommentTok{\# set {-}u: treat unset variables as errors}
+\CommentTok{\# set {-}o pipefail: if any command in a pipe fails, the whole pipe fails}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Configuration}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\CommentTok{\# Replace with your GitHub username, in lowercase}
+\VariableTok{IMAGE\_REPO}\OperatorTok{=}\StringTok{"ghcr.io/your{-}username/notes{-}api"}
+\VariableTok{IMAGE\_TAG}\OperatorTok{=}\StringTok{"}\VariableTok{$\{1}\OperatorTok{:?}\NormalTok{Usage: deploy.sh sha{-}\textless{}7{-}character commit hash\textgreater{}}\VariableTok{\}}\StringTok{"}
+
+\VariableTok{FULL\_IMAGE}\OperatorTok{=}\StringTok{"}\VariableTok{$\{IMAGE\_REPO\}}\StringTok{:}\VariableTok{$\{IMAGE\_TAG\}}\StringTok{"}
+\VariableTok{CONTAINER\_NAME}\OperatorTok{=}\StringTok{"notes{-}api"}
+\VariableTok{ENV\_FILE}\OperatorTok{=}\StringTok{"/opt/notes{-}api/config/notes{-}api.env"}
+\VariableTok{DEPLOY\_LOG\_DIR}\OperatorTok{=}\StringTok{"/opt/notes{-}api/deploy{-}logs"}
+\VariableTok{HEALTH\_URL}\OperatorTok{=}\StringTok{"http://127.0.0.1:5000/health"}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Logging (the directory must exist before the first log line)}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\FunctionTok{mkdir} \AttributeTok{{-}p} \StringTok{"}\VariableTok{$DEPLOY\_LOG\_DIR}\StringTok{"}
+\VariableTok{LOG\_FILE}\OperatorTok{=}\StringTok{"}\VariableTok{$\{DEPLOY\_LOG\_DIR\}}\StringTok{/deploy{-}}\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%Y\%m\%d{-}\%H\%M\%S}\VariableTok{)}\StringTok{.log"}
+
+\FunctionTok{log()} \KeywordTok{\{}
+    \BuiltInTok{local} \VariableTok{msg}\OperatorTok{=}\StringTok{"[}\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%Y{-}\%m{-}\%dT\%H:\%M:\%S}\VariableTok{)}\StringTok{] }\VariableTok{$*}\StringTok{"}
+    \BuiltInTok{echo} \StringTok{"}\VariableTok{$msg}\StringTok{"}
+    \BuiltInTok{echo} \StringTok{"}\VariableTok{$msg}\StringTok{"} \OperatorTok{\textgreater{}\textgreater{}} \StringTok{"}\VariableTok{$LOG\_FILE}\StringTok{"}
+\KeywordTok{\}}
+
+\FunctionTok{die()} \KeywordTok{\{}
+    \ExtensionTok{log} \StringTok{"ERROR: }\VariableTok{$*}\StringTok{"}
+    \BuiltInTok{exit}\NormalTok{ 1}
+\KeywordTok{\}}
+
+\CommentTok{\# Start the container from a given image. One function, so the deployment}
+\CommentTok{\# and the rollback cannot drift apart.}
+\CommentTok{\#   {-}p 127.0.0.1:5000:5000  publish on loopback only: Nginx reaches it,}
+\CommentTok{\#                           the internet cannot (Docker bypasses UFW)}
+\CommentTok{\#   {-}{-}stop{-}timeout 35       give Gunicorn time to finish in{-}flight}
+\CommentTok{\#                           requests when stopped (Chapter 24)}
+\FunctionTok{start\_container()} \KeywordTok{\{}
+    \ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \DataTypeTok{\textbackslash{}}
+        \AttributeTok{{-}{-}name} \StringTok{"}\VariableTok{$CONTAINER\_NAME}\StringTok{"} \DataTypeTok{\textbackslash{}}
+        \AttributeTok{{-}{-}restart}\NormalTok{ unless{-}stopped }\DataTypeTok{\textbackslash{}}
+        \AttributeTok{{-}{-}stop{-}timeout}\NormalTok{ 35 }\DataTypeTok{\textbackslash{}}
+        \AttributeTok{{-}p}\NormalTok{ 127.0.0.1:5000:5000 }\DataTypeTok{\textbackslash{}}
+        \AttributeTok{{-}{-}env{-}file} \StringTok{"}\VariableTok{$ENV\_FILE}\StringTok{"} \DataTypeTok{\textbackslash{}}
+        \StringTok{"}\VariableTok{$1}\StringTok{"} \OperatorTok{\textgreater{}\textgreater{}} \StringTok{"}\VariableTok{$LOG\_FILE}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1}
+\KeywordTok{\}}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Pre{-}deployment checks}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\ExtensionTok{log} \StringTok{"Starting deployment: }\VariableTok{$\{FULL\_IMAGE\}}\StringTok{"}
+
+\KeywordTok{[[} \StringTok{"}\VariableTok{$IMAGE\_TAG}\StringTok{"} \OtherTok{=\textasciitilde{}} \PreprocessorTok{\^{}}\SpecialStringTok{sha{-}}\OperatorTok{[}\SpecialStringTok{0}\OperatorTok{{-}}\SpecialStringTok{9a}\OperatorTok{{-}}\SpecialStringTok{f}\OperatorTok{]}\VariableTok{\{}\DecValTok{7}\VariableTok{\}}\OperatorTok{$} \KeywordTok{]]} \KeywordTok{||} \DataTypeTok{\textbackslash{}}
+    \ExtensionTok{die} \StringTok{"Tag must look like sha{-}a1b2c3d (lowercase), got: }\VariableTok{$IMAGE\_TAG}\StringTok{"}
+\BuiltInTok{[} \OtherTok{{-}f} \StringTok{"}\VariableTok{$ENV\_FILE}\StringTok{"} \BuiltInTok{]} \KeywordTok{||} \ExtensionTok{die} \StringTok{"Environment file not found: }\VariableTok{$ENV\_FILE}\StringTok{"}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Step 1: Record the currently running image (for rollback)}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\CommentTok{\# Record the image ID (sha256:…), not the name the container was started}
+\CommentTok{\# with: a name such as ":latest" may point at a different image by now.}
+\VariableTok{PREVIOUS\_IMAGE}\OperatorTok{=}\StringTok{""}
+\ControlFlowTok{if} \ExtensionTok{docker}\NormalTok{ container inspect }\StringTok{"}\VariableTok{$CONTAINER\_NAME}\StringTok{"} \OperatorTok{\textgreater{}}\NormalTok{ /dev/null }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1}\KeywordTok{;} \ControlFlowTok{then}
+    \VariableTok{PREVIOUS\_IMAGE}\OperatorTok{=}\VariableTok{$(}\ExtensionTok{docker}\NormalTok{ inspect }\StringTok{"}\VariableTok{$CONTAINER\_NAME}\StringTok{"} \AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}\{\{.Image\}\}\textquotesingle{}}\VariableTok{)}
+    \VariableTok{PREVIOUS\_NAME}\OperatorTok{=}\VariableTok{$(}\ExtensionTok{docker}\NormalTok{ inspect }\StringTok{"}\VariableTok{$CONTAINER\_NAME}\StringTok{"} \AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}\{\{.Config.Image\}\}\textquotesingle{}}\VariableTok{)}
+    \ExtensionTok{log} \StringTok{"Current image: }\VariableTok{$\{PREVIOUS\_NAME\}}\StringTok{ (}\VariableTok{$\{PREVIOUS\_IMAGE}\OperatorTok{:}\DecValTok{7}\OperatorTok{:}\DecValTok{12}\VariableTok{\}}\StringTok{)"}
+\ControlFlowTok{else}
+    \ExtensionTok{log} \StringTok{"No existing container found. This is a fresh deployment."}
+\ControlFlowTok{fi}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Step 2: Pull the new image}
+\CommentTok{\# (uses the registry login saved in \textasciitilde{}/.docker/config.json — section 23.3)}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\ExtensionTok{log} \StringTok{"Pulling image: }\VariableTok{$\{FULL\_IMAGE\}}\StringTok{"}
+\ExtensionTok{docker}\NormalTok{ pull }\StringTok{"}\VariableTok{$FULL\_IMAGE}\StringTok{"} \OperatorTok{\textgreater{}\textgreater{}} \StringTok{"}\VariableTok{$LOG\_FILE}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{||} \ExtensionTok{die} \StringTok{"Pull failed. Is the tag right, and is the server logged in to the registry?"}
+\ExtensionTok{log} \StringTok{"Image pull: complete"}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Step 3: Stop and remove the old container}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\CommentTok{\# "container inspect" finds the container whether it is running or has}
+\CommentTok{\# exited — a crashed container is a common reason to redeploy, and its}
+\CommentTok{\# name must be freed before the new container can use it.}
+\ControlFlowTok{if} \ExtensionTok{docker}\NormalTok{ container inspect }\StringTok{"}\VariableTok{$CONTAINER\_NAME}\StringTok{"} \OperatorTok{\textgreater{}}\NormalTok{ /dev/null }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1}\KeywordTok{;} \ControlFlowTok{then}
+    \ExtensionTok{log} \StringTok{"Stopping and removing existing container: }\VariableTok{$CONTAINER\_NAME}\StringTok{"}
+    \ExtensionTok{docker}\NormalTok{ stop }\StringTok{"}\VariableTok{$CONTAINER\_NAME}\StringTok{"} \OperatorTok{\textgreater{}\textgreater{}} \StringTok{"}\VariableTok{$LOG\_FILE}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1}
+    \ExtensionTok{docker}\NormalTok{ rm }\StringTok{"}\VariableTok{$CONTAINER\_NAME}\StringTok{"} \OperatorTok{\textgreater{}\textgreater{}} \StringTok{"}\VariableTok{$LOG\_FILE}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1}
+\ControlFlowTok{fi}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Step 4: Start the new container}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\ExtensionTok{log} \StringTok{"Starting new container with image: }\VariableTok{$\{FULL\_IMAGE\}}\StringTok{"}
+\ExtensionTok{start\_container} \StringTok{"}\VariableTok{$FULL\_IMAGE}\StringTok{"}
+\ExtensionTok{log} \StringTok{"Container started: }\VariableTok{$(}\ExtensionTok{docker}\NormalTok{ inspect }\StringTok{"}\VariableTok{$CONTAINER\_NAME}\StringTok{"} \AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}\{\{.Id\}\}\textquotesingle{}} \KeywordTok{|} \FunctionTok{cut} \AttributeTok{{-}c1{-}12}\VariableTok{)}\StringTok{"}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Step 5: Wait for the health check to pass}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\ExtensionTok{log} \StringTok{"Waiting for application to become healthy..."}
+
+\VariableTok{RETRIES}\OperatorTok{=}\NormalTok{30        }\CommentTok{\# Try 30 times}
+\VariableTok{INTERVAL}\OperatorTok{=}\NormalTok{2        }\CommentTok{\# Wait 2 seconds between tries (about 60 seconds in all)}
+
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \VariableTok{$(}\FunctionTok{seq}\NormalTok{ 1 }\VariableTok{$RETRIES)}\KeywordTok{;} \ControlFlowTok{do}
+    \CommentTok{\# The response must be a 2xx (curl {-}f) AND say "ok"}
+    \ControlFlowTok{if} \ExtensionTok{curl} \AttributeTok{{-}sf} \AttributeTok{{-}{-}max{-}time}\NormalTok{ 3 }\StringTok{"}\VariableTok{$HEALTH\_URL}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}}\NormalTok{/dev/null }\KeywordTok{|} \FunctionTok{grep} \AttributeTok{{-}q} \StringTok{\textquotesingle{}"status":"ok"\textquotesingle{}}\KeywordTok{;} \ControlFlowTok{then}
+        \ExtensionTok{log} \StringTok{"Health check passed (attempt }\VariableTok{$i}\StringTok{ of }\VariableTok{$RETRIES}\StringTok{)."}
+        \ControlFlowTok{break}
+    \ControlFlowTok{fi}
+
+    \ControlFlowTok{if} \BuiltInTok{[} \StringTok{"}\VariableTok{$i}\StringTok{"} \OtherTok{{-}eq} \StringTok{"}\VariableTok{$RETRIES}\StringTok{"} \BuiltInTok{]}\KeywordTok{;} \ControlFlowTok{then}
+        \ExtensionTok{log} \StringTok{"Health check failed after }\VariableTok{$((RETRIES} \OperatorTok{*} \VariableTok{INTERVAL))}\StringTok{ seconds."}
+        \ExtensionTok{log} \StringTok{"Container logs (last 50 lines) saved to }\VariableTok{$LOG\_FILE}\StringTok{"}
+        \ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}tail}\OperatorTok{=}\NormalTok{50 }\StringTok{"}\VariableTok{$CONTAINER\_NAME}\StringTok{"} \OperatorTok{\textgreater{}\textgreater{}} \StringTok{"}\VariableTok{$LOG\_FILE}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{||} \FunctionTok{true}
+
+        \CommentTok{\# ─────────────────────────────────────────────────────────────────}
+        \CommentTok{\# Rollback: start the previous version if there was one}
+        \CommentTok{\# ─────────────────────────────────────────────────────────────────}
+        \ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f} \StringTok{"}\VariableTok{$CONTAINER\_NAME}\StringTok{"} \OperatorTok{\textgreater{}\textgreater{}} \StringTok{"}\VariableTok{$LOG\_FILE}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{||} \FunctionTok{true}
+        \ControlFlowTok{if} \BuiltInTok{[} \OtherTok{{-}n} \StringTok{"}\VariableTok{$PREVIOUS\_IMAGE}\StringTok{"} \BuiltInTok{]}\KeywordTok{;} \ControlFlowTok{then}
+            \ExtensionTok{log} \StringTok{"Rolling back to: }\VariableTok{$\{PREVIOUS\_NAME\}}\StringTok{ (}\VariableTok{$\{PREVIOUS\_IMAGE}\OperatorTok{:}\DecValTok{7}\OperatorTok{:}\DecValTok{12}\VariableTok{\}}\StringTok{)"}
+            \ExtensionTok{start\_container} \StringTok{"}\VariableTok{$PREVIOUS\_IMAGE}\StringTok{"}
+            \ExtensionTok{log} \StringTok{"Rollback complete. Previous version is running."}
+        \ControlFlowTok{else}
+            \ExtensionTok{log} \StringTok{"No previous version to roll back to."}
+        \ControlFlowTok{fi}
+
+        \ExtensionTok{die} \StringTok{"Deployment failed. Check logs at: }\VariableTok{$LOG\_FILE}\StringTok{"}
+    \ControlFlowTok{fi}
+
+    \FunctionTok{sleep} \StringTok{"}\VariableTok{$INTERVAL}\StringTok{"}
+\ControlFlowTok{done}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Deployment complete}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\ExtensionTok{log} \StringTok{"Deployment complete: }\VariableTok{$\{FULL\_IMAGE\}}\StringTok{"}
+\ExtensionTok{log} \StringTok{"Health: }\VariableTok{$(}\ExtensionTok{curl} \AttributeTok{{-}sf} \AttributeTok{{-}{-}max{-}time}\NormalTok{ 5 }\StringTok{"}\VariableTok{$HEALTH\_URL}\StringTok{"}\VariableTok{)}\StringTok{"}
+\ExtensionTok{log} \StringTok{"Log file: }\VariableTok{$LOG\_FILE}\StringTok{"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Make the script executable:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{chmod}\NormalTok{ +x /opt/notes{-}api/deploy.sh}
+\FunctionTok{chown}\NormalTok{ deploy:deploy /opt/notes{-}api/deploy.sh}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Running a deployment}\phantomsection\label{23-code-transfer:running-a-deployment}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# From your laptop, trigger a deployment on the server:}
+\FunctionTok{ssh}\NormalTok{ deploy@203.0.113.42 }\StringTok{\textquotesingle{}/opt/notes{-}api/deploy.sh sha{-}a1b2c3d\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Expected output:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+[2024-01-15T14:00:00] Starting deployment:
+                      ghcr.io/your-username/notes-api:sha-a1b2c3d
+[2024-01-15T14:00:00] Current image:
+                      ghcr.io/your-username/notes-api:sha-9f8e7d6 (3c9d4e1f2a7b)
+[2024-01-15T14:00:00] Pulling image:
+                      ghcr.io/your-username/notes-api:sha-a1b2c3d
+[2024-01-15T14:00:04] Image pull: complete
+[2024-01-15T14:00:04] Stopping and removing existing container: notes-api
+[2024-01-15T14:00:05] Starting new container with image:
+                      ghcr.io/your-username/notes-api:sha-a1b2c3d
+[2024-01-15T14:00:06] Container started: d4e5f6a7b8c9
+[2024-01-15T14:00:06] Waiting for application to become healthy...
+[2024-01-15T14:00:08] Health check passed (attempt 2 of 30).
+[2024-01-15T14:00:08] Deployment complete:
+                      ghcr.io/your-username/notes-api:sha-a1b2c3d
+[2024-01-15T14:00:08] Health: {"status":"ok"}
+[2024-01-15T14:00:08] Log file: /opt/notes-api/deploy-logs/deploy-20240115-140000.log
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}(Long lines are wrapped here for the page; the script prints each message on one line.)
+
+\setcounter{section}{4}
+\section{Zero-Downtime Deployment}\label{23-code-transfer:235-zero-downtime-deployment}
+
+The deployment script in Section 23.4 stops the old container and starts the new one. There is a brief period~--- typically 2--10 seconds~--- when no container is running. Requests arriving during this window fail.
+
+For the Notes API in a learning context, this is acceptable. For a production service with real users, even a 2-second downtime might cause failed requests, timeout errors, and user complaints.
+
+\textbf{Zero-downtime deployment} replaces the old version with the new one without any gap in service.
+
+\subsection*{The blue-green pattern}\phantomsection\label{23-code-transfer:the-blue-green-pattern}
+
+\textbf{Blue-green deployment} runs two identical environments (called ``blue'' and ``green''):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Before deployment:
+  Blue container (port 5000) ← receiving traffic
+  Green container (port 5001) ← standing by (old version or empty)
+
+During deployment:
+  Blue container (port 5000) ← still receiving traffic
+  Green container (port 5001) ← started with NEW version
+
+After health check passes on green:
+  Update Nginx to point to green (port 5001)
+  Blue container ← now idle (old version)
+
+Cleanup:
+  Stop blue container
+  Next deployment: blue gets the new version
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The key: Nginx does the traffic switch, and a reload lets requests already in progress finish on the old container. There is no moment when no container is running.
+
+Blue-green deployment needs Nginx, which is installed and configured in \hyperref[ch:28-traffic-routing]{Chapter 28}; if you are following along in order, use Listing 23.1 until then and come back to this section afterwards. Two pieces of setup come first. The script runs as \texttt{deploy}, but rewriting an Nginx file and reloading Nginx need root, so grant exactly those three commands~--- and nothing else~--- through a sudoers drop-in:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On the server, as a sudo user. visudo checks the syntax before saving:}
+\CommentTok{\# a broken sudoers file can lock you out of sudo entirely.}
+\FunctionTok{sudo}\NormalTok{ visudo }\AttributeTok{{-}f}\NormalTok{ /etc/sudoers.d/notes{-}api{-}deploy}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+deploy ALL=(root) NOPASSWD: /usr/bin/tee /etc/nginx/conf.d/notes-api-upstream.conf, /usr/sbin/nginx -t, /usr/bin/systemctl reload nginx
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}And the file \texttt{/}\allowbreak{}\texttt{etc/}\allowbreak{}\texttt{nginx/}\allowbreak{}\texttt{conf.}\allowbreak{}\texttt{d/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api-}\allowbreak{}\texttt{upstream.}\allowbreak{}\texttt{conf} is the \textbf{only} place the \texttt{notes\_api} upstream is defined. The site configuration in \hyperref[ch:28-traffic-routing]{Chapter 28} refers to it by name (\texttt{proxy\_}\allowbreak{}\texttt{pass\ http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{notes\_}\allowbreak{}\texttt{api;}) instead of defining its own; two \texttt{upstream\ notes\_api} blocks would make \texttt{nginx\ -t} fail with ``duplicate upstream''.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 23.2}\enspace /opt/notes-api/deploy-bluegreen.sh (zero-downtime, blue-green)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#!/bin/bash}
+\BuiltInTok{set} \AttributeTok{{-}euo}\NormalTok{ pipefail}
+
+\VariableTok{IMAGE\_REPO}\OperatorTok{=}\StringTok{"ghcr.io/your{-}username/notes{-}api"}
+\VariableTok{IMAGE\_TAG}\OperatorTok{=}\StringTok{"}\VariableTok{$\{1}\OperatorTok{:?}\NormalTok{Usage: deploy{-}bluegreen.sh sha{-}\textless{}7{-}character commit hash\textgreater{}}\VariableTok{\}}\StringTok{"}
+\VariableTok{FULL\_IMAGE}\OperatorTok{=}\StringTok{"}\VariableTok{$\{IMAGE\_REPO\}}\StringTok{:}\VariableTok{$\{IMAGE\_TAG\}}\StringTok{"}
+\VariableTok{ENV\_FILE}\OperatorTok{=}\StringTok{"/opt/notes{-}api/config/notes{-}api.env"}
+\VariableTok{UPSTREAM\_CONF}\OperatorTok{=}\StringTok{"/etc/nginx/conf.d/notes{-}api{-}upstream.conf"}
+
+\FunctionTok{log()} \KeywordTok{\{} \BuiltInTok{echo} \StringTok{"[}\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%Y{-}\%m{-}\%dT\%H:\%M:\%S}\VariableTok{)}\StringTok{] }\VariableTok{$*}\StringTok{"}\KeywordTok{;} \KeywordTok{\}}
+\FunctionTok{die()} \KeywordTok{\{} \ExtensionTok{log} \StringTok{"ERROR: }\VariableTok{$*}\StringTok{"}\KeywordTok{;} \BuiltInTok{exit}\NormalTok{ 1}\KeywordTok{;} \KeywordTok{\}}
+
+\CommentTok{\# Determine which slot is currently active.}
+\CommentTok{\# (name=\^{}…$ matches the whole name; a plain name filter matches substrings)}
+\ControlFlowTok{if} \ExtensionTok{docker}\NormalTok{ ps }\AttributeTok{{-}q} \AttributeTok{{-}{-}filter} \StringTok{"name=\^{}notes{-}api{-}blue$"} \KeywordTok{|} \FunctionTok{grep} \AttributeTok{{-}q}\NormalTok{ .}\KeywordTok{;} \ControlFlowTok{then}
+    \VariableTok{ACTIVE\_CONTAINER}\OperatorTok{=}\StringTok{"notes{-}api{-}blue"}\KeywordTok{;}  \VariableTok{INACTIVE}\OperatorTok{=}\StringTok{"green"}\KeywordTok{;} \VariableTok{INACTIVE\_PORT}\OperatorTok{=}\StringTok{"5001"}
+\ControlFlowTok{elif} \ExtensionTok{docker}\NormalTok{ ps }\AttributeTok{{-}q} \AttributeTok{{-}{-}filter} \StringTok{"name=\^{}notes{-}api{-}green$"} \KeywordTok{|} \FunctionTok{grep} \AttributeTok{{-}q}\NormalTok{ .}\KeywordTok{;} \ControlFlowTok{then}
+    \VariableTok{ACTIVE\_CONTAINER}\OperatorTok{=}\StringTok{"notes{-}api{-}green"}\KeywordTok{;} \VariableTok{INACTIVE}\OperatorTok{=}\StringTok{"blue"}\KeywordTok{;}  \VariableTok{INACTIVE\_PORT}\OperatorTok{=}\StringTok{"5000"}
+\ControlFlowTok{else}
+    \CommentTok{\# First blue{-}green deployment: the container from Listing 23.1}
+    \CommentTok{\# ("notes{-}api") still holds port 5000, so start with green on 5001}
+    \VariableTok{ACTIVE\_CONTAINER}\OperatorTok{=}\StringTok{"notes{-}api"}\KeywordTok{;}       \VariableTok{INACTIVE}\OperatorTok{=}\StringTok{"green"}\KeywordTok{;} \VariableTok{INACTIVE\_PORT}\OperatorTok{=}\StringTok{"5001"}
+\ControlFlowTok{fi}
+
+\ExtensionTok{log} \StringTok{"Active: }\VariableTok{$ACTIVE\_CONTAINER}\StringTok{"}
+\ExtensionTok{log} \StringTok{"Deploying to: notes{-}api{-}}\VariableTok{$INACTIVE}\StringTok{ (port }\VariableTok{$INACTIVE\_PORT}\StringTok{)"}
+
+\CommentTok{\# Pull new image}
+\ExtensionTok{log} \StringTok{"Pulling image: }\VariableTok{$FULL\_IMAGE}\StringTok{"}
+\ExtensionTok{docker}\NormalTok{ pull }\StringTok{"}\VariableTok{$FULL\_IMAGE}\StringTok{"}
+
+\CommentTok{\# Remove the old inactive container if it exists (running or not)}
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f} \StringTok{"notes{-}api{-}}\VariableTok{$INACTIVE}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}}\NormalTok{/dev/null }\KeywordTok{||} \FunctionTok{true}
+
+\CommentTok{\# Start the new container on the inactive port (loopback only)}
+\ExtensionTok{log} \StringTok{"Starting notes{-}api{-}}\VariableTok{$INACTIVE}\StringTok{ on port }\VariableTok{$INACTIVE\_PORT}\StringTok{..."}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}name} \StringTok{"notes{-}api{-}}\VariableTok{$INACTIVE}\StringTok{"} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}restart}\NormalTok{ unless{-}stopped }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}stop{-}timeout}\NormalTok{ 35 }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}p} \StringTok{"127.0.0.1:}\VariableTok{$\{INACTIVE\_PORT\}}\StringTok{:5000"} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}env{-}file} \StringTok{"}\VariableTok{$ENV\_FILE}\StringTok{"} \DataTypeTok{\textbackslash{}}
+    \StringTok{"}\VariableTok{$FULL\_IMAGE}\StringTok{"}
+
+\CommentTok{\# Wait for health check on the new container}
+\ExtensionTok{log} \StringTok{"Waiting for health check on port }\VariableTok{$INACTIVE\_PORT}\StringTok{..."}
+\ControlFlowTok{for}\NormalTok{ i }\KeywordTok{in} \VariableTok{$(}\FunctionTok{seq}\NormalTok{ 1 30}\VariableTok{)}\KeywordTok{;} \ControlFlowTok{do}
+    \ControlFlowTok{if} \ExtensionTok{curl} \AttributeTok{{-}sf} \AttributeTok{{-}{-}max{-}time}\NormalTok{ 3 }\StringTok{"http://127.0.0.1:}\VariableTok{$\{INACTIVE\_PORT\}}\StringTok{/health"} \OperatorTok{\textgreater{}}\NormalTok{ /dev/null}\KeywordTok{;} \ControlFlowTok{then}
+        \ExtensionTok{log} \StringTok{"Health check passed."}
+        \ControlFlowTok{break}
+    \ControlFlowTok{fi}
+    \ControlFlowTok{if} \BuiltInTok{[} \StringTok{"}\VariableTok{$i}\StringTok{"} \OtherTok{{-}eq}\NormalTok{ 30 }\BuiltInTok{]}\KeywordTok{;} \ControlFlowTok{then}
+        \ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f} \StringTok{"notes{-}api{-}}\VariableTok{$INACTIVE}\StringTok{"} \KeywordTok{||} \FunctionTok{true}
+        \ExtensionTok{die} \StringTok{"Health check failed. }\VariableTok{$ACTIVE\_CONTAINER}\StringTok{ stays active."}
+    \ControlFlowTok{fi}
+    \FunctionTok{sleep}\NormalTok{ 2}
+\ControlFlowTok{done}
+
+\CommentTok{\# Switch Nginx to the new container}
+\ExtensionTok{log} \StringTok{"Switching traffic to notes{-}api{-}}\VariableTok{$INACTIVE}\StringTok{..."}
+\BuiltInTok{printf} \StringTok{\textquotesingle{}upstream notes\_api \{\textbackslash{}n    server 127.0.0.1:\%s;\textbackslash{}n\}\textbackslash{}n\textquotesingle{}} \StringTok{"}\VariableTok{$INACTIVE\_PORT}\StringTok{"} \DataTypeTok{\textbackslash{}}
+    \KeywordTok{|} \FunctionTok{sudo}\NormalTok{ tee }\StringTok{"}\VariableTok{$UPSTREAM\_CONF}\StringTok{"} \OperatorTok{\textgreater{}}\NormalTok{ /dev/null}
+
+\CommentTok{\# Test and reload Nginx (graceful: old workers finish their requests)}
+\FunctionTok{sudo}\NormalTok{ nginx }\AttributeTok{{-}t}
+\FunctionTok{sudo}\NormalTok{ systemctl reload nginx}
+\ExtensionTok{log} \StringTok{"Traffic switched to notes{-}api{-}}\VariableTok{$INACTIVE}\StringTok{ (port }\VariableTok{$INACTIVE\_PORT}\StringTok{)."}
+
+\CommentTok{\# Let requests already in flight on the old container finish before}
+\CommentTok{\# stopping it: Nginx\textquotesingle{}s old worker processes may still be proxying them}
+\ExtensionTok{log} \StringTok{"Draining }\VariableTok{$ACTIVE\_CONTAINER}\StringTok{ for 15 seconds..."}
+\FunctionTok{sleep}\NormalTok{ 15}
+
+\ExtensionTok{log} \StringTok{"Stopping old container: }\VariableTok{$ACTIVE\_CONTAINER}\StringTok{"}
+\ExtensionTok{docker}\NormalTok{ stop }\StringTok{"}\VariableTok{$ACTIVE\_CONTAINER}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}}\NormalTok{/dev/null }\KeywordTok{||} \FunctionTok{true}
+\ExtensionTok{docker}\NormalTok{ rm }\StringTok{"}\VariableTok{$ACTIVE\_CONTAINER}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}}\NormalTok{/dev/null }\KeywordTok{||} \FunctionTok{true}
+
+\ExtensionTok{log} \StringTok{"Deployment complete. Running: notes{-}api{-}}\VariableTok{$INACTIVE}\StringTok{ with }\VariableTok{$FULL\_IMAGE}\StringTok{"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}No request finds the door closed: new connections go to the new container from the moment of the reload, and the old container keeps running through the drain period, until the requests Nginx had already sent it are finished. (The 15 seconds is a judgment call: long enough for the Notes API's requests, which take milliseconds. An application with slow requests needs a longer drain.)
+
+\setcounter{section}{5}
+\section{Automating Deployment from CI}\label{23-code-transfer:236-automating-deployment-from-ci}
+
+The final step: trigger the deployment automatically when code is merged to main (no manual SSH required).
+
+Update the GitHub Actions workflow to include a deployment step:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Additions to .github/workflows/build.yml}
+
+\AttributeTok{  }\FunctionTok{deploy}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Deploy to Production}
+\AttributeTok{    }\FunctionTok{runs{-}on}\KeywordTok{:}\AttributeTok{ ubuntu{-}latest}
+\AttributeTok{    }\FunctionTok{needs}\KeywordTok{:}\AttributeTok{ publish}\CommentTok{       \# Only deploy if the image was published successfully}
+\AttributeTok{    }\FunctionTok{if}\KeywordTok{:}\AttributeTok{ github.ref == \textquotesingle{}refs/heads/main\textquotesingle{}}
+
+\AttributeTok{    }\FunctionTok{environment}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ production}
+\CommentTok{      \# GitHub Environments show deployment status in the repository\textquotesingle{}s}
+\CommentTok{      \# deployments page, and can require an approval before this job runs}
+\CommentTok{      \# (if you add "required reviewers" to the environment\textquotesingle{}s protection rules)}
+
+\AttributeTok{    }\FunctionTok{steps}\KeywordTok{:}
+\CommentTok{      \# github.sha is the full 40{-}character hash; the image tag uses the}
+\CommentTok{      \# first 7 characters (Chapter 19)}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Compute the image tag}
+\AttributeTok{        }\FunctionTok{id}\KeywordTok{:}\AttributeTok{ tag}
+\AttributeTok{        }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ echo "tag=sha{-}$\{GITHUB\_SHA::7\}" \textgreater{}\textgreater{} "$GITHUB\_OUTPUT"}
+
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Deploy to production server}
+\CommentTok{        \# A third{-}party action that receives a production SSH key: pin it to}
+\CommentTok{        \# a full commit SHA of a release you have reviewed, not a movable tag}
+\AttributeTok{        }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ appleboy/ssh{-}action@\textless{}full{-}commit{-}sha\textgreater{}}\CommentTok{   \# v1.x}
+\AttributeTok{        }\FunctionTok{with}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{host}\KeywordTok{:}\AttributeTok{ $\{\{ secrets.SERVER\_IP \}\}}
+\AttributeTok{          }\FunctionTok{username}\KeywordTok{:}\AttributeTok{ deploy}
+\AttributeTok{          }\FunctionTok{key}\KeywordTok{:}\AttributeTok{ $\{\{ secrets.SERVER\_SSH\_KEY \}\}}
+\CommentTok{          \# Verify the server\textquotesingle{}s host key, so CI cannot be tricked into}
+\CommentTok{          \# connecting to an impostor (get it with: ssh{-}keyscan {-}t ed25519}
+\CommentTok{          \# 203.0.113.42 | ssh{-}keygen {-}lf {-})}
+\AttributeTok{          }\FunctionTok{fingerprint}\KeywordTok{:}\AttributeTok{ $\{\{ secrets.SERVER\_HOST\_FINGERPRINT \}\}}
+\CommentTok{          \# One command, which the restricted CI key (below) allows}
+\AttributeTok{          }\FunctionTok{script}\KeywordTok{:}\AttributeTok{ /opt/notes{-}api/deploy.sh $\{\{ steps.tag.outputs.tag \}\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Setting up GitHub Secrets:}
+
+In the GitHub repository settings → Secrets and variables → Actions:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{SERVER\_IP}: the server's IP address (\texttt{203.0.113.42})
+\item
+  \texttt{SERVER\_SSH\_KEY}: the contents of a private SSH key that has access to the server (generate a separate key pair just for CI)
+\item
+  \texttt{SERVER\_HOST\_FINGERPRINT}: the server's SSH host key fingerprint
+\end{itemize}
+
+\noindent{}This job runs \texttt{deploy.sh} (Listing 23.1). To deploy with zero downtime instead, call \texttt{deploy-bluegreen.sh} (Listing 23.2)~--- the arguments are the same.
+
+\textbf{Adding the CI key to the server:}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Generate a key pair for CI (on your laptop). {-}N "" means no passphrase:}
+\CommentTok{\# CI cannot type one. The key\textquotesingle{}s protection is where it is stored.}
+\FunctionTok{ssh{-}keygen} \AttributeTok{{-}t}\NormalTok{ ed25519 }\AttributeTok{{-}C} \StringTok{"ci{-}deploy"} \AttributeTok{{-}N} \StringTok{""} \AttributeTok{{-}f}\NormalTok{ \textasciitilde{}/.ssh/notes{-}api{-}ci}
+
+\CommentTok{\# Add the private key to GitHub Secrets}
+\FunctionTok{cat}\NormalTok{ \textasciitilde{}/.ssh/notes{-}api{-}ci}
+\CommentTok{\# Copy this to GitHub → Settings → Secrets → SERVER\_SSH\_KEY}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Then add the public key to \texttt{/}\allowbreak{}\texttt{home/}\allowbreak{}\texttt{deploy/}\allowbreak{}\texttt{.}\allowbreak{}\texttt{ssh/}\allowbreak{}\texttt{authorized\_}\allowbreak{}\texttt{keys} on the server~--- not as a plain line, but with restrictions in front of it. \texttt{deploy} is in the \texttt{sudo} and \texttt{docker} groups, so an unrestricted key would give whoever steals it root on the server. With \texttt{command=}, the key can run the deployment script and nothing else, whatever command the client asks for:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+command="/opt/notes-api/ci-deploy.sh",no-pty,no-port-forwarding,no-agent-forwarding,no-X11-forwarding ssh-ed25519 AAAAC3Nza… ci-deploy
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The small wrapper receives the requested command in \texttt{\$SSH\_ORIGINAL\_COMMAND} and allows only a deployment:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#!/bin/bash}
+\CommentTok{\# /opt/notes{-}api/ci{-}deploy.sh — the only thing the CI key may run}
+\BuiltInTok{set} \AttributeTok{{-}euo}\NormalTok{ pipefail}
+\BuiltInTok{read} \AttributeTok{{-}r} \AttributeTok{{-}a} \VariableTok{args} \OperatorTok{\textless{}\textless{}\textless{}} \StringTok{"}\VariableTok{$\{SSH\_ORIGINAL\_COMMAND}\OperatorTok{:{-}}\VariableTok{\}}\StringTok{"}
+\KeywordTok{[[} \StringTok{"}\VariableTok{$\{args}\OperatorTok{[}\DecValTok{0}\OperatorTok{]:{-}}\VariableTok{\}}\StringTok{"} \OtherTok{==} \StringTok{"/opt/notes{-}api/deploy.sh"} \KeywordTok{]]} \KeywordTok{||} \KeywordTok{\{} \BuiltInTok{echo} \StringTok{"Not allowed"}\KeywordTok{;} \BuiltInTok{exit}\NormalTok{ 1}\KeywordTok{;} \KeywordTok{\}}
+\BuiltInTok{exec}\NormalTok{ /opt/notes{-}api/deploy.sh }\StringTok{"}\VariableTok{$\{args}\OperatorTok{[}\DecValTok{1}\OperatorTok{]:{-}}\VariableTok{\}}\StringTok{"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(\texttt{deploy.sh} itself rejects anything that is not a well-formed \texttt{sha-} tag. Test the whole path once from your laptop: \texttt{ssh\ -}\allowbreak{}\texttt{i\ \textasciitilde{}/}\allowbreak{}\texttt{.}\allowbreak{}\texttt{ssh/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api-}\allowbreak{}\texttt{ci\ deploy@203.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{113.}\allowbreak{}\texttt{42\ /}\allowbreak{}\texttt{opt/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{api/}\allowbreak{}\texttt{deploy.}\allowbreak{}\texttt{sh\ sha-}\allowbreak{}\texttt{a1b2c3d}.)
+
+Now the complete pipeline runs automatically:
+
+\begin{diagrambox}[short]{252.6pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+git push origin main
+         │
+         ▼
+CI: build + test + publish Docker image
+         │
+         ▼
+CI: SSH to server, run deploy.sh sha-HASH
+         │
+         ▼
+Server: docker pull ghcr.io/.../notes-api:sha-HASH
+         │
+         ▼
+Server: replace the container (or blue-green switch)
+         │
+         ▼
+Server: health check passes ✓
+         │
+         ▼
+Deployment complete — new version live
+\end{Verbatim}
+\end{diagrambox}
+
+\setcounter{section}{6}
+\section{Rollback}\label{23-code-transfer:237-rollback}
+
+When a deployment fails (health check times out), the deploy script automatically rolls back (as seen in Listing 23.1). Manual rollback is also possible:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Manual rollback to a previous version}
+\FunctionTok{ssh}\NormalTok{ deploy@203.0.113.42 }\StringTok{\textquotesingle{}/opt/notes{-}api/deploy.sh sha{-}9f8e7d6\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Because every release image is tagged with the git commit hash and stored in the registry, any previous version can be deployed with one command. This is the core value of artifact storage from \hyperref[ch:19-artifact-storage]{Chapter 19}. ``Any previous version'' has a limit, though: the registry's retention policy (Chapter 19 keeps the last 10 \texttt{sha-} images) defines how far back you can roll. Images tagged \texttt{prod-…} are kept regardless.
+
+\phantomsection\label{23-code-transfer:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Pull images, do not copy code.} Docker images are immutable, self-contained environments. Pulling eliminates environment drift, and an image arrives whole or not at all.
+\item
+  \textbf{Layer caching} makes \texttt{docker\ pull} efficient: only changed layers are transferred. Code changes typically download kilobytes, not gigabytes.
+\item
+  \textbf{A deployment script} must pull the new image, stop the old container, start the new one, verify health, and roll back on failure. Every step should be logged. On the server, containers are always published on \texttt{127.0.0.1}.
+\item
+  \textbf{The health check endpoint} (\texttt{GET\ /health}) is the deployment's verification: if it returns \texttt{\{"status":"ok"\}}, the new process is up and serving HTTP. (It does not prove the database is reachable; \hyperref[ch:35-observability]{Chapter 35} adds a deeper check.)
+\item
+  \textbf{Zero-downtime deployment} (blue-green) starts the new version alongside the old, waits for it to be healthy, switches Nginx's upstream with a graceful reload, and drains the old container before stopping it. No gap in service.
+\item
+  \textbf{Automating deployment from CI} removes human error: every merge to main triggers a deployment. The \texttt{deploy.sh} script on the server is the deployment unit~--- CI just calls it, with a key that can do nothing else.
+\item
+  \textbf{Rollback is trivial} when every version is tagged by commit in the registry. \texttt{deploy.}\allowbreak{}\texttt{sh\ sha-}\allowbreak{}\texttt{PREVIOUS\_}\allowbreak{}\texttt{HASH} rolls back to any historical version in seconds.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{23-code-transfer:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Deploy a version whose \texttt{/health} returns 500. What does \texttt{deploy.sh} do, and what is running afterwards?
+\item
+  \textbf{Break and fix.} Revoke the server's registry token, then deploy. Which step fails, what does the log say, and is the old version still serving?
+\item
+  \textbf{Extend.} Make the deploy script post a one-line message (version, result, duration) to a chat channel through a webhook URL kept in the server's environment file.
+\item
+  \textbf{Explain.} Why does the book pull images onto the server instead of copying source code and building there?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-23.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{23-code-transfer:whats-next}
+
+The application is now deployed~--- the container is running, Gunicorn is accepting connections, and the health check passes. But Gunicorn is running on port 5000, not port 80 or 443. There is no TLS. There is no reverse proxy. The application is technically running but not yet reachable in the correct way.
+
+The next step is configuring the process startup: how Gunicorn is configured, how the container is made to start automatically on boot, and what happens when the container crashes.
+
+\noindent{}→ \hyperref[ch:24-process-startup]{Chapter 24}~--- Process Startup in Production

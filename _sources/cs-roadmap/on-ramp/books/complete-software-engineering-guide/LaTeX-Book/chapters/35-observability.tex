@@ -1,0 +1,1086 @@
+\setcounter{chapter}{34}
+\chapter{Observability}\label{ch:35-observability}
+
+\chapterrule
+
+A production system that you cannot observe is a system you cannot maintain. When something breaks at 3 AM~--- a spike in error rates, a slow database, a process consuming all available memory~--- you need to know quickly, understand what is happening, and fix it.
+
+\textbf{Observability} is the property of a system that allows you to understand its internal state from its external outputs. An observable system emits enough data that you can answer questions like:
+
+\begin{itemize}
+\tightlist
+\item
+  Is the system healthy right now?
+\item
+  How many requests per second are we handling?
+\item
+  What was the error rate in the last hour?
+\item
+  Which requests are slowest, and why?
+\item
+  When did the problem start?
+\end{itemize}
+
+\noindent{}The three pillars of observability are \textbf{logs}, \textbf{metrics}, and \textbf{traces}. This chapter covers each one in the context of the Notes API, along with health checks and alerting.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What structured logging is and why it is superior to plain text logs for production
+\item
+  What metrics are, how to collect them, and what to measure
+\item
+  What distributed tracing is (conceptually) and when it matters
+\item
+  How health check endpoints work and what they should check
+\item
+  How to set up alerting so problems wake you up before users notice
+\item
+  How to query and analyze logs in a running production system
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{The Three Pillars of Observability}\label{35-observability:351-the-three-pillars-of-observability}
+
+\subsection*{Logs}\phantomsection\label{35-observability:logs}
+
+\textbf{Logs} are discrete events that happened in the system, recorded as text or structured data.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+{"timestamp":"2024-01-15T14:00:00.024Z","level":"INFO","message":"Created note id=42.","request_id":"a1b2c3"}
+{"timestamp":"2024-01-15T14:00:01.001Z","level":"ERROR","message":"Database connection failed","error":"FATAL: role \"notes_app\" does not exist"}
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Logs are good for: understanding what happened in a specific request, debugging a specific error, answering ``what exactly happened at time X?''
+
+\subsection*{Metrics}\phantomsection\label{35-observability:metrics}
+
+\textbf{Metrics} are numerical measurements aggregated over time.
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+http_requests_total{method="POST",path="/notes/",status="201"} 1492
+http_request_duration_seconds{quantile="0.5"} 0.004
+http_request_duration_seconds{quantile="0.99"} 0.028
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}(Each line is one time series: a metric name, its labels, and the current value. Section 35.4 shows what a real application exposes.)
+
+Metrics are good for: trending (``is error rate going up?''), capacity planning (``how many requests per second can we handle?''), alerting (``alert me if p99 latency exceeds 500ms'').
+
+\subsection*{Traces}\phantomsection\label{35-observability:traces}
+
+\textbf{Traces} follow a single request through all the services it touches. In a microservices architecture, a single user request might touch 10 different services. A trace shows the timeline: which service did what, in what order, and how long each step took.
+
+For the Notes API (a single-service application), tracing is less critical. A single request touches: Flask → PostgreSQL. The important timing information can come from logs (request duration) and database slow query logs.
+
+Traces become essential when you have multiple services and need to find which one is causing latency.
+
+\setcounter{section}{1}
+\section{Structured Logging in Depth}\label{35-observability:352-structured-logging-in-depth}
+
+\hyperref[ch:16-logging-error-handling]{Chapter 16} introduced structured logging~--- JSON-formatted log messages. Let's go deeper on \emph{what} to log and \emph{how} to make logs useful.
+
+\subsection*{What every request log should contain}\phantomsection\label{35-observability:what-every-request-log-should-contain}
+
+A request log entry should answer:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Who}: the client IP, the authenticated user (if applicable), an API key (if applicable)
+\item
+  \textbf{What}: the HTTP method, the URL path, the request ID (a unique identifier for this request)
+\item
+  \textbf{When}: the timestamp (with milliseconds and timezone)
+\item
+  \textbf{How long}: the duration in milliseconds
+\item
+  \textbf{Outcome}: the HTTP status code
+\end{itemize}
+
+\noindent{}Chapter 16's middleware already logs every request's arrival and departure. Two changes turn those lines into this record. Each request gets a \textbf{request ID}, and the log calls pass the details as \texttt{extra} fields, which the JSON formatter from Chapter 16 copies into the output:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/middleware.py — changes to Chapter 16\textquotesingle{}s register\_middleware()}
+\ImportTok{import}\NormalTok{ uuid}
+
+    \AttributeTok{@app.before\_request}
+    \KeywordTok{def}\NormalTok{ log\_request\_start():}
+        \CommentTok{\# A unique ID for this request: every log line it produces carries}
+        \CommentTok{\# it, so all the lines of one request can be found together}
+\NormalTok{        g.request\_id }\OperatorTok{=} \BuiltInTok{str}\NormalTok{(uuid.uuid4())}
+\NormalTok{        g.request\_start\_time }\OperatorTok{=}\NormalTok{ time.perf\_counter()}
+\NormalTok{        logger.info(}
+            \StringTok{"→ }\SpecialCharTok{\%s}\StringTok{ }\SpecialCharTok{\%s}\StringTok{ (from }\SpecialCharTok{\%s}\StringTok{)"}\NormalTok{,}
+\NormalTok{            request.method,}
+\NormalTok{            request.path,}
+\NormalTok{            request.remote\_addr,}
+\NormalTok{            extra}\OperatorTok{=}\NormalTok{\{}
+                \StringTok{"method"}\NormalTok{: request.method,}
+                \StringTok{"path"}\NormalTok{: request.path,}
+                \StringTok{"remote\_addr"}\NormalTok{: request.remote\_addr,}
+\NormalTok{            \},}
+\NormalTok{        )}
+
+    \AttributeTok{@app.after\_request}
+    \KeywordTok{def}\NormalTok{ log\_request\_end(response):}
+\NormalTok{        start }\OperatorTok{=}\NormalTok{ g.get(}\StringTok{"request\_start\_time"}\NormalTok{, time.perf\_counter())}
+\NormalTok{        elapsed\_ms }\OperatorTok{=}\NormalTok{ (time.perf\_counter() }\OperatorTok{{-}}\NormalTok{ start) }\OperatorTok{*} \DecValTok{1000}
+\NormalTok{        response.headers[}\StringTok{"X{-}Response{-}Time{-}Ms"}\NormalTok{] }\OperatorTok{=} \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{elapsed\_ms}\SpecialCharTok{:.1f\}}\SpecialStringTok{"}
+        \CommentTok{\# Give the ID to the client too: a user reporting a problem can}
+        \CommentTok{\# quote it, and you can find that exact request in the logs}
+\NormalTok{        response.headers[}\StringTok{"X{-}Request{-}ID"}\NormalTok{] }\OperatorTok{=}\NormalTok{ g.get(}\StringTok{"request\_id"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+        \CommentTok{\# Log level by status code, as in Chapter 16}
+        \ControlFlowTok{if}\NormalTok{ response.status\_code }\OperatorTok{\textgreater{}=} \DecValTok{500}\NormalTok{:}
+\NormalTok{            log\_fn }\OperatorTok{=}\NormalTok{ logger.error}
+        \ControlFlowTok{elif}\NormalTok{ response.status\_code }\OperatorTok{\textgreater{}=} \DecValTok{400}\NormalTok{:}
+\NormalTok{            log\_fn }\OperatorTok{=}\NormalTok{ logger.warning}
+        \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{            log\_fn }\OperatorTok{=}\NormalTok{ logger.info}
+\NormalTok{        log\_fn(}
+            \StringTok{"← }\SpecialCharTok{\%s}\StringTok{ in }\SpecialCharTok{\%.1f}\StringTok{ms"}\NormalTok{,}
+\NormalTok{            response.status\_code,}
+\NormalTok{            elapsed\_ms,}
+\NormalTok{            extra}\OperatorTok{=}\NormalTok{\{}
+                \StringTok{"method"}\NormalTok{: request.method,}
+                \StringTok{"path"}\NormalTok{: request.path,}
+                \StringTok{"status\_code"}\NormalTok{: response.status\_code,}
+                \StringTok{"duration\_ms"}\NormalTok{: }\BuiltInTok{round}\NormalTok{(elapsed\_ms, }\DecValTok{2}\NormalTok{),}
+                \StringTok{"content\_length"}\NormalTok{: response.content\_length,}
+\NormalTok{            \},}
+\NormalTok{        )}
+        \ControlFlowTok{return}\NormalTok{ response}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The messages stay the same~--- the log searches in \hyperref[ch:25-process-management]{Chapter 25} still work~--- but each line now also carries separate, typed fields. (The human-readable formatter prints only the message; the \texttt{extra} fields appear in JSON output.)
+
+\subsection*{The request\_id: correlated logs}\phantomsection\label{35-observability:the-request-id-correlated-logs}
+
+The \texttt{request\_id} is a UUID generated at the start of each request. When every log message for that request includes the same \texttt{request\_id}, you can filter log output to see everything that happened during one specific request:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In a log aggregation system, filter by request\_id:}
+\ExtensionTok{request\_id}\NormalTok{ = }\StringTok{"a1b2c3d4{-}e5f6{-}7890{-}abcd{-}ef1234567890"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Output (abbreviated: the \texttt{function} and \texttt{line} fields are left out):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}\DataTypeTok{"timestamp"}\FunctionTok{:}\StringTok{"2024{-}01{-}15T14:00:00.020Z"}\FunctionTok{,}\DataTypeTok{"level"}\FunctionTok{:}\StringTok{"INFO"}\FunctionTok{,}\DataTypeTok{"logger"}\FunctionTok{:}\StringTok{"app.middleware"}\FunctionTok{,}\DataTypeTok{"message"}\FunctionTok{:}\StringTok{"→ POST /notes/ (from 89.100.200.50)"}\FunctionTok{,}\DataTypeTok{"request\_id"}\FunctionTok{:}\StringTok{"a1b2c3d4…"}\FunctionTok{,}\DataTypeTok{"method"}\FunctionTok{:}\StringTok{"POST"}\FunctionTok{,}\DataTypeTok{"path"}\FunctionTok{:}\StringTok{"/notes/"}\FunctionTok{,}\DataTypeTok{"remote\_addr"}\FunctionTok{:}\StringTok{"89.100.200.50"}\FunctionTok{\}}
+\FunctionTok{\{}\DataTypeTok{"timestamp"}\FunctionTok{:}\StringTok{"2024{-}01{-}15T14:00:00.034Z"}\FunctionTok{,}\DataTypeTok{"level"}\FunctionTok{:}\StringTok{"INFO"}\FunctionTok{,}\DataTypeTok{"logger"}\FunctionTok{:}\StringTok{"app.routes.notes"}\FunctionTok{,}\DataTypeTok{"message"}\FunctionTok{:}\StringTok{"Created note id=42."}\FunctionTok{,}\DataTypeTok{"request\_id"}\FunctionTok{:}\StringTok{"a1b2c3d4…"}\FunctionTok{\}}
+\FunctionTok{\{}\DataTypeTok{"timestamp"}\FunctionTok{:}\StringTok{"2024{-}01{-}15T14:00:00.034Z"}\FunctionTok{,}\DataTypeTok{"level"}\FunctionTok{:}\StringTok{"INFO"}\FunctionTok{,}\DataTypeTok{"logger"}\FunctionTok{:}\StringTok{"app.middleware"}\FunctionTok{,}\DataTypeTok{"message"}\FunctionTok{:}\StringTok{"← 201 in 14.3ms"}\FunctionTok{,}\DataTypeTok{"request\_id"}\FunctionTok{:}\StringTok{"a1b2c3d4…"}\FunctionTok{,}\DataTypeTok{"method"}\FunctionTok{:}\StringTok{"POST"}\FunctionTok{,}\DataTypeTok{"path"}\FunctionTok{:}\StringTok{"/notes/"}\FunctionTok{,}\DataTypeTok{"status\_code"}\FunctionTok{:}\DecValTok{201}\FunctionTok{,}\DataTypeTok{"duration\_ms"}\FunctionTok{:}\FloatTok{14.3}\FunctionTok{,}\DataTypeTok{"content\_length"}\FunctionTok{:}\DecValTok{84}\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Without the \texttt{request\_id}, logs from concurrent requests are interleaved and impossible to untangle.
+
+\subsection*{Including request\_id in all log messages}\phantomsection\label{35-observability:including-request-id-in-all-log-messages}
+
+The challenge: \texttt{g.request\_id} is set in a before\_request hook, but it needs to appear in log messages from any module (\texttt{app.database}, \texttt{app.routes.notes}, etc.). Passing the \texttt{request\_id} explicitly through every function call is impractical.
+
+Solution: use Python's logging filter mechanism to inject the \texttt{request\_id} into every log record. Add the filter to Chapter 16's \texttt{app/}\allowbreak{}\texttt{logging\_config.py}, and attach it to its handlers:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/logging\_config.py (additions)}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ g, has\_request\_context}
+
+\KeywordTok{class}\NormalTok{ RequestIDFilter(logging.Filter):}
+    \CommentTok{"""}
+\CommentTok{    A logging filter that injects the current request ID into log records.}
+
+\CommentTok{    Attached to the log handlers: every record that passes through them}
+\CommentTok{    gets a \textquotesingle{}request\_id\textquotesingle{} attribute, which the JSON formatter from}
+\CommentTok{    Chapter 16 copies into the output like any other extra field.}
+\CommentTok{    """}
+    \KeywordTok{def} \BuiltInTok{filter}\NormalTok{(}\VariableTok{self}\NormalTok{, record):}
+        \CommentTok{\# has\_request\_context() returns True when inside a Flask request}
+        \ControlFlowTok{if}\NormalTok{ has\_request\_context():}
+\NormalTok{            record.request\_id }\OperatorTok{=}\NormalTok{ g.get(}\StringTok{"request\_id"}\NormalTok{)}
+        \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{            record.request\_id }\OperatorTok{=} \VariableTok{None}   \CommentTok{\# startup messages, for example}
+        \ControlFlowTok{return} \VariableTok{True}  \CommentTok{\# Always emit the log record}
+
+\CommentTok{\# In configure\_logging(), after creating the handlers:}
+\NormalTok{    console\_handler.addFilter(RequestIDFilter())}
+    \ControlFlowTok{if}\NormalTok{ file\_handler:}
+\NormalTok{        file\_handler.addFilter(RequestIDFilter())}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Now every \texttt{logger.}\allowbreak{}\texttt{info("Created\ note\ id=}\allowbreak{}\texttt{\%d.}\allowbreak{}\texttt{",}\allowbreak{}\texttt{\ note\_}\allowbreak{}\texttt{id)} call automatically includes the \texttt{request\_id} in the JSON output~--- from any module, without passing anything around. Nothing else in \texttt{logging\_config.py} changes: the JSON formatter already copies every non-standard attribute of a record, and its timestamp is already ISO 8601 in UTC.
+
+\subsection*{What NOT to log}\phantomsection\label{35-observability:what-not-to-log}
+
+Logs are often stored long-term and may be accessed by many people. Never log:
+
+\begin{itemize}
+\tightlist
+\item
+  Passwords or password hashes
+\item
+  API keys or tokens
+\item
+  Credit card numbers
+\item
+  Social security numbers or government IDs
+\item
+  Full request bodies (they may contain sensitive data)
+\item
+  Database connection strings (they contain passwords)
+\end{itemize}
+
+\noindent{}For the Notes API:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# WRONG:}
+\NormalTok{logger.info(}\StringTok{"DB connection: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, DATABASE\_URL)}
+\CommentTok{\# This logs the database password!}
+
+\CommentTok{\# CORRECT: log only the parts that are safe to show}
+\NormalTok{parsed }\OperatorTok{=}\NormalTok{ urlparse(DATABASE\_URL)}
+\NormalTok{logger.info(}\StringTok{"Connecting to database at }\SpecialCharTok{\%s}\StringTok{/}\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, parsed.hostname, parsed.path.lstrip(}\StringTok{"/"}\NormalTok{))}
+\CommentTok{\# (The startup checks from Chapter 15 mask the password the same way: \_mask())}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{2}
+\section{Health Checks}\label{35-observability:353-health-checks}
+
+A \textbf{health check endpoint} is a URL that external systems (load balancers, orchestrators, monitoring systems) can query to determine if the application is functioning.
+
+Docker's \texttt{HEALTHCHECK} directive, load balancers (including the commercial NGINX Plus~--- open-source Nginx only checks passively), Kubernetes probes, and uptime monitors all call a health check endpoint and interpret the response.
+
+\subsection*{What a health check should do}\phantomsection\label{35-observability:what-a-health-check-should-do}
+
+A good health check verifies:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{The application is running} (the endpoint responds at all)
+\item
+  \textbf{Critical dependencies are reachable} (the database is accessible)
+\item
+  \textbf{The application can serve requests} (it can actually do work, not just listen)
+\end{enumerate}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/health.py (replaces the Chapter 15 version)}
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{import}\NormalTok{ time}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Blueprint, jsonify}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\NormalTok{health\_bp }\OperatorTok{=}\NormalTok{ Blueprint(}\StringTok{"health"}\NormalTok{, }\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\AttributeTok{@health\_bp.route}\NormalTok{(}\StringTok{"/health"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ health\_check():}
+    \CommentTok{"""}
+\CommentTok{    Deep health check: is the application able to do its job?}
+
+\CommentTok{    Returns 200 \{"status": "ok", ...\} if healthy, 503 \{"status": "unhealthy", ...\}}
+\CommentTok{    if not. Called by:}
+\CommentTok{    {-} the deploy scripts, to verify a new container (Chapter 23)}
+\CommentTok{    {-} uptime monitors (section 35.6)}
+\CommentTok{    """}
+\NormalTok{    checks }\OperatorTok{=}\NormalTok{ \{\}}
+\NormalTok{    overall\_healthy }\OperatorTok{=} \VariableTok{True}
+
+    \CommentTok{\# Database connectivity}
+\NormalTok{    db\_start }\OperatorTok{=}\NormalTok{ time.perf\_counter()}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{        cursor.execute(}\StringTok{"SELECT 1"}\NormalTok{)}
+\NormalTok{        cursor.fetchone()}
+\NormalTok{        checks[}\StringTok{"database"}\NormalTok{] }\OperatorTok{=}\NormalTok{ \{}
+            \StringTok{"status"}\NormalTok{: }\StringTok{"ok"}\NormalTok{,}
+            \StringTok{"latency\_ms"}\NormalTok{: }\BuiltInTok{round}\NormalTok{((time.perf\_counter() }\OperatorTok{{-}}\NormalTok{ db\_start) }\OperatorTok{*} \DecValTok{1000}\NormalTok{, }\DecValTok{2}\NormalTok{),}
+\NormalTok{        \}}
+    \ControlFlowTok{except} \PreprocessorTok{Exception}\NormalTok{:}
+        \CommentTok{\# Log the details; tell the caller only that the check failed.}
+        \CommentTok{\# (An exception message from the driver can include the database}
+        \CommentTok{\# host, port and user name — nothing a public endpoint should show.)}
+\NormalTok{        logger.exception(}\StringTok{"Health check: database unhealthy"}\NormalTok{)}
+\NormalTok{        checks[}\StringTok{"database"}\NormalTok{] }\OperatorTok{=}\NormalTok{ \{}\StringTok{"status"}\NormalTok{: }\StringTok{"unhealthy"}\NormalTok{\}}
+\NormalTok{        overall\_healthy }\OperatorTok{=} \VariableTok{False}
+
+\NormalTok{    status\_code }\OperatorTok{=} \DecValTok{200} \ControlFlowTok{if}\NormalTok{ overall\_healthy }\ControlFlowTok{else} \DecValTok{503}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}
+        \StringTok{"status"}\NormalTok{: }\StringTok{"ok"} \ControlFlowTok{if}\NormalTok{ overall\_healthy }\ControlFlowTok{else} \StringTok{"unhealthy"}\NormalTok{,}
+        \StringTok{"checks"}\NormalTok{: checks,}
+\NormalTok{    \}), status\_code}
+
+\AttributeTok{@health\_bp.route}\NormalTok{(}\StringTok{"/ping"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ ping():}
+    \CommentTok{"""Shallow health check: is the process up and answering HTTP?"""}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"status"}\NormalTok{: }\StringTok{"ok"}\NormalTok{\}), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The top-level \texttt{status} is still \texttt{"ok"} when all is well, so every existing consumer~--- the \texttt{grep\ \textquotesingle{}"status":"ok"\textquotesingle{}} in the deploy scripts, the smoke test in CI~--- keeps working; and a failing check now also changes the HTTP status to 503, which \texttt{curl\ -f} treats as a failure. (Checking the status code is the sturdier habit: it does not depend on the exact JSON.)
+
+\subsection*{Shallow vs deep health checks}\phantomsection\label{35-observability:shallow-vs-deep-health-checks}
+
+The check above is a \textbf{deep health check}~--- it verifies external dependencies (the database). This is the most useful kind, but it has a cost: every health check makes a database query.
+
+A \textbf{shallow health check} (also called a liveness check)~--- the \texttt{/ping} route above~--- just verifies the process is running.
+
+Some systems use both:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Liveness check} (\texttt{/ping}): fast, no dependencies. If this fails, the process is completely unresponsive~--- restart it.
+\item
+  \textbf{Readiness check} (\texttt{/health}): verifies dependencies. If this fails, stop routing traffic here, but don't restart the process (the process is alive; the dependency is down).
+\end{itemize}
+
+\noindent{}This distinction decides which URL each consumer should call. The Dockerfile's \texttt{HEALTHCHECK} (\hyperref[ch:18-containerization]{Chapter 18}) is a liveness check: point it at \texttt{/ping} from now on. Otherwise a short database outage marks \emph{every} container unhealthy at once, and an orchestrator that restarts unhealthy containers would restart them all~--- which cannot fix a database. The deploy scripts keep calling \texttt{/health}: a new version that cannot reach its database should not go live.
+
+\subsection*{Protecting the health endpoint}\phantomsection\label{35-observability:protecting-the-health-endpoint}
+
+The health check endpoint must be reachable by the monitoring infrastructure, but not necessarily by the public. Options:
+
+\begin{itemize}
+\tightlist
+\item
+  Rate-limit it in Nginx (it should only be called a few times per minute, not thousands)
+\item
+  Restrict it to known IP addresses in Nginx
+\item
+  Or simply leave it public
+\end{itemize}
+
+\noindent{}The Notes API leaves \texttt{/health} public: it reveals only \texttt{ok} or \texttt{unhealthy} per check, and an external uptime monitor (section 35.6) must be able to reach it. If you restrict it, remember to allow your monitor's addresses too:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# Allow health checks only from the server itself, the VPC, and the monitor}
+\NormalTok{location /health \{}
+\NormalTok{    allow 127.0.0.1;}
+\NormalTok{    allow 10.0.0.0/8;          \# VPC range}
+\NormalTok{    allow 198.51.100.0/24;     \# your uptime monitor\textquotesingle{}s published addresses}
+\NormalTok{    deny all;}
+\NormalTok{    proxy\_pass http://notes\_api;}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{3}
+\section{Metrics Collection}\label{35-observability:354-metrics-collection}
+
+Logs tell you \emph{what} happened. Metrics tell you \emph{how much} and \emph{how fast}.
+
+The most common metrics to collect for a web API:
+
+\Needspace{16\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3416}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1509}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5075}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Metric
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What it tells you
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{http\_requests\_total} & Counter & Total requests over time; rate = requests per second. A \texttt{status} label breaks it down by status code \\
+\texttt{http\_}\allowbreak{}\texttt{request\_}\allowbreak{}\texttt{duration\_}\allowbreak{}\texttt{seconds} & Histogram & Latency distribution (p50, p95, p99) \\
+\texttt{database\_}\allowbreak{}\texttt{query\_}\allowbreak{}\texttt{duration\_}\allowbreak{}\texttt{seconds} & Histogram & Database latency distribution \\
+\texttt{active\_requests} & Gauge & Currently in-flight requests \\
+\texttt{memory\_usage\_bytes} & Gauge & Memory used by the process \\
+\end{longtable}
+}
+
+\subsection*{Prometheus: the de facto standard}\phantomsection\label{35-observability:prometheus-the-de-facto-standard}
+
+\textbf{Prometheus} is the most widely-used open-source metrics collection system. It works by \textbf{scraping}~--- periodically fetching a \texttt{/metrics} endpoint from your application and storing the values in a time-series database.
+
+The \texttt{prometheus-}\allowbreak{}\texttt{flask-}\allowbreak{}\texttt{exporter} library instruments Flask automatically. One detail decides how to set it up: the Notes API runs under \textbf{Gunicorn with several worker processes}, and each worker would count only the requests \emph{it} handled. A scrape of \texttt{/metrics} would reach one random worker and report only that worker's numbers, so graphs would jump around and totals would be wrong. The library's \textbf{multiprocess mode} fixes this: every worker writes its counters to files in a shared directory, and a small HTTP server in the Gunicorn master adds them up.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install prometheus{-}flask{-}exporter   }\CommentTok{\# and add it, pinned, to requirements.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/\_\_init\_\_.py}
+\ImportTok{from}\NormalTok{ prometheus\_flask\_exporter.multiprocess }\ImportTok{import}\NormalTok{ GunicornPrometheusMetrics}
+
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ PROMETHEUS\_MULTIPROC\_DIR}
+
+\KeywordTok{def}\NormalTok{ create\_app():}
+\NormalTok{    app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+    \CommentTok{\# ...}
+
+    \CommentTok{\# Multiprocess metrics need their shared directory, which the Docker image}
+    \CommentTok{\# provides (below). Elsewhere (the tests, python run.py) the library would}
+    \CommentTok{\# refuse to start, so the application runs without metrics instead.}
+    \ControlFlowTok{if}\NormalTok{ PROMETHEUS\_MULTIPROC\_DIR:}
+        \CommentTok{\# Automatically tracks, for every request:}
+        \CommentTok{\# {-} flask\_http\_request\_duration\_seconds  (histogram: method, path, status)}
+        \CommentTok{\# {-} flask\_http\_request\_total             (counter: method, status)}
+\NormalTok{        metrics }\OperatorTok{=}\NormalTok{ GunicornPrometheusMetrics(app)}
+
+        \CommentTok{\# An "info" metric carrying labels about the running application}
+\NormalTok{        metrics.info(}\StringTok{"app\_info"}\NormalTok{, }\StringTok{"Application info"}\NormalTok{, version}\OperatorTok{=}\StringTok{"1.0.0"}\NormalTok{)}
+
+    \ControlFlowTok{return}\NormalTok{ app}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{PROMETHEUS\_}\allowbreak{}\texttt{MULTIPROC\_}\allowbreak{}\texttt{DIR} is read in \texttt{app/config.py}, like every other setting: \texttt{PROMETHEUS\_}\allowbreak{}\texttt{MULTIPROC\_}\allowbreak{}\texttt{DIR:}\allowbreak{}\texttt{\ str\ =}\allowbreak{}\texttt{\ os.}\allowbreak{}\texttt{getenv("PROMETHEUS\_}\allowbreak{}\texttt{MULTIPROC\_}\allowbreak{}\texttt{DIR",}\allowbreak{}\texttt{\ "")}. Without that condition, \texttt{GunicornPrometheusMetrics(app)} raises \texttt{ValueError:}\allowbreak{}\texttt{\ one\ of\ env\ PROMETHEUS\_}\allowbreak{}\texttt{MULTIPROC\_}\allowbreak{}\texttt{DIR\ or\ env\ prometheus\_}\allowbreak{}\texttt{multiproc\_}\allowbreak{}\texttt{dir\ must\ be\ set\ and\ be\ a\ directory}, and every test fails at \texttt{create\_app()}.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# gunicorn.conf.py (additions)}
+\ImportTok{import}\NormalTok{ os}
+
+\ImportTok{from}\NormalTok{ prometheus\_flask\_exporter.multiprocess }\ImportTok{import}\NormalTok{ GunicornPrometheusMetrics}
+
+\CommentTok{\# Like create\_app(), only with the metrics directory set (the Docker image).}
+\CommentTok{\# Without it, both calls raise ValueError and Gunicorn would not start.}
+\NormalTok{METRICS }\OperatorTok{=} \BuiltInTok{bool}\NormalTok{(os.getenv(}\StringTok{"PROMETHEUS\_MULTIPROC\_DIR"}\NormalTok{))}
+
+\KeywordTok{def}\NormalTok{ when\_ready(server):}
+    \CommentTok{\# Serve the combined metrics of all workers on port 9200}
+    \ControlFlowTok{if}\NormalTok{ METRICS:}
+\NormalTok{        GunicornPrometheusMetrics.start\_http\_server\_when\_ready(}\DecValTok{9200}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ child\_exit(server, worker):}
+    \CommentTok{\# Tell the metrics library that a worker has gone}
+    \ControlFlowTok{if}\NormalTok{ METRICS:}
+\NormalTok{        GunicornPrometheusMetrics.mark\_process\_dead\_on\_child\_exit(worker.pid)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Multiprocess mode needs one more setting: an empty, writable directory for the workers' files, named by an environment variable. In the Dockerfile:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ENV}\NormalTok{ PROMETHEUS\_MULTIPROC\_DIR=/tmp/prometheus}
+\KeywordTok{RUN} \FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ /tmp/prometheus }\KeywordTok{\&\&} \FunctionTok{chown}\NormalTok{ notes:notes /tmp/prometheus}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The metrics are now served on port 9200, separately from the API~--- so they never go through Nginx to the public. On the server, publish that port on the loopback address too, by adding \texttt{-p\ 127.0.0.1:9200:9200} to the \texttt{docker\ run} commands in the deploy scripts.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ http://127.0.0.1:9200/metrics}
+
+\CommentTok{\# Output (Prometheus text format, abbreviated):}
+\CommentTok{\# HELP flask\_http\_request\_duration\_seconds Flask HTTP request duration in seconds}
+\CommentTok{\# TYPE flask\_http\_request\_duration\_seconds histogram}
+\ExtensionTok{flask\_http\_request\_duration\_seconds\_bucket}\DataTypeTok{\{le=}\StringTok{"0.005"}\OperatorTok{,}\DataTypeTok{method=}\StringTok{"GET"}\OperatorTok{,}\DataTypeTok{path=}\StringTok{"/notes/"}\OperatorTok{,}\DataTypeTok{status=}\StringTok{"200"}\DataTypeTok{\}}\NormalTok{ 145.0}
+\ExtensionTok{flask\_http\_request\_duration\_seconds\_bucket}\DataTypeTok{\{le=}\StringTok{"0.01"}\OperatorTok{,}\DataTypeTok{method=}\StringTok{"GET"}\OperatorTok{,}\DataTypeTok{path=}\StringTok{"/notes/"}\OperatorTok{,}\DataTypeTok{status=}\StringTok{"200"}\DataTypeTok{\}}\NormalTok{ 198.0}
+\ExtensionTok{...}
+\ExtensionTok{flask\_http\_request\_duration\_seconds\_count}\DataTypeTok{\{method=}\StringTok{"GET"}\OperatorTok{,}\DataTypeTok{path=}\StringTok{"/notes/"}\OperatorTok{,}\DataTypeTok{status=}\StringTok{"200"}\DataTypeTok{\}}\NormalTok{ 203.0}
+\ExtensionTok{flask\_http\_request\_duration\_seconds\_sum}\DataTypeTok{\{method=}\StringTok{"GET"}\OperatorTok{,}\DataTypeTok{path=}\StringTok{"/notes/"}\OperatorTok{,}\DataTypeTok{status=}\StringTok{"200"}\DataTypeTok{\}}\NormalTok{ 0.892}
+\CommentTok{\# HELP flask\_http\_request\_total Total number of HTTP requests}
+\CommentTok{\# TYPE flask\_http\_request\_total counter}
+\ExtensionTok{flask\_http\_request\_total}\DataTypeTok{\{method=}\StringTok{"GET"}\OperatorTok{,}\DataTypeTok{status=}\StringTok{"200"}\DataTypeTok{\}}\NormalTok{ 203.0}
+\ExtensionTok{flask\_http\_request\_total}\DataTypeTok{\{method=}\StringTok{"POST"}\OperatorTok{,}\DataTypeTok{status=}\StringTok{"201"}\DataTypeTok{\}}\NormalTok{ 1492.0}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Custom metrics}\phantomsection\label{35-observability:custom-metrics}
+
+Track application-specific quantities (in multiprocess mode, counters and histograms are combined across workers automatically):
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ prometheus\_client }\ImportTok{import}\NormalTok{ Counter, Histogram}
+
+\NormalTok{notes\_created }\OperatorTok{=}\NormalTok{ Counter(}
+    \StringTok{"notes\_created\_total"}\NormalTok{,}
+    \StringTok{"Total number of notes created"}\NormalTok{,}
+\NormalTok{)}
+
+\NormalTok{note\_content\_length }\OperatorTok{=}\NormalTok{ Histogram(}
+    \StringTok{"note\_content\_length\_bytes"}\NormalTok{,}
+    \StringTok{"Length of note content at creation time"}\NormalTok{,}
+\NormalTok{    buckets}\OperatorTok{=}\NormalTok{[}\DecValTok{10}\NormalTok{, }\DecValTok{50}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{500}\NormalTok{, }\DecValTok{1000}\NormalTok{, }\DecValTok{5000}\NormalTok{, }\DecValTok{10000}\NormalTok{],}
+\NormalTok{)}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+    \CommentTok{\# ... validation ...}
+    \CommentTok{\# ... database insert ...}
+\NormalTok{    notes\_created.inc()                          }\CommentTok{\# Increment the counter}
+\NormalTok{    note\_content\_length.observe(}\BuiltInTok{len}\NormalTok{(content))    }\CommentTok{\# Record the content length}
+    \ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{201}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Setting up Prometheus and Grafana}\phantomsection\label{35-observability:setting-up-prometheus-and-grafana}
+
+In a complete production setup:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# docker{-}compose.monitoring.yml (monitoring stack, on the same server)}
+\FunctionTok{services}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{prometheus}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{image}\KeywordTok{:}\AttributeTok{ prom/prometheus:v2.53.0}\CommentTok{       \# pinned, never :latest (Chapter 19)}
+\CommentTok{    \# Host networking: Prometheus can reach 127.0.0.1:9200, and its own}
+\CommentTok{    \# port stays behind UFW — nothing is published through Docker, so}
+\CommentTok{    \# nothing bypasses the firewall (Chapter 21)}
+\AttributeTok{    }\FunctionTok{network\_mode}\KeywordTok{:}\AttributeTok{ host}
+\AttributeTok{    }\FunctionTok{command}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\StringTok{"{-}{-}config.file=/etc/prometheus/prometheus.yml"}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\StringTok{"{-}{-}web.listen{-}address=127.0.0.1:9090"}\CommentTok{   \# no authentication: loopback only}
+\AttributeTok{    }\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ ./prometheus.yml:/etc/prometheus/prometheus.yml:ro}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ prometheus{-}data:/prometheus}
+
+\AttributeTok{  }\FunctionTok{grafana}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{image}\KeywordTok{:}\AttributeTok{ grafana/grafana:11.1.0}
+\AttributeTok{    }\FunctionTok{network\_mode}\KeywordTok{:}\AttributeTok{ host}
+\AttributeTok{    }\FunctionTok{environment}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{GF\_SERVER\_HTTP\_ADDR}\KeywordTok{:}\AttributeTok{ }\StringTok{"127.0.0.1"}
+\AttributeTok{    }\FunctionTok{env\_file}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ /opt/notes{-}api/config/grafana.env}\CommentTok{   \# GF\_SECURITY\_ADMIN\_PASSWORD=… (mode 600)}
+\AttributeTok{    }\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ grafana{-}data:/var/lib/grafana}
+
+\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{prometheus{-}data}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{grafana{-}data}\KeywordTok{:}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# prometheus.yml}
+\FunctionTok{global}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{scrape\_interval}\KeywordTok{:}\AttributeTok{ 15s}\CommentTok{  \# Scrape every 15 seconds}
+
+\FunctionTok{scrape\_configs}\KeywordTok{:}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{job\_name}\KeywordTok{:}\AttributeTok{ }\StringTok{"notes{-}api"}
+\AttributeTok{    }\FunctionTok{static\_configs}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{targets}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"127.0.0.1:9200"}\KeywordTok{]}\CommentTok{  \# The metrics server in the Gunicorn master}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Both web interfaces listen on the server's loopback address only. To use them from your laptop, forward the ports over SSH:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ssh} \AttributeTok{{-}L}\NormalTok{ 3000:127.0.0.1:3000 }\AttributeTok{{-}L}\NormalTok{ 9090:127.0.0.1:9090 notes{-}api}
+\CommentTok{\# then open http://localhost:3000 (Grafana) in your browser}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Grafana connects to Prometheus and lets you build dashboards: requests per second, error rates, p99 latency, database query times, all plotted over time.
+
+\subsection*{The four golden signals}\phantomsection\label{35-observability:the-four-golden-signals}
+
+Google's Site Reliability Engineering book identifies four ``golden signals'' that should be monitored for any user-facing service:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Latency}: How long requests take. Track p50 (median), p95, p99. A rising p99 means the slowest 1\% of requests are getting slower.
+\item
+  \textbf{Traffic}: How many requests per second. Sudden increases might indicate an attack; sudden decreases might indicate a problem with clients.
+\item
+  \textbf{Errors}: The rate of requests that fail (5xx status codes, or 4xx for client errors that shouldn't be occurring). A rising error rate is usually the first sign of a problem.
+\item
+  \textbf{Saturation}: How full the system is. CPU usage, memory usage, the number of open database connections compared with the database's limit. Saturation predicts future problems before they become failures.
+\end{enumerate}
+
+\setcounter{section}{4}
+\section{Log Aggregation}\label{35-observability:355-log-aggregation}
+
+When your application runs in Docker on a single server, logs go to stdout/stderr and are captured by Docker's log driver. You can view them with \texttt{docker\ logs\ notes-api}.
+
+For production, you need logs to be:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Persistent}: available even after the container restarts
+\item
+  \textbf{Searchable}: queryable by timestamp, level, field values
+\item
+  \textbf{Aggregated}: from all servers in one place (when you scale to multiple servers)
+\end{itemize}
+
+\subsection*{The ELK Stack}\phantomsection\label{35-observability:the-elk-stack}
+
+The most common open-source log aggregation system:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Elasticsearch}: stores and indexes logs
+\item
+  \textbf{Logstash} (or \textbf{Filebeat}): ships logs from servers to Elasticsearch
+\item
+  \textbf{Kibana}: web UI for searching and visualizing logs
+\end{itemize}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Application → stdout → Docker log driver → Filebeat → Elasticsearch → Kibana
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{Cloud logging services}\phantomsection\label{35-observability:cloud-logging-services}
+
+For a small production setup, cloud logging services are simpler than running your own ELK stack:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{DigitalOcean Monitoring}: free server metrics (CPU, memory, disk) and alert policies for Droplets~--- but no search over application logs
+\item
+  \textbf{AWS CloudWatch}: managed log storage and search
+\item
+  \textbf{Datadog}: all-in-one monitoring (logs + metrics + traces), paid
+\item
+  \textbf{Better Stack}, \textbf{Papertrail}, and similar hosted log services: ship logs to them, search them in a web UI
+\end{itemize}
+
+\noindent{}(Plans, free tiers, and even product names in this market change often~--- check the current offer before you choose.)
+
+For the Notes API on one Droplet, DigitalOcean's metrics plus \texttt{docker\ logs} and \texttt{jq} are enough to start with.
+
+\subsection*{Querying logs in production}\phantomsection\label{35-observability:querying-logs-in-production}
+
+With Docker on a single server:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# View all logs for the notes{-}api container}
+\ExtensionTok{docker}\NormalTok{ logs notes{-}api}
+
+\CommentTok{\# Follow logs in real time}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}f}\NormalTok{ notes{-}api}
+
+\CommentTok{\# Show only the last 100 lines}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}tail}\NormalTok{ 100 notes{-}api}
+
+\CommentTok{\# Filter logs since a specific time}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}since} \StringTok{"2024{-}01{-}15T14:00:00"}\NormalTok{ notes{-}api}
+
+\CommentTok{\# Pipe to jq for JSON parsing. {-}R reads raw lines, and fromjson? parses}
+\CommentTok{\# the ones that are JSON and skips the rest (Gunicorn\textquotesingle{}s own plain{-}text lines)}
+\ExtensionTok{docker}\NormalTok{ logs notes{-}api }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{|} \ExtensionTok{jq} \AttributeTok{{-}cR} \StringTok{\textquotesingle{}fromjson? | select(.level == "ERROR")\textquotesingle{}}
+
+\CommentTok{\# Find all errors in the last hour}
+\ExtensionTok{docker}\NormalTok{ logs }\AttributeTok{{-}{-}since} \StringTok{"1h"}\NormalTok{ notes{-}api }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{|} \ExtensionTok{jq} \AttributeTok{{-}cR} \StringTok{\textquotesingle{}fromjson? | select(.level == "ERROR")\textquotesingle{}}
+
+\CommentTok{\# Find all requests that took more than 100ms}
+\ExtensionTok{docker}\NormalTok{ logs notes{-}api }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{|} \ExtensionTok{jq} \AttributeTok{{-}cR} \StringTok{\textquotesingle{}fromjson? | select(.duration\_ms \textgreater{} 100)\textquotesingle{}}
+
+\CommentTok{\# Find all 5xx responses}
+\ExtensionTok{docker}\NormalTok{ logs notes{-}api }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{|} \ExtensionTok{jq} \AttributeTok{{-}cR} \StringTok{\textquotesingle{}fromjson? | select(.status\_code \textgreater{}= 500)\textquotesingle{}}
+
+\CommentTok{\# Everything one request logged}
+\ExtensionTok{docker}\NormalTok{ logs notes{-}api }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{|} \ExtensionTok{jq} \AttributeTok{{-}cR} \StringTok{\textquotesingle{}fromjson? | select(.request\_id == "a1b2c3d4{-}…")\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{5}
+\section{Alerting}\label{35-observability:356-alerting}
+
+Observability is only valuable if problems surface before users notice. \textbf{Alerting} is the process of automatically detecting problematic conditions and notifying the on-call engineer.
+
+\subsection*{What to alert on}\phantomsection\label{35-observability:what-to-alert-on}
+
+\textbf{Alert on symptoms, not causes.} A symptom is something the user experiences: slow responses, errors, downtime. A cause is something internal: high CPU, slow database queries, disk filling up.
+
+Alert on:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Error rate} exceeds 1\% of requests (5xx responses)
+\item
+  \textbf{p99 latency} exceeds 500ms (the slowest 1\% of requests are too slow)
+\item
+  \textbf{Health check} fails for more than 60 seconds (the service is down)
+\item
+  \textbf{Disk space} above 85\% used (risk of running out)
+\end{itemize}
+
+\noindent{}Consider monitoring (but not paging for) causes:
+
+\begin{itemize}
+\tightlist
+\item
+  High CPU usage
+\item
+  High memory usage
+\item
+  Slow database queries (warn in logs, but only page if they cause user-visible symptoms)
+\end{itemize}
+
+\subsection*{Implementing alerts with UptimeRobot (free tier)}\phantomsection\label{35-observability:implementing-alerts-with-uptimerobot-free-tier}
+
+\textbf{UptimeRobot} monitors URLs and alerts you if they return errors or respond slowly. At the time of writing, its free plan checks up to 50 URLs every 5 minutes (check the current terms: they have changed, including for commercial use).
+
+Setup:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Create an account at uptimerobot.com
+\item
+  Add a monitor for \texttt{https:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{api.}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{example.}\allowbreak{}\texttt{com/}\allowbreak{}\texttt{health}
+\item
+  Set alert condition: if response is not 200 (the deep check answers 503 when the database is unreachable), or response time \textgreater{} 10 seconds
+\item
+  Add notification channels: email, SMS, Slack webhook, PagerDuty
+\end{enumerate}
+
+\noindent{}This gives you basic uptime monitoring without any code changes~--- just the \texttt{/health} endpoint.
+
+\subsection*{Implementing alerts with Prometheus Alertmanager}\phantomsection\label{35-observability:implementing-alerts-with-prometheus-alertmanager}
+
+For metric-based alerting:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# prometheus\_rules.yml}
+\FunctionTok{groups}\KeywordTok{:}
+\AttributeTok{  }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ notes{-}api}
+\AttributeTok{    }\FunctionTok{rules}\KeywordTok{:}
+\CommentTok{      \# Alert if error rate exceeds 1\%}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{alert}\KeywordTok{:}\AttributeTok{ HighErrorRate}
+\FunctionTok{        expr}\KeywordTok{: }\CharTok{|}
+\NormalTok{          (}
+\NormalTok{            sum(rate(flask\_http\_request\_total\{status=\textasciitilde{}"5.."\}[5m]))}
+\NormalTok{            /}
+\NormalTok{            sum(rate(flask\_http\_request\_total[5m]))}
+\NormalTok{          ) \textgreater{} 0.01}
+\AttributeTok{        }\FunctionTok{for}\KeywordTok{:}\AttributeTok{ 2m}\CommentTok{  \# Must be true for 2 minutes before firing}
+\AttributeTok{        }\FunctionTok{labels}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{severity}\KeywordTok{:}\AttributeTok{ page}
+\AttributeTok{        }\FunctionTok{annotations}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{summary}\KeywordTok{:}\AttributeTok{ }\StringTok{"High error rate: \{\{ $value | humanizePercentage \}\}"}
+\AttributeTok{          }\FunctionTok{description}\KeywordTok{:}\AttributeTok{ }\StringTok{"More than 1\% of requests are failing over the last 5 minutes."}
+
+\CommentTok{      \# Alert if p99 latency exceeds 500ms}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{alert}\KeywordTok{:}\AttributeTok{ HighLatency}
+\FunctionTok{        expr}\KeywordTok{: }\CharTok{|}
+\NormalTok{          histogram\_quantile(}
+\NormalTok{            0.99,}
+\NormalTok{            sum(rate(flask\_http\_request\_duration\_seconds\_bucket[5m])) by (le)}
+\NormalTok{          ) \textgreater{} 0.5}
+\AttributeTok{        }\FunctionTok{for}\KeywordTok{:}\AttributeTok{ 5m}
+\AttributeTok{        }\FunctionTok{labels}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{severity}\KeywordTok{:}\AttributeTok{ page}
+\AttributeTok{        }\FunctionTok{annotations}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{summary}\KeywordTok{:}\AttributeTok{ }\StringTok{"High p99 latency: \{\{ $value | humanizeDuration \}\}"}
+
+\CommentTok{      \# Alert if Prometheus cannot scrape the application at all}
+\CommentTok{      \# (this is a scrape failure, not a /health check: the uptime}
+\CommentTok{      \# monitor above watches /health)}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{alert}\KeywordTok{:}\AttributeTok{ TargetDown}
+\AttributeTok{        }\FunctionTok{expr}\KeywordTok{:}\AttributeTok{ up\{job="notes{-}api"\} == 0}
+\AttributeTok{        }\FunctionTok{for}\KeywordTok{:}\AttributeTok{ 1m}
+\AttributeTok{        }\FunctionTok{labels}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{severity}\KeywordTok{:}\AttributeTok{ page}
+\AttributeTok{        }\FunctionTok{annotations}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{summary}\KeywordTok{:}\AttributeTok{ }\StringTok{"Notes API metrics endpoint is unreachable"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Alert fatigue}\phantomsection\label{35-observability:alert-fatigue}
+
+Too many alerts → engineers start ignoring them (alert fatigue). Rules for good alerts:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Actionable}: every alert should have a clear action to take
+\item
+  \textbf{Urgent}: only page for things that need immediate attention
+\item
+  \textbf{Accurate}: low false positive rate
+\item
+  \textbf{Novel}: don't alert on the same issue multiple times
+\end{itemize}
+
+\noindent{}For a small notes API, start with just two alerts: the service is down, and the error rate is high. Add more alerts as you learn what problems actually occur in practice.
+
+\setcounter{section}{6}
+\section{The Nginx Access Log}\label{35-observability:357-the-nginx-access-log}
+
+Nginx's access log provides another view of incoming traffic, independent of the application's own logs. \hyperref[ch:28-traffic-routing]{Chapter 28} used Nginx's default format, \texttt{combined}, which records no timings. Define a format that adds two~--- a \texttt{log\_format} belongs in the \texttt{http\ \{\}} context, so a file in \texttt{conf.d/} is the place:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\# /etc/nginx/conf.d/log{-}format.conf}
+\NormalTok{log\_format timed \textquotesingle{}$remote\_addr {-} $remote\_user [$time\_local] \textquotesingle{}}
+\NormalTok{                 \textquotesingle{}"$request" $status $body\_bytes\_sent \textquotesingle{}}
+\NormalTok{                 \textquotesingle{}"$http\_referer" "$http\_user\_agent" \textquotesingle{}}
+\NormalTok{                 \textquotesingle{}$request\_time $upstream\_response\_time\textquotesingle{};}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Then use it in the site configuration, in place of the plain \texttt{access\_log} line:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{access\_log /var/log/nginx/notes{-}api{-}access.log timed;}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This produces lines like:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+89.100.200.50 - - [15/Jan/2024:14:00:00 +0000] "POST /notes/ HTTP/2.0" 201 84 "-" "curl/8.1.2" 0.016 0.015
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Fields:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{89.100.200.50}: client IP
+\item
+  \texttt{{[}15/}\allowbreak{}\texttt{Jan/}\allowbreak{}\texttt{2024:}\allowbreak{}\texttt{14:}\allowbreak{}\texttt{00:}\allowbreak{}\texttt{00\ +0000{]}}: timestamp
+\item
+  \texttt{POST\ /}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\ HTTP/}\allowbreak{}\texttt{2.0}: method, path, protocol
+\item
+  \texttt{201}: status code
+\item
+  \texttt{84}: response body size in bytes
+\item
+  \texttt{-}: referrer (empty)
+\item
+  \texttt{curl/8.1.2}: User-Agent
+\item
+  \texttt{0.016}: request time in seconds~--- the \emph{whole} request, from the first byte read from the client to the last byte sent back
+\item
+  \texttt{0.015}: upstream response time~--- how long Gunicorn took to answer. A big gap between the two points at the network or a slow client, not the application
+\end{itemize}
+
+\noindent{}The Nginx access log captures traffic that the application log misses~--- like requests rejected by Nginx itself (rate limits, wrong host headers)~--- and provides a ground truth for traffic volume independent of the application.
+
+\subsection*{Analyzing Nginx logs}\phantomsection\label{35-observability:analyzing-nginx-logs}
+
+Nginx runs on the host (Chapter 28), so these run directly on the server. The log file covers everything since its last rotation~--- usually one day:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Count requests by status code (in the current log file)}
+\FunctionTok{sudo}\NormalTok{ awk }\StringTok{\textquotesingle{}\{print $9\}\textquotesingle{}}\NormalTok{ /var/log/nginx/notes{-}api{-}access.log }\KeywordTok{|} \FunctionTok{sort} \KeywordTok{|} \FunctionTok{uniq} \AttributeTok{{-}c} \KeywordTok{|} \FunctionTok{sort} \AttributeTok{{-}rn}
+\CommentTok{\# Output:}
+\CommentTok{\# 1492  201}
+\CommentTok{\#  203  200}
+\CommentTok{\#    7  404}
+\CommentTok{\#    2  429}
+
+\CommentTok{\# Find the slowest requests (request time is the second{-}to{-}last field)}
+\FunctionTok{sudo}\NormalTok{ awk }\StringTok{\textquotesingle{}\{print $(NF{-}1), $7\}\textquotesingle{}}\NormalTok{ /var/log/nginx/notes{-}api{-}access.log }\KeywordTok{|} \FunctionTok{sort} \AttributeTok{{-}rn} \KeywordTok{|} \FunctionTok{head} \AttributeTok{{-}20}
+
+\CommentTok{\# Count requests per minute (for rate analysis)}
+\FunctionTok{sudo}\NormalTok{ awk }\StringTok{\textquotesingle{}\{print $4\}\textquotesingle{}}\NormalTok{ /var/log/nginx/notes{-}api{-}access.log }\KeywordTok{|} \FunctionTok{cut} \AttributeTok{{-}c1{-}18} \KeywordTok{|} \FunctionTok{sort} \KeywordTok{|} \FunctionTok{uniq} \AttributeTok{{-}c}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\setcounter{section}{7}
+\section{The Observability Stack for the Notes API}\label{35-observability:358-the-observability-stack-for-the-notes-api}
+
+Here is the complete observability setup for the Notes API at production scale:
+
+\begin{diagrambox}[short]{317.1pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Monitoring layer:
+├── UptimeRobot (free)
+│   └── Pings /health every 5 minutes → email alert if down
+│
+├── Application logs (structured JSON → stdout → Docker)
+│   ├── Viewed with: docker logs notes-api | jq ...
+│   └── Rotated by size: 3 files × 10 MB (daemon.json, Chapter 21)
+│
+├── Nginx access logs
+│   ├── Location: /var/log/nginx/notes-api-access.log
+│   └── Stored 14 days by logrotate
+│
+└── Server metrics (DigitalOcean Monitoring, free)
+    ├── CPU usage (alert at 80%)
+    ├── Memory usage (alert at 90%)
+    └── Disk usage (alert at 85%)
+
+Next level (when traffic grows):
+├── Prometheus + Grafana (metrics)
+│   ├── flask_http_request_total by method and status
+│   ├── flask_http_request_duration_seconds histograms
+│   └── Alertmanager for metric-based alerts
+│
+└── Log aggregation (a hosted service, Datadog, or ELK)
+    ├── Centralized search across log fields
+    └── Alert on log patterns ("ERROR" rate exceeds threshold)
+\end{Verbatim}
+\end{diagrambox}
+
+\phantomsection\label{35-observability:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Observability} is the ability to understand system state from external outputs. The three pillars are logs (events), metrics (numbers over time), and traces (request flows across services).
+\item
+  \textbf{Structured logs} (JSON format) are machine-readable. They enable filtering by field values, extracting specific fields, and aggregating across many log lines.
+\item
+  \textbf{Request IDs} (UUIDs set at the start of each request) appear in all log messages for that request. They are essential for correlating log lines across concurrent requests.
+\item
+  \textbf{Health check endpoints}: \texttt{/health} (deep) verifies that the application and its dependencies (database) are working~--- for deploy scripts and uptime monitors; \texttt{/ping} (shallow) only that the process answers~--- for Docker's \texttt{HEALTHCHECK}. Neither reveals internal error details.
+\item
+  \textbf{The four golden signals} to monitor: latency, traffic, errors, saturation.
+\item
+  \textbf{Prometheus} scrapes a \texttt{/metrics} endpoint to collect metrics. \texttt{prometheus-}\allowbreak{}\texttt{flask-}\allowbreak{}\texttt{exporter} instruments Flask automatically~--- under a multi-worker Gunicorn, in its multiprocess mode, served on a port that is not public.
+\item
+  \textbf{Alert on symptoms} (slow responses, high error rate, service down), not causes (high CPU). Too many alerts cause alert fatigue.
+\item
+  \textbf{Nginx access logs} provide an independent record of all incoming traffic, including requests that the application itself never processes.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{35-observability:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Stop the database and call \texttt{/ping} and \texttt{/health}. What does each return, and which would you give to a load balancer?
+\item
+  \textbf{Break and fix.} Remove the request-ID middleware and try to find all the log lines of one failing request among 1,000 concurrent ones. Restore it and try again.
+\item
+  \textbf{Extend.} Add a Prometheus alert rule for ``95th-percentile latency above 500 ms for 5 minutes'' and test it by adding a delay to a route.
+\item
+  \textbf{Explain.} Why alert on symptoms (errors, latency) rather than causes (CPU, memory)?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-35.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{35-observability:whats-next}
+
+The system is observable. Now consider what happens when the system encounters more traffic than anticipated, or when you need to deploy to multiple servers. The next chapter covers scaling and load handling.
+
+\noindent{}→ \hyperref[ch:36-scaling-load]{Chapter 36}~--- Scaling and Load Handling

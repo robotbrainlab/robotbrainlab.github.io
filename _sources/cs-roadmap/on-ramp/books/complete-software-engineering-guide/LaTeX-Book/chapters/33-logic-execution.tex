@@ -1,0 +1,2504 @@
+\setcounter{chapter}{32}
+\chapter{Logic Execution}\label{ch:33-logic-execution}
+
+\chapterrule
+
+The routing layer (\hyperref[ch:32-routing]{Chapter 32}) identified the handler function and called it with the validated URL variables. The input handling layer (\hyperref[ch:31-input-handling]{Chapter 31}) validated and cleaned the request data. Now the handler runs its \textbf{business logic}~--- the code that actually does what the API is supposed to do.
+
+For the Notes API, business logic is simple: read from and write to a PostgreSQL database. Real-world applications have more complex logic~--- but the structural patterns are the same. This chapter traces how logic executes inside a Flask handler, from the function call to the database and back, and explains the tools and techniques that make that execution reliable, observable, and maintainable.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What ``business logic'' means and where it lives in the code structure
+\item
+  How the Flask request context makes \texttt{request}, \texttt{g}, and \texttt{current\_app} available
+\item
+  How database connections are managed per-request with \texttt{g}
+\item
+  The complete lifecycle of a database query: connection, cursor, execute, fetch, commit
+\item
+  How transactions protect against partial writes
+\item
+  How a migration runner keeps every database's schema in step with the code, and where migrations fit in a deployment
+\item
+  How to turn a schema design into tables whose constraints protect the data
+\item
+  How to query across tables with joins and aggregates, and how to avoid the N+1 problem
+\item
+  What happens when two requests change the same data at once, and the tools that keep it correct
+\item
+  When raw SQL, a query builder, or an ORM is the right choice
+\item
+  How to structure handler functions for readability and testability
+\item
+  How errors during logic execution are handled and logged
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{What Is Business Logic?}\label{33-logic-execution:331-what-is-business-logic}
+
+\textbf{Business logic} is the code that implements the rules of your application's domain.
+
+For the Notes API:
+
+\begin{itemize}
+\tightlist
+\item
+  Creating a note means inserting a row into the \texttt{notes} table
+\item
+  Getting a note means selecting a row by its \texttt{id}
+\item
+  Updating a note means replacing its \texttt{content}
+\item
+  Deleting a note means removing the row
+\end{itemize}
+
+\noindent{}These rules are specific to the Notes domain. They are distinct from:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Infrastructure logic} (how to connect to PostgreSQL, how to run a query)
+\item
+  \textbf{HTTP logic} (how to parse JSON, how to set response headers)
+\item
+  \textbf{Validation logic} (whether the input data is acceptable)
+\end{itemize}
+
+\noindent{}Keeping these concerns separate makes code easier to test, modify, and reason about.
+
+\subsection*{Where does business logic live?}\phantomsection\label{33-logic-execution:where-does-business-logic-live}
+
+There are two common patterns:
+
+\textbf{Pattern 1: Logic in the handler (small apps)}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+    \CommentTok{\# ... validation ...}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"INSERT INTO notes (content) VALUES (?) RETURNING id, content, created\_at"}\NormalTok{),}
+\NormalTok{        (content,),}
+\NormalTok{    )}
+\NormalTok{    note }\OperatorTok{=}\NormalTok{ row\_to\_note(cursor.fetchone())}
+\NormalTok{    db.commit()}
+    \ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{201}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Pattern 2: Logic in a service layer (larger apps)}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/services/notes.py}
+\KeywordTok{def}\NormalTok{ create\_note(db, content: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict}\NormalTok{:}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(...)}
+\NormalTok{    note }\OperatorTok{=}\NormalTok{ row\_to\_note(cursor.fetchone())}
+\NormalTok{    db.commit()}
+    \ControlFlowTok{return}\NormalTok{ note}
+
+\CommentTok{\# app/routes/notes.py}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+    \CommentTok{\# ... validation ...}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    note }\OperatorTok{=}\NormalTok{ note\_service.create\_note(db, content)}
+    \ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{201}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}For the Notes API at its current scale, Pattern 1 is appropriate. Pattern 2 becomes valuable when the same business logic needs to be called from multiple handlers (e.g., a CLI command and an HTTP endpoint both creating notes), or when the logic grows complex enough that it needs its own tests independent of HTTP.
+
+This chapter uses Pattern 1 because it is direct and easier to trace.
+
+\setcounter{section}{1}
+\section{The Flask Request Context}\label{33-logic-execution:332-the-flask-request-context}
+
+When Flask calls your handler function, a \textbf{request context} has already been pushed. The request context is the mechanism that makes Flask's global-looking objects~--- \texttt{request}, \texttt{g}, \texttt{current\_app}~--- work correctly even when multiple threads or processes are handling different requests simultaneously.
+
+\subsection*{What the contexts contain}\phantomsection\label{33-logic-execution:what-the-contexts-contain}
+
+Flask actually keeps two contexts, pushed together for every request:
+
+\begin{diagrambox}[short]{358.6pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Application Context (pushed for each request, and by app.app_context())
+├── current_app  → The Flask application handling the request
+└── g            → A namespace for storing data during this context
+
+Request Context (one per active request)
+├── request      → The Request object (parsed HTTP request)
+└── session      → The session object (signed cookie)
+
+These are "context locals". Separate Gunicorn worker PROCESSES are isolated
+anyway; the context machinery matters when several THREADS (or greenlets)
+in one worker handle requests at the same time — each sees its own request
+and its own g.
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Because \texttt{g} belongs to the application context, and Flask pushes a fresh one for every request, \texttt{g} is in practice per-request storage.
+
+\subsection*{How Flask implements context locals}\phantomsection\label{33-logic-execution:how-flask-implements-context-locals}
+
+Flask uses Python's \texttt{contextvars} module (Python 3.7+) to store context-local data. Each coroutine or thread has its own context variable storage, so \texttt{flask.request} in Thread A is a different object from \texttt{flask.request} in Thread B~--- even though they look like the same global variable.
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# What you write (looks like a global):}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ request, g}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+    \CommentTok{\# request.method is the METHOD of THIS request}
+    \CommentTok{\# g.request\_start\_time was set by a before\_request hook for THIS request}
+\NormalTok{    ...}
+
+\CommentTok{\# What Flask does under the hood (very simplified):}
+\ImportTok{import}\NormalTok{ contextvars}
+\ImportTok{from}\NormalTok{ werkzeug.local }\ImportTok{import}\NormalTok{ LocalProxy}
+
+\NormalTok{\_cv\_request }\OperatorTok{=}\NormalTok{ contextvars.ContextVar(}\StringTok{"flask.request\_ctx"}\NormalTok{)}
+
+\CommentTok{\# "request" is a proxy OBJECT: every attribute access (request.method)}
+\CommentTok{\# looks up the request context that is current right now, in this thread}
+\NormalTok{request }\OperatorTok{=}\NormalTok{ LocalProxy(\_cv\_request, }\StringTok{"request"}\NormalTok{)}
+
+\CommentTok{\# Each time a new request arrives, Flask does:}
+\NormalTok{ctx }\OperatorTok{=}\NormalTok{ RequestContext(app, environ)}
+\NormalTok{ctx.push()  }\CommentTok{\# Sets \_cv\_request (and the app context) for this request}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}You don't need to manage context variables yourself. Flask handles this. The important thing to understand is that \texttt{request} and \texttt{g} are \textbf{request-scoped}: they exist for the duration of a single request and are discarded afterward.
+
+\subsection*{\texorpdfstring{The \texttt{g} object}{The g object}}\phantomsection\label{33-logic-execution:the-g-object}
+
+\texttt{g} is a per-request namespace for storing data that needs to be shared between the parts of request processing (before-request hooks, the handler, after-request hooks) without passing it explicitly through function arguments.
+
+Common uses:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# before\_request hook: store the start time}
+\AttributeTok{@app.before\_request}
+\KeywordTok{def}\NormalTok{ log\_request\_start():}
+\NormalTok{    g.request\_start\_time }\OperatorTok{=}\NormalTok{ time.perf\_counter()}
+
+\CommentTok{\# after\_request hook: compute and log the duration}
+\AttributeTok{@app.after\_request}
+\KeywordTok{def}\NormalTok{ log\_request\_end(response):}
+\NormalTok{    elapsed\_ms }\OperatorTok{=}\NormalTok{ (time.perf\_counter() }\OperatorTok{{-}}\NormalTok{ g.request\_start\_time) }\OperatorTok{*} \DecValTok{1000}
+\NormalTok{    logger.info(}\StringTok{"← }\SpecialCharTok{\%s}\StringTok{ in }\SpecialCharTok{\%.1f}\StringTok{ms"}\NormalTok{, response.status\_code, elapsed\_ms)}
+    \ControlFlowTok{return}\NormalTok{ response}
+
+\CommentTok{\# Database connection management}
+\KeywordTok{def}\NormalTok{ get\_db():}
+    \ControlFlowTok{if} \StringTok{"db"} \KeywordTok{not} \KeywordTok{in}\NormalTok{ g:}
+\NormalTok{        g.db }\OperatorTok{=}\NormalTok{ open\_db\_connection()}
+    \ControlFlowTok{return}\NormalTok{ g.db}
+
+\AttributeTok{@app.teardown\_appcontext}
+\KeywordTok{def}\NormalTok{ close\_db(error):}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ g.pop(}\StringTok{"db"}\NormalTok{, }\VariableTok{None}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ db }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+\NormalTok{        db.rollback()}
+\NormalTok{        db.close()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{g} is not a cache that persists between requests. It is wiped clean at the end of each request.
+
+\setcounter{section}{2}
+\section{Database Connection Management}\label{33-logic-execution:333-database-connection-management}
+
+\hyperref[ch:04-request-handling-paths]{Chapter 4} introduced \texttt{get\_db()}~--- the function that opens (or reuses) a database connection for the current request~--- and \hyperref[ch:15-structuring-the-application]{Chapter 15} moved it, with everything else database-specific, into \texttt{app/database.py}. Let's examine it in full.
+
+\subsection*{The connection pool question}\phantomsection\label{33-logic-execution:the-connection-pool-question}
+
+Ideally, you would use a \textbf{connection pool}~--- a set of pre-opened database connections that are checked out for a request and returned afterward, avoiding the overhead of opening a new connection for every request.
+
+The \texttt{psycopg2.pool} module (part of psycopg2) or SQLAlchemy's connection pool provide this. For the Notes API, we use a simpler pattern: \textbf{one connection per request}, opened on first use and closed when the request ends.
+
+The overhead of opening a PostgreSQL connection is real: a TCP handshake, a TLS handshake (managed databases require TLS), and authentication~--- typically 10--30 ms over a VPC. And every open connection counts against the database's connection limit, which on the smallest managed plans is only a few dozen. For a small API, one connection per request is acceptable; as traffic grows, a pool (or a pooler such as PgBouncer, \hyperref[ch:36-scaling-load]{Chapter 36}) becomes essential.
+
+\subsection*{The get\_db() pattern}\phantomsection\label{33-logic-execution:the-get-db-pattern}
+
+This is the connection-handling half of Listing 15.2, \texttt{app/database.py}, unchanged:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/database.py (from Chapter 15)}
+\ImportTok{import}\NormalTok{ sqlite3}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ g}
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ DATABASE\_URL, IS\_SQLITE}
+
+\KeywordTok{def}\NormalTok{ open\_db():}
+    \CommentTok{"""}
+\CommentTok{    Open a database connection appropriate for the configured DATABASE\_URL.}
+
+\CommentTok{    Both kinds of connection return rows that behave like dictionaries}
+\CommentTok{    (row["id"]), so the code that reads them does not care which it got.}
+\CommentTok{    """}
+    \ControlFlowTok{if}\NormalTok{ IS\_SQLITE:}
+\NormalTok{        conn }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_URL[}\BuiltInTok{len}\NormalTok{(}\StringTok{"sqlite:///"}\NormalTok{):])}
+\NormalTok{        conn.row\_factory }\OperatorTok{=}\NormalTok{ sqlite3.Row}
+        \ControlFlowTok{return}\NormalTok{ conn}
+
+    \ImportTok{import}\NormalTok{ psycopg2}
+    \ImportTok{import}\NormalTok{ psycopg2.extras}
+    \CommentTok{\# psycopg2 starts a transaction automatically; handlers commit explicitly}
+    \ControlFlowTok{return}\NormalTok{ psycopg2.}\ExtensionTok{connect}\NormalTok{(DATABASE\_URL, cursor\_factory}\OperatorTok{=}\NormalTok{psycopg2.extras.RealDictCursor)}
+
+\KeywordTok{def}\NormalTok{ get\_db():}
+    \CommentTok{"""Return the per{-}request database connection, opening it if needed."""}
+    \ControlFlowTok{if} \StringTok{"db"} \KeywordTok{not} \KeywordTok{in}\NormalTok{ g:}
+\NormalTok{        g.db }\OperatorTok{=}\NormalTok{ open\_db()}
+    \ControlFlowTok{return}\NormalTok{ g.db}
+
+\KeywordTok{def}\NormalTok{ close\_db(error}\OperatorTok{=}\VariableTok{None}\NormalTok{):}
+    \CommentTok{"""}
+\CommentTok{    Close the database connection at the end of a request.}
+
+\CommentTok{    Handlers commit their own work *before* they return a response, so}
+\CommentTok{    anything still uncommitted here belongs to a request that failed}
+\CommentTok{    part{-}way: it is rolled back, never committed.}
+\CommentTok{    """}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ g.pop(}\StringTok{"db"}\NormalTok{, }\VariableTok{None}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ db }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:}
+\NormalTok{        db.rollback()       }\CommentTok{\# A no{-}op after a commit; discards half{-}finished work}
+\NormalTok{        db.close()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}It is worth seeing why \texttt{close\_db()} does not do what many tutorials do~--- ``commit if \texttt{error} is None, otherwise roll back'':
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Teardown runs \emph{after} the response has been built. A commit that fails there cannot change the \texttt{201\ Created} the client is about to receive for a note that was never saved.
+\item
+  Flask passes an \texttt{error} to teardown only for exceptions that no error handler caught. The Notes API's catch-all handler (\hyperref[ch:16-logging-error-handling]{Chapter 16}) catches every exception, so \texttt{error} is always \texttt{None}~--- and a ``commit if no error'' teardown would commit the half-finished work of a request that just failed with a 500.
+\end{enumerate}
+
+\noindent{}So the rule is simple: \textbf{a handler that changes data commits before it responds; teardown only ever rolls back.}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/\_\_init\_\_.py}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ close\_db}
+
+\KeywordTok{def}\NormalTok{ create\_app():}
+\NormalTok{    app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+    \CommentTok{\# ...}
+\NormalTok{    app.teardown\_appcontext(close\_db)}
+    \ControlFlowTok{return}\NormalTok{ app}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Connection lifecycle diagram}\phantomsection\label{33-logic-execution:connection-lifecycle-diagram}
+
+\begin{diagrambox}[short]{312.5pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Request arrives
+       │
+       ▼
+Before-request hooks run
+(g.db is not set yet)
+       │
+       ▼
+Handler function called
+       │
+       ├─ First call to get_db()
+       │      Opens the connection (TCP, TLS, authentication)
+       │      Sets g.db = connection
+       │      Returns connection
+       │
+       ├─ Handler uses connection
+       │      cursor.execute(...)
+       │      cursor.fetchone()
+       │      db.commit()          ← before the response is built
+       │
+       ├─ Second call to get_db() (if handler calls it again)
+       │      g.db already set → return existing connection
+       │      No new connection opened
+       │
+       ▼
+After-request hooks run
+       │
+       ▼
+teardown_appcontext (close_db) runs
+       │
+       ├─ db.rollback() (a no-op if the handler committed)
+       └─ db.close() (closes the connection)
+\end{Verbatim}
+\end{diagrambox}
+
+\setcounter{section}{3}
+\section{Executing a Database Query}\label{33-logic-execution:334-executing-a-database-query}
+
+With a database connection in hand, the handler executes queries. PostgreSQL queries go through a \textbf{cursor}~--- an object that manages query execution and result fetching.
+
+\subsection*{The cursor}\phantomsection\label{33-logic-execution:the-cursor}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+
+\CommentTok{\# On PostgreSQL, cursor is a psycopg2.extras.RealDictCursor (open\_db passes}
+\CommentTok{\# cursor\_factory=RealDictCursor); on SQLite, rows are sqlite3.Row objects.}
+\CommentTok{\# Either way, row["id"] works.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Parameterized queries}\phantomsection\label{33-logic-execution:parameterized-queries}
+
+Every database query that includes variable data \textbf{must} use parameterized queries. \hyperref[ch:31-input-handling]{Chapter 31} explained why: SQL injection. The mechanism:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# WRONG — vulnerable to SQL injection:}
+\NormalTok{cursor.execute(}\SpecialStringTok{f"SELECT * FROM notes WHERE id = }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+\CommentTok{\# CORRECT — parameterized query:}
+\NormalTok{cursor.execute(sql(}\StringTok{"SELECT * FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \texttt{?} is a placeholder; \texttt{sql()} (Chapter 15) turns it into psycopg2's \texttt{\%s} when the database is PostgreSQL. The value never becomes part of the SQL text as code: \texttt{sqlite3} binds it to a prepared statement, and psycopg2 inserts it into the query on the client side as a correctly quoted literal. Either way, it cannot be interpreted as SQL syntax.
+
+Note the comma after \texttt{note\_id} in \texttt{(note\_id,)}~--- this creates a \textbf{tuple} with one element. Without the comma, \texttt{(note\_id)} is just \texttt{note\_id} in parentheses (not a tuple), and the driver fails with a confusing error.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Common mistake:}
+\NormalTok{cursor.execute(sql(}\StringTok{"SELECT * FROM notes WHERE id = ?"}\NormalTok{), (note\_id))}
+\CommentTok{\# psycopg2: TypeError: \textquotesingle{}int\textquotesingle{} object does not support indexing}
+\CommentTok{\# sqlite3:  ValueError: parameters are of unsupported type}
+
+\CommentTok{\# Correct:}
+\NormalTok{cursor.execute(sql(}\StringTok{"SELECT * FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))  }\CommentTok{\# tuple with one element}
+\NormalTok{cursor.execute(sql(}\StringTok{"SELECT * FROM notes WHERE id = ?"}\NormalTok{), [note\_id])   }\CommentTok{\# list also works}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Fetching results}\phantomsection\label{33-logic-execution:fetching-results}
+
+After \texttt{execute()}, fetch the results:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Fetch one row (or None if no rows matched)}
+\NormalTok{row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+\CommentTok{\# On PostgreSQL, a dict (or None):}
+\CommentTok{\# \{"id": 42, "content": "Buy groceries", "created\_at": datetime(...)\}}
+
+\CommentTok{\# Fetch all rows}
+\NormalTok{rows }\OperatorTok{=}\NormalTok{ cursor.fetchall()}
+\CommentTok{\# List of dicts (empty list if no rows matched)}
+
+\CommentTok{\# Fetch N rows at a time (for large result sets)}
+\NormalTok{rows }\OperatorTok{=}\NormalTok{ cursor.fetchmany(size}\OperatorTok{=}\DecValTok{100}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{INSERT with RETURNING}\phantomsection\label{33-logic-execution:insert-with-returning}
+
+PostgreSQL (and SQLite since version 3.35) supports a \texttt{RETURNING} clause that returns data from the inserted row. This is useful because it gives you the auto-generated \texttt{id} and \texttt{created\_at} values without a separate SELECT:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cursor.execute(}
+\NormalTok{    sql(}\StringTok{"""}
+\StringTok{        INSERT INTO notes (content)}
+\StringTok{        VALUES (?)}
+\StringTok{        RETURNING id, content, created\_at}
+\StringTok{    """}\NormalTok{),}
+\NormalTok{    (content,),}
+\NormalTok{)}
+\NormalTok{row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+\CommentTok{\# On PostgreSQL:}
+\CommentTok{\# row = \{"id": 42, "content": "Buy groceries",}
+\CommentTok{\#        "created\_at": datetime(2024, 1, 15, 14, 0, 0, 123456, tzinfo=timezone.utc)\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Without \texttt{RETURNING}, you would need two queries: the INSERT followed by \texttt{SELECT\ lastval()} (and a SELECT for the other columns). \texttt{RETURNING} does it in one round trip.
+
+\setcounter{section}{4}
+\section{Transactions}\label{33-logic-execution:335-transactions}
+
+A \textbf{transaction} is a group of database operations that are treated as a single atomic unit: either all operations succeed (and are committed), or all are rolled back (and have no effect).
+
+\subsection*{Why transactions matter}\phantomsection\label{33-logic-execution:why-transactions-matter}
+
+Consider an operation that needs to do two things atomically:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Hypothetical: move a note to an archive table}
+\NormalTok{cursor.execute(}\StringTok{"INSERT INTO archived\_notes SELECT * FROM notes WHERE id = }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, (note\_id,))}
+\NormalTok{cursor.execute(}\StringTok{"DELETE FROM notes WHERE id = }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, (note\_id,))}
+\NormalTok{db.commit()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Both statements run inside one transaction, which the \texttt{commit()} ends. If the process crashes after the INSERT but before the commit, the database rolls the whole transaction back: the note is not left in both tables. That is the guarantee transactions give~--- and psycopg2's automatic transactions (below) give it here without any extra code.
+
+What a \texttt{try/except} adds is not atomicity but tidiness when an \emph{exception} happens in the middle:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{try}\NormalTok{:}
+\NormalTok{    cursor.execute(}\StringTok{"INSERT INTO archived\_notes SELECT * FROM notes WHERE id = }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, (note\_id,))}
+\NormalTok{    cursor.execute(}\StringTok{"DELETE FROM notes WHERE id = }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, (note\_id,))}
+\NormalTok{    db.commit()   }\CommentTok{\# Both operations committed atomically}
+\ControlFlowTok{except} \PreprocessorTok{Exception}\NormalTok{:}
+\NormalTok{    db.rollback() }\CommentTok{\# End the failed transaction now, so the connection is usable again}
+    \ControlFlowTok{raise}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(In the Notes API, \texttt{close\_db()} already rolls back at the end of every request, so handlers do not need this.)
+
+\subsection*{psycopg2's default transaction mode}\phantomsection\label{33-logic-execution:psycopg2s-default-transaction-mode}
+
+psycopg2 begins a transaction automatically when you execute the first query after \texttt{connect()} (or after the previous \texttt{commit()} or \texttt{rollback()}). You explicitly end the transaction with \texttt{commit()} or \texttt{rollback()}.
+
+\begin{diagrambox}[short]{307.9pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+connect()
+   │
+   ▼ (transaction implicitly started by first execute)
+execute("INSERT ...")
+execute("UPDATE ...")
+   │
+   ├── commit()   → Both changes written to database permanently
+   └── rollback() → Neither change written; database unchanged
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}For simple APIs, each request is typically one logical operation (one INSERT, or one SELECT), so there is one transaction per request.
+
+\subsection*{Autocommit mode}\phantomsection\label{33-logic-execution:autocommit-mode}
+
+For queries that must not be in a transaction (like \texttt{CREATE\ DATABASE} or \texttt{VACUUM}), you can set:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{conn.autocommit }\OperatorTok{=} \VariableTok{True}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}In autocommit mode, each \texttt{execute()} is immediately committed. There is no multi-statement transaction. This is generally not what you want for web application queries.
+
+\subsection*{Commit strategy for the Notes API}\phantomsection\label{33-logic-execution:commit-strategy-for-the-notes-api}
+
+The Notes API commits explicitly in each handler that changes data, \emph{before} it returns the response; \texttt{close\_db()} only ever rolls back:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# In the handler (explicit commit, before responding):}
+\NormalTok{db.commit()}
+
+\CommentTok{\# In close\_db (anything left uncommitted belongs to a failed request):}
+\NormalTok{db.rollback()}
+\NormalTok{db.close()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}A handler that forgets to commit therefore loses its change~--- loudly, in the first test that reads the data back~--- instead of having it committed silently after the response. Section 33.3 explains why the ``commit in teardown'' alternative is unsafe.
+
+\setcounter{section}{5}
+\section{\texorpdfstring{The Complete Handler: \texttt{create\_note}}{The Complete Handler: create\_note}}\label{33-logic-execution:336-the-complete-handler-create-note}
+
+Let's trace the complete execution of \texttt{POST\ /notes/} through the handler~--- Chapter 16's handler, with the \texttt{Validator} from \hyperref[ch:31-input-handling]{Chapter 31} in place of the individual checks:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/notes.py}
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Blueprint, jsonify, request}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db, sql, row\_to\_note}
+\ImportTok{from}\NormalTok{ app.validation }\ImportTok{import}\NormalTok{ Validator}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\NormalTok{notes\_bp }\OperatorTok{=}\NormalTok{ Blueprint(}\StringTok{"notes"}\NormalTok{, }\VariableTok{\_\_name\_\_}\NormalTok{, url\_prefix}\OperatorTok{=}\StringTok{"/notes"}\NormalTok{)}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+    \CommentTok{"""}
+\CommentTok{    Create a new note.}
+
+\CommentTok{    Request body: \{"content": "note text"\}}
+\CommentTok{    Response: 201 Created with the created note as JSON}
+\CommentTok{    """}
+    \CommentTok{\# ── Phase 1: Parse the request body ────────────────────────────────────}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+    \CommentTok{\# silent=True means parse errors return None instead of raising an exception}
+
+    \CommentTok{\# ── Phase 2: Validate input ─────────────────────────────────────────────}
+\NormalTok{    validator }\OperatorTok{=}\NormalTok{ Validator(data)}
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ validator.require\_string(}
+        \StringTok{"content"}\NormalTok{,}
+\NormalTok{        min\_length}\OperatorTok{=}\DecValTok{1}\NormalTok{,}
+\NormalTok{        max\_length}\OperatorTok{=}\DecValTok{10\_000}\NormalTok{,}
+\NormalTok{        strip}\OperatorTok{=}\VariableTok{True}\NormalTok{,}
+\NormalTok{    )}
+
+    \ControlFlowTok{if}\NormalTok{ validator.has\_errors():}
+\NormalTok{        logger.warning(}\StringTok{"POST /notes/ rejected: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, }\StringTok{"; "}\NormalTok{.join(validator.errors))}
+        \ControlFlowTok{return}\NormalTok{ validator.error\_response()   }\CommentTok{\# 400, \{"error": ...\}}
+
+    \CommentTok{\# ── Phase 3: Business logic (database interaction) ───────────────────────}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"""}
+\StringTok{            INSERT INTO notes (content)}
+\StringTok{            VALUES (?)}
+\StringTok{            RETURNING id, content, created\_at}
+\StringTok{        """}\NormalTok{),}
+\NormalTok{        (content,),}
+\NormalTok{    )}
+
+\NormalTok{    note }\OperatorTok{=}\NormalTok{ row\_to\_note(cursor.fetchone())}
+\NormalTok{    db.commit()   }\CommentTok{\# before responding: a 201 must mean the note is saved}
+
+\NormalTok{    logger.info(}\StringTok{"Created note id=}\SpecialCharTok{\%d}\StringTok{."}\NormalTok{, note[}\StringTok{"id"}\NormalTok{])}
+
+    \CommentTok{\# ── Phase 4: Build and return the response ───────────────────────────────}
+    \ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{201}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Phase-by-phase trace}\phantomsection\label{33-logic-execution:phase-by-phase-trace}
+
+\textbf{Phase 1}: \texttt{request.}\allowbreak{}\texttt{get\_}\allowbreak{}\texttt{json(silent=}\allowbreak{}\texttt{True)}
+
+\begin{itemize}
+\tightlist
+\item
+  Flask reads \texttt{Content-}\allowbreak{}\texttt{Type:}\allowbreak{}\texttt{\ application/}\allowbreak{}\texttt{json} from headers
+\item
+  Calls \texttt{json.loads()} on the request body bytes
+\item
+  Returns a Python dict: \texttt{\{"content":}\allowbreak{}\texttt{\ "Buy\ groceries"\}}
+\item
+  If the body is not valid JSON, returns \texttt{None} (due to \texttt{silent=True})
+\end{itemize}
+
+\noindent{}\textbf{Phase 2}: \texttt{Validator(data).}\allowbreak{}\texttt{require\_}\allowbreak{}\texttt{string(.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{)}
+
+\begin{itemize}
+\tightlist
+\item
+  Checks that \texttt{data} is a JSON object (not \texttt{None}, a list, or a bare string)
+\item
+  Checks that \texttt{data{[}"content"{]}} exists and is a string
+\item
+  Strips leading/trailing whitespace
+\item
+  Checks length is within bounds
+\item
+  If any check fails, adds a message to \texttt{validator.errors} and returns \texttt{None}
+\item
+  If there are errors, the handler returns a 400 response immediately
+\end{itemize}
+
+\noindent{}\textbf{Phase 3}: Database interaction
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{get\_db()} returns the per-request connection (opens it if this is the first call)
+\item
+  \texttt{cursor.}\allowbreak{}\texttt{execute(INSERT\ .}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{)} sends the parameterized query to PostgreSQL
+\item
+  PostgreSQL inserts the row and returns the new row's data
+\item
+  \texttt{cursor.fetchone()} retrieves that returned row, and \texttt{row\_to\_note()} turns it into the note dictionary
+\item
+  \texttt{db.commit()} commits the transaction, making the insert permanent
+\item
+  The logger records the successful creation with the new note's ID
+\end{itemize}
+
+\noindent{}\textbf{Phase 4}: Response construction
+
+\begin{itemize}
+\tightlist
+\item
+  On PostgreSQL, the row's \texttt{created\_at} is a timezone-aware \texttt{datetime}~--- which \texttt{jsonify} would turn into an HTTP-style date (\texttt{"Mon,}\allowbreak{}\texttt{\ 15\ Jan\ 2024\ 14:}\allowbreak{}\texttt{00:}\allowbreak{}\texttt{00\ GMT"}), not ISO 8601
+\item
+  So \texttt{row\_to\_note()} (through \texttt{to\_iso()}, Chapter 15) converts it to \texttt{"2024-}\allowbreak{}\texttt{01-}\allowbreak{}\texttt{15T14:}\allowbreak{}\texttt{00:}\allowbreak{}\texttt{00.}\allowbreak{}\texttt{123456+00:}\allowbreak{}\texttt{00"}~--- the same ISO 8601 form the SQLite branch produces
+\item
+  \texttt{jsonify(note)} serializes the dict to JSON and sets \texttt{Content-}\allowbreak{}\texttt{Type:}\allowbreak{}\texttt{\ application/}\allowbreak{}\texttt{json}
+\item
+  HTTP 201 Created status indicates resource creation
+\end{itemize}
+
+\setcounter{section}{6}
+\section{\texorpdfstring{Reading a Note: \texttt{get\_note}}{Reading a Note: get\_note}}\label{33-logic-execution:337-reading-a-note-get-note}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""}
+\CommentTok{    Retrieve a note by its ID.}
+
+\CommentTok{    URL parameter: note\_id (int, guaranteed by \textless{}int:\textgreater{} converter)}
+\CommentTok{    Response: 200 OK with the note, or 404 if not found}
+\CommentTok{    """}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ?"}\NormalTok{),}
+\NormalTok{        (note\_id,),}
+\NormalTok{    )}
+
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \CommentTok{\# Note not found — this is a well{-}defined 404}
+\NormalTok{        logger.info(}\StringTok{"Note id=}\SpecialCharTok{\%d}\StringTok{ not found."}\NormalTok{, note\_id)}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+
+    \ControlFlowTok{return}\NormalTok{ jsonify(row\_to\_note(row)), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Key points:}
+
+\begin{itemize}
+\tightlist
+\item
+  The URL converter guarantees \texttt{note\_id} is a valid integer. No need to validate it.
+\item
+  \texttt{fetchone()} returns \texttt{None} if no row matches the \texttt{WHERE\ id\ =\ ?} clause.
+\item
+  A missing note is a 404, not a 500. The handler explicitly checks for \texttt{None} and returns the appropriate status code.
+\item
+  No \texttt{db.commit()} is needed after a SELECT (reads don't modify data).
+\end{itemize}
+
+\setcounter{section}{7}
+\section{Listing Notes with Filtering}\label{33-logic-execution:338-listing-notes-with-filtering}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \CommentTok{"""}
+\CommentTok{    List notes, newest first, optionally filtered by a search term.}
+
+\CommentTok{    Query parameter: ?search=term}
+\CommentTok{    Response: 200 OK with \{"notes": [...], "count": n\}}
+\CommentTok{    """}
+    \CommentTok{\# Optional search parameter}
+\NormalTok{    search }\OperatorTok{=}\NormalTok{ request.args.get(}\StringTok{"search"}\NormalTok{, }\StringTok{""}\NormalTok{).strip()}
+
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+
+    \ControlFlowTok{if}\NormalTok{ search:}
+        \CommentTok{\# In a LIKE pattern, \% and \_ are wildcards. Escape them (and the}
+        \CommentTok{\# escape character itself) so a search for "50\%" means "50\%".}
+\NormalTok{        escaped }\OperatorTok{=}\NormalTok{ (search.replace(}\StringTok{"}\CharTok{\textbackslash{}\textbackslash{}}\StringTok{"}\NormalTok{, }\StringTok{"}\CharTok{\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}}\StringTok{"}\NormalTok{)}
+\NormalTok{                         .replace(}\StringTok{"\%"}\NormalTok{, }\StringTok{"}\CharTok{\textbackslash{}\textbackslash{}}\StringTok{\%"}\NormalTok{)}
+\NormalTok{                         .replace(}\StringTok{"\_"}\NormalTok{, }\StringTok{"}\CharTok{\textbackslash{}\textbackslash{}}\StringTok{\_"}\NormalTok{))}
+        \CommentTok{\# Case{-}insensitive search using PostgreSQL\textquotesingle{}s ILIKE}
+\NormalTok{        cursor.execute(}
+            \StringTok{"""}
+\StringTok{            SELECT id, content, created\_at}
+\StringTok{            FROM notes}
+\StringTok{            WHERE content ILIKE }\SpecialCharTok{\%s}\StringTok{ ESCAPE \textquotesingle{}}\CharTok{\textbackslash{}\textbackslash{}}\StringTok{\textquotesingle{}}
+\StringTok{            ORDER BY id DESC}
+\StringTok{            """}\NormalTok{,}
+\NormalTok{            (}\SpecialStringTok{f"\%}\SpecialCharTok{\{}\NormalTok{escaped}\SpecialCharTok{\}}\SpecialStringTok{\%"}\NormalTok{,),}
+\NormalTok{        )}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        cursor.execute(}\StringTok{"SELECT id, content, created\_at FROM notes ORDER BY id DESC"}\NormalTok{)}
+
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [row\_to\_note(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: notes, }\StringTok{"count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(notes)\}), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Key points:}
+
+The ILIKE pattern \texttt{\%\{escaped\}\%} uses \texttt{\%} as the SQL wildcard (match any sequence of characters). It is passed as a parameter \emph{value}~--- not written into the SQL string. Two kinds of \texttt{\%} meet here, and it helps to keep them apart:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{\%s} in the SQL text is psycopg2's parameter placeholder.
+\item
+  The \texttt{\%} characters inside the parameter \emph{value} are LIKE wildcards. psycopg2 passes the value through as data; PostgreSQL sees exactly the pattern \texttt{\%groceries\%}.
+\item
+  A literal \texttt{\%} in the SQL \emph{text} of a parameterized query must be written \texttt{\%\%}, because psycopg2 reads \texttt{\%} there as the start of a placeholder.
+\end{itemize}
+
+\noindent{}Two more things to know about this query:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{It is PostgreSQL-only.} \texttt{ILIKE} does not exist in SQLite, and this branch is written with \texttt{\%s} directly rather than through \texttt{sql()}. The tests from \hyperref[ch:17-build-process]{Chapter 17} run on SQLite and never call \texttt{?search=}, so they cannot notice. That gap~--- code that only the production database ever runs~--- is exactly the subject of \hyperref[ch:39-local-vs-production]{Chapter 39}.
+\item
+  \textbf{It reads the whole table.} A pattern that starts with \texttt{\%} cannot use an ordinary B-tree index, so PostgreSQL scans every row. That is fine for thousands of notes; for millions, a trigram index (the \texttt{pg\_trgm} extension) or full-text search is the fix (\hyperref[ch:36-scaling-load]{Chapter 36}).
+\end{itemize}
+
+\setcounter{section}{8}
+\section{Updating and Deleting Notes}\label{33-logic-execution:339-updating-and-deleting-notes}
+
+Updating a note needs something the \texttt{notes} table does not have yet: a record of \emph{when} it was last changed. The table was created by \texttt{init\_db()} with \texttt{CREATE\ TABLE\ IF\ NOT\ EXISTS}~--- which does nothing at all for a table that already exists. So the new column needs a \textbf{migration}: a one-time change to every existing database, stored with the code (\hyperref[ch:19-artifact-storage]{Chapter 19} introduced the idea):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} migrations/0002\_add\_updated\_at.sql}
+\CommentTok{{-}{-} Run once against each existing database (development and production).}
+\CommentTok{{-}{-} NULL until the note is first updated.}
+\KeywordTok{ALTER} \KeywordTok{TABLE}\NormalTok{ notes }\KeywordTok{ADD} \KeywordTok{COLUMN}\NormalTok{ updated\_at TIMESTAMPTZ;     }\CommentTok{{-}{-} PostgreSQL}
+\CommentTok{{-}{-} ALTER TABLE notes ADD COLUMN updated\_at TIMESTAMP;    {-}{-} SQLite}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Production: run it with psql against the managed database}
+\ExtensionTok{psql} \StringTok{"}\VariableTok{$DATABASE\_URL}\StringTok{"} \AttributeTok{{-}f}\NormalTok{ migrations/0002\_add\_updated\_at.sql}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Add the column to the \texttt{CREATE\ TABLE} statements in \texttt{init\_db()} too (\texttt{updated\_at\ TIMESTAMPTZ} for PostgreSQL, \texttt{updated\_at\ TIMESTAMP} for SQLite), so that new databases~--- the test database, for one~--- get it from the start. And teach \texttt{row\_to\_note()} in \texttt{app/database.py} to convert the new timestamp as well:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ row\_to\_note(row) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict}\NormalTok{:}
+    \CommentTok{"""Convert a database row into the note dictionary the API returns."""}
+\NormalTok{    note }\OperatorTok{=} \BuiltInTok{dict}\NormalTok{(row)}
+    \ControlFlowTok{for}\NormalTok{ field }\KeywordTok{in}\NormalTok{ (}\StringTok{"created\_at"}\NormalTok{, }\StringTok{"updated\_at"}\NormalTok{):}
+        \ControlFlowTok{if}\NormalTok{ note.get(field) }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{:   }\CommentTok{\# updated\_at is NULL until an update}
+\NormalTok{            note[field] }\OperatorTok{=}\NormalTok{ to\_iso(note[field])}
+    \ControlFlowTok{return}\NormalTok{ note}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The order matters when you deploy: run the migration \emph{before} the new code. The old code simply ignores the extra column; the new code fails without it. A nullable new column is an \textbf{additive} change (\hyperref[ch:06-local-dependencies]{Chapter 6}): safe for the code already running, which is exactly what makes this order work. (Running migrations by hand does not scale past the first one; section 33.10 turns it into a system.)
+
+Now the handler:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"PUT"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ update\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""Replace a note\textquotesingle{}s content."""}
+\NormalTok{    validator }\OperatorTok{=}\NormalTok{ Validator(request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{))}
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ validator.require\_string(}\StringTok{"content"}\NormalTok{, min\_length}\OperatorTok{=}\DecValTok{1}\NormalTok{, max\_length}\OperatorTok{=}\DecValTok{10\_000}\NormalTok{, strip}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+
+    \ControlFlowTok{if}\NormalTok{ validator.has\_errors():}
+        \ControlFlowTok{return}\NormalTok{ validator.error\_response()}
+
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"""}
+\StringTok{            UPDATE notes}
+\StringTok{            SET content = ?, updated\_at = CURRENT\_TIMESTAMP}
+\StringTok{            WHERE id = ?}
+\StringTok{            RETURNING id, content, created\_at, updated\_at}
+\StringTok{        """}\NormalTok{),}
+\NormalTok{        (content, note\_id),}
+\NormalTok{    )}
+
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \CommentTok{\# No row was updated — the note doesn\textquotesingle{}t exist}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+
+\NormalTok{    note }\OperatorTok{=}\NormalTok{ row\_to\_note(row)}
+\NormalTok{    db.commit()}
+\NormalTok{    logger.info(}\StringTok{"Updated note id=}\SpecialCharTok{\%d}\StringTok{."}\NormalTok{, note\_id)}
+
+    \ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Key point for UPDATE}: After executing an UPDATE, \texttt{fetchone()} returns \texttt{None} if no rows matched the WHERE clause. This distinguishes between ``note updated successfully'' and ``note not found''~--- without requiring a separate SELECT.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ delete\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""Delete a note."""}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"DELETE FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    db.commit()}
+
+    \CommentTok{\# rowcount: how many rows the DELETE removed (0 or 1 here)}
+    \ControlFlowTok{if}\NormalTok{ cursor.rowcount }\OperatorTok{==} \DecValTok{0}\NormalTok{:}
+\NormalTok{        logger.info(}\StringTok{"DELETE note id=}\SpecialCharTok{\%d}\StringTok{: not found."}\NormalTok{, note\_id)}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+
+\NormalTok{    logger.info(}\StringTok{"Deleted note id=}\SpecialCharTok{\%d}\StringTok{."}\NormalTok{, note\_id)}
+
+    \CommentTok{\# 204 No Content: success, but nothing to return}
+    \ControlFlowTok{return} \StringTok{""}\NormalTok{, }\DecValTok{204}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\textbf{Key point for DELETE}: HTTP 204 No Content is the conventional response for successful deletes. A 204 response must not include a body, hence the empty string \texttt{""}. (Whether deleting a note that does not exist should be a 404, as here, or a 204~--- ``it is gone either way''~--- is the design choice discussed in Chapter 16, section 16.5.)
+
+\setcounter{section}{9}
+\section{Migrations as a System}\label{33-logic-execution:3310-migrations-as-a-system}
+
+Section 33.9 made the Notes API's first schema change by hand: write a SQL file, run it with \texttt{psql}, and add the same column to \texttt{init\_db()}. That worked once. But it exposed three problems, and each one gets worse with every change that follows:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Nobody knows which changes a database has had.} Was \texttt{0002} run on staging? On production? On your colleague's laptop? The only record is somebody's memory.
+\item
+  \textbf{The schema is written down twice.} \texttt{init\_db()}'s \texttt{CREATE\ TABLE} builds new databases (the test database, a new developer's), while the migration files change old ones. Every change has to be made in both places, and sooner or later the two drift apart. When they do, the database your tests run against is no longer the one production runs.
+\item
+  \textbf{A person is part of the deploy.} A release that needs someone to remember a \texttt{psql} command will, one day, go out without it.
+\end{enumerate}
+
+\noindent{}Almost every production team solves this the same way, with three parts:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Every schema change is a numbered file in the repository.} The migrations are the \emph{only} definition of the schema. A brand-new database is built by running all of them, from the first.
+\item
+  \textbf{Each database records which migrations it has had}, in a table of its own.
+\item
+  \textbf{A migration runner applies the missing ones}, in order, as a step of every deployment.
+\end{itemize}
+
+\noindent{}Tools that do exactly this exist for every stack: Alembic (for SQLAlchemy), Flyway and Liquibase (any SQL database), the migration systems built into Django and Rails, \texttt{golang-migrate}. The Notes API writes its own runner instead, because at a little over 200 lines, nearly a third of them comments, docstrings and blank lines, it is short enough to understand completely. Once you have seen how one works, every one of those tools will feel familiar.
+
+\subsection*{The migrations directory}\phantomsection\label{33-logic-execution:the-migrations-directory}
+
+\begin{diagrambox}[short]{243.4pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+migrations/
+├── postgresql/
+│   ├── 0001_create_notes.sql
+│   ├── 0002_add_updated_at.sql
+│   └── 0003_add_tags.sql          ← section 33.11
+└── sqlite/
+    ├── 0001_create_notes.sql
+    ├── 0002_add_updated_at.sql
+    └── 0003_add_tags.sql
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}There are two folders because the two databases speak slightly different SQL: \texttt{SERIAL} against \texttt{INTEGER\ PRIMARY\ KEY\ AUTOINCREMENT}, \texttt{TIMESTAMPTZ} against \texttt{TIMESTAMP}. Until \hyperref[ch:39-local-vs-production]{Chapter 39} moves everything to PostgreSQL, every migration is written twice. That duplication is part of the price of running two databases, and Chapter 39 counts it.
+
+\texttt{0001} is the table that \texttt{init\_db()} used to create, now written down as the first migration. \texttt{0002} is section 33.9's file, split in two:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} migrations/postgresql/0001\_create\_notes.sql}
+\CommentTok{{-}{-} The notes table as init\_db() created it (Chapters 13–16).}
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ notes (}
+    \KeywordTok{id}\NormalTok{          SERIAL }\KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{,}
+\NormalTok{    content     TEXT }\KeywordTok{NOT} \KeywordTok{NULL}\NormalTok{,}
+\NormalTok{    created\_at  TIMESTAMPTZ }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{DEFAULT} \FunctionTok{CURRENT\_TIMESTAMP}
+\NormalTok{);}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} migrations/postgresql/0002\_add\_updated\_at.sql}
+\CommentTok{{-}{-} NULL until the note is first updated (section 33.9).}
+\KeywordTok{ALTER} \KeywordTok{TABLE}\NormalTok{ notes }\KeywordTok{ADD} \KeywordTok{COLUMN}\NormalTok{ updated\_at TIMESTAMPTZ;}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The rules that make migrations trustworthy are few, and every team that ignores one of them eventually learns why it exists:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Numbered, applied in order, never renumbered.} The number is the migration's identity. Zero-padding (\texttt{0001}, not \texttt{1}) makes plain alphabetical sorting put them in the right order.
+\item
+  \textbf{Never edit a migration that has run anywhere except your own laptop.} It has already happened to those databases. Editing the file changes what \emph{new} databases get, and old and new drift apart. A mistake in a migration is fixed by the \emph{next} migration.
+\item
+  \textbf{Every migration must be safe for the code that is already running.} It runs \emph{before} the new code starts, while the old version is still serving, and the old version may be rolled back to later. Additive changes are safe. A breaking change, such as a rename, a drop, or a new \texttt{NOT\ NULL}, goes through expand/contract (\hyperref[ch:06-local-dependencies]{Chapter 6}), spread over several releases.
+\item
+  \textbf{One migration, one transaction.} PostgreSQL can change a schema inside a transaction, so a migration that fails half-way leaves nothing behind. (A few statements, such as \texttt{CREATE\ INDEX\ CONCURRENTLY}, refuse to run inside a transaction. This small runner does not support them; the full-size tools do.)
+\end{itemize}
+
+\subsection*{The runner}\phantomsection\label{33-logic-execution:the-runner}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/migrate.py}
+\CommentTok{"""}
+\CommentTok{The migration runner: brings a database\textquotesingle{}s schema up to date.}
+
+\CommentTok{    python {-}m app.migrate                    apply every pending migration}
+\CommentTok{    python {-}m app.migrate {-}{-}status           show which migrations are applied}
+\CommentTok{    python {-}m app.migrate {-}{-}baseline 0002    record 0001–0002 as applied (not run)}
+
+\CommentTok{Migrations are SQL files in migrations/sqlite/ or migrations/postgresql/,}
+\CommentTok{named NNNN\_description.sql, and run in the order of their numbers. Each one}
+\CommentTok{runs in its own transaction together with the row that records it in}
+\CommentTok{schema\_migrations, so a migration is either applied and recorded, or}
+\CommentTok{neither.}
+\CommentTok{"""}
+
+\ImportTok{import}\NormalTok{ argparse}
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{import}\NormalTok{ sqlite3}
+\ImportTok{import}\NormalTok{ sys}
+\ImportTok{from}\NormalTok{ pathlib }\ImportTok{import}\NormalTok{ Path}
+
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ IS\_SQLITE}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ open\_db, sql}
+
+\CommentTok{\# Named explicitly: run as "python {-}m app.migrate", \_\_name\_\_ is "\_\_main\_\_"}
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\StringTok{"app.migrate"}\NormalTok{)}
+
+\NormalTok{MIGRATIONS\_DIR }\OperatorTok{=}\NormalTok{ (}
+\NormalTok{    Path(}\VariableTok{\_\_file\_\_}\NormalTok{).resolve().parent.parent}
+    \OperatorTok{/} \StringTok{"migrations"}
+    \OperatorTok{/}\NormalTok{ (}\StringTok{"sqlite"} \ControlFlowTok{if}\NormalTok{ IS\_SQLITE }\ControlFlowTok{else} \StringTok{"postgresql"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Any constant will do: every runner asks PostgreSQL for the same lock number}
+\NormalTok{\_LOCK\_ID }\OperatorTok{=} \DecValTok{331\_000}
+
+
+\KeywordTok{def}\NormalTok{ available() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{list}\NormalTok{[}\BuiltInTok{tuple}\NormalTok{[}\BuiltInTok{str}\NormalTok{, Path]]:}
+    \CommentTok{"""Every migration file as (version, path), in order: [("0001", …), …]."""}
+    \ControlFlowTok{return}\NormalTok{ [}
+\NormalTok{        (path.name[:}\DecValTok{4}\NormalTok{], path)}
+        \ControlFlowTok{for}\NormalTok{ path }\KeywordTok{in} \BuiltInTok{sorted}\NormalTok{(MIGRATIONS\_DIR.glob(}\StringTok{"[0{-}9][0{-}9][0{-}9][0{-}9]\_*.sql"}\NormalTok{))}
+\NormalTok{    ]}
+
+
+\KeywordTok{def}\NormalTok{ \_lock(conn) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Make sure only one runner changes the schema at a time. PostgreSQL: a}
+\CommentTok{    session{-}level advisory lock, held until the connection closes; any other}
+\CommentTok{    runner waits here. SQLite needs nothing more: each migration\textquotesingle{}s}
+\CommentTok{    }\RegionMarkerTok{BEGIN}\CommentTok{ IMMEDIATE (in \_begin) takes the database\textquotesingle{}s single write lock.}
+\CommentTok{    """}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ IS\_SQLITE:}
+\NormalTok{        conn.cursor().execute(}\StringTok{"SELECT pg\_advisory\_lock(}\SpecialCharTok{\%s}\StringTok{)"}\NormalTok{, (\_LOCK\_ID,))}
+\NormalTok{        conn.commit()  }\CommentTok{\# a session{-}level lock outlives the transaction}
+
+
+\KeywordTok{def}\NormalTok{ \_prepare(conn) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""Create the table that records applied migrations (only under the lock)."""}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ conn.cursor()}
+\NormalTok{    cursor.execute(}\StringTok{"""}
+\StringTok{        CREATE TABLE IF NOT EXISTS schema\_migrations (}
+\StringTok{            version     TEXT PRIMARY KEY,}
+\StringTok{            applied\_at  TIMESTAMP NOT NULL DEFAULT CURRENT\_TIMESTAMP}
+\StringTok{        )}
+\StringTok{    """}\NormalTok{)}
+\NormalTok{    conn.commit()}
+
+
+\KeywordTok{def}\NormalTok{ \_has\_record\_table(conn) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{bool}\NormalTok{:}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ conn.cursor()}
+    \ControlFlowTok{if}\NormalTok{ IS\_SQLITE:}
+\NormalTok{        cursor.execute(}
+            \StringTok{"SELECT name FROM sqlite\_master "}
+            \StringTok{"WHERE type = \textquotesingle{}table\textquotesingle{} AND name = \textquotesingle{}schema\_migrations\textquotesingle{}"}
+\NormalTok{        )}
+        \ControlFlowTok{return}\NormalTok{ cursor.fetchone() }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}
+\NormalTok{    cursor.execute(}\StringTok{"SELECT to\_regclass(\textquotesingle{}schema\_migrations\textquotesingle{}) AS name"}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ cursor.fetchone()[}\StringTok{"name"}\NormalTok{] }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}
+
+
+\KeywordTok{def}\NormalTok{ \_applied(conn) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{set}\NormalTok{[}\BuiltInTok{str}\NormalTok{]:}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ conn.cursor()}
+\NormalTok{    cursor.execute(}\StringTok{"SELECT version FROM schema\_migrations"}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ \{row[}\StringTok{"version"}\NormalTok{] }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()\}}
+
+
+\KeywordTok{def}\NormalTok{ \_statements(text: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{list}\NormalTok{[}\BuiltInTok{str}\NormalTok{]:}
+    \CommentTok{"""}
+\CommentTok{    Split a migration file into statements. PostgreSQL accepts the whole}
+\CommentTok{    file in one execute(); sqlite3 accepts one statement at a time.}
+\CommentTok{    """}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ IS\_SQLITE:}
+        \ControlFlowTok{return}\NormalTok{ [text]}
+\NormalTok{    statements, current }\OperatorTok{=}\NormalTok{ [], }\StringTok{""}
+    \ControlFlowTok{for}\NormalTok{ line }\KeywordTok{in}\NormalTok{ text.splitlines(keepends}\OperatorTok{=}\VariableTok{True}\NormalTok{):}
+\NormalTok{        current }\OperatorTok{+=}\NormalTok{ line}
+        \ControlFlowTok{if}\NormalTok{ sqlite3.complete\_statement(current):}
+\NormalTok{            statements.append(current)}
+\NormalTok{            current }\OperatorTok{=} \StringTok{""}
+\NormalTok{    leftover }\OperatorTok{=}\NormalTok{ [}
+\NormalTok{        ln}
+        \ControlFlowTok{for}\NormalTok{ ln }\KeywordTok{in}\NormalTok{ current.splitlines()}
+        \ControlFlowTok{if}\NormalTok{ ln.strip() }\KeywordTok{and} \KeywordTok{not}\NormalTok{ ln.strip().startswith(}\StringTok{"{-}{-}"}\NormalTok{)}
+\NormalTok{    ]}
+    \ControlFlowTok{if}\NormalTok{ leftover:}
+        \ControlFlowTok{raise} \PreprocessorTok{ValueError}\NormalTok{(}
+            \SpecialStringTok{f"Incomplete SQL statement at the end of the file: }\SpecialCharTok{\{}\NormalTok{leftover[}\DecValTok{0}\NormalTok{]}\SpecialCharTok{!r\}}\SpecialStringTok{"}
+\NormalTok{        )}
+    \ControlFlowTok{return}\NormalTok{ statements}
+
+
+\KeywordTok{def}\NormalTok{ \_begin(conn) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Start one migration\textquotesingle{}s transaction. SQLite: }\RegionMarkerTok{BEGIN}\CommentTok{ IMMEDIATE takes the}
+\CommentTok{    write lock at once. (psycopg2 starts a transaction by itself.)}
+\CommentTok{    """}
+    \ControlFlowTok{if}\NormalTok{ IS\_SQLITE:}
+\NormalTok{        conn.cursor().execute(}\StringTok{"BEGIN IMMEDIATE"}\NormalTok{)}
+
+
+\KeywordTok{def}\NormalTok{ pending() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{list}\NormalTok{[}\BuiltInTok{str}\NormalTok{]:}
+    \CommentTok{"""}
+\CommentTok{    The versions of the migrations not yet applied to the database. It only}
+\CommentTok{    reads, so every worker can safely call it at startup.}
+\CommentTok{    """}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ open\_db()}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        done }\OperatorTok{=}\NormalTok{ \_applied(conn) }\ControlFlowTok{if}\NormalTok{ \_has\_record\_table(conn) }\ControlFlowTok{else} \BuiltInTok{set}\NormalTok{()}
+        \ControlFlowTok{return}\NormalTok{ [version }\ControlFlowTok{for}\NormalTok{ version, \_ }\KeywordTok{in}\NormalTok{ available() }\ControlFlowTok{if}\NormalTok{ version }\KeywordTok{not} \KeywordTok{in}\NormalTok{ done]}
+    \ControlFlowTok{finally}\NormalTok{:}
+\NormalTok{        conn.close()}
+
+
+\KeywordTok{def}\NormalTok{ migrate() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{list}\NormalTok{[}\BuiltInTok{str}\NormalTok{]:}
+    \CommentTok{"""Apply every pending migration, in order. Returns the versions applied."""}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ open\_db()}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        \_lock(conn)}
+\NormalTok{        \_prepare(conn)}
+\NormalTok{        newly\_applied }\OperatorTok{=}\NormalTok{ []}
+        \ControlFlowTok{for}\NormalTok{ version, path }\KeywordTok{in}\NormalTok{ available():}
+\NormalTok{            \_begin(conn)}
+            \CommentTok{\# Checked inside the lock: another runner may have applied it}
+            \ControlFlowTok{if}\NormalTok{ version }\KeywordTok{in}\NormalTok{ \_applied(conn):}
+\NormalTok{                conn.rollback()}
+                \ControlFlowTok{continue}
+\NormalTok{            logger.info(}\StringTok{"Applying migration }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, path.name)}
+            \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{                cursor }\OperatorTok{=}\NormalTok{ conn.cursor()}
+                \ControlFlowTok{for}\NormalTok{ statement }\KeywordTok{in}\NormalTok{ \_statements(path.read\_text()):}
+\NormalTok{                    cursor.execute(statement)}
+\NormalTok{                cursor.execute(}
+\NormalTok{                    sql(}\StringTok{"INSERT INTO schema\_migrations (version) VALUES (?)"}\NormalTok{),}
+\NormalTok{                    (version,),}
+\NormalTok{                )}
+\NormalTok{                conn.commit()}
+            \ControlFlowTok{except} \PreprocessorTok{Exception}\NormalTok{:}
+\NormalTok{                conn.rollback()}
+\NormalTok{                logger.error(}
+                    \StringTok{"Migration }\SpecialCharTok{\%s}\StringTok{ failed; nothing from it was applied."}\NormalTok{, path.name}
+\NormalTok{                )}
+                \ControlFlowTok{raise}
+\NormalTok{            newly\_applied.append(version)}
+        \ControlFlowTok{return}\NormalTok{ newly\_applied}
+    \ControlFlowTok{finally}\NormalTok{:}
+\NormalTok{        conn.close()  }\CommentTok{\# also releases the PostgreSQL lock}
+
+
+\KeywordTok{def}\NormalTok{ baseline(up\_to: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{list}\NormalTok{[}\BuiltInTok{str}\NormalTok{]:}
+    \CommentTok{"""}
+\CommentTok{    Record every migration up to and including \textasciigrave{}up\_to\textasciigrave{} as applied, without}
+\CommentTok{    running it — for a database whose schema was built before the runner}
+\CommentTok{    existed (by init\_db() and by hand).}
+\CommentTok{    """}
+\NormalTok{    versions }\OperatorTok{=}\NormalTok{ [version }\ControlFlowTok{for}\NormalTok{ version, \_ }\KeywordTok{in}\NormalTok{ available() }\ControlFlowTok{if}\NormalTok{ version }\OperatorTok{\textless{}=}\NormalTok{ up\_to]}
+    \ControlFlowTok{if}\NormalTok{ up\_to }\KeywordTok{not} \KeywordTok{in}\NormalTok{ versions:}
+        \ControlFlowTok{raise} \PreprocessorTok{ValueError}\NormalTok{(}\SpecialStringTok{f"No migration numbered }\SpecialCharTok{\{}\NormalTok{up\_to}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ open\_db()}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        \_lock(conn)}
+\NormalTok{        \_prepare(conn)}
+\NormalTok{        \_begin(conn)}
+\NormalTok{        done }\OperatorTok{=}\NormalTok{ \_applied(conn)}
+\NormalTok{        cursor }\OperatorTok{=}\NormalTok{ conn.cursor()}
+\NormalTok{        recorded }\OperatorTok{=}\NormalTok{ [v }\ControlFlowTok{for}\NormalTok{ v }\KeywordTok{in}\NormalTok{ versions }\ControlFlowTok{if}\NormalTok{ v }\KeywordTok{not} \KeywordTok{in}\NormalTok{ done]}
+        \ControlFlowTok{for}\NormalTok{ version }\KeywordTok{in}\NormalTok{ recorded:}
+\NormalTok{            cursor.execute(}
+\NormalTok{                sql(}\StringTok{"INSERT INTO schema\_migrations (version) VALUES (?)"}\NormalTok{),}
+\NormalTok{                (version,),}
+\NormalTok{            )}
+\NormalTok{        conn.commit()}
+        \ControlFlowTok{return}\NormalTok{ recorded}
+    \ControlFlowTok{finally}\NormalTok{:}
+\NormalTok{        conn.close()}
+
+
+\KeywordTok{def}\NormalTok{ main(argv: }\BuiltInTok{list}\NormalTok{[}\BuiltInTok{str}\NormalTok{] }\OperatorTok{|} \VariableTok{None} \OperatorTok{=} \VariableTok{None}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{int}\NormalTok{:}
+    \ImportTok{from}\NormalTok{ app.logging\_config }\ImportTok{import}\NormalTok{ configure\_logging}
+
+\NormalTok{    parser }\OperatorTok{=}\NormalTok{ argparse.ArgumentParser(}
+\NormalTok{        prog}\OperatorTok{=}\StringTok{"python {-}m app.migrate"}\NormalTok{, description}\OperatorTok{=}\NormalTok{\_\_doc\_\_.split(}\StringTok{"}\CharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)[}\DecValTok{0}\NormalTok{]}
+\NormalTok{    )}
+\NormalTok{    group }\OperatorTok{=}\NormalTok{ parser.add\_mutually\_exclusive\_group()}
+\NormalTok{    group.add\_argument(}
+        \StringTok{"{-}{-}status"}\NormalTok{, action}\OperatorTok{=}\StringTok{"store\_true"}\NormalTok{, }\BuiltInTok{help}\OperatorTok{=}\StringTok{"show which migrations are applied"}
+\NormalTok{    )}
+\NormalTok{    group.add\_argument(}
+        \StringTok{"{-}{-}baseline"}\NormalTok{,}
+\NormalTok{        metavar}\OperatorTok{=}\StringTok{"VERSION"}\NormalTok{,}
+        \BuiltInTok{help}\OperatorTok{=}\StringTok{"record migrations up to VERSION as applied"}\NormalTok{,}
+\NormalTok{    )}
+\NormalTok{    args }\OperatorTok{=}\NormalTok{ parser.parse\_args(argv)}
+\NormalTok{    configure\_logging()}
+
+    \ControlFlowTok{if}\NormalTok{ args.status:}
+\NormalTok{        waiting }\OperatorTok{=} \BuiltInTok{set}\NormalTok{(pending())}
+        \ControlFlowTok{for}\NormalTok{ version, path }\KeywordTok{in}\NormalTok{ available():}
+            \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}pending \textquotesingle{}} \ControlFlowTok{if}\NormalTok{ version }\KeywordTok{in}\NormalTok{ waiting }\ControlFlowTok{else} \StringTok{\textquotesingle{}applied \textquotesingle{}}\SpecialCharTok{\}}\SpecialStringTok{ }\SpecialCharTok{\{}\NormalTok{path}\SpecialCharTok{.}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{return} \DecValTok{0}
+    \ControlFlowTok{if}\NormalTok{ args.baseline:}
+\NormalTok{        recorded }\OperatorTok{=}\NormalTok{ baseline(args.baseline)}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Recorded as applied: }\SpecialCharTok{\{}\StringTok{\textquotesingle{}, \textquotesingle{}}\SpecialCharTok{.}\NormalTok{join(recorded) }\KeywordTok{or} \StringTok{\textquotesingle{}nothing new\textquotesingle{}}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{return} \DecValTok{0}
+\NormalTok{    applied\_now }\OperatorTok{=}\NormalTok{ migrate()}
+    \BuiltInTok{print}\NormalTok{(}
+        \SpecialStringTok{f"Applied: }\SpecialCharTok{\{}\StringTok{\textquotesingle{}, \textquotesingle{}}\SpecialCharTok{.}\NormalTok{join(applied\_now)}\SpecialCharTok{\}}\SpecialStringTok{"}
+        \ControlFlowTok{if}\NormalTok{ applied\_now}
+        \ControlFlowTok{else} \StringTok{"Database schema is up to date."}
+\NormalTok{    )}
+    \ControlFlowTok{return} \DecValTok{0}
+
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    sys.exit(main())}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The runner does five things:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\texttt{schema\_migrations} is the database's own record.} It has one row per applied migration. \texttt{pending()} compares that record with the files on disk; everything on disk and not in the table is still to do.
+\item
+  \textbf{A migration and its record commit together.} \texttt{migrate()} runs a file's statements \emph{and} inserts its version into \texttt{schema\_migrations} in the same transaction, then commits once. A crash can therefore never leave a migration ``applied but not recorded'', which would make the next run try it a second time. Either both happened, or neither did.
+\item
+  \textbf{Only one runner changes the schema at a time.} Two deploys started at once, or two servers deploying together, must not both apply \texttt{0003}. On PostgreSQL, \texttt{\_lock()} takes an \textbf{advisory lock}: a lock on a number that the application chooses, held until the connection closes. Every runner asks for the same number, so they queue up. On SQLite, each migration's \texttt{BEGIN\ IMMEDIATE} takes the database's single write lock. Inside the lock, the runner checks \texttt{schema\_migrations} \emph{again}, because another runner may have applied the migration while this one waited.
+\item
+  \textbf{Everything that writes happens under the lock, including creating \texttt{schema\_migrations} itself.} That line exists because of a real bug, found by starting six runners at once against an empty PostgreSQL database. \texttt{CREATE\ TABLE\ IF\ NOT\ EXISTS} sounds safe to run concurrently, but it is not: two sessions can both see ``not there'' and both try to create it, and one fails with a \texttt{UniqueViolation}. For the same reason \texttt{pending()} never creates anything. Every Gunicorn worker calls it at startup, several at the same moment, so it only reads. When the bookkeeping table does not exist yet, it simply reports every migration as pending.
+\item
+  \textbf{SQLite needs one statement at a time.} psycopg2 happily runs a whole file in one \texttt{execute()}, but Python's \texttt{sqlite3} refuses more than one statement per call. \texttt{\_statements()} splits the file, and uses \texttt{sqlite3.}\allowbreak{}\texttt{complete\_}\allowbreak{}\texttt{statement()} to find where each statement ends, so a \texttt{;} inside a quoted string does not fool it.
+\end{itemize}
+
+\noindent{}Using it:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+$ python -m app.migrate --status
+pending  0001_create_notes.sql
+pending  0002_add_updated_at.sql
+pending  0003_add_tags.sql
+
+$ python -m app.migrate
+2024-01-15 14:00:05.474 INFO     app.migrate        | Applying migration 0001_create_notes.sql
+2024-01-15 14:00:05.476 INFO     app.migrate        | Applying migration 0002_add_updated_at.sql
+2024-01-15 14:00:05.476 INFO     app.migrate        | Applying migration 0003_add_tags.sql
+Applied: 0001, 0002, 0003
+
+$ python -m app.migrate
+Database schema is up to date.
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Running it twice is safe. The second run finds nothing pending and changes nothing, so a deploy can run it every time without thinking.
+
+\subsection*{Baselining a database that already exists}\phantomsection\label{33-logic-execution:baselining-a-database-that-already-exists}
+
+The empty database above is the easy case. Your development database and the production database already \emph{have} a \texttt{notes} table with an \texttt{updated\_at} column: \texttt{init\_db()} built the first, and section 33.9's \texttt{psql} command added the second. They do not have a \texttt{schema\_migrations} table yet, so the runner believes nothing has been applied. Run \texttt{migrate} against one of them, and \texttt{0001} fails immediately:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+psycopg2.errors.DuplicateTable: relation "notes" already exists
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}That is harmless: the transaction rolls back, and the database is exactly as it was. The runner simply needs to be told the truth, once:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+$ python -m app.migrate --baseline 0002
+Recorded as applied: 0001, 0002
+
+$ python -m app.migrate
+2024-01-15 14:02:11.120 INFO     app.migrate        | Applying migration 0003_add_tags.sql
+Applied: 0003
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}\texttt{-\/-baseline} records migrations as applied \emph{without running them}. You use it once on each database that existed before the runner (your laptop, staging and production) and never again. Every database created from now on is built by the migrations from \texttt{0001}. Flyway calls this exact operation ``baseline''; Alembic calls it \texttt{stamp}.
+
+\subsection*{\texorpdfstring{\texttt{init\_db()} retires, and startup checks the schema}{init\_db() retires, and startup checks the schema}}\phantomsection\label{33-logic-execution:init-db-retires-and-startup-checks-the-schema}
+
+With the schema defined by the migrations, \texttt{init\_db()} and its \texttt{CREATE\ TABLE} statements are deleted from \texttt{app/database.py}, and the \texttt{init\_db(app)} call is deleted from \texttt{create\_app()}. There is now one source of truth.
+
+Something must take its place at startup, though. Code that starts against a database that is missing a migration would run normally until the first request touches the missing table, and then fail on every such request. The startup checks from \hyperref[ch:14-runtime-contract]{Chapter 14} gain one more:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/startup.py (added)}
+\KeywordTok{def}\NormalTok{ check\_schema():}
+    \CommentTok{"""}
+\CommentTok{    Verify that every migration has been applied. The schema belongs to the}
+\CommentTok{    migrations (python {-}m app.migrate); code that starts on a database that}
+\CommentTok{    is behind it would fail on the first request that needs what is missing.}
+\CommentTok{    """}
+    \ImportTok{from}\NormalTok{ app.migrate }\ImportTok{import}\NormalTok{ pending}
+
+\NormalTok{    waiting }\OperatorTok{=}\NormalTok{ pending()}
+    \ControlFlowTok{if}\NormalTok{ waiting:}
+\NormalTok{        \_fail(}
+            \SpecialStringTok{f"The database schema is out of date: migration(s) "}
+            \SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}, \textquotesingle{}}\SpecialCharTok{.}\NormalTok{join(waiting)}\SpecialCharTok{\}}\SpecialStringTok{ not applied.}\CharTok{\textbackslash{}n}\SpecialStringTok{Run: python {-}m app.migrate"}
+\NormalTok{        )}
+\NormalTok{    logger.info(}\StringTok{"Database schema: up to date"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{run()} calls it straight after \texttt{check\_database()}. A process that refuses to start fails the deploy's health check, and the deploy script from \hyperref[ch:23-code-transfer]{Chapter 23} rolls back on its own. That is fail-fast doing its job.
+
+Why not simply run the migrations at startup, and skip the separate step? It is tempting, and some teams do it. But every Gunicorn worker on every server would start by racing to change the schema. A slow migration would hold up startup until health checks give up. A failing one would put the whole service into a restart loop. A migration is a deliberate, once-per-release step with its own success or failure, not a side effect of starting a process. So it gets its own step in the deploy.
+
+\subsection*{Migrations in the deployment}\phantomsection\label{33-logic-execution:migrations-in-the-deployment}
+
+The migration files have to travel inside the image, next to the code that expects them. The Dockerfile from \hyperref[ch:18-containerization]{Chapter 18} (with \hyperref[ch:24-process-startup]{Chapter 24}'s \texttt{gunicorn.conf.py}) gains one line:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{COPY} \OperatorTok{{-}{-}chown=notes:notes}\NormalTok{ app/ ./app/}
+\CommentTok{\# New: the schema travels with the code that expects it}
+\KeywordTok{COPY} \OperatorTok{{-}{-}chown=notes:notes}\NormalTok{ migrations/ ./migrations/}
+\KeywordTok{COPY} \OperatorTok{{-}{-}chown=notes:notes}\NormalTok{ run.py .}
+\KeywordTok{COPY} \OperatorTok{{-}{-}chown=notes:notes}\NormalTok{ gunicorn.conf.py .}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The CI smoke test from \hyperref[ch:19-artifact-storage]{Chapter 19} starts the new image against a brand-new SQLite file inside the container. That database has no tables, so the application now (correctly) refuses to start, and the smoke test would fail. The smoke test builds the schema first, in the same container, and then starts Gunicorn exactly as the image's \texttt{CMD} does:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Smoke{-}test the image}
+\FunctionTok{        run}\KeywordTok{: }\CharTok{|}
+\NormalTok{          \# A new, empty database: build the schema, then start as the image would}
+\NormalTok{          docker run {-}d {-}{-}name smoke {-}p 5000:5000 \textbackslash{}}
+\NormalTok{            {-}e DATABASE\_URL="sqlite:///notes.db" \textbackslash{}}
+\NormalTok{            {-}e SECRET\_KEY="ci{-}test{-}secret{-}key{-}not{-}for{-}production{-}1234" \textbackslash{}}
+\NormalTok{            notes{-}api:ci{-}test \textbackslash{}}
+\NormalTok{            sh {-}c "python {-}m app.migrate \&\& \textbackslash{}}
+\NormalTok{                   exec gunicorn {-}{-}config gunicorn.conf.py \textquotesingle{}app:create\_app()\textquotesingle{}"}
+\NormalTok{          curl {-}{-}fail {-}{-}retry 10 {-}{-}retry{-}delay 1 {-}{-}retry{-}connrefused \textbackslash{}}
+\NormalTok{            http://localhost:5000/health}
+\NormalTok{          docker rm {-}f smoke}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}As a bonus, every build now proves that the migrations run from \texttt{0001} on an empty database, inside the real image. (The \texttt{docker-run} target of Chapter 18's \texttt{Makefile} needs the same \texttt{sh\ -}\allowbreak{}\texttt{c\ "python\ -}\allowbreak{}\texttt{m\ app.}\allowbreak{}\texttt{migrate\ \&}\allowbreak{}\texttt{\&}\allowbreak{}\texttt{\ exec\ …"} command.)
+
+The deploy script from \hyperref[ch:23-code-transfer]{Chapter 23} gains a step between pulling the new image (Step 2) and stopping the old container (Step 3):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Step 2b: Apply database migrations: from the NEW image, while the OLD}
+\CommentTok{\# version is still serving}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\ExtensionTok{log} \StringTok{"Applying database migrations"}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}{-}rm} \AttributeTok{{-}{-}env{-}file} \StringTok{"}\VariableTok{$ENV\_FILE}\StringTok{"} \StringTok{"}\VariableTok{$FULL\_IMAGE}\StringTok{"}\NormalTok{ python }\AttributeTok{{-}m}\NormalTok{ app.migrate }\DataTypeTok{\textbackslash{}}
+    \OperatorTok{\textgreater{}\textgreater{}} \StringTok{"}\VariableTok{$LOG\_FILE}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \DataTypeTok{\textbackslash{}}
+    \KeywordTok{||} \ExtensionTok{die} \StringTok{"Migrations failed. The previous version is still running, unchanged."}
+\ExtensionTok{log} \StringTok{"Migrations: done"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is a throwaway container (\texttt{-\/-rm}). It runs from the \emph{new} image, so it has the new migration files, and it uses the same environment file, so it reaches the same database. If a migration fails, nothing else has happened yet and the old container is still serving. \texttt{deploy-bluegreen.sh} gets the same step, before the new colour starts.
+
+Notice what a rollback does \emph{not} do: it does not undo the schema. When the deploy script rolls back to the previous image, that image keeps running on the newer schema. That is why the rule ``safe for the code that is already running'' matters so much. It is also why most teams do not write ``down'' migrations at all. Reversing a data change is rarely safe, so they \emph{fix forward} with a new migration instead.
+
+Two smaller places change too. The tests build their database with the same runner, so the schema they test is, file for file, the one production has (section 33.16). And on your laptop, after pulling code that brings a new migration, you run \texttt{python\ -m\ app.migrate}. If you forget, the startup check tells you.
+
+\setcounter{section}{10}
+\section{Growing the Schema: Tags}\label{33-logic-execution:3311-growing-the-schema-tags}
+
+\hyperref[ch:06-local-dependencies]{Chapter 6} designed a grown-up version of the Notes API's schema on paper, with tags and a join table between notes and tags. Now it is time to build it, and to make the database itself enforce the design.
+
+The feature: a note can carry short labels such as \texttt{work}, \texttt{urgent} or \texttt{to-do}. One note can have many tags, and one tag can label many notes. That is a many-to-many relationship, so the connection needs a table of its own. This is migration \texttt{0003}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} migrations/postgresql/0003\_add\_tags.sql}
+\CommentTok{{-}{-} Tags: short labels such as "work" or "urgent". A note has many tags,}
+\CommentTok{{-}{-} and a tag belongs to many notes, so the link is a table of its own.}
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ tags (}
+    \KeywordTok{id}\NormalTok{    SERIAL }\KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{,}
+\NormalTok{    name  TEXT }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{UNIQUE}
+          \KeywordTok{CHECK}\NormalTok{ (}\FunctionTok{length}\NormalTok{(name) }\KeywordTok{BETWEEN} \DecValTok{1} \KeywordTok{AND} \DecValTok{30} \KeywordTok{AND}\NormalTok{ name }\OperatorTok{=} \FunctionTok{lower}\NormalTok{(name))}
+\NormalTok{);}
+
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ note\_tags (}
+\NormalTok{    note\_id  }\DataTypeTok{INTEGER} \KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{REFERENCES}\NormalTok{ notes(}\KeywordTok{id}\NormalTok{) }\KeywordTok{ON} \KeywordTok{DELETE} \KeywordTok{CASCADE}\NormalTok{,}
+\NormalTok{    tag\_id   }\DataTypeTok{INTEGER} \KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{REFERENCES}\NormalTok{ tags(}\KeywordTok{id}\NormalTok{)  }\KeywordTok{ON} \KeywordTok{DELETE} \KeywordTok{CASCADE}\NormalTok{,}
+    \KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{ (note\_id, tag\_id)}
+\NormalTok{);}
+
+\CommentTok{{-}{-} The primary key (note\_id, tag\_id) already serves "the tags of note 42".}
+\CommentTok{{-}{-} "The notes with tag 7" needs an index that starts with tag\_id.}
+\KeywordTok{CREATE} \KeywordTok{INDEX}\NormalTok{ idx\_note\_tags\_tag\_id }\KeywordTok{ON}\NormalTok{ note\_tags (tag\_id);}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(The SQLite version differs only in its first column: \texttt{id\ INTEGER\ PRIMARY\ KEY\ AUTOINCREMENT}.)
+
+\subsection*{Constraints: rules the database enforces}\phantomsection\label{33-logic-execution:constraints-rules-the-database-enforces}
+
+Every line of those two tables is a rule that the database will now enforce against \emph{every} piece of code that ever writes to it:
+
+\Needspace{18\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2698}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3175}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4127}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Constraint
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+The rule
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What it prevents
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{NOT\ NULL} & the value must be present & a tag with no name; a link to no note \\
+\texttt{UNIQUE} on \texttt{tags.name} & one row per tag name & two different \texttt{work} tags, which would split one label in two \\
+\texttt{CHECK\ (...)} & 1--30 characters, lower case & \texttt{Work} and \texttt{work} becoming different tags; empty or huge names \\
+\texttt{PRIMARY\ KEY\ (note\_}\allowbreak{}\texttt{id,}\allowbreak{}\texttt{\ tag\_}\allowbreak{}\texttt{id)} & each pair at most once & a note carrying the same tag twice \\
+\texttt{REFERENCES\ ...} (a \textbf{foreign key}) & the id must exist in the other table & a link to a note that does not exist \\
+\end{longtable}
+}
+
+The input validation of \hyperref[ch:31-input-handling]{Chapter 31} checks the same tag rules, so why say them twice? Because the two do different jobs. \textbf{Validation is for the client}: it rejects bad input early, with a helpful \texttt{400} and a message. \textbf{Constraints are for the data}: they hold even for code that forgets to validate, a one-off script, a \texttt{psql} session at 2 a.m., or a second service written next year by another team. The application is one visitor to the data. The constraints protect the data from all of them.
+
+\subsection*{What happens on delete}\phantomsection\label{33-logic-execution:what-happens-on-delete}
+
+A foreign key also has to answer a question: what happens to the links when the thing they point at is deleted? \texttt{ON\ DELETE} gives the answer:
+
+\Needspace{13\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2857}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3233}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3910}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\texttt{ON\ DELETE}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+When the note (or tag) is deleted\ldots{}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Use it when
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{CASCADE} & its links are deleted with it & the child means nothing without the parent, as here \\
+\texttt{RESTRICT} / \texttt{NO\ ACTION} (the default) & the delete is refused while links exist & the child must never be lost silently, like a user's notes \\
+\texttt{SET\ NULL} & the link column becomes \texttt{NULL} & the child can live on without the parent \\
+\end{longtable}
+}
+
+This is a business decision written in SQL. Deleting a note should remove its tags, so \texttt{note\_tags} uses \texttt{CASCADE}. Deleting a \emph{user} who still has notes probably should not quietly delete years of their writing, so a foreign key from notes to users would use \texttt{RESTRICT}, or the application would soft-delete instead (\hyperref[ch:06-local-dependencies]{Chapter 6}).
+
+\begin{warnbox}
+
+\textbf{Warning:} SQLite does \emph{not} enforce foreign keys unless each connection switches them on. Without that one line, every \texttt{REFERENCES} clause above is silently ignored, including in your tests. \texttt{open\_db()} in \texttt{app/database.py} gains it:
+
+\end{warnbox}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{if}\NormalTok{ IS\_SQLITE:}
+\NormalTok{    conn }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_URL[}\BuiltInTok{len}\NormalTok{(}\StringTok{"sqlite:///"}\NormalTok{) :])}
+\NormalTok{    conn.row\_factory }\OperatorTok{=}\NormalTok{ sqlite3.Row}
+    \CommentTok{\# SQLite ignores FOREIGN KEY constraints unless each connection}
+    \CommentTok{\# switches them on (PostgreSQL always enforces them)}
+\NormalTok{    conn.execute(}\StringTok{"PRAGMA foreign\_keys = ON"}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ conn}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Indexes for the new tables}\phantomsection\label{33-logic-execution:indexes-for-the-new-tables}
+
+PostgreSQL automatically creates an index for every primary key and every \texttt{UNIQUE} constraint, but \textbf{not for foreign keys}. The primary key of \texttt{note\_tags} is \texttt{(note\_id,\ tag\_id)}. An index on two columns works like a phone book sorted by surname and then first name: it finds everyone called Smith quickly, but it does not help you find everyone called John. So it serves ``the tags of note 42'' and not ``the notes with tag 7'', which is why the migration adds a second index that starts with \texttt{tag\_id}. The rule of thumb: \textbf{index every foreign key column you will search by.} \hyperref[ch:36-scaling-load]{Chapter 36} (section 36.2) shows how to read a query plan and prove that an index is used.
+
+Add constraints when you create a table. Adding them later is much harder. SQLite cannot add a constraint to an existing table at all; the table has to be rebuilt and its data copied. PostgreSQL can add one with \texttt{ALTER\ TABLE\ …\ ADD\ CONSTRAINT}, but it checks every existing row while holding a lock. On a large table, that means adding the constraint \texttt{NOT\ VALID} first and validating it in a second step. Rules written in on day one cost nothing.
+
+\subsection*{The tags API}\phantomsection\label{33-logic-execution:the-tags-api}
+
+Three endpoints expose the feature:
+
+\Needspace{10\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4228}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3171}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2602}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Request
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Response
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{GET\ /}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{42/}\allowbreak{}\texttt{tags} & the tags of note 42 & \texttt{\{"tags":}\allowbreak{}\texttt{\ {[}"urgent",}\allowbreak{}\texttt{\ "work"{]}\}} \\
+\texttt{PUT\ /}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{42/}\allowbreak{}\texttt{tags} with \texttt{\{"tags":}\allowbreak{}\texttt{\ {[}"work",}\allowbreak{}\texttt{\ "urgent"{]}\}} & replace note 42's tags & \texttt{\{"tags":}\allowbreak{}\texttt{\ {[}"urgent",}\allowbreak{}\texttt{\ "work"{]}\}} \\
+\texttt{GET\ /}\allowbreak{}\texttt{tags/}\allowbreak{}\texttt{work/}\allowbreak{}\texttt{notes} & the notes tagged \texttt{work}, newest first & \texttt{\{"notes":}\allowbreak{}\texttt{\ {[}.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{{]},}\allowbreak{}\texttt{\ "count":}\allowbreak{}\texttt{\ 2\}} \\
+\end{longtable}
+}
+
+\texttt{PUT} replaces the \emph{whole set} rather than adding or removing one tag at a time. That makes it idempotent (section 34.10): sending the same request twice leaves the same result. It is also simpler for clients, which just send the tags they want. \texttt{\{"tags":\ {[}{]}\}} removes them all.
+
+The \texttt{Validator} from Chapter 31 gains a method for lists of short strings. It cleans each item, removes duplicates, and checks every item against a pattern:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/validation.py (added to the Validator class; needs "import re" at the top)}
+\KeywordTok{def}\NormalTok{ require\_string\_list(}
+    \VariableTok{self}\NormalTok{,}
+\NormalTok{    field: }\BuiltInTok{str}\NormalTok{,}
+    \OperatorTok{*}\NormalTok{,}
+\NormalTok{    max\_items: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{10}\NormalTok{,}
+\NormalTok{    max\_length: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{30}\NormalTok{,}
+\NormalTok{    allowed: }\BuiltInTok{tuple}\NormalTok{[re.Pattern, }\BuiltInTok{str}\NormalTok{] }\OperatorTok{|} \VariableTok{None} \OperatorTok{=} \VariableTok{None}\NormalTok{,}
+\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{list}\NormalTok{[}\BuiltInTok{str}\NormalTok{] }\OperatorTok{|} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Extract and validate a required list of strings.}
+
+\CommentTok{    Each item is stripped and lower{-}cased, and duplicates are removed.}
+\CommentTok{    \textasciigrave{}allowed\textasciigrave{} is an optional (pattern, description) pair that every item}
+\CommentTok{    must match in full. Returns the items sorted, or None if validation}
+\CommentTok{    failed. An empty list is valid: it means "none".}
+\CommentTok{    """}
+    \ControlFlowTok{if} \VariableTok{self}\NormalTok{.require\_dict() }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return} \VariableTok{None}
+
+    \ControlFlowTok{if}\NormalTok{ field }\KeywordTok{not} \KeywordTok{in} \VariableTok{self}\NormalTok{.data:}
+        \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} is required"}\NormalTok{)}
+        \ControlFlowTok{return} \VariableTok{None}
+
+\NormalTok{    value }\OperatorTok{=} \VariableTok{self}\NormalTok{.data[field]}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(value, }\BuiltInTok{list}\NormalTok{) }\KeywordTok{or} \KeywordTok{not} \BuiltInTok{all}\NormalTok{(}
+        \BuiltInTok{isinstance}\NormalTok{(item, }\BuiltInTok{str}\NormalTok{) }\ControlFlowTok{for}\NormalTok{ item }\KeywordTok{in}\NormalTok{ value}
+\NormalTok{    ):}
+        \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} must be a list of strings"}\NormalTok{)}
+        \ControlFlowTok{return} \VariableTok{None}
+
+\NormalTok{    items }\OperatorTok{=} \BuiltInTok{sorted}\NormalTok{(\{item.strip().lower() }\ControlFlowTok{for}\NormalTok{ item }\KeywordTok{in}\NormalTok{ value\})}
+
+    \ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(items) }\OperatorTok{\textgreater{}}\NormalTok{ max\_items:}
+        \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"\textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} cannot have more than }\SpecialCharTok{\{}\NormalTok{max\_items}\SpecialCharTok{\}}\SpecialStringTok{ items"}\NormalTok{)}
+        \ControlFlowTok{return} \VariableTok{None}
+    \ControlFlowTok{if} \BuiltInTok{any}\NormalTok{(}\KeywordTok{not} \DecValTok{1} \OperatorTok{\textless{}=} \BuiltInTok{len}\NormalTok{(item) }\OperatorTok{\textless{}=}\NormalTok{ max\_length }\ControlFlowTok{for}\NormalTok{ item }\KeywordTok{in}\NormalTok{ items):}
+        \VariableTok{self}\NormalTok{.\_add\_error(}
+            \SpecialStringTok{f"Each of \textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} must be 1 to }\SpecialCharTok{\{}\NormalTok{max\_length}\SpecialCharTok{\}}\SpecialStringTok{ characters long"}
+\NormalTok{        )}
+        \ControlFlowTok{return} \VariableTok{None}
+    \ControlFlowTok{if}\NormalTok{ allowed }\KeywordTok{and} \BuiltInTok{any}\NormalTok{(}\KeywordTok{not}\NormalTok{ allowed[}\DecValTok{0}\NormalTok{].fullmatch(item) }\ControlFlowTok{for}\NormalTok{ item }\KeywordTok{in}\NormalTok{ items):}
+        \VariableTok{self}\NormalTok{.\_add\_error(}\SpecialStringTok{f"Each of \textquotesingle{}}\SpecialCharTok{\{}\NormalTok{field}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{} may contain only }\SpecialCharTok{\{}\NormalTok{allowed[}\DecValTok{1}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{return} \VariableTok{None}
+
+    \ControlFlowTok{return}\NormalTok{ items}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The handlers themselves are the subject of the next two sections, because each one teaches something different. Reading tags teaches \textbf{joins}. Writing them teaches \textbf{transactions under concurrency}.
+
+\setcounter{section}{11}
+\section{Querying Across Tables}\label{33-logic-execution:3312-querying-across-tables}
+
+Once data is split across tables, which is exactly what normalization asks for (\hyperref[ch:06-local-dependencies]{Chapter 6}), almost every useful question needs several tables at once. ``Which notes are tagged \texttt{work}?'' touches \texttt{notes}, \texttt{note\_tags} and \texttt{tags}. The tool that puts them back together is the \textbf{join}.
+
+\subsection*{JOIN: combining rows that match}\phantomsection\label{33-logic-execution:join-combining-rows-that-match}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/tags.py}
+\ImportTok{import}\NormalTok{ logging}
+
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Blueprint, jsonify}
+
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db, row\_to\_note, sql}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\NormalTok{tags\_bp }\OperatorTok{=}\NormalTok{ Blueprint(}\StringTok{"tags"}\NormalTok{, }\VariableTok{\_\_name\_\_}\NormalTok{, url\_prefix}\OperatorTok{=}\StringTok{"/tags"}\NormalTok{)}
+
+
+\AttributeTok{@tags\_bp.route}\NormalTok{(}\StringTok{"/\textless{}name\textgreater{}/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ notes\_with\_tag(name: }\BuiltInTok{str}\NormalTok{):}
+    \CommentTok{"""The notes that carry one tag, newest first: \{"notes": [...], "count": n\}."""}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"""}
+\StringTok{            SELECT n.id, n.content, n.created\_at}
+\StringTok{            FROM notes n}
+\StringTok{            JOIN note\_tags nt ON nt.note\_id = n.id}
+\StringTok{            JOIN tags t ON t.id = nt.tag\_id}
+\StringTok{            WHERE t.name = ?}
+\StringTok{            ORDER BY n.id DESC}
+\StringTok{        """}\NormalTok{),}
+\NormalTok{        (name.lower(),),}
+\NormalTok{    )}
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [row\_to\_note(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+    \CommentTok{\# An unknown tag is not an error: it simply has no notes}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: notes, }\StringTok{"count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(notes)\}), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(\texttt{create\_app()} registers the new blueprint next to the other two: \texttt{app.}\allowbreak{}\texttt{register\_}\allowbreak{}\texttt{blueprint(tags\_}\allowbreak{}\texttt{bp)}.)
+
+The letters \texttt{n}, \texttt{nt} and \texttt{t} are \textbf{aliases}, short names for the tables within this query. A \texttt{JOIN\ …\ ON} produces one combined row for every pair of rows that satisfy the \texttt{ON} condition. It helps to see it with real rows:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+notes                 note_tags            tags
+id  content           note_id  tag_id      id  name
+1   Buy milk          1        2           1   work
+2   Ship the report   2        1           2   home
+3   Call the bank     2        2
+
+notes JOIN note_tags ON nt.note_id = n.id JOIN tags ON t.id = nt.tag_id:
+n.id  n.content         t.name
+1     Buy milk          home
+2     Ship the report   work
+2     Ship the report   home
+                                   (note 3 has no links, so no rows)
+
+… WHERE t.name = 'work'  →  one row: note 2
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Two things in that picture are worth remembering. A note appears once \emph{per matching tag}, so joins can multiply rows. And a note with no tags does not appear at all, because a plain \texttt{JOIN} (an \textbf{inner join}) keeps only rows that found a partner.
+
+\subsection*{LEFT JOIN: keeping rows without a partner}\phantomsection\label{33-logic-execution:left-join-keeping-rows-without-a-partner}
+
+Sometimes the rows without a partner are exactly the ones you need. ``The tags of note 42'' must tell apart two situations: \emph{note 42 has no tags} and \emph{there is no note 42}. That is the job of a \textbf{LEFT JOIN}, which keeps every row from the table on the left and fills the missing side with \texttt{NULL}:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/notes.py (added)}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}/tags"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note\_tags(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""The tags of one note: \{"tags": ["urgent", "work"]\}."""}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+    \CommentTok{\# LEFT JOIN keeps the note\textquotesingle{}s row even when it has no tags (name is then}
+    \CommentTok{\# NULL), so "no such note" (no rows) and "no tags" (one NULL row) differ}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"""}
+\StringTok{            SELECT t.name}
+\StringTok{            FROM notes n}
+\StringTok{            LEFT JOIN note\_tags nt ON nt.note\_id = n.id}
+\StringTok{            LEFT JOIN tags t ON t.id = nt.tag\_id}
+\StringTok{            WHERE n.id = ?}
+\StringTok{            ORDER BY t.name}
+\StringTok{        """}\NormalTok{),}
+\NormalTok{        (note\_id,),}
+\NormalTok{    )}
+\NormalTok{    rows }\OperatorTok{=}\NormalTok{ cursor.fetchall()}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ rows:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+    \ControlFlowTok{return}\NormalTok{ (}
+\NormalTok{        jsonify(\{}\StringTok{"tags"}\NormalTok{: [row[}\StringTok{"name"}\NormalTok{] }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ rows }\ControlFlowTok{if}\NormalTok{ row[}\StringTok{"name"}\NormalTok{] }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}\NormalTok{]\}),}
+        \DecValTok{200}\NormalTok{,}
+\NormalTok{    )}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}For note 3 in the example, the result is one row whose \texttt{name} is \texttt{NULL}, which becomes \texttt{\{"tags":\ {[}{]}\}}. For a note that does not exist, the result is no rows at all, which becomes a \texttt{404}. One query answers both questions.
+
+\subsection*{Aggregates: counting and grouping}\phantomsection\label{33-logic-execution:aggregates-counting-and-grouping}
+
+Some questions are about groups rather than rows: ``how many notes use each tag?'' \texttt{GROUP\ BY} collapses rows that share a value into one row per group, and \textbf{aggregate functions} such as \texttt{COUNT}, \texttt{SUM}, \texttt{MIN}, \texttt{MAX} and \texttt{AVG} compute a value over each group. Queries like these are what you run in \texttt{psql} to understand your data, or behind an admin report:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} How many notes use each tag, including tags no note uses any more}
+\KeywordTok{SELECT}\NormalTok{ t.name, }\FunctionTok{COUNT}\NormalTok{(nt.note\_id) }\KeywordTok{AS}\NormalTok{ notes}
+\KeywordTok{FROM}\NormalTok{ tags t}
+\KeywordTok{LEFT} \KeywordTok{JOIN}\NormalTok{ note\_tags nt }\KeywordTok{ON}\NormalTok{ nt.tag\_id }\OperatorTok{=}\NormalTok{ t.}\KeywordTok{id}
+\KeywordTok{GROUP} \KeywordTok{BY}\NormalTok{ t.name}
+\KeywordTok{ORDER} \KeywordTok{BY}\NormalTok{ notes }\KeywordTok{DESC}\NormalTok{, t.name;}
+
+\CommentTok{{-}{-} Only the popular ones: HAVING filters groups, as WHERE filters rows}
+\KeywordTok{SELECT}\NormalTok{ t.name, }\FunctionTok{COUNT}\NormalTok{(}\OperatorTok{*}\NormalTok{) }\KeywordTok{AS}\NormalTok{ notes}
+\KeywordTok{FROM}\NormalTok{ tags t}
+\KeywordTok{JOIN}\NormalTok{ note\_tags nt }\KeywordTok{ON}\NormalTok{ nt.tag\_id }\OperatorTok{=}\NormalTok{ t.}\KeywordTok{id}
+\KeywordTok{GROUP} \KeywordTok{BY}\NormalTok{ t.name}
+\KeywordTok{HAVING} \FunctionTok{COUNT}\NormalTok{(}\OperatorTok{*}\NormalTok{) }\OperatorTok{\textgreater{}=} \DecValTok{10}\NormalTok{;}
+
+\CommentTok{{-}{-} Notes with no tags at all: NOT EXISTS asks "is there no matching row?"}
+\KeywordTok{SELECT}\NormalTok{ n.}\KeywordTok{id}\NormalTok{, n.content}
+\KeywordTok{FROM}\NormalTok{ notes n}
+\KeywordTok{WHERE} \KeywordTok{NOT} \KeywordTok{EXISTS}\NormalTok{ (}\KeywordTok{SELECT} \DecValTok{1} \KeywordTok{FROM}\NormalTok{ note\_tags nt }\KeywordTok{WHERE}\NormalTok{ nt.note\_id }\OperatorTok{=}\NormalTok{ n.}\KeywordTok{id}\NormalTok{);}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The first query shows a detail that trips everyone up once. \texttt{COUNT(*)} counts rows, but \texttt{COUNT(nt.note\_id)} counts only the rows where \texttt{nt.note\_id} is not \texttt{NULL}. A tag that no note uses still gets one row from the \texttt{LEFT\ JOIN}, with \texttt{NULL} on the \texttt{note\_tags} side. So \texttt{COUNT(*)} would report 1 for it, while \texttt{COUNT(nt.note\_id)} correctly reports 0.
+
+It also helps to know the order in which the database \emph{logically} evaluates a query, because it is not the order in which the query is written:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+FROM / JOIN  →  WHERE  →  GROUP BY  →  HAVING  →  SELECT  →  ORDER BY  →  LIMIT
+ (build rows)  (filter)   (group)     (filter    (compute   (sort)       (cut)
+                           rows)       groups)    columns)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This explains rules that otherwise look arbitrary. \texttt{WHERE} cannot use \texttt{COUNT(*)}, because the groups do not exist yet when \texttt{WHERE} runs; that is what \texttt{HAVING} is for. And \texttt{ORDER\ BY} \emph{can} use the alias \texttt{notes} from the \texttt{SELECT} list, because it runs afterwards.
+
+\subsection*{The N+1 problem}\phantomsection\label{33-logic-execution:the-n1-problem}
+
+Suppose the list endpoint returned every note \emph{with} its tags. The natural first version asks for the notes, then asks for each note's tags inside a loop:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cursor.execute(}\StringTok{"SELECT id, content, created\_at FROM notes ORDER BY id DESC"}\NormalTok{)}
+\NormalTok{notes }\OperatorTok{=}\NormalTok{ [row\_to\_note(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+\ControlFlowTok{for}\NormalTok{ note }\KeywordTok{in}\NormalTok{ notes:                      }\CommentTok{\# one more query for EVERY note}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"SELECT t.name FROM tags t JOIN note\_tags nt ON nt.tag\_id = t.id "}
+            \StringTok{"WHERE nt.note\_id = ?"}\NormalTok{),}
+\NormalTok{        (note[}\StringTok{"id"}\NormalTok{],),}
+\NormalTok{    )}
+\NormalTok{    note[}\StringTok{"tags"}\NormalTok{] }\OperatorTok{=}\NormalTok{ [row[}\StringTok{"name"}\NormalTok{] }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}For N notes, that is 1 + N queries: the \textbf{N+1 problem}. On a laptop, each query takes a fraction of a millisecond and nobody notices. In production, each one is a network round trip to the database, and a page of 100 notes becomes 101 round trips. The fix is to ask for all the tags of all the notes \emph{at once}, and sort them out in Python:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ attach\_tags(cursor, notes: }\BuiltInTok{list}\NormalTok{[}\BuiltInTok{dict}\NormalTok{]) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""Add a "tags" list to every note, with one query for all of them."""}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ notes:}
+        \ControlFlowTok{return}
+\NormalTok{    placeholders }\OperatorTok{=} \StringTok{", "}\NormalTok{.join(}\StringTok{"?"} \ControlFlowTok{for}\NormalTok{ \_ }\KeywordTok{in}\NormalTok{ notes)}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\SpecialStringTok{f"""}
+\SpecialStringTok{            SELECT nt.note\_id, t.name}
+\SpecialStringTok{            FROM note\_tags nt}
+\SpecialStringTok{            JOIN tags t ON t.id = nt.tag\_id}
+\SpecialStringTok{            WHERE nt.note\_id IN (}\SpecialCharTok{\{}\NormalTok{placeholders}\SpecialCharTok{\}}\SpecialStringTok{)}
+\SpecialStringTok{            ORDER BY t.name}
+\SpecialStringTok{        """}\NormalTok{),}
+\NormalTok{        [note[}\StringTok{"id"}\NormalTok{] }\ControlFlowTok{for}\NormalTok{ note }\KeywordTok{in}\NormalTok{ notes],}
+\NormalTok{    )}
+\NormalTok{    tags\_by\_note: }\BuiltInTok{dict}\NormalTok{[}\BuiltInTok{int}\NormalTok{, }\BuiltInTok{list}\NormalTok{[}\BuiltInTok{str}\NormalTok{]] }\OperatorTok{=}\NormalTok{ \{note[}\StringTok{"id"}\NormalTok{]: [] }\ControlFlowTok{for}\NormalTok{ note }\KeywordTok{in}\NormalTok{ notes\}}
+    \ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall():}
+\NormalTok{        tags\_by\_note[row[}\StringTok{"note\_id"}\NormalTok{]].append(row[}\StringTok{"name"}\NormalTok{])}
+    \ControlFlowTok{for}\NormalTok{ note }\KeywordTok{in}\NormalTok{ notes:}
+\NormalTok{        note[}\StringTok{"tags"}\NormalTok{] }\OperatorTok{=}\NormalTok{ tags\_by\_note[note[}\StringTok{"id"}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}That is two queries, however many notes there are. Notice how the \texttt{IN\ (…)} list is built. Only the \emph{placeholders} (\texttt{?,\ ?,\ ?}) go into the SQL text. The ids themselves still travel as parameters, so this is not the string-building that \hyperref[ch:31-input-handling]{Chapter 31} forbids. \hyperref[ch:39-local-vs-production]{Chapter 39} shows a single-query PostgreSQL version, and section 36.2 measures what N+1 costs.
+
+\setcounter{section}{12}
+\section{Transactions in Depth: When Requests Collide}\label{33-logic-execution:3313-transactions-in-depth-when-requests-collide}
+
+Section 33.5 introduced transactions for one request working alone. Real servers are never alone. Several Gunicorn workers handle requests \emph{at the same time}, and two of them can easily touch the same row: a user with two browser tabs, a phone app retrying after a timeout, two colleagues editing one note. This section is about what happens then.
+
+\subsection*{Several statements, one unit}\phantomsection\label{33-logic-execution:several-statements-one-unit}
+
+Here is the handler that sets a note's tags. It needs three steps:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/notes.py (added; needs "import re" at the top, and for\_update}
+\CommentTok{\# imported from app.database)}
+\CommentTok{\# A tag: lowercase letters and digits, with single hyphens between them ("to{-}do")}
+\NormalTok{TAG\_NAME }\OperatorTok{=}\NormalTok{ re.}\BuiltInTok{compile}\NormalTok{(}\VerbatimStringTok{r"}\PreprocessorTok{[a{-}z0{-}9]}\OperatorTok{+}\NormalTok{(?:}\VerbatimStringTok{{-}}\PreprocessorTok{[a{-}z0{-}9]}\OperatorTok{+}\NormalTok{)}\OperatorTok{*}\VerbatimStringTok{"}\NormalTok{)}
+
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}/tags"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"PUT"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ set\_note\_tags(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""Replace a note\textquotesingle{}s tags: PUT \{"tags": ["work", "urgent"]\}; [] removes all."""}
+\NormalTok{    validator }\OperatorTok{=}\NormalTok{ Validator(request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{))}
+\NormalTok{    names }\OperatorTok{=}\NormalTok{ validator.require\_string\_list(}
+        \StringTok{"tags"}\NormalTok{,}
+\NormalTok{        max\_items}\OperatorTok{=}\DecValTok{10}\NormalTok{,}
+\NormalTok{        max\_length}\OperatorTok{=}\DecValTok{30}\NormalTok{,}
+\NormalTok{        allowed}\OperatorTok{=}\NormalTok{(TAG\_NAME, }\StringTok{"lowercase letters, digits and single hyphens"}\NormalTok{),}
+\NormalTok{    )}
+    \ControlFlowTok{if}\NormalTok{ names }\KeywordTok{is} \VariableTok{None}\NormalTok{:  }\CommentTok{\# validation failed}
+        \ControlFlowTok{return}\NormalTok{ validator.error\_response()}
+
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+
+    \CommentTok{\# 1. Lock the note: a second PUT for the same note waits here until this}
+    \CommentTok{\#    transaction ends (section 33.13)}
+\NormalTok{    cursor.execute(for\_update(sql(}\StringTok{"SELECT id FROM notes WHERE id = ?"}\NormalTok{)), (note\_id,))}
+    \ControlFlowTok{if}\NormalTok{ cursor.fetchone() }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+
+    \CommentTok{\# 2. Make sure every tag exists. ON CONFLICT DO NOTHING skips names that}
+    \CommentTok{\#    are already there, even one that another request inserted a moment ago}
+\NormalTok{    cursor.executemany(}
+\NormalTok{        sql(}\StringTok{"INSERT INTO tags (name) VALUES (?) ON CONFLICT (name) DO NOTHING"}\NormalTok{),}
+\NormalTok{        [(name,) }\ControlFlowTok{for}\NormalTok{ name }\KeywordTok{in}\NormalTok{ names],}
+\NormalTok{    )}
+
+    \CommentTok{\# 3. Replace the note\textquotesingle{}s links: remove all, then add the new set}
+\NormalTok{    cursor.execute(sql(}\StringTok{"DELETE FROM note\_tags WHERE note\_id = ?"}\NormalTok{), (note\_id,))}
+    \ControlFlowTok{if}\NormalTok{ names:}
+        \CommentTok{\# One placeholder per name. Only "?"s are built into the SQL text;}
+        \CommentTok{\# the names themselves still travel as parameters.}
+\NormalTok{        placeholders }\OperatorTok{=} \StringTok{", "}\NormalTok{.join(}\StringTok{"?"} \ControlFlowTok{for}\NormalTok{ \_ }\KeywordTok{in}\NormalTok{ names)}
+\NormalTok{        cursor.execute(}
+\NormalTok{            sql(}\SpecialStringTok{f"""}
+\SpecialStringTok{                INSERT INTO note\_tags (note\_id, tag\_id)}
+\SpecialStringTok{                SELECT ?, id FROM tags WHERE name IN (}\SpecialCharTok{\{}\NormalTok{placeholders}\SpecialCharTok{\}}\SpecialStringTok{)}
+\SpecialStringTok{            """}\NormalTok{),}
+\NormalTok{            (note\_id, }\OperatorTok{*}\NormalTok{names),}
+\NormalTok{        )}
+
+\NormalTok{    db.commit()  }\CommentTok{\# all three steps, or none of them}
+\NormalTok{    logger.info(}\StringTok{"Set }\SpecialCharTok{\%d}\StringTok{ tag(s) on note id=}\SpecialCharTok{\%d}\StringTok{."}\NormalTok{, }\BuiltInTok{len}\NormalTok{(names), note\_id)}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"tags"}\NormalTok{: names\}), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}(\texttt{INSERT\ …\ SELECT} inserts the rows a query returns, which here is one link per requested tag. \texttt{executemany()} runs one statement once for each set of parameters.)
+
+All three steps run in one transaction and commit once, at the end. If step 3 fails, for example because the connection drops, \texttt{close\_db()} rolls back everything, including the tags that step 2 created. The note keeps its old tags; it never ends up with half of the new ones. This is the atomicity of section 33.5 doing real work.
+
+\subsection*{The race: two requests, one note}\phantomsection\label{33-logic-execution:the-race-two-requests-one-note}
+
+Now take away step 1, the lock, and send two requests for the same note at the same moment. Request A sets \texttt{{[}"work"{]}} and request B sets \texttt{{[}"home"{]}}. On PostgreSQL, one possible timing looks like this:
+
+\begin{diagrambox}[short]{390.9pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Request A: PUT {"tags": ["work"]}          Request B: PUT {"tags": ["home"]}
+─────────────────────────────────          ─────────────────────────────────
+DELETE links of note 42  (none yet)
+INSERT link (42, work)   (not committed)
+                                           DELETE links of note 42
+                                             A's new link is not committed,
+                                             so B cannot see it: nothing to delete
+                                           INSERT link (42, home)
+COMMIT
+                                           COMMIT
+
+Result: note 42 has BOTH "work" and "home". Neither request asked for that.
+\end{Verbatim}
+\end{diagrambox}
+
+\noindent{}Each transaction behaved correctly on its own, yet the combination is wrong. This is a \textbf{race condition}. Tests never catch it, because tests send one request at a time. It shows up only in production, only occasionally, and it looks like a bug that cannot happen.
+
+\subsection*{Isolation levels}\phantomsection\label{33-logic-execution:isolation-levels}
+
+How much one transaction sees of another is its \textbf{isolation level}. The SQL standard defines four, and PostgreSQL implements three of them:
+
+\Needspace{16\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2828}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3586}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3586}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Level
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+What a transaction sees
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Cost
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Read Committed (PostgreSQL's default) & each \emph{statement} sees what was committed before that statement began & cheapest; races like the one above are possible \\
+Repeatable Read & the whole \emph{transaction} sees one snapshot, taken at its start & when two transactions update the same row, one fails and must be retried \\
+Serializable & the result is as if the transactions ran one after another & the strongest guarantee; conflicting transactions fail and must be retried \\
+\end{longtable}
+}
+
+Stronger isolation catches more races, but it does so by \emph{aborting} transactions, which the application must then retry. Most applications keep the default, and handle the few places where concurrency matters with the tools below.
+
+SQLite takes a different approach altogether. A transaction that writes locks the \emph{whole database}, so writers always take turns, and the race above cannot happen on SQLite. That sounds like good news, but it has an unwelcome consequence: \textbf{tests that run on SQLite cannot find this kind of bug.} It is one more reason, alongside the search query of section 33.8, why \hyperref[ch:39-local-vs-production]{Chapter 39} runs the tests on PostgreSQL.
+
+\subsection*{Four tools for concurrent writes}\phantomsection\label{33-logic-execution:four-tools-for-concurrent-writes}
+
+\textbf{1. Do it in one statement.} A single SQL statement is atomic on its own. \texttt{UPDATE\ counters\ SET\ value\ =}\allowbreak{}\texttt{\ value\ +\ 1\ WHERE\ id\ =}\allowbreak{}\texttt{\ ?} can never lose an increment. Reading the value into Python, adding one, and writing it back can: two requests read 5, and both write 6.
+
+\textbf{2. Lock first (pessimistic).} \texttt{SELECT\ …\ FOR\ UPDATE} locks the rows it returns until the transaction ends. Any other transaction that asks for the same lock waits until then. That is step 1 of \texttt{set\_note\_tags}: the second \texttt{PUT} for note 42 waits at step 1 until the first commits, and then does its whole job on top of the first one's result. The last request wins, cleanly. SQLite has no \texttt{FOR\ UPDATE}, and does not need it, so \texttt{app/database.py} keeps the difference out of the handlers, just as \texttt{sql()} does:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/database.py (added)}
+\KeywordTok{def}\NormalTok{ for\_update(query: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Lock the rows a SELECT returns until the transaction ends (PostgreSQL).}
+\CommentTok{    SQLite has no row locks: a transaction that writes locks the whole}
+\CommentTok{    database, which already makes writers take turns.}
+\CommentTok{    """}
+    \ControlFlowTok{return}\NormalTok{ query }\ControlFlowTok{if}\NormalTok{ IS\_SQLITE }\ControlFlowTok{else}\NormalTok{ query }\OperatorTok{+} \StringTok{" FOR UPDATE"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Locks make other requests wait, so hold them briefly. \textbf{Never do slow work inside a transaction that holds locks}, such as calling another service over the network (\hyperref[ch:37-reliability]{Chapter 37}) or anything that waits on a person.
+
+\textbf{3. Check at write time (optimistic).} \texttt{update\_note} (section 33.9) has a quieter version of the race, called a \textbf{lost update}. Two people open the same note, both edit it, and both press Save. The second \texttt{PUT} silently replaces the first person's work. Locking cannot help here, because the two edits happen minutes apart, in two separate requests. The fix is to record \emph{which version} each edit was based on, and to refuse a write based on an old one:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} A "version" column that every update increments}
+\KeywordTok{UPDATE}\NormalTok{ notes}
+\KeywordTok{SET}\NormalTok{ content }\OperatorTok{=}\NormalTok{ ?, version }\OperatorTok{=}\NormalTok{ version }\OperatorTok{+} \DecValTok{1}
+\KeywordTok{WHERE} \KeywordTok{id} \OperatorTok{=}\NormalTok{ ? }\KeywordTok{AND}\NormalTok{ version }\OperatorTok{=}\NormalTok{ ?      }\CommentTok{{-}{-} the version the client started from}
+\CommentTok{{-}{-} 0 rows updated → someone else saved first → 409 Conflict: reload and retry}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}HTTP has standard headers for exactly this (an \texttt{ETag} on the response, and \texttt{If-Match} on the next \texttt{PUT}). Adding it to the Notes API would change the API contract, which section 34.10 discusses, so it stays a sketch here. But recognize the pattern: whenever people edit shared data, lost updates happen unless something like this prevents them.
+
+\textbf{4. Let a constraint decide.} Step 2 of \texttt{set\_note\_tags} guards against a race of its own. Two requests both want the tag \texttt{urgent}, which does not exist yet. The obvious code is ``SELECT it; if it is missing, INSERT it'', and both requests can run the SELECT before either runs the INSERT. Then both insert, the \texttt{UNIQUE} constraint rejects the second, and that request fails with a \texttt{500}. The fix is not to check first at all. Let the \texttt{UNIQUE} constraint be the single judge, and tell the database what to do when it objects: \texttt{INSERT\ …\ ON\ CONFLICT\ (name)\ DO\ NOTHING}. Whichever request comes second quietly uses the row the first one created.
+
+\subsection*{Deadlocks}\phantomsection\label{33-logic-execution:deadlocks}
+
+Locks can also cause a failure of their own. Suppose transaction A locks note 1 and then asks for note 2, while transaction B has locked note 2 and asks for note 1. Each now waits for the other, forever. That is a \textbf{deadlock}. PostgreSQL detects it after about a second, aborts one of the two with \texttt{ERROR:}\allowbreak{}\texttt{\ deadlock\ detected}, and lets the other finish.
+
+The prevention is dull but effective. When a transaction needs several locks, take them in a consistent order, for example by ascending id, and keep transactions short. When a deadlock or a serialization failure does happen anyway, the right response is to \textbf{retry the whole transaction}. Chapter 37 covers retrying safely.
+
+\setcounter{section}{13}
+\section{Raw SQL, Query Builders, and ORMs}\label{33-logic-execution:3314-raw-sql-query-builders-and-orms}
+
+The Notes API writes its SQL by hand. Many Python teams do not. Most use \textbf{SQLAlchemy}, or the ORM built into Django. It is worth knowing what those tools do, and what this chapter's hand-written SQL teaches you about using them well.
+
+There are three levels to choose from:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Raw SQL} through the database driver, as in this book. You write the exact SQL that runs.
+\item
+  \textbf{A query builder}, such as SQLAlchemy Core. You build queries from Python objects, and the library writes the SQL for your database's dialect.
+\item
+  \textbf{An ORM} (object-relational mapper), such as SQLAlchemy's ORM or Django's. You define classes, the library maps them to tables, and you work with objects instead of rows.
+\end{itemize}
+
+\noindent{}This is \texttt{notes\_with\_tag} written with SQLAlchemy's ORM:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ sqlalchemy }\ImportTok{import}\NormalTok{ Column, ForeignKey, String, Table, Text, select}
+\ImportTok{from}\NormalTok{ sqlalchemy.orm }\ImportTok{import}\NormalTok{ DeclarativeBase, Mapped, mapped\_column, relationship}
+
+
+\KeywordTok{class}\NormalTok{ Base(DeclarativeBase):}
+    \ControlFlowTok{pass}
+
+
+\NormalTok{note\_tags }\OperatorTok{=}\NormalTok{ Table(}
+    \StringTok{"note\_tags"}\NormalTok{,}
+\NormalTok{    Base.metadata,}
+\NormalTok{    Column(}\StringTok{"note\_id"}\NormalTok{, ForeignKey(}\StringTok{"notes.id"}\NormalTok{, ondelete}\OperatorTok{=}\StringTok{"CASCADE"}\NormalTok{), primary\_key}\OperatorTok{=}\VariableTok{True}\NormalTok{),}
+\NormalTok{    Column(}\StringTok{"tag\_id"}\NormalTok{, ForeignKey(}\StringTok{"tags.id"}\NormalTok{, ondelete}\OperatorTok{=}\StringTok{"CASCADE"}\NormalTok{), primary\_key}\OperatorTok{=}\VariableTok{True}\NormalTok{),}
+\NormalTok{)}
+
+
+\KeywordTok{class}\NormalTok{ Tag(Base):}
+\NormalTok{    \_\_tablename\_\_ }\OperatorTok{=} \StringTok{"tags"}
+    \BuiltInTok{id}\NormalTok{: Mapped[}\BuiltInTok{int}\NormalTok{] }\OperatorTok{=}\NormalTok{ mapped\_column(primary\_key}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\NormalTok{    name: Mapped[}\BuiltInTok{str}\NormalTok{] }\OperatorTok{=}\NormalTok{ mapped\_column(String(}\DecValTok{30}\NormalTok{), unique}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+
+
+\KeywordTok{class}\NormalTok{ Note(Base):}
+\NormalTok{    \_\_tablename\_\_ }\OperatorTok{=} \StringTok{"notes"}
+    \BuiltInTok{id}\NormalTok{: Mapped[}\BuiltInTok{int}\NormalTok{] }\OperatorTok{=}\NormalTok{ mapped\_column(primary\_key}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\NormalTok{    content: Mapped[}\BuiltInTok{str}\NormalTok{] }\OperatorTok{=}\NormalTok{ mapped\_column(Text)}
+\NormalTok{    tags: Mapped[}\BuiltInTok{list}\NormalTok{[Tag]] }\OperatorTok{=}\NormalTok{ relationship(secondary}\OperatorTok{=}\NormalTok{note\_tags)}
+
+
+\CommentTok{\# The notes tagged "work", newest first (session: an open SQLAlchemy Session)}
+\NormalTok{query }\OperatorTok{=}\NormalTok{ (}
+\NormalTok{    select(Note)}
+\NormalTok{    .join(Note.tags)}
+\NormalTok{    .where(Tag.name }\OperatorTok{==} \StringTok{"work"}\NormalTok{)}
+\NormalTok{    .order\_by(Note.}\BuiltInTok{id}\NormalTok{.desc())}
+\NormalTok{)}
+\NormalTok{notes }\OperatorTok{=}\NormalTok{ session.scalars(query).}\BuiltInTok{all}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The trade-offs:
+
+\Needspace{20\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1806}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4097}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4097}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Raw SQL
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ORM
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+What runs & exactly the SQL you wrote & SQL the library generates from your code \\
+Repetitive code & more: turning rows into dictionaries, building \texttt{IN} lists & much less \\
+Two databases & your job (\texttt{sql()}, two migration folders) & mostly handled for you \\
+Performance traps & visible in the code & easy to miss: reading \texttt{note.tags} in a loop quietly runs the N+1 queries of section 33.12 \\
+Migrations & written by hand (section 33.10) & \emph{generated} from model changes (Alembic's \texttt{autogenerate}), then reviewed by a person \\
+\end{longtable}
+}
+
+Neither choice is wrong. An ORM is the normal choice in a large codebase with many tables. Raw SQL is common in small services, and in code where performance matters and every query should be visible. What matters is that \textbf{an ORM does not replace knowing SQL; it depends on it.} The engineers who use ORMs well are the ones who could write the SQL themselves. They look at what the ORM generates (SQLAlchemy prints every statement when the engine is created with \texttt{echo=True}), they spot the N+1 loop, and they drop down to plain SQL for the one report query that needs it.
+
+The same goes for migrations. Alembic has the same three parts as this chapter's runner. A \texttt{versions/} directory holds the migration files, an \texttt{alembic\_version} table records what has been applied, and \texttt{alembic\ upgrade\ head} applies what is missing. Even the baseline has an equivalent: \texttt{alembic\ stamp}. Once you have seen one runner, you have seen them all.
+
+\setcounter{section}{14}
+\section{Error Handling During Logic Execution}\label{33-logic-execution:3315-error-handling-during-logic-execution}
+
+What happens when the database is unavailable or the query fails?
+
+\subsection*{Database errors}\phantomsection\label{33-logic-execution:database-errors}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{db }\OperatorTok{=}\NormalTok{ get\_db()}
+\CommentTok{\# If PostgreSQL is down: psycopg2.OperationalError, raised here — when}
+\CommentTok{\# get\_db() opens the connection — not at execute()}
+
+\NormalTok{cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{cursor.execute(sql(}\StringTok{"SELECT * FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\CommentTok{\# If the notes table doesn\textquotesingle{}t exist: raises psycopg2.errors.UndefinedTable}
+\CommentTok{\# If the query violates a constraint: raises psycopg2.IntegrityError}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}These are exceptions. If the handler does not catch them, they propagate up through Flask's call stack.
+
+\subsection*{Flask's exception handling}\phantomsection\label{33-logic-execution:flasks-exception-handling}
+
+An exception that escapes a handler is caught by Flask, which:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Looks for an error handler registered for the exception's class
+\item
+  Uses it to build the response~--- for the Notes API, the catch-all from Chapter 16, which logs the traceback and returns a 500
+\end{enumerate}
+
+\noindent{}This is the correct behavior. A database error is a server-side fault~--- the client correctly learns that something went wrong on the server side (500), without learning the internal details (no database schema or error messages in the response body).
+
+The application's handling boundary (\hyperref[ch:16-logging-error-handling]{Chapter 16}) catches these:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.errorhandler}\NormalTok{(}\PreprocessorTok{Exception}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ handle\_unexpected\_exception(error):}
+\NormalTok{    logger.exception(}\StringTok{"Unhandled exception in }\SpecialCharTok{\%s}\StringTok{ }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, request.method, request.path)}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"An unexpected error occurred"}\NormalTok{\}), }\DecValTok{500}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \texttt{logger.exception()} call logs the full traceback, which is visible in \texttt{docker\ logs\ notes-api} or via the centralized logging system. The response to the client says only ``An unexpected error occurred''~--- no internal details.
+
+\subsection*{Distinguishing error types}\phantomsection\label{33-logic-execution:distinguishing-error-types}
+
+Some errors should be 400 (invalid input from the client), some should be 404 (resource not found), and some should be 5xx (server fault). The handler controls this:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ get\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{        cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{        cursor.execute(sql(}\StringTok{"SELECT ... WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{        row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \ControlFlowTok{except}\NormalTok{ psycopg2.OperationalError }\ImportTok{as}\NormalTok{ e:}
+        \CommentTok{\# Database unreachable — a server{-}side problem, and probably a}
+        \CommentTok{\# temporary one: 503 Service Unavailable rather than a plain 500}
+\NormalTok{        logger.error(}\StringTok{"Database error fetching note }\SpecialCharTok{\%d}\StringTok{: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, note\_id, e)}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Service temporarily unavailable"}\NormalTok{\}), }\DecValTok{503}
+
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \CommentTok{\# Note doesn\textquotesingle{}t exist — this is a 404}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+
+    \CommentTok{\# Success — this is a 200}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{...\}), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The explicit \texttt{try/except} lets the handler control what error message and status code the client sees. Without it, the catch-all handler turns the \texttt{psycopg2.}\allowbreak{}\texttt{OperationalError} into a 500.
+
+For the Notes API, the catch-all handler is acceptable because the error detail comes through in the application logs, and a database being down is an unusual event. In a larger system, you might distinguish between transient errors (503 Service Unavailable, with a \texttt{Retry-After} header) and permanent server errors (500).
+
+\subsection*{Constraint violations}\phantomsection\label{33-logic-execution:constraint-violations}
+
+The constraints of section 33.11 add a new kind of database error: \texttt{IntegrityError} (in psycopg2, subclasses such as \texttt{psycopg2.}\allowbreak{}\texttt{errors.}\allowbreak{}\texttt{UniqueViolation} and \texttt{ForeignKeyViolation}). It is tempting to catch it and return a \texttt{400}. Resist that. With validation in front of the database, a constraint violation during a request means one of two things. Either there is a race the code did not handle, whose fix is locking or \texttt{ON\ CONFLICT} (section 33.13), or the validator and the constraint disagree about a rule, which is a bug. Either way the fault is on the server's side, so the catch-all handler's \texttt{500}, with the full traceback in the logs, is the honest response. Catch an \texttt{IntegrityError} only where it is an expected outcome that the code has a plan for.
+
+\setcounter{section}{15}
+\section{Structuring Logic for Testability}\label{33-logic-execution:3316-structuring-logic-for-testability}
+
+The handler structure shown above~--- parse, validate, query, return~--- is easy to test with Flask's test client:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_notes.py}
+
+\KeywordTok{def}\NormalTok{ test\_create\_note\_success(client):}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ client.post(}
+        \StringTok{"/notes/"}\NormalTok{,}
+\NormalTok{        json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Buy groceries"}\NormalTok{\},}
+\NormalTok{    )}
+    \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{201}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+    \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"content"}\NormalTok{] }\OperatorTok{==} \StringTok{"Buy groceries"}
+    \ControlFlowTok{assert} \StringTok{"id"} \KeywordTok{in}\NormalTok{ data}
+    \ControlFlowTok{assert} \StringTok{"created\_at"} \KeywordTok{in}\NormalTok{ data}
+
+\KeywordTok{def}\NormalTok{ test\_create\_note\_missing\_content(client):}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{\})}
+    \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{400}
+    \ControlFlowTok{assert}\NormalTok{ response.get\_json() }\OperatorTok{==}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"\textquotesingle{}content\textquotesingle{} is required"}\NormalTok{\}}
+
+\KeywordTok{def}\NormalTok{ test\_update\_note(client):}
+\NormalTok{    note\_id }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"Old"}\NormalTok{\}).get\_json()[}\StringTok{"id"}\NormalTok{]}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ client.put(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"New"}\NormalTok{\})}
+    \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{200}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ response.get\_json()}
+    \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"content"}\NormalTok{] }\OperatorTok{==} \StringTok{"New"}
+    \ControlFlowTok{assert}\NormalTok{ data[}\StringTok{"updated\_at"}\NormalTok{] }\KeywordTok{is} \KeywordTok{not} \VariableTok{None}
+
+\KeywordTok{def}\NormalTok{ test\_get\_note\_not\_found(client):}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/notes/99999"}\NormalTok{)}
+    \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{404}
+
+\KeywordTok{def}\NormalTok{ test\_delete\_note(client):}
+    \CommentTok{\# First create a note}
+\NormalTok{    create\_response }\OperatorTok{=}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: }\StringTok{"To delete"}\NormalTok{\})}
+\NormalTok{    note\_id }\OperatorTok{=}\NormalTok{ create\_response.get\_json()[}\StringTok{"id"}\NormalTok{]}
+
+    \CommentTok{\# Then delete it}
+\NormalTok{    delete\_response }\OperatorTok{=}\NormalTok{ client.delete(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+    \ControlFlowTok{assert}\NormalTok{ delete\_response.status\_code }\OperatorTok{==} \DecValTok{204}
+
+    \CommentTok{\# Then verify it\textquotesingle{}s gone}
+\NormalTok{    get\_response }\OperatorTok{=}\NormalTok{ client.get(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+    \ControlFlowTok{assert}\NormalTok{ get\_response.status\_code }\OperatorTok{==} \DecValTok{404}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}These tests exercise the complete logic path (including the database) through Flask's test client. The test database is the temporary SQLite file configured in \texttt{tests/conftest.py} (\hyperref[ch:17-build-process]{Chapter 17}), emptied before each test.
+
+With the migration runner, \texttt{conftest.py} changes in two places. The test database is now built by the same migration files that build production, instead of by \texttt{init\_db()}. And cleaning up between tests has one more table to empty:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/conftest.py (changed lines)}
+\ImportTok{from}\NormalTok{ app }\ImportTok{import}\NormalTok{ create\_app  }\CommentTok{\# noqa: E402  (must come after the settings above)}
+\ImportTok{from}\NormalTok{ app.migrate }\ImportTok{import}\NormalTok{ migrate  }\CommentTok{\# noqa: E402}
+
+
+\AttributeTok{@pytest.fixture}\NormalTok{(scope}\OperatorTok{=}\StringTok{"session"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ app():}
+\NormalTok{    migrate()  }\CommentTok{\# a fresh database: build the schema exactly as production does}
+\NormalTok{    application }\OperatorTok{=}\NormalTok{ create\_app()}
+\NormalTok{    ...}
+
+
+\AttributeTok{@pytest.fixture}\NormalTok{(scope}\OperatorTok{=}\StringTok{"function"}\NormalTok{, autouse}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ clean\_database(app):}
+    \ControlFlowTok{with}\NormalTok{ app.app\_context():}
+        \ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db}
+
+\NormalTok{        db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{        cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+        \CommentTok{\# Deleting the notes also deletes their note\_tags rows (ON DELETE CASCADE)}
+\NormalTok{        cursor.execute(}\StringTok{"DELETE FROM notes"}\NormalTok{)}
+\NormalTok{        cursor.execute(}\StringTok{"DELETE FROM tags"}\NormalTok{)}
+\NormalTok{        db.commit()}
+    \ControlFlowTok{yield}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The new features get tests of their own. Some check behaviour through the API, and some reach past it to check that the database's own rules hold:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_tags.py (excerpt)}
+\KeywordTok{def}\NormalTok{ make\_note(client, content}\OperatorTok{=}\StringTok{"A note"}\NormalTok{):}
+    \ControlFlowTok{return}\NormalTok{ client.post(}\StringTok{"/notes/"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"content"}\NormalTok{: content\}).get\_json()[}\StringTok{"id"}\NormalTok{]}
+
+
+\KeywordTok{def}\NormalTok{ test\_put\_replaces\_the\_whole\_set(client):}
+\NormalTok{    note\_id }\OperatorTok{=}\NormalTok{ make\_note(client)}
+\NormalTok{    client.put(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{/tags"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"tags"}\NormalTok{: [}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{]\})}
+\NormalTok{    client.put(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{/tags"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"tags"}\NormalTok{: [}\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{]\})}
+    \ControlFlowTok{assert}\NormalTok{ client.get(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{/tags"}\NormalTok{).get\_json() }\OperatorTok{==}\NormalTok{ \{}\StringTok{"tags"}\NormalTok{: [}\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{]\}}
+
+
+\KeywordTok{def}\NormalTok{ test\_deleting\_a\_note\_removes\_its\_links(client, app):}
+\NormalTok{    note\_id }\OperatorTok{=}\NormalTok{ make\_note(client)}
+\NormalTok{    client.put(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{/tags"}\NormalTok{, json}\OperatorTok{=}\NormalTok{\{}\StringTok{"tags"}\NormalTok{: [}\StringTok{"work"}\NormalTok{]\})}
+\NormalTok{    client.delete(}\SpecialStringTok{f"/notes/}\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+    \ControlFlowTok{with}\NormalTok{ app.app\_context():}
+        \ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db}
+
+\NormalTok{        cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{        cursor.execute(}\StringTok{"SELECT COUNT(*) AS n FROM note\_tags"}\NormalTok{)}
+        \ControlFlowTok{assert}\NormalTok{ cursor.fetchone()[}\StringTok{"n"}\NormalTok{] }\OperatorTok{==} \DecValTok{0}  \CommentTok{\# ON DELETE CASCADE did its job}
+
+
+\KeywordTok{def}\NormalTok{ test\_constraints\_back\_up\_the\_validation(app):}
+    \CommentTok{"""Even code that skips the Validator cannot store a bad tag."""}
+    \ImportTok{import}\NormalTok{ pytest}
+
+    \ControlFlowTok{with}\NormalTok{ app.app\_context():}
+        \ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db}
+
+\NormalTok{        db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{        cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+        \CommentTok{\# Every DB{-}API connection carries its driver\textquotesingle{}s exception classes,}
+        \CommentTok{\# so db.IntegrityError works on SQLite and PostgreSQL alike}
+        \ControlFlowTok{with}\NormalTok{ pytest.raises(db.IntegrityError):  }\CommentTok{\# the CHECK: lower case only}
+\NormalTok{            cursor.execute(}\StringTok{"INSERT INTO tags (name) VALUES (\textquotesingle{}Work\textquotesingle{})"}\NormalTok{)}
+\NormalTok{        db.rollback()  }\CommentTok{\# PostgreSQL refuses further statements after an error}
+        \ControlFlowTok{with}\NormalTok{ pytest.raises(db.IntegrityError):  }\CommentTok{\# the FOREIGN KEY}
+\NormalTok{            cursor.execute(}
+                \StringTok{"INSERT INTO note\_tags (note\_id, tag\_id) VALUES (99999, 1)"}
+\NormalTok{            )}
+
+
+\CommentTok{\# tests/test\_migrations.py}
+\ImportTok{from}\NormalTok{ app.migrate }\ImportTok{import}\NormalTok{ available, migrate, pending}
+
+
+\KeywordTok{def}\NormalTok{ test\_every\_migration\_is\_applied():}
+    \ControlFlowTok{assert}\NormalTok{ pending() }\OperatorTok{==}\NormalTok{ []}
+
+
+\KeywordTok{def}\NormalTok{ test\_running\_again\_changes\_nothing():}
+    \ControlFlowTok{assert}\NormalTok{ migrate() }\OperatorTok{==}\NormalTok{ []}
+
+
+\KeywordTok{def}\NormalTok{ test\_versions\_are\_unique\_and\_in\_order():}
+\NormalTok{    versions }\OperatorTok{=}\NormalTok{ [version }\ControlFlowTok{for}\NormalTok{ version, \_ }\KeywordTok{in}\NormalTok{ available()]}
+    \ControlFlowTok{assert}\NormalTok{ versions }\OperatorTok{==} \BuiltInTok{sorted}\NormalTok{(}\BuiltInTok{set}\NormalTok{(versions))}
+    \ControlFlowTok{assert}\NormalTok{ versions[}\DecValTok{0}\NormalTok{] }\OperatorTok{==} \StringTok{"0001"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Try removing the \texttt{PRAGMA\ foreign\_}\allowbreak{}\texttt{keys\ =}\allowbreak{}\texttt{\ ON} line from \texttt{open\_db()}. SQLite then ignores \texttt{ON\ DELETE\ CASCADE}, the link outlives its note, and \texttt{test\_}\allowbreak{}\texttt{deleting\_}\allowbreak{}\texttt{a\_}\allowbreak{}\texttt{note\_}\allowbreak{}\texttt{removes\_}\allowbreak{}\texttt{its\_}\allowbreak{}\texttt{links} fails, along with the foreign-key half of \texttt{test\_}\allowbreak{}\texttt{constraints\_}\allowbreak{}\texttt{back\_}\allowbreak{}\texttt{up\_}\allowbreak{}\texttt{the\_}\allowbreak{}\texttt{validation}. Those tests exist to catch exactly that mistake.
+
+Notice what these tests cannot cover. The first gap is the PostgreSQL-only search branch of \texttt{list\_notes}. The second is subtler: the race of section 33.13. On SQLite, writers take turns for the whole database, so the race cannot happen there, and \texttt{for\_update()} adds nothing. A test suite that runs only on SQLite can never tell you whether the PostgreSQL lock is right. \hyperref[ch:39-local-vs-production]{Chapter 39} closes both gaps by running the tests against PostgreSQL.
+
+\phantomsection\label{33-logic-execution:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Business logic} is the code that implements the application's domain rules. For the Notes API, it is the database queries that read and write notes.
+\item
+  \textbf{Flask's contexts} (the application context and the request context) use Python's \texttt{contextvars} to make \texttt{request}, \texttt{g}, and \texttt{current\_app} available as apparent globals that are actually per-request state.
+\item
+  \textbf{\texttt{g}} is per-request storage. \texttt{get\_db()} stores the database connection in \texttt{g.db} so it is opened once and reused within a request. Handlers commit before they respond; \texttt{teardown\_appcontext} only rolls back and closes.
+\item
+  \textbf{Parameterized queries} (\texttt{?} placeholders, converted by \texttt{sql()}) are mandatory. Interpolating values into SQL strings creates SQL injection vulnerabilities.
+\item
+  \textbf{\texttt{RETURNING}} lets INSERT and UPDATE return the affected row's data in a single round trip, avoiding a follow-up SELECT.
+\item
+  \textbf{Schema changes need migrations.} \texttt{CREATE\ TABLE\ IF\ NOT\ EXISTS} never changes an existing table; a new column arrives through an \texttt{ALTER\ TABLE}, run before the code that uses it.
+\item
+  \textbf{Migrations are a system, not a habit.} Numbered files are the only definition of the schema. A \texttt{schema\_migrations} table records what each database has had, and a runner applies the rest, one transaction per migration, as its own step in every deploy, before the new code starts. Never edit an applied migration; fix forward. An existing database is baselined once.
+\item
+  \textbf{Every migration must be safe for the code already running.} The old version keeps serving during the deploy and can be rolled back to, and a rollback does not undo the schema.
+\item
+  \textbf{Constraints protect the data; validation serves the client.} Use \texttt{NOT\ NULL}, \texttt{UNIQUE}, \texttt{CHECK}, and foreign keys with a deliberate \texttt{ON\ DELETE}. Index the foreign-key columns you search by. SQLite enforces foreign keys only with \texttt{PRAGMA\ foreign\_}\allowbreak{}\texttt{keys\ =}\allowbreak{}\texttt{\ ON}.
+\item
+  \textbf{Joins put normalized data back together.} An inner \texttt{JOIN} keeps only rows with a partner, and a \texttt{LEFT\ JOIN} keeps them all. \texttt{GROUP\ BY} with aggregates answers questions about groups, and \texttt{HAVING} filters them. Avoid N+1 queries by fetching related rows for all items at once.
+\item
+  \textbf{Concurrent requests race.} Tools that keep data correct: do it in one statement; lock first (\texttt{SELECT\ …\ FOR\ UPDATE}); check a version at write time (optimistic concurrency, against lost updates); let a \texttt{UNIQUE} constraint decide (\texttt{ON\ CONFLICT}). Keep transactions short, take locks in a consistent order, and retry deadlocks and serialization failures.
+\item
+  \textbf{An ORM does not replace SQL; it depends on it.} Know what SQL your tool generates, and when to write it yourself.
+\item
+  \textbf{\texttt{fetchone()} returning \texttt{None}} after an UPDATE or DELETE means no row matched the WHERE clause~--- the resource wasn't found (404), not a server error (500).
+\item
+  \textbf{HTTP 204 No Content} is the conventional response for successful DELETE operations.
+\item
+  \textbf{Unhandled exceptions} in handlers propagate to the catch-all error handler, which logs the traceback and returns a safe 500 response. Explicit \texttt{try/except} blocks let you control the error message and status code.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{33-logic-execution:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} In two \texttt{psql} sessions, run \texttt{BEGIN;\ UPDATE\ notes\ SET\ content\ =}\allowbreak{}\texttt{\ \textquotesingle{}A\textquotesingle{}\ WHERE\ id\ =}\allowbreak{}\texttt{\ 1;} in one, then the same with \texttt{\textquotesingle{}B\textquotesingle{}} in the other. What does the second session do? What happens when the first commits?
+\item
+  \textbf{Break and fix.} Write the next migration (\texttt{0004} at this point) so that it adds a \texttt{NOT\ NULL} column without a default to \texttt{notes}. Run it against a database with rows. Read the error, then write it the expand/contract way.
+\item
+  \textbf{Extend.} Add a \texttt{GET\ /tags/} report: every tag, with the number of notes that carry it. Use a \texttt{LEFT\ JOIN} and \texttt{GROUP\ BY}, and test that a tag no longer on any note shows 0. (After Chapter 38 adds accounts, ask what this report would reveal about other users.)
+\item
+  \textbf{Explain.} Explain why the runner records a migration in the same transaction as the migration itself.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-33.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{33-logic-execution:whats-next}
+
+The handler has executed its logic and computed a result. Now that result must be converted into an HTTP response and sent back to the client. The process of constructing responses~--- status codes, headers, body serialization, content negotiation~--- is the subject of the next chapter.
+
+\noindent{}→ \hyperref[ch:34-response-handling]{Chapter 34}~--- Response Handling

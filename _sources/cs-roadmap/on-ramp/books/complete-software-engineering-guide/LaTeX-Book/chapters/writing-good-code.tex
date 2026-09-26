@@ -1,0 +1,852 @@
+\unnumberedchapter{The Craft of Good Code}\label{ch:writing-good-code}
+
+\chapterrule
+
+Code that \emph{works} is the floor, not the goal. Almost any approach produces code that passes its
+tests today. \textbf{Good} code is code that the next person~--- usually you, six months from now~--- can
+read, understand, and change \emph{safely}. That is a higher and more durable bar, and it is what this part of the book is about.
+
+It has two chapters, because ``good code'' means two things at once:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{The Craft of Good Code.} How to write each individual piece well: naming, functions, modules,
+  error handling, comments, refactoring. This is the \emph{how} of turning intent into code a human can
+  follow.
+\item
+  \textbf{Engineering Practices \& Maturity.} What a whole \emph{codebase} must have to be considered
+  good~--- logging, testing, validation, security, reliability~--- and, crucially, in what \emph{order} to
+  adopt each practice as a project grows. This is the practical checklist behind the question ``is
+  this codebase actually good?''
+\end{itemize}
+
+\noindent{}The two reinforce each other: the craft makes each line good; the practices make the whole system
+good.
+
+\unnumberedsection{true}{What ``Good Code'' Actually Means}\label{writing-good-code:what-good-code-actually-means}
+
+There is one enemy beneath every rule that follows, and it has a name: \textbf{complexity}~--- anything
+about the structure of the code that makes it hard to understand or change. Complexity is not ``lots
+of code'' or ``advanced code''; a hundred-line file can be complex and a hundred-thousand-line system
+can be simple. What matters is how hard it is to change \emph{safely}.
+
+John Ousterhout's \emph{A Philosophy of Software Design} names its three symptoms, and every technique
+in this part is a tactic against one of them:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{High cognitive load}~--- how much you must hold in your head to make a correct change. The more
+  context a single edit requires, the worse the code.
+\item
+  \textbf{Change amplification}~--- how many places one logical change forces you to touch. Good structure
+  keeps one change \emph{one} change.
+\item
+  \textbf{Unknown unknowns}~--- when it is not even obvious \emph{which} code must change, or what else a change
+  will affect. This is the worst of the three, because you cannot plan around what you cannot see.
+\end{itemize}
+
+\noindent{}A useful reframing: \textbf{code is read far more often than it is written, and changed far more often
+than you expect.} Optimize for the reader and the future editor, not for the few minutes it takes
+to type it.
+
+\unnumberedsection{true}{Naming}\label{writing-good-code:naming}
+
+Names are the cheapest and highest-leverage design decision you make. A good name tells the reader
+\emph{what a thing is}, \emph{what it does}, and \emph{what it costs}~--- so they never have to open the body to find
+out.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Reveal intent.} \texttt{invoice\_due\_date\_utc} beats \texttt{d}; \texttt{is\_eligible\_for\_refund} beats \texttt{flag}.
+\item
+  \textbf{Avoid noise words}~--- \texttt{data}, \texttt{info}, \texttt{tmp}, \texttt{manager}, \texttt{helper}, \texttt{util}. They carry no meaning;
+  a name that could apply to anything describes nothing.
+\item
+  \textbf{Be consistent.} One concept, one word, everywhere. Don't call it \texttt{user} here and \texttt{account}
+  there if it's the same thing.
+\item
+  \textbf{Length should match scope.} A loop index \texttt{i} is fine; a one-letter module-level constant is not.
+\end{itemize}
+
+\noindent{}A name you struggle to find is usually a sign the thing is doing too much. The naming difficulty is
+the design telling you to split it.
+
+\unnumberedsection{true}{Functions}\label{writing-good-code:functions}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Small, and one thing.} A function should do a single thing at a single level of abstraction. If
+  you need the word ``and'' to describe it, it's probably two functions.
+\item
+  \textbf{Few parameters.} Many parameters are hard to read and easy to mis-order. Prefer passing an
+  object; be suspicious of boolean flag parameters (they usually mean the function does two things~---
+  split it).
+\item
+  \textbf{Command/Query Separation.} A function should either \emph{do} something (a command~--- it has a side
+  effect and returns nothing meaningful) or \emph{answer} something (a query~--- it returns a value and
+  changes nothing), but not both. Functions that quietly do both surprise their callers.
+\item
+  \textbf{Make side effects obvious.} Hidden state changes are where bugs hide. A function that mutates
+  something outside itself should say so in its name and its docs.
+\end{itemize}
+
+\unnumberedsection{true}{Modules, Boundaries, and Design}\label{writing-good-code:modules-boundaries-and-design}
+
+Above the function sits the module (a class, a file, a package, a service). Good module design is
+mostly one idea~--- \textbf{information hiding}~--- expressed several ways.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Information hiding.} A module exposes a small interface and hides its implementation behind it.
+  The secret it keeps is exactly the complexity its users never have to think about. Expose little;
+  hide much.
+\item
+  \textbf{Deep vs shallow modules.} A \emph{deep} module offers a simple interface over substantial hidden
+  functionality~--- it earns its place. A \emph{shallow} module has an interface nearly as complex as its
+  body (a thin wrapper, a class whose every method you must understand to call any)~--- it barely pays
+  for the cost of existing. Prefer deep modules.
+\item
+  \textbf{Coupling and cohesion.} Aim for \textbf{high cohesion} (each unit does one well-defined job) and
+  \textbf{low coupling} (units interact through the narrowest possible interface). This single sentence is
+  the north star of structural design.
+\item
+  \textbf{Separation of concerns.} Keep distinct responsibilities in distinct places~--- business logic,
+  data access, and transport (HTTP/CLI) in separate layers. When a request handler also queries the
+  database and sends email, every future change has to understand all three.
+\item
+  \textbf{The SOLID principles}, briefly, each guarding against one failure: \textbf{S}ingle Responsibility (a
+  unit has one reason to change); \textbf{O}pen/Closed (extend without modifying); \textbf{L}iskov Substitution
+  (subtypes honor their base's contract); \textbf{I}nterface Segregation (small, focused interfaces);
+  \textbf{D}ependency Inversion (depend on abstractions, not concretions~--- your logic talks to a
+  \texttt{UserRepository} interface, not to PostgreSQL directly).
+\item
+  \textbf{Avoid premature complexity.} Microservices, event sourcing, CQRS, and elaborate abstractions are
+  powerful and frequently catastrophic when adopted too early. Choose the simplest design that solves
+  today's problem while keeping tomorrow's options open.
+\end{itemize}
+
+\unnumberedsection{true}{Comments}\label{writing-good-code:comments}
+
+Good code explains \emph{what} it does through naming and structure. Comments are for the \textbf{why}~--- the
+non-obvious trade-off, the external constraint, the subtle bug that forced this approach.
+
+\begin{itemize}
+\tightlist
+\item
+  A comment that restates the code (\texttt{i\ =}\allowbreak{}\texttt{\ i\ +\ 1\ \ \#\ add\ one\ to\ i}) is noise.
+\item
+  A comment that has drifted out of sync with the code is worse than none~--- it actively lies. If you
+  change the code, change the comment.
+\item
+  The best ``comment'' is often a better name or a smaller function that makes the comment unnecessary.
+\end{itemize}
+
+\unnumberedsection{true}{Error Handling}\label{writing-good-code:error-handling}
+
+Decide an error-handling philosophy and apply it consistently~--- inconsistency here produces the
+hardest bugs to find.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Expected vs exceptional.} Outcomes that are a normal part of the job (invalid input, a missing
+  record) are best handled with ordinary return values and clear responses. Genuine surprises (a
+  dropped connection) are exceptions, and should be allowed to propagate.
+\item
+  \textbf{Handle errors where you can act.} If a function can't do anything useful about an error, it
+  should not catch it~--- let it propagate to a boundary that can log it and turn it into a sane
+  response. Catching to do nothing hides the problem without solving it.
+\item
+  \textbf{Never swallow silently.} \texttt{except\ Exception:\ pass} is how a system acquires invisible failures.
+  Catch \emph{narrowly}, or not at all.
+\item
+  \textbf{Design errors out of existence.} The best error handling is the error you made impossible~--- an
+  idempotent ``delete'' that treats ``already gone'' as success removes an entire error path. (Whether
+  that is right depends on what callers need to know; the Notes API in Part IV deliberately keeps a
+  \texttt{404} so clients can tell ``deleted now'' from ``never existed''.)
+\end{itemize}
+
+\unnumberedsection{true}{Code Smells}\label{writing-good-code:code-smells}
+
+A \textbf{code smell} (the term comes from Kent Beck and Martin Fowler's \emph{Refactoring}) is a
+recognizable surface pattern that hints at deeper trouble. A smell is not a
+bug; it's a prompt to look closer. The ones worth memorizing:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Long method / large class (god object)}~--- a unit that has absorbed too many responsibilities.
+\item
+  \textbf{Long parameter list}~--- usually a missing object, or a function doing too much.
+\item
+  \textbf{Primitive obsession}~--- passing raw strings and dicts where a named type belongs.
+\item
+  \textbf{Feature envy}~--- a function more interested in another module's data than its own.
+\item
+  \textbf{Shotgun surgery}~--- one logical change that forces edits scattered across many files.
+\item
+  \textbf{Duplicated code}~--- the same knowledge expressed in more than one place.
+\item
+  \textbf{Dead code}~--- commented-out blocks and unused paths that confuse what actually runs. Delete
+  aggressively; version control remembers.
+\end{itemize}
+
+\unnumberedsection{true}{Refactoring}\label{writing-good-code:refactoring}
+
+\textbf{Refactoring} is changing the \emph{structure} of code without changing its \emph{behavior}~--- and it is a
+continuous discipline, not a one-time project.
+
+\begin{itemize}
+\tightlist
+\item
+  Work in \textbf{small, safe steps}, each leaving the code working, ideally under tests: small change →
+  run tests → commit. This rhythm is what makes restructuring safe instead of scary.
+\item
+  Follow the \textbf{boy-scout rule}: leave each file a little cleaner than you found it. Continuous small
+  improvements compound; the ``big rewrite'' rarely arrives and rarely survives contact with reality.
+\end{itemize}
+
+\unnumberedsection{true}{Strategic vs Tactical Programming}\label{writing-good-code:strategic-vs-tactical-programming}
+
+Every change is an opportunity to invest or to borrow.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Tactical programming} optimizes for \emph{making this work now}. It is faster per change and leaves a
+  little complexity behind each time~--- and that complexity compounds until the codebase fights you.
+\item
+  \textbf{Strategic programming} treats clean design as an investment that keeps \emph{every future change}
+  cheap. It costs a little more today and pays back continuously.
+\end{itemize}
+
+\noindent{}Good code is the result of many small strategic investments. You don't need a quarter to ``clean up
+the codebase''; you need the habit of leaving good structure behind on every change.
+
+\unnumberedsection{true}{A Practitioner's Habits}\label{writing-good-code:a-practitioners-habits}
+
+The things experienced engineers do almost without thinking:
+
+\begin{itemize}
+\tightlist
+\item
+  Name things so the body rarely needs reading.
+\item
+  Keep functions small and honest about their side effects.
+\item
+  Hide complexity behind deep, narrow interfaces.
+\item
+  Make the easy case obvious and the dangerous case hard.
+\item
+  Handle errors at a boundary; never swallow them.
+\item
+  Delete dead code on sight.
+\item
+  Refactor in small steps, under tests, as you go.
+\item
+  Reach for the simplest thing that works, and add complexity only when reality demands it.
+\end{itemize}
+
+\unnumberedchapter{Engineering Practices \& Maturity}\label{ch:writing-good-code-2}
+
+\chapterrule
+
+The previous chapter is about each \emph{piece} of code. This chapter is about the whole \emph{codebase}: the practices a
+project should have to be considered good, sequenced by the category of risk each one manages. No
+codebase has all of this on day one~--- the goal is to be deliberate about what you have and what
+you're deferring, and to adopt each practice in the right order, before its absence causes an
+incident.
+
+\unnumberedsection{true}{Overview}\label{writing-good-code:overview}
+
+This chapter serves two purposes:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  A \textbf{maturity model} that sequences the adoption of engineering practices across the lifecycle of a software project.
+\item
+  A \textbf{comprehensive reference} for every major dimension of codebase quality.
+\end{enumerate}
+
+\noindent{}Each stage in the maturity model manages a different \emph{category of risk}. Moving to the next stage before the current one is solid doesn't skip work~--- it defers it under worse conditions. \textbf{The order matters as much as the content.}
+
+\Needspace{23\baselineskip}
+
+\unnumberedsection{true}{The Complete Roadmap at a Glance}\label{writing-good-code:the-complete-roadmap-at-a-glance}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2308}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3248}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4444}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Stage
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Primary Risk Being Managed
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Key Deliverables
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{1. Foundation} & Irreversible early mistakes & Version control, secrets hygiene, linting, README \\
+\textbf{2. Early Development} & Silent failures, no feedback loops & Unit tests, logging, CI, input validation \\
+\textbf{3. Growing Codebase} & Inability to change safely & Architecture layers, integration tests, code review, ADRs \\
+\textbf{4. Production Readiness} & Inability to operate & Metrics/alerting, deployment automation, rollback, runbooks \\
+\textbf{5. Scale \& Reliability} & Systemic and cascading failures & IaC, circuit breakers, tracing, verified backups \\
+\textbf{6. Excellence} & Long-term sustainability & Postmortems, performance testing, compliance, bus factor \\
+\end{longtable}
+}
+
+\unnumberedsection{true}{Stage 1 --- Project Foundation}\label{writing-good-code:stage-1--project-foundation}
+
+\begin{notebox}
+
+\textbf{Day 0. Before a single line of business logic is written.}
+
+\end{notebox}
+
+\noindent{}The decisions made here are the hardest to undo later. This stage is about establishing the structural skeleton that everything else will grow on.
+
+\subsection*{Stage 1: Non-Negotiables}\phantomsection\label{writing-good-code:stage-1-non-negotiables}
+
+\subsubsection*{Version Control with a Branching Strategy}\phantomsection\label{writing-good-code:version-control-with-a-branching-strategy}
+
+Initialize a Git repository before writing any code. Decide immediately on a branching convention~--- trunk-based development (recommended for small teams) or Gitflow. This decision shapes how you integrate, review, and release for the entire life of the project. Changing it later is painful.
+
+\subsubsection*{Dependency and Environment Management}\phantomsection\label{writing-good-code:dependency-and-environment-management}
+
+Define your runtime explicitly: a \texttt{package.json}, \texttt{pyproject.toml}, \texttt{go.mod}, or equivalent. Pin versions. Use a virtual environment or container from the start. The ``it works on my machine'' problem is born here if you ignore it.
+
+\subsubsection*{Project README}\phantomsection\label{writing-good-code:project-readme}
+
+Write it on day one, even if it's three lines. It should answer: what is this, how do I run it, and how do I run the tests. Update it as the project evolves. This is the front door to your codebase.
+
+\subsubsection*{\texorpdfstring{\texttt{.gitignore} and Secrets Hygiene}{.gitignore and Secrets Hygiene}}\phantomsection\label{writing-good-code:gitignore-and-secrets-hygiene}
+
+A \texttt{.gitignore} that excludes build artifacts, local config, and \texttt{.env} files should exist before the first commit. An \texttt{.env.example} with placeholder values documents what configuration the project needs without leaking real values. A secret committed to version control must be treated as leaked: rotate it immediately. Rewriting history afterwards is not enough, because every clone, fork, and CI cache may already hold a copy.
+
+\subsubsection*{Linter and Formatter}\phantomsection\label{writing-good-code:linter-and-formatter}
+
+Configure both before writing any code. A linter (Ruff, ESLint, golangci-lint) catches likely bugs and bad patterns; a formatter settles style. Zero-configuration formatters (Black or \texttt{ruff\ format}, Prettier, gofmt) are preferable because they eliminate style decisions entirely. Enforcing style from the start means you never have a ``style cleanup'' PR that pollutes your git history.
+
+\subsection*{Stage 1: Nice to Have}\phantomsection\label{writing-good-code:stage-1-nice-to-have}
+
+\begin{itemize}
+\tightlist
+\item
+  A basic \texttt{Makefile} or task runner (\texttt{just}, \texttt{invoke}) with commands for \texttt{run}, \texttt{test}, \texttt{lint} so common operations are documented as code.
+\item
+  A brief \texttt{CONTRIBUTING.md} stub, even if it's just the branching strategy.
+\end{itemize}
+
+\subsection*{Stage 1: Why Not Later?}\phantomsection\label{writing-good-code:stage-1-why-not-later}
+
+Version control, secrets hygiene, and formatting enforced \emph{after} code is already written require retroactive cleanup that almost never happens completely. These are the only practices where ``later'' genuinely means ``never.''
+
+\unnumberedsection{true}{Stage 2 --- Early Development}\label{writing-good-code:stage-2--early-development}
+
+\begin{notebox}
+
+\textbf{The first few weeks. You're writing real features and the codebase is taking shape.}
+
+\end{notebox}
+
+\noindent{}You now have business logic worth protecting and interfaces worth stabilizing. This stage builds the feedback loops and structural habits that will carry the project forward.
+
+\subsection*{Stage 2: Non-Negotiables}\phantomsection\label{writing-good-code:stage-2-non-negotiables}
+
+\subsubsection*{Unit Tests for Business Logic}\phantomsection\label{writing-good-code:unit-tests-for-business-logic}
+
+Write tests alongside every non-trivial function. You don't need 100\% coverage~--- you need coverage of critical paths, edge cases, and anything that's broken once before. The discipline of writing tests early forces better design: tightly coupled, side-effectful code is hard to test, so tests push you toward cleaner architecture.
+
+\subsubsection*{Basic Logging}\phantomsection\label{writing-good-code:basic-logging}
+
+Introduce structured logging from the start. Every significant operation, error, and state transition should emit a log entry. Use levels correctly:
+
+\Needspace{10\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Level & Purpose \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{DEBUG} & Development noise, verbose detail \\
+\texttt{INFO} & Normal operations, milestones \\
+\texttt{WARNING} & Recoverable anomalies \\
+\texttt{ERROR} & Failures requiring attention \\
+\end{longtable}
+}
+
+Retrofitting logging into existing code is tedious and leaves gaps.
+
+\subsubsection*{Basic CI Pipeline}\phantomsection\label{writing-good-code:basic-ci-pipeline}
+
+Connect your repository to a CI service (GitHub Actions, GitLab CI, CircleCI). At minimum, CI should: install dependencies, run the linter, and run the test suite on every push and pull request. This is the first automated quality gate. Without it, broken code regularly reaches shared branches.
+
+\subsubsection*{Explicit Error Handling}\phantomsection\label{writing-good-code:explicit-error-handling}
+
+Decide on an error-handling philosophy and apply it consistently. Never swallow exceptions silently. Errors should either be handled gracefully (with logging and a meaningful response) or propagate loudly so they surface in tests and monitoring. Silent failures are the hardest bugs to diagnose.
+
+\subsubsection*{Input Validation at Boundaries}\phantomsection\label{writing-good-code:input-validation-at-boundaries}
+
+Any data entering your system from outside~--- HTTP requests, file uploads, CLI arguments, environment variables~--- should be validated at the point of entry. Do not let unvalidated data propagate deep into business logic. Libraries like Pydantic, Zod, or Joi make this structured and cheap.
+
+\subsection*{Stage 2: Nice to Have}\phantomsection\label{writing-good-code:stage-2-nice-to-have}
+
+\begin{itemize}
+\tightlist
+\item
+  A \texttt{CHANGELOG.md} started early, even informally.
+\item
+  Pre-commit hooks for linting and formatting (faster feedback than waiting for CI).
+\item
+  Basic health check endpoint if the project is a service.
+\end{itemize}
+
+\subsection*{Stage 2: Dependencies on Stage 1}\phantomsection\label{writing-good-code:stage-2-dependencies-on-stage-1}
+
+\begin{itemize}
+\tightlist
+\item
+  CI depends on version control.
+\item
+  Testing depends on having a structured project layout.
+\item
+  Both depend on dependency management being correctly configured.
+\end{itemize}
+
+\subsection*{Stage 2: Why Not Later?}\phantomsection\label{writing-good-code:stage-2-why-not-later}
+
+Tests and logging written after the fact tend to be superficial~--- they cover the happy path because the developer already knows the code works. Written alongside the code, they reveal design problems while they're still cheap to fix. CI without tests is useless; tests without CI are run inconsistently.
+
+\unnumberedsection{true}{Stage 3 --- Growing Codebase}\label{writing-good-code:stage-3--growing-codebase}
+
+\begin{notebox}
+
+\textbf{The project has real users or real collaborators. The codebase is large enough that no one person holds it all in their head.}
+
+\end{notebox}
+
+\noindent{}The primary risk at this stage shifts from ``will it work?'' to ``will we be able to change it safely?'' The practices here protect the ability to move quickly without breaking things.
+
+\subsection*{Stage 3: Non-Negotiables}\phantomsection\label{writing-good-code:stage-3-non-negotiables}
+
+\subsubsection*{Architecture with Clear Separation of Concerns}\phantomsection\label{writing-good-code:architecture-with-clear-separation-of-concerns}
+
+Business logic, data access, and transport (HTTP handlers, CLI commands) should live in distinct layers with clear interfaces between them. If your HTTP handler is also querying the database and sending emails, you have a maintenance problem that compounds with every feature added. Introduce this structure before the codebase is too large to refactor easily.
+
+\subsubsection*{Integration Tests}\phantomsection\label{writing-good-code:integration-tests}
+
+Unit tests verify logic in isolation. Integration tests verify that components actually work together~--- that your code and your database produce the right results, that your service and its dependencies interact correctly. Add them as you build each significant integration.
+
+\subsubsection*{Secrets Manager or Vault}\phantomsection\label{writing-good-code:secrets-manager-or-vault}
+
+If you're still loading secrets from \texttt{.env} files passed around manually, now is the time to move to a proper secrets management solution (AWS Secrets Manager, HashiCorp Vault, Doppler). As teams grow, sharing secrets over Slack or email becomes a serious security liability.
+
+\subsubsection*{Dependency Vulnerability Scanning}\phantomsection\label{writing-good-code:dependency-vulnerability-scanning}
+
+Enable automated scanning (GitHub Dependabot, Snyk, \texttt{pip-audit}) on your repository. At this stage you likely have enough dependencies that manually auditing them is impractical. This runs passively and alerts you to known CVEs.
+
+\subsubsection*{Code Review Process}\phantomsection\label{writing-good-code:code-review-process}
+
+Establish a pull request process with required reviews before merging. Document what reviewers are expected to check. Code review is the primary mechanism for knowledge sharing, catching design problems, and maintaining quality standards as a team grows. Without it, the codebase quickly diverges in style and quality.
+
+\subsubsection*{Architecture Decision Records (ADRs)}\phantomsection\label{writing-good-code:architecture-decision-records-adrs}
+
+When you make a significant architectural decision~--- choosing a database, selecting a message queue, deciding on an auth approach~--- write a short ADR. Future maintainers (including yourself) will otherwise spend hours reverse-engineering \emph{why} the code looks the way it does.
+
+\subsection*{Stage 3: Nice to Have}\phantomsection\label{writing-good-code:stage-3-nice-to-have}
+
+\begin{itemize}
+\tightlist
+\item
+  Database migration tooling (Flyway, Alembic, golang-migrate) with versioned, reversible migrations.
+\item
+  API documentation (OpenAPI/Swagger) if you have external or cross-team consumers.
+\item
+  A formal \texttt{CONTRIBUTING.md} that formalizes PR conventions, commit message format, and review expectations.
+\item
+  Performance benchmarks for critical paths, even informal ones, to establish a baseline.
+\end{itemize}
+
+\subsection*{Stage 3: Dependencies on Stage 2}\phantomsection\label{writing-good-code:stage-3-dependencies-on-stage-2}
+
+\begin{itemize}
+\tightlist
+\item
+  Integration tests depend on having a test infrastructure already established.
+\item
+  A code review process depends on CI~--- reviewers should not be manually checking things the machine can check.
+\end{itemize}
+
+\subsection*{Stage 3: Why Not Earlier?}\phantomsection\label{writing-good-code:stage-3-why-not-earlier}
+
+Formal architecture layers are premature in the first days of a project when the domain isn't understood yet. Introduced too early, they add ceremony without value. By this stage, the domain is understood and the cost of architectural debt is becoming visible.
+
+\unnumberedsection{true}{Stage 4 --- Production Readiness}\label{writing-good-code:stage-4--production-readiness}
+
+\begin{notebox}
+
+\textbf{You're about to deploy to real users, or you're already there and gaps are becoming painful.}
+
+\end{notebox}
+
+\noindent{}The primary risk shifts again: from ``can we change it safely?'' to ``can we operate it?'' This stage is about making the system observable, deployable, and recoverable.
+
+\subsection*{Stage 4: Non-Negotiables}\phantomsection\label{writing-good-code:stage-4-non-negotiables}
+
+\subsubsection*{Structured Metrics and Alerting}\phantomsection\label{writing-good-code:structured-metrics-and-alerting}
+
+Logs tell you what happened; metrics tell you the shape of your system's behavior over time. Instrument key operations: request rates, error rates, latency percentiles, queue depths. Connect metrics to an alerting system (PagerDuty, Opsgenie, or even a simple email alert) so you find out about problems before your users do.
+
+\subsubsection*{Health Check and Readiness Endpoints}\phantomsection\label{writing-good-code:health-check-and-readiness-endpoints}
+
+Every service must expose health endpoints. Load balancers and orchestration systems (Kubernetes) use these to route traffic. Without them, you may be serving requests to a broken instance with no visibility into it.
+
+\subsubsection*{Automated, Repeatable Deployment}\phantomsection\label{writing-good-code:automated-repeatable-deployment}
+
+Deploying to production should be a single command or pipeline trigger, never a manual runbook. Every manual deployment step is a potential source of human error and an undocumented process. The deployment pipeline is part of the product.
+
+\subsubsection*{Rollback Strategy}\phantomsection\label{writing-good-code:rollback-strategy}
+
+Every deployment must have a defined, tested rollback path. Blue-green deployments keep the previous version hot. At minimum, know the exact steps to revert a bad deployment before you deploy. \textbf{A rollback strategy you haven't practiced is not a rollback strategy.}
+
+\subsubsection*{End-to-End Tests for Critical Paths}\phantomsection\label{writing-good-code:end-to-end-tests-for-critical-paths}
+
+A small suite of E2E tests covering your most important user journeys~--- login, checkout, core workflow~--- gives you confidence that a deployment hasn't broken the product from the user's perspective. These are slow and should be few, but they catch failure modes nothing else will.
+
+\subsubsection*{Runbooks for Common Incidents}\phantomsection\label{writing-good-code:runbooks-for-common-incidents}
+
+Before going to production, write a runbook for each foreseeable incident: service is down, database is full, a background job is stuck, an external dependency is unavailable. The act of writing them surfaces gaps in your system design. They save hours during actual incidents.
+
+\subsection*{Stage 4: Nice to Have}\phantomsection\label{writing-good-code:stage-4-nice-to-have}
+
+\begin{itemize}
+\tightlist
+\item
+  Feature flags for decoupling deployment from release.
+\item
+  Staging environment that closely mirrors production.
+\item
+  Basic load testing before major releases.
+\item
+  Audit logging for user-facing actions that touch sensitive data.
+\end{itemize}
+
+\subsection*{Stage 4: Dependencies on Stage 3}\phantomsection\label{writing-good-code:stage-4-dependencies-on-stage-3}
+
+\begin{itemize}
+\tightlist
+\item
+  Automated deployment depends on a CI pipeline.
+\item
+  E2E tests depend on an established test infrastructure.
+\item
+  Metrics alerting depends on knowing what ``normal'' looks like. Start with simple static thresholds (error rate, health check, disk space) at launch, and tune them once real traffic shows the baseline.
+\end{itemize}
+
+\subsection*{Stage 4: Why Not Earlier?}\phantomsection\label{writing-good-code:stage-4-why-not-earlier}
+
+Runbooks, rollback strategies, and production metrics are irrelevant before you have a production environment. Introducing E2E tests too early, when the UI and API are changing daily, produces a brittle suite that becomes a maintenance burden rather than a safety net.
+
+\unnumberedsection{true}{Stage 5 --- Scale and Reliability}\label{writing-good-code:stage-5--scale-and-reliability}
+
+\begin{notebox}
+
+\textbf{The product is established. Failures are costly. The team is larger. The system has real operational complexity.}
+
+\end{notebox}
+
+\noindent{}At this stage, the risks are systemic: cascading failures, knowledge silos, environments that drift, and infrastructure that was clicked together in a console two years ago by someone who has since left.
+
+\subsection*{Stage 5: Non-Negotiables}\phantomsection\label{writing-good-code:stage-5-non-negotiables}
+
+\subsubsection*{Infrastructure as Code}\phantomsection\label{writing-good-code:infrastructure-as-code}
+
+All cloud infrastructure~--- servers, databases, queues, DNS, IAM roles~--- should be defined in version-controlled code (Terraform, Pulumi, CloudFormation). Undocumented infrastructure is invisible technical debt. When something breaks in an environment you can't reproduce, you have a serious problem.
+
+\subsubsection*{Graceful Degradation and Circuit Breakers}\phantomsection\label{writing-good-code:graceful-degradation-and-circuit-breakers}
+
+Design explicitly for partial failure. When a non-critical dependency is down, the core product should continue functioning. Circuit breakers (\texttt{resilience4j}, \texttt{pybreaker}) stop requests to a known-failing service before they exhaust your connection pool and bring down everything else. This is what separates ``that service was slow for 5 minutes'' from a full outage.
+
+\subsubsection*{Idempotency for Critical Operations}\phantomsection\label{writing-good-code:idempotency-for-critical-operations}
+
+Any operation that can be retried~--- payment processing, email sending, job execution~--- must be idempotent: running it twice should produce the same result as running it once. Without this, retries produce duplicate charges, duplicate emails, and corrupted state.
+
+\subsubsection*{Timeouts, Retries, and Backoff Everywhere}\phantomsection\label{writing-good-code:timeouts-retries-and-backoff-everywhere}
+
+Every outbound call should have an explicit timeout. Retries should use exponential backoff with jitter to prevent thundering herds. Without these, a single slow dependency can exhaust your threads, block your event loop, and cascade into a full outage.
+
+\subsubsection*{Distributed Tracing}\phantomsection\label{writing-good-code:distributed-tracing}
+
+When a request crosses multiple services, you need the ability to follow it end-to-end. OpenTelemetry is the current standard. Without tracing, debugging latency or correctness issues across service boundaries is largely guesswork.
+
+\subsubsection*{Disaster Recovery --- Verified Backups}\phantomsection\label{writing-good-code:disaster-recovery--verified-backups}
+
+Having backups is not enough. You must regularly test your ability to \emph{restore} from them and measure your actual RTO (recovery time objective) and RPO (recovery point objective). Many teams discover their backups are corrupted or incomplete during an actual disaster.
+
+\subsection*{Stage 5: Nice to Have}\phantomsection\label{writing-good-code:stage-5-nice-to-have}
+
+\begin{itemize}
+\tightlist
+\item
+  Chaos engineering practices (controlled fault injection to find reliability gaps before they find you).
+\item
+  SLOs (Service Level Objectives) formally defined and tracked.
+\item
+  Contract tests between services to catch API incompatibilities before deployment.
+\item
+  Capacity planning reviews~--- understanding what breaks first when load doubles.
+\end{itemize}
+
+\subsection*{Stage 5: Dependencies on Stage 4}\phantomsection\label{writing-good-code:stage-5-dependencies-on-stage-4}
+
+\begin{itemize}
+\tightlist
+\item
+  Circuit breakers and graceful degradation require observability to know when to open and close.
+\item
+  IaC is most tractable when introduced before infrastructure proliferates; at this stage it may require an audit and cleanup first.
+\item
+  Distributed tracing is only valuable once you have multiple services.
+\end{itemize}
+
+\unnumberedsection{true}{Stage 6 --- Advanced Engineering Excellence}\label{writing-good-code:stage-6--advanced-engineering-excellence}
+
+\begin{notebox}
+
+\textbf{A mature, large, or high-stakes system. Operational discipline is institutionalized. You are optimizing for long-term sustainability.}
+
+\end{notebox}
+
+\noindent{}These practices have high value but require foundational maturity to implement well. Applied too early, they add overhead without payoff.
+
+\subsection*{Stage 6: Practices}\phantomsection\label{writing-good-code:stage-6-practices}
+
+\subsubsection*{Blameless Postmortems as Institutional Practice}\phantomsection\label{writing-good-code:blameless-postmortems-as-institutional-practice}
+
+Every significant incident produces a written postmortem: timeline, root cause, contributing factors, and concrete action items. The goal is systemic improvement, not blame. Over time, a postmortem corpus becomes invaluable institutional knowledge that outlasts any individual engineer.
+
+\subsubsection*{Performance Testing as a First-Class Practice}\phantomsection\label{writing-good-code:performance-testing-as-a-first-class-practice}
+
+Automated load tests run in CI or pre-release pipelines. Benchmarks for critical paths are tracked over time so regressions are caught before they reach production. Latency budgets are defined and enforced.
+
+\subsubsection*{Data Retention and Lifecycle Policies}\phantomsection\label{writing-good-code:data-retention-and-lifecycle-policies}
+
+Define what data gets deleted or archived, and when. Databases that grow without bound degrade in performance and increase cost in ways that are often invisible until they become incidents. Compliance requirements (GDPR right to erasure, HIPAA retention periods) add urgency for regulated domains.
+
+\subsubsection*{API Versioning and Backward Compatibility Strategy}\phantomsection\label{writing-good-code:api-versioning-and-backward-compatibility-strategy}
+
+If external consumers depend on your interfaces, establish a formal versioning policy, deprecation timelines, and compatibility guarantees. Schema changes without versioning discipline are a primary source of silent breakage for API consumers.
+
+\subsubsection*{Compliance and Auditability}\phantomsection\label{writing-good-code:compliance-and-auditability}
+
+In regulated domains (finance, healthcare, legal), audit logs~--- recording who did what and when~--- are distinct from application logs and are a legal requirement. Access controls, data residency, and retention policies also become non-negotiable at this stage.
+
+\subsubsection*{Developer Onboarding Time as a Metric}\phantomsection\label{writing-good-code:developer-onboarding-time-as-a-metric}
+
+Track how long it takes a new engineer to make their first meaningful contribution. This single metric reflects the aggregate quality of your documentation, tooling, architecture, and development environment. Optimizing it forces improvements across many dimensions simultaneously.
+
+\subsubsection*{Knowledge Sharing and Bus Factor Reduction}\phantomsection\label{writing-good-code:knowledge-sharing-and-bus-factor-reduction}
+
+Formal practices for reducing knowledge silos: pair programming rotations, internal tech talks, documentation sprints, rotating on-call assignments. A system that only one person understands is a liability, not an asset.
+
+\unnumberedsection{true}{Full Quality Framework Reference}\label{writing-good-code:full-quality-framework-reference}
+
+\subsection*{Observability and Diagnostics}\phantomsection\label{writing-good-code:observability-and-diagnostics}
+
+\textbf{Logging} \emph{(Essential)}~--- Structured logs (JSON, key-value pairs) are far more useful than plain strings. Log at appropriate levels and never log sensitive data. Without logging, you're flying blind in production~--- you can't reconstruct what happened before a failure.
+
+\begin{notebox}
+
+\emph{Common mistake:} Logging too much noise (every loop iteration) or too little (only errors). Both defeat the purpose.
+
+\end{notebox}
+
+\noindent{}\textbf{Metrics} \emph{(Important)}~--- Counters, gauges, and histograms tell you the shape of your system's behavior over time~--- request rates, latency percentiles, queue depths, error rates. Tools like Prometheus + Grafana or Datadog make this concrete. Logs tell you \emph{what} happened; metrics tell you \emph{how often} and \emph{how slow}.
+
+\textbf{Distributed Tracing} \emph{(Advanced)}~--- When a request touches multiple services, tracing (OpenTelemetry, Jaeger) lets you follow it end-to-end and pinpoint exactly which component is slow or failing. Without it, debugging across service boundaries is guesswork.
+
+\textbf{Health Checks and Readiness Probes} \emph{(Essential)}~--- Every service should expose a \texttt{/health} or \texttt{/ready} endpoint. Orchestration systems need these to route traffic correctly. Without them, you may be serving traffic to a broken instance.
+
+\subsection*{Testing}\phantomsection\label{writing-good-code:testing}
+
+\textbf{Unit Tests} \emph{(Essential)}~--- Test individual functions and classes in isolation. They run fast, catch regressions early, and force better design. Aim for meaningful coverage of business logic~--- 100\% coverage is a vanity metric; covering critical paths is the goal.
+
+\textbf{Integration Tests} \emph{(Essential)}~--- Test that components work together correctly. Unit tests can pass while integration tests fail catastrophically.
+
+\textbf{End-to-End (E2E) Tests} \emph{(Important)}~--- Simulate real user workflows through the full stack. Slower and more brittle, but they catch failure modes nothing else will.
+
+\textbf{Contract Tests} \emph{(Advanced)}~--- If you own multiple services, contract tests (Pact) verify that a consumer and provider agree on an API's shape without requiring both to be running simultaneously.
+
+\textbf{Test Pyramid Discipline} \emph{(Important)}~--- Many fast unit tests, fewer integration tests, very few E2E tests. Inverting this produces a fragile, slow test suite that developers start skipping.
+
+\begin{notebox}
+
+\emph{Common mistake:} Writing tests only after bugs appear, or only testing the happy path. Never mock what you don't own~--- mocking third-party libraries leads to tests that pass but code that fails.
+
+\end{notebox}
+
+\subsection*{Architecture and Design}\phantomsection\label{writing-good-code:architecture-and-design}
+
+\textbf{Separation of Concerns} \emph{(Essential)}~--- Business logic, data access, and transport should be in distinct layers. When these bleed together, changing anything requires understanding everything.
+
+\textbf{Dependency Inversion} \emph{(Important)}~--- Depend on abstractions, not concrete implementations. Your business logic shouldn't know whether it's talking to PostgreSQL or MongoDB~--- it should talk to a \texttt{UserRepository} interface.
+
+\textbf{Explicit Boundaries} \emph{(Important)}~--- Define clear interfaces between modules or services. Everything outside a module's public interface should be private by default.
+
+\textbf{Avoiding Premature Complexity} \emph{(Essential)}~--- Microservices, event sourcing, CQRS, and hexagonal architecture are powerful~--- and frequently catastrophic when adopted too early. Choose the simplest architecture that solves today's problem while keeping tomorrow's options open.
+
+\subsection*{Code Quality and Maintainability}\phantomsection\label{writing-good-code:code-quality-and-maintainability}
+
+\textbf{Consistent Style and Formatting} \emph{(Essential)}~--- Use a linter and formatter enforced automatically. Consistency makes diffs cleaner and reviews faster.
+
+\textbf{Meaningful Naming} \emph{(Essential)}~--- Variable names like \texttt{d}, \texttt{tmp}, or \texttt{data} are a form of technical debt. Names should convey intent: \texttt{invoice\_due\_date\_utc}, not \texttt{d}. This is the single highest-ROI maintainability practice.
+
+\textbf{Small, Focused Functions and Modules} \emph{(Important)}~--- Functions that do one thing are easier to test, understand, and reuse. A 500-line function is almost always a maintenance liability.
+
+\textbf{No Dead Code} \emph{(Important)}~--- Commented-out code, unused variables, deprecated paths never deleted~--- these create confusion about what actually runs. Delete aggressively; version control preserves history.
+
+\textbf{Dependency Management} \emph{(Essential)}~--- Pin dependency versions. Regularly audit and update them. Every library you add is a liability you inherit.
+
+\begin{notebox}
+
+\emph{Common mistake:} Treating \texttt{npm\ install} as free. Every dependency brings its own bugs, licenses, and security surface.
+
+\end{notebox}
+
+\subsection*{Documentation}\phantomsection\label{writing-good-code:documentation}
+
+\textbf{README as the Front Door} \emph{(Essential)}~--- A new developer should be able to clone the repo and get it running from the README alone.
+
+\textbf{Architecture Decision Records (ADRs)} \emph{(Important)}~--- When you make a significant design decision, write it down. Future maintainers will otherwise spend hours reverse-engineering \emph{why} the code looks the way it does.
+
+\textbf{Inline Comments for Why, Not What} \emph{(Important)}~--- Code explains \emph{what} through good naming. Comments explain \emph{why}~--- the non-obvious trade-off, the external constraint, the bug that forced this approach.
+
+\textbf{API Documentation} \emph{(Important)}~--- Any interface consumed by others needs documented inputs, outputs, error codes, and examples. OpenAPI/Swagger is the standard for HTTP APIs.
+
+\subsection*{Security}\phantomsection\label{writing-good-code:security}
+
+\textbf{Secrets Management} \emph{(Essential)}~--- No credentials, API keys, or passwords in source code. Ever. Use environment variables or a secrets manager. One leaked credential in a public repo can compromise an entire system.
+
+\textbf{Input Validation and Sanitization} \emph{(Essential)}~--- Never trust input from users, external APIs, or other internal services. Validate at system boundaries. This is the first defense against injection attacks and data corruption.
+
+\textbf{Principle of Least Privilege} \emph{(Important)}~--- Services, users, and processes should have only the permissions they need. Blast radius from a compromise is proportional to the permissions granted.
+
+\textbf{Dependency Vulnerability Scanning} \emph{(Important)}~--- Tools like Snyk, \texttt{npm\ audit}, or GitHub Dependabot scan your dependency tree for known CVEs. Passive, low-cost, and high-value.
+
+\textbf{Authentication and Authorization Hygiene} \emph{(Essential)}~--- Use proven libraries and protocols. Never roll your own cryptography. Separate authentication (who are you?) from authorization (what are you allowed to do?).
+
+\begin{notebox}
+
+\emph{Common mistake:} Implementing authorization checks inconsistently across endpoints.
+
+\end{notebox}
+
+\subsection*{Reliability and Error Handling}\phantomsection\label{writing-good-code:reliability-and-error-handling}
+
+\textbf{Explicit Error Handling} \emph{(Essential)}~--- Every error path should be intentional. Swallowing exceptions with empty catch blocks produces silent failures that are nearly impossible to diagnose.
+
+\textbf{Graceful Degradation} \emph{(Important)}~--- If a non-critical dependency fails, the core user experience should continue. Design for partial failure.
+
+\textbf{Idempotency} \emph{(Important)}~--- Operations that can be retried safely should produce the same result no matter how many times they're called.
+
+\textbf{Timeouts and Retries with Backoff} \emph{(Important)}~--- Every outbound call should have a timeout. Retries should use exponential backoff with jitter to avoid thundering herd problems.
+
+\subsection*{CI/CD and Deployment}\phantomsection\label{writing-good-code:cicd-and-deployment}
+
+\textbf{Continuous Integration} \emph{(Essential)}~--- Every push should automatically run linting, tests, and security scans. Broken builds should block merges.
+
+\textbf{Repeatable, Automated Deployment} \emph{(Essential)}~--- Deploying should be a single command or button push. Manual deployments are slow, error-prone, and undocumented.
+
+\textbf{Environment Parity} \emph{(Important)}~--- Dev, staging, and production environments should be as similar as possible. Containerization (Docker) and IaC (Terraform) are the primary tools.
+
+\textbf{Feature Flags} \emph{(Advanced)}~--- Decouple deployment from release. Deploy code hidden behind a flag; roll back instantly by toggling it rather than reverting a deployment.
+
+\textbf{Rollback Strategy} \emph{(Important)}~--- Every deployment should have a defined rollback path. Blue-green deployments and canary releases make this safer.
+
+\subsection*{Developer Experience}\phantomsection\label{writing-good-code:developer-experience}
+
+\textbf{Fast Local Setup} \emph{(Essential)}~--- A new developer should be productive within hours, not days. Docker Compose for local dependencies, seed data scripts, and \texttt{.env.example} files all matter here.
+
+\textbf{Fast Feedback Loops} \emph{(Important)}~--- Tests that take 20 minutes to run will be skipped. Invest in parallelization, caching, and incremental builds.
+
+\textbf{Useful Pre-Commit Hooks} \emph{(Important)}~--- Run formatting, linting, and fast tests before a commit is made. Tools: \texttt{husky} (JS), \texttt{pre-commit} (Python).
+
+\textbf{Clear Contribution Guidelines} \emph{(Important)}~--- A \texttt{CONTRIBUTING.md} that explains branching strategy, PR conventions, commit message format, and review expectations.
+
+\subsection*{Operational Excellence and Long-Term Scalability}\phantomsection\label{writing-good-code:operational-excellence-and-long-term-scalability}
+
+\textbf{Infrastructure as Code} \emph{(Important)}~--- Infrastructure should be defined in version-controlled code. Undocumented cloud resources are invisible technical debt.
+
+\textbf{Runbooks} \emph{(Important)}~--- For each common operational scenario, write a step-by-step guide for the on-call engineer. The act of writing them also surfaces gaps in your system design.
+
+\textbf{Capacity Planning Awareness} \emph{(Advanced)}~--- Understand the growth limits of your system: what breaks first if traffic doubles? You don't need to solve these problems in advance, but you should know where the cliff is.
+
+\textbf{Data Retention and Cleanup Policies} \emph{(Important)}~--- Define what gets deleted or archived, and when. Databases that grow without bound eventually cause performance degradation and unexpected costs.
+
+\textbf{Postmortems and Incident Reviews} \emph{(Important)}~--- When things go wrong, write a blameless postmortem. Document the timeline, root cause, contributing factors, and action items.
+
+\unnumberedsection{true}{Priority Reference Matrix}\label{writing-good-code:priority-reference-matrix}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2103}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3046}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3046}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1806}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Area
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Essential
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Important
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Advanced
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Observability & Logging, Health Checks & Metrics & Distributed Tracing \\
+Testing & Unit, Integration & E2E, Test Pyramid & Contract Tests \\
+Architecture & Separation of Concerns, Avoiding Premature Complexity & Dependency Inversion, Explicit Boundaries & --- \\
+Code Quality & Linting and Formatting, Naming, Dependency Management & Small Functions, No Dead Code & --- \\
+Documentation & README & ADRs, Inline Why, API Documentation & --- \\
+Security & Secrets, Input Validation, AuthN/AuthZ & Least Privilege, Vulnerability Scanning & --- \\
+Reliability & Error Handling & Graceful Degradation, Idempotency, Timeouts & --- \\
+CI/CD & CI Pipeline, Automated Deployment & Environment Parity, Rollback & Feature Flags \\
+Developer Experience & Fast Setup & Fast Feedback, Pre-commit Hooks, Contribution Guidelines & --- \\
+Operations & --- & IaC, Runbooks, Data Retention, Postmortems & Capacity Planning \\
+\end{longtable}
+}
+
+\unnumberedsection{true}{Gaps and Domain-Specific Considerations}\label{writing-good-code:gaps-and-domain-specific-considerations}
+
+The main framework covers the vast majority of what matters in most codebases. The following areas are either domain-specific or become critical only at scale.
+
+\textbf{Data Integrity.} Database migrations (versioned, reversible, never destructive), transaction boundaries, and consistency guarantees. These cause some of the worst production incidents and are underrepresented in typical quality checklists.
+
+\textbf{Versioning and Backward Compatibility.} API versioning strategy and how you evolve schemas without breaking consumers. Critical if anything external depends on your interfaces.
+
+\textbf{Compliance and Auditability.} Audit logs~--- recording who did what, when~--- are distinct from application logs. Relevant if your domain involves user data, finance, or regulated industries.
+
+\textbf{Performance Testing.} Load testing and benchmarking as a sustained practice, not just functional correctness. A system can pass all tests and still fall over under real traffic.
+
+\textbf{Human and Team Factors.} Code review culture, pair programming norms, and how knowledge is shared across a team. Tools don't help if the team practices aren't there.
+
+\textbf{Disaster Recovery.} Backup strategy, RTO/RPO definitions, and actually testing your ability to restore from backups. Most teams have backups; far fewer have \emph{verified} backups.

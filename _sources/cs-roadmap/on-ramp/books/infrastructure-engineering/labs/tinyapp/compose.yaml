@@ -1,0 +1,29 @@
+name: tinyapp
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8000"
+    environment:
+      APP_VERSION: "1.0"
+      DATABASE_URL: postgresql://tinyapp:${DB_PASSWORD}@db:5432/tinyapp
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: tinyapp
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: tinyapp
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "tinyapp"]
+      interval: 2s
+      retries: 10
+
+volumes:
+  db-data:

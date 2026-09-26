@@ -1,0 +1,44 @@
+# Glossary
+
+| Term | Meaning |
+|---|---|
+| API | Application Programming Interface: the agreement on what a back end can be asked and what it answers |
+| Back end | The hidden part of an app that keeps the data and does the work |
+| Back-end framework | Ready-made plumbing for answering requests (FastAPI, Django, Express) |
+| Browser | The program that downloads web pages and draws them (Chrome, Safari, Firefox) |
+| Business logic | The app's own rules, such as "never sell the same seat twice" |
+| Cache | A nearby copy of an answer, kept so it doesn't have to be fetched again |
+| CDN | Content delivery network: servers worldwide keeping copies of files near users |
+| Client | The program that asks: a browser, a phone app, or a tool like `curl` |
+| Component | A small, reusable piece of a screen, such as a like button |
+| Cookie | A small piece of text the browser keeps and sends back with every request to a site |
+| CSS | The language that says how a page looks: colours, fonts, and layout |
+| Database | A program that keeps data safe on disk, finds it fast, and shares it |
+| Developer tools | The panel built into a browser that shows what a page is doing |
+| DNS | Domain Name System: the internet's phone book, turning domain names into IP addresses |
+| Domain name | A human-friendly name for a server, such as `notes.example.com` |
+| Endpoint | One thing an API offers, such as "save a note" at `POST /notes` |
+| Front end | The part of an app you see and touch, running on your device |
+| Front-end framework | Ready-made code that keeps a screen in step with its data (React, Vue) |
+| Full-stack developer | A developer who works on both the front end and the back end |
+| Handler | A back-end function that answers one kind of request |
+| Hashed | Scrambled one way, as passwords are stored, so the original can't be read back |
+| HTML | The language that says what is on a page: text, buttons, images |
+| HTTPS | The sealed, encrypted way requests and responses travel |
+| IP address | The number computers use to find each other on the internet |
+| JavaScript | The language that says what a page does when you touch it |
+| JSON | A plain-text data format that looks like a Python dictionary |
+| Logs | Lines a server writes about each request |
+| Native app | An app written for one kind of phone, such as iPhone or Android |
+| Request | The message a client sends to ask for something |
+| Response | The message a server sends back with the answer |
+| Responsive design | CSS rules that let one page fit any screen size |
+| Round trip | One request plus its response |
+| Route | A rule linking a kind of request, such as `POST /notes`, to its handler |
+| Server | The program that answers requests, or the computer it runs on |
+| Session | The server's record of who is logged in, looked up by a cookie |
+| Stack | The front end, back end, and database an app is built from |
+| Status code | A number saying how a request went (200 OK, 404 Not Found) |
+| Timeout | The time a client waits for a response before giving up |
+| URL | The full address a request is sent to |
+| Web application | A program split between your device and a server |

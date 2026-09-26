@@ -1,0 +1,920 @@
+\setcounter{chapter}{4}
+\chapter{Internal Request Execution}\label{ch:05-internal-request-execution}
+
+\chaptersubtitle{The Local API Flow}
+
+\chapterrule
+
+We have arrived at the center of Stage 1. Everything before this chapter has been preparation: starting the process, initializing the runtime, creating a socket, defining routes, and registering middleware. Now a request actually arrives.
+
+A user opens their API client and sends \texttt{POST\ /notes} with a JSON body. That action generates a TCP connection, a stream of bytes, and~--- from the perspective of your running program~--- a single call to \texttt{accept()} returning a new socket. Everything that follows, from reading those bytes to sending a response, is what this chapter traces.
+
+This is the complete execution path of a single API request. It is the heart of what a web server actually does. It is also the most important chapter in Stage 1, because it connects all the layers: the socket (\hyperref[ch:03-network-capability]{Chapter 3}), the route table (\hyperref[ch:04-request-handling-paths]{Chapter 4}), the business logic (your code), the database (touched in \hyperref[ch:02-runtime-initialization]{Chapter 2}), and the serialized response sent back through the same connection.
+
+The request journey has eleven distinct steps, each building on the last. By the end of this chapter, you will be able to read any web request~--- from any framework, in any language~--- and know exactly what is happening at each stage.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  How \texttt{accept()} returns a connection and what the two sockets are
+\item
+  How \texttt{recv()} reads raw bytes from the network
+\item
+  How HTTP is parsed: turning bytes into structured request data
+\item
+  How Flask extracts path, method, headers, query parameters, and body
+\item
+  How the route table resolves a request to a handler function
+\item
+  How middleware runs before and after the handler
+\item
+  How business logic accesses the database during a request
+\item
+  How the response is constructed, serialized, and sent back through the socket
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{\texorpdfstring{Accepting a Connection: \texttt{accept()}}{Accepting a Connection: accept()}}\label{05-internal-request-execution:51-accepting-a-connection-accept}
+
+The server socket has been listening since \texttt{app.run()} was called (← \hyperref[ch:03-network-capability]{Chapter 3}~--- Creating Network Capability). When a client makes a connection, the kernel completes the TCP handshake and places the connection in the accept queue.
+
+Your program retrieves it by calling \texttt{accept()}.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.1}\enspace The accept() call, shown explicitly}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# (Flask calls this internally; shown here for understanding)}
+
+\NormalTok{client\_socket, client\_address }\OperatorTok{=}\NormalTok{ server\_socket.accept()}
+\CommentTok{\# client\_socket: a new socket connected to this specific client}
+\CommentTok{\# client\_address: a tuple like (\textquotesingle{}127.0.0.1\textquotesingle{}, 54321)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{accept()} \textbf{blocks}~--- it pauses the program until a connection is available. If no connection is in the queue, the program waits. If a connection is already in the queue (because it arrived while you were handling a previous request), \texttt{accept()} returns immediately.
+
+After \texttt{accept()} returns:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{client\_socket} is a new file descriptor (e.g., fd 4) representing this specific connection
+\item
+  \texttt{client\_address} identifies the client: the IP address and port the client used on its end
+\item
+  The original listening socket (e.g., fd 3) is unchanged and continues listening
+\end{itemize}
+
+\noindent{}The client address is a pair of numbers: \texttt{(\textquotesingle{}127.0.0.1\textquotesingle{},}\allowbreak{}\texttt{\ 54321)}. The IP is the client's address (in this case, the same machine since we are running locally). The port (\texttt{54321}) is an \textbf{ephemeral port}~--- a temporary port number the client's operating system assigned to this outgoing connection. The client does not listen on port 54321; it is simply the source port for tracking the connection on the client's side.
+
+\subsection*{Flask's threading model for accept}\phantomsection\label{05-internal-request-execution:flasks-threading-model-for-accept}
+
+Flask's development server (since Flask 1.0) is multi-threaded by default: after \texttt{accept()} returns a connection, it hands that connection to a new thread and immediately goes back to \texttt{accept()} for the next one. Several requests can therefore be in progress at once~--- but it is a convenience server, not tuned or hardened for real traffic.
+
+In production, Gunicorn spawns multiple worker processes, each calling \texttt{accept()} independently. Multiple requests are handled simultaneously. We cover this in → \hyperref[ch:24-process-startup]{Chapter 24}~--- Process Startup in Production and → \hyperref[ch:36-scaling-load]{Chapter 36}~--- Scaling and Load Handling.
+
+For local development, the built-in server is fine. You are the only user.
+
+\setcounter{section}{1}
+\section{\texorpdfstring{Reading the Request: \texttt{recv()}}{Reading the Request: recv()}}\label{05-internal-request-execution:52-reading-the-request-recv}
+
+After \texttt{accept()} returns the client socket, the program reads the request data from it using \texttt{recv()}.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.2}\enspace Reading raw bytes from the client socket}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# (again, Flask handles this internally)}
+
+\NormalTok{raw\_request }\OperatorTok{=}\NormalTok{ client\_socket.recv(}\DecValTok{4096}\NormalTok{)}
+\CommentTok{\# raw\_request is a bytes object — raw network data}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{recv(4096)} reads up to 4096 bytes from the socket. If the request is longer than 4096 bytes, you would need multiple \texttt{recv()} calls to read it all. Flask's underlying HTTP library (Werkzeug, using Python's \texttt{http.server} module in development) handles this correctly, reading in chunks until the full request is received.
+
+The value returned by \texttt{recv()} is a \texttt{bytes} object~--- raw bytes, not a string. It is the exact bytes the client sent over the network.
+
+\subsection*{What the raw bytes look like}\phantomsection\label{05-internal-request-execution:what-the-raw-bytes-look-like}
+
+To understand what you have just received, let us look at what a \texttt{POST\ /notes} request actually looks like in raw form:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+POST /notes HTTP/1.1\r\n
+Host: localhost:5000\r\n
+Content-Type: application/json\r\n
+Content-Length: 28\r\n
+User-Agent: curl/7.88.1\r\n
+Accept: */*\r\n
+\r\n
+{"content": "Buy groceries"}
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}In actual bytes, every \texttt{\textbackslash{}r\textbackslash{}n} is a carriage return followed by a newline (two bytes: \texttt{0x0D\ 0x0A}). The blank line \texttt{\textbackslash{}r\textbackslash{}n} after the headers separates the header section from the body. This is the HTTP/1.1 wire format~--- a text-based protocol defined by RFC 7230 (and successors).
+
+Everything you need to know about the request~--- the method, the URL, the headers, the body~--- is in these bytes. The next step is extracting meaning from them.
+
+\setcounter{section}{2}
+\section{Parsing the HTTP Protocol: Turning Bytes into Structure}\label{05-internal-request-execution:53-parsing-the-http-protocol-turning-bytes-into-structure}
+
+The raw bytes are text following the HTTP protocol format. \textbf{Parsing} means reading that text and extracting structured data from it.
+
+Flask uses Werkzeug for HTTP parsing. Werkzeug's parser reads the raw bytes and builds a structured \texttt{Request} object. Here is what the parser does:
+
+\textbf{Step 1: Find the request line.} The first line of an HTTP request is always the \textbf{request line}:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+POST /notes HTTP/1.1
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}The request line contains:
+
+\begin{itemize}
+\tightlist
+\item
+  The \textbf{method}: \texttt{POST}
+\item
+  The \textbf{path and query string}: \texttt{/notes} (or \texttt{/}\allowbreak{}\texttt{notes?}\allowbreak{}\texttt{page=}\allowbreak{}\texttt{2\&}\allowbreak{}\texttt{sort=}\allowbreak{}\texttt{date})
+\item
+  The \textbf{HTTP version}: \texttt{HTTP/1.1}
+\end{itemize}
+
+\noindent{}The parser splits this line and stores each part separately.
+
+\textbf{Step 2: Parse the headers.} Every line after the request line (up to the blank line) is a header. Headers follow the format \texttt{Name:\ Value}. The parser builds a dictionary of headers:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{\{}
+    \StringTok{"Host"}\NormalTok{: }\StringTok{"localhost:5000"}\NormalTok{,}
+    \StringTok{"Content{-}Type"}\NormalTok{: }\StringTok{"application/json"}\NormalTok{,}
+    \StringTok{"Content{-}Length"}\NormalTok{: }\StringTok{"28"}\NormalTok{,}
+    \StringTok{"User{-}Agent"}\NormalTok{: }\StringTok{"curl/7.88.1"}\NormalTok{,}
+    \StringTok{"Accept"}\NormalTok{: }\StringTok{"*/*"}\NormalTok{,}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Headers are case-insensitive by the HTTP standard. \texttt{Content-Type}, \texttt{content-type}, and \texttt{CONTENT-TYPE} all refer to the same header.
+
+\textbf{Step 3: Find the blank line.} The \texttt{\textbackslash{}r\textbackslash{}n\textbackslash{}r\textbackslash{}n} sequence (a blank line) marks the end of the headers and the beginning of the body.
+
+\textbf{Step 4: Read the body.} The \texttt{Content-Length} header tells the parser how many bytes to expect in the body. The parser reads exactly that many bytes from the socket:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+{"content": "Buy groceries"}
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}That is 28 bytes~--- matching the \texttt{Content-Length:\ 28} header.
+
+If a request has neither a \texttt{Content-Length} nor a \texttt{Transfer-}\allowbreak{}\texttt{Encoding:}\allowbreak{}\texttt{\ chunked} header (the normal case for GET requests), HTTP/1.1 says it has no body, and the parser does not wait for one.
+
+\subsection*{What Werkzeug builds}\phantomsection\label{05-internal-request-execution:what-werkzeug-builds}
+
+After parsing, Werkzeug has built a \texttt{Request} object. You can see this object's attributes:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.3}\enspace Inspecting Flask\textquotesingle s request object inside a handler}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, request, jsonify}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Method:         }\SpecialCharTok{\{}\NormalTok{request}\SpecialCharTok{.}\NormalTok{method}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)          }\CommentTok{\# POST}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Path:           }\SpecialCharTok{\{}\NormalTok{request}\SpecialCharTok{.}\NormalTok{path}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)            }\CommentTok{\# /notes}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Full URL:       }\SpecialCharTok{\{}\NormalTok{request}\SpecialCharTok{.}\NormalTok{url}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)             }\CommentTok{\# http://localhost:5000/notes}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Content{-}Type:   }\SpecialCharTok{\{}\NormalTok{request}\SpecialCharTok{.}\NormalTok{content\_type}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)    }\CommentTok{\# application/json}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Content{-}Length: }\SpecialCharTok{\{}\NormalTok{request}\SpecialCharTok{.}\NormalTok{content\_length}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)  }\CommentTok{\# 28}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"User{-}Agent:     }\SpecialCharTok{\{}\NormalTok{request}\SpecialCharTok{.}\NormalTok{user\_agent}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)      }\CommentTok{\# curl/7.88.1}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Remote addr:    }\SpecialCharTok{\{}\NormalTok{request}\SpecialCharTok{.}\NormalTok{remote\_addr}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)     }\CommentTok{\# 127.0.0.1}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Raw body:       }\SpecialCharTok{\{}\NormalTok{request}\SpecialCharTok{.}\NormalTok{data}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)            }\CommentTok{\# b\textquotesingle{}\{"content": "Buy groceries"\}\textquotesingle{}}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"received"}\NormalTok{: }\VariableTok{True}\NormalTok{\})}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The \texttt{request} object provides clean, Pythonic access to every part of the HTTP request. This is the benefit of the framework layer~--- instead of parsing bytes manually, you work with a structured object.
+
+\setcounter{section}{3}
+\section{Extracting Metadata: Path, Method, Headers, Query Parameters, and Body}\label{05-internal-request-execution:54-extracting-metadata-path-method-headers-query-parameters-and-body}
+
+The parsed \texttt{Request} object contains everything. Flask makes different parts of it accessible through different attributes and methods:
+
+\subsection*{Method and path}\phantomsection\label{05-internal-request-execution:method-and-path}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.4}\enspace Accessing method and path}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{request.method        }\CommentTok{\# "POST", "GET", "DELETE", etc.}
+\NormalTok{request.path          }\CommentTok{\# "/notes" — path only, no query string}
+\NormalTok{request.full\_path     }\CommentTok{\# "/notes?page=2" — path + query string}
+\NormalTok{request.url           }\CommentTok{\# "http://localhost:5000/notes?page=2" — complete URL}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\subsection*{Headers}\phantomsection\label{05-internal-request-execution:headers}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.5}\enspace Accessing request headers}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Using dict{-}style access (case{-}insensitive)}
+\NormalTok{content\_type }\OperatorTok{=}\NormalTok{ request.headers.get(}\StringTok{"Content{-}Type"}\NormalTok{)}
+\NormalTok{auth\_header  }\OperatorTok{=}\NormalTok{ request.headers.get(}\StringTok{"Authorization"}\NormalTok{)}
+
+\CommentTok{\# Iterating over all headers}
+\ControlFlowTok{for}\NormalTok{ name, value }\KeywordTok{in}\NormalTok{ request.headers:}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{: }\SpecialCharTok{\{}\NormalTok{value}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Headers are stored in a \texttt{Headers} object that behaves like a dictionary but is case-insensitive.
+
+\subsection*{Query parameters}\phantomsection\label{05-internal-request-execution:query-parameters}
+
+Query parameters are the key-value pairs after the \texttt{?} in a URL. For a request to \texttt{/}\allowbreak{}\texttt{notes?}\allowbreak{}\texttt{page=}\allowbreak{}\texttt{2\&}\allowbreak{}\texttt{sort=}\allowbreak{}\texttt{date}:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.6}\enspace Accessing query string parameters}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{page  }\OperatorTok{=}\NormalTok{ request.args.get(}\StringTok{"page"}\NormalTok{, default}\OperatorTok{=}\DecValTok{1}\NormalTok{, }\BuiltInTok{type}\OperatorTok{=}\BuiltInTok{int}\NormalTok{)    }\CommentTok{\# 2 (as int)}
+\NormalTok{sort  }\OperatorTok{=}\NormalTok{ request.args.get(}\StringTok{"sort"}\NormalTok{, default}\OperatorTok{=}\StringTok{"date"}\NormalTok{)          }\CommentTok{\# "date"}
+\NormalTok{limit }\OperatorTok{=}\NormalTok{ request.args.get(}\StringTok{"limit"}\NormalTok{, default}\OperatorTok{=}\DecValTok{20}\NormalTok{, }\BuiltInTok{type}\OperatorTok{=}\BuiltInTok{int}\NormalTok{)   }\CommentTok{\# 20 (default, not in URL)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{request.args} is a \texttt{MultiDict}~--- a dictionary that supports multiple values per key (because \texttt{?}\allowbreak{}\texttt{tag=}\allowbreak{}\texttt{python\&}\allowbreak{}\texttt{tag=}\allowbreak{}\texttt{flask} is valid). \texttt{args.get()} returns the first value; \texttt{args.getlist("tag")} returns all values for a key.
+
+\subsection*{Request body}\phantomsection\label{05-internal-request-execution:request-body}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.7}\enspace Accessing the request body}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# As raw bytes}
+\NormalTok{raw\_bytes }\OperatorTok{=}\NormalTok{ request.data}
+
+\CommentTok{\# As JSON (parses the JSON body, returns a Python dict/list/etc.)}
+\NormalTok{json\_data }\OperatorTok{=}\NormalTok{ request.get\_json()}
+\CommentTok{\# Content{-}Type is not application/json → Flask aborts with 415 Unsupported Media Type}
+\CommentTok{\# The body is not valid JSON           → Flask aborts with 400 Bad Request}
+
+\CommentTok{\# As JSON, returning None instead of aborting}
+\NormalTok{json\_data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\CommentTok{\# silent=True: return None on a wrong Content{-}Type or malformed JSON}
+\CommentTok{\# force=True:  parse as JSON regardless of the Content{-}Type header}
+
+\CommentTok{\# As form data (for HTML form submissions)}
+\NormalTok{form\_value }\OperatorTok{=}\NormalTok{ request.form.get(}\StringTok{"username"}\NormalTok{)}
+
+\CommentTok{\# As files (for file uploads)}
+\NormalTok{uploaded\_file }\OperatorTok{=}\NormalTok{ request.files.get(}\StringTok{"document"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}For an API that accepts JSON (like the Notes API), \texttt{request.get\_json()} is the standard way to access the request body. The Notes API uses \texttt{get\_json(silent=}\allowbreak{}\texttt{True)} so it can return its own JSON error message instead of Flask's default HTML error page.
+
+\setcounter{section}{4}
+\section{Route Matching and Handler Lookup}\label{05-internal-request-execution:55-route-matching-and-handler-lookup}
+
+The \texttt{Request} object is fully built. Now Flask must determine which handler function should process it.
+
+Flask passes the request to Werkzeug's URL matcher, which takes the request's method and path and finds the matching rule in the \texttt{Map}.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.8}\enspace How Flask resolves the route internally (conceptual illustration)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Flask calls something like this internally:}
+\NormalTok{adapter }\OperatorTok{=}\NormalTok{ app.url\_map.bind(request.host)}
+\NormalTok{endpoint, kwargs }\OperatorTok{=}\NormalTok{ adapter.match(request.path, method}\OperatorTok{=}\NormalTok{request.method)}
+\CommentTok{\# endpoint = "create\_note" (the function name / endpoint name)}
+\CommentTok{\# kwargs   = \{\}  (no URL variables in /notes)}
+
+\CommentTok{\# Then looks up the handler function:}
+\NormalTok{handler\_function }\OperatorTok{=}\NormalTok{ app.view\_functions[endpoint]}
+\CommentTok{\# handler\_function = \textless{}function create\_note at 0x...\textgreater{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}For a \texttt{POST\ /notes} request:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{endpoint} = \texttt{"create\_note"}
+\item
+  \texttt{kwargs} = \texttt{\{\}} (no URL variables)
+\item
+  \texttt{handler\_function} = the \texttt{create\_note} Python function
+\end{itemize}
+
+\noindent{}For a \texttt{GET\ /notes/42} request:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{endpoint} = \texttt{"get\_note"}
+\item
+  \texttt{kwargs} = \texttt{\{"note\_id":\ 42\}} (extracted from the URL, already converted to int)
+\item
+  \texttt{handler\_function} = the \texttt{get\_note} Python function
+\end{itemize}
+
+\subsection*{What happens when no route matches}\phantomsection\label{05-internal-request-execution:what-happens-when-no-route-matches}
+
+If no rule matches the path and method, Werkzeug raises an exception:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{NotFound} (404): the path does not exist in the route table at all
+\item
+  \texttt{MethodNotAllowed} (405): the path exists but not for this method
+\end{itemize}
+
+\noindent{}Flask catches these exceptions and converts them into appropriate HTTP error responses automatically. If you want to customize the 404 response (for example, to return JSON instead of HTML), you can register an error handler:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.9}\enspace Custom error handlers}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.errorhandler}\NormalTok{(}\DecValTok{404}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ not\_found(error):}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"The requested resource was not found"}\NormalTok{\}), }\DecValTok{404}
+
+\AttributeTok{@app.errorhandler}\NormalTok{(}\DecValTok{405}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ method\_not\_allowed(error):}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Method not allowed for this endpoint"}\NormalTok{\}), }\DecValTok{405}
+
+\AttributeTok{@app.errorhandler}\NormalTok{(}\DecValTok{500}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ internal\_error(error):}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"An internal server error occurred"}\NormalTok{\}), }\DecValTok{500}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Without custom handlers, Flask returns HTML error pages, which is not appropriate for an API that should always return JSON.
+
+\setcounter{section}{5}
+\section{Middleware Execution: Authentication, Logging, Validation}\label{05-internal-request-execution:56-middleware-execution-authentication-logging-validation}
+
+Before the handler function runs, Flask calls all registered \texttt{@before\_request} functions in order. After the handler returns, Flask calls all \texttt{@after\_request} functions in reverse order.
+
+For the Notes API from Listing 4.11, the middleware chain for a \texttt{POST\ /notes} request looks like this:
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Request: POST /notes
+
+Step 1: before_request — start_timer()
+  g.start_time = 1704067200.837
+
+Step 2: before_request — require_json_for_writes()
+  request.method is "POST" → check Content-Type
+  request.is_json is True → pass (do not return early)
+
+Step 3: Handler — create_note()
+  [executed next — see Section 5.7]
+
+Step 4: after_request — add_timing_header(response)
+  duration = now - g.start_time = 4.2ms
+  response.headers["X-Response-Time-Ms"] = "4.2"
+  return response
+
+Step 5: teardown_request — close_db(exception)
+  g.db exists → db.close()
+  g.db removed from g
+\end{Verbatim}
+\end{outputbox}
+
+\subsection*{Middleware can short-circuit the request}\phantomsection\label{05-internal-request-execution:middleware-can-short-circuit-the-request}
+
+If a \texttt{before\_request} function returns a value (any value other than \texttt{None}), Flask treats that value as the response and skips the handler entirely. The \texttt{after\_request} and \texttt{teardown\_request} functions still run.
+
+This is how authentication middleware works:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.10}\enspace Authentication middleware using before\_request}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ hmac}
+
+\AttributeTok{@app.before\_request}
+\KeywordTok{def}\NormalTok{ require\_api\_key():}
+    \CommentTok{"""Reject requests without a valid API key."""}
+    \CommentTok{\# Skip authentication for the health check endpoint}
+    \ControlFlowTok{if}\NormalTok{ request.endpoint }\OperatorTok{==} \StringTok{"health\_check"}\NormalTok{:}
+        \ControlFlowTok{return} \VariableTok{None}  \CommentTok{\# None means "continue normally"}
+
+\NormalTok{    api\_key }\OperatorTok{=}\NormalTok{ request.headers.get(}\StringTok{"X{-}API{-}Key"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+\NormalTok{    expected }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"API\_KEY"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+    \CommentTok{\# compare\_digest takes the same time whether the first or last character differs,}
+    \CommentTok{\# so an attacker cannot guess the key one character at a time (→ Chapter 38)}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ expected }\KeywordTok{or} \KeywordTok{not}\NormalTok{ hmac.compare\_digest(api\_key, expected):}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Unauthorized"}\NormalTok{\}), }\DecValTok{401}
+    \CommentTok{\# Return None implicitly — request continues to the handler}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}If the API key is missing or invalid, \texttt{require\_api\_key} returns a 401 response. Flask sends it immediately. The handler never runs. The after\_request hook adds the timing header to even this error response. The teardown hook closes the database connection (even though it was never opened in this case~--- \texttt{g.pop("db",\ None)} returns \texttt{None} safely).
+
+\setcounter{section}{6}
+\section{Business Logic Execution}\label{05-internal-request-execution:57-business-logic-execution}
+
+The handler function runs. This is where your application does its actual work.
+
+For \texttt{POST\ /notes}, the handler is \texttt{create\_note()}:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 5.11}\enspace The create\_note handler with detailed comments}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+    \CommentTok{\# ── Step 1: Parse the request body ────────────────────────────────────}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+    \CommentTok{\# data is now: \{"content": "Buy groceries"\}}
+    \CommentTok{\# If the body was not valid JSON, data is None}
+
+    \CommentTok{\# ── Step 2: Validate the input ────────────────────────────────────────}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(data, }\BuiltInTok{dict}\NormalTok{):}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Request body must be a JSON object"}\NormalTok{\}), }\DecValTok{400}
+
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ data.get(}\StringTok{"content"}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(content, }\BuiltInTok{str}\NormalTok{) }\KeywordTok{or} \KeywordTok{not}\NormalTok{ content.strip():}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"content is required and cannot be empty"}\NormalTok{\}), }\DecValTok{400}
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ content.strip()}
+
+    \ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(content) }\OperatorTok{\textgreater{}} \DecValTok{10000}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"content must not exceed 10,000 characters"}\NormalTok{\}), }\DecValTok{400}
+
+    \CommentTok{\# ── Step 3: Execute business logic ────────────────────────────────────}
+    \CommentTok{\# (For this simple API, "business logic" is just storing the note.}
+    \CommentTok{\# In a more complex API, there might be permission checks, rate limiting,}
+    \CommentTok{\# notification triggers, audit logging, etc.)}
+
+    \CommentTok{\# ── Step 4: Data access ───────────────────────────────────────────────}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()  }\CommentTok{\# Returns the request{-}scoped database connection from g}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.execute(}
+        \StringTok{"INSERT INTO notes (content) VALUES (?)"}\NormalTok{,}
+\NormalTok{        (content,)}
+\NormalTok{    )}
+\NormalTok{    db.commit()}
+    \CommentTok{\# cursor.lastrowid is the auto{-}assigned ID for the new row}
+\NormalTok{    note\_id }\OperatorTok{=}\NormalTok{ cursor.lastrowid}
+
+    \CommentTok{\# ── Step 5: Construct and return the response ──────────────────────────}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}
+        \StringTok{"id"}\NormalTok{: note\_id,}
+        \StringTok{"content"}\NormalTok{: content,}
+\NormalTok{    \}), }\DecValTok{201}  \CommentTok{\# 201 Created — the standard status for successful resource creation}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The handler function reads the validated input, writes a record to the database, and returns the created resource with a 201 status code.
+
+This is pure Python. The HTTP layer is handled by Flask above this function, and the database layer is handled by SQLite below it. The handler function itself is just business logic~--- clean, testable, and independent of network concerns.
+
+\setcounter{section}{7}
+\section{Data Access: Database Calls During a Request}\label{05-internal-request-execution:58-data-access-database-calls-during-a-request}
+
+Every real API eventually needs to read or write persistent data. In the Notes API, that means SQLite.
+
+\subsection*{The request-scoped database connection}\phantomsection\label{05-internal-request-execution:the-request-scoped-database-connection}
+
+In Listing 4.11, we set up a \texttt{get\_db()} function that stores the database connection in \texttt{g} (the request context object):
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.12}\enspace The get\_db() helper (from Chapter 4\textquotesingle s app.py)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ get\_db():}
+    \ControlFlowTok{if} \StringTok{"db"} \KeywordTok{not} \KeywordTok{in}\NormalTok{ g:}
+\NormalTok{        g.db }\OperatorTok{=}\NormalTok{ sqlite3.}\ExtensionTok{connect}\NormalTok{(DATABASE\_PATH)}
+\NormalTok{        g.db.row\_factory }\OperatorTok{=}\NormalTok{ sqlite3.Row}
+    \ControlFlowTok{return}\NormalTok{ g.db}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The first time \texttt{get\_db()} is called during a request, it opens a new database connection and stores it in \texttt{g.db}. Subsequent calls during the same request return the same connection. The teardown hook closes it once the response has been built.
+
+This pattern is important for two reasons:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Efficiency}: Opening a database connection has overhead (allocating memory, establishing protocol state). Doing it once per request~--- not once per handler call or per query~--- is the right balance.
+\item
+  \textbf{Consistency}: All database operations within a single request share the same connection. This means they share the same transaction. If you execute multiple \texttt{INSERT} statements and then \texttt{db.commit()}, they all commit together. If an exception occurs before the commit, none of them is saved: the uncommitted transaction is discarded when the teardown hook closes the connection (or explicitly, with \texttt{db.rollback()}). This is \textbf{atomicity}~--- a fundamental property of relational databases.
+\end{enumerate}
+
+\subsection*{How SQLite processes a query}\phantomsection\label{05-internal-request-execution:how-sqlite-processes-a-query}
+
+When \texttt{db.}\allowbreak{}\texttt{execute("INSERT\ INTO\ notes\ (content)\ VALUES\ (?}\allowbreak{}\texttt{)",}\allowbreak{}\texttt{\ (content,}\allowbreak{}\texttt{))} runs:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The \texttt{sqlite3} module hands SQLite the SQL text and the parameter (\texttt{content}) \emph{separately}: SQLite compiles the statement with a \texttt{?} placeholder and then binds the value into it. The value is never parsed as SQL, which is what prevents \textbf{SQL injection} (→ \hyperref[ch:38-security]{Chapter 38}~--- Security explains this in detail)
+\item
+  SQLite receives the compiled statement and the bound value
+\item
+  SQLite parses the SQL, checks it against the schema, and executes it
+\item
+  SQLite writes the new row to the database file (\texttt{notes.db}) on disk
+\item
+  The \texttt{cursor} object returned contains metadata about the operation, including \texttt{cursor.lastrowid}
+\end{enumerate}
+
+\noindent{}\texttt{db.commit()} flushes the transaction to disk. Without \texttt{commit()}, the change exists only in memory and will be lost when the connection closes.
+
+\subsection*{\texorpdfstring{The \texttt{Row} factory}{The Row factory}}\phantomsection\label{05-internal-request-execution:the-row-factory}
+
+The line \texttt{g.}\allowbreak{}\texttt{db.}\allowbreak{}\texttt{row\_}\allowbreak{}\texttt{factory\ =}\allowbreak{}\texttt{\ sqlite3.}\allowbreak{}\texttt{Row} changes how SQLite returns query results. Without it, rows are returned as plain tuples: \texttt{(1,}\allowbreak{}\texttt{\ "Buy\ groceries",}\allowbreak{}\texttt{\ "2024-}\allowbreak{}\texttt{01-}\allowbreak{}\texttt{01\ 12:}\allowbreak{}\texttt{00:}\allowbreak{}\texttt{00")}. With \texttt{sqlite3.Row}, rows behave like dictionaries: \texttt{row{[}"id"{]}}, \texttt{row{[}"content"{]}}, \texttt{row{[}"created\_at"{]}}. This makes the code more readable and allows \texttt{dict(row)} to convert a row to a regular Python dictionary for JSON serialization.
+
+\setcounter{section}{8}
+\section{Response Construction: Status Code, Headers, Body}\label{05-internal-request-execution:59-response-construction-status-code-headers-body}
+
+The handler function has done its work and is ready to return a response. Flask takes the handler's return value and constructs a proper HTTP response object.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# The handler returns:}
+\ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\StringTok{"content"}\NormalTok{: }\StringTok{"Buy groceries"}\NormalTok{\}), }\DecValTok{201}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Flask decomposes this tuple:
+
+\begin{itemize}
+\tightlist
+\item
+  The first element (\texttt{jsonify(...)}) becomes the response body and sets \texttt{Content-}\allowbreak{}\texttt{Type:}\allowbreak{}\texttt{\ application/}\allowbreak{}\texttt{json}
+\item
+  The second element (\texttt{201}) becomes the HTTP status code
+\end{itemize}
+
+\noindent{}Flask assembles the response object:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# What Flask builds internally (conceptual):}
+\NormalTok{response }\OperatorTok{=}\NormalTok{ Response(}
+\NormalTok{    response}\OperatorTok{=}\StringTok{\textquotesingle{}\{"content":"Buy groceries","id":1\}}\CharTok{\textbackslash{}n}\StringTok{\textquotesingle{}}\NormalTok{,   }\CommentTok{\# compact, keys sorted}
+\NormalTok{    status}\OperatorTok{=}\DecValTok{201}\NormalTok{,}
+\NormalTok{    headers}\OperatorTok{=}\NormalTok{\{}
+        \StringTok{"Content{-}Type"}\NormalTok{: }\StringTok{"application/json"}\NormalTok{,}
+        \StringTok{"Content{-}Length"}\NormalTok{: }\StringTok{"35"}\NormalTok{,}
+\NormalTok{    \}}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Then \texttt{after\_request} middleware runs and adds the timing header:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{response.headers[}\StringTok{"X{-}Response{-}Time{-}Ms"}\NormalTok{] }\OperatorTok{=} \StringTok{"4.2"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The final response object has:
+
+\begin{itemize}
+\tightlist
+\item
+  Status line: \texttt{HTTP/}\allowbreak{}\texttt{1.1\ 201\ Created}
+\item
+  Headers including \texttt{Content-Type}, \texttt{Content-Length}, \texttt{X-Response-Time-Ms}
+\item
+  Body: the JSON string
+\end{itemize}
+
+\subsection*{HTTP status codes}\phantomsection\label{05-internal-request-execution:http-status-codes}
+
+Status codes tell the client what happened:
+
+\Needspace{25\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+Code & Meaning & When to use \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+200 & OK & Successful GET, PUT, DELETE \\
+201 & Created & Successful POST that created a resource \\
+204 & No Content & Successful operation with no response body \\
+400 & Bad Request & Client sent invalid data \\
+401 & Unauthorized & Authentication required \\
+403 & Forbidden & Authenticated but not permitted \\
+404 & Not Found & Resource does not exist \\
+405 & Method Not Allowed & Method not supported for this path \\
+415 & Unsupported Media Type & Wrong Content-Type \\
+422 & Unprocessable Entity & Data was parseable but invalid \\
+429 & Too Many Requests & Rate limit exceeded \\
+500 & Internal Server Error & Unhandled exception in the server \\
+\end{longtable}
+}
+
+Using the right status code is part of the API's contract. A client that receives a 400 knows the problem is on its side. A client that receives a 500 knows the problem is on the server's side. A client that receives a 404 knows the resource does not exist. These distinctions matter for debugging, monitoring, and client behavior.
+
+\setcounter{section}{9}
+\section{Serialization: Turning Python Objects into JSON}\label{05-internal-request-execution:510-serialization-turning-python-objects-into-json}
+
+The response body must be bytes that can be transmitted over the network. Python objects~--- dictionaries, lists, integers, strings~--- cannot be sent directly. They must be \textbf{serialized} into a text format that both sides understand.
+
+For APIs, that format is \textbf{JSON} (JavaScript Object Notation).
+
+\texttt{jsonify()} calls Python's \texttt{json.dumps()} internally:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.13}\enspace What jsonify does internally}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ json}
+
+\NormalTok{python\_object }\OperatorTok{=}\NormalTok{ \{}\StringTok{"id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\StringTok{"content"}\NormalTok{: }\StringTok{"Buy groceries"}\NormalTok{\}}
+\NormalTok{json\_string }\OperatorTok{=}\NormalTok{ json.dumps(python\_object)}
+\CommentTok{\# \textquotesingle{}\{"id": 1, "content": "Buy groceries"\}\textquotesingle{}}
+
+\NormalTok{json\_bytes }\OperatorTok{=}\NormalTok{ json\_string.encode(}\StringTok{"utf{-}8"}\NormalTok{)}
+\CommentTok{\# b\textquotesingle{}\{"id": 1, "content": "Buy groceries"\}\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{json.dumps()} converts a Python dictionary to a JSON string. \texttt{encode("utf-8")} converts the string to bytes. The bytes are what gets written to the socket.
+
+\subsection*{What can be serialized}\phantomsection\label{05-internal-request-execution:what-can-be-serialized}
+
+Python's \texttt{json} module handles:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{dict} → JSON object \texttt{\{\}}
+\item
+  \texttt{list}, \texttt{tuple} → JSON array \texttt{{[}{]}}
+\item
+  \texttt{str} → JSON string \texttt{""}
+\item
+  \texttt{int}, \texttt{float} → JSON number
+\item
+  \texttt{True}, \texttt{False} → JSON \texttt{true}, \texttt{false}
+\item
+  \texttt{None} → JSON \texttt{null}
+\end{itemize}
+
+\noindent{}What it cannot handle directly:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{datetime} objects → Python's \texttt{json} module cannot serialize them; Flask's \texttt{jsonify()} can, but it produces an HTTP-date string such as \texttt{"Mon,}\allowbreak{}\texttt{\ 15\ Jan\ 2024\ 14:}\allowbreak{}\texttt{00:}\allowbreak{}\texttt{00\ GMT"}, so APIs usually convert them explicitly with \texttt{dt.isoformat()}
+\item
+  SQLite \texttt{Row} objects → must be converted to \texttt{dict} with \texttt{dict(row)}
+\item
+  Custom Python classes → must be converted manually or with a custom JSON encoder
+\end{itemize}
+
+\noindent{}This is why \texttt{dict(row)} appears in the Notes API handlers~--- SQLite \texttt{Row} objects must be converted to plain dictionaries before passing them to \texttt{jsonify()}.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.14}\enspace Serializing SQLite rows correctly}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{@app.route}\NormalTok{(}\StringTok{"/notes"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.execute(}\StringTok{"SELECT id, content, created\_at FROM notes ORDER BY id DESC"}\NormalTok{)}
+
+    \CommentTok{\# cursor.fetchall() returns a list of Row objects}
+\NormalTok{    rows }\OperatorTok{=}\NormalTok{ cursor.fetchall()}
+
+    \CommentTok{\# Convert each Row to a dict for JSON serialization}
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [}\BuiltInTok{dict}\NormalTok{(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ rows]}
+
+    \CommentTok{\# Now notes is a list of plain dicts — jsonify can handle this}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: notes, }\StringTok{"count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(notes)\})}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\setcounter{section}{10}
+\section{\texorpdfstring{Sending the Response: \texttt{send()}}{Sending the Response: send()}}\label{05-internal-request-execution:511-sending-the-response-send}
+
+The response object is built. The middleware has run. Now Flask sends it back to the client through the client socket.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 5.15}\enspace Sending the response (conceptual, Flask does this internally)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{response\_bytes }\OperatorTok{=}\NormalTok{ (}
+    \StringTok{b"HTTP/1.1 201 Created}\CharTok{\textbackslash{}r\textbackslash{}n}\StringTok{"}
+    \StringTok{b"Content{-}Type: application/json}\CharTok{\textbackslash{}r\textbackslash{}n}\StringTok{"}
+    \StringTok{b"Content{-}Length: 35}\CharTok{\textbackslash{}r\textbackslash{}n}\StringTok{"}
+    \StringTok{b"X{-}Response{-}Time{-}Ms: 4.2}\CharTok{\textbackslash{}r\textbackslash{}n}\StringTok{"}
+    \StringTok{b"}\CharTok{\textbackslash{}r\textbackslash{}n}\StringTok{"}
+    \StringTok{b\textquotesingle{}\{"content":"Buy groceries","id":1\}}\CharTok{\textbackslash{}n}\StringTok{\textquotesingle{}}
+\NormalTok{)}
+
+\NormalTok{client\_socket.sendall(response\_bytes)}
+\NormalTok{client\_socket.close()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{sendall()} is the Python socket method that ensures all bytes are sent, even if the underlying \texttt{send()} system call does not transmit everything in one shot (which can happen on a busy network or with large responses). It loops internally until all bytes are written to the socket's send buffer.
+
+The kernel's networking stack takes those bytes from the send buffer, wraps them in TCP packets, and transmits them to the client. The client receives the packets, reassembles them into the original bytes, and passes them to the browser or API client, which parses the HTTP response.
+
+\subsection*{Connection keep-alive}\phantomsection\label{05-internal-request-execution:connection-keep-alive}
+
+In HTTP/1.1, connections can be reused for multiple requests (keep-alive): if the client sends another request on the same socket, the server handles it without a new connection or another trip through the accept queue. Not every server does this. Flask's development server closes the connection after each response (it sends \texttt{Connection:\ close}), and so do Gunicorn's default ``sync'' workers. In production, keep-alive with clients is usually handled by Nginx in front of the application (→ \hyperref[ch:28-traffic-routing]{Chapter 28}).
+
+This is an optimization for performance~--- establishing a new TCP connection has a cost (the three-way handshake). Reusing a connection for multiple requests amortizes that cost.
+
+\unnumberedsection{false}{The Complete Request Execution Sequence}\label{05-internal-request-execution:the-complete-request-execution-sequence}
+
+Putting all eleven steps together for a \texttt{POST\ /notes} request with body \texttt{\{"content":}\allowbreak{}\texttt{\ "Buy\ groceries"\}}:
+
+\begin{diagrambox}{381.6pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+CLIENT                              FLASK SERVER (your program)
+  │                                       │
+  │ TCP connection established             │
+  │ ─────────────────────────────────────►│
+  │                                       │
+  │                                 accept() returns client_socket
+  │                                       │
+  │ POST /notes HTTP/1.1                  │
+  │ Host: localhost:5000                  │
+  │ Content-Type: application/json        │
+  │ Content-Length: 28                    │
+  │ {"content": "Buy groceries"}          │
+  │ ─────────────────────────────────────►│
+  │                                       │
+  │                                 recv() reads raw bytes
+  │                                       │
+  │                                 Werkzeug parses HTTP:
+  │                                   method = "POST"
+  │                                   path   = "/notes"
+  │                                   headers parsed
+  │                                   body   = b'{"content":...}'
+  │                                       │
+  │                                 Route matching:
+  │                                   "POST /notes" → create_note()
+  │                                       │
+  │                                 before_request[0]: start_timer()
+  │                                   g.start_time = now
+  │                                       │
+  │                                 before_request[1]: require_json_for_writes()
+  │                                   is_json = True → pass
+  │                                       │
+  │                                 Handler: create_note()
+  │                                   request.get_json() → {"content": "Buy..."}
+  │                                   validate: content not empty ✓
+  │                                   get_db() → sqlite3 connection
+  │                                   INSERT INTO notes ...
+  │                                   commit()
+  │                                   note_id = 1
+  │                                       │
+  │                                 Response built:
+  │                                   jsonify({"id": 1, "content": "..."})
+  │                                   status = 201
+  │                                       │
+  │                                 after_request: add_timing_header()
+  │                                   duration = 4.2ms
+  │                                   X-Response-Time-Ms: 4.2 added
+  │                                       │
+  │                                 teardown_request: close_db()
+  │                                   g.db.close()
+  │                                       │
+  │                                 sendall() writes response bytes
+  │                                       │
+  │◄─────────────────────────────────────-│
+  │ HTTP/1.1 201 Created                  │
+  │ Content-Type: application/json        │
+  │ X-Response-Time-Ms: 4.2               │
+  │ {"content":"Buy groceries","id":1}    │
+  │                                       │
+  │ [connection closed or reused]         │
+                                    accept() waits for next connection
+\end{Verbatim}
+\end{diagrambox}
+
+\phantomsection\label{05-internal-request-execution:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\texttt{accept()}} retrieves the next completed connection from the accept queue. It returns a new client socket (for communication with this specific client) and the client's address.
+\item
+  \textbf{\texttt{recv()}} reads raw bytes from the client socket. These bytes are the HTTP request in wire format~--- method, path, headers, body.
+\item
+  \textbf{HTTP parsing} converts the raw bytes into a structured \texttt{Request} object. Werkzeug handles this. The result provides clean access to method, path, headers, query parameters, and body.
+\item
+  \textbf{Route matching} uses Werkzeug's \texttt{Map} to find the right handler function for the request's method and path combination. If no match exists, Flask returns 404 or 405 automatically.
+\item
+  \textbf{Middleware} (\texttt{before\_request}) runs first. If any middleware function returns a value, the handler is skipped and that value becomes the response.
+\item
+  \textbf{The handler function} does the application's real work: validate input, run business logic, access the database, and return a result.
+\item
+  \textbf{Database access} during a request uses a request-scoped connection stored in \texttt{g}. The connection is opened lazily (on first use) and closed by a teardown hook once the response has been built.
+\item
+  \textbf{Serialization} converts Python objects to JSON bytes using \texttt{json.dumps()}. SQLite \texttt{Row} objects must be converted to dicts first.
+\item
+  \textbf{\texttt{sendall()}} writes the complete response~--- status line, headers, body~--- back through the client socket to the client.
+\item
+  The \textbf{after\_request} and \textbf{teardown\_request} hooks always run, even if the handler raised an exception. Teardown hooks are the right place for cleanup.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{05-internal-request-execution:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} With \texttt{printf} and \texttt{nc}, send a request with the header \texttt{X-}\allowbreak{}\texttt{Note:}\allowbreak{}\texttt{\ a\textbackslash{}r\textbackslash{}nX-}\allowbreak{}\texttt{Admin:}\allowbreak{}\texttt{\ yes}, that is, a value followed by \texttt{\textbackslash{}r\textbackslash{}n} and a second, invented header. What does the server see? Then try to \emph{set} such a header value in a Flask response. What happens?
+\item
+  \textbf{Break and fix.} Make a handler return a Python \texttt{set}. What error do you get, and where? Change it to return a JSON-serializable type.
+\item
+  \textbf{Extend.} Add a \texttt{before\_request} hook that rejects requests whose \texttt{User-Agent} is empty, with a JSON \texttt{400}. Test it with \texttt{curl\ -A\ ""}.
+\item
+  \textbf{Explain.} Trace, in your own words, the eleven steps a request goes through between \texttt{accept()} and \texttt{sendall()}.
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-05.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{05-internal-request-execution:whats-next}
+
+The local API works. You can run it, test it, and watch it create and retrieve notes. But everything you have built so far depends on hidden assumptions about your machine: a specific Python version, specific packages installed globally, a specific file path for the database, a loopback address that is not reachable from anywhere else. Before you can move this system anywhere~--- another machine, another developer's laptop, a server~--- those assumptions must be made visible.
+
+\noindent{}→ \hyperref[ch:06-local-dependencies]{Chapter 6}~--- Local Dependencies and Resources

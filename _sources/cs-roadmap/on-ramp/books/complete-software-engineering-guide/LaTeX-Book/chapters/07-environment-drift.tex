@@ -1,0 +1,662 @@
+\setcounter{chapter}{6}
+\chapter{Environment Drift}\label{ch:07-environment-drift}
+
+\chapterrule
+
+Stage 1 ended with a working Notes API. The application runs, handles requests, stores data. You tested it thoroughly with \texttt{curl}, Postman, and the browser. Everything works.
+
+Stage 2 starts with a question: what would happen if you gave your project to someone else?
+
+Not deployed it to a server~--- just handed the source code to a colleague and said ``run this.'' What would they need to do? And would it actually work for them the way it works for you?
+
+The honest answer, for most projects developed without careful thought about portability, is: probably not immediately. They might get it working eventually~--- after some frustration, some Googling, and some changes to their machine. Or they might give up.
+
+This fragility has a name: \textbf{environment drift}. It is what happens when the execution environment of a program~--- the OS, the runtime, the libraries, the filesystem, the configuration~--- drifts away from the environment the developer had in mind when writing the code. On a developer's machine, drift accumulates silently. The developer never notices because their machine is always the reference. The moment the code moves, the drift becomes visible.
+
+\textbf{Environment drift is not caused by bad code.} It is caused by assumptions that are implicit rather than explicit. The code is not wrong. The environment is different. The fix is not to patch the code~--- it is to make the assumptions explicit so they can be reproduced reliably anywhere.
+
+This chapter names the four types of environment drift that affect Python applications most commonly: OS differences, runtime version mismatches, missing system libraries, and filesystem differences. Each one is a real-world failure mode. Each one has a concrete solution, which we build in Stage 3.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  What the operating system provides to a running program, and why OS differences matter
+\item
+  How Python runtime version differences cause silent and loud failures
+\item
+  How missing system libraries produce failures that look like Python errors
+\item
+  How filesystem differences between operating systems create subtle bugs
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{The Illusion of ``It Works on My Machine''}\label{07-environment-drift:71-the-illusion-of-it-works-on-my-machine}
+
+Before examining specific types of drift, it is worth understanding why the developer's machine is a deceptive environment.
+
+A developer's machine is not a clean slate. It is the accumulated result of months or years of software installation, configuration changes, and forgotten one-off adjustments. The machine has:
+
+\begin{itemize}
+\tightlist
+\item
+  A specific operating system version, updated (or not updated) on some schedule
+\item
+  A Python installation, possibly multiple, from various sources (system package manager, python.org, Homebrew, pyenv)
+\item
+  Dozens or hundreds of system libraries, installed as dependencies of other software
+\item
+  Environment variables set in shell configuration files (\texttt{.bashrc}, \texttt{.zshrc}, \texttt{.profile}) that load at login time
+\item
+  User-level configurations for pip, git, SSH, and other tools
+\item
+  A filesystem organized in a way that makes sense to this developer but is not reproduced anywhere else
+\end{itemize}
+
+\noindent{}The Notes API works in this environment. When you type \texttt{python\ app.py}, Python starts, finds Flask, creates the database, and listens for connections. All the implicit assumptions are satisfied~--- not because you made them explicit, but because they happen to be true on your machine.
+
+The server you will eventually deploy to has none of this. It is a fresh Linux installation. It has the packages its distribution includes by default. It has no \texttt{venv}. It has no \texttt{.env} file. It has no \texttt{notes.db}. It has a different user account, a different home directory, and possibly a different Python version.
+
+Each difference is a potential failure. Environment drift is the accumulation of all these differences.
+
+\setcounter{section}{1}
+\section{Operating System Differences: macOS, Windows, and Linux}\label{07-environment-drift:72-operating-system-differences-macos-windows-and-linux}
+
+Most Python developers develop on macOS or Windows. Most production servers run Linux. These are not the same operating system, and the differences matter.
+
+\subsection*{The file path separator}\phantomsection\label{07-environment-drift:the-file-path-separator}
+
+On macOS and Linux, directory separators in file paths are forward slashes (\texttt{/}). On Windows, the native separator is the backslash (\texttt{\textbackslash{}}), although Windows APIs~--- and Python's \texttt{open()}~--- also accept forward slashes.
+
+So a hand-built path such as \texttt{"data"\ +\ "/}\allowbreak{}\texttt{"\ +\ "notes.}\allowbreak{}\texttt{db"} usually works everywhere. The trouble with building paths from strings shows up at the edges: drive letters (\texttt{C:}), paths returned by the OS with backslashes that you then compare against strings with slashes, absolute paths (\texttt{/data} means something different on Windows), and doubled or missing separators when pieces come from configuration:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 7.1}\enspace Fragile path construction with strings}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{base }\OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"DATA\_DIR"}\NormalTok{, }\StringTok{"data"}\NormalTok{)      }\CommentTok{\# "data", "data/", or "C:\textbackslash{}\textbackslash{}notes\textbackslash{}\textbackslash{}data"?}
+\NormalTok{path }\OperatorTok{=}\NormalTok{ base }\OperatorTok{+} \StringTok{"/"} \OperatorTok{+} \StringTok{"notes.db"}            \CommentTok{\# may produce "data//notes.db" or mixed separators}
+\ControlFlowTok{if}\NormalTok{ path }\OperatorTok{==}\NormalTok{ found\_path:                    }\CommentTok{\# "data/notes.db" != "data\textbackslash{}\textbackslash{}notes.db" on Windows}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The robust approach~--- using \texttt{pathlib} or \texttt{os.path.join}, which handle separators and edge cases for you:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 7.2}\enspace OS-independent path construction}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ pathlib }\ImportTok{import}\NormalTok{ Path}
+
+\CommentTok{\# pathlib.Path uses the correct separator for the current OS}
+\NormalTok{path }\OperatorTok{=}\NormalTok{ Path(}\StringTok{"data"}\NormalTok{) }\OperatorTok{/} \StringTok{"notes.db"}
+\CommentTok{\# On macOS/Linux: "data/notes.db"}
+\CommentTok{\# On Windows:     "data\textbackslash{}notes.db"}
+
+\CommentTok{\# Or with os.path.join:}
+\ImportTok{import}\NormalTok{ os}
+\NormalTok{path }\OperatorTok{=}\NormalTok{ os.path.join(}\StringTok{"data"}\NormalTok{, }\StringTok{"notes.db"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}For the Notes API deployed to Linux, the path separator issue is less relevant since both development (macOS) and production (Linux) use \texttt{/}. But if your team includes Windows developers, this is a real problem.
+
+\subsection*{Case sensitivity}\phantomsection\label{07-environment-drift:case-sensitivity}
+
+Linux file systems are \textbf{case-sensitive}. macOS file systems (APFS by default, and HFS+ before it) are \textbf{case-insensitive} unless you format them otherwise.
+
+This means on macOS:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{open}\NormalTok{(}\StringTok{"Notes.db"}\NormalTok{)  }\CommentTok{\# Works even if the file is named "notes.db"}
+\BuiltInTok{open}\NormalTok{(}\StringTok{"NOTES.DB"}\NormalTok{)  }\CommentTok{\# Also works}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}On Linux:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{open}\NormalTok{(}\StringTok{"Notes.db"}\NormalTok{)  }\CommentTok{\# FileNotFoundError if the file is "notes.db"}
+\BuiltInTok{open}\NormalTok{(}\StringTok{"NOTES.DB"}\NormalTok{)  }\CommentTok{\# FileNotFoundError}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}If your code refers to a file with different capitalization from the name on disk~--- a data file, a SQL script, a template, a static asset~--- it works on macOS and fails on Linux. This class of bug is particularly insidious because it is invisible in development.
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 7.3}\enspace Capitalization bug invisible on macOS, fatal on Linux}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Suppose the file on disk is "schema.sql" (all lowercase)}
+
+\ControlFlowTok{with} \BuiltInTok{open}\NormalTok{(}\StringTok{"Schema.sql"}\NormalTok{) }\ImportTok{as}\NormalTok{ f:     }\CommentTok{\# macOS: opens schema.sql without complaint}
+\NormalTok{    schema }\OperatorTok{=}\NormalTok{ f.read()}
+
+\CommentTok{\# On Linux, this raises:}
+\CommentTok{\# FileNotFoundError: [Errno 2] No such file or directory: \textquotesingle{}Schema.sql\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Python's own imports are protected from this: even on macOS, CPython checks that a module's file name matches the case used in the \texttt{import} statement, so \texttt{from\ Notes\_}\allowbreak{}\texttt{model\ import\ create\_}\allowbreak{}\texttt{note} fails on both systems if the file is \texttt{notes\_model.py}. Every other file path your program uses gets no such protection.
+
+\textbf{Rule}: Always use lowercase filenames in Python projects. It removes an entire class of OS-specific bugs.
+
+\subsection*{Line endings}\phantomsection\label{07-environment-drift:line-endings}
+
+Text files on Windows use \texttt{\textbackslash{}r\textbackslash{}n} (carriage return + newline) as the line ending. On macOS and Linux, files use \texttt{\textbackslash{}n} (newline only).
+
+If a Python script is written on Windows with \texttt{\textbackslash{}r\textbackslash{}n} line endings and then run on Linux:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On Linux, running a script with Windows line endings directly}
+\ExtensionTok{./script.py}
+\CommentTok{\# bash: ./script.py: /usr/bin/python3\^{}M: bad interpreter: No such file or directory}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \texttt{\textbackslash{}r} character (shown by bash as \texttt{\^{}M}) at the end of the shebang line (\texttt{\#!/}\allowbreak{}\texttt{usr/}\allowbreak{}\texttt{bin/}\allowbreak{}\texttt{python3}) is treated as part of the interpreter path, which does not exist. (Running \texttt{python3\ script.py} instead bypasses the shebang, and Python itself accepts either line ending.)
+
+Git can be configured to handle line ending conversion automatically (\texttt{git\ config\ core.}\allowbreak{}\texttt{autocrlf}), but the safest approach is to configure your editor to always use Unix line endings (\texttt{\textbackslash{}n}) for Python files.
+
+\subsection*{Available system tools}\phantomsection\label{07-environment-drift:available-system-tools}
+
+macOS and Linux ship with different default tools and different versions of shared tools. For example:
+
+\begin{itemize}
+\tightlist
+\item
+  macOS ships with BSD-style \texttt{sed}, \texttt{awk}, and \texttt{grep}. Linux typically ships with GNU versions. They have different flags and behaviors.
+\item
+  macOS ships with an old version of Bash (3.2, due to licensing reasons) and has used zsh as the default login shell since 2019. Linux distributions ship Bash 5.x.
+\item
+  macOS does not have \texttt{apt} or \texttt{yum}. Linux does not have \texttt{brew}.
+\end{itemize}
+
+\noindent{}If your \texttt{app.py} or a helper script calls a system command using Python's \texttt{subprocess} module:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 7.4}\enspace Calling a system command --- risky if the tool differs by OS}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ subprocess}
+
+\NormalTok{result }\OperatorTok{=}\NormalTok{ subprocess.run(}
+\NormalTok{    [}\StringTok{"grep"}\NormalTok{, }\StringTok{"{-}P"}\NormalTok{, }\StringTok{"pattern"}\NormalTok{, }\StringTok{"file.txt"}\NormalTok{],  }\CommentTok{\# {-}P flag is GNU{-}specific}
+\NormalTok{    capture\_output}\OperatorTok{=}\VariableTok{True}\NormalTok{,}
+\NormalTok{    text}\OperatorTok{=}\VariableTok{True}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The \texttt{-P} flag (Perl-compatible regex) is available in GNU grep but not in BSD grep (used on macOS). This code would work on Linux and fail on macOS with:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+grep: invalid option -- P
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Or vice versa~--- a macOS-specific flag that fails on Linux. Any call to system tools creates an OS-specific dependency.
+
+The most reliable way to avoid this whole family of problems is to develop on the same operating system you deploy to~--- for a Linux server, that means a Linux machine, a Linux VM, or a Linux container (→ \hyperref[ch:18-containerization]{Chapter 18}~--- Containerization).
+
+\setcounter{section}{2}
+\section{Runtime Version Mismatches: Python 3.9 vs 3.11}\label{07-environment-drift:73-runtime-version-mismatches-python-39-vs-311}
+
+Python is not one language~--- it is a language that evolves between versions. New features are added. Old features are deprecated and eventually removed. Code written for Python 3.9 may not run on Python 3.11 (rare), and code that takes advantage of Python 3.11 features will definitely not run on Python 3.9.
+
+\subsection*{New syntax unavailable in older versions}\phantomsection\label{07-environment-drift:new-syntax-unavailable-in-older-versions}
+
+Python 3.10 introduced \textbf{structural pattern matching} (the \texttt{match} statement). If your code uses it:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 7.5}\enspace Python 3.10+ syntax}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ process\_event(event):}
+    \ControlFlowTok{match}\NormalTok{ event[}\StringTok{"type"}\NormalTok{]:}
+        \ControlFlowTok{case} \StringTok{"created"}\NormalTok{:}
+            \ControlFlowTok{return}\NormalTok{ create\_handler(event)}
+        \ControlFlowTok{case} \StringTok{"updated"}\NormalTok{:}
+            \ControlFlowTok{return}\NormalTok{ update\_handler(event)}
+        \ControlFlowTok{case}\NormalTok{ \_:}
+            \ControlFlowTok{return}\NormalTok{ default\_handler(event)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}On Python 3.9 or earlier, this raises:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+SyntaxError: invalid syntax
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Python 3.9 does not understand the \texttt{match} keyword.
+
+Similarly, \textbf{f-string debugging} (\texttt{f"\{value=\}"}) was added in Python 3.8. \textbf{Walrus operator} (\texttt{:=}) was added in Python 3.8. \textbf{\texttt{TypedDict}} was added to \texttt{typing} in 3.8. \textbf{\texttt{tomllib}} (TOML parsing) was added to the standard library in 3.11. \textbf{Exception groups} (\texttt{ExceptionGroup}) arrived in Python 3.11.
+
+If you develop on Python 3.11 and your server runs an older Python~--- Debian 11 ships 3.9, Ubuntu 20.04 ships 3.8~--- any code that uses 3.10 or 3.11 features will fail.
+
+\subsection*{Checking the Python version}\phantomsection\label{07-environment-drift:checking-the-python-version}
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 7.6}\enspace Checking the Python version at runtime}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ sys}
+
+\BuiltInTok{print}\NormalTok{(sys.version)}
+\CommentTok{\# 3.11.7 (main, Dec  4 2023, 18:10:11) [GCC 11.4.0]}
+
+\BuiltInTok{print}\NormalTok{(sys.version\_info)}
+\CommentTok{\# sys.version\_info(major=3, minor=11, micro=7, releaselevel=\textquotesingle{}final\textquotesingle{}, serial=0)}
+
+\CommentTok{\# Assert a minimum version requirement}
+\ControlFlowTok{if}\NormalTok{ sys.version\_info }\OperatorTok{\textless{}}\NormalTok{ (}\DecValTok{3}\NormalTok{, }\DecValTok{10}\NormalTok{):}
+    \ControlFlowTok{raise} \PreprocessorTok{RuntimeError}\NormalTok{(}
+        \SpecialStringTok{f"This application requires Python 3.10 or later. "}
+        \SpecialStringTok{f"You are running Python }\SpecialCharTok{\{}\NormalTok{sys}\SpecialCharTok{.}\NormalTok{version\_info}\SpecialCharTok{.}\NormalTok{major}\SpecialCharTok{\}}\SpecialStringTok{.}\SpecialCharTok{\{}\NormalTok{sys}\SpecialCharTok{.}\NormalTok{version\_info}\SpecialCharTok{.}\NormalTok{minor}\SpecialCharTok{\}}\SpecialStringTok{."}
+\NormalTok{    )}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Adding a version check at startup gives a clear error message instead of a confusing syntax error or AttributeError.
+
+\subsection*{Library version differences}\phantomsection\label{07-environment-drift:library-version-differences}
+
+Beyond the interpreter itself, the libraries that run on Python 3.9 versus Python 3.11 may differ in important ways.
+
+Flask 3.0, for example, requires Python 3.8 or later. If a future version of Flask drops Python 3.8 support, users on Python 3.8 are stuck with an older Flask version. When a new dependency requires a newer Python version that the server does not have, upgrading becomes complicated.
+
+\subsection*{Type annotation differences}\phantomsection\label{07-environment-drift:type-annotation-differences}
+
+Python's type annotation syntax has evolved significantly between versions:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Python 3.8 and earlier: generic types must be imported from typing}
+\ImportTok{from}\NormalTok{ typing }\ImportTok{import}\NormalTok{ List, Dict, Optional}
+
+\KeywordTok{def}\NormalTok{ get\_notes() }\OperatorTok{{-}\textgreater{}}\NormalTok{ List[Dict[}\BuiltInTok{str}\NormalTok{, }\BuiltInTok{str}\NormalTok{]]:}
+\NormalTok{    ...}
+
+\CommentTok{\# Python 3.9+: built{-}in types can be used directly}
+\KeywordTok{def}\NormalTok{ get\_notes() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{list}\NormalTok{[}\BuiltInTok{dict}\NormalTok{[}\BuiltInTok{str}\NormalTok{, }\BuiltInTok{str}\NormalTok{]]:}
+\NormalTok{    ...}
+
+\CommentTok{\# Python 3.10+: the X | Y union syntax}
+\KeywordTok{def}\NormalTok{ find\_note(note\_id: }\BuiltInTok{int}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict} \OperatorTok{|} \VariableTok{None}\NormalTok{:}
+\NormalTok{    ...}
+
+\CommentTok{\# Equivalent that also works on Python 3.8 and 3.9:}
+\KeywordTok{def}\NormalTok{ find\_note(note\_id: }\BuiltInTok{int}\NormalTok{) }\OperatorTok{{-}\textgreater{}}\NormalTok{ Optional[}\BuiltInTok{dict}\NormalTok{]:}
+\NormalTok{    ...}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Neither mistake is a \texttt{SyntaxError}~--- the code parses fine. Both fail at runtime, when Python evaluates the annotation (normally as the \texttt{def} statement runs, at import time):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+# list[dict] on Python 3.8:
+TypeError: 'type' object is not subscriptable
+
+# dict | None on Python 3.9:
+TypeError: unsupported operand type(s) for |: 'type' and 'NoneType'
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}(With \texttt{from\ \_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{future\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{\ import\ annotations} at the top of the module, annotations are not evaluated and neither error appears~--- until a library such as a validation framework evaluates them.)
+
+\setcounter{section}{3}
+\section{Missing System Libraries: libc, OpenSSL, and Silent Failures}\label{07-environment-drift:74-missing-system-libraries-libc-openssl-and-silent-failures}
+
+Some Python packages are not pure Python~--- they contain \textbf{compiled C extensions} that link against system libraries. When these libraries are missing or are the wrong version, the package fails to import, often with a confusing error.
+
+\subsection*{What compiled extensions are}\phantomsection\label{07-environment-drift:what-compiled-extensions-are}
+
+Python packages like \texttt{cryptography}, \texttt{Pillow}, \texttt{numpy}, \texttt{psycopg2}, and others include C code that is compiled into a \texttt{.so} (shared object) file on Linux or a \texttt{.dylib} on macOS. This compiled code runs natively for performance reasons.
+
+When you \texttt{pip\ install\ cryptography}, pip downloads a \textbf{wheel file} that contains pre-compiled \texttt{.so} files for your platform. These compiled files link against system libraries.
+
+\subsection*{When there is no ready-made wheel}\phantomsection\label{07-environment-drift:when-there-is-no-ready-made-wheel}
+
+Many popular packages (\texttt{cryptography}, \texttt{numpy}, \texttt{Pillow}) publish wheels for all common platforms that \emph{bundle} the C libraries they need, so they install cleanly almost anywhere. Trouble starts when pip cannot find a wheel for your platform~--- a brand-new Python version, an unusual CPU, a minimal Alpine image~--- or when the package's authors do not publish one at all. Then pip downloads the source code and tries to compile it, which needs a C compiler and the \emph{development headers} of every system library the package uses.
+
+On a fresh minimal Ubuntu image, for example, the MySQL driver \texttt{mysqlclient} has no wheel for Linux:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install mysqlclient}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This fails with:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Exception: Can not find valid pkg-config name.
+Specify MYSQLCLIENT_CFLAGS and MYSQLCLIENT_LDFLAGS env vars manually
+...
+ERROR: Failed to build installable wheels for some pyproject.toml based projects (mysqlclient)
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}A second failure mode shows up only at runtime. Some packages load a system library when they are imported. \texttt{python-magic}, which detects file types, installs without complaint but needs \texttt{libmagic} at import time:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ magic}
+\CommentTok{\# ImportError: failed to find libmagic.  Check your installation}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The package installed, but the system library it needs is not present.
+
+The fix is to install the system packages before installing the Python package:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{apt{-}get}\NormalTok{ install }\AttributeTok{{-}y}\NormalTok{ pkg{-}config build{-}essential default{-}libmysqlclient{-}dev  }\CommentTok{\# for mysqlclient}
+\ExtensionTok{apt{-}get}\NormalTok{ install }\AttributeTok{{-}y}\NormalTok{ libmagic1                                                }\CommentTok{\# for python{-}magic}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This must happen at the operating system level~--- \texttt{pip\ install} cannot do it.
+
+\subsection*{\texorpdfstring{The \texttt{psycopg2} dependency on PostgreSQL libraries}{The psycopg2 dependency on PostgreSQL libraries}}\phantomsection\label{07-environment-drift:the-psycopg2-dependency-on-postgresql-libraries}
+
+The \texttt{psycopg2} package~--- the long-standing Python adapter for PostgreSQL (which we will use in → \hyperref[ch:13-configuration-externalization]{Chapter 13}~--- Configuration Externalization; its successor is \texttt{psycopg} version 3)~--- requires the PostgreSQL client library (\texttt{libpq.so}) when it is built from source:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install psycopg2}
+\CommentTok{\# This tries to compile C code that links against libpq}
+
+\CommentTok{\# If libpq{-}dev is not installed:}
+\CommentTok{\# Error: pg\_config executable not found.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Solution: install the system dependency first:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{apt{-}get}\NormalTok{ install }\AttributeTok{{-}y}\NormalTok{ libpq{-}dev build{-}essential python3{-}dev   }\CommentTok{\# headers + C compiler}
+\ExtensionTok{pip}\NormalTok{ install psycopg2                                       }\CommentTok{\# Now builds and installs}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Or use \texttt{psycopg2-binary}~--- a wheel that includes the necessary libraries statically:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{pip}\NormalTok{ install psycopg2{-}binary    }\CommentTok{\# No system dependency needed}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{psycopg2-binary} is convenient for development. For production, the project's documentation recommends using the source distribution (\texttt{psycopg2}) because \texttt{psycopg2-binary} is not guaranteed to be compatible with all system configurations.
+
+\subsection*{How to detect missing system libraries before deploying}\phantomsection\label{07-environment-drift:how-to-detect-missing-system-libraries-before-deploying}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# After installing Python packages, verify imports work:}
+\ExtensionTok{python} \AttributeTok{{-}c} \StringTok{"import flask; import sqlite3; print(\textquotesingle{}OK\textquotesingle{})"}
+
+\CommentTok{\# Check that compiled extensions load:}
+\ExtensionTok{python} \AttributeTok{{-}c} \StringTok{"import psycopg2; print(\textquotesingle{}psycopg2 OK\textquotesingle{})"}
+
+\CommentTok{\# List the shared libraries a compiled extension needs (psycopg2 built from source):}
+\FunctionTok{ldd}\NormalTok{ venv/lib/python3.11/site{-}packages/psycopg2/\_psycopg}\PreprocessorTok{*}\NormalTok{.so}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Running these checks in your deployment environment (before the application starts) catches library problems early with clear error messages, instead of discovering them when a user's request hits a code path that uses the broken package.
+
+\setcounter{section}{4}
+\section{File System Differences: Paths, Permissions, and Line Endings}\label{07-environment-drift:75-file-system-differences-paths-permissions-and-line-endings}
+
+Beyond file path separators and case sensitivity (covered in Section 7.2), the filesystem on a production server differs from a development machine in ways that affect application behavior.
+
+\subsection*{Different home directory locations}\phantomsection\label{07-environment-drift:different-home-directory-locations}
+
+On macOS, home directories are at \texttt{/Users/yourname}. On Linux, they are at \texttt{/home/yourname}. If your application constructs file paths relative to the home directory:
+
+\begin{codeboxcap}[short]{\textcolor{accent}{Listing 7.7}\enspace Hardcoded path to home directory --- bad practice}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ os}
+
+\CommentTok{\# This works on macOS if the user is \textquotesingle{}developer\textquotesingle{}:}
+\NormalTok{config\_path }\OperatorTok{=} \StringTok{"/Users/developer/notes{-}api/.env"}
+
+\CommentTok{\# This works on Linux:}
+\CommentTok{\# config\_path = "/home/developer/notes{-}api/.env"}
+
+\CommentTok{\# Neither is portable. Use environment variables or Path.home() instead:}
+\NormalTok{config\_path }\OperatorTok{=}\NormalTok{ os.path.join(os.path.expanduser(}\StringTok{"\textasciitilde{}"}\NormalTok{), }\StringTok{"notes{-}api"}\NormalTok{, }\StringTok{".env"}\NormalTok{)}
+\CommentTok{\# Or with pathlib:}
+\ImportTok{from}\NormalTok{ pathlib }\ImportTok{import}\NormalTok{ Path}
+\NormalTok{config\_path }\OperatorTok{=}\NormalTok{ Path.home() }\OperatorTok{/} \StringTok{"notes{-}api"} \OperatorTok{/} \StringTok{".env"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}\texttt{os.path.expanduser("\textasciitilde{}")} expands \texttt{\textasciitilde{}} to the actual home directory, correctly on every OS.
+
+\subsection*{File permissions and ownership}\phantomsection\label{07-environment-drift:file-permissions-and-ownership}
+
+Linux has a strict permission model. Files and directories have an owner, a group, and permission bits for read (\texttt{r}), write (\texttt{w}), and execute (\texttt{x}) for the owner, the group, and others.
+
+A common failure: the application's user account does not have write permission to the directory where it tries to create the database.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# On the server, the app runs as user \textquotesingle{}appuser\textquotesingle{}}
+\CommentTok{\# But notes.db will be in /opt/notes{-}api/, owned by root}
+
+\FunctionTok{ls} \AttributeTok{{-}la}\NormalTok{ /opt/notes{-}api/}
+\CommentTok{\# drwxr{-}xr{-}x 2 root root 4096 Jan 1 12:00 .}
+
+\CommentTok{\# appuser has no write permission to this directory (others: r{-}x)}
+\ExtensionTok{python}\NormalTok{ app.py}
+\CommentTok{\# sqlite3.OperationalError: unable to open database file}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The application fails because it cannot create the database file. The error message mentions SQLite, but the real cause is a Linux permission issue. This rarely occurs on a developer's machine, where you usually work inside your own home directory and own every file in it.
+
+The fix is to ensure the application's user account owns the directory where it writes:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{chown}\NormalTok{ appuser:appuser /opt/notes{-}api/data/}
+\FunctionTok{chmod}\NormalTok{ 755 /opt/notes{-}api/data/}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{Read-only filesystems}\phantomsection\label{07-environment-drift:read-only-filesystems}
+
+Some deployment environments use read-only root filesystems~--- the application code is deployed as a read-only archive, and only specific directories are writable. Docker containers, for example, can be run with \texttt{-\/-read-only}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}{-}read{-}only}\NormalTok{ notes{-}api}
+\CommentTok{\# Any write to the filesystem will fail with:}
+\CommentTok{\# OSError: [Errno 30] Read{-}only file system}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}An application that writes its SQLite database to the current directory will fail in a read-only container. The fix is to mount a writable volume at a specific path and configure the application to write there.
+
+\subsection*{\texorpdfstring{Temporary files and \texttt{/tmp}}{Temporary files and /tmp}}\phantomsection\label{07-environment-drift:temporary-files-and-tmp}
+
+The \texttt{/tmp} directory is a universal location for temporary files on Unix-like systems. It is always writable. But it has two properties developers must be aware of:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{It is cleaned on reboot on many systems} (and often on a schedule). Anything written to \texttt{/tmp} may disappear without warning. A database in \texttt{/tmp} is a database that will be lost on the next server restart.
+\item
+  \textbf{It is shared across all users and processes}. If your application creates predictable filenames in \texttt{/tmp} (e.g., \texttt{/tmp/notes.db}), another process or another instance of your application may overwrite them. Use \texttt{tempfile.mkstemp()} or \texttt{tempfile.mkdtemp()} to create uniquely named temporary files.
+\end{enumerate}
+
+\unnumberedsection{false}{Environment Drift Summary: A Checklist}\label{07-environment-drift:environment-drift-summary-a-checklist}
+
+Before deploying, the following differences between your development machine and the target server should be verified:
+
+\Needspace{29\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3735}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6265}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Concern
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Check
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+OS type & macOS → Linux (different defaults, different tools) \\
+File path separators & Use \texttt{pathlib.Path} everywhere, not string concatenation \\
+Case sensitivity & Use lowercase filenames; every path in code matches the on-disk name exactly \\
+Line endings & Configure your editor to use Unix line endings (\texttt{\textbackslash{}n}) \\
+Python version & \texttt{python\ -\/-version} on both machines; ensure they match \\
+System library availability & \texttt{ldd} check for compiled extensions; verify on target OS \\
+File permissions & Application user has write access to data directories \\
+Home directory & Do not hardcode \texttt{/Users/...} or \texttt{/home/...} paths \\
+Temp directory assumptions & \texttt{/tmp} is ephemeral; do not store persistent data there \\
+Filesystem mutability & Know whether the target filesystem is read-only \\
+\end{longtable}
+}
+
+This checklist does not eliminate environment drift~--- it makes it visible. Making it visible is what Stage 3 of this book is about: converting each of these implicit assumptions into explicit, documented, reproducible specifications.
+
+\phantomsection\label{07-environment-drift:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Environment drift} is the accumulation of differences between a developer's machine and the target execution environment. It causes software that ``works on my machine'' to fail elsewhere.
+\item
+  \textbf{OS differences} between macOS and Linux include: file path separators, case sensitivity, line endings, and available system tools. The safest rule: develop on Linux or use a Linux container for development.
+\item
+  \textbf{Python runtime version mismatches} cause failures ranging from \texttt{SyntaxError} (new syntax on old interpreter) to subtle behavioral differences. Always know which Python version you are targeting, and verify it is installed on the target server.
+\item
+  \textbf{Missing system libraries} cause Python packages with compiled C extensions to fail at import time, often with confusing error messages. These libraries must be installed at the OS level before the Python packages can work.
+\item
+  \textbf{Filesystem differences} include case sensitivity, permission models, and home directory paths. Production servers often have stricter permission requirements than development machines.
+\item
+  The solution to environment drift is not to fix bugs when they appear, but to declare all assumptions explicitly~--- which is what Chapters 12--16 build toward.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{07-environment-drift:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Create files \texttt{Notes.py} and \texttt{notes.py} in the same directory on macOS, then on Linux (or in a directory \emph{inside} a Linux container, such as \texttt{/tmp}, not a directory mounted from your Mac). What happens on each?
+\item
+  \textbf{Break and fix.} Use a Python 3.10-only syntax feature (a \texttt{match} statement) and run the file with Python 3.9 (in a container: \texttt{docker\ run\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{rm\ -}\allowbreak{}\texttt{v\ \$PWD:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{w\ python:}\allowbreak{}\texttt{3.}\allowbreak{}\texttt{9\ python\ /}\allowbreak{}\texttt{w/}\allowbreak{}\texttt{file.}\allowbreak{}\texttt{py}). Read the error, then declare the minimum version so it fails clearly.
+\item
+  \textbf{Extend.} Write a script that prints the OS, Python version, locale, time zone and file-system case sensitivity of the machine it runs on. Run it on your laptop and in a container (from a directory inside the container, such as \texttt{/tmp}), and compare.
+\item
+  \textbf{Explain.} Why is ``develop in the same kind of environment you deploy to'' a better fix for drift than fixing each difference as it appears?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-07.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{07-environment-drift:whats-next}
+
+Environment drift is drift you can see~--- visible differences in the execution environment. The next chapter addresses a subtler problem: dependencies that are hidden inside the system, not in your code, not in your \texttt{requirements.txt}, and not obviously connected to your application at all.
+
+\noindent{}→ \hyperref[ch:08-hidden-dependencies]{Chapter 8}~--- Hidden Dependencies

@@ -1,0 +1,1483 @@
+\setcounter{chapter}{15}
+\chapter{Logging and Error Handling}\label{ch:16-logging-error-handling}
+
+\chapterrule
+
+When a production application fails, someone needs to know. Not eventually, not when a user complains~--- immediately, with enough information to understand what went wrong and why.
+
+Right now, the Notes API communicates failure through \texttt{print()} statements and Python's default exception output: text that appears on the terminal where the server is running. This is adequate when you are sitting at that terminal during development. It is completely inadequate for production.
+
+In production:
+
+\begin{itemize}
+\tightlist
+\item
+  The application runs in the background. There is no terminal to watch.
+\item
+  The process might restart automatically after a crash. Any \texttt{print()} output from before the crash is lost.
+\item
+  Multiple instances of the application might run simultaneously, each writing output to different places.
+\item
+  Someone needs to search through hours of output to find the one line that explains why the application failed at 3:00 AM.
+\end{itemize}
+
+\noindent{}\textbf{Logging} is the discipline of writing structured, persistent, searchable records of what an application is doing. A logging system is not just \texttt{print()} with timestamps~--- it is a complete infrastructure for capturing, routing, filtering, storing, and querying application events.
+
+\textbf{Error handling} is the discipline of catching failures before they crash the application, converting them into informative responses, and ensuring that every failure is recorded.
+
+This chapter builds both: a production-grade logging system for the Notes API and a comprehensive error handling layer.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  Why \texttt{print()} is insufficient for production logging and what replaces it
+\item
+  How Python's \texttt{logging} module works: loggers, handlers, formatters, and levels
+\item
+  How to configure structured logging that writes to both the console and a rotating log file
+\item
+  How to capture every unhandled exception before it crashes the process
+\item
+  How to write a Flask error handler that returns consistent JSON error responses
+\item
+  The error-handling \textbf{philosophy} behind that handler: when failure should be a return value versus an exception, \emph{where} an error should be handled, and what to do when it cannot be handled meaningfully
+\item
+  How to log every HTTP request and response with relevant context
+\item
+  What structured logging (JSON format) is and why it matters for production systems
+\item
+  How to debug methodically: reproduce, read the traceback from the bottom up, stop inside the code with \texttt{breakpoint()}, and find the commit that broke something with \texttt{git\ bisect}
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{\texorpdfstring{What Is Wrong with \texttt{print()}}{What Is Wrong with print()}}\label{16-logging-error-handling:161-what-is-wrong-with-print}
+
+Consider what the current Notes API does when something fails:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# The current behavior — no logging, only Python\textquotesingle{}s default traceback}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(data, }\BuiltInTok{dict}\NormalTok{):}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Request body must be a JSON object"}\NormalTok{\}), }\DecValTok{400}
+    \CommentTok{\# ... if an unexpected exception occurs here, Python prints a traceback}
+    \CommentTok{\# to stderr and Flask returns a 500 response}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}If a database connection fails unexpectedly, Python prints something like:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Traceback (most recent call last):
+  File "/notes-api/app/routes/notes.py", line 71, in create_note
+    db = get_db()
+  File "/notes-api/app/database.py", line 42, in get_db
+    g.db = open_db()
+  File "/notes-api/app/database.py", line 29, in open_db
+    return psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
+psycopg2.OperationalError: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}This output goes to \texttt{stderr}. In development, you see it in your terminal. In production:
+
+\begin{itemize}
+\tightlist
+\item
+  If the process is run by systemd (\hyperref[ch:25-process-management]{Chapter 25}), stderr is captured by the journal~--- but only until the journal fills up and older entries are deleted.
+\item
+  If the process is run in a container (\hyperref[ch:18-containerization]{Chapter 18}), stderr goes to the container runtime's log buffer~--- which has a size limit.
+\item
+  If the process crashes, the output from the moment before the crash might not be flushed to disk.
+\item
+  If you want to find all database errors from the past week, there is no way to search: the output is unstructured text mixed with all other output.
+\end{itemize}
+
+\noindent{}The specific problems with \texttt{print()} are:
+
+\textbf{1. No severity levels.} A debug trace and a critical error look identical when printed. There is no way to filter ``show me only serious problems.''
+
+\textbf{2. No automatic context.} When did this happen? Which endpoint was serving the request? Which user triggered it? What was the request ID? \texttt{print()} only writes what you explicitly include.
+
+\textbf{3. No routing.} \texttt{print()} goes to stdout (or stderr if you specify). You cannot say ``send INFO messages to a log file and ERROR messages to a monitoring service'' with \texttt{print()}.
+
+\textbf{4. No file rotation.} If you redirect print output to a file (\texttt{python\ run.}\allowbreak{}\texttt{py\ \textgreater{}\textgreater{}\ app.}\allowbreak{}\texttt{log}), the file grows forever. Eventually it fills the disk.
+
+\textbf{5. No coordination between threads.} If several threads call \texttt{print()} at the same moment, the text of one line and the newline of another can interleave, producing merged or broken lines. Each \texttt{logging} handler holds a lock while it writes a record, so every record comes out whole.
+
+Python's built-in \texttt{logging} module solves all of these problems.
+
+\setcounter{section}{1}
+\section{\texorpdfstring{Python's \texttt{logging} Module: The Architecture}{Python's logging Module: The Architecture}}\label{16-logging-error-handling:162-pythons-logging-module-the-architecture}
+
+The \texttt{logging} module has four main components that work together:
+
+\subsection*{Loggers}\phantomsection\label{16-logging-error-handling:loggers}
+
+A \textbf{logger} is the object your code writes to. You get a logger by name:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ logging}
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\StringTok{"app.routes.notes"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Logger names form a hierarchy using dots. \texttt{"app.routes.notes"} is a child of \texttt{"app.routes"}, which is a child of \texttt{"app"}, which is a child of the \textbf{root logger}.
+
+When you write \texttt{logger.}\allowbreak{}\texttt{error("something\ failed")}, the logger first compares the message's level with its own \emph{effective} level (its own level if it has one, otherwise the level of its nearest ancestor that does). If the message passes, it is handed to the handlers of that logger and then to the handlers of \textbf{every} ancestor, all the way up to the root logger, unless a logger on the way has \texttt{propagate\ =\ False}. The ancestors' own levels are not checked again. This is why attaching a handler to both \texttt{"app"} and the root logger prints every line twice.
+
+\subsection*{Handlers}\phantomsection\label{16-logging-error-handling:handlers}
+
+A \textbf{handler} determines where a log message goes. There are many built-in handlers:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{StreamHandler}: writes to a stream (stdout or stderr)
+\item
+  \texttt{FileHandler}: writes to a file
+\item
+  \texttt{RotatingFileHandler}: writes to a file, rotates when it reaches a size limit
+\item
+  \texttt{TimedRotatingFileHandler}: writes to a file, rotates at a regular time interval
+\item
+  \texttt{SysLogHandler}: writes to the Unix syslog daemon
+\item
+  \texttt{SMTPHandler}: sends an email (useful for critical errors)
+\end{itemize}
+
+\noindent{}You can attach multiple handlers to one logger, sending messages to multiple destinations simultaneously.
+
+\subsection*{Formatters}\phantomsection\label{16-logging-error-handling:formatters}
+
+A \textbf{formatter} defines what each log line looks like. A formatter takes the log record~--- which contains the message, the level, the logger name, the timestamp, the source file, the line number, and more~--- and converts it to a string (or JSON).
+
+\subsection*{Levels}\phantomsection\label{16-logging-error-handling:levels}
+
+Every log message has a \textbf{level}, and every logger and handler can have a minimum level. Messages below the minimum level are silently discarded.
+
+The standard levels, in order from lowest to highest severity:
+
+\Needspace{19\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1600}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1467}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6933}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Level
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Integer
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+When to use
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{DEBUG} & 10 & Detailed diagnostic information, useful during development \\
+\texttt{INFO} & 20 & Confirmation that things are working as expected \\
+\texttt{WARNING} & 30 & Something unexpected happened, but the application continues \\
+\texttt{ERROR} & 40 & A serious problem occurred; some functionality is broken \\
+\texttt{CRITICAL} & 50 & A very serious error; the application may not be able to continue \\
+\end{longtable}
+}
+
+Setting a logger's level to \texttt{INFO} means DEBUG messages are discarded. Setting it to \texttt{WARNING} means DEBUG and INFO messages are discarded.
+
+\subsection*{How they connect}\phantomsection\label{16-logging-error-handling:how-they-connect}
+
+\begin{diagrambox}[short]{377.0pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+Your code calls:
+  logger.error("Database connection failed")
+        │
+        ▼
+  Logger ("app.routes.notes")
+        │ level check (the only one): ERROR >= effective level?
+        │ No level is set here, so it is inherited from the nearest
+        │ ancestor that has one: the root logger (INFO). Yes → propagate.
+        ▼
+  Logger ("app.routes")   no handlers, no level check → pass up
+        ▼
+  Logger ("app")          no handlers, no level check → pass up
+        ▼
+  Root logger             handlers: StreamHandler, RotatingFileHandler
+        │                 (each handler applies its own level)
+        ▼
+  StreamHandler ─────────────────────────► Console output
+  (Formatter: "2024-01-15 12:00:00.000 ERROR    app.routes.notes | Database …")
+
+  RotatingFileHandler ───────────────────► /var/log/notes-api/app.log
+  (Formatter: same format)
+\end{Verbatim}
+\end{diagrambox}
+
+\setcounter{section}{2}
+\section{Configuring Logging for the Notes API}\label{16-logging-error-handling:163-configuring-logging-for-the-notes-api}
+
+Logging needs three settings, and \hyperref[ch:15-structuring-the-application]{Chapter 15} made \texttt{app/config.py} the one place where environment variables are read. \texttt{LOG\_DIR} is already there; add the other two next to it:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/config.py (additions, in the optional{-}configuration section)}
+\NormalTok{LOG\_LEVEL: }\BuiltInTok{str} \OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"LOG\_LEVEL"}\NormalTok{, }\StringTok{"INFO"}\NormalTok{)}
+\NormalTok{LOG\_FORMAT: }\BuiltInTok{str} \OperatorTok{=}\NormalTok{ os.getenv(}\StringTok{"LOG\_FORMAT"}\NormalTok{, }\StringTok{"human"}\NormalTok{).lower()   }\CommentTok{\# "human" or "json"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Then create a new file \texttt{app/}\allowbreak{}\texttt{logging\_config.py} that sets up the logging system for the entire application.
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 16.1}\enspace app/logging\_config.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Logging configuration for the Notes API.}
+
+\CommentTok{Call configure\_logging() once at application startup, before any other}
+\CommentTok{code that might produce log output. After calling this function, all}
+\CommentTok{code can use:}
+
+\CommentTok{    import logging}
+\CommentTok{    logger = logging.getLogger(\_\_name\_\_)}
+\CommentTok{    logger.info("Something happened")}
+
+\CommentTok{and the output will be routed according to the configuration here.}
+\CommentTok{"""}
+\ImportTok{import}\NormalTok{ json}
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{import}\NormalTok{ logging.handlers}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{import}\NormalTok{ sys}
+\ImportTok{from}\NormalTok{ datetime }\ImportTok{import}\NormalTok{ datetime, timezone}
+
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ LOG\_DIR, LOG\_FORMAT, LOG\_LEVEL}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Log level configuration}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\NormalTok{\_LEVELS }\OperatorTok{=}\NormalTok{ \{}
+    \StringTok{"DEBUG"}\NormalTok{: logging.DEBUG,}
+    \StringTok{"INFO"}\NormalTok{: logging.INFO,}
+    \StringTok{"WARNING"}\NormalTok{: logging.WARNING,}
+    \StringTok{"ERROR"}\NormalTok{: logging.ERROR,}
+    \StringTok{"CRITICAL"}\NormalTok{: logging.CRITICAL,}
+\NormalTok{\}}
+
+\KeywordTok{def}\NormalTok{ \_parse\_log\_level(level\_name: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{int}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Convert a log level name (DEBUG, INFO, }\AlertTok{WARNING}\CommentTok{, ERROR, CRITICAL)}
+\CommentTok{    to its integer value. Falls back to INFO if the name is unrecognized.}
+\CommentTok{    """}
+\NormalTok{    level }\OperatorTok{=}\NormalTok{ \_LEVELS.get(level\_name.upper())}
+    \ControlFlowTok{if}\NormalTok{ level }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \CommentTok{\# Logging is not configured yet, so this one message goes to stderr directly}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Warning: Unrecognized LOG\_LEVEL \textquotesingle{}}\SpecialCharTok{\{}\NormalTok{level\_name}\SpecialCharTok{\}}\SpecialStringTok{\textquotesingle{}. Using INFO."}\NormalTok{, }\BuiltInTok{file}\OperatorTok{=}\NormalTok{sys.stderr)}
+        \ControlFlowTok{return}\NormalTok{ logging.INFO}
+    \ControlFlowTok{return}\NormalTok{ level}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Formatters}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\KeywordTok{class}\NormalTok{ HumanReadableFormatter(logging.Formatter):}
+    \CommentTok{"""}
+\CommentTok{    A formatter that produces human{-}readable log lines.}
+
+\CommentTok{    Output format:}
+\CommentTok{        2024{-}01{-}15 14:32:01.234 INFO     app.routes.notes  | Note 42 created successfully.}
+\CommentTok{        2024{-}01{-}15 14:32:01.301 ERROR    app.database      | Connection failed: timeout}
+\CommentTok{    """}
+
+    \KeywordTok{def} \BuiltInTok{format}\NormalTok{(}\VariableTok{self}\NormalTok{, record: logging.LogRecord) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+        \CommentTok{\# Format timestamp in ISO 8601 with milliseconds}
+        \CommentTok{\# datetime.fromtimestamp converts the record\textquotesingle{}s Unix timestamp}
+        \CommentTok{\# to a human{-}readable datetime. timezone.utc ensures UTC.}
+\NormalTok{        ts }\OperatorTok{=}\NormalTok{ datetime.fromtimestamp(record.created, tz}\OperatorTok{=}\NormalTok{timezone.utc)}
+\NormalTok{        timestamp }\OperatorTok{=}\NormalTok{ ts.strftime(}\StringTok{"\%Y{-}\%m{-}}\SpecialCharTok{\%d}\StringTok{ \%H:\%M:\%S."}\NormalTok{) }\OperatorTok{+} \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{ts}\SpecialCharTok{.}\NormalTok{microsecond }\OperatorTok{//} \DecValTok{1000}\SpecialCharTok{:03d\}}\SpecialStringTok{"}
+
+        \CommentTok{\# Left{-}pad the level name to 8 characters for alignment}
+\NormalTok{        level }\OperatorTok{=}\NormalTok{ record.levelname.ljust(}\DecValTok{8}\NormalTok{)}
+
+        \CommentTok{\# The logger name (e.g., "app.routes.notes"), padded so the | line up}
+\NormalTok{        name }\OperatorTok{=}\NormalTok{ record.name.ljust(}\DecValTok{18}\NormalTok{)}
+
+        \CommentTok{\# The actual log message}
+\NormalTok{        message }\OperatorTok{=}\NormalTok{ record.getMessage()}
+
+        \CommentTok{\# Format the base line}
+\NormalTok{        line }\OperatorTok{=} \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{timestamp}\SpecialCharTok{\}}\SpecialStringTok{ }\SpecialCharTok{\{}\NormalTok{level}\SpecialCharTok{\}}\SpecialStringTok{ }\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{ | }\SpecialCharTok{\{}\NormalTok{message}\SpecialCharTok{\}}\SpecialStringTok{"}
+
+        \CommentTok{\# If there is exception info (a traceback), append it}
+        \ControlFlowTok{if}\NormalTok{ record.exc\_info:}
+            \CommentTok{\# formatException returns the traceback as a string}
+\NormalTok{            exc\_text }\OperatorTok{=} \VariableTok{self}\NormalTok{.formatException(record.exc\_info)}
+\NormalTok{            line }\OperatorTok{=} \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{line}\SpecialCharTok{\}}\CharTok{\textbackslash{}n}\SpecialCharTok{\{}\NormalTok{exc\_text}\SpecialCharTok{\}}\SpecialStringTok{"}
+
+        \ControlFlowTok{return}\NormalTok{ line}
+
+\KeywordTok{class}\NormalTok{ JSONFormatter(logging.Formatter):}
+    \CommentTok{"""}
+\CommentTok{    A formatter that produces JSON log lines.}
+
+\CommentTok{    Each log line is a single JSON object on one line. This format is}
+\CommentTok{    designed for production environments where log aggregation tools}
+\CommentTok{    (Elasticsearch, Datadog, Splunk, CloudWatch) parse structured logs}
+\CommentTok{    for searching and alerting.}
+
+\CommentTok{    Output format (one line per log record):}
+\CommentTok{        \{"timestamp":"2024{-}01{-}15T14:32:01.234Z","level":"INFO",}
+\CommentTok{         "logger":"app.routes.notes","message":"Created note id=42.",}
+\CommentTok{         "function":"create\_note","line":54\}}
+\CommentTok{    """}
+
+    \CommentTok{\# Every attribute a plain LogRecord has. Anything else on a record was}
+    \CommentTok{\# added by the caller through extra=\{...\} and is copied into the output.}
+    \CommentTok{\# Computing the set (rather than typing it out) keeps it right when a new}
+    \CommentTok{\# Python version adds an attribute, as 3.12 did with taskName.}
+\NormalTok{    \_STANDARD\_ATTRS }\OperatorTok{=} \BuiltInTok{set}\NormalTok{(}
+\NormalTok{        logging.LogRecord(}\StringTok{""}\NormalTok{, }\DecValTok{0}\NormalTok{, }\StringTok{""}\NormalTok{, }\DecValTok{0}\NormalTok{, }\StringTok{""}\NormalTok{, (), }\VariableTok{None}\NormalTok{).\_\_dict\_\_}
+\NormalTok{    ) }\OperatorTok{|}\NormalTok{ \{}\StringTok{"message"}\NormalTok{, }\StringTok{"asctime"}\NormalTok{\}}
+
+    \KeywordTok{def} \BuiltInTok{format}\NormalTok{(}\VariableTok{self}\NormalTok{, record: logging.LogRecord) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+\NormalTok{        ts }\OperatorTok{=}\NormalTok{ datetime.fromtimestamp(record.created, tz}\OperatorTok{=}\NormalTok{timezone.utc)}
+
+\NormalTok{        log\_entry }\OperatorTok{=}\NormalTok{ \{}
+            \StringTok{"timestamp"}\NormalTok{: ts.strftime(}\StringTok{"\%Y{-}\%m{-}}\SpecialCharTok{\%d}\StringTok{T\%H:\%M:\%S."}\NormalTok{) }\OperatorTok{+} \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{ts}\SpecialCharTok{.}\NormalTok{microsecond }\OperatorTok{//} \DecValTok{1000}\SpecialCharTok{:03d\}}\SpecialStringTok{Z"}\NormalTok{,}
+            \StringTok{"level"}\NormalTok{: record.levelname,}
+            \StringTok{"logger"}\NormalTok{: record.name,}
+            \StringTok{"message"}\NormalTok{: record.getMessage(),}
+            \StringTok{"function"}\NormalTok{: record.funcName,}
+            \StringTok{"line"}\NormalTok{: record.lineno,}
+\NormalTok{        \}}
+
+        \CommentTok{\# Include exception information if present}
+        \ControlFlowTok{if}\NormalTok{ record.exc\_info:}
+\NormalTok{            log\_entry[}\StringTok{"exception"}\NormalTok{] }\OperatorTok{=} \VariableTok{self}\NormalTok{.formatException(record.exc\_info)}
+
+        \CommentTok{\# Include any extra fields attached to the record}
+        \CommentTok{\# These are added via: logger.info("msg", extra=\{"request\_id": "abc"\})}
+        \ControlFlowTok{for}\NormalTok{ key, value }\KeywordTok{in}\NormalTok{ record.\_\_dict\_\_.items():}
+            \ControlFlowTok{if}\NormalTok{ key }\KeywordTok{not} \KeywordTok{in} \VariableTok{self}\NormalTok{.\_STANDARD\_ATTRS:}
+\NormalTok{                log\_entry[key] }\OperatorTok{=}\NormalTok{ value}
+
+        \CommentTok{\# Compact separators: one short line per record, easy to grep.}
+        \CommentTok{\# ensure\_ascii=False keeps characters such as → readable.}
+        \ControlFlowTok{return}\NormalTok{ json.dumps(log\_entry, default}\OperatorTok{=}\BuiltInTok{str}\NormalTok{, separators}\OperatorTok{=}\NormalTok{(}\StringTok{","}\NormalTok{, }\StringTok{":"}\NormalTok{), ensure\_ascii}\OperatorTok{=}\VariableTok{False}\NormalTok{)}
+
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Main configuration function}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\KeywordTok{def}\NormalTok{ configure\_logging() }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Configure the logging system for the Notes API.}
+
+\CommentTok{    Uses three settings from app.config:}
+\CommentTok{      LOG\_LEVEL  — minimum severity to log (default: INFO)}
+\CommentTok{      LOG\_DIR    — directory for log files (optional; if empty, no file logging)}
+\CommentTok{      LOG\_FORMAT — "human" for readable output, "json" for structured output}
+\CommentTok{                   (default: "human"; set "json" in production)}
+
+\CommentTok{    Safe to call more than once (each test creates a new app): the root}
+\CommentTok{    logger\textquotesingle{}s handlers are replaced, not added to.}
+
+\CommentTok{    After calling this function:}
+\CommentTok{      {-} The root logger is configured with the appropriate level}
+\CommentTok{      {-} All log output goes to stderr (always)}
+\CommentTok{      {-} If LOG\_DIR is set, log output also goes to a rotating file}
+\CommentTok{      {-} Werkzeug\textquotesingle{}s own request log is silenced (we log requests ourselves)}
+\CommentTok{    """}
+\NormalTok{    log\_level }\OperatorTok{=}\NormalTok{ \_parse\_log\_level(LOG\_LEVEL)}
+\NormalTok{    log\_dir }\OperatorTok{=}\NormalTok{ LOG\_DIR}
+\NormalTok{    log\_format }\OperatorTok{=}\NormalTok{ LOG\_FORMAT}
+
+    \CommentTok{\# Choose the formatter based on LOG\_FORMAT}
+\NormalTok{    formatter: logging.Formatter}
+    \ControlFlowTok{if}\NormalTok{ log\_format }\OperatorTok{==} \StringTok{"json"}\NormalTok{:}
+\NormalTok{        formatter }\OperatorTok{=}\NormalTok{ JSONFormatter()}
+    \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{        formatter }\OperatorTok{=}\NormalTok{ HumanReadableFormatter()}
+
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────}
+    \CommentTok{\# Console handler — writes to stderr}
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────}
+    \CommentTok{\# We write to stderr rather than stdout. This convention separates}
+    \CommentTok{\# application logs (stderr) from application output (stdout), which}
+    \CommentTok{\# matters when piping output in shell scripts.}
+\NormalTok{    console\_handler }\OperatorTok{=}\NormalTok{ logging.StreamHandler(sys.stderr)}
+\NormalTok{    console\_handler.setLevel(log\_level)}
+\NormalTok{    console\_handler.setFormatter(formatter)}
+
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────}
+    \CommentTok{\# File handler — writes to a rotating log file (if LOG\_DIR is set)}
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────}
+\NormalTok{    file\_handler }\OperatorTok{=} \VariableTok{None}
+    \ControlFlowTok{if}\NormalTok{ log\_dir:}
+\NormalTok{        os.makedirs(log\_dir, exist\_ok}\OperatorTok{=}\VariableTok{True}\NormalTok{)  }\CommentTok{\# Create directory if it doesn\textquotesingle{}t exist}
+\NormalTok{        log\_file }\OperatorTok{=}\NormalTok{ os.path.join(log\_dir, }\StringTok{"app.log"}\NormalTok{)}
+
+        \CommentTok{\# RotatingFileHandler automatically manages log file size.}
+        \CommentTok{\# When the file reaches maxBytes, it is renamed to app.log.1,}
+        \CommentTok{\# the previous app.log.1 becomes app.log.2, etc., up to backupCount.}
+        \CommentTok{\# Old files beyond backupCount are deleted.}
+        \CommentTok{\#}
+        \CommentTok{\# maxBytes = 10 MB = 10 * 1024 * 1024 bytes}
+        \CommentTok{\# backupCount = 5 means we keep app.log + app.log.1 through app.log.5}
+        \CommentTok{\# Total storage: up to 60 MB of logs.}
+\NormalTok{        file\_handler }\OperatorTok{=}\NormalTok{ logging.handlers.RotatingFileHandler(}
+\NormalTok{            filename}\OperatorTok{=}\NormalTok{log\_file,}
+\NormalTok{            maxBytes}\OperatorTok{=}\DecValTok{10} \OperatorTok{*} \DecValTok{1024} \OperatorTok{*} \DecValTok{1024}\NormalTok{,  }\CommentTok{\# 10 MB}
+\NormalTok{            backupCount}\OperatorTok{=}\DecValTok{5}\NormalTok{,}
+\NormalTok{            encoding}\OperatorTok{=}\StringTok{"utf{-}8"}\NormalTok{,}
+\NormalTok{        )}
+\NormalTok{        file\_handler.setLevel(log\_level)}
+\NormalTok{        file\_handler.setFormatter(formatter)}
+
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────}
+    \CommentTok{\# Configure the root logger}
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────}
+    \CommentTok{\# The root logger is the ancestor of all loggers. Configuring it}
+    \CommentTok{\# affects all loggers in the application and all imported libraries}
+    \CommentTok{\# that use Python\textquotesingle{}s logging module.}
+\NormalTok{    root\_logger }\OperatorTok{=}\NormalTok{ logging.getLogger()}
+\NormalTok{    root\_logger.setLevel(log\_level)}
+
+    \CommentTok{\# Remove any existing handlers (Python might add a default one)}
+\NormalTok{    root\_logger.handlers.clear()}
+
+\NormalTok{    root\_logger.addHandler(console\_handler)}
+    \ControlFlowTok{if}\NormalTok{ file\_handler:}
+\NormalTok{        root\_logger.addHandler(file\_handler)}
+
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────}
+    \CommentTok{\# Silence noisy third{-}party loggers}
+    \CommentTok{\# ─────────────────────────────────────────────────────────────────}
+    \CommentTok{\# Werkzeug (Flask\textquotesingle{}s development server) logs every request at INFO in}
+    \CommentTok{\# its own format. We raise its level because our middleware logs}
+    \CommentTok{\# requests. This also hides the server\textquotesingle{}s INFO{-}level startup lines}
+    \CommentTok{\# ("Running on http://127.0.0.1:5000", "Press CTRL+C to quit");}
+    \CommentTok{\# run.py logs its own "Starting Notes API" line instead.}
+\NormalTok{    logging.getLogger(}\StringTok{"werkzeug"}\NormalTok{).setLevel(logging.WARNING)}
+
+    \CommentTok{\# Log that logging is configured (this is the first structured log message)}
+\NormalTok{    logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\NormalTok{    logger.info(}
+        \StringTok{"Logging configured. level=}\SpecialCharTok{\%s}\StringTok{ format=}\SpecialCharTok{\%s}\StringTok{ log\_dir=}\SpecialCharTok{\%s}\StringTok{"}\NormalTok{,}
+\NormalTok{        logging.getLevelName(log\_level),}
+\NormalTok{        log\_format,}
+\NormalTok{        log\_dir }\KeywordTok{or} \StringTok{"(console only)"}\NormalTok{,}
+\NormalTok{    )}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\setcounter{section}{3}
+\section{Request Logging Middleware}\label{16-logging-error-handling:164-request-logging-middleware}
+
+Every HTTP request and response should be logged. This gives you a complete record of every interaction the API had, which is essential for debugging, auditing, and capacity planning.
+
+\hyperref[ch:15-structuring-the-application]{Chapter 15} left two of Chapter 13's hooks out of its listings: the JSON content-type check and the \texttt{X-Response-Time-Ms} timing header. They belong in the same module as request logging, because all three run around every request. Create \texttt{app/middleware.py}:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 16.2}\enspace app/middleware.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Request middleware for the Notes API.}
+
+\CommentTok{Hooks that run around every request: the JSON content{-}type check and the}
+\CommentTok{timing header from Chapter 13, plus request logging, which records every}
+\CommentTok{request when it arrives and every response when it departs.}
+
+\CommentTok{Log output per request:}
+\CommentTok{  → POST /notes/ (from 127.0.0.1)}
+\CommentTok{  ← 201 in 4.2ms}
+
+\CommentTok{And for errors:}
+\CommentTok{  → DELETE /notes/999 (from 127.0.0.1)}
+\CommentTok{  ← 404 in 1.1ms}
+\CommentTok{"""}
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{import}\NormalTok{ time}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, g, jsonify, request}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ register\_middleware(app: Flask) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Register the request hooks on the Flask application.}
+
+\CommentTok{    Call this from create\_app() after creating the Flask instance.}
+\CommentTok{    """}
+
+    \AttributeTok{@app.before\_request}
+    \KeywordTok{def}\NormalTok{ log\_request\_start():}
+        \CommentTok{"""}
+\CommentTok{        Called by Flask before each request handler runs.}
+
+\CommentTok{        Records the start time on g so that after\_request can compute}
+\CommentTok{        the elapsed time. Logs the incoming request.}
+\CommentTok{        """}
+\NormalTok{        g.request\_start\_time }\OperatorTok{=}\NormalTok{ time.perf\_counter()}
+
+        \CommentTok{\# Log the incoming request.}
+        \CommentTok{\# We include the remote address (client IP), method, and path.}
+        \CommentTok{\# In production behind a reverse proxy, request.remote\_addr will be}
+        \CommentTok{\# the proxy\textquotesingle{}s IP. To get the real client IP, you need the}
+        \CommentTok{\# X{-}Forwarded{-}For header (Chapter 28).}
+\NormalTok{        logger.info(}
+            \StringTok{"→ }\SpecialCharTok{\%s}\StringTok{ }\SpecialCharTok{\%s}\StringTok{ (from }\SpecialCharTok{\%s}\StringTok{)"}\NormalTok{,}
+\NormalTok{            request.method,}
+\NormalTok{            request.path,}
+\NormalTok{            request.remote\_addr,}
+\NormalTok{        )}
+
+    \AttributeTok{@app.before\_request}
+    \KeywordTok{def}\NormalTok{ require\_json\_for\_writes():}
+        \CommentTok{"""Reject writes whose body is not declared as JSON (Chapter 13)."""}
+        \ControlFlowTok{if}\NormalTok{ request.url\_rule }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+            \ControlFlowTok{return}  \CommentTok{\# No route matched: let Flask answer 404 or 405}
+        \ControlFlowTok{if}\NormalTok{ request.method }\KeywordTok{in}\NormalTok{ (}\StringTok{"POST"}\NormalTok{, }\StringTok{"PUT"}\NormalTok{, }\StringTok{"PATCH"}\NormalTok{) }\KeywordTok{and} \KeywordTok{not}\NormalTok{ request.is\_json:}
+            \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Content{-}Type must be application/json"}\NormalTok{\}), }\DecValTok{415}
+
+    \AttributeTok{@app.after\_request}
+    \KeywordTok{def}\NormalTok{ log\_request\_end(response):}
+        \CommentTok{"""}
+\CommentTok{        Called by Flask after each request handler returns a response.}
+
+\CommentTok{        Computes elapsed time, adds the timing header, and logs the response}
+\CommentTok{        status code. Must return the response object — if you forget this,}
+\CommentTok{        Flask breaks.}
+\CommentTok{        """}
+\NormalTok{        start }\OperatorTok{=}\NormalTok{ g.get(}\StringTok{"request\_start\_time"}\NormalTok{, time.perf\_counter())}
+\NormalTok{        elapsed\_ms }\OperatorTok{=}\NormalTok{ (time.perf\_counter() }\OperatorTok{{-}}\NormalTok{ start) }\OperatorTok{*} \DecValTok{1000}
+\NormalTok{        response.headers[}\StringTok{"X{-}Response{-}Time{-}Ms"}\NormalTok{] }\OperatorTok{=} \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{elapsed\_ms}\SpecialCharTok{:.1f\}}\SpecialStringTok{"}
+
+        \CommentTok{\# Choose the log level based on the response status code:}
+        \CommentTok{\# 2xx → INFO (success)}
+        \CommentTok{\# 4xx → }\AlertTok{WARNING}\CommentTok{ (client error — not our fault, but worth noting)}
+        \CommentTok{\# 5xx → ERROR (server error — our fault)}
+        \ControlFlowTok{if}\NormalTok{ response.status\_code }\OperatorTok{\textgreater{}=} \DecValTok{500}\NormalTok{:}
+\NormalTok{            log\_fn }\OperatorTok{=}\NormalTok{ logger.error}
+        \ControlFlowTok{elif}\NormalTok{ response.status\_code }\OperatorTok{\textgreater{}=} \DecValTok{400}\NormalTok{:}
+\NormalTok{            log\_fn }\OperatorTok{=}\NormalTok{ logger.warning}
+        \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{            log\_fn }\OperatorTok{=}\NormalTok{ logger.info}
+
+\NormalTok{        log\_fn(}
+            \StringTok{"← }\SpecialCharTok{\%s}\StringTok{ in }\SpecialCharTok{\%.1f}\StringTok{ms"}\NormalTok{,}
+\NormalTok{            response.status\_code,}
+\NormalTok{            elapsed\_ms,}
+\NormalTok{        )}
+
+        \ControlFlowTok{return}\NormalTok{ response  }\CommentTok{\# REQUIRED: Flask expects the response back}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\setcounter{section}{4}
+\section{Error Handling: Catching Failures Before They Reach the Client}\label{16-logging-error-handling:165-error-handling-catching-failures-before-they-reach-the-client}
+
+Logging tells you what happened. \textbf{Error handling} decides what \emph{should} happen when something goes wrong~--- and that is as much a design discipline as a coding task. Before we register a single Flask handler, it is worth being deliberate about three questions that every piece of code you ever write has to answer: how should a failure be \emph{signaled}, \emph{where} should it be \emph{handled}, and what do you do when it \emph{cannot} be handled. Get these right and your error handling is a thin, predictable layer; get them wrong and errors leak to clients, hide in silence, or crash the process at 3 a.m. with no trace.
+
+\subsection*{Three ways to signal a failure}\phantomsection\label{16-logging-error-handling:three-ways-to-signal-a-failure}
+
+When a function cannot do what its name promises, it has exactly three ways to say so, and choosing between them is a real design decision:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Return a value that means ``failure.''} The function returns a sentinel~--- \texttt{None}, \texttt{-1}, \texttt{False}, or a small result object like \texttt{\{"ok":}\allowbreak{}\texttt{\ False,}\allowbreak{}\texttt{\ "error":}\allowbreak{}\texttt{\ .}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{\}}. The caller must check it. This is explicit: the failure is right there in the return, impossible to miss if you read the signature. Its weaknesses are clutter (every call site grows an \texttt{if}) and the danger that a caller forgets to check and sails on with \texttt{None}.
+\item
+  \textbf{Raise an exception.} The function \texttt{raise}s, and control jumps~--- past the caller, past \emph{its} caller~--- until something catches it (in Python, \texttt{except}). This keeps the \emph{happy path} clean: the body reads as if nothing can go wrong, because the error path is elsewhere. Its weakness is the mirror image: the control flow is invisible at the call site. You cannot tell, from \texttt{note\ =}\allowbreak{}\texttt{\ get\_note(id)}, that it might explode.
+\item
+  \textbf{Let it crash.} Do nothing~--- let the exception propagate all the way out and take the process down. Inside a request this is usually wrong. But at the \emph{boundaries} of a system it is sometimes the honest choice: a misconfigured \texttt{DATABASE\_URL} at startup \emph{should} crash the process immediately (\hyperref[ch:15-structuring-the-application]{Chapter 15}'s startup checks do exactly this~--- \textbf{failing fast}), because a server that starts in a broken state is worse than one that refuses to start.
+\end{enumerate}
+
+\noindent{}Python's culture leans on exceptions, and the Notes API follows suit: exceptions for the unexpected, ordinary return values for outcomes that are a normal part of the job. Which brings us to the distinction that decides which tool to reach for.
+
+\subsection*{Expected vs. exceptional: the distinction that drives every choice}\phantomsection\label{16-logging-error-handling:expected-vs-exceptional-the-distinction-that-drives-every-choice}
+
+The single most useful question in error handling is: \textbf{is this failure a normal part of the operation, or a genuine surprise?}
+
+\begin{itemize}
+\tightlist
+\item
+  A \texttt{POST\ /notes/} with empty \texttt{content} is \textbf{expected}. Clients send bad input constantly; rejecting it is part of the endpoint's \emph{job}, not an emergency. So the route handler treats it as ordinary control flow~--- \texttt{return\ jsonify(\{"error":}\allowbreak{}\texttt{\ .}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{\}),}\allowbreak{}\texttt{\ 400}, exactly as you saw in \hyperref[ch:15-structuring-the-application]{Chapter 15}. No exception is raised, because nothing exceptional happened.
+\item
+  A note that does not exist for \texttt{GET\ /notes/\textless{}id\textgreater{}} is also \textbf{expected}~--- \texttt{return\ ...,\ 404}. A normal outcome, handled with a normal return.
+\item
+  The database connection dropping in the middle of a query is \textbf{exceptional}. There is nothing the route handler can sensibly do about it; repairing the database is not part of the endpoint's job. So it is allowed to raise and propagate.
+\end{itemize}
+
+\noindent{}Get this distinction right and a clean separation falls out: \textbf{route handlers handle the expected errors locally with explicit returns, and let the exceptional ones fly past them.} The handler stays focused on its real work, because it is not littered with defensive \texttt{try/except} blocks guarding against things it could not fix anyway.
+
+\subsection*{Where to handle an error: the handling boundary}\phantomsection\label{16-logging-error-handling:where-to-handle-an-error-the-handling-boundary}
+
+If a function catches an exception it cannot do anything useful about, it has made things \emph{worse}~--- it has hidden the problem without solving it. The rule is simple: \textbf{handle an error only where you can actually do something about it.} Everywhere else, let it propagate.
+
+For most exceptions in a web application, the place that can ``do something'' is not the route handler at all~--- it is a single, well-defined \textbf{handling boundary} at the very edge of request processing. That boundary has exactly the context needed for the one decision that \emph{can} be made about an unexpected failure: log it in full, and turn it into a safe HTTP 500 so the client gets a clean response and the process keeps serving everyone else.
+
+That is precisely what \texttt{app/errors.py}, below, is~--- the Notes API's handling boundary, made concrete. Its \texttt{@app.}\allowbreak{}\texttt{errorhandler(Exception)} catch-all is the one place in the whole application that catches the truly unexpected. \emph{Because it exists}, no other code needs a bare \texttt{try/except} to keep the server alive~--- every route handler and database function can let exceptions propagate, trusting the boundary to catch them. One place to log, one place to convert, one consistent error shape for clients.
+
+\begin{warnbox}
+
+\textbf{Warning:} A handling boundary is a safety net, not a license to wrap your own bugs in a smile. It catches \emph{unexpected} failures so one bad request cannot kill the process~--- it does not excuse code that should have validated its input or checked its preconditions in the first place.
+
+\end{warnbox}
+
+\subsection*{When you cannot handle an error meaningfully}\phantomsection\label{16-logging-error-handling:when-you-cannot-handle-an-error-meaningfully}
+
+Sooner or later you will write a \texttt{try} and stare at the \texttt{except}, unsure what to put in it. The answer is almost never this:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{try}\NormalTok{:}
+\NormalTok{    do\_something()}
+\ControlFlowTok{except} \PreprocessorTok{Exception}\NormalTok{:}
+    \ControlFlowTok{pass}          \CommentTok{\# \textless{}{-} often the single most expensive line in a codebase}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Swallowing an exception silently is how a system acquires \textbf{unknown unknowns} (\hyperref[ch:15-structuring-the-application]{Chapter 15}): the failure happened, nobody was told, and the symptom surfaces hours later somewhere unrelated. If you cannot handle an error meaningfully, you have three honest options, in order of preference:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Don't catch it.} Let it propagate to the handling boundary, which will log and convert it. This is the default, and usually the right one.
+\item
+  \textbf{Catch, add context, and re-raise.} If you can make the error \emph{more useful}~--- attach which note ID failed, which external service timed out~--- do that, then re-raise so the boundary still sees it. Python's \texttt{raise\ NewError(.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{)\ from\ err} preserves the original cause (\textbf{exception chaining}), so you keep the full story.
+\item
+  \textbf{Catch and degrade deliberately.} If, and only if, there is a sensible fallback~--- serve a cached value, skip an optional enrichment~--- catch the \emph{specific} exception (never bare \texttt{Exception}), log that you are degrading, and continue. That is graceful degradation (→ \hyperref[ch:37-reliability]{Chapter 37}), and it is a \emph{decision}, not an accident.
+\end{enumerate}
+
+\noindent{}What unifies all three is that the error is never silently lost. \textbf{Catch narrowly, or not at all.} A bare \texttt{except\ Exception:\ pass} is the code equivalent of unplugging the smoke detector because the beeping is annoying.
+
+\subsection*{Designing errors out of existence}\phantomsection\label{16-logging-error-handling:designing-errors-out-of-existence}
+
+The best error handling is the error you never have to handle. A surprising amount of error-handling code exists only because the interface \emph{invited} the error, and a small design change would make it impossible.
+
+Consider \texttt{DELETE\ /}\allowbreak{}\texttt{notes/}\allowbreak{}\texttt{\textless{}id\textgreater{}} for a note that is already gone. You can treat it as an error (404)~--- or you can decide that ``delete'' means ``ensure this note does not exist,'' in which case deleting something already absent is simply \emph{success} (\texttt{204}), and an entire error path disappears. That is \textbf{idempotency} (→ \hyperref[ch:37-reliability]{Chapter 37}), and also an instance of a deeper principle~--- \emph{defining errors out of existence}: shape your interfaces so the common case is not an error at all. Every error you design away is error-handling code that nobody has to write, read, or get wrong. (The Notes API keeps the 404: a client deleting a note it never saw probably has a bug worth reporting. Either choice is defensible; what matters is that it is deliberate and documented.)
+
+This is why error handling belongs to \emph{design}, not just coding. A function's failures are part of its \textbf{contract}, as much as its parameters and return type. When you write a function, decide deliberately: what does it promise, how does it signal a broken promise, and have you made the easy cases impossible to break? Document the exceptions a function can raise the same way you document what it returns~--- the reader is always asking ``what can go wrong here?'', and a well-designed error contract answers it for them.
+
+With those principles in hand, the implementation is almost mechanical. Flask gives us \textbf{error handlers}: functions that are called when a specific HTTP error or exception is \emph{raised}~--- by Flask itself, by \texttt{abort()}, or by a bug. (A route handler that \emph{returns} an error response, such as \texttt{return\ jsonify(.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{),}\allowbreak{}\texttt{\ 404}, does not pass through them.) Instead of letting Flask return its default HTML error pages, we register handlers that return JSON~--- consistent with the rest of the API, and structured so that \emph{expected} errors are reported cleanly while \emph{unexpected} ones are logged in full and reduced to a safe, generic response.
+
+Create \texttt{app/errors.py}:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 16.3}\enspace app/errors.py}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Error handlers for the Notes API.}
+
+\CommentTok{Flask calls these functions when an HTTP error or an exception is raised}
+\CommentTok{during request handling. Each handler receives the error and returns a}
+\CommentTok{JSON response.}
+
+\CommentTok{Without these handlers:}
+\CommentTok{  {-} HTTP 404 returns Flask\textquotesingle{}s default HTML error page}
+\CommentTok{  {-} Unhandled exceptions return a generic 500 HTML page}
+\CommentTok{  {-} The client gets HTML when it expects JSON}
+
+\CommentTok{With these handlers:}
+\CommentTok{  {-} Every error has the same shape: \{"error": "description"\}}
+\CommentTok{  {-} Unexpected exceptions are logged once, with their full traceback}
+\CommentTok{  {-} The client always gets JSON, whatever went wrong}
+
+\CommentTok{The request{-}logging middleware already records each response\textquotesingle{}s status}
+\CommentTok{code, so these handlers log only what it cannot see: the traceback of an}
+\CommentTok{unexpected exception.}
+\CommentTok{"""}
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask, jsonify, request}
+\ImportTok{from}\NormalTok{ werkzeug.exceptions }\ImportTok{import}\NormalTok{ HTTPException}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ register\_error\_handlers(app: Flask) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Register error handlers on the Flask application.}
+
+\CommentTok{    Call this from create\_app() after creating the Flask instance.}
+\CommentTok{    """}
+
+    \AttributeTok{@app.errorhandler}\NormalTok{(}\DecValTok{404}\NormalTok{)}
+    \KeywordTok{def}\NormalTok{ not\_found(error):}
+        \CommentTok{"""}
+\CommentTok{        HTTP 404 Not Found — no route matches the URL.}
+
+\CommentTok{        Flask raises this automatically, including when a URL converter}
+\CommentTok{        fails: /notes/abc does not match /notes/\textless{}int:note\_id\textgreater{}.}
+\CommentTok{        """}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Not found"}\NormalTok{\}), }\DecValTok{404}
+
+    \AttributeTok{@app.errorhandler}\NormalTok{(}\DecValTok{405}\NormalTok{)}
+    \KeywordTok{def}\NormalTok{ method\_not\_allowed(error):}
+        \CommentTok{"""}
+\CommentTok{        HTTP 405 Method Not Allowed — the route exists, but not for this method.}
+
+\CommentTok{        Example: sending DELETE to /health, which only accepts GET.}
+\CommentTok{        HTTP requires a 405 to carry an Allow header listing the methods}
+\CommentTok{        that do work; a new response must add it back.}
+\CommentTok{        """}
+\NormalTok{        allow }\OperatorTok{=} \StringTok{", "}\NormalTok{.join(}\BuiltInTok{sorted}\NormalTok{(error.valid\_methods }\KeywordTok{or}\NormalTok{ []))}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Method not allowed"}\NormalTok{\}), }\DecValTok{405}\NormalTok{, \{}\StringTok{"Allow"}\NormalTok{: allow\}}
+
+    \AttributeTok{@app.errorhandler}\NormalTok{(}\DecValTok{429}\NormalTok{)}
+    \KeywordTok{def}\NormalTok{ too\_many\_requests(error):}
+        \CommentTok{"""}
+\CommentTok{        HTTP 429 Too Many Requests — rate limit exceeded.}
+\CommentTok{        Relevant after rate limiting is added (Chapter 38).}
+\CommentTok{        """}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\StringTok{"Too many requests, please slow down"}\NormalTok{\}), }\DecValTok{429}
+
+    \AttributeTok{@app.errorhandler}\NormalTok{(HTTPException)}
+    \KeywordTok{def}\NormalTok{ handle\_http\_exception(error):}
+        \CommentTok{"""}
+\CommentTok{        Any other HTTP error from Flask, Werkzeug, or abort(): 400 for a}
+\CommentTok{        malformed request, 413 for a body that is too large, and so on.}
+
+\CommentTok{        error.description is Werkzeug\textquotesingle{}s one{-}sentence explanation of the error.}
+\CommentTok{        """}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: error.description\}), error.code}
+
+    \AttributeTok{@app.errorhandler}\NormalTok{(}\PreprocessorTok{Exception}\NormalTok{)}
+    \KeywordTok{def}\NormalTok{ handle\_unexpected\_exception(error):}
+        \CommentTok{"""}
+\CommentTok{        The handling boundary: any exception that is not an HTTP error.}
+
+\CommentTok{        Flask chooses a handler by the exception\textquotesingle{}s class, so an unexpected}
+\CommentTok{        exception (a dropped database connection, a bug) arrives here. That is}
+\CommentTok{        why this file has no @app.errorhandler(500): for these errors it would}
+\CommentTok{        never run, because this handler matches first.}
+
+\CommentTok{        We ALWAYS log the full traceback here. Without this, the error}
+\CommentTok{        silently becomes a 500 response and the traceback is lost}
+\CommentTok{        (especially in production where there is no terminal to watch).}
+\CommentTok{        """}
+        \CommentTok{\# logger.exception() logs at ERROR level and adds the traceback}
+\NormalTok{        logger.exception(}\StringTok{"Unhandled exception in }\SpecialCharTok{\%s}\StringTok{ }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, request.method, request.path)}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}
+            \StringTok{"error"}\NormalTok{: }\StringTok{"An unexpected error occurred"}\NormalTok{,}
+            \CommentTok{\# Do NOT include the exception message or traceback in the response.}
+            \CommentTok{\# Internal error details can reveal security{-}sensitive information}
+            \CommentTok{\# (database schemas, file paths, internal implementation details).}
+\NormalTok{        \}), }\DecValTok{500}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\begin{warnbox}
+
+\textbf{Critical security note on error responses:}
+
+\end{warnbox}
+
+\noindent{}The \texttt{handle\_}\allowbreak{}\texttt{unexpected\_}\allowbreak{}\texttt{exception} handler deliberately does not include the exception message in the JSON response. Here is why:
+
+If your database query fails with:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+psycopg2.ProgrammingError: column "password_hash" of relation "users" does not exist
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Returning this to the client reveals:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  You are using PostgreSQL
+\item
+  You have a \texttt{users} table
+\item
+  You have a \texttt{password\_hash} column (or tried to)
+\end{enumerate}
+
+\noindent{}This information helps an attacker understand your database schema. The log entry contains the full exception~--- developers can find it there. The client response contains only the generic message.
+
+Step back and notice the shape of what you just built. The per-status handlers (\texttt{404}, \texttt{405}, \texttt{429}) report the \emph{expected} errors cleanly. The two catch-alls~--- \texttt{@app.}\allowbreak{}\texttt{errorhandler(HTTPException)} and \texttt{@app.}\allowbreak{}\texttt{errorhandler(Exception)}~--- are the \textbf{handling boundary} from the start of this section, made real: the single place the whole application trusts to catch the unexpected, log it in full, and reduce it to one safe response shape. That boundary is \emph{why} every route handler and database function elsewhere in the Notes API can let exceptions propagate instead of smothering them in defensive \texttt{try/except} blocks. The discipline and the implementation are the same idea seen from two sides.
+
+\setcounter{section}{5}
+\section{Integrating Everything into the Application Factory}\label{16-logging-error-handling:166-integrating-everything-into-the-application-factory}
+
+Update \texttt{app/\_\_init\_\_.py} to use the new logging, middleware, and error handling:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 16.4}\enspace app/\_\_init\_\_.py (updated)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""}
+\CommentTok{Application factory for the Notes API.}
+\CommentTok{"""}
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Flask}
+\ImportTok{from}\NormalTok{ app }\ImportTok{import}\NormalTok{ startup}
+\ImportTok{from}\NormalTok{ app.config }\ImportTok{import}\NormalTok{ SECRET\_KEY, FLASK\_DEBUG}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ close\_db, init\_db}
+\ImportTok{from}\NormalTok{ app.errors }\ImportTok{import}\NormalTok{ register\_error\_handlers}
+\ImportTok{from}\NormalTok{ app.logging\_config }\ImportTok{import}\NormalTok{ configure\_logging}
+\ImportTok{from}\NormalTok{ app.middleware }\ImportTok{import}\NormalTok{ register\_middleware}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ create\_app() }\OperatorTok{{-}\textgreater{}}\NormalTok{ Flask:}
+    \CommentTok{"""}
+\CommentTok{    Create and configure a Flask application instance.}
+\CommentTok{    """}
+    \CommentTok{\# Configure logging first, so the startup checks and everything}
+    \CommentTok{\# after them report through it}
+\NormalTok{    configure\_logging()}
+\NormalTok{    startup.run()}
+
+\NormalTok{    logger.info(}\StringTok{"Creating Flask application..."}\NormalTok{)}
+\NormalTok{    app }\OperatorTok{=}\NormalTok{ Flask(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+    \CommentTok{\# Apply configuration}
+\NormalTok{    app.config[}\StringTok{"SECRET\_KEY"}\NormalTok{] }\OperatorTok{=}\NormalTok{ SECRET\_KEY}
+\NormalTok{    app.config[}\StringTok{"DEBUG"}\NormalTok{] }\OperatorTok{=}\NormalTok{ FLASK\_DEBUG}
+
+    \CommentTok{\# Register database teardown}
+\NormalTok{    app.teardown\_appcontext(close\_db)}
+
+    \CommentTok{\# Register the request hooks and the error handlers}
+\NormalTok{    register\_middleware(app)}
+\NormalTok{    register\_error\_handlers(app)}
+
+    \CommentTok{\# Register Blueprints}
+    \ImportTok{from}\NormalTok{ app.routes.health }\ImportTok{import}\NormalTok{ health\_bp}
+    \ImportTok{from}\NormalTok{ app.routes.notes }\ImportTok{import}\NormalTok{ notes\_bp}
+\NormalTok{    app.register\_blueprint(health\_bp)}
+\NormalTok{    app.register\_blueprint(notes\_bp)}
+
+    \CommentTok{\# Initialize database schema}
+\NormalTok{    init\_db(app)}
+
+\NormalTok{    logger.info(}\StringTok{"Flask application created successfully."}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ app}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}The new modules can be imported at the top of the file: unlike the route modules, they do not import anything from the \texttt{app} package that could import them back.
+
+With logging in place, the \texttt{print()} calls left over from Chapters 14 and 15 should go too. In \texttt{app/startup.py}, the status messages become log calls, and \texttt{\_fail()} logs at CRITICAL before it exits:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/startup.py (changes)}
+\ImportTok{import}\NormalTok{ logging}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+\CommentTok{\# In check\_database(), replace the print() with:}
+\NormalTok{        logger.info(}\StringTok{"Database connectivity: OK"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ run():}
+    \CommentTok{"""Run the checks that apply wherever the application starts."""}
+\NormalTok{    logger.info(}\StringTok{"Running startup checks..."}\NormalTok{)}
+\NormalTok{    check\_python\_version()}
+\NormalTok{    check\_secret\_key()}
+\NormalTok{    check\_database()}
+\NormalTok{    logger.info(}\StringTok{"All startup checks passed."}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ \_fail(message: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""Log the error and exit with code 1."""}
+\NormalTok{    logger.critical(}\StringTok{"Startup failed: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, message)}
+\NormalTok{    sys.exit(}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}In the same way, \texttt{init\_db()} in \texttt{app/database.py} ends with \texttt{logger.}\allowbreak{}\texttt{info("Database\ initialized.}\allowbreak{}\texttt{")} (with \texttt{logger\ =}\allowbreak{}\texttt{\ logging.}\allowbreak{}\texttt{getLogger(\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{name\_}\allowbreak{}\texttt{\_}\allowbreak{}\texttt{)} at the top of that module), and \texttt{run.py} announces the server through a logger named \texttt{"run"}:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# run.py (changes)}
+\ImportTok{import}\NormalTok{ logging}
+\NormalTok{...}
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    check\_port(HOST, PORT)}
+\NormalTok{    logging.getLogger(}\StringTok{"run"}\NormalTok{).info(}\StringTok{"Starting Notes API on http://}\SpecialCharTok{\%s}\StringTok{:}\SpecialCharTok{\%d}\StringTok{"}\NormalTok{, HOST, PORT)}
+\NormalTok{    app.run(host}\OperatorTok{=}\NormalTok{HOST, port}\OperatorTok{=}\NormalTok{PORT, debug}\OperatorTok{=}\NormalTok{FLASK\_DEBUG)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}One message still bypasses logging on purpose: \texttt{\_require()} in \texttt{app/config.py}, which reports a missing required variable. It runs when the package is first imported, before logging exists~--- and logging's own settings come from that same configuration~--- so it keeps writing straight to stderr.
+
+\setcounter{section}{6}
+\section{Adding Logging to Route Handlers}\label{16-logging-error-handling:167-adding-logging-to-route-handlers}
+
+With the logging system in place, add logging to the route handlers. Each handler now has a logger that records what it is doing.
+
+Here is the updated \texttt{app/}\allowbreak{}\texttt{routes/}\allowbreak{}\texttt{notes.py} with logging integrated. The small \texttt{\_invalid()} helper gives every validation failure the same warning and the same response, so no branch can forget to log:
+
+\begin{codeboxcap}{\textcolor{accent}{Listing 16.5}\enspace app/routes/notes.py (with logging)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{from}\NormalTok{ flask }\ImportTok{import}\NormalTok{ Blueprint, request, jsonify}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ get\_db, sql, row\_to\_note}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+\CommentTok{\# This logger\textquotesingle{}s name will be "app.routes.notes" because \_\_name\_\_ in this}
+\CommentTok{\# module is "app.routes.notes". When this logger emits a message, it}
+\CommentTok{\# travels up to the root logger and is handled by our configured handlers.}
+
+\NormalTok{notes\_bp }\OperatorTok{=}\NormalTok{ Blueprint(}\StringTok{"notes"}\NormalTok{, }\VariableTok{\_\_name\_\_}\NormalTok{, url\_prefix}\OperatorTok{=}\StringTok{"/notes"}\NormalTok{)}
+
+\KeywordTok{def}\NormalTok{ \_invalid(message: }\BuiltInTok{str}\NormalTok{):}
+    \CommentTok{"""Log a rejected request and build its 400 response."""}
+    \CommentTok{\# Log the reason, never the note\textquotesingle{}s content (it may be private)}
+\NormalTok{    logger.warning(}\StringTok{"POST /notes/ rejected: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, message)}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: message\}), }\DecValTok{400}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(}\StringTok{"SELECT id, content, created\_at FROM notes ORDER BY id DESC"}\NormalTok{)}
+\NormalTok{    notes }\OperatorTok{=}\NormalTok{ [row\_to\_note(row) }\ControlFlowTok{for}\NormalTok{ row }\KeywordTok{in}\NormalTok{ cursor.fetchall()]}
+\NormalTok{    logger.debug(}\StringTok{"Returning }\SpecialCharTok{\%d}\StringTok{ notes."}\NormalTok{, }\BuiltInTok{len}\NormalTok{(notes))}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"notes"}\NormalTok{: notes, }\StringTok{"count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(notes)\}), }\DecValTok{200}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ create\_note():}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(data, }\BuiltInTok{dict}\NormalTok{):}
+        \ControlFlowTok{return}\NormalTok{ \_invalid(}\StringTok{"Request body must be a JSON object"}\NormalTok{)}
+
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ data.get(}\StringTok{"content"}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ content }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ \_invalid(}\StringTok{"\textquotesingle{}content\textquotesingle{} is required"}\NormalTok{)}
+    \ControlFlowTok{if} \KeywordTok{not} \BuiltInTok{isinstance}\NormalTok{(content, }\BuiltInTok{str}\NormalTok{):}
+        \ControlFlowTok{return}\NormalTok{ \_invalid(}\StringTok{"\textquotesingle{}content\textquotesingle{} must be a string"}\NormalTok{)}
+
+\NormalTok{    content }\OperatorTok{=}\NormalTok{ content.strip()}
+    \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ content:}
+        \ControlFlowTok{return}\NormalTok{ \_invalid(}\StringTok{"\textquotesingle{}content\textquotesingle{} cannot be empty"}\NormalTok{)}
+    \ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(content) }\OperatorTok{\textgreater{}} \DecValTok{10\_000}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ \_invalid(}\StringTok{"\textquotesingle{}content\textquotesingle{} cannot exceed 10,000 characters"}\NormalTok{)}
+
+    \CommentTok{\# No try/except here: if the database fails, the exception propagates}
+    \CommentTok{\# to the handling boundary in errors.py, which logs it once, in full.}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"INSERT INTO notes (content) VALUES (?) RETURNING id, content, created\_at"}\NormalTok{),}
+\NormalTok{        (content,),}
+\NormalTok{    )}
+\NormalTok{    note }\OperatorTok{=}\NormalTok{ row\_to\_note(cursor.fetchone())}
+\NormalTok{    db.commit()}
+\NormalTok{    logger.info(}\StringTok{"Created note id=}\SpecialCharTok{\%d}\StringTok{."}\NormalTok{, note[}\StringTok{"id"}\NormalTok{])}
+    \ControlFlowTok{return}\NormalTok{ jsonify(note), }\DecValTok{201}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"GET"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ get\_note(note\_id):}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ get\_db().cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"SELECT id, content, created\_at FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{        logger.info(}\StringTok{"Note id=}\SpecialCharTok{\%d}\StringTok{ not found."}\NormalTok{, note\_id)}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+    \ControlFlowTok{return}\NormalTok{ jsonify(row\_to\_note(row)), }\DecValTok{200}
+
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"DELETE"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ delete\_note(note\_id):}
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(sql(}\StringTok{"DELETE FROM notes WHERE id = ?"}\NormalTok{), (note\_id,))}
+\NormalTok{    db.commit()}
+    \ControlFlowTok{if}\NormalTok{ cursor.rowcount }\OperatorTok{==} \DecValTok{0}\NormalTok{:}
+\NormalTok{        logger.info(}\StringTok{"DELETE note id=}\SpecialCharTok{\%d}\StringTok{: not found."}\NormalTok{, note\_id)}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+\NormalTok{    logger.info(}\StringTok{"Deleted note id=}\SpecialCharTok{\%d}\StringTok{."}\NormalTok{, note\_id)}
+    \ControlFlowTok{return} \StringTok{""}\NormalTok{, }\DecValTok{204}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeboxcap}
+
+\noindent{}Notice what \texttt{create\_note} does \emph{not} have: a \texttt{try/except} around the database work. An earlier draft of this handler caught the exception, logged it, and re-raised it~--- which logs every database failure twice, once here and once at the handling boundary, and adds no information. The boundary already knows the method and path; the traceback shows the handler.
+
+\setcounter{section}{7}
+\section{What the Log Output Looks Like}\label{16-logging-error-handling:168-what-the-log-output-looks-like}
+
+With everything configured, here is what the log output looks like for a sequence of requests:
+
+\subsection*{Development (human-readable format)}\phantomsection\label{16-logging-error-handling:development-human-readable-format}
+
+\begin{outputbox}
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+2024-01-15 14:32:00.001 INFO     app.logging_config | Logging configured. level=INFO format=human log_dir=(console only)
+2024-01-15 14:32:00.002 INFO     app.startup        | Running startup checks...
+2024-01-15 14:32:00.003 INFO     app.startup        | All startup checks passed.
+2024-01-15 14:32:00.004 INFO     app                | Creating Flask application...
+2024-01-15 14:32:00.045 INFO     app.database       | Database initialized.
+2024-01-15 14:32:00.046 INFO     app                | Flask application created successfully.
+2024-01-15 14:32:00.047 INFO     run                | Starting Notes API on http://127.0.0.1:5000
+
+2024-01-15 14:32:15.100 INFO     app.middleware     | → POST /notes/ (from 127.0.0.1)
+2024-01-15 14:32:15.103 INFO     app.routes.notes   | Created note id=1.
+2024-01-15 14:32:15.104 INFO     app.middleware     | ← 201 in 4.1ms
+
+2024-01-15 14:32:20.200 INFO     app.middleware     | → GET /notes/ (from 127.0.0.1)
+2024-01-15 14:32:20.202 INFO     app.middleware     | ← 200 in 1.8ms
+
+2024-01-15 14:32:25.300 INFO     app.middleware     | → GET /notes/999 (from 127.0.0.1)
+2024-01-15 14:32:25.301 INFO     app.routes.notes   | Note id=999 not found.
+2024-01-15 14:32:25.301 WARNING  app.middleware     | ← 404 in 0.9ms
+
+2024-01-15 14:32:30.400 INFO     app.middleware     | → POST /notes/ (from 127.0.0.1)
+2024-01-15 14:32:30.401 WARNING  app.routes.notes   | POST /notes/ rejected: 'content' is required
+2024-01-15 14:32:30.401 WARNING  app.middleware     | ← 400 in 0.8ms
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}With SQLite there is no ``Database connectivity: OK'' line: the database check has nothing to connect to.
+
+This output tells the complete story of each request: when it arrived, what happened, what the response was, and how long it took.
+
+\subsection*{Production (JSON format, with LOG\_FORMAT=json)}\phantomsection\label{16-logging-error-handling:production-json-format-with-log-formatjson}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}\DataTypeTok{"timestamp"}\FunctionTok{:}\StringTok{"2024{-}01{-}15T14:32:00.001Z"}\FunctionTok{,}\DataTypeTok{"level"}\FunctionTok{:}\StringTok{"INFO"}\FunctionTok{,}\DataTypeTok{"logger"}\FunctionTok{:}\StringTok{"app.logging\_config"}\FunctionTok{,}\DataTypeTok{"message"}\FunctionTok{:}\StringTok{"Logging configured. level=INFO format=json log\_dir=/var/log/notes{-}api"}\FunctionTok{,}\DataTypeTok{"function"}\FunctionTok{:}\StringTok{"configure\_logging"}\FunctionTok{,}\DataTypeTok{"line"}\FunctionTok{:}\DecValTok{233}\FunctionTok{\}}
+\FunctionTok{\{}\DataTypeTok{"timestamp"}\FunctionTok{:}\StringTok{"2024{-}01{-}15T14:32:15.100Z"}\FunctionTok{,}\DataTypeTok{"level"}\FunctionTok{:}\StringTok{"INFO"}\FunctionTok{,}\DataTypeTok{"logger"}\FunctionTok{:}\StringTok{"app.middleware"}\FunctionTok{,}\DataTypeTok{"message"}\FunctionTok{:}\StringTok{"→ POST /notes/ (from 10.0.0.5)"}\FunctionTok{,}\DataTypeTok{"function"}\FunctionTok{:}\StringTok{"log\_request\_start"}\FunctionTok{,}\DataTypeTok{"line"}\FunctionTok{:}\DecValTok{44}\FunctionTok{\}}
+\FunctionTok{\{}\DataTypeTok{"timestamp"}\FunctionTok{:}\StringTok{"2024{-}01{-}15T14:32:15.103Z"}\FunctionTok{,}\DataTypeTok{"level"}\FunctionTok{:}\StringTok{"INFO"}\FunctionTok{,}\DataTypeTok{"logger"}\FunctionTok{:}\StringTok{"app.routes.notes"}\FunctionTok{,}\DataTypeTok{"message"}\FunctionTok{:}\StringTok{"Created note id=1."}\FunctionTok{,}\DataTypeTok{"function"}\FunctionTok{:}\StringTok{"create\_note"}\FunctionTok{,}\DataTypeTok{"line"}\FunctionTok{:}\DecValTok{54}\FunctionTok{\}}
+\FunctionTok{\{}\DataTypeTok{"timestamp"}\FunctionTok{:}\StringTok{"2024{-}01{-}15T14:32:15.104Z"}\FunctionTok{,}\DataTypeTok{"level"}\FunctionTok{:}\StringTok{"INFO"}\FunctionTok{,}\DataTypeTok{"logger"}\FunctionTok{:}\StringTok{"app.middleware"}\FunctionTok{,}\DataTypeTok{"message"}\FunctionTok{:}\StringTok{"← 201 in 4.1ms"}\FunctionTok{,}\DataTypeTok{"function"}\FunctionTok{:}\StringTok{"log\_request\_end"}\FunctionTok{,}\DataTypeTok{"line"}\FunctionTok{:}\DecValTok{83}\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Each line is a single JSON object. A log aggregation tool (like Elasticsearch/Kibana, Datadog, or AWS CloudWatch) parses these lines and makes them searchable:
+
+\begin{itemize}
+\tightlist
+\item
+  ``Show me all ERROR messages in the past hour''
+\item
+  ``Show me all requests to /notes/ that took longer than 100ms''
+\item
+  ``How many 400 responses did we return today?''
+\end{itemize}
+
+\noindent{}JSON logs enable these queries. Human-readable logs do not.
+
+\setcounter{section}{8}
+\section{Logging Best Practices}\label{16-logging-error-handling:169-logging-best-practices}
+
+\subsection*{What to log (and what not to log)}\phantomsection\label{16-logging-error-handling:what-to-log-and-what-not-to-log}
+
+\textbf{Log these:}
+
+\begin{itemize}
+\tightlist
+\item
+  Every request arrival and departure (done by middleware)
+\item
+  Every resource creation or deletion (\texttt{Created\ note\ id=}\allowbreak{}\texttt{42}, \texttt{Deleted\ note\ id=7})
+\item
+  Every validation failure with the reason (\texttt{\textquotesingle{}content\textquotesingle{}\ field\ missing})
+\item
+  Every external service call (database, email, third-party API)
+\item
+  Every configuration decision made at startup
+\item
+  Every error, with its full traceback
+\end{itemize}
+
+\noindent{}\textbf{Do not log these:}
+
+\begin{itemize}
+\tightlist
+\item
+  Passwords, tokens, secret keys, or any credential
+\item
+  Full request bodies that might contain sensitive data (log the structure, not the content)
+\item
+  Personal information (email addresses, names, addresses)
+\item
+  Credit card numbers, social security numbers, or any PII
+\item
+  High-frequency data that would fill your log files (e.g., do not log inside a loop that runs 10,000 times per request)
+\end{itemize}
+
+\subsection*{Using the correct log level}\phantomsection\label{16-logging-error-handling:using-the-correct-log-level}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# DEBUG — visible only when LOG\_LEVEL=DEBUG; for detailed tracing}
+\NormalTok{logger.debug(}\StringTok{"Fetching note id=}\SpecialCharTok{\%d}\StringTok{ from database."}\NormalTok{, note\_id)}
+\NormalTok{logger.debug(}\StringTok{"SQL query: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, query)}
+
+\CommentTok{\# INFO — normal operational events; things that should happen}
+\NormalTok{logger.info(}\StringTok{"Note id=}\SpecialCharTok{\%d}\StringTok{ created successfully."}\NormalTok{, note\_id)}
+\NormalTok{logger.info(}\StringTok{"Server starting on }\SpecialCharTok{\%s}\StringTok{:}\SpecialCharTok{\%d}\StringTok{"}\NormalTok{, host, port)}
+
+\CommentTok{\# }\AlertTok{WARNING}\CommentTok{ — something unexpected, but the operation succeeded}
+\NormalTok{logger.warning(}\StringTok{"POST /notes/ — content exceeds recommended length (}\SpecialCharTok{\%d}\StringTok{ chars)."}\NormalTok{, length)}
+\NormalTok{logger.warning(}\StringTok{"Database connection took }\SpecialCharTok{\%.1f}\StringTok{s — pool may be exhausted."}\NormalTok{, elapsed)}
+
+\CommentTok{\# ERROR — an operation failed; intervention may be needed}
+\NormalTok{logger.error(}\StringTok{"Failed to insert note into database."}\NormalTok{, exc\_info}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\NormalTok{logger.error(}\StringTok{"Database connection failed: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, error)}
+
+\CommentTok{\# CRITICAL — the application cannot continue}
+\NormalTok{logger.critical(}\StringTok{"Cannot bind to port }\SpecialCharTok{\%d}\StringTok{ — exiting."}\NormalTok{, port)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\subsection*{String formatting in log calls}\phantomsection\label{16-logging-error-handling:string-formatting-in-log-calls}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Wrong — string concatenation evaluates the format even if the message is filtered}
+\NormalTok{logger.debug(}\StringTok{"Processing note: "} \OperatorTok{+} \BuiltInTok{str}\NormalTok{(note\_data))}
+
+\CommentTok{\# Wrong — f{-}string evaluates the format even if the message is filtered}
+\NormalTok{logger.debug(}\SpecialStringTok{f"Processing note: }\SpecialCharTok{\{}\NormalTok{note\_data}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+
+\CommentTok{\# Correct — pass the format string and arguments separately}
+\CommentTok{\# The logging module only calls str(note\_data) if DEBUG messages are enabled}
+\NormalTok{logger.debug(}\StringTok{"Processing note: }\SpecialCharTok{\%s}\StringTok{"}\NormalTok{, note\_data)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The \texttt{\%s} format is evaluated lazily. If the logger's level is INFO, DEBUG messages are filtered before formatting occurs~--- avoiding unnecessary string operations. With f-strings, the formatting always occurs, even when the message is discarded. For high-frequency log calls, this can be a meaningful performance difference.
+
+\setcounter{section}{9}
+\section{Debugging: From a Failure to Its Cause}\label{16-logging-error-handling:1610-debugging-from-a-failure-to-its-cause}
+
+Logs tell you \emph{that} something went wrong, and roughly where. \textbf{Debugging} is the work of getting from there to \emph{why}. Experienced engineers are not faster because they guess better. They are faster because they follow a method, and they stop guessing sooner.
+
+\subsection*{A method, not a mood}\phantomsection\label{16-logging-error-handling:a-method-not-a-mood}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Reproduce it.} Make the failure happen on demand: one \texttt{curl}, one test, one input. A bug you cannot trigger is a bug you cannot confirm you have fixed. If it happens only in production, find what differs: the data, the configuration, the load, or the database (\hyperref[ch:39-local-vs-production]{Chapter 39} is a whole chapter about those differences).
+\item
+  \textbf{Read the evidence before touching the code.} Read the traceback, the log lines around it, and the exact input. Most bugs announce their cause, if you read to the end.
+\item
+  \textbf{Form one hypothesis, and test it.} ``The note is missing, and nothing checks for that.'' Then check exactly that: add one log line, one assertion, or one breakpoint. Change one thing at a time, or you will not know which change mattered.
+\item
+  \textbf{Narrow it down.} When the evidence does not point anywhere, halve the search space: which half of the code, the input, or the history contains the bug? Repeat.
+\item
+  \textbf{Fix it, and prove it with a test.} Write the test that fails \emph{before} the fix (\hyperref[ch:17-build-process]{Chapter 17}, section 17.8), so the bug cannot come back unnoticed.
+\end{enumerate}
+
+\subsection*{Reading a traceback}\phantomsection\label{16-logging-error-handling:reading-a-traceback}
+
+Suppose someone ``simplified'' \texttt{get\_note} and removed the check for a missing note. A request for a note that does not exist now gets a \texttt{500} instead of a \texttt{404}, and the catch-all handler logs this:
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+2024-01-15 14:00:05.101 ERROR    app.errors         | Unhandled exception in GET /notes/99999
+Traceback (most recent call last):
+  File ".../site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File ".../site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/you/notes-api/app/routes/notes.py", line 73, in get_note
+    return jsonify(row_to_note(row)), 200
+                   ^^^^^^^^^^^^^^^^
+  File "/home/you/notes-api/app/database.py", line 84, in row_to_note
+    note = dict(row)
+TypeError: 'NoneType' object is not iterable
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Read a Python traceback \textbf{from the bottom up}:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{The last line is what happened}: a \texttt{TypeError}, because something tried to iterate over \texttt{None}.
+\item
+  \textbf{The frame just above it is where it happened}: \texttt{dict(row)} in \texttt{row\_to\_note}, so \texttt{row} was \texttt{None}.
+\item
+  \textbf{Walk up the frames to find your own code and the caller that passed the bad value}: \texttt{get\_note} called \texttt{row\_to\_note(row)} with a \texttt{row} that \texttt{fetchone()} had returned as \texttt{None}.
+\item
+  \textbf{Skip the framework's frames} (Flask's \texttt{app.py}) unless the evidence leads there. They are almost always innocent. The bug is nearly always in the first frame that belongs to \emph{you}.
+\end{itemize}
+
+\noindent{}The \texttt{\^{}\^{}\^{}\^{}} markers (Python 3.11 and later) point at the exact expression within the line. The cause is now plain: nothing handles ``no such note'' any more. The fix is the missing \texttt{if\ row\ is\ None:}\allowbreak{}\texttt{\ return\ …\ 404}, and the proof is the test \texttt{test\_}\allowbreak{}\texttt{get\_}\allowbreak{}\texttt{nonexistent\_}\allowbreak{}\texttt{note\_}\allowbreak{}\texttt{returns\_}\allowbreak{}\texttt{404}, which had in fact been failing since that commit.
+
+\subsection*{\texorpdfstring{Stopping inside the code: \texttt{breakpoint()}}{Stopping inside the code: breakpoint()}}\phantomsection\label{16-logging-error-handling:stopping-inside-the-code-breakpoint}
+
+When reading is not enough, stop the program at the interesting moment and look around. Put \texttt{breakpoint()} on the line before the suspect one. When execution reaches it, Python opens its debugger, \textbf{pdb}, in your terminal:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+    \BuiltInTok{breakpoint}\NormalTok{()  }\CommentTok{\# execution stops here; remove before committing}
+    \ControlFlowTok{return}\NormalTok{ jsonify(row\_to\_note(row)), }\DecValTok{200}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\Needspace{19\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Command & What it does \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{p\ row} & print a value (\texttt{pp} pretty-prints dictionaries and lists) \\
+\texttt{n} & run the next line, stepping \emph{over} function calls \\
+\texttt{s} & step \emph{into} the function called on this line \\
+\texttt{c} & continue until the next breakpoint \\
+\texttt{w} & show where you are: the call stack \\
+\texttt{u} / \texttt{d} & move up or down the stack, to inspect a caller's variables \\
+\texttt{l} & list the source around the current line \\
+\texttt{q} & quit \\
+\end{longtable}
+}
+
+Debuggers need a terminal attached to the process. So use them where you have one: with the development server (\texttt{python\ run.py}), or in a test. \texttt{pytest\ -\/-pdb} opens the debugger right at the failing line of any failing test, with all of its variables in reach. That is often the fastest route of all. Setting the environment variable \texttt{PYTHONBREAKPOINT=}\allowbreak{}\texttt{0} makes every \texttt{breakpoint()} do nothing, which is a safety net for any that slip through. But the real rule is simpler: never commit one. \texttt{ruff} flags them (rule \texttt{T100}, if you enable it).
+
+Flask's debug mode (\texttt{FLASK\_DEBUG=true}) shows a similar interactive debugger \emph{in the browser} whenever a request fails. It is convenient on your laptop, and a remote code-execution hole anywhere else, because anyone who can trigger an error can run Python on your server. That is why \texttt{FLASK\_DEBUG} must be \texttt{false} in production, and why the startup checks of \hyperref[ch:38-security]{Chapter 38} warn when it is not.
+
+\subsection*{\texorpdfstring{Narrowing down in history: \texttt{git\ bisect}}{Narrowing down in history: git bisect}}\phantomsection\label{16-logging-error-handling:narrowing-down-in-history-git-bisect}
+
+Sometimes the question is not ``why does this fail?'' but ``it worked last week; what changed?'' With dozens of commits since the last good version, reading them all is slow. \textbf{\texttt{git\ bisect}} does a binary search through history. It checks out the commit halfway between a known-good and a known-bad version, asks whether that one is good or bad, and halves the range again, until one commit is left. And if a test can answer ``good or bad'', Git can run the whole search by itself:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ bisect start HEAD v1.3.0       }\CommentTok{\# bad: now; good: the last release}
+\FunctionTok{git}\NormalTok{ bisect run pytest }\AttributeTok{{-}x} \AttributeTok{{-}q}\NormalTok{ tests/test\_notes.py}
+\FunctionTok{git}\NormalTok{ bisect reset                   }\CommentTok{\# back to where you were}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+Bisecting: 4 revisions left to test after this (roughly 2 steps)
+running 'pytest' '-x' '-q' 'tests/test_notes.py'
+Bisecting: 2 revisions left to test after this (roughly 1 step)
+running 'pytest' '-x' '-q' 'tests/test_notes.py'
+Bisecting: 0 revisions left to test after this (roughly 0 steps)
+running 'pytest' '-x' '-q' 'tests/test_notes.py'
+639606a35b076e00419a248aea2788b22f57c337 is the first bad commit
+commit 639606a35b076e00419a248aea2788b22f57c337
+Author: Dev <dev@example.com>
+Date:   Mon Jan 15 14:00:05 2024 +0000
+
+    Simplify get_note
+
+ app/routes/notes.py | 3 ---
+bisect found first bad commit
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Three test runs searched nine commits and found the one that deleted three lines from \texttt{get\_note}. The search takes about log₂(n) steps, so a thousand commits need only about ten. This is where small, single-purpose commits pay off (\hyperref[ch:17-build-process]{Chapter 17}, section 17.9): the commit bisect finds \emph{is} the explanation. A thousand-line commit, by contrast, only tells you the bug is somewhere in those thousand lines.
+
+\subsection*{When it happens only in production}\phantomsection\label{16-logging-error-handling:when-it-happens-only-in-production}
+
+Production is the one place you cannot freely stop, step through or experiment. So the order of work changes:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Logs and metrics first.} Find the failing request in the logs. From \hyperref[ch:35-observability]{Chapter 35} on, its request ID ties together every line it produced. Check whether the error rate changed after a deploy.
+\item
+  \textbf{Reproduce it locally}, with the same input and, where you can, the same kind of data: a copy of the relevant rows (with personal data removed), and the same database engine.
+\item
+  \textbf{Look inside the running container only to read, never to fix.} \texttt{docker\ logs\ notes-api} (\hyperref[ch:18-containerization]{Chapter 18}) and \texttt{docker\ exec\ -}\allowbreak{}\texttt{it\ notes-}\allowbreak{}\texttt{api\ python} (a Python shell inside the running container, with its configuration) are for \emph{looking}. A fix made by hand on a server is lost at the next deploy, and nobody reviews it. The fix goes through a commit, a test, CI and a deploy, like every other change.
+\end{enumerate}
+
+\noindent{}And when the failure is not \emph{wrong} but \emph{slow}, the tool is a profiler, which \hyperref[ch:36-scaling-load]{Chapter 36} (section 36.2) introduces.
+
+\setcounter{section}{10}
+\section{\texorpdfstring{The Updated \texttt{.env.example}}{The Updated .env.example}}\label{16-logging-error-handling:1611-the-updated-envexample}
+
+Add the new logging-related environment variables to \texttt{.env.example}:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# .env.example — environment variable template for the Notes API}
+\CommentTok{\# Copy to .env and fill in real values before running.}
+\CommentTok{\# Run: python run.py}
+
+\CommentTok{\# Database connection}
+\VariableTok{DATABASE\_URL}\OperatorTok{=}\NormalTok{sqlite:///notes.db}
+
+\CommentTok{\# Required — generate a value with:}
+\CommentTok{\#   python {-}c "import secrets; print(secrets.token\_hex(32))"}
+\VariableTok{SECRET\_KEY}\OperatorTok{=}
+
+\CommentTok{\# Development server settings}
+\VariableTok{FLASK\_DEBUG}\OperatorTok{=}\NormalTok{false}
+\VariableTok{PORT}\OperatorTok{=}\NormalTok{5000}
+\VariableTok{HOST}\OperatorTok{=}\NormalTok{127.0.0.1}
+
+\CommentTok{\# Logging settings}
+\CommentTok{\# LOG\_LEVEL: DEBUG, INFO, }\AlertTok{WARNING}\CommentTok{, ERROR, CRITICAL (default: INFO)}
+\VariableTok{LOG\_LEVEL}\OperatorTok{=}\NormalTok{INFO}
+\CommentTok{\# LOG\_FORMAT: human (readable) or json (structured) (default: human)}
+\VariableTok{LOG\_FORMAT}\OperatorTok{=}\NormalTok{human}
+\CommentTok{\# LOG\_DIR: directory for log files (optional; if empty, logs go to stderr only)}
+\VariableTok{LOG\_DIR}\OperatorTok{=}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\unnumberedsection{false}{The Updated Project Structure}\label{16-logging-error-handling:the-updated-project-structure}
+
+\begin{diagrambox}[short]{386.2pt}
+\begin{Verbatim}[fontsize=\fontsize{9.0}{8.55}\selectfont]
+notes-api/
+├── app/
+│   ├── __init__.py         ← create_app() factory (updated)
+│   ├── config.py           ← Configuration loading (LOG_LEVEL, LOG_FORMAT added)
+│   ├── database.py         ← Database connection management (logs)
+│   ├── errors.py           ← Error handlers (NEW)
+│   ├── logging_config.py   ← Logging setup (NEW)
+│   ├── middleware.py       ← Request hooks and request logging (NEW)
+│   ├── startup.py          ← Startup checks (log instead of print)
+│   └── routes/
+│       ├── __init__.py
+│       ├── health.py
+│       └── notes.py        ← Updated with logging
+├── run.py                  ← Logs its startup line
+├── requirements.txt
+├── .env
+├── .env.example            ← Updated with LOG_* variables
+├── .python-version
+└── .gitignore
+\end{Verbatim}
+\end{diagrambox}
+
+\phantomsection\label{16-logging-error-handling:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\texttt{print()} is not logging.} It has no severity levels, no routing, no file rotation, no structure, and no thread safety. Python's \texttt{logging} module provides all of these.
+\item
+  \textbf{The four components of Python logging} are: loggers (what your code writes to), handlers (where messages go), formatters (what each line looks like), and levels (which messages are important enough to record).
+\item
+  \textbf{Logger hierarchy}: logger names like \texttt{"app.routes.notes"} form a tree. A message that passes the originating logger's level check is handed to the handlers of that logger and of every ancestor up to the root.
+\item
+  \textbf{Two formatter styles}: human-readable (for development, easy to read) and JSON (for production, machine-parseable by log aggregation tools).
+\item
+  \textbf{RotatingFileHandler} prevents log files from filling the disk by automatically rotating them when they reach a size limit.
+\item
+  \textbf{Error handlers} in Flask intercept raised exceptions and HTTP errors, returning JSON responses in one consistent shape. Without them, Flask returns HTML, which API clients cannot parse.
+\item
+  \textbf{Never include internal error details in API responses.} Log the full traceback, but return only a generic message to the client.
+\item
+  \textbf{Expected vs. exceptional is the core distinction.} Bad input and missing resources are a normal part of an endpoint's job~--- handle them with explicit return values (400, 404). Genuine surprises (a dropped connection) are exceptions~--- let them propagate.
+\item
+  \textbf{Handle errors only where you can do something about them}, and concentrate the unexpected ones at a single \textbf{handling boundary} (the catch-all error handler). Everywhere else, let them propagate~--- \texttt{except\ Exception:\ pass} is how systems acquire silent, invisible failures.
+\item
+  \textbf{Catch narrowly, or not at all.} If you must catch, add context and re-raise (\texttt{raise\ ...\ from\ err}) or degrade deliberately on a \emph{specific} exception~--- never swallow.
+\item
+  \textbf{Design errors out of existence.} A function's failures are part of its contract; shaping interfaces so the common case is not an error (e.g. an idempotent delete) removes error-handling code entirely.
+\item
+  \textbf{Log at the right level.} \texttt{DEBUG} for tracing, \texttt{INFO} for normal events, \texttt{WARNING} for unexpected-but-recoverable situations, \texttt{ERROR} for failures, \texttt{CRITICAL} for process-ending problems.
+\item
+  \textbf{Use \texttt{\%s} format arguments} (not f-strings) in log calls, so formatting is skipped when the message is filtered by level.
+\item
+  \textbf{Debug with a method}: reproduce the failure on demand, read the evidence (tracebacks bottom-up; your own first frame is usually the culprit), test one hypothesis at a time, halve the search space (\texttt{git\ bisect\ run} automates it through history), and prove the fix with a test. Use \texttt{breakpoint()} and \texttt{pytest\ -\/-pdb} locally, never in committed code; in production, read logs and reproduce locally instead of fixing on the server.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{16-logging-error-handling:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Set \texttt{LOG\_LEVEL=WARNING} and create a note. Which log lines disappear? Now set \texttt{LOG\_FORMAT=json}, and pipe the log output through \texttt{jq} with \texttt{python\ run.}\allowbreak{}\texttt{py\ 2\textgreater{}\&}\allowbreak{}\texttt{1\ \textgreater{}/}\allowbreak{}\texttt{dev/}\allowbreak{}\texttt{null\ \textbar{}\ jq\ -}\allowbreak{}\texttt{r\ .}\allowbreak{}\texttt{message}.
+\item
+  \textbf{Break and fix.} Make a handler catch every exception and return \texttt{\{"error":\ "oops"\}} with a 200. What does the monitoring see, and what do clients see? Remove the catch.
+\item
+  \textbf{Extend.} Add the request's method and path to every log line produced during a request, not only to the middleware's lines.
+\item
+  \textbf{Explain.} Why does the Notes API handle unexpected exceptions in one place, the handling boundary, instead of in each handler?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-16.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{16-logging-error-handling:whats-next}
+
+The application now has structured logging and comprehensive error handling. The next question is: how do you reliably produce the artifact~--- the built, tested, deployable package~--- that represents the application at a specific point in time? Building is not just running \texttt{pip\ install}. It is a defined, repeatable process that produces a specific output.
+
+\noindent{}→ \hyperref[ch:17-build-process]{Chapter 17}~--- Build Process

@@ -1,0 +1,860 @@
+\setcounter{chapter}{40}
+\chapter{Event-Driven and Asynchronous Architecture}\label{ch:41-event-driven-architecture}
+
+\chapterrule
+
+The Notes API, like most of this book, is \textbf{synchronous and request-driven}: a client calls, the server does the work \emph{right then} while the client waits, and a response comes back. That model is simple and correct, and it is the right default. But it has two limits. Slow work makes the caller wait (resize an image, call a sluggish third party, and the request hangs). And it couples systems tightly in time~--- the caller and the callee must both be up, at the same moment, for anything to happen.
+
+\textbf{Event-driven architecture} loosens both. Instead of calling another service and waiting, a service announces that something happened~--- an \textbf{event}~--- and moves on. Other services react to that event later, on their own schedule. Where \hyperref[ch:40-distributed-systems]{Chapter 40} decoupled work in \emph{space} (across machines), this chapter decouples it in \emph{time}.
+
+\begin{objectives}
+
+By the end of this chapter, you will understand:
+
+\begin{itemize}
+\tightlist
+\item
+  The difference between synchronous request/response and asynchronous, event-driven flow
+\item
+  What a \textbf{message queue} is, and the producer / broker / consumer model
+\item
+  Why teams reach for async: decoupling, buffering, resilience, and independent scaling
+\item
+  \textbf{Delivery semantics} (at-least-once, the exactly-once myth) and why idempotency returns
+\item
+  \textbf{Queues} vs \textbf{publish/subscribe}, and what an ``event'' really is
+\item
+  How to build a job queue in PostgreSQL (\texttt{SKIP\ LOCKED}, leases, retries with backoff, scheduled jobs) and run a worker next to the API, with its own metrics
+\item
+  \textbf{Event sourcing} and \textbf{CQRS} at a conceptual level, and what log-based \textbf{streaming} adds
+\item
+  \textbf{Backpressure}, and the real costs: eventual consistency and harder debugging
+\end{itemize}
+
+\end{objectives}
+
+\setcounter{section}{0}
+\section{Two Ways for Systems to Talk}\label{41-event-driven-architecture:411-two-ways-for-systems-to-talk}
+
+Hold two shapes in mind.
+
+\textbf{Synchronous (request/response):} Service A calls Service B and \emph{blocks} until B replies. A depends on B being available, fast, and correct, right now. If B is slow, A is slow; if B is down, A's request fails. This is every call the Notes API has made so far: each query to its database waits for the answer, and so, since \hyperref[ch:37-reliability]{Chapter 37}, does its call to the email service.
+
+\textbf{Asynchronous (message/event):} Service A writes a \textbf{message} to an intermediary and immediately continues. Later~--- milliseconds or minutes~--- Service B picks the message up and processes it. A does not wait for B, does not need B to be up, and does not even need to know B exists. The intermediary holds the message until someone is ready.
+
+The shift sounds small and changes everything. The synchronous question is ``who do I call?'' The asynchronous question is ``what happened, and who might care?'' That inversion~--- from \emph{commands aimed at a known recipient} to \emph{events broadcast to unknown listeners}~--- is the heart of event-driven design.
+
+\setcounter{section}{1}
+\section{The Message Queue}\label{41-event-driven-architecture:412-the-message-queue}
+
+The intermediary, in its simplest form, is a \textbf{message queue}. Three roles:
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{producer} puts a message on the queue (the Notes API, having accepted a new note, enqueues ``index this note for search'').
+\item
+  A \textbf{broker}~--- the queue system itself (RabbitMQ, Amazon SQS, Redis-backed Celery or RQ)~--- stores the message durably until it is handled.
+\item
+  A \textbf{consumer} (a \textbf{worker} process, supervised by systemd exactly like the API~--- \hyperref[ch:25-process-management]{Chapter 25}) takes the message off and does the work.
+\end{itemize}
+
+\noindent{}You met this exact pattern in §25.9, as the answer to ``what about work that doesn't belong inside a request?'' Here is why it is worth the extra moving part:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Decoupling.} Producer and consumer never talk directly; either can be deployed, restarted, or scaled without the other knowing.
+\item
+  \textbf{Buffering / load-leveling.} A traffic spike fills the queue instead of overwhelming the workers. The queue absorbs the burst; workers drain it at their own steady pace. The system bends instead of breaking.
+\item
+  \textbf{Resilience.} If the workers are down, messages wait in the queue rather than being lost. Work resumes when they return.
+\item
+  \textbf{Independent scaling.} Slow work that piles up? Add more workers. The web tier and the worker tier scale separately, each to its own bottleneck.
+\end{itemize}
+
+\noindent{}The cost is that the result is no longer immediate. The note becomes searchable \emph{soon}, not \emph{now}~--- which is fine for a search index and unacceptable for ``is this password correct?'' Async is for work the caller does not need the answer to \emph{right now}.
+
+\setcounter{section}{2}
+\section{Delivery Semantics, and Why Idempotency Returns}\label{41-event-driven-architecture:413-delivery-semantics-and-why-idempotency-returns}
+
+Because a broker and its consumers are themselves a small distributed system, the uncertainty of \hyperref[ch:40-distributed-systems]{Chapter 40} reappears: after a worker processes a message, it must tell the broker ``done'' so the message is removed~--- and that acknowledgement can be lost. So brokers offer \textbf{delivery guarantees}, and you must know which you have:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{At-most-once}~--- each message delivered zero or one time. Simple, but messages can be silently dropped. Rarely acceptable.
+\item
+  \textbf{At-least-once}~--- each message delivered one \emph{or more} times. Nothing is lost, but a message can be \textbf{redelivered} (the work happened, the ack was lost, so the broker hands it out again). This is the common, practical default.
+\item
+  \textbf{Exactly-once}~--- the holy grail, and largely a myth in the strict sense. What real systems do is combine at-least-once delivery with \textbf{idempotent consumers}, achieving \emph{effectively}-once processing.
+\end{itemize}
+
+\noindent{}So idempotency arrives once more (after Chapters 25, 34, and 40), and the lesson is now unmistakable: \textbf{a message consumer will eventually process the same message twice, so it must be safe to do so.} Record which messages you have handled, or design the work so re-applying it changes nothing. Build the consumer any other way and a lost acknowledgement becomes a duplicate charge.
+
+A related subtlety is \textbf{ordering}: most queues do \emph{not} guarantee messages are processed in the order produced (workers run in parallel; redelivery reshuffles). If order matters~--- ``created'' must precede ``updated''~--- you need an ordering key or a system that preserves order per key, and you should not assume it for free.
+
+\setcounter{section}{3}
+\section{Queues vs Pub/Sub, and What an ``Event'' Is}\label{41-event-driven-architecture:414-queues-vs-pubsub-and-what-an-event-is}
+
+Two distribution shapes sit on top of brokers:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Queue (point-to-point):} each message is handled by \emph{exactly one} consumer from a pool. Use it to \emph{distribute work}~--- ``index this note'' should happen once, by whichever worker is free.
+\item
+  \textbf{Publish/subscribe (pub/sub):} each message is delivered to \emph{every} interested subscriber. Use it to \emph{announce facts}~--- ``a new note was created'' might interest a search-indexer, an analytics pipeline, and a notifications service, each reacting independently.
+\end{itemize}
+
+\noindent{}Pub/sub is where event-driven architecture comes into its own, and it turns on the meaning of an \textbf{event}. A \emph{command} says ``do this'' to a known recipient (``index note 42''). An \textbf{event} states ``this happened'' as a fact, addressed to no one in particular (``NoteCreated'', ``UserSignedUp''). The producer of an event does not know or care who consumes it. That is what makes the architecture extensible: to add a feature that reacts to new notes, you subscribe a new service to \texttt{NoteCreated} and \emph{change nothing} in the Notes API. New behavior is added by adding listeners, not by editing the source of the event.
+
+\setcounter{section}{4}
+\section{Building It: A Job Queue for the Notes API}\label{41-event-driven-architecture:415-building-it-a-job-queue-for-the-notes-api}
+
+Everything so far in this chapter has been ideas. This section builds the smallest real version of them. \hyperref[ch:37-reliability]{Chapter 37} gave the Notes API an endpoint that emails a note, and it calls the email service \emph{inside the request}. The client waits while the provider thinks, and a slow provider can hold a Gunicorn worker for more than ten seconds. That is the textbook case for background work: the client does not need the email \emph{sent}, only \emph{accepted}.
+
+The plan:
+
+\begin{itemize}
+\tightlist
+\item
+  The endpoint stops sending. It records a \textbf{job}, ``email note 42 to this address'', and answers \texttt{202\ Accepted} at once. The answer is the same \texttt{202} it already gave, so no client notices the change.
+\item
+  A separate \textbf{worker} process, running the same code, takes jobs and does them. It retries failures with growing delays, gives up after a limit, and never loses or duplicates work when it crashes.
+\item
+  The queue is a \textbf{table in PostgreSQL}.
+\end{itemize}
+
+\subsection*{Why a table, and not a message broker?}\phantomsection\label{41-event-driven-architecture:why-a-table-and-not-a-message-broker}
+
+Section 41.2 listed RabbitMQ, Amazon SQS and Redis-based queues. Any of them would work. The Notes API uses the database it already has, for three reasons:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{No new system to run.} A broker is one more service to deploy, secure, monitor and back up. The database is already all of those.
+\item
+  \textbf{The job and the change that causes it commit together.} Inserting the job row happens in the \emph{same transaction} as the rest of the request's work. If the transaction commits, the job exists; if it rolls back, the job never existed. With a separate broker, you would write to two systems, and a crash between the two leaves them disagreeing: a user created with no welcome email, or an email about a user who was never created. (This is called the \textbf{transactional outbox} pattern, and teams that \emph{do} use a broker often keep it for exactly this reason: they write jobs to an ``outbox'' table, and a small process forwards them to the broker.)
+\item
+  \textbf{PostgreSQL has the one feature a queue needs}: \texttt{SELECT\ …\ FOR\ UPDATE\ SKIP\ LOCKED}, which lets many workers take jobs at the same time without ever taking the same one.
+\end{itemize}
+
+\noindent{}A database is not the right queue for everything. At thousands of jobs a second, or when many independent consumers need the same events (the publish/subscribe of section 41.4), a dedicated broker wins. But a database table serves a very large range of real applications well, and it teaches every mechanism a broker has.
+
+\subsection*{The jobs table}\phantomsection\label{41-event-driven-architecture:the-jobs-table}
+
+This migration exists only for PostgreSQL. Since \hyperref[ch:39-local-vs-production]{Chapter 39}, PostgreSQL is the only database the Notes API uses:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} migrations/postgresql/0005\_add\_jobs.sql}
+\CommentTok{{-}{-} Background jobs (Chapter 41): work the API accepts now and does later.}
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ jobs (}
+    \KeywordTok{id}\NormalTok{            BIGSERIAL }\KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{,}
+\NormalTok{    kind          TEXT }\KeywordTok{NOT} \KeywordTok{NULL}\NormalTok{,              }\CommentTok{{-}{-} what to do, e.g. \textquotesingle{}email\_note\textquotesingle{}}
+\NormalTok{    payload       JSONB }\KeywordTok{NOT} \KeywordTok{NULL}\NormalTok{,             }\CommentTok{{-}{-} its arguments}
+\NormalTok{    status        TEXT }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{DEFAULT} \StringTok{\textquotesingle{}pending\textquotesingle{}}
+                  \KeywordTok{CHECK}\NormalTok{ (status }\KeywordTok{IN}\NormalTok{ (}\StringTok{\textquotesingle{}pending\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}running\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}done\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}failed\textquotesingle{}}\NormalTok{)),}
+\NormalTok{    attempts      }\DataTypeTok{INTEGER} \KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{DEFAULT} \DecValTok{0}\NormalTok{,}
+\NormalTok{    max\_attempts  }\DataTypeTok{INTEGER} \KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{DEFAULT} \DecValTok{5}\NormalTok{,}
+\NormalTok{    run\_at        TIMESTAMPTZ }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{DEFAULT}\NormalTok{ now(),  }\CommentTok{{-}{-} not before this time}
+\NormalTok{    locked\_until  TIMESTAMPTZ,       }\CommentTok{{-}{-} a running job\textquotesingle{}s lease (see the worker)}
+\NormalTok{    last\_error    TEXT,}
+\NormalTok{    created\_at    TIMESTAMPTZ }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{DEFAULT}\NormalTok{ now(),}
+\NormalTok{    finished\_at   TIMESTAMPTZ}
+\NormalTok{);}
+
+\CommentTok{{-}{-} The worker\textquotesingle{}s question, "what is ready to run?", touches only unfinished}
+\CommentTok{{-}{-} jobs: a partial index keeps it small however many finished jobs pile up}
+\KeywordTok{CREATE} \KeywordTok{INDEX}\NormalTok{ idx\_jobs\_ready }\KeywordTok{ON}\NormalTok{ jobs (run\_at) }\KeywordTok{WHERE}\NormalTok{ status }\KeywordTok{IN}\NormalTok{ (}\StringTok{\textquotesingle{}pending\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}running\textquotesingle{}}\NormalTok{);}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Each column answers a question the worker will ask:
+
+\Needspace{19\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Column
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+The question it answers
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{kind}, \texttt{payload} & What should be done, and with what arguments? \\
+\texttt{status} & Is it waiting, being worked on, finished, or given up on? \\
+\texttt{attempts}, \texttt{max\_attempts} & How many times has it been tried, and how many tries does it get? \\
+\texttt{run\_at} & When may it run? A retry, or a job scheduled for later, sets it in the future. \\
+\texttt{locked\_until} & If a worker took it, until when is that worker's claim valid? \\
+\texttt{last\_error} & Why did the last attempt fail? This is the first thing to read when a job fails. \\
+\end{longtable}
+}
+
+\subsection*{Queueing a job}\phantomsection\label{41-event-driven-architecture:queueing-a-job}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/jobs.py}
+\CommentTok{"""}
+\CommentTok{The job queue: a table in PostgreSQL that the API writes to and the worker}
+\CommentTok{reads from (Chapter 41).}
+\CommentTok{"""}
+
+\ImportTok{import}\NormalTok{ json}
+\ImportTok{import}\NormalTok{ random}
+\ImportTok{from}\NormalTok{ datetime }\ImportTok{import}\NormalTok{ datetime}
+
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ sql}
+
+\NormalTok{LEASE\_SECONDS }\OperatorTok{=} \DecValTok{300}  \CommentTok{\# a job must finish within this, or it counts as abandoned}
+
+
+\KeywordTok{class}\NormalTok{ PermanentError(}\PreprocessorTok{Exception}\NormalTok{):}
+    \CommentTok{"""Raised by a task when trying again cannot help: the job fails at once."""}
+
+
+\KeywordTok{def}\NormalTok{ enqueue(}
+\NormalTok{    cursor, kind: }\BuiltInTok{str}\NormalTok{, payload: }\BuiltInTok{dict}\NormalTok{, run\_at: datetime }\OperatorTok{|} \VariableTok{None} \OperatorTok{=} \VariableTok{None}
+\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{int}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Add a job, inside the caller\textquotesingle{}s transaction: it becomes visible to the}
+\CommentTok{    worker only when that transaction commits, together with everything else.}
+\CommentTok{    """}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"""}
+\StringTok{            INSERT INTO jobs (kind, payload, run\_at)}
+\StringTok{            VALUES (?, CAST(? AS JSONB), COALESCE(?, now()))}
+\StringTok{            RETURNING id}
+\StringTok{        """}\NormalTok{),}
+\NormalTok{        (kind, json.dumps(payload), run\_at),}
+\NormalTok{    )}
+    \ControlFlowTok{return}\NormalTok{ cursor.fetchone()[}\StringTok{"id"}\NormalTok{]}
+
+
+\KeywordTok{def}\NormalTok{ claim(conn) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict} \OperatorTok{|} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""}
+\CommentTok{    Take the next job that is ready, or None. SKIP LOCKED lets many workers}
+\CommentTok{    claim at once without waiting for, or taking, each other\textquotesingle{}s jobs.}
+\CommentTok{    """}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ conn.cursor()}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"""}
+\StringTok{            UPDATE jobs}
+\StringTok{            SET status = \textquotesingle{}running\textquotesingle{},}
+\StringTok{                attempts = attempts + 1,}
+\StringTok{                locked\_until = now() + make\_interval(secs =\textgreater{} ?)}
+\StringTok{            WHERE id = (}
+\StringTok{                SELECT id FROM jobs}
+\StringTok{                WHERE (status = \textquotesingle{}pending\textquotesingle{} AND run\_at \textless{}= now())}
+\StringTok{                   OR (status = \textquotesingle{}running\textquotesingle{} AND locked\_until \textless{} now())  {-}{-} abandoned}
+\StringTok{                ORDER BY run\_at}
+\StringTok{                LIMIT 1}
+\StringTok{                FOR UPDATE SKIP LOCKED}
+\StringTok{            )}
+\StringTok{            RETURNING id, kind, payload, attempts, max\_attempts}
+\StringTok{        """}\NormalTok{),}
+\NormalTok{        (LEASE\_SECONDS,),}
+\NormalTok{    )}
+\NormalTok{    job }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+\NormalTok{    conn.commit()  }\CommentTok{\# the claim is its own short transaction}
+    \ControlFlowTok{return} \BuiltInTok{dict}\NormalTok{(job) }\ControlFlowTok{if}\NormalTok{ job }\ControlFlowTok{else} \VariableTok{None}
+
+
+\KeywordTok{def}\NormalTok{ complete(conn, job\_id: }\BuiltInTok{int}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+\NormalTok{    \_finish(conn, job\_id, }\StringTok{"done"}\NormalTok{, }\VariableTok{None}\NormalTok{)}
+
+
+\KeywordTok{def}\NormalTok{ fail(conn, job\_id: }\BuiltInTok{int}\NormalTok{, error: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+\NormalTok{    \_finish(conn, job\_id, }\StringTok{"failed"}\NormalTok{, error)}
+
+
+\KeywordTok{def}\NormalTok{ retry\_later(conn, job: }\BuiltInTok{dict}\NormalTok{, error: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+    \CommentTok{"""Put the job back, to run again after a growing delay (with jitter)."""}
+\NormalTok{    delay }\OperatorTok{=} \BuiltInTok{min}\NormalTok{(}\DecValTok{30} \OperatorTok{*} \DecValTok{2} \OperatorTok{**}\NormalTok{ (job[}\StringTok{"attempts"}\NormalTok{] }\OperatorTok{{-}} \DecValTok{1}\NormalTok{), }\DecValTok{3600}\NormalTok{) }\OperatorTok{*}\NormalTok{ random.uniform(}\FloatTok{0.8}\NormalTok{, }\FloatTok{1.2}\NormalTok{)}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ conn.cursor()}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"""}
+\StringTok{            UPDATE jobs}
+\StringTok{            SET status = \textquotesingle{}pending\textquotesingle{}, locked\_until = NULL, last\_error = ?,}
+\StringTok{                run\_at = now() + make\_interval(secs =\textgreater{} ?)}
+\StringTok{            WHERE id = ?}
+\StringTok{        """}\NormalTok{),}
+\NormalTok{        (error[:}\DecValTok{1000}\NormalTok{], delay, job[}\StringTok{"id"}\NormalTok{]),}
+\NormalTok{    )}
+\NormalTok{    conn.commit()}
+
+
+\KeywordTok{def}\NormalTok{ \_finish(conn, job\_id: }\BuiltInTok{int}\NormalTok{, status: }\BuiltInTok{str}\NormalTok{, error: }\BuiltInTok{str} \OperatorTok{|} \VariableTok{None}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ conn.cursor()}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"""}
+\StringTok{            UPDATE jobs}
+\StringTok{            SET status = ?, locked\_until = NULL, last\_error = ?, finished\_at = now()}
+\StringTok{            WHERE id = ?}
+\StringTok{        """}\NormalTok{),}
+\NormalTok{        (status, error[:}\DecValTok{1000}\NormalTok{] }\ControlFlowTok{if}\NormalTok{ error }\ControlFlowTok{else} \VariableTok{None}\NormalTok{, job\_id),}
+\NormalTok{    )}
+\NormalTok{    conn.commit()}
+
+
+\KeywordTok{def}\NormalTok{ stats(conn) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{dict}\NormalTok{:}
+    \CommentTok{"""How many jobs are waiting, and for how long the oldest has waited."""}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ conn.cursor()}
+\NormalTok{    cursor.execute(}\StringTok{"""}
+\StringTok{        SELECT}
+\StringTok{            count(*) FILTER (WHERE status = \textquotesingle{}pending\textquotesingle{} AND run\_at \textless{}= now()) AS ready,}
+\StringTok{            count(*) FILTER (WHERE status = \textquotesingle{}running\textquotesingle{}) AS running,}
+\StringTok{            count(*) FILTER (WHERE status = \textquotesingle{}failed\textquotesingle{}) AS failed,}
+\StringTok{            coalesce(extract(epoch FROM now() {-} min(run\_at)}
+\StringTok{                FILTER (WHERE status = \textquotesingle{}pending\textquotesingle{} AND run\_at \textless{}= now())), 0) AS oldest}
+\StringTok{        FROM jobs}
+\StringTok{    """}\NormalTok{)}
+\NormalTok{    row }\OperatorTok{=} \BuiltInTok{dict}\NormalTok{(cursor.fetchone())}
+\NormalTok{    conn.commit()}
+    \ControlFlowTok{return}\NormalTok{ row}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The endpoint now queues instead of sending:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/routes/notes.py (the email endpoint, now queueing; add "import uuid")}
+\AttributeTok{@notes\_bp.route}\NormalTok{(}\StringTok{"/\textless{}int:note\_id\textgreater{}/email"}\NormalTok{, methods}\OperatorTok{=}\NormalTok{[}\StringTok{"POST"}\NormalTok{])}
+\KeywordTok{def}\NormalTok{ email\_note(note\_id: }\BuiltInTok{int}\NormalTok{):}
+    \CommentTok{"""Email a note: POST \{"to": "someone@example.com"\} → 202 Accepted."""}
+\NormalTok{    validator }\OperatorTok{=}\NormalTok{ Validator(request.get\_json(silent}\OperatorTok{=}\VariableTok{True}\NormalTok{))}
+\NormalTok{    to }\OperatorTok{=}\NormalTok{ validator.require\_email(}\StringTok{"to"}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{ to }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ validator.error\_response()}
+
+\NormalTok{    db }\OperatorTok{=}\NormalTok{ get\_db()}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ db.cursor()}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"SELECT id FROM notes WHERE id = ? AND user\_id = ?"}\NormalTok{),}
+\NormalTok{        (note\_id, g.user[}\StringTok{"id"}\NormalTok{]),}
+\NormalTok{    )}
+    \ControlFlowTok{if}\NormalTok{ cursor.fetchone() }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+        \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"error"}\NormalTok{: }\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{note\_id}\SpecialCharTok{\}}\SpecialStringTok{ not found"}\NormalTok{\}), }\DecValTok{404}
+
+    \CommentTok{\# Not sent here: queued, and sent by the worker (Chapter 41)}
+\NormalTok{    job\_id }\OperatorTok{=}\NormalTok{ enqueue(}
+\NormalTok{        cursor,}
+        \StringTok{"email\_note"}\NormalTok{,}
+\NormalTok{        \{}
+            \StringTok{"note\_id"}\NormalTok{: note\_id,}
+            \StringTok{"user\_id"}\NormalTok{: g.user[}\StringTok{"id"}\NormalTok{],}
+            \StringTok{"to"}\NormalTok{: to,}
+            \StringTok{"idempotency\_key"}\NormalTok{: }\BuiltInTok{str}\NormalTok{(uuid.uuid4()),}
+\NormalTok{        \},}
+\NormalTok{    )}
+\NormalTok{    db.commit()}
+\NormalTok{    logger.info(}\StringTok{"Queued job id=}\SpecialCharTok{\%d}\StringTok{: email note id=}\SpecialCharTok{\%d}\StringTok{."}\NormalTok{, job\_id, note\_id)}
+    \ControlFlowTok{return}\NormalTok{ jsonify(\{}\StringTok{"status"}\NormalTok{: }\StringTok{"accepted"}\NormalTok{\}), }\DecValTok{202}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Two decisions are hidden in the payload:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{It stores the note's id, not its content.} The worker reads the note when it runs, so it sends the note as it is \emph{then}, or nothing if the note was deleted in the meantime. The other choice, storing a snapshot of the content, is right when the job must describe the moment it was created, such as ``email the receipt for this order''. Choose deliberately.
+\item
+  \textbf{The idempotency key is chosen now, once.} Every attempt to send this email, including one made by a \emph{different} worker after a crash, uses the same key, so an email service that supports keys sends it exactly once (section 37.5).
+\end{itemize}
+
+\noindent{}For that, \texttt{send\_email()} from section 37.5 takes the key as a new, optional parameter, instead of always making a fresh one:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/email.py (changed): the caller may choose the key}
+\KeywordTok{def}\NormalTok{ send\_email(}
+\NormalTok{    to: }\BuiltInTok{str}\NormalTok{, subject: }\BuiltInTok{str}\NormalTok{, text: }\BuiltInTok{str}\NormalTok{, idempotency\_key: }\BuiltInTok{str} \OperatorTok{|} \VariableTok{None} \OperatorTok{=} \VariableTok{None}
+\NormalTok{) }\OperatorTok{{-}\textgreater{}} \BuiltInTok{str}\NormalTok{:}
+\NormalTok{    ...}
+\NormalTok{    headers }\OperatorTok{=}\NormalTok{ \{}\StringTok{"Idempotency{-}Key"}\NormalTok{: idempotency\_key }\KeywordTok{or} \BuiltInTok{str}\NormalTok{(uuid.uuid4())\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The endpoint's contract changes too. It no longer talks to the email service, so it can no longer answer \texttt{503}, \texttt{504} or \texttt{502}. Those three responses leave \texttt{openapi.yaml}, which now promises \texttt{202}, \texttt{400} and \texttt{404}. Chapter 37's endpoint tests, which replaced \texttt{send\_email()} with a fake and checked those statuses, become queue tests: after a \texttt{202}, exactly one \texttt{email\_note} job is waiting, with the right payload. The failure cases move to the worker's tests, below.
+
+\subsection*{\texorpdfstring{Taking a job: \texttt{FOR\ UPDATE\ SKIP\ LOCKED}}{Taking a job: FOR UPDATE SKIP LOCKED}}\phantomsection\label{41-event-driven-architecture:taking-a-job-for-update-skip-locked}
+
+The heart of the queue is \texttt{claim()}. Its inner \texttt{SELECT} finds the oldest job that is ready. \texttt{FOR\ UPDATE} locks that row, and \textbf{\texttt{SKIP\ LOCKED}} makes other workers, running the same query at the same moment, \emph{skip} rows that are locked instead of waiting for them. Three workers polling together therefore take three different jobs, never the same one twice, and never queue up behind each other. The outer \texttt{UPDATE} marks the job as running, counts the attempt, and records a \textbf{lease} (\texttt{locked\_until}, five minutes from now), all in one short transaction.
+
+The lease is how the queue survives a crash. Suppose a worker takes a job and then dies, killed by the out-of-memory killer, or its server lost. The job is stuck at \texttt{running}, and nobody is working on it. The lease makes that state temporary. Once \texttt{locked\_until} has passed, \texttt{claim()} treats the job as abandoned and hands it out again. The cost is one rule: \textbf{a job must finish well within its lease}, or a second worker will start it while the first is still busy.
+
+Together, this gives the queue the guarantee of section 41.3: \textbf{at-least-once}. A job is never lost, but it may run twice. For example, a worker sends the email and crashes before marking the job done, so after the lease runs out the job runs again. That is why tasks must be idempotent. This one is, thanks to the idempotency key.
+
+\subsection*{The worker}\phantomsection\label{41-event-driven-architecture:the-worker}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/tasks.py}
+\CommentTok{"""}
+\CommentTok{What each kind of job does. A task receives a database connection and the}
+\CommentTok{job\textquotesingle{}s payload; it raises PermanentError when trying again cannot help.}
+\CommentTok{"""}
+
+\ImportTok{import}\NormalTok{ logging}
+
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ sql}
+\ImportTok{from}\NormalTok{ app.email }\ImportTok{import}\NormalTok{ EmailRejectedError, send\_email}
+\ImportTok{from}\NormalTok{ app.jobs }\ImportTok{import}\NormalTok{ PermanentError}
+
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\VariableTok{\_\_name\_\_}\NormalTok{)}
+
+
+\KeywordTok{def}\NormalTok{ email\_note(conn, payload: }\BuiltInTok{dict}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+\NormalTok{    cursor }\OperatorTok{=}\NormalTok{ conn.cursor()}
+\NormalTok{    cursor.execute(}
+\NormalTok{        sql(}\StringTok{"SELECT content FROM notes WHERE id = ? AND user\_id = ?"}\NormalTok{),}
+\NormalTok{        (payload[}\StringTok{"note\_id"}\NormalTok{], payload[}\StringTok{"user\_id"}\NormalTok{]),}
+\NormalTok{    )}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ cursor.fetchone()}
+\NormalTok{    conn.rollback()  }\CommentTok{\# end the read transaction before the slow call (33.13)}
+    \ControlFlowTok{if}\NormalTok{ row }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{        logger.info(}\StringTok{"Note id=}\SpecialCharTok{\%d}\StringTok{ is gone; nothing to send."}\NormalTok{, payload[}\StringTok{"note\_id"}\NormalTok{])}
+        \ControlFlowTok{return}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        send\_email(}
+\NormalTok{            to}\OperatorTok{=}\NormalTok{payload[}\StringTok{"to"}\NormalTok{],}
+\NormalTok{            subject}\OperatorTok{=}\SpecialStringTok{f"Note }\SpecialCharTok{\{}\NormalTok{payload[}\StringTok{\textquotesingle{}note\_id\textquotesingle{}}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{,}
+\NormalTok{            text}\OperatorTok{=}\NormalTok{row[}\StringTok{"content"}\NormalTok{],}
+            \CommentTok{\# Chosen once, when the job was created: every attempt, even one}
+            \CommentTok{\# after a worker crash, asks the service for the same email}
+\NormalTok{            idempotency\_key}\OperatorTok{=}\NormalTok{payload[}\StringTok{"idempotency\_key"}\NormalTok{],}
+\NormalTok{        )}
+    \ControlFlowTok{except}\NormalTok{ EmailRejectedError }\ImportTok{as}\NormalTok{ error:}
+        \ControlFlowTok{raise}\NormalTok{ PermanentError(}\BuiltInTok{str}\NormalTok{(error)) }\ImportTok{from}\NormalTok{ error}
+
+
+\NormalTok{HANDLERS }\OperatorTok{=}\NormalTok{ \{}\StringTok{"email\_note"}\NormalTok{: email\_note\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app/worker.py}
+\CommentTok{"""}
+\CommentTok{The worker: a second process, running the same code as the API, that}
+\CommentTok{takes jobs from the queue and runs them.}
+
+\CommentTok{    python {-}m app.worker}
+\CommentTok{"""}
+
+\ImportTok{import}\NormalTok{ logging}
+\ImportTok{import}\NormalTok{ signal}
+\ImportTok{import}\NormalTok{ sys}
+\ImportTok{import}\NormalTok{ time}
+
+\ImportTok{from}\NormalTok{ prometheus\_client }\ImportTok{import}\NormalTok{ Counter, Gauge, start\_http\_server}
+
+\ImportTok{from}\NormalTok{ app }\ImportTok{import}\NormalTok{ jobs, startup}
+\ImportTok{from}\NormalTok{ app.database }\ImportTok{import}\NormalTok{ open\_db}
+\ImportTok{from}\NormalTok{ app.logging\_config }\ImportTok{import}\NormalTok{ configure\_logging}
+\ImportTok{from}\NormalTok{ app.tasks }\ImportTok{import}\NormalTok{ HANDLERS}
+
+\CommentTok{\# Named explicitly: run as "python {-}m app.worker", \_\_name\_\_ is "\_\_main\_\_"}
+\NormalTok{logger }\OperatorTok{=}\NormalTok{ logging.getLogger(}\StringTok{"app.worker"}\NormalTok{)}
+
+\NormalTok{POLL\_SECONDS }\OperatorTok{=} \FloatTok{1.0}  \CommentTok{\# how long to wait when the queue is empty}
+\NormalTok{STATS\_SECONDS }\OperatorTok{=} \FloatTok{15.0}  \CommentTok{\# how often to refresh the queue metrics}
+
+\NormalTok{JOBS\_DONE }\OperatorTok{=}\NormalTok{ Counter(}\StringTok{"worker\_jobs\_total"}\NormalTok{, }\StringTok{"Jobs processed"}\NormalTok{, [}\StringTok{"kind"}\NormalTok{, }\StringTok{"outcome"}\NormalTok{])}
+\NormalTok{QUEUE\_READY }\OperatorTok{=}\NormalTok{ Gauge(}\StringTok{"worker\_queue\_ready\_jobs"}\NormalTok{, }\StringTok{"Jobs ready to run, waiting"}\NormalTok{)}
+\NormalTok{QUEUE\_OLDEST }\OperatorTok{=}\NormalTok{ Gauge(}\StringTok{"worker\_queue\_oldest\_seconds"}\NormalTok{, }\StringTok{"Wait of the oldest ready job"}\NormalTok{)}
+\NormalTok{QUEUE\_FAILED }\OperatorTok{=}\NormalTok{ Gauge(}\StringTok{"worker\_queue\_failed\_jobs"}\NormalTok{, }\StringTok{"Jobs that failed for good"}\NormalTok{)}
+
+
+\KeywordTok{class}\NormalTok{ Worker:}
+    \KeywordTok{def} \FunctionTok{\_\_init\_\_}\NormalTok{(}\VariableTok{self}\NormalTok{):}
+        \VariableTok{self}\NormalTok{.stopping }\OperatorTok{=} \VariableTok{False}
+
+    \KeywordTok{def}\NormalTok{ stop(}\VariableTok{self}\NormalTok{, signum, frame):}
+        \CommentTok{"""SIGTERM: finish the current job, then exit (Chapter 37)."""}
+\NormalTok{        logger.info(}
+            \StringTok{"Received }\SpecialCharTok{\%s}\StringTok{; stopping after the current job."}\NormalTok{,}
+\NormalTok{            signal.Signals(signum).name,}
+\NormalTok{        )}
+        \VariableTok{self}\NormalTok{.stopping }\OperatorTok{=} \VariableTok{True}
+
+    \KeywordTok{def}\NormalTok{ run(}\VariableTok{self}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+\NormalTok{        conn }\OperatorTok{=}\NormalTok{ open\_db()}
+\NormalTok{        last\_stats }\OperatorTok{=} \FloatTok{0.0}
+        \ControlFlowTok{try}\NormalTok{:}
+            \ControlFlowTok{while} \KeywordTok{not} \VariableTok{self}\NormalTok{.stopping:}
+                \ControlFlowTok{if}\NormalTok{ time.monotonic() }\OperatorTok{{-}}\NormalTok{ last\_stats }\OperatorTok{\textgreater{}}\NormalTok{ STATS\_SECONDS:}
+                    \VariableTok{self}\NormalTok{.refresh\_stats(conn)}
+\NormalTok{                    last\_stats }\OperatorTok{=}\NormalTok{ time.monotonic()}
+\NormalTok{                job }\OperatorTok{=}\NormalTok{ jobs.claim(conn)}
+                \ControlFlowTok{if}\NormalTok{ job }\KeywordTok{is} \VariableTok{None}\NormalTok{:}
+\NormalTok{                    time.sleep(POLL\_SECONDS)}
+                    \ControlFlowTok{continue}
+                \VariableTok{self}\NormalTok{.process(conn, job)}
+        \ControlFlowTok{finally}\NormalTok{:}
+\NormalTok{            conn.close()}
+\NormalTok{        logger.info(}\StringTok{"Worker stopped."}\NormalTok{)}
+
+    \KeywordTok{def}\NormalTok{ process(}\VariableTok{self}\NormalTok{, conn, job: }\BuiltInTok{dict}\NormalTok{) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+\NormalTok{        kind, job\_id }\OperatorTok{=}\NormalTok{ job[}\StringTok{"kind"}\NormalTok{], job[}\StringTok{"id"}\NormalTok{]}
+\NormalTok{        started }\OperatorTok{=}\NormalTok{ time.perf\_counter()}
+        \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{            HANDLERS[kind](conn, job[}\StringTok{"payload"}\NormalTok{])}
+        \ControlFlowTok{except}\NormalTok{ jobs.PermanentError }\ImportTok{as}\NormalTok{ error:}
+\NormalTok{            conn.rollback()}
+\NormalTok{            jobs.fail(conn, job\_id, }\BuiltInTok{str}\NormalTok{(error))}
+\NormalTok{            outcome }\OperatorTok{=} \StringTok{"failed"}
+        \ControlFlowTok{except} \PreprocessorTok{Exception} \ImportTok{as}\NormalTok{ error:  }\CommentTok{\# anything else may be temporary}
+\NormalTok{            conn.rollback()}
+            \ControlFlowTok{if}\NormalTok{ job[}\StringTok{"attempts"}\NormalTok{] }\OperatorTok{\textgreater{}=}\NormalTok{ job[}\StringTok{"max\_attempts"}\NormalTok{]:}
+\NormalTok{                jobs.fail(conn, job\_id, }\BuiltInTok{repr}\NormalTok{(error))}
+\NormalTok{                outcome }\OperatorTok{=} \StringTok{"failed"}
+            \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{                jobs.retry\_later(conn, job, }\BuiltInTok{repr}\NormalTok{(error))}
+\NormalTok{                outcome }\OperatorTok{=} \StringTok{"retry"}
+        \ControlFlowTok{else}\NormalTok{:}
+\NormalTok{            jobs.complete(conn, job\_id)}
+\NormalTok{            outcome }\OperatorTok{=} \StringTok{"done"}
+\NormalTok{        JOBS\_DONE.labels(kind, outcome).inc()}
+\NormalTok{        elapsed\_ms }\OperatorTok{=}\NormalTok{ (time.perf\_counter() }\OperatorTok{{-}}\NormalTok{ started) }\OperatorTok{*} \DecValTok{1000}
+\NormalTok{        log }\OperatorTok{=}\NormalTok{ logger.warning }\ControlFlowTok{if}\NormalTok{ outcome }\OperatorTok{!=} \StringTok{"done"} \ControlFlowTok{else}\NormalTok{ logger.info}
+\NormalTok{        log(}
+            \StringTok{"Job id=}\SpecialCharTok{\%d}\StringTok{ (}\SpecialCharTok{\%s}\StringTok{, attempt }\SpecialCharTok{\%d}\StringTok{): }\SpecialCharTok{\%s}\StringTok{ in \%.0f ms"}\NormalTok{,}
+\NormalTok{            job\_id,}
+\NormalTok{            kind,}
+\NormalTok{            job[}\StringTok{"attempts"}\NormalTok{],}
+\NormalTok{            outcome,}
+\NormalTok{            elapsed\_ms,}
+\NormalTok{        )}
+
+    \KeywordTok{def}\NormalTok{ refresh\_stats(}\VariableTok{self}\NormalTok{, conn) }\OperatorTok{{-}\textgreater{}} \VariableTok{None}\NormalTok{:}
+\NormalTok{        numbers }\OperatorTok{=}\NormalTok{ jobs.stats(conn)}
+\NormalTok{        QUEUE\_READY.}\BuiltInTok{set}\NormalTok{(numbers[}\StringTok{"ready"}\NormalTok{])}
+\NormalTok{        QUEUE\_OLDEST.}\BuiltInTok{set}\NormalTok{(}\BuiltInTok{float}\NormalTok{(numbers[}\StringTok{"oldest"}\NormalTok{]))}
+\NormalTok{        QUEUE\_FAILED.}\BuiltInTok{set}\NormalTok{(numbers[}\StringTok{"failed"}\NormalTok{])}
+
+
+\KeywordTok{def}\NormalTok{ main() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{int}\NormalTok{:}
+\NormalTok{    configure\_logging()}
+\NormalTok{    startup.run()  }\CommentTok{\# the same checks as the API: config, database, schema}
+\NormalTok{    worker }\OperatorTok{=}\NormalTok{ Worker()}
+\NormalTok{    signal.signal(signal.SIGTERM, worker.stop)}
+\NormalTok{    signal.signal(signal.SIGINT, worker.stop)  }\CommentTok{\# Ctrl+C, when run by hand}
+\NormalTok{    start\_http\_server(}\DecValTok{9201}\NormalTok{)  }\CommentTok{\# metrics for Prometheus, like the API\textquotesingle{}s 9200}
+\NormalTok{    logger.info(}\StringTok{"Worker started."}\NormalTok{)}
+\NormalTok{    worker.run()}
+    \ControlFlowTok{return} \DecValTok{0}
+
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    sys.exit(main())}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}The worker is a loop: claim a job, run it, record the outcome, and repeat. When the queue is empty, it sleeps for a second before asking again. That polling costs one tiny query a second, and it means a new job waits up to a second. (PostgreSQL's \texttt{LISTEN}/\texttt{NOTIFY} can wake workers instantly; it is a refinement to add when that second matters.)
+
+Every attempt ends in exactly one of three outcomes:
+
+\Needspace{14\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4394}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1211}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4394}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+What happened
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Outcome
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Next
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+the task finished & \texttt{done} & nothing \\
+the task raised \texttt{PermanentError} (the email service rejected the request) & \texttt{failed} & a person looks at \texttt{last\_error} \\
+anything else went wrong (service down, timeout, a bug) & \texttt{retry} & runs again after 30 s, 60 s, 120 s\ldots, with jitter, until \texttt{max\_attempts} (5), then \texttt{failed} \\
+\end{longtable}
+}
+
+Treating \emph{unknown} errors as temporary is deliberate. A bug that raises \texttt{KeyError} will fail five times over about eight minutes and then land in \texttt{failed}, with its traceback text in \texttt{last\_error}. That costs a little, and it never loses a job to a failure that would have passed on its own.
+
+Two details make the worker a good citizen:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Graceful shutdown.} \texttt{docker\ stop} sends \texttt{SIGTERM} (\hyperref[ch:37-reliability]{Chapter 37}, section 37.8). The worker's handler only sets a flag, so the job in progress finishes and is recorded, and the loop then exits. Docker's \texttt{-\/-stop-timeout\ 35} gives it half a minute to do so. The email task takes seconds at most, well within that.
+\item
+  \textbf{The same startup checks as the API.} \texttt{startup.run()} refuses to start with a bad configuration, an unreachable database, or a schema that is behind (section 33.10). A worker running old code against a new schema, or new code against an old one, fails loudly at startup instead of mysteriously later.
+\end{itemize}
+
+\subsection*{Scheduled jobs}\phantomsection\label{41-event-driven-architecture:scheduled-jobs}
+
+\texttt{run\_at} makes scheduling almost free. A job enqueued with \texttt{run\_at} set to tomorrow at nine simply is not ready until then:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tomorrow\_at\_nine }\OperatorTok{=}\NormalTok{ datetime(}\DecValTok{2024}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{16}\NormalTok{, }\DecValTok{9}\NormalTok{, }\DecValTok{0}\NormalTok{, tzinfo}\OperatorTok{=}\NormalTok{timezone.utc)}
+\NormalTok{enqueue(cursor, }\StringTok{"email\_note"}\NormalTok{, payload, run\_at}\OperatorTok{=}\NormalTok{tomorrow\_at\_nine)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}This is how you build reminders (``email me this note on Friday''), delayed follow-ups, and retries. Recurring work, like a nightly clean-up, still needs something to create the job every night. That is a cron job or systemd timer (\hyperref[ch:25-process-management]{Chapter 25}, section 25.9) whose only task is to enqueue it, so that the work itself gets the queue's retries, visibility and single-runner guarantee.
+
+\subsection*{Seeing the queue}\phantomsection\label{41-event-driven-architecture:seeing-the-queue}
+
+A queue is where work goes to be forgotten. \hyperref[ch:25-process-management]{Chapter 25} warned that background work fails silently, and a queue without monitoring is the purest example. Every fifteen seconds the worker refreshes three \textbf{gauges}, and it counts every job it processes. It serves them on port 9201, just as the API serves its metrics on 9200 (\hyperref[ch:35-observability]{Chapter 35}):
+
+\begin{outputbox}[short]
+\begin{Verbatim}[fontsize=\codesize, breaklines, breakanywhere, breaksymbolleft={\tiny\textcolor{muted}{$\hookrightarrow$}}]
+worker_jobs_total{kind="email_note",outcome="done"} 1.0
+worker_queue_ready_jobs 0.0
+worker_queue_oldest_seconds 0.0
+worker_queue_failed_jobs 0.0
+\end{Verbatim}
+\end{outputbox}
+
+\noindent{}Add the worker to Prometheus's \texttt{scrape\_configs} as a second job (\texttt{targets:}\allowbreak{}\texttt{\ {[}"127.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{1:}\allowbreak{}\texttt{9201"{]}}). Then alert on the two numbers that mean trouble:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\texttt{worker\_}\allowbreak{}\texttt{queue\_}\allowbreak{}\texttt{oldest\_}\allowbreak{}\texttt{seconds\ \textgreater{}\ 300}}: work is waiting too long. Either the workers are down, or they cannot keep up. This is the backpressure signal of section 41.7, as one number.
+\item
+  \textbf{\texttt{worker\_}\allowbreak{}\texttt{queue\_}\allowbreak{}\texttt{failed\_}\allowbreak{}\texttt{jobs} rising}: something is failing for good, and each failure is a user whose email never came. A person should look at \texttt{last\_error}, fix the cause, and re-queue the failed jobs if they are still wanted (\texttt{UPDATE\ jobs\ SET\ status\ =}\allowbreak{}\texttt{\ \textquotesingle{}pending\textquotesingle{},}\allowbreak{}\texttt{\ attempts\ =}\allowbreak{}\texttt{\ 0,}\allowbreak{}\texttt{\ run\_}\allowbreak{}\texttt{at\ =}\allowbreak{}\texttt{\ now()\ WHERE\ status\ =}\allowbreak{}\texttt{\ \textquotesingle{}failed\textquotesingle{}\ AND\ …}).
+\end{itemize}
+
+\noindent{}Finished jobs pile up. Delete old \texttt{done} jobs on a schedule (say, after a week). That is the retention policy of \hyperref[ch:37-reliability]{Chapter 37}, section 37.4, applied to your own bookkeeping.
+
+\subsection*{Running the worker}\phantomsection\label{41-event-driven-architecture:running-the-worker}
+
+The worker runs from \textbf{the same image} as the API; only the command differs. In production it is a second container next to the API's. Add it to the deploy script from \hyperref[ch:23-code-transfer]{Chapter 23}, \emph{after} the new API container has passed its health check (a release that fails the check rolls back before it touches the worker):
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+\CommentTok{\# Step 6: Replace the worker. It takes no traffic, so no blue{-}green: stop the}
+\CommentTok{\# old one (SIGTERM: it finishes its current job), start the new one.}
+\CommentTok{\# ─────────────────────────────────────────────────────────────────────────────}
+
+\ControlFlowTok{if} \ExtensionTok{docker}\NormalTok{ container inspect notes{-}worker }\OperatorTok{\textgreater{}}\NormalTok{ /dev/null }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1}\KeywordTok{;} \ControlFlowTok{then}
+    \ExtensionTok{docker}\NormalTok{ stop notes{-}worker }\OperatorTok{\textgreater{}\textgreater{}} \StringTok{"}\VariableTok{$LOG\_FILE}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1}
+    \ExtensionTok{docker}\NormalTok{ rm notes{-}worker }\OperatorTok{\textgreater{}\textgreater{}} \StringTok{"}\VariableTok{$LOG\_FILE}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1}
+\ControlFlowTok{fi}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}name}\NormalTok{ notes{-}worker }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}restart}\NormalTok{ unless{-}stopped }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}stop{-}timeout}\NormalTok{ 35 }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}no{-}healthcheck} \DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}p}\NormalTok{ 127.0.0.1:9201:9201 }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}{-}env{-}file} \StringTok{"}\VariableTok{$ENV\_FILE}\StringTok{"} \DataTypeTok{\textbackslash{}}
+    \StringTok{"}\VariableTok{$FULL\_IMAGE}\StringTok{"}\NormalTok{ python }\AttributeTok{{-}m}\NormalTok{ app.worker }\OperatorTok{\textgreater{}\textgreater{}} \StringTok{"}\VariableTok{$LOG\_FILE}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1}
+\ExtensionTok{log} \StringTok{"Worker started."}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{-\/-no-healthcheck} matters. The image's \texttt{HEALTHCHECK} (\hyperref[ch:18-containerization]{Chapter 18}) asks \texttt{http:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{localhost:}\allowbreak{}\texttt{5000/}\allowbreak{}\texttt{health}, and the worker serves no web requests, so Docker would mark it \texttt{unhealthy} forever. The worker's health is its metrics: is \texttt{worker\_}\allowbreak{}\texttt{queue\_}\allowbreak{}\texttt{oldest\_}\allowbreak{}\texttt{seconds} staying low? The environment file gains the email settings from section 37.5 (\texttt{EMAIL\_API\_URL}, \texttt{EMAIL\_API\_KEY}, \texttt{EMAIL\_FROM}), which only the worker now uses.
+
+Locally, \texttt{docker-compose.yml} from \hyperref[ch:39-local-vs-production]{Chapter 39} gains the worker and Mailpit:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{  }\FunctionTok{worker}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{build}\KeywordTok{:}\AttributeTok{ .}
+\AttributeTok{    }\FunctionTok{depends\_on}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{db}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{condition}\KeywordTok{:}\AttributeTok{ service\_healthy}
+\AttributeTok{    }\FunctionTok{environment}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{DATABASE\_URL}\KeywordTok{:}\AttributeTok{ postgresql://notes\_user:dev\_password@db/notesdb}
+\AttributeTok{      }\FunctionTok{SECRET\_KEY}\KeywordTok{:}\AttributeTok{ dev{-}secret{-}key{-}not{-}for{-}production{-}1234}
+\AttributeTok{      }\FunctionTok{EMAIL\_API\_URL}\KeywordTok{:}\AttributeTok{ http://mailpit:8025/api/v1/send}
+\AttributeTok{      }\FunctionTok{LOG\_FORMAT}\KeywordTok{:}\AttributeTok{ human}
+\AttributeTok{    }\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ .:/app}
+\CommentTok{    \# Migrating is safe here too: the runner\textquotesingle{}s lock (section 33.10) makes}
+\CommentTok{    \# the API and the worker take turns}
+\AttributeTok{    }\FunctionTok{command}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"sh"}\KeywordTok{,}\AttributeTok{ }\StringTok{"{-}c"}\KeywordTok{,}\AttributeTok{ }\StringTok{"python {-}m app.migrate \&\& exec python {-}m app.worker"}\KeywordTok{]}
+\AttributeTok{    }\FunctionTok{healthcheck}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{disable}\KeywordTok{:}\AttributeTok{ }\CharTok{true}
+
+\AttributeTok{  }\FunctionTok{mailpit}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{image}\KeywordTok{:}\AttributeTok{ axllent/mailpit}
+\AttributeTok{    }\FunctionTok{ports}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\StringTok{"127.0.0.1:8025:8025"}\CommentTok{   \# the web inbox: http://localhost:8025}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Scaling is now a separate decision for each half. When the queue's oldest job keeps growing, run a second worker container (\texttt{notes-worker-2}, same command). \texttt{SKIP\ LOCKED} has made that safe from the start. That is the ``independent scaling'' of section 41.2, for real.
+
+\subsection*{Tests}\phantomsection\label{41-event-driven-architecture:tests}
+
+Every test now starts with an empty queue too. In \texttt{tests/conftest.py}, the table list becomes \texttt{TRUNCATE\ notes,}\allowbreak{}\texttt{\ tags,}\allowbreak{}\texttt{\ users,}\allowbreak{}\texttt{\ jobs\ RESTART\ IDENTITY\ CASCADE}; without \texttt{jobs}, jobs left by one test would be claimed by the next.
+
+The worker's tests run it one job at a time, with \texttt{send\_email} replaced by a fake that can be told to fail. Here is the most important one, which proves that a retried job reuses its key:
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# tests/test\_worker.py (excerpt)}
+\KeywordTok{def}\NormalTok{ test\_a\_temporary\_failure\_is\_retried\_later\_with\_the\_same\_key(}
+\NormalTok{    conn, queued\_email, fake\_email}
+\NormalTok{):}
+\NormalTok{    fake\_email.failures }\OperatorTok{=}\NormalTok{ [email.EmailOutcomeUnknownError(}\StringTok{"no answer"}\NormalTok{)]}
+\NormalTok{    run\_next\_job(conn)}
+\NormalTok{    row }\OperatorTok{=}\NormalTok{ job\_row(conn)}
+    \ControlFlowTok{assert}\NormalTok{ row[}\StringTok{"status"}\NormalTok{] }\OperatorTok{==} \StringTok{"pending"} \KeywordTok{and}\NormalTok{ row[}\StringTok{"attempts"}\NormalTok{] }\OperatorTok{==} \DecValTok{1} \KeywordTok{and}\NormalTok{ row[}\StringTok{"later"}\NormalTok{]}
+
+\NormalTok{    conn.cursor().execute(}\StringTok{"UPDATE jobs SET run\_at = now()"}\NormalTok{)  }\CommentTok{\# skip the wait}
+\NormalTok{    conn.commit()}
+\NormalTok{    run\_next\_job(conn)}
+    \ControlFlowTok{assert}\NormalTok{ job\_row(conn)[}\StringTok{"status"}\NormalTok{] }\OperatorTok{==} \StringTok{"done"}
+\NormalTok{    keys }\OperatorTok{=}\NormalTok{ [attempt[}\StringTok{"key"}\NormalTok{] }\ControlFlowTok{for}\NormalTok{ attempt }\KeywordTok{in}\NormalTok{ fake\_email.attempts]}
+    \ControlFlowTok{assert} \BuiltInTok{len}\NormalTok{(keys) }\OperatorTok{==} \DecValTok{2} \KeywordTok{and}\NormalTok{ keys[}\DecValTok{0}\NormalTok{] }\OperatorTok{==}\NormalTok{ keys[}\DecValTok{1}\NormalTok{]  }\CommentTok{\# the service can deduplicate}
+
+
+\KeywordTok{def}\NormalTok{ test\_a\_crashed\_workers\_job\_is\_taken\_again(conn, queued\_email, fake\_email):}
+\NormalTok{    abandoned }\OperatorTok{=}\NormalTok{ jobs.claim(conn)  }\CommentTok{\# a worker claims it... and dies}
+    \ControlFlowTok{assert}\NormalTok{ jobs.claim(conn) }\KeywordTok{is} \VariableTok{None}  \CommentTok{\# while its lease runs, nobody else takes it}
+\NormalTok{    conn.cursor().execute(}
+        \StringTok{"UPDATE jobs SET locked\_until = now() {-} interval \textquotesingle{}1 second\textquotesingle{}"}
+\NormalTok{    )}
+\NormalTok{    conn.commit()  }\CommentTok{\# the lease expires}
+\NormalTok{    again }\OperatorTok{=}\NormalTok{ jobs.claim(conn)}
+    \ControlFlowTok{assert}\NormalTok{ again[}\StringTok{"id"}\NormalTok{] }\OperatorTok{==}\NormalTok{ abandoned[}\StringTok{"id"}\NormalTok{] }\KeywordTok{and}\NormalTok{ again[}\StringTok{"attempts"}\NormalTok{] }\OperatorTok{==} \DecValTok{2}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Other tests in the file cover a rejected email (failed at once), the attempt limit, a note deleted before its job ran (nothing sent, job done), and two workers claiming at the same moment (different jobs). Run end to end against PostgreSQL and Mailpit, the change is easy to see: the API now answers \texttt{202} in a few milliseconds instead of waiting on the provider, and the email lands in Mailpit's inbox about a second later, when the worker's next poll picks it up.
+
+\setcounter{section}{5}
+\section{Event Sourcing, CQRS, and Streaming}\label{41-event-driven-architecture:416-event-sourcing-cqrs-and-streaming}
+
+Three ideas you will hear, worth recognizing even from a distance:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Event sourcing}~--- instead of storing only the current state (the \texttt{notes} table as it is \emph{now}), store the full, append-only log of events that produced it (\texttt{NoteCreated}, \texttt{NoteEdited}, \texttt{NoteDeleted}). Current state becomes a \emph{replay} of the log. This gives a perfect audit trail and the ability to reconstruct any past state, at the cost of more complexity and no simple ``just read the row.''
+\item
+  \textbf{CQRS} (Command Query Responsibility Segregation)~--- use \emph{different models} for writing and for reading. Writes go through one path (often event-sourced); reads come from separate, denormalized views optimized for queries and kept up to date by consuming the events. Powerful when read and write patterns differ sharply; overkill for most CRUD.
+\item
+  \textbf{Streaming}~--- log-based brokers like \textbf{Apache Kafka} blur the line between ``message queue'' and ``database.'' Events are kept in an ordered, replayable, durable log that many consumers read independently at their own positions. This underpins both event-driven microservices and the data pipelines of the next chapter, because the same event stream can feed an operational consumer \emph{and} an analytics one.
+\end{itemize}
+
+\noindent{}You do not need these for a Notes API. You need to recognize them when you join a system built on them, and to know that each is a heavier trade made for a specific payoff~--- audit, read/write asymmetry, or replayable scale.
+
+\setcounter{section}{6}
+\section{Backpressure and the Real Costs}\label{41-event-driven-architecture:417-backpressure-and-the-real-costs}
+
+A queue that fills faster than workers drain it is a warning, not a relief: latency climbs, memory or disk fills, and eventually something breaks. \textbf{Backpressure} is the system's way of signaling ``slow down''~--- bounding queue size, rejecting or shedding load, or scaling consumers~--- so a producer cannot indefinitely outrun its consumers. An async system without a backpressure plan has simply moved its breaking point out of sight, not removed it.
+
+And be honest about what async costs, because it is not free:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Eventual consistency} (\hyperref[ch:40-distributed-systems]{Chapter 40}, again): the world is not immediately up to date after an event, and the UI and the user must tolerate the lag.
+\item
+  \textbf{Harder debugging.} A synchronous request is one stack trace. An event-driven flow is a chain of hops across producers, brokers, and consumers, with no single trace tying them together~--- unless you invest in \textbf{distributed tracing} and correlation IDs (the request-ID discipline of \hyperref[ch:35-observability]{Chapter 35}, extended across services). Observability stops being optional the moment work goes async.
+\end{itemize}
+
+\noindent{}Reach for asynchronous, event-driven design when decoupling, buffering, or independent scaling genuinely pay for that complexity~--- and keep the synchronous path for everything that needs an answer now.
+
+\phantomsection\label{41-event-driven-architecture:key-takeaways}
+\begin{takeaways}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Synchronous} = call and wait (simple, immediate, tightly coupled in time). \textbf{Asynchronous/event-driven} = announce and move on (decoupled, buffered, eventually consistent). Async is for work the caller does not need answered \emph{right now}.
+\item
+  A \textbf{message queue} has a \textbf{producer}, a durable \textbf{broker}, and \textbf{consumer} workers. It buys decoupling, load-leveling, resilience, and independent scaling~--- at the price of immediacy.
+\item
+  Real brokers deliver \textbf{at-least-once}, so messages get \textbf{redelivered}: consumers must be \textbf{idempotent} (idempotency, once more) and must not assume ordering.
+\item
+  \textbf{Queues} distribute work to one consumer; \textbf{pub/sub} broadcasts \textbf{events} (``this happened'') to many. Events let you add features by adding subscribers, changing nothing upstream.
+\item
+  A \textbf{job table in PostgreSQL} is a real queue: enqueue in the same transaction as the change that causes it (the outbox idea), claim with \texttt{FOR\ UPDATE\ SKIP\ LOCKED}, protect against crashed workers with a \textbf{lease}, retry with growing delays up to a limit, and fail permanently only for errors that retrying cannot fix. Run the worker from the same image, stop it with SIGTERM, and watch its queue (the age of the oldest waiting job, and failed jobs).
+\item
+  \textbf{Event sourcing} (store the event log, not just state), \textbf{CQRS} (separate read/write models), and \textbf{streaming} (Kafka's replayable log) are heavier patterns for audit, read/write asymmetry, and replayable scale.
+\item
+  Plan for \textbf{backpressure}, and pay for \textbf{distributed tracing}~--- async turns one stack trace into a cross-service chain.
+\end{itemize}
+
+\end{takeaways}
+
+\unnumberedsection{false}{Exercises}\label{41-event-driven-architecture:exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Predict.} Queue 1,000 email jobs with one worker running. Watch \texttt{worker\_}\allowbreak{}\texttt{queue\_}\allowbreak{}\texttt{oldest\_}\allowbreak{}\texttt{seconds}. Now start a second worker. How does the curve change?
+\item
+  \textbf{Break and fix.} Remove \texttt{SKIP\ LOCKED} from \texttt{claim()}, queue 2,000 jobs that do almost nothing, and time how long four workers take to empty the queue, with and without it. Is any job taken twice? Why is the difference smaller than you might expect, and when would it grow?
+\item
+  \textbf{Extend.} The worker already counts retries: \texttt{worker\_}\allowbreak{}\texttt{jobs\_}\allowbreak{}\texttt{total\{outcome=}\allowbreak{}\texttt{"retry"\}}. Write the PromQL for a Grafana panel (or the Prometheus graph page) showing retries per minute by kind, and an alert rule that fires when there are more than ten a minute for ten minutes.
+\item
+  \textbf{Explain.} Why does the book enqueue the job in the same transaction as the request's other changes?
+\end{enumerate}
+
+\noindent{}Solutions and hints are in the companion repository, in \texttt{exercises/}\allowbreak{}\texttt{chapter-41.md}. Try each exercise before reading its solution: the point is the thinking, not the answer.
+
+\unnumberedsection{false}{What's Next}\label{41-event-driven-architecture:whats-next}
+
+Events and streams carry not just \emph{commands to act on} but \emph{data to learn from}. The next chapter follows that data off the request path entirely, into the analytics plane~--- the warehouses, lakes, and pipelines a system grows alongside its transactional core.
+
+\noindent{}→ \hyperref[ch:42-data-analytics-plane]{Chapter 42}~--- The Data and Analytics Plane
