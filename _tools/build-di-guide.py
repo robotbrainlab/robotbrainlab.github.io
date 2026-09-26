@@ -8,7 +8,8 @@ Usage (from the repository root):
 1. Runs the roadmap's own generator (with its validation) into a temp directory.
    The roadmap source in _sources/ai-roadmap/ is only read, never modified.
 2. Adds a "Towards Intelligence" link to each page's top bar, pointing back to
-   the site home page. This is the only change made to the generated pages.
+   the site home page, and justifies the running text on the guide's home page.
+   These are the only changes made to the generated pages.
 3. Replaces data-intelligence/guide/ with the result.
 """
 
@@ -30,6 +31,12 @@ STYLE = """<style>
   @media (max-width: 700px) { .ti-home .tool-label { display: none; } }
 </style>
 </head>"""
+# The guide's home page only: justify all running text.
+HOME_PAGE = "index.html"
+HOME_STYLE = """<style>
+  main.home p:not(.home-actions), main.home li, .site-footer p { text-align: justify; hyphens: auto; }
+</style>
+</head>"""
 
 
 def home_link(rel_to_root: str) -> str:
@@ -49,6 +56,8 @@ def add_home_link(out: Path) -> int:
         if html.count(ANCHOR) != 1 or html.count("</head>") != 1:
             sys.exit(f"Unexpected page structure, not patching: {page.relative_to(out)}")
         html = html.replace(ANCHOR, home_link("../" * depth)).replace("</head>", STYLE)
+        if page.relative_to(out).as_posix() == HOME_PAGE:
+            html = html.replace("</head>", HOME_STYLE)
         page.write_text(html, encoding="utf-8")
         patched += 1
     return patched
