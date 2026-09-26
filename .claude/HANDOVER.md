@@ -83,7 +83,7 @@ blue accent and gradient emphasis. The rule is **not a single letter of content 
 
 | Page | Status |
 | --- | --- |
-| `index.html` | **Pilot done** (2026-09-26): text-check OK, checked light/dark/mobile. Waiting for the user's verdict before it goes live |
+| `index.html` | **Done, live** (2026-09-26): text-check OK, checked light/dark/mobile |
 | `cse/index.html` | To do. The large nested knowledge tree maps to cards |
 | `cse/on-ramp.html` | To do. One table with row spans; restyle it like the reference's `table.grid` inside a card |
 | `data-intelligence/resources.html` | To do. 7 tables, same treatment |

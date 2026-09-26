@@ -9,714 +9,46 @@
   <meta property="og:title" content="Towards Intelligence"/>
   <meta property="og:description" content="A structured learning path across Computer Science, Data & Intelligence, and Engineering — from mathematical foundations to large language models."/>
   <meta property="og:type" content="website"/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <style>
-    :root {
-      --bg:         #0e0e0f;
-      --surface:    #151516;
-      --surface2:   #1c1c1e;
-      --rule:       #2a2a2e;
-      --rule-lt:    #333338;
-      --ink:        #e8e8e8;
-      --ink-mid:    #d4d4d4;
-      --ink-dim:    #a8a8a8;
-      --white:      #f8f8f8;
-      --accent:     #c8a96e;
-      --accent-dim: #3a2e1a;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: 'Source Serif 4', Georgia, serif;
-      background: var(--bg);
-      color: var(--ink);
-      line-height: 1.7;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: clip;
-    }
-
-    /* Overview grid: 2 columns on desktop, stacked on mobile */
-    .overview-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-      border: 1px solid var(--rule);
-      margin-top: 2.5rem;
-      margin-bottom: 2.5rem;
-    }
-    .overview-grid > .col {
-      padding: 1.4rem;
-    }
-    .overview-grid > .col:first-child {
-      border-right: 1px solid var(--rule);
-    }
-    @media (max-width: 720px) {
-      .overview-grid { grid-template-columns: 1fr; }
-      .overview-grid > .col:first-child {
-        border-right: none;
-        border-bottom: 1px solid var(--rule);
-      }
-    }
-    /* Foundation row (single full-width card) — used for the Math row above the D&I Science/Engineering grid */
-    .foundation-row {
-      border: 1px solid var(--rule);
-      padding: 1.4rem;
-      margin-top: 2.5rem;
-      margin-bottom: 0;
-      border-bottom: none;
-    }
-    .foundation-row + .overview-grid {
-      margin-top: 0;
-    }
-    .foundation-row .foundation-topic {
-      font-family: 'Source Serif 4', serif;
-      font-size: 1.02rem; color: var(--ink); font-weight: 400;
-    }
-    .foundation-row .foundation-topic a {
-      color: var(--ink); text-decoration: none;
-      border-bottom: 1px solid var(--rule-lt);
-      transition: color 0.2s, border-color 0.2s;
-    }
-    .foundation-row .foundation-topic a:hover {
-      color: var(--accent); border-color: var(--accent);
-    }
-    .foundation-row .foundation-bullets {
-      padding-left: 1rem;
-      margin-top: 0.4rem;
-      display: flex; flex-direction: column;
-      gap: 0.15rem;
-    }
-    .foundation-row .foundation-bullets span {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; color: var(--ink-dim);
-      padding-left: 0.9rem;
-    }
-    .foundation-row .foundation-desc {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.86rem; color: var(--ink-dim);
-      margin-top: 0.7rem; line-height: 1.6;
-      text-align: justify; hyphens: auto;
-    }
-
-    /* -- GLOBAL LINK STYLE -- */
-    a.item-link {
-      color: var(--ink-mid);
-      text-decoration: none;
-      border-bottom: 1px solid var(--rule-lt);
-      transition: color 0.2s, border-color 0.2s;
-    }
-    a.item-link:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-    }
-
-    /* -- NAV -- */
-    body > nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(14, 14, 15, 0.94);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--rule);
-    }
-    .nav-inner {
-      max-width: 1100px; margin: 0 auto;
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 1rem 2rem;
-    }
-    .nav-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em;
-      color: var(--white); text-decoration: none;
-    }
-    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
-    .nav-links a {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.92rem; font-weight: 500; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--ink-mid);
-      text-decoration: none; transition: color 0.2s;
-    }
-    .nav-links a:hover { color: var(--accent); }
-
-    /* -- HAMBURGER -- */
-    .nav-hamburger {
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 5px;
-      width: 44px; height: 44px;
-      cursor: pointer;
-      background: none; border: none; padding: 0;
-    }
-    .nav-hamburger span {
-      display: block; width: 24px; height: 2px;
-      background: var(--ink); border-radius: 1px;
-      transition: transform 0.3s, opacity 0.3s;
-    }
-    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
-    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-    .mobile-menu {
-      display: none;
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      z-index: 99;
-      background: rgba(14, 14, 15, 0.97);
-      backdrop-filter: blur(12px);
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 2rem;
-    }
-    .mobile-menu.open { display: flex; }
-    .mobile-menu a {
-      font-family: 'Karla', sans-serif;
-      font-size: 1.1rem; font-weight: 500; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--ink-mid);
-      text-decoration: none; transition: color 0.2s;
-    }
-    .mobile-menu a:hover { color: var(--accent); }
-
-    /* -- PAGE WRAP -- */
-    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
-
-    /* Inner content container for full-width sections */
-    .section-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* -- HERO -- */
-    #hero {
-      min-height: 100vh;
-      padding: 0;
-      border-bottom: none;
-      display: flex;
-      align-items: center;
-      position: relative;
-    }
-    #hero::after {
-      content: '';
-      position: absolute; bottom: 0; left: 2rem; right: 2rem;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--rule-lt) 20%, var(--rule-lt) 80%, transparent);
-    }
-    .hero-kicker {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--accent);
-      display: flex; align-items: center; gap: 0.8rem;
-      margin-bottom: 1.6rem;
-    }
-    .hero-kicker::before {
-      content: ''; display: block;
-      width: 32px; height: 1px; background: var(--accent);
-    }
-    .hero-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(3.2rem, 6vw, 5.5rem);
-      font-weight: 600; line-height: 1.05;
-      letter-spacing: -0.01em;
-      color: var(--white);
-      margin-bottom: 1.8rem;
-    }
-    .hero-name em { font-style: italic; font-weight: 400; color: var(--accent); }
-    .hero-summary {
-      font-size: 1.08rem; line-height: 1.85;
-      color: var(--ink); max-width: 720px;
-      margin-bottom: 2.4rem; font-weight: 400;
-      text-align: justify;
-    }
-    .hero-summary strong { font-weight: 600; color: var(--white); }
-
-    /* -- SECTION COMMONS -- */
-    .section-wrap {
-      min-height: 100vh;
-      padding: 7rem 0 5rem;
-      border-bottom: none;
-      position: relative;
-    }
-    .section-wrap::after {
-      content: '';
-      position: absolute; bottom: 0; left: 2rem; right: 2rem;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--rule-lt) 20%, var(--rule-lt) 80%, transparent);
-    }
-
-    /* Alternating page backgrounds */
-    .section-wrap:nth-of-type(odd)  { background: var(--bg); }
-    .section-wrap:nth-of-type(even) { background: var(--surface); }
-
-    /* Large watermark section number */
-    .section-wrap { counter-increment: section; }
-    .section-watermark {
-      position: absolute;
-      top: 5.5rem; right: 2rem;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(6rem, 12vw, 10rem);
-      font-weight: 700;
-      color: var(--rule);
-      line-height: 1;
-      pointer-events: none;
-      user-select: none;
-      opacity: 0.4;
-    }
-
-    .section-header {
-      display: grid;
-      grid-template-columns: 200px 1fr;
-      gap: 3rem;
-      margin-bottom: 3.5rem;
-    }
-    .section-num {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--ink-dim);
-      padding-top: 0.3rem;
-    }
-    .section-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.8rem, 3vw, 2.6rem);
-      font-weight: 600; line-height: 1.15;
-      color: var(--white); letter-spacing: -0.01em;
-    }
-    .section-title em { font-style: italic; font-weight: 400; color: var(--accent); }
-    .section-intro {
-      font-size: 1.02rem; color: var(--ink); line-height: 1.75;
-      max-width: 680px; margin-top: 0.6rem;
-      font-family: 'Karla', sans-serif;
-      text-align: justify;
-    }
-
-    /* -- EXPLANATION BLOCK -- */
-    .explanation {
-      font-family: 'Source Serif 4', serif;
-      font-size: 1rem; color: var(--ink); line-height: 1.8;
-      font-weight: 400;
-      padding: 1.2rem 0 1.2rem 1.4rem;
-      border-left: 2px solid var(--accent-dim);
-      margin-bottom: 2rem;
-      text-align: justify;
-    }
-    .explanation strong { font-weight: 600; color: var(--white); }
-
-    /* -- DISCIPLINE ROW (The On-Ramp) -- */
-    .discipline-group { margin-bottom: 2.5rem; }
-    .discipline-label {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--accent);
-      margin-bottom: 1rem;
-      display: flex; align-items: center; gap: 0.8rem;
-    }
-    .discipline-label::before {
-      content: ''; display: block;
-      width: 20px; height: 1px; background: var(--accent);
-    }
-
-    .course-list { display: flex; flex-direction: column; gap: 0; }
-    .course-item {
-      display: flex; align-items: center; gap: 1rem;
-      padding: 0.8rem 0;
-      border-bottom: 1px solid var(--rule);
-      font-family: 'Source Serif 4', serif;
-      font-size: 1rem; color: var(--white);
-      font-weight: 400;
-    }
-    .course-item:first-child { border-top: 1px solid var(--rule); }
-    .course-num {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.95rem; color: var(--ink-mid); font-style: italic;
-      min-width: 24px;
-    }
-    .course-desc {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.94rem; color: var(--ink-mid); margin-top: 0.2rem;
-      line-height: 1.5;
-    }
-    .course-content { display: flex; flex-direction: column; }
-    .course-content a.item-link { font-size: 1rem; }
-
-    /* -- MATH CHIPS -- */
-    .chip-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .chip {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--ink-dim);
-      padding: 0.4rem 0.9rem;
-      border: 1px solid var(--rule-lt); border-radius: 1px;
-      transition: border-color 0.2s, color 0.2s;
-    }
-    .chip:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* -- CSE TREE -- */
-    .tree-group { margin-bottom: 2.5rem; }
-    .tree-discipline {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.35rem; font-weight: 600; color: var(--white);
-      margin-bottom: 1.2rem;
-    }
-    .tree-category {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--accent);
-      margin-bottom: 0.8rem; margin-top: 1.6rem;
-    }
-    .tree-desc {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.96rem; color: var(--ink-mid); line-height: 1.65;
-      margin-bottom: 1rem;
-      text-align: justify;
-    }
-
-    .topic-list { display: flex; flex-direction: column; }
-    .topic-item {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 1rem;
-      align-items: baseline;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid var(--rule);
-      position: relative;
-    }
-    .topic-item:first-child { border-top: 1px solid var(--rule); }
-    .topic-item:hover .topic-name { color: var(--accent); }
-    .topic-item::before {
-      content: '';
-      position: absolute; left: -1rem; top: 0; bottom: 0; width: 2px;
-      background: var(--accent);
-      transform: scaleY(0);
-      transform-origin: top;
-      transition: transform 0.25s ease;
-    }
-    .topic-item:hover::before { transform: scaleY(1); }
-    .topic-name {
-      font-family: 'Source Serif 4', serif;
-      font-size: 1rem; color: var(--ink);
-      font-weight: 400; transition: color 0.2s;
-    }
-    .topic-sub {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.06em;
-      white-space: nowrap;
-    }
-    .topic-sub-line {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.9rem; color: var(--ink-mid);
-      line-height: 1.55; margin-top: 0.2rem;
-      font-weight: 400;
-    }
-
-    /* Section action links (stripped sections) */
-    .section-links {
-      display: flex;
-      gap: 2rem;
-      flex-wrap: wrap;
-      margin-top: 2.5rem;
-    }
-    .section-link {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--accent);
-      text-decoration: none;
-      border-bottom: 1px solid var(--accent-dim);
-      padding-bottom: 0.2rem;
-      transition: border-color 0.2s;
-    }
-    .section-link:hover { border-color: var(--accent); }
-
-    /* -- D&I MERGED-CELL BRACKET (Infrastructure Engineering + Operating share MLOps/LLMOps) -- */
-    .anchor-pair {
-      position: relative;
-      padding-left: 1.4rem;
-      margin-top: 0.6rem;
-      margin-bottom: 0.4rem;
-    }
-    .anchor-pair::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0.45rem; bottom: 0.45rem;
-      width: 2px;
-      background: var(--accent);
-      border-radius: 1px;
-    }
-    .anchor-pair .anchor-label {
-      font-family: 'Source Serif 4', serif;
-      font-size: 0.98rem;
-      color: var(--ink);
-      font-weight: 500;
-      padding: 0.15rem 0;
-    }
-    .merged-content {
-      margin-top: 0.5rem;
-      margin-left: 1.4rem;
-      padding: 0.9rem 1rem;
-      border: 1px solid var(--accent-dim);
-      border-radius: 2px;
-      background: rgba(58, 46, 26, 0.18);
-    }
-    .merge-caption {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.74rem; font-weight: 600; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--accent);
-      margin-bottom: 0.6rem;
-    }
-    .ops-item { margin-bottom: 0.7rem; }
-    .ops-item:last-child { margin-bottom: 0; }
-    .ops-item-name {
-      font-family: 'Source Serif 4', serif;
-      font-size: 0.98rem;
-      color: var(--ink);
-      font-weight: 600;
-    }
-    .ops-note {
-      margin-top: 0.4rem;
-      padding-left: 0.9rem;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.84rem;
-      color: var(--ink-dim);
-      line-height: 1.55;
-      text-align: justify;
-      hyphens: auto;
-    }
-
-    /* -- DATA & INTELLIGENCE RESOURCE ROWS -- */
-    .track-header {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.35rem; font-weight: 600; color: var(--white);
-      margin-bottom: 0.4rem;
-    }
-    .track-subtitle {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--ink-dim);
-      margin-bottom: 1.6rem;
-    }
-
-    .resource-row {
-      display: grid;
-      grid-template-columns: 200px 1fr;
-      gap: 3rem;
-      padding: 1.8rem 0;
-      border-bottom: 1px solid var(--rule);
-      position: relative;
-    }
-    .resource-row:first-of-type { border-top: 1px solid var(--rule); }
-    .resource-row:hover .resource-topic { color: var(--accent); }
-    .resource-row::before {
-      content: '';
-      position: absolute; left: -1rem; top: 0; bottom: 0; width: 2px;
-      background: var(--accent);
-      transform: scaleY(0);
-      transform-origin: top;
-      transition: transform 0.25s ease;
-    }
-    .resource-row:hover::before { transform: scaleY(1); }
-
-    .resource-topic {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.2rem; font-weight: 600; color: var(--white);
-      transition: color 0.2s;
-      padding-top: 0.1rem;
-    }
-    .resource-list { display: flex; flex-direction: column; gap: 0.6rem; }
-    .resource-item {
-      font-family: 'Source Serif 4', serif;
-      font-size: 1rem; color: var(--ink);
-      font-weight: 400;
-      line-height: 1.7;
-      margin-bottom: 0.3rem;
-    }
-    .resource-item a {
-      color: var(--ink);
-      text-decoration: none;
-      border-bottom: 1px solid var(--rule-lt);
-      transition: color 0.2s, border-color 0.2s;
-      font-weight: 400;
-    }
-    .resource-item a:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-    }
-    .resource-type {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--ink-dim);
-      margin-left: 0.6rem;
-      background: var(--surface2);
-      padding: 0.15rem 0.5rem;
-      border-radius: 2px;
-    }
-
-    /* -- SUBTOPICS NOTE -- */
-    .note-block {
-      background: var(--surface);
-      border: 1px solid var(--rule);
-      padding: 1.6rem 2rem;
-      margin-top: 2.5rem;
-    }
-    .note-label {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--accent);
-      margin-bottom: 0.8rem;
-    }
-    .note-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.15rem; font-weight: 600; color: var(--white);
-      margin-bottom: 0.6rem;
-    }
-    .note-desc {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.96rem; color: var(--ink-mid); line-height: 1.65;
-      margin-bottom: 0.8rem;
-      text-align: justify;
-    }
-
-    .sub-list {
-      display: flex; flex-wrap: wrap; gap: 0.4rem;
-      margin-top: 0.6rem; margin-bottom: 0.6rem;
-    }
-    .sub-chip {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.84rem; font-weight: 500; letter-spacing: 0.04em;
-      color: var(--ink-dim);
-      padding: 0.25rem 0.6rem;
-      border: 1px solid var(--rule); border-radius: 1px;
-    }
-
-    /* -- FOOTER -- */
-    footer {
-      border-top: 1px solid var(--rule);
-      padding: 1.6rem 2rem;
-      background: var(--surface);
-    }
-    .footer-inner {
-      max-width: 1100px; margin: 0 auto;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .footer-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.95rem; color: var(--ink-dim);
-    }
-    .footer-copy {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.05em;
-    }
-
-    /* -- SCROLL REVEAL -- */
-    .reveal {
-      opacity: 0; transform: translateY(16px);
-      transition: opacity 0.65s ease, transform 0.65s ease;
-    }
-    .reveal.visible { opacity: 1; transform: none; }
-
-    /* -- RESPONSIVE -- */
-    @media (max-width: 860px) {
-      .section-header { grid-template-columns: 1fr; gap: 0.8rem; margin-bottom: 2rem; }
-      .resource-row { grid-template-columns: 1fr; gap: 0.6rem; }
-      .section-watermark {
-        top: 1.4rem;
-        right: 1.2rem;
-        font-size: clamp(3rem, 14vw, 4.5rem);
-      }
-      div[style*="grid-template-columns: 1fr 1fr"] {
-        grid-template-columns: 1fr !important;
-      }
-      div[style*="border-right: 1px solid var(--rule)"] {
-        border-right: none !important;
-        border-bottom: 1px solid var(--rule) !important;
-      }
-    }
-    @media (max-width: 600px) {
-      .nav-links { display: none; }
-      .nav-hamburger { display: flex; }
-      .nav-inner, .page-wrap, .section-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
-    }
-
-    /* -- PAGE INDICATOR DOTS -- */
-    .page-dots {
-      position: fixed;
-      right: 1.5rem;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 99;
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-    .page-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      border: 1px solid var(--ink-dim);
-      background: transparent;
-      transition: all 0.3s;
-      cursor: pointer;
-      text-decoration: none;
-      position: relative;
-    }
-    .page-dot.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      transform: scale(1.3);
-    }
-    .page-dot::before {
-      content: attr(data-label);
-      position: absolute;
-      right: 1.4rem;
-      top: 50%;
-      transform: translateY(-50%);
-      font-family: 'Karla', sans-serif;
-      font-size: 0.82rem;
-      letter-spacing: 0.06em;
-      color: var(--ink-dim);
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
-    .page-dot:hover::before { opacity: 1; }
-
-    /* Active nav link */
-    .nav-links a.active { color: var(--accent); }
-
-    @media (max-width: 860px) {
-      .page-dots { display: none; }
-    }
-
-    /* Justify prose: hero/section intros, body classes, tables, and grid cells (site-wide consistency) */
-    .hero-subtitle, .part-subtitle, .major-section-desc, .sub-discipline-desc,
-    .cell-desc, .cell-explainer, .cell-merged-note,
-    .tree-desc, .ops-note, .note-desc,
-    .sub-label-desc, .track-desc,
-    .mirror-table tbody td:not(:first-child),
-    .content-table tbody td:not(:first-child),
-    .resource-table tbody td:not(:first-child) {
-      text-align: justify;
-      hyphens: auto;
-    }
-  </style>
+  <script>
+    /* Apply the saved (or system) theme before first paint to avoid a flash. */
+    (function () {
+      var t;
+      try { t = localStorage.getItem('ti-theme'); } catch (e) {}
+      if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.classList.add('js');
+    })();
+  </script>
+  <link rel="stylesheet" href="theme/site.css"/>
 </head>
 <body>
 
 <!-- NAV -->
-<nav>
-  <div class="nav-inner">
-    <a href="#hero" class="nav-logo">Towards Intelligence</a>
-    <ul class="nav-links">
-      <li><a href="#mathematics">Mathematics</a></li>
-      <li><a href="#cse">CS &amp; Engineering</a></li>
-      <li><a href="#data-intelligence">Data &amp; Intelligence</a></li>
-    </ul>
-    <button class="nav-hamburger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+<nav class="nav" aria-label="Sections">
+  <div class="wrap">
+    <a href="#hero" class="brand">Towards Intelligence</a>
+    <div class="right">
+      <ul class="links">
+        <li><a href="#mathematics">Mathematics</a></li>
+        <li><a href="#cse">CS &amp; Engineering</a></li>
+        <li><a href="#data-intelligence">Data &amp; Intelligence</a></li>
+      </ul>
+      <button class="switch" id="themeToggle" type="button" role="switch"
+              aria-checked="false" aria-label="Dark mode" title="Toggle dark mode">
+        <span class="knob">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2" fill="currentColor"/>
+            <path d="M12 2v2.5M12 19.5V22M4.2 4.2 6 6M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8 6 18M18 6l1.8-1.8"/>
+          </svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1Z"/>
+          </svg>
+        </span>
+      </button>
+      <button class="nav-hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
 </nav>
 
@@ -726,12 +58,14 @@
   <a href="#data-intelligence" class="mobile-link">Data &amp; Intelligence</a>
 </div>
 
+<main>
+
 <!-- HERO -->
-<section id="hero">
-  <div class="section-inner">
-    <div class="hero-kicker">Structured Learning Path</div>
-    <h1 class="hero-name">Towards <em>Intelligence</em></h1>
-    <p class="hero-summary">
+<header id="hero" class="hero" data-track>
+  <div class="wrap">
+    <div class="eyebrow reveal">Structured Learning Path</div>
+    <h1 class="reveal">Towards <em>Intelligence</em></h1>
+    <p class="purpose reveal">
       This roadmap organises three parallel disciplines &mdash;
       <strong>Mathematics</strong>, <strong>Computer Science &amp; Engineering</strong>,
       and <strong>Data &amp; Intelligence</strong> &mdash; into a structured
@@ -742,268 +76,272 @@
       foundations before building on them is the whole point.
     </p>
   </div>
-</section>
+</header>
 
 <!-- ========================================== -->
 <!-- 01 / MATHEMATICS                           -->
 <!-- ========================================== -->
-<section id="mathematics" class="section-wrap">
-  <div class="section-watermark">01</div>
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-num">01 &nbsp;/&nbsp; Mathematics</div>
-      <div>
-        <h2 class="section-title">Mathematical <em>Foundations</em></h2>
-        <p class="section-intro">
+<section id="mathematics" class="band alt" data-track>
+  <div class="wrap">
+    <div class="wrap-narrow" style="padding:0; margin-left:0">
+      <div class="sec-head reveal">
+        <div class="sec-mark">01</div>
+        <span class="num">01 &nbsp;/&nbsp; Mathematics</span>
+        <h2>Mathematical <em>Foundations</em></h2>
+        <p class="lede">
           The mathematical layer that underpins everything else &mdash;
           a core pillar that both Computer Science and Data &amp; Intelligence build on top of.
         </p>
       </div>
+
+      <div class="prose reveal">
+        Mathematics is not a prerequisite you complete and then forget &mdash; it is the common
+        vocabulary. Computer Science leans on discrete mathematics and formal logic.
+        Data &amp; Intelligence leans on linear algebra, probability, and statistics. But the
+        boundary is not clean: modern machine learning is impossible without calculus, database
+        theory is impossible without combinatorics, and anything involving randomness requires
+        probability. Treating mathematics as a first-class pillar is not about rigour for its
+        own sake &mdash; it is about the fact that every interesting problem eventually reduces
+        to a mathematical question.
+      </div>
     </div>
 
-    <div class="explanation reveal">
-      Mathematics is not a prerequisite you complete and then forget &mdash; it is the common
-      vocabulary. Computer Science leans on discrete mathematics and formal logic.
-      Data &amp; Intelligence leans on linear algebra, probability, and statistics. But the
-      boundary is not clean: modern machine learning is impossible without calculus, database
-      theory is impossible without combinatorics, and anything involving randomness requires
-      probability. Treating mathematics as a first-class pillar is not about rigour for its
-      own sake &mdash; it is about the fact that every interesting problem eventually reduces
-      to a mathematical question.
+    <div class="ctas reveal">
+      <a href="mathematics/index.html" class="btn">Read the Mathematics guide &rarr;</a>
     </div>
-
-    <div class="reveal section-links">
-      <a href="mathematics/index.html" class="section-link">Read the Mathematics guide &rarr;</a>
-    </div>
-  </div><!-- /section-inner -->
+  </div>
 </section>
 
 <!-- ========================================== -->
 <!-- 02 / COMPUTER SCIENCE & ENGINEERING        -->
 <!-- ========================================== -->
-<section id="cse" class="section-wrap">
-  <div class="section-watermark">02</div>
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-num">02 &nbsp;/&nbsp; CS &amp; Engineering</div>
-      <div>
-        <h2 class="section-title">Computer Science &amp; <em>Engineering</em></h2>
-        <p class="section-intro">
+<section id="cse" class="band" data-track>
+  <div class="wrap">
+    <div class="wrap-narrow" style="padding:0; margin-left:0">
+      <div class="sec-head reveal">
+        <div class="sec-mark">02</div>
+        <span class="num">02 &nbsp;/&nbsp; CS &amp; Engineering</span>
+        <h2>Computer Science &amp; <em>Engineering</em></h2>
+        <p class="lede">
           The full knowledge tree &mdash; organised as a deliberate progression
           from the on-ramp through theoretical foundations to practical engineering at scale.
         </p>
       </div>
-    </div>
 
-    <div class="explanation reveal">
-      This discipline is split into <strong>Science</strong> and <strong>Engineering</strong>
-      because they answer fundamentally different questions. Science asks: <em>how does
-      computation work?</em> What makes an algorithm correct? Why does a distributed system
-      fail in the ways it does? These are questions of understanding &mdash; and skipping
-      them means you end up building things you cannot debug, optimise, or reason about
-      when they break. Engineering asks: <em>how do I build and run real systems?</em>
-      Knowing how a B-tree works is Science; designing a database schema that survives
-      production traffic is Engineering. You need both, and in that order.
-      <br><br>
-      Within Science, the split is between <strong>Fundamentals</strong> and <strong>Systems</strong>.
-      Fundamentals covers the abstract core &mdash; computation theory, algorithms, language
-      design &mdash; the concepts that do not change regardless of what technology stack you
-      use. Systems takes those ideas and grounds them in real infrastructure: how databases
-      manage transactions, how operating systems schedule processes, how networks route packets.
-      Fundamentals gives you the &ldquo;what&rdquo;; Systems gives you the &ldquo;where it actually runs.&rdquo;
-      <br><br>
-      Within Engineering, the split is between <strong>Building</strong> and <strong>Operating</strong>.
-      Building is about construction &mdash; writing software, setting up infrastructure,
-      designing cloud architectures, establishing CI/CD pipelines. But building a system is
-      only half the job. Operating is about keeping it alive: ensuring reliability through SRE
-      practices, catching performance regressions before users do, hardening security posture,
-      and maintaining observability so that when something does go wrong at 3 AM, you can
-      actually find out why. A system that cannot be operated is a system that cannot be trusted.
+      <div class="prose reveal">
+        This discipline is split into <strong>Science</strong> and <strong>Engineering</strong>
+        because they answer fundamentally different questions. Science asks: <em>how does
+        computation work?</em> What makes an algorithm correct? Why does a distributed system
+        fail in the ways it does? These are questions of understanding &mdash; and skipping
+        them means you end up building things you cannot debug, optimise, or reason about
+        when they break. Engineering asks: <em>how do I build and run real systems?</em>
+        Knowing how a B-tree works is Science; designing a database schema that survives
+        production traffic is Engineering. You need both, and in that order.
+        <br><br>
+        Within Science, the split is between <strong>Fundamentals</strong> and <strong>Systems</strong>.
+        Fundamentals covers the abstract core &mdash; computation theory, algorithms, language
+        design &mdash; the concepts that do not change regardless of what technology stack you
+        use. Systems takes those ideas and grounds them in real infrastructure: how databases
+        manage transactions, how operating systems schedule processes, how networks route packets.
+        Fundamentals gives you the &ldquo;what&rdquo;; Systems gives you the &ldquo;where it actually runs.&rdquo;
+        <br><br>
+        Within Engineering, the split is between <strong>Building</strong> and <strong>Operating</strong>.
+        Building is about construction &mdash; writing software, setting up infrastructure,
+        designing cloud architectures, establishing CI/CD pipelines. But building a system is
+        only half the job. Operating is about keeping it alive: ensuring reliability through SRE
+        practices, catching performance regressions before users do, hardening security posture,
+        and maintaining observability so that when something does go wrong at 3 AM, you can
+        actually find out why. A system that cannot be operated is a system that cannot be trusted.
+      </div>
     </div>
 
     <!-- CS&E Overview Grid -->
-    <div class="overview-grid reveal">
-      <div class="col">
-        <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Science</div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Fundamentals</div>
-        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.9rem;">
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Discrete Mathematics</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Programming Languages &amp; Compilers</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Data Structures &amp; Algorithms</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Theory of Computation</span>
+    <div class="grid-2 tree reveal">
+      <div class="card">
+        <h4>Science</h4>
+        <div class="grp">Fundamentals</div>
+        <div class="items">
+          <span>&mdash; Discrete Mathematics</span>
+          <span>&mdash; Programming Languages &amp; Compilers</span>
+          <span>&mdash; Data Structures &amp; Algorithms</span>
+          <span>&mdash; Theory of Computation</span>
         </div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Systems</div>
-        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Databases</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Distributed Systems</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Operating Systems</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Computer Networks</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Parallel &amp; Concurrent Computing</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Computer Organization &amp; Architecture</span>
+        <div class="grp">Systems</div>
+        <div class="items">
+          <span>&mdash; Databases</span>
+          <span>&mdash; Distributed Systems</span>
+          <span>&mdash; Operating Systems</span>
+          <span>&mdash; Computer Networks</span>
+          <span>&mdash; Parallel &amp; Concurrent Computing</span>
+          <span>&mdash; Computer Organization &amp; Architecture</span>
         </div>
       </div>
-      <div class="col">
-        <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Engineering</div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Building</div>
-        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem; margin-bottom: 0.9rem;">
-          <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.2rem;">Software Engineering</span>
-          <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.6rem;">Infrastructure Engineering</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Development Operations (DevOps)</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Cloud Engineering</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Platform Engineering</span>
+      <div class="card">
+        <h4>Engineering</h4>
+        <div class="grp">Building</div>
+        <div class="items">
+          <span class="sub">Software Engineering</span>
+          <span class="sub">Infrastructure Engineering</span>
+          <span>&mdash; Development Operations (DevOps)</span>
+          <span>&mdash; Cloud Engineering</span>
+          <span>&mdash; Platform Engineering</span>
         </div>
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Operating</div>
-        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Reliability Engineering (SRE)</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Performance Engineering</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Security Engineering</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Observability Engineering</span>
+        <div class="grp">Operating</div>
+        <div class="items">
+          <span>&mdash; Reliability Engineering (SRE)</span>
+          <span>&mdash; Performance Engineering</span>
+          <span>&mdash; Security Engineering</span>
+          <span>&mdash; Observability Engineering</span>
         </div>
       </div>
     </div>
 
-    <div class="reveal section-links">
-      <a href="cse/on-ramp.html" class="section-link">The On-Ramp &rarr;</a>
-      <a href="cse/index.html" class="section-link">Read the CS &amp; Engineering guide &rarr;</a>
+    <div class="ctas reveal">
+      <a href="cse/on-ramp.html" class="btn">The On-Ramp &rarr;</a>
+      <a href="cse/index.html" class="btn secondary">Read the CS &amp; Engineering guide &rarr;</a>
     </div>
-  </div><!-- /section-inner -->
+  </div>
 </section>
 
 <!-- ========================================== -->
 <!-- 03 / DATA & INTELLIGENCE                   -->
 <!-- ========================================== -->
-<section id="data-intelligence" class="section-wrap">
-  <div class="section-watermark">03</div>
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-num">03 &nbsp;/&nbsp; Data &amp; Intelligence</div>
-      <div>
-        <h2 class="section-title">Data &amp; <em>Intelligence</em></h2>
-        <p class="section-intro">
+<section id="data-intelligence" class="band alt" data-track>
+  <div class="wrap">
+    <div class="wrap-narrow" style="padding:0; margin-left:0">
+      <div class="sec-head reveal">
+        <div class="sec-mark">03</div>
+        <span class="num">03 &nbsp;/&nbsp; Data &amp; Intelligence</span>
+        <h2>Data &amp; <em>Intelligence</em></h2>
+        <p class="lede">
           A dual-track approach to AI and data &mdash; through
           theoretical depth and hands-on building, following the same progression
           from data analysis to large language models.
         </p>
       </div>
-    </div>
 
-    <div class="explanation reveal">
-      D&amp;I is organised as three tracks: <strong>Mathematics</strong> (the foundational layer),
-      <strong>Science</strong> (theoretical depth across the field), and
-      <strong>Engineering</strong> (practical fluency for actually building). Mathematics sits beneath
-      the other two because every Science topic and most Engineering work assumes calculus,
-      linear algebra, probability, and statistics &mdash; the maths the rest of the roadmap
-      takes for granted. Science and Engineering then mirror each other topic-for-topic across
-      the same five areas built on top of that foundation: <strong>Data Analysis, Machine Learning,
-      Deep Learning, NLP, and Transformers/LLMs</strong>. The Science track uses canonical
-      textbooks and Stanford lecture series to build theoretical depth &mdash; understanding
-      <em>why</em> algorithms work, what their guarantees are, and where they break down.
-      The Engineering track uses implementation-focused books and code repositories to build
-      practical fluency &mdash; understanding <em>how</em> to actually train, evaluate, ship,
-      and iterate on real models. It also picks up <strong>Programming</strong> as a sixth
-      Engineering-only foundation: the Science track can be read without Python proficiency,
-      but no Engineering work in D&amp;I happens without it.
-      <br><br>
-      The Engineering track has the same two Categories as CS&amp;E: <strong>Building</strong>
-      (Software Engineering &mdash; writing the model code; Infrastructure Engineering &mdash;
-      the pipelines and serving stack underneath) and <strong>Operating</strong>
-      (Reliability, Performance, Security, Observability &mdash; the four disciplines
-      that keep a running system alive). What&rsquo;s different in D&amp;I is that two
-      practices &mdash; <strong>MLOps</strong> and <strong>LLMOps</strong> &mdash; span
-      Infrastructure Engineering and all four Operating disciplines, giving them their
-      ML- and LLM-specific treatment. MLOps covers the closed-loop discipline for ML
-      systems; LLMOps is the same loop specialised for LLM-based systems. The same engineer
-      typically designs the pipeline, ships it, watches it drift, and retrains it &mdash;
-      so the same two specialisations cover all five rows.
-      <br><br>
-      The deliberate mirroring between Science and Engineering is the point. Theory without
-      practice is academic &mdash; you understand the math but cannot ship anything.
-      Practice without theory is fragile &mdash; you can follow a tutorial, but the moment
-      something behaves unexpectedly, you have no mental model to fall back on. Both tracks
-      together produce someone who can reason about <em>and</em> build intelligent systems.
+      <div class="prose reveal">
+        D&amp;I is organised as three tracks: <strong>Mathematics</strong> (the foundational layer),
+        <strong>Science</strong> (theoretical depth across the field), and
+        <strong>Engineering</strong> (practical fluency for actually building). Mathematics sits beneath
+        the other two because every Science topic and most Engineering work assumes calculus,
+        linear algebra, probability, and statistics &mdash; the maths the rest of the roadmap
+        takes for granted. Science and Engineering then mirror each other topic-for-topic across
+        the same five areas built on top of that foundation: <strong>Data Analysis, Machine Learning,
+        Deep Learning, NLP, and Transformers/LLMs</strong>. The Science track uses canonical
+        textbooks and Stanford lecture series to build theoretical depth &mdash; understanding
+        <em>why</em> algorithms work, what their guarantees are, and where they break down.
+        The Engineering track uses implementation-focused books and code repositories to build
+        practical fluency &mdash; understanding <em>how</em> to actually train, evaluate, ship,
+        and iterate on real models. It also picks up <strong>Programming</strong> as a sixth
+        Engineering-only foundation: the Science track can be read without Python proficiency,
+        but no Engineering work in D&amp;I happens without it.
+        <br><br>
+        The Engineering track has the same two Categories as CS&amp;E: <strong>Building</strong>
+        (Software Engineering &mdash; writing the model code; Infrastructure Engineering &mdash;
+        the pipelines and serving stack underneath) and <strong>Operating</strong>
+        (Reliability, Performance, Security, Observability &mdash; the four disciplines
+        that keep a running system alive). What&rsquo;s different in D&amp;I is that two
+        practices &mdash; <strong>MLOps</strong> and <strong>LLMOps</strong> &mdash; span
+        Infrastructure Engineering and all four Operating disciplines, giving them their
+        ML- and LLM-specific treatment. MLOps covers the closed-loop discipline for ML
+        systems; LLMOps is the same loop specialised for LLM-based systems. The same engineer
+        typically designs the pipeline, ships it, watches it drift, and retrains it &mdash;
+        so the same two specialisations cover all five rows.
+        <br><br>
+        The deliberate mirroring between Science and Engineering is the point. Theory without
+        practice is academic &mdash; you understand the math but cannot ship anything.
+        Practice without theory is fragile &mdash; you can follow a tutorial, but the moment
+        something behaves unexpectedly, you have no mental model to fall back on. Both tracks
+        together produce someone who can reason about <em>and</em> build intelligent systems.
+      </div>
     </div>
 
     <!-- D&I Overview Grid — Math foundation row + Science/Engineering mirror grid -->
-    <div class="foundation-row reveal">
-      <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Mathematics</div>
-      <div class="foundation-topic"><a href="#mathematics">Mathematics</a></div>
-      <div class="foundation-bullets">
-        <span>&mdash; Calculus</span>
-        <span>&mdash; Linear Algebra</span>
-        <span>&mdash; Probability</span>
-        <span>&mdash; Statistics</span>
-      </div>
-      <div class="foundation-desc">
-        The foundational layer beneath both Science and Engineering. Every Science topic and most Engineering work in D&amp;I assumes this material. The dedicated <a href="#mathematics" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim);">Mathematics discipline</a> covers it in depth.
-      </div>
-    </div>
-
-    <div class="overview-grid reveal">
-      <div class="col">
-        <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Science</div>
-        <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Data Analysis</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Machine Learning</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Deep Learning</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Natural Language Processing</div>
-          <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 400;">Transformers &amp; LLMs</div>
+    <div class="tree">
+      <div class="card foundation reveal">
+        <h4>Mathematics</h4>
+        <div class="topic"><a href="#mathematics">Mathematics</a></div>
+        <div class="chips">
+          <span>&mdash; Calculus</span>
+          <span>&mdash; Linear Algebra</span>
+          <span>&mdash; Probability</span>
+          <span>&mdash; Statistics</span>
+        </div>
+        <div class="desc">
+          The foundational layer beneath both Science and Engineering. Every Science topic and most Engineering work in D&amp;I assumes this material. The dedicated <a href="#mathematics">Mathematics discipline</a> covers it in depth.
         </div>
       </div>
-      <div class="col">
-        <div class="tree-category" style="margin-top: 0; margin-bottom: 1rem;">Engineering</div>
 
-        <!-- BUILDING -->
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-bottom: 0.4rem;">Building</div>
-        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.15rem;">
-          <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.2rem;">Software Engineering</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Programming</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Data Analysis</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Machine Learning</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Deep Learning</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Natural Language Processing</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim); padding-left: 0.9rem;">&mdash; Transformers &amp; LLMs</span>
-          <span style="font-family: 'Source Serif 4', serif; font-size: 0.98rem; color: var(--ink); font-weight: 500; margin-top: 0.6rem;">Infrastructure Engineering</span>
-        </div>
-
-        <!-- OPERATING -->
-        <div style="font-family: 'Source Serif 4', serif; font-size: 1.02rem; color: var(--ink); font-weight: 500; margin-top: 0.9rem; margin-bottom: 0.4rem;">Operating</div>
-        <div style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Reliability Engineering (SRE)</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Performance Engineering</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Security Engineering</span>
-          <span style="font-family: 'Karla', sans-serif; font-size: 0.82rem; color: var(--ink-dim);">&mdash; Observability Engineering</span>
-        </div>
-
-        <!-- MLOps & LLMOps: the spanning practices that cover Infra Eng + all 4 Operating disciplines -->
-        <div class="merged-content">
-          <div class="merge-caption">Spans Infrastructure Engineering + Operating &mdash; MLOps &amp; LLMOps</div>
-          <div class="ops-item">
-            <span class="ops-item-name">MLOps</span>
-            <div class="ops-note">
-              The build/operate loop for ML systems &mdash; training and feature pipelines,
-              model registries, deployment automation, drift monitoring, retraining cadences,
-              data lineage. Treats the model lifecycle as a closed loop rather than a one-shot ship.
-            </div>
-          </div>
-          <div class="ops-item">
-            <span class="ops-item-name">LLMOps</span>
-            <div class="ops-note">
-              The same closed-loop discipline specialised for LLM-based systems &mdash;
-              prompt and configuration version management, evaluation harnesses
-              (offline + LLM-as-judge), token-cost and latency monitoring, semantic caching,
-              prompt-injection defense, and the rest of the production concerns specific to
-              probabilistic, prompt-driven systems.
-            </div>
+      <div class="grid-2 reveal">
+        <div class="card">
+          <h4>Science</h4>
+          <div class="topics">
+            <div>Data Analysis</div>
+            <div>Machine Learning</div>
+            <div>Deep Learning</div>
+            <div>Natural Language Processing</div>
+            <div>Transformers &amp; LLMs</div>
           </div>
         </div>
+        <div class="card">
+          <h4>Engineering</h4>
+
+          <!-- BUILDING -->
+          <div class="grp">Building</div>
+          <div class="items">
+            <span class="sub">Software Engineering</span>
+            <span>&mdash; Programming</span>
+            <span>&mdash; Data Analysis</span>
+            <span>&mdash; Machine Learning</span>
+            <span>&mdash; Deep Learning</span>
+            <span>&mdash; Natural Language Processing</span>
+            <span>&mdash; Transformers &amp; LLMs</span>
+            <span class="sub">Infrastructure Engineering</span>
+          </div>
+
+          <!-- OPERATING -->
+          <div class="grp">Operating</div>
+          <div class="items">
+            <span>&mdash; Reliability Engineering (SRE)</span>
+            <span>&mdash; Performance Engineering</span>
+            <span>&mdash; Security Engineering</span>
+            <span>&mdash; Observability Engineering</span>
+          </div>
+
+          <!-- MLOps & LLMOps: the spanning practices that cover Infra Eng + all 4 Operating disciplines -->
+          <div class="span-block">
+            <div class="label">Spans Infrastructure Engineering + Operating &mdash; MLOps &amp; LLMOps</div>
+            <div class="item">
+              <span class="name">MLOps</span>
+              <div class="note">
+                The build/operate loop for ML systems &mdash; training and feature pipelines,
+                model registries, deployment automation, drift monitoring, retraining cadences,
+                data lineage. Treats the model lifecycle as a closed loop rather than a one-shot ship.
+              </div>
+            </div>
+            <div class="item">
+              <span class="name">LLMOps</span>
+              <div class="note">
+                The same closed-loop discipline specialised for LLM-based systems &mdash;
+                prompt and configuration version management, evaluation harnesses
+                (offline + LLM-as-judge), token-cost and latency monitoring, semantic caching,
+                prompt-injection defense, and the rest of the production concerns specific to
+                probabilistic, prompt-driven systems.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="reveal section-links">
-      <a href="data-intelligence/guide/index.html" class="section-link">Read the Data &amp; Intelligence guide &rarr;</a>
+    <div class="ctas reveal">
+      <a href="data-intelligence/guide/index.html" class="btn">Read the Data &amp; Intelligence guide &rarr;</a>
     </div>
-  </div><!-- /section-inner -->
+  </div>
 </section>
+
+</main>
 
 <!-- PAGE DOTS -->
 <div class="page-dots">
@@ -1014,69 +352,13 @@
 </div>
 
 <footer>
-  <div class="footer-inner">
+  <div class="wrap">
     <span class="footer-name">Towards Intelligence</span>
     <span class="footer-copy">Last updated &mdash; April 2026 &nbsp;&middot;&nbsp; &copy; 2026</span>
   </div>
 </footer>
 
-<script>
-  // Scroll reveal
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
-  }, { threshold: 0.05 });
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-  // Active section tracking for dots + nav
-  const sections = document.querySelectorAll('#hero, .section-wrap');
-  const dots = document.querySelectorAll('.page-dot');
-  const navLinks = document.querySelectorAll('.nav-links a');
-
-  function updateActiveSection() {
-    let current = '';
-    sections.forEach(section => {
-      const rect = section.getBoundingClientRect();
-      if (rect.top <= window.innerHeight * 0.4) {
-        current = section.id;
-      }
-    });
-    if (current) {
-      dots.forEach(d => d.classList.toggle('active', d.dataset.section === current));
-      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
-    }
-  }
-
-  window.addEventListener('scroll', updateActiveSection, { passive: true });
-  updateActiveSection();
-
-  // Ensure page-load hash fragment (e.g. ../index.html#data-intelligence) jumps to the section
-  // once layout has settled — some browsers fail the native scroll-to-fragment on first paint.
-  if (location.hash) {
-    history.scrollRestoration = 'manual';
-    const jumpToHash = () => {
-      const target = document.getElementById(location.hash.slice(1));
-      if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
-    };
-    window.addEventListener('load', () => setTimeout(jumpToHash, 0));
-  }
-
-  // Mobile menu toggle
-  const hamburger = document.querySelector('.nav-hamburger');
-  const mobileMenu = document.querySelector('.mobile-menu');
-  hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('open');
-    mobileMenu.classList.toggle('open');
-    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
-  });
-  document.querySelectorAll('.mobile-link').forEach(link => {
-    link.addEventListener('click', () => {
-      hamburger.classList.remove('open');
-      mobileMenu.classList.remove('open');
-      document.body.style.overflow = '';
-    });
-  });
-
-</script>
+<script src="theme/site.js"></script>
 
 </body>
 </html>
