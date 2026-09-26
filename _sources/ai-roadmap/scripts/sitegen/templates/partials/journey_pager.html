@@ -1,0 +1,16 @@
+{#- The primary journey controls: one sequence through Depth steps and Modern topics alike. -#}
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  {% if previous %}
+  <a class="guide-pager-link guide-pager-link--prev{% if previous.modern %} guide-pager-link--modern{% endif %}" href="{{ previous.href }}" rel="prev"><span class="guide-pager-label">{{ previous.label }}</span><span class="guide-pager-title">{% if previous.number %}{{ previous.number }}. {% endif %}{{ previous.title }}</span></a>
+  {% else %}
+  <a class="guide-pager-link guide-pager-link--prev" href="{{ overview_href }}"><span class="guide-pager-label">← Back</span><span class="guide-pager-title">How this guide works</span></a>
+  {% endif %}
+  {% if next %}
+  <a class="guide-pager-link guide-pager-link--next{% if next.modern %} guide-pager-link--modern{% endif %}" href="{{ next.href }}" rel="next"><span class="guide-pager-label">{{ next.label }}</span><span class="guide-pager-title">{% if next.number %}{{ next.number }}. {% endif %}{{ next.title }}</span></a>
+  {% else %}
+  <a class="guide-pager-link guide-pager-link--next" href="{{ overview_href }}"><span class="guide-pager-label">You have reached the end of the path</span><span class="guide-pager-title">Back to the whole path</span></a>
+  {% endif %}
+  {% if skip %}
+  <p class="guide-pager-aside">Taking it later? The numbered path continues at <a class="guide-pager-skip" href="{{ skip.href }}">{% if skip.number %}{{ skip.number }}. {% endif %}{{ skip.title }}</a>.</p>
+  {% endif %}
+</nav>

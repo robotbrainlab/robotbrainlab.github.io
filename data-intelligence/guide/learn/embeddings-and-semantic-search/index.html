@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Embeddings and Semantic Search · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><a href="../modern-ai-engineering/index.html">Modern AI Engineering</a></li>
+<li><span aria-current="page">Embeddings and Semantic Search</span></li>      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part guide-kicker-part--modern">Modern AI Engineering</span><span aria-hidden="true"> · </span><span>Opens: After step 7</span></p>
+<h1 id="embeddings-and-semantic-search" class="guide-title">Embeddings and Semantic Search</h1>
+<div class="guide-body guide-body--modern">
+<p>Two sentences can mean nearly the same thing while sharing no words at all. An <strong>embedding</strong> is what lets a program notice that: a model turns a piece of text into a list of numbers — a vector — placed so that texts with similar meaning land near each other. It is the learned representation of step 7, used directly.</p>
+<p>Search built on that closeness is called semantic search, and it is usually the first retrieval an engineer builds with modern models: embed your documents once, embed the question, return the nearest passages. This topic is a deliberately small version of it — enough to watch it work, and to find the places where it quietly does not.</p>
+<section class="guide-block guide-block--opens-when" aria-label="Opens when">
+<p class="guide-label"><strong>Opens when</strong></p>
+<p>After <a href="../1-python-sql-and-data-analysis/index.html">1. Python, SQL and Data Analysis</a>, <a href="../3-machine-learning-framing-problems-and-building-models/index.html">3. Machine Learning: Framing Problems and Building Models</a> and at least part of <a href="../7-deep-learning/index.html">7. Deep Learning</a>, where you learn what an embedding is.</p>
+<p>The best time is after <a href="../7-deep-learning/index.html">7. Deep Learning</a>, alongside <a href="../working-with-models/index.html">Working with Models</a>.</p>
+</section>
+<section class="guide-block guide-block--how-to-take-it" aria-label="How to take it">
+<p class="guide-label"><strong>How to take it</strong></p>
+<p><strong>Recommended, and deliberately small.</strong> This is first contact with embeddings, not retrieval engineering: you build a demonstration and form intuitions. Indexes, ranking metrics and hybrid retrieval wait for <a href="../9-retrieval-and-search/index.html">9. Retrieval and Search</a> and the <a href="../retrieval-augmented-systems/index.html">Retrieval-Augmented Systems</a> topic, because measuring search properly needs what step 9 teaches.</p>
+</section>
+<section class="guide-block guide-block--return-to-the-numbered-path" aria-label="Return to the numbered path">
+<p class="guide-label"><strong>Return to the numbered path</strong></p>
+<p>Return to <a href="../8-how-language-models-work-build-one/index.html">8. How Language Models Work: Build One</a> with <a href="../working-with-models/index.html">Working with Models</a>.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#embedding-text-with-current-models">Embedding text with current models</a>
+<ol class="unit-toc-sublist">
+<li><a href="#what-an-embedding-model-produces">What an embedding model produces</a></li>
+<li><a href="#choosing-a-model-on-your-own-data">Choosing a model on your own data</a></li>
+</ol>
+</li>
+<li><a href="#searching-and-its-failure-modes">Searching, and its failure modes</a>
+<ol class="unit-toc-sublist">
+<li><a href="#dense-search-misses-exact-terms">Dense search misses exact terms</a></li>
+<li><a href="#similarity-is-not-relevance">Similarity is not relevance</a></li>
+</ol>
+</li>
+<li><a href="#what-this-demonstration-cannot-tell-you">What this demonstration cannot tell you</a>
+<ol class="unit-toc-sublist">
+<li><a href="#why-you-cannot-yet-judge-the-results">Why you cannot yet judge the results</a></li>
+<li><a href="#what-step-9-and-the-retrieval-topic-add">What step 9 and the retrieval topic add</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-to-understand-today" aria-label="What to understand today">
+<p class="guide-label"><strong>What to understand today</strong></p>
+<p>How semantic search is built with current embedding models: what the vectors mean, how to choose a model on your own data, where dense search fails, and how to judge the results rather than eyeball them.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>Embedding, indexing and judging form one pipeline, and each stage constrains the next. The embedding model decides what &quot;similar&quot; means for your data; the index decides how much of that similarity you can afford to search at your latency; relevance judgments decide whether either choice was right; and the failure you will meet first — a missed exact term — is the reason the durable answer in step 9 is to combine dense with lexical retrieval rather than replace it.</p>
+</section>
+<section class="unit-area" aria-labelledby="embedding-text-with-current-models">
+<h2 id="embedding-text-with-current-models">Embedding text with current models<a class="heading-anchor" href="#embedding-text-with-current-models" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The practical half of the representations you met in step 7.</p>
+</section>
+<section class="unit-concept" aria-labelledby="what-an-embedding-model-produces">
+<h3 id="what-an-embedding-model-produces">What an embedding model produces<a class="heading-anchor" href="#what-an-embedding-model-produces" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>A query and each document become vectors, so that related texts lie close together; search ranks by that closeness. <strong>Studied in:</strong> <em>Hands-On Large Language Models</em> ch 2.</p>
+</section>
+<section class="unit-concept" aria-labelledby="choosing-a-model-on-your-own-data">
+<h3 id="choosing-a-model-on-your-own-data">Choosing a model on your own data<a class="heading-anchor" href="#choosing-a-model-on-your-own-data" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Current embedding models are often built on language-model backbones, and which one works best depends on your language, domain and document length. Public benchmark scores are a starting point, not a verdict. <strong>Studied in:</strong> the <a href="../../evidence/current-practice/index.html">current-practice register</a>, with its evidence; your own comparison.</p>
+</section>
+<section class="unit-area" aria-labelledby="searching-and-its-failure-modes">
+<h2 id="searching-and-its-failure-modes">Searching, and its failure modes<a class="heading-anchor" href="#searching-and-its-failure-modes" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>What goes wrong first, and why step 9&#x27;s answer is a combination rather than a replacement.</p>
+</section>
+<section class="unit-concept" aria-labelledby="dense-search-misses-exact-terms">
+<h3 id="dense-search-misses-exact-terms">Dense search misses exact terms<a class="heading-anchor" href="#dense-search-misses-exact-terms" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Names, codes and rare words that lexical search finds easily can be lost in a vector — the single most common surprise in a first semantic-search build. <strong>Studied in:</strong> <em>Hands-On Large Language Models</em> ch 2; cross-reference: step 9.</p>
+</section>
+<section class="unit-concept" aria-labelledby="similarity-is-not-relevance">
+<h3 id="similarity-is-not-relevance">Similarity is not relevance<a class="heading-anchor" href="#similarity-is-not-relevance" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>A close vector can still be the wrong answer, which is why results are judged with relevance judgments rather than inspected for plausibility. <strong>Studied in:</strong> cross-reference: step 9&#x27;s ranking metrics.</p>
+</section>
+<section class="unit-area" aria-labelledby="what-this-demonstration-cannot-tell-you">
+<h2 id="what-this-demonstration-cannot-tell-you">What this demonstration cannot tell you<a class="heading-anchor" href="#what-this-demonstration-cannot-tell-you" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The boundary of this topic, stated plainly so that a working demonstration is not mistaken for retrieval engineering.</p>
+</section>
+<section class="unit-concept" aria-labelledby="why-you-cannot-yet-judge-the-results">
+<h3 id="why-you-cannot-yet-judge-the-results">Why you cannot yet judge the results<a class="heading-anchor" href="#why-you-cannot-yet-judge-the-results" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>You can see that one model&#x27;s neighbours look better than another&#x27;s. You cannot yet say by how much, because that needs relevance judgments and ranking metrics — <a href="../9-retrieval-and-search/index.html">9. Retrieval and Search</a>. Resist concluding anything numerical here. <strong>Studied in:</strong> cross-reference: step 9.</p>
+</section>
+<section class="unit-concept" aria-labelledby="what-step-9-and-the-retrieval-topic-add">
+<h3 id="what-step-9-and-the-retrieval-topic-add">What step 9 and the retrieval topic add<a class="heading-anchor" href="#what-step-9-and-the-retrieval-topic-add" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Lexical retrieval and hybrid search, two-stage reranking, approximate indexes and the recall–latency trade-off, chunking, and evaluation of the whole pipeline. Those turn this demonstration into retrieval you can defend. <strong>Studied in:</strong> cross-reference: <a href="../9-retrieval-and-search/index.html">9. Retrieval and Search</a> and <a href="../retrieval-augmented-systems/index.html">Retrieval-Augmented Systems</a>.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary · continuing</strong></span><span class="study-title"><em>Hands-On Large Language Models</em></span><span class="study-task"><strong>revisit:</strong> (you began this book in <a href="../working-with-models/index.html">Working with Models</a>) chapter 2 (tokens and embeddings).</span><span class="study-why"><strong>Why:</strong> how embeddings are produced and used, in runnable notebooks.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<p>Embed a small collection of documents from your evolving system&#x27;s domain with two different embedding models, and build a brute-force similarity search over each — no index, no metrics. Run a dozen queries through both and read the results: where do they agree, where do they differ, and where is each obviously wrong? Find at least one query where dense search misses an exact term, and keep it: step 9 explains why, and the retrieval topic fixes it.</p>
+</section>
+<section class="guide-block guide-block--how-deeply-to-know-it-now" aria-label="How deeply to know it now">
+<p class="guide-label"><strong>How deeply to know it now</strong></p>
+<p>Use. You can:</p>
+<ul class="guide-list guide-list--how-deeply-to-know-it-now">
+<li>build a working similarity search over your own documents;</li>
+<li>describe how two embedding models differ on your own queries, and say what you would need from step 9 to turn that description into evidence;</li>
+<li>explain a failure where dense search misses what lexical search would find.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--what-lasts-and-what-changes" aria-label="What lasts and what changes">
+<p class="guide-label"><strong>What lasts and what changes</strong></p>
+<ul class="guide-list guide-list--what-lasts-and-what-changes">
+<li><strong>Lasting:</strong> vector representations and why they support similarity (<a href="../7-deep-learning/index.html">7. Deep Learning</a>); lexical and dense retrieval, relevance evaluation and the recall–latency trade-off (<a href="../9-retrieval-and-search/index.html">9. Retrieval and Search</a>).</li>
+<li><strong>Current convention:</strong> embedding models built on language-model backbones; off-the-shelf embedding services; brute-force similarity for small collections, indexes once they grow.</li>
+<li><strong>Likely to change:</strong> which embedding models lead, their dimensions, and public leaderboards.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--when-to-revisit" aria-label="When to revisit">
+<p class="guide-label"><strong>When to revisit</strong></p>
+<p>At step 9, where you combine dense with lexical retrieval and measure both, and when you build <a href="../retrieval-augmented-systems/index.html">Retrieval-Augmented Systems</a>.</p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev guide-pager-link--modern" href="../working-with-models/index.html" rel="prev"><span class="guide-pager-label">← Previous · Modern AI Engineering · required</span><span class="guide-pager-title">Working with Models</span></a>
+  <a class="guide-pager-link guide-pager-link--next" href="../8-how-language-models-work-build-one/index.html" rel="next"><span class="guide-pager-label">Next → back on the numbered path</span><span class="guide-pager-title">8. How Language Models Work: Build One</span></a>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+</body>
+</html>

@@ -1,0 +1,3659 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Generated Site: Architecture and UX Specification · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-design">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../../learn/index.html">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../index.html" class="is-current" aria-current="true">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button toc-toggle" type="button" aria-controls="page-toc" aria-expanded="false" data-drawer-toggle="page-toc">
+        <span class="toc-glyph" aria-hidden="true"></span><span class="tool-label">On this page</span>
+      </button>
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../../learn/index.html">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../index.html" class="is-current" aria-current="true">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--about" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">About</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>About overview</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Curriculum specification</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../curriculum/index.html">
+        <span class="area-link-title"><span>AI Engineer — Data &amp; Intelligence Roadmap</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Maintenance and reviews</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../governance/index.html">
+        <span class="area-link-title"><span>AGENTS.md</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../maintenance/index.html">
+        <span class="area-link-title"><span>Maintenance Procedure</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../reviews/index.html">
+        <span class="area-link-title"><span>Maintenance status and review reports</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Project</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../philosophy/index.html">
+        <span class="area-link-title"><span>AI Engineer Roadmap</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../project-state/index.html">
+        <span class="area-link-title"><span>Project State</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Design records</p>  <ul class="area-list">
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span>Generated Site: Architecture and UX Specification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../design/content-fidelity-audit/index.html">
+        <span class="area-link-title"><span>Content-Fidelity Audit</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../design/curriculum-proposal/index.html">
+        <span class="area-link-title"><span>Curriculum Proposal — Data &amp; Intelligence</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../design/learner-guide/index.html">
+        <span class="area-link-title"><span>Learner Guide — Derivation and Resource Reconciliation</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Methodology</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../methodology/landscape-research/index.html">
+        <span class="area-link-title"><span>Independent Data &amp; Intelligence Landscape Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">History</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../history/roadmap-baseline-1/index.html">
+        <span class="area-link-title"><span>AI Engineer — Data &amp; Intelligence Roadmap</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../history/roadmap-baseline-v0/index.html">
+        <span class="area-link-title"><span>AI Engineer — Data &amp; Intelligence Roadmap</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">About</a></li>
+<li><span aria-current="page">Generated Site: Architecture and UX Specification</span></li>      </ol>
+    </nav>
+    <article class="prose doc doc--design">
+<p class="doc-kind doc-kind--design" data-chrome><span class="doc-kind-label">Design record</span><span class="doc-kind-divider" aria-hidden="true"></span><span class="doc-kind-note">Reasoning — not the curriculum itself</span></p><h1 id="generated-site-architecture-and-ux-specification">Generated Site: Architecture and UX Specification</h1>
+<dl class="doc-meta" data-chrome>
+  <div class="doc-meta-item"><dt>Canonical source</dt><dd><code>design/site-architecture.md</code></dd></div>
+</dl><div class="table-wrap" role="region" tabindex="0" aria-label="Table: Generated Site: Architecture and UX Specification"><table class="doc-table table--kv" style="--cols:2">
+<thead>
+<tr>
+<th scope="col"></th>
+<th scope="col"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="kv-row kv-row--status">
+<td><strong>Status</strong></td>
+<td>Architecture approved by the human owner, with recorded implementation decisions — not implemented</td>
+</tr>
+<tr class="kv-row kv-row--date">
+<td><strong>Date</strong></td>
+<td>2026-09-17 (proposed); approval recorded 2026-09-17</td>
+</tr>
+<tr class="kv-row kv-row--approved-decisions">
+<td><strong>Approved decisions</strong></td>
+<td><a href="#approved-implementation-decisions">Approved Implementation Decisions</a> — these override conflicting recommendations elsewhere in this document</td>
+</tr>
+<tr class="kv-row kv-row--scope">
+<td><strong>Scope</strong></td>
+<td>Architecture, information architecture and UX of the generated HTML interface in <code>site/</code></td>
+</tr>
+<tr class="kv-row kv-row--amended">
+<td><strong>Amended</strong></td>
+<td>2026-09-19: the learner interface is now the learning guide — areas Learn · Evidence · About, one page per step, one navigation mechanism. See <a href="../design/learner-guide/index.html">learner-guide.md</a>. Sections below that describe the Roadmap experience record the earlier design</td>
+</tr>
+<tr class="kv-row kv-row--amended">
+<td><strong>Amended</strong></td>
+<td>2026-09-21, owner instruction: the blanket justification of 2026-09-19 is superseded. Long-form prose is justified at a wide enough measure and ragged right below it; headings, navigation, labels, tables, controls, code and diagram labels are never justified (<a href="../governance/index.html#generated-html-output">AGENTS.md — Generated HTML Output</a>). The original left-aligned treatment described below applies again, with the reading experience recorded in <a href="../design/learner-guide/index.html#14-reading-experience">learner-guide.md §14</a></td>
+</tr>
+<tr class="kv-row kv-row--does-not-change">
+<td><strong>Does not change</strong></td>
+<td>Curriculum, research findings, review records, governance rules, or any canonical Markdown</td>
+</tr>
+</tbody>
+</table></div>
+<p>This document decides <strong>what to build before building it</strong>. It contains no implementation, and it creates no CSS, JavaScript, generator or generated output.</p>
+<blockquote class="callout callout-warning">
+<p>⚠️ Nothing in this specification is a curriculum decision.</p>
+<p>Where examples mention stages, topics or maturity labels, they illustrate how the interface would <em>display</em> canonical information. They do not assert that any topic belongs anywhere.</p>
+</blockquote>
+<nav class="doc-contents" aria-labelledby="contents">
+<h2 id="contents">Contents<a class="heading-anchor" href="#contents" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<details open>
+<summary><b>Click to expand / collapse</b></summary>
+<p><strong>Approved Decisions</strong></p>
+<ul>
+<li><a href="#approved-implementation-decisions">Approved Implementation Decisions</a>
+<ul>
+<li><a href="#ad1-roadmap-overview-is-part-of-version-1">AD1. Roadmap Overview Is Part of Version 1</a></li>
+<li><a href="#ad2-local-first-does-not-permanently-mean-file">AD2. Local-First Does Not Permanently Mean file://</a></li>
+<li><a href="#ad3-simplified-version-1-validation">AD3. Simplified Version 1 Validation</a></li>
+<li><a href="#ad4-deterministic-content-not-byte-identity">AD4. Deterministic Content, Not Byte Identity</a></li>
+<li><a href="#ad5-advanced-reading-interactions-are-post-core-polish">AD5. Advanced Reading Interactions Are Post-Core Polish</a></li>
+<li><a href="#first-implementation-milestone">First Implementation Milestone</a></li>
+<li><a href="#principles-that-remain-unchanged">Principles That Remain Unchanged</a></li>
+</ul>
+</li>
+</ul>
+<p><strong>Foundations</strong></p>
+<ol>
+<li><a href="#1-product-vision">Product Vision</a></li>
+<li><a href="#2-design-principles">Design Principles</a>
+<ul>
+<li><a href="#the-three-layer-rule">The Three-Layer Rule</a></li>
+<li><a href="#principles">Principles</a></li>
+<li><a href="#what-the-repository-contains-today">What the Repository Contains Today</a></li>
+</ul>
+</li>
+</ol>
+<p><strong>Structure and Navigation</strong></p>
+<ol start="3">
+<li><a href="#3-information-architecture">Information Architecture</a>
+<ul>
+<li><a href="#content-kinds">Content Kinds</a></li>
+<li><a href="#placement-decisions">Placement Decisions</a></li>
+</ul>
+</li>
+<li><a href="#4-navigation-model">Navigation Model</a>
+<ul>
+<li><a href="#page-anatomy">Page Anatomy</a></li>
+<li><a href="#navigation-elements">Navigation Elements</a></li>
+<li><a href="#quiet-reading">Quiet Reading</a></li>
+<li><a href="#keyboard-model">Keyboard Model</a></li>
+</ul>
+</li>
+</ol>
+<p><strong>Experiences</strong></p>
+<ol start="5">
+<li><a href="#5-roadmap-experience">Roadmap Experience</a></li>
+<li><a href="#6-long-form-reading-experience">Long-Form Reading Experience</a></li>
+<li><a href="#7-research-experience">Research Experience</a></li>
+<li><a href="#8-review-and-maintenance-experience">Review and Maintenance Experience</a></li>
+<li><a href="#9-topic-and-relationship-model">Topic and Relationship Model</a>
+<ul>
+<li><a href="#topic-page-model">Topic Page Model</a></li>
+<li><a href="#relationship-model">Relationship Model</a></li>
+<li><a href="#relationship-representations">Relationship Representations</a></li>
+</ul>
+</li>
+<li><a href="#10-search-design">Search Design</a></li>
+</ol>
+<p><strong>Visual System</strong></p>
+<ol start="11">
+<li><a href="#11-theme-and-visual-system">Theme and Visual System</a></li>
+<li><a href="#12-typography">Typography</a></li>
+<li><a href="#13-math-code-diagram-and-table-handling">Math, Code, Diagram and Table Handling</a>
+<ul>
+<li><a href="#mathematics">Mathematics</a></li>
+<li><a href="#code">Code</a></li>
+<li><a href="#mermaid-and-diagrams">Mermaid and Diagrams</a></li>
+<li><a href="#tables">Tables</a></li>
+<li><a href="#callouts-details-and-other-constructs">Callouts, Details and Other Constructs</a></li>
+</ul>
+</li>
+<li><a href="#14-citation-and-source-experience">Citation and Source Experience</a></li>
+</ol>
+<p><strong>Quality</strong></p>
+<ol start="15">
+<li><a href="#15-accessibility">Accessibility</a></li>
+<li><a href="#16-responsive-behavior">Responsive Behavior</a></li>
+<li><a href="#17-print-behavior">Print Behavior</a></li>
+</ol>
+<p><strong>Build</strong></p>
+<ol start="18">
+<li><a href="#18-static-site-and-generator-architecture">Static-Site and Generator Architecture</a>
+<ul>
+<li><a href="#technology-recommendation">Technology Recommendation</a></li>
+<li><a href="#pipeline">Pipeline</a></li>
+<li><a href="#document-model">Document Model</a></li>
+<li><a href="#separation-of-concerns">Separation of Concerns</a></li>
+<li><a href="#runtime-enhancements">Runtime Enhancements</a></li>
+</ul>
+</li>
+<li><a href="#19-proposed-generated-file-and-url-structure">Proposed Generated File and URL Structure</a></li>
+<li><a href="#20-validation-strategy">Validation Strategy</a></li>
+</ol>
+<p><strong>Delivery</strong></p>
+<ol start="21">
+<li><a href="#21-progressive-implementation-phases">Progressive Implementation Phases</a></li>
+<li><a href="#22-explicit-non-goals">Explicit Non-Goals</a></li>
+<li><a href="#23-open-design-decisions">Open Design Decisions</a></li>
+<li><a href="#24-recommended-version-1-scope">Recommended Version 1 Scope</a></li>
+</ol>
+</details>
+<hr class="section-break">
+</nav>
+<section class="doc-section" aria-labelledby="approved-implementation-decisions">
+<h2 id="approved-implementation-decisions">Approved Implementation Decisions<a class="heading-anchor" href="#approved-implementation-decisions" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p class="section-subnav"><strong>In this section:</strong> <a href="#ad1-roadmap-overview-is-part-of-version-1">AD1</a> · <a href="#ad2-local-first-does-not-permanently-mean-file">AD2</a> · <a href="#ad3-simplified-version-1-validation">AD3</a> · <a href="#ad4-deterministic-content-not-byte-identity">AD4</a> · <a href="#ad5-advanced-reading-interactions-are-post-core-polish">AD5</a> · <a href="#first-implementation-milestone">First Implementation Milestone</a> · <a href="#principles-that-remain-unchanged">Principles That Remain Unchanged</a></p>
+<p><strong>Status:</strong> Approved by the human owner on 2026-09-17.</p>
+<p>The overall architecture in this document is approved, together with the implementation decisions below.</p>
+<blockquote class="callout callout-warning">
+<p>⚠️ These decisions override any conflicting recommendation elsewhere in this document.</p>
+<p>The affected sections have been updated to match. If any remaining text still conflicts, this section takes precedence.</p>
+</blockquote>
+<p>This approval does not resolve the open decisions in <a href="#23-open-design-decisions">23</a> unless a decision below explicitly does so.</p>
+<h3 id="ad1-roadmap-overview-is-part-of-version-1">AD1. Roadmap Overview Is Part of Version 1<a class="heading-anchor" href="#ad1-roadmap-overview-is-part-of-version-1" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<ul>
+<li>The high-level roadmap overview visualization (<a href="#5-roadmap-experience">5</a>) moves from Version 2 into <strong>Version 1</strong>.</li>
+<li>The <strong>Home</strong> page must visually communicate the core learning architecture: Fundamentals → Advanced → Mastery → Research as a sequence, with Modern AI Engineering shown as a <strong>parallel track</strong>, never as a fifth sequential stage.</li>
+<li>The visualization is derived <strong>only from approved canonical structure</strong>. It must not invent topic classifications, relationships, maturity, prerequisites or curriculum decisions.</li>
+<li>The first implementation needs no sophisticated interaction. A clear, polished, responsive visual representation is sufficient.</li>
+</ul>
+<h3 id="ad2-local-first-does-not-permanently-mean-file">AD2. Local-First Does Not Permanently Mean file://<a class="heading-anchor" href="#ad2-local-first-does-not-permanently-mean-file" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Direct <code>file://</code> operation is <strong>desirable for Version 1</strong> and should be supported where reasonably practical. It is <strong>not</strong> a permanent architectural constraint, and it must not block better technology choices later.</p>
+<p>The durable requirements are:</p>
+<ul>
+<li>local-first;</li>
+<li>static;</li>
+<li>no backend required;</li>
+<li>no account required;</li>
+<li>no analytics or telemetry;</li>
+<li>no external runtime dependency for ordinary reading;</li>
+<li>servable locally with something as simple as <code>python -m http.server</code>.</li>
+</ul>
+<p>Future versions may use browser capabilities that work reliably through localhost or static hosting, even if they are awkward or unavailable under <code>file://</code>. Examples include <code>fetch</code> of index files, ES modules, and chunked search indexes. This resolves open decision D14.</p>
+<h3 id="ad3-simplified-version-1-validation">AD3. Simplified Version 1 Validation<a class="heading-anchor" href="#ad3-simplified-version-1-validation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The full validation strategy (<a href="#20-validation-strategy">20</a>) remains the long-term target. Version 1 must not spend disproportionate effort building a sophisticated validation framework.</p>
+<p>Version 1 must primarily verify that:</p>
+<ol>
+<li>every intended canonical Markdown source generates successfully;</li>
+<li>internal document links resolve;</li>
+<li>heading anchors resolve;</li>
+<li>generated navigation resolves;</li>
+<li>canonical learner-facing wording is not silently changed by presentation generation;</li>
+<li>generated HTML has valid basic structure;</li>
+<li>basic accessibility requirements are met;</li>
+<li>required assets work locally and offline;</li>
+<li>generated output has not become an independent source of curriculum content.</li>
+</ol>
+<p>Other checks are <strong>progressive capabilities</strong>, introduced when justified. Section <a href="#20-validation-strategy">20</a> maps each check to its phase.</p>
+<h3 id="ad4-deterministic-content-not-byte-identity">AD4. Deterministic Content, Not Byte Identity<a class="heading-anchor" href="#ad4-deterministic-content-not-byte-identity" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<ul>
+<li>Generated output should be deterministic <strong>in content and structure</strong>.</li>
+<li>Avoid unnecessary nondeterminism, such as random identifiers or meaningless generated timestamps.</li>
+<li>Proving that two consecutive builds are byte-for-byte identical is <strong>not</strong> a major Version 1 objective. Version 1 must not add significant complexity solely for byte-identical reproducibility.</li>
+<li>Stronger reproducibility checks may be introduced later if they become useful.</li>
+</ul>
+<h3 id="ad5-advanced-reading-interactions-are-post-core-polish">AD5. Advanced Reading Interactions Are Post-Core Polish<a class="heading-anchor" href="#ad5-advanced-reading-interactions-are-post-core-polish" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>These ideas remain part of the architecture, but they are <strong>not required</strong> before the core visual experience is evaluated:</p>
+<ul>
+<li>focus mode;</li>
+<li>automatic top-bar hiding;</li>
+<li>persistent sidebar state;</li>
+<li>advanced keyboard shortcuts;</li>
+<li>sophisticated navigation animation;</li>
+<li>other optional reading-mode enhancements.</li>
+</ul>
+<p>The core interface comes first:</p>
+<ul>
+<li>top navigation;</li>
+<li>left area navigation;</li>
+<li>central reading column;</li>
+<li>right-side on-this-page navigation;</li>
+<li>responsive navigation;</li>
+<li>heading anchors;</li>
+<li>Light / Dark / System themes;</li>
+<li>excellent typography;</li>
+<li>tables;</li>
+<li>code;</li>
+<li>Mermaid;</li>
+<li>callouts;</li>
+<li>print behavior;</li>
+<li>roadmap overview on Home.</li>
+</ul>
+<p>Advanced interaction polish comes only after the core interface has been visually reviewed.</p>
+<h3 id="first-implementation-milestone">First Implementation Milestone<a class="heading-anchor" href="#first-implementation-milestone" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p><strong>Not implemented yet.</strong> The first implementation pass is deliberately limited to:</p>
+<ol>
+<li>the global site shell;</li>
+<li>the Home page;</li>
+<li>the roadmap overview;</li>
+<li>one representative long-form canonical document page;</li>
+<li>the core design system required to render those correctly.</li>
+</ol>
+<p>The first pass must <strong>not</strong> generate and polish the entire repository.</p>
+<p><strong>Purpose:</strong> visual validation. Before the generator is expanded, the human owner inspects:</p>
+<ul>
+<li>typography;</li>
+<li>spacing;</li>
+<li>information hierarchy;</li>
+<li>navigation;</li>
+<li>reading width;</li>
+<li>sidebar behavior;</li>
+<li>light theme;</li>
+<li>dark theme;</li>
+<li>roadmap visualization;</li>
+<li>tables;</li>
+<li>code blocks;</li>
+<li>diagrams;</li>
+<li>responsive behavior;</li>
+<li>overall visual character.</li>
+</ul>
+<p><strong>Gate:</strong> only after that visual review is the generator expanded across the complete repository to finish Version 1.</p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: First Implementation Milestone"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    M1[&quot;First implementation milestone&lt;br/&gt;shell, Home, roadmap overview,&lt;br/&gt;one long-form document, core design system&quot;] --&gt; R[&quot;Human owner visual review&quot;]
+    R --&gt; V1[&quot;Complete Version 1&lt;br/&gt;all canonical documents&quot;]
+    V1 --&gt; P[&quot;Post-core polish&lt;br/&gt;(AD5 items)&quot;]
+    V1 --&gt; V2[&quot;Version 2&quot;]
+</code></pre></figure>
+<h3 id="principles-that-remain-unchanged">Principles That Remain Unchanged<a class="heading-anchor" href="#principles-that-remain-unchanged" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The approval preserves these principles:</p>
+<ul>
+<li>Markdown and approved canonical sources remain the source of truth.</li>
+<li>Generated HTML is presentation only.</li>
+<li>Evidence, curriculum decisions and presentation remain separate.</li>
+<li>The site must not infer curriculum decisions.</li>
+<li>Research and evidence must remain visually and semantically distinguishable from curriculum.</li>
+<li>Presentation configuration must not become a hidden curriculum database.</li>
+<li>Concepts and content must not be added merely because the UI would benefit from them.</li>
+<li>Learner state must remain separate from canonical curriculum.</li>
+<li>Generated HTML must not be manually maintained as an independent content source.</li>
+</ul>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="1-product-vision">
+<h2 id="1-product-vision">1. Product Vision<a class="heading-anchor" href="#1-product-vision" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The generated site is a <strong>local-first personal portal for AI learning, the roadmap, research and curriculum maintenance</strong>, generated entirely from canonical Markdown sources.</p>
+<p>It serves one learner who needs to do two different things:</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 1. Product Vision"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Mode</th>
+<th scope="col">What the learner is doing</th>
+<th scope="col">What the interface should feel like</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Navigating</strong></td>
+<td>Orienting, finding, comparing, following relationships, checking what changed</td>
+<td>An application: fast, structured, predictable, searchable</td>
+</tr>
+<tr>
+<td><strong>Reading</strong></td>
+<td>Studying a section, working through a research report, reading a derivation</td>
+<td>A technical book: quiet, typographically careful, uninterrupted</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="quote quote-principle">
+<p><strong>Application when navigating. Book when learning.</strong></p>
+</blockquote>
+<p>Over time the portal should help the learner:</p>
+<ol>
+<li>understand what to learn and why it matters;</li>
+<li>see the depth progression — Fundamentals → Advanced → Mastery → Research — and follow Modern AI Engineering alongside it as a parallel track;</li>
+<li>read learning material comfortably;</li>
+<li>inspect the independently reconstructed landscape without confusing it with accepted curriculum;</li>
+<li>see how the roadmap is maintained (scans, reviews, changes);</li>
+<li>understand topic maturity and relationships where canonical sources record them;</li>
+<li>search a growing repository;</li>
+<li>optionally track personal progress, if that capability is later approved.</li>
+</ol>
+<p>The portal is <strong>not</strong> a rendering of Markdown with nicer CSS. Its added value comes from structure it can <em>expose</em>: navigation, cross-links, indexes, search, relationships and review history. It must never add value by <em>inventing</em> content.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="2-design-principles">
+<h2 id="2-design-principles">2. Design Principles<a class="heading-anchor" href="#2-design-principles" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p class="section-subnav"><strong>In this section:</strong> <a href="#the-three-layer-rule">The Three-Layer Rule</a> · <a href="#principles">Principles</a> · <a href="#what-the-repository-contains-today">What the Repository Contains Today</a></p>
+<h3 id="the-three-layer-rule">The Three-Layer Rule<a class="heading-anchor" href="#the-three-layer-rule" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The repository holds three different kinds of information. The generator reads the first two and produces the third. Information never flows back.</p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: The Three-Layer Rule"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    subgraph EVIDENCE[&quot;Evidence&quot;]
+        R[&quot;research/&quot;]
+        V[&quot;reviews/ (observations)&quot;]
+    end
+    subgraph DECISIONS[&quot;Accepted decisions and governance&quot;]
+        RM[&quot;ROADMAP.md&quot;]
+        RD[&quot;README.md&quot;]
+        AG[&quot;AGENTS.md&quot;]
+        PR[&quot;prompts/ (methodology)&quot;]
+    end
+    subgraph PRESENTATION[&quot;Presentation (disposable)&quot;]
+        S[&quot;site/&quot;]
+    end
+    EVIDENCE --&gt; G[&quot;Site generator&quot;]
+    DECISIONS --&gt; G
+    G --&gt; S
+</code></pre></figure>
+<blockquote class="quote quote-principle">
+<p><strong>Presentation may expose structure. Presentation may not invent curriculum.</strong></p>
+</blockquote>
+<p>In practice:</p>
+<ul>
+<li>If <code>ROADMAP.md</code> places a topic in Fundamentals, the site may <em>display</em> it as Fundamentals.</li>
+<li>If a research report labels something <em>Emerging</em>, the site may <em>display</em> that label <strong>inside the research context</strong>.</li>
+<li>The generator must never move, promote, rank, classify, or relate curriculum items on its own. It must not infer a maturity, a stage, a prerequisite or a citation link that the sources do not state.</li>
+</ul>
+<h3 id="principles">Principles<a class="heading-anchor" href="#principles" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Principles"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">#</th>
+<th scope="col">Principle</th>
+<th scope="col">Consequence for design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td><strong>Canonical sources win.</strong></td>
+<td>Generated HTML is disposable. No text is ever maintained in <code>site/</code>. A drift check detects stale or hand-edited output.</td>
+</tr>
+<tr>
+<td>P2</td>
+<td><strong>Expose, never infer.</strong></td>
+<td>Metadata, relationships and classifications are displayed only when explicitly present in canonical sources. Missing data produces an absent field, not a guess.</td>
+</tr>
+<tr>
+<td>P3</td>
+<td><strong>Evidence is visibly not curriculum.</strong></td>
+<td>Research and review content always carries a persistent, unmistakable context marker (see <a href="#7-research-experience">7</a>).</td>
+</tr>
+<tr>
+<td>P4</td>
+<td><strong>Reading comes first.</strong></td>
+<td>Measure, typography and quiet chrome take priority over density of UI.</td>
+</tr>
+<tr>
+<td>P5</td>
+<td><strong>Smallest architecture that grows cleanly.</strong></td>
+<td>Static files, a small build script, no server, no database, no framework. Each dependency must justify itself in <a href="#18-static-site-and-generator-architecture">18</a>.</td>
+</tr>
+<tr>
+<td>P6</td>
+<td><strong>Local-first and static</strong> (revised by <a href="#ad2-local-first-does-not-permanently-mean-file">AD2</a>).</td>
+<td>No backend, account, analytics or external runtime dependency for ordinary reading. It must be servable locally with <code>python -m http.server</code>. Direct <code>file://</code> opening is supported in Version 1 where reasonably practical, but it is not a permanent constraint.</td>
+</tr>
+<tr>
+<td>P7</td>
+<td><strong>Progressive enhancement.</strong></td>
+<td>All content is readable with JavaScript disabled. JavaScript adds search, copy buttons, diagram rendering, theme persistence and section highlighting.</td>
+</tr>
+<tr>
+<td>P8</td>
+<td><strong>Deterministic content</strong> (revised by <a href="#ad4-deterministic-content-not-byte-identity">AD4</a>).</td>
+<td>Same sources + same generator version → same content and structure; no random identifiers or meaningless timestamps. Byte-identical output is not a Version 1 objective.</td>
+</tr>
+<tr>
+<td>P9</td>
+<td><strong>Structure scales; visuals stay legible.</strong></td>
+<td>Prefer lists, tables and local views over global graphs that become unreadable as the repository grows.</td>
+</tr>
+<tr>
+<td>P10</td>
+<td><strong>Accessibility is a requirement.</strong></td>
+<td>WCAG 2.2 AA is the baseline for every feature, including diagrams and tables.</td>
+</tr>
+<tr>
+<td>P11</td>
+<td><strong>Honor existing governance.</strong></td>
+<td><a href="../governance/index.html#generated-html">AGENTS.md — Generated HTML</a> and <a href="../governance/index.html#generated-html-output">Generated HTML Output</a> already set requirements. This specification refines them and does not override them.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="what-the-repository-contains-today">What the Repository Contains Today<a class="heading-anchor" href="#what-the-repository-contains-today" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The design is derived from the actual repository as of the date above.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: What the Repository Contains Today"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Path</th>
+<th scope="col">Kind</th>
+<th scope="col">State</th>
+<th scope="col">Notable structure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>README.md</code></td>
+<td>Governance — project philosophy</td>
+<td>Complete</td>
+<td>Mermaid diagrams (some with emoji labels), tables, blockquotes</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>Governance — operating rules</td>
+<td>Complete</td>
+<td>~950 lines, 30 sections, grouped Contents, callouts, Mermaid, many tables</td>
+</tr>
+<tr>
+<td><code>ROADMAP.md</code></td>
+<td>Curriculum (canonical)</td>
+<td>Baseline v0</td>
+<td>Fundamentals sections 1–7 with explicit <strong>Primary resource:</strong> / <strong>Purpose:</strong> / <strong>Status:</strong> labels; Advanced, Mastery and Research marked &quot;Not yet designed&quot;; Modern AI Engineering candidate lists; status table</td>
+</tr>
+<tr>
+<td><code>prompts/landscape-research.md</code></td>
+<td>Methodology</td>
+<td>Complete</td>
+<td>Research process definition</td>
+</tr>
+<tr>
+<td><code>research/2026-09-17-data-intelligence-landscape.md</code></td>
+<td>Evidence — landscape report</td>
+<td>Complete</td>
+<td>~24,000 words; 7-column evidence tables; ID-based citations (<code>`[D26]`</code>) resolving to a source register with ~200 entries; maturity vocabulary defined in a Legend</td>
+</tr>
+<tr>
+<td><code>research/2026-09-17-roadmap-comparison.md</code></td>
+<td>Evidence — comparison report</td>
+<td>Complete</td>
+<td>Coverage matrix; cites the landscape report&#x27;s register by ID</td>
+</tr>
+<tr>
+<td><code>reviews/</code></td>
+<td>Maintenance records</td>
+<td>Empty</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>scripts/</code></td>
+<td>Tooling</td>
+<td>Empty</td>
+<td>Natural home for the generator</td>
+</tr>
+<tr>
+<td><code>site/</code></td>
+<td>Generated output</td>
+<td>Empty</td>
+<td>Output target</td>
+</tr>
+</tbody>
+</table></div>
+<p>Existing Markdown conventions the generator must understand (from <a href="../governance/index.html#markdown-source-files">AGENTS.md — Markdown Source Files</a>):</p>
+<ul>
+<li>a document-wide <code>&lt;div align=&quot;justify&quot;&gt;</code> wrapper;</li>
+<li>a <code>## Contents</code> list inside <code>&lt;details open&gt;</code>;</li>
+<li><code>**In this section:**</code> sub-TOC lines;</li>
+<li><code>[⬆ Back to Contents](#contents)</code> links;</li>
+<li><code>---</code> section separators;</li>
+<li><code>mermaid</code> fenced blocks;</li>
+<li><code>&gt; ⚠️</code> warning callouts;</li>
+<li>bold field labels;</li>
+<li>GitHub-style heading slugs.</li>
+</ul>
+<p>The repository is <strong>not currently under version control</strong>, which affects change history and drift detection (see <a href="#23-open-design-decisions">23</a>).</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="3-information-architecture">
+<h2 id="3-information-architecture">3. Information Architecture<a class="heading-anchor" href="#3-information-architecture" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p class="section-subnav"><strong>In this section:</strong> <a href="#content-kinds">Content Kinds</a> · <a href="#placement-decisions">Placement Decisions</a></p>
+<h3 id="content-kinds">Content Kinds<a class="heading-anchor" href="#content-kinds" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Every page belongs to exactly one <strong>content kind</strong>. The kind is determined <strong>only by the source path</strong>, through a small declared mapping. The generator never reads a document&#x27;s content to decide its kind.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Content Kinds"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Content kind</th>
+<th scope="col">Source (today)</th>
+<th scope="col">Future sources (if created)</th>
+<th scope="col">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Curriculum</strong></td>
+<td><code>ROADMAP.md</code></td>
+<td>Additional approved curriculum files, topic files, project files</td>
+<td>Accepted learning decisions</td>
+</tr>
+<tr>
+<td><strong>Evidence</strong></td>
+<td><code>research/*.md</code></td>
+<td>Topic research, scan reports</td>
+<td>Research findings — not decisions</td>
+</tr>
+<tr>
+<td><strong>Maintenance</strong></td>
+<td><code>reviews/*.md</code> (none yet)</td>
+<td>4-week scans, 12-week reviews, change records, watchlist</td>
+<td>Records of observation and decision processes</td>
+</tr>
+<tr>
+<td><strong>Governance</strong></td>
+<td><code>README.md</code>, <code>AGENTS.md</code>, <code>prompts/*.md</code></td>
+<td><code>design/*.md</code> (if included)</td>
+<td>Philosophy, rules and methodology</td>
+</tr>
+<tr>
+<td><strong>Generated views</strong></td>
+<td>— (no source file)</td>
+<td>—</td>
+<td>Home, section indexes, search, timelines. Built only from other pages&#x27; explicit structure, and never containing original curriculum or research prose.</td>
+</tr>
+</tbody>
+</table></div>
+<p>The user-proposed areas map onto these kinds as follows:</p>
+<figure class="diagram" data-diagram aria-label="Diagram: Content Kinds"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart TB
+    HOME[&quot;Home (generated hub)&quot;]
+    HOME --&gt; LEARN[&quot;Learn — Curriculum&quot;]
+    HOME --&gt; EVID[&quot;Evidence — Research&quot;]
+    HOME --&gt; MAINT[&quot;Maintain — Reviews&quot;]
+    HOME --&gt; GOV[&quot;About — Governance&quot;]
+    LEARN --&gt; L1[&quot;Roadmap&quot;]
+    LEARN --&gt; L2[&quot;Stage views (when curriculum structure supports them)&quot;]
+    LEARN --&gt; L3[&quot;Modern AI Engineering&quot;]
+    LEARN --&gt; L4[&quot;Projects (when projects exist)&quot;]
+    EVID --&gt; E1[&quot;Research reports&quot;]
+    EVID --&gt; E2[&quot;Field landscape&quot;]
+    EVID --&gt; E3[&quot;Source registers (inside reports)&quot;]
+    MAINT --&gt; M1[&quot;Review archive and timeline&quot;]
+    MAINT --&gt; M2[&quot;Changes, watchlist (when records exist)&quot;]
+    GOV --&gt; G1[&quot;Project philosophy&quot;]
+    GOV --&gt; G2[&quot;Governance rules&quot;]
+    GOV --&gt; G3[&quot;Methodology&quot;]
+</code></pre></figure>
+<p><strong>A naming collision must be resolved.</strong> &quot;Research&quot; is both a depth stage (Fundamentals → Advanced → Mastery → <strong>Research</strong>) and the name of the evidence folder (<code>research/</code>). A learner who clicks &quot;Research&quot; in the primary navigation could reasonably expect either one. The specification therefore recommends:</p>
+<ul>
+<li>the depth stage is always labeled <strong>&quot;Research stage&quot;</strong> in navigation and headings generated by the site (canonical headings are rendered unchanged);</li>
+<li>the evidence area is labeled <strong>&quot;Evidence&quot;</strong> in primary navigation, with the page subtitle &quot;Research reports and findings&quot;.</li>
+</ul>
+<p>The final label is an open decision (<a href="#23-open-design-decisions">23</a>, D5). The URL stays <code>research/</code> so it mirrors the source folder.</p>
+<h3 id="placement-decisions">Placement Decisions<a class="heading-anchor" href="#placement-decisions" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The goal is a quiet navigation surface. An item earns permanent navigation space only if the learner needs it frequently.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Placement Decisions"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Item</th>
+<th scope="col">Placement</th>
+<th scope="col">Reasoning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Home</td>
+<td>Site title link</td>
+<td>Standard; no separate nav item needed</td>
+</tr>
+<tr>
+<td>Roadmap (Learn)</td>
+<td><strong>Primary navigation</strong></td>
+<td>Most frequent destination</td>
+</tr>
+<tr>
+<td>Evidence (research reports)</td>
+<td><strong>Primary navigation</strong></td>
+<td>Distinct content kind that must be reachable without being confused with curriculum</td>
+</tr>
+<tr>
+<td>Reviews (Maintain)</td>
+<td><strong>Primary navigation</strong> — shown once at least one review exists; before that, reachable from Home and the footer with an honest empty state</td>
+<td>Avoids a permanent link to an empty page</td>
+</tr>
+<tr>
+<td>About (Governance)</td>
+<td><strong>Primary navigation</strong> (rightmost, visually lighter)</td>
+<td>Needed occasionally; must remain findable</td>
+</tr>
+<tr>
+<td>Search</td>
+<td><strong>Utility control</strong> in the top bar (icon + shortcut)</td>
+<td>Global and frequent</td>
+</tr>
+<tr>
+<td>Theme</td>
+<td><strong>Utility control</strong></td>
+<td>Global, infrequent</td>
+</tr>
+<tr>
+<td>Fundamentals / Advanced / Mastery / Research stage</td>
+<td><strong>Secondary navigation</strong> inside Learn, plus the roadmap overview visual</td>
+<td>Only Fundamentals has content today</td>
+</tr>
+<tr>
+<td>Modern AI Engineering</td>
+<td><strong>Secondary navigation</strong> inside Learn, visually set apart from the stage sequence</td>
+<td>Parallel track, not a fifth stage</td>
+</tr>
+<tr>
+<td>Dynamic Topics, Review Cycle, Curriculum Boundary, Pending Engineering Section, Curriculum Status, Next Roadmap Work</td>
+<td><strong>Document navigation</strong> (sections of the roadmap page)</td>
+<td>They are sections of one canonical document</td>
+</tr>
+<tr>
+<td>Field Landscape</td>
+<td><strong>Secondary navigation</strong> inside Evidence (pinned as the baseline report)</td>
+<td>Important, but still one report</td>
+</tr>
+<tr>
+<td>Individual research reports</td>
+<td><strong>Secondary navigation</strong> list inside Evidence, newest first</td>
+<td>Grows over time</td>
+</tr>
+<tr>
+<td>Source register entries</td>
+<td><strong>Document navigation</strong> + <strong>contextual links</strong> from citations</td>
+<td>Belongs to its report</td>
+</tr>
+<tr>
+<td>Curriculum changes, watchlist, research history</td>
+<td><strong>Secondary navigation inside Reviews</strong>, only when explicit records exist</td>
+<td>No records today</td>
+</tr>
+<tr>
+<td>Project philosophy, AGENTS rules, methodology prompts</td>
+<td><strong>Secondary navigation</strong> inside About</td>
+<td>Stable, infrequent</td>
+</tr>
+<tr>
+<td>Maturity labels, report dates, statuses, primary resources</td>
+<td><strong>Metadata</strong> (document header / table cells)</td>
+<td>Descriptive, not navigational</td>
+</tr>
+<tr>
+<td>Prerequisites, related topics, alternatives, lineage</td>
+<td><strong>Contextual relationship panel</strong> on topic pages (future)</td>
+<td>Only meaningful in context</td>
+</tr>
+<tr>
+<td>Individual source URLs, heading-level content, legend terms</td>
+<td><strong>Search only</strong> (plus in-page presence)</td>
+<td>Too granular for navigation</td>
+</tr>
+<tr>
+<td>Site design document (<code>design/</code>)</td>
+<td><strong>About → Site design</strong> or excluded</td>
+<td>Open decision (D17)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="4-navigation-model">
+<h2 id="4-navigation-model">4. Navigation Model<a class="heading-anchor" href="#4-navigation-model" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p class="section-subnav"><strong>In this section:</strong> <a href="#page-anatomy">Page Anatomy</a> · <a href="#navigation-elements">Navigation Elements</a> · <a href="#quiet-reading">Quiet Reading</a> · <a href="#keyboard-model">Keyboard Model</a></p>
+<h3 id="page-anatomy">Page Anatomy<a class="heading-anchor" href="#page-anatomy" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Wide desktop layout (≥ 1280 px). The central reading column is the fixed point, and everything else is arranged around it.</p>
+<div class="code-block" data-lang="text"><div class="code-meta" data-chrome><span class="code-lang">TEXT</span></div><pre class="code"><code>┌──────────────────────────────────────────────────────────────────────────────┐
+│ AI Engineer Roadmap   Roadmap  Evidence  Reviews  About        [⌕ /]  [◐]   │  top bar (slim)
+├───────────────┬──────────────────────────────────────────┬───────────────────┤
+│ LEARN         │ Roadmap › 1. Fundamentals                │ ON THIS PAGE      │
+│  Roadmap      │                                          │  Objective        │
+│  Fundamentals │ ┃ CURRICULUM · Baseline v0               │  1. Mathematics…  │
+│  Advanced     │                                          │ ▸2. Python        │
+│  Mastery      │ 1. Fundamentals                          │  3. SQL           │
+│  Research stg │ ─────────────────────────────            │  …                │
+│ ───────────── │ Build the mathematical, programming…     │                   │
+│  Modern AI    │ (reading column, ~68–75ch)               │                   │
+│  Engineering  │                                          │                   │
+│               │                                          │ ↑ Top             │
+│               │          ‹ Previous   Next ›             │                   │
+└───────────────┴──────────────────────────────────────────┴───────────────────┘
+      area nav                  reading column                on-this-page TOC
+</code></pre></div>
+<p>This is a wireframe of layout relationships, not a visual design. Labels are illustrative placeholders taken from existing canonical headings.</p>
+<h3 id="navigation-elements">Navigation Elements<a class="heading-anchor" href="#navigation-elements" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Navigation Elements"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Element</th>
+<th scope="col">Behavior</th>
+<th scope="col">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Top bar</strong></td>
+<td>Site title (→ Home), 3–4 primary items, search, theme. Height ≈ 48–52 px. The current area is shown with an underline or weight change, not a filled pill.</td>
+<td>Sans-serif UI face</td>
+</tr>
+<tr>
+<td><strong>Area sidebar</strong> (left)</td>
+<td>Lists documents and generated views in the current area. Collapsible groups. Persisting the collapsed state per viewer (local storage) is post-core polish (<a href="#ad5-advanced-reading-interactions-are-post-core-polish">AD5</a>).</td>
+<td>Hidden on Home. On the roadmap page it shows the canonical H2 structure of <code>ROADMAP.md</code>.</td>
+</tr>
+<tr>
+<td><strong>On this page</strong> (right)</td>
+<td>H2 and H3 outline of the current document. The section currently in view is highlighted (IntersectionObserver). Nested levels collapse to the active H2 for very long documents.</td>
+<td>Uses the same slugs as the source Markdown</td>
+</tr>
+<tr>
+<td><strong>Breadcrumbs</strong></td>
+<td><code>Area › Document › (Section)</code>. Section appears only when a deep link is opened.</td>
+<td>Rendered as <code>nav aria-label=&quot;Breadcrumb&quot;</code></td>
+</tr>
+<tr>
+<td><strong>Previous / Next</strong></td>
+<td>Only within explicitly ordered collections: roadmap stage/section order as it appears in <code>ROADMAP.md</code>; research reports by date in filename; reviews by date. No global previous/next.</td>
+<td>Order is taken from sources, never computed by relevance</td>
+</tr>
+<tr>
+<td><strong>Heading anchors</strong></td>
+<td>A <code>#</code> link appears on hover and focus beside each heading. Activating it copies the section URL and announces &quot;Link copied&quot; through a polite live region.</td>
+<td>IDs are identical to GitHub slugs (AGENTS requirement)</td>
+</tr>
+<tr>
+<td><strong>In-document Contents</strong></td>
+<td>The canonical <code>## Contents</code> block is rendered in place as a navigation landmark that keeps its <code>&lt;details open&gt;</code> state, styled like the reference&#x27;s quiet numbered list.</td>
+<td>Not removed — see open decision D6</td>
+</tr>
+<tr>
+<td><strong>&quot;In this section&quot; lines</strong></td>
+<td>Rendered in place as a compact inline link row</td>
+<td>Canonical navigation text</td>
+</tr>
+<tr>
+<td><strong>&quot;Back to Contents&quot; links</strong></td>
+<td>Rendered as a small right-aligned text link at section ends (the reference&#x27;s <code>.back</code> treatment, lighter)</td>
+<td>Canonical; AGENTS requires presence</td>
+</tr>
+<tr>
+<td><strong>Back to top</strong></td>
+<td>Floating button that appears after scrolling beyond one viewport; bottom-right; hidden in print</td>
+<td>Required by AGENTS</td>
+</tr>
+<tr>
+<td><strong>Mobile menu</strong></td>
+<td>Top bar collapses to title + menu + search. The menu is a full-height drawer containing primary navigation and the area sidebar. &quot;On this page&quot; becomes a separate button that opens a sheet.</td>
+<td>See <a href="#16-responsive-behavior">16</a></td>
+</tr>
+<tr>
+<td><strong>Footer</strong></td>
+<td>Source file path of the page (&quot;Generated from <code>ROADMAP.md</code>&quot;), build date of the source (not the build time; see determinism), link to About, link to Reviews when that area is hidden from primary navigation</td>
+<td>Makes the source of truth visible</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="quiet-reading">Quiet Reading<a class="heading-anchor" href="#quiet-reading" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Navigation should recede when the learner is reading deeply, without disappearing unexpectedly.</p>
+<blockquote class="callout callout-warning">
+<p>⚠️ Items 1 and 3 (top-bar auto-hide, focus mode) are post-core polish under <a href="#ad5-advanced-reading-interactions-are-post-core-polish">AD5</a>.</p>
+<p>They are not part of the first implementation milestone and are implemented only after the core interface has been visually reviewed. Items 2, 4 and 5 are ordinary styling rules and apply from the start.</p>
+</blockquote>
+<ol>
+<li><strong>Top bar auto-hide.</strong> It hides after sustained downward scrolling in the reading column and returns on any upward scroll, focus entering it, or pointer at the top edge. With reduced motion, it stays visible and static rather than animating.</li>
+<li><strong>Sidebar de-emphasis.</strong> Side navigation uses muted text and no background fill. Only the active item uses the accent.</li>
+<li><strong>Focus mode (optional control).</strong> Hides both sidebars and centers the reading column. The toggle is available from the top bar and a keyboard shortcut. The state persists per viewer.</li>
+<li><strong>No sticky banners</strong> other than the thin evidence marker in research pages (<a href="#7-research-experience">7</a>).</li>
+<li><strong>Nothing moves by itself.</strong> No carousels, no auto-expanding panels, no decorative animation.</li>
+</ol>
+<h3 id="keyboard-model">Keyboard Model<a class="heading-anchor" href="#keyboard-model" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Keyboard Model"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Key</th>
+<th scope="col">Action</th>
+<th scope="col">Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Tab</code> / <code>Shift+Tab</code></td>
+<td>Standard focus order: skip link → top bar → area nav → main → on-this-page</td>
+<td>Always</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>Open search</td>
+<td>Not while typing in a field</td>
+</tr>
+<tr>
+<td><code>Esc</code></td>
+<td>Close search, drawer or sheet; return focus to the invoking control</td>
+<td>When an overlay is open</td>
+</tr>
+<tr>
+<td><code>↑</code> / <code>↓</code>, <code>Enter</code></td>
+<td>Move through and open search results</td>
+<td>In search</td>
+</tr>
+<tr>
+<td><code>f</code></td>
+<td>Toggle focus mode (if implemented)</td>
+<td>Not while typing; documented in About</td>
+</tr>
+</tbody>
+</table></div>
+<p>Single-key shortcuts are kept to a minimum, can be disabled (WCAG 2.1.4), and are listed on a small &quot;Keyboard&quot; help page in About.</p>
+<p>Standard keyboard operability (<code>Tab</code>, <code>Shift+Tab</code>, <code>Esc</code> for open drawers and sheets) is core and required from the first milestone. The single-key shortcuts (<code>/</code>, <code>f</code>) and the Keyboard help page are post-core polish (<a href="#ad5-advanced-reading-interactions-are-post-core-polish">AD5</a>). The <code>/</code> shortcut arrives with search in Version 2 at the earliest.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="5-roadmap-experience">
+<h2 id="5-roadmap-experience">5. Roadmap Experience<a class="heading-anchor" href="#5-roadmap-experience" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>Problem.</strong> <code>ROADMAP.md</code> is one long document. Its most important idea is architectural, and a scrolling page does not communicate it well: four sequential depth stages, plus a parallel currency track that is <strong>not</strong> stage five.</p>
+<p><strong>Recommendation.</strong> A generated <strong>Roadmap overview</strong> shows the architecture, and the full canonical document is rendered as the detailed reading view.</p>
+<p><strong>Approved placement (<a href="#ad1-roadmap-overview-is-part-of-version-1">AD1</a>):</strong> the overview is part of <strong>Version 1</strong> and is shown on the <strong>Home</strong> page. It is also part of the first implementation milestone. The same generated component may later also serve as the <code>roadmap/</code> index page (<a href="#19-proposed-generated-file-and-url-structure">19</a>). Rich interaction is not required initially; a clear, polished, responsive representation is sufficient.</p>
+<p>The overview contains only:</p>
+<ul>
+<li>stage names and their order, exactly as they appear in canonical headings;</li>
+<li>the explicit <strong>Status:</strong> / <strong>Objective</strong> text of each stage, quoted verbatim with a link to the source section;</li>
+<li>explicit section lists (e.g., Fundamentals sections 1–7 with their <strong>Primary resource:</strong> labels);</li>
+<li>the Modern AI Engineering track&#x27;s explicit status and phase names (Before the Parallel Track → Early Modern AI Engineering → Full Parallel Track);</li>
+<li>the explicit &quot;Curriculum Status&quot; table, rendered as-is.</li>
+</ul>
+<p>Representation chosen: <strong>a horizontal stage sequence with a separate parallel band beneath it.</strong> It is rendered as semantic HTML (an ordered list for the stages and a complementary region for the track), not as a diagram image.</p>
+<div class="code-block" data-lang="text"><div class="code-meta" data-chrome><span class="code-lang">TEXT</span></div><pre class="code"><code> DEPTH (sequential)
+ ┌───────────────┐   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐
+ │ Fundamentals  │ → │ Advanced      │ → │ Mastery       │ → │ Research      │
+ │ 7 sections    │   │ Not yet       │   │ Not yet       │   │ Not yet       │
+ │ Baseline      │   │ designed      │   │ designed      │   │ designed      │
+ └───────────────┘   └───────────────┘   └───────────────┘   └───────────────┘
+ ═══════════════════════════════════════════════════════════════════════════════
+ CURRENCY (parallel track, runs alongside every stage)
+ Modern AI Engineering — Before the Parallel Track → Early → Full Parallel Track
+ Status: Parallel track — detailed curriculum not yet designed.
+</code></pre></div>
+<p>The text inside the wireframe is quoted from <code>ROADMAP.md</code> and <code>README.md</code> (&quot;depth&quot;, &quot;currency&quot;). The generator would take it from those sources, not from templates.</p>
+<p>Why this representation:</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 5. Roadmap Experience"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">Alternative considered</th>
+<th scope="col">Why not chosen as the primary view</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Five columns / five cards in a row</td>
+<td>Visually implies Modern AI Engineering is stage five. The sources explicitly say it is not.</td>
+</tr>
+<tr>
+<td>Mermaid diagram of stages</td>
+<td>Duplicates the diagrams already in the source. Weak for interaction and linking. Harder to make accessible and responsive than HTML.</td>
+</tr>
+<tr>
+<td>Force-directed topic graph</td>
+<td>No topic relationship data exists yet. It would become unreadable as the repository grows.</td>
+</tr>
+<tr>
+<td>Progress dashboard with percentages</td>
+<td>No progress data exists, and progress is not an approved feature. Percentages of &quot;designed&quot; stages would be invented metrics.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Design details:</p>
+<ul>
+<li><strong>Sequence is conveyed structurally.</strong> An ordered list with arrow separators works as visual decoration. Screen readers announce &quot;list, 4 items&quot; in order.</li>
+<li><strong>The parallel track spans the full width</strong> below the sequence and is visually connected to all four stages by a thin continuous rule. It uses a distinct label (&quot;parallel track&quot;) and is not given a number. On narrow screens the band becomes a vertical rail beside the stacked stages, so it still reads as &quot;alongside&quot;.</li>
+<li><strong>Undesigned stages are shown honestly</strong> with their canonical status text in muted type. There are no placeholder topics.</li>
+<li><strong>Stage detail views.</strong> In Version 1, each stage card links to the corresponding section of the full roadmap page (<code>roadmap/document/#1-fundamentals</code>). Separate per-stage pages are deferred. They should follow a <em>canonical</em> split of curriculum files rather than a presentation-only split (open decision D20).</li>
+<li><strong>Dynamic topics</strong> are shown on the overview only as the explicit list from <code>ROADMAP.md</code>, labeled as that document labels them (&quot;Possible examples… provisional&quot;).</li>
+<li><strong>Research is linked but separated.</strong> A secondary strip at the bottom — &quot;Evidence informing future roadmap work&quot; — lists research reports by title and date. It carries the evidence marker, and it never places research areas inside stage cards.</li>
+</ul>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="6-long-form-reading-experience">
+<h2 id="6-long-form-reading-experience">6. Long-Form Reading Experience<a class="heading-anchor" href="#6-long-form-reading-experience" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The reading view is the heart of the site. The supplied reference establishes a minimum quality bar. Its qualities are preserved here in a system that also handles much larger documents and richer content.</p>
+<p><strong>What is kept from the reference:</strong></p>
+<ul>
+<li>restrained, editorial appearance;</li>
+<li>serif reading text with generous leading;</li>
+<li>a narrow measure;</li>
+<li>warm, low-saturation accent used sparingly (rules, active states, numbering);</li>
+<li>hairline rules instead of boxes;</li>
+<li>uppercase small labels for table headers and H4;</li>
+<li>a quiet contents list;</li>
+<li>a left-rule note callout;</li>
+<li>intentionally designed dark and light themes;</li>
+<li>a thoughtful print stylesheet.</li>
+</ul>
+<p><strong>What is deliberately changed or extended:</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 6. Long-Form Reading Experience"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Reference behavior</th>
+<th scope="col">Change</th>
+<th scope="col">Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Times New Roman</code> everywhere, including UI</td>
+<td>Serif for reading, system sans for UI and dense tables</td>
+<td>Times is optimized for narrow print columns and has a small x-height on screen; UI controls read better in sans</td>
+</tr>
+<tr>
+<td>15pt body, line-height 1.88</td>
+<td>≈ 18–19 px body, line-height ≈ 1.65–1.7</td>
+<td>Similar comfort with less vertical sprawl in 20,000-word documents</td>
+</tr>
+<tr>
+<td>Point (<code>pt</code>) units</td>
+<td><code>rem</code> units</td>
+<td>Respects user font-size settings and zoom</td>
+</tr>
+<tr>
+<td>Justified text and hyphenation everywhere, including tables</td>
+<td>Justified prose only (AGENTS requirement), with <code>lang=&quot;en&quot;</code> for hyphenation; left-aligned tables, headings, code, captions; left-aligned below ~600 px</td>
+<td>AGENTS rule; avoids rivers in narrow cells</td>
+</tr>
+<tr>
+<td>Section numbers hung in the left margin</td>
+<td>Numbers remain part of canonical heading text; no margin hanging</td>
+<td>Canonical headings already contain their numbers (e.g., &quot;5. Machine Learning &amp; Deep Learning&quot;)</td>
+</tr>
+<tr>
+<td>Single column, no navigation</td>
+<td>Three-zone layout with quiet sidebars</td>
+<td>Repository-scale navigation</td>
+</tr>
+<tr>
+<td><code>data-theme</code> defaults to dark</td>
+<td>Default follows system preference; explicit choice persists</td>
+<td>Theme requirement</td>
+</tr>
+<tr>
+<td>Hover-shift animation on TOC links</td>
+<td>No positional animation; color and underline only</td>
+<td>Avoid decorative motion</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Reading column rules:</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 6. Long-Form Reading Experience"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">Aspect</th>
+<th scope="col">Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Measure</td>
+<td>68–75ch for prose (AGENTS: roughly 70–80ch)</td>
+</tr>
+<tr>
+<td>Paragraph spacing</td>
+<td>≈ 0.9–1.0 em</td>
+</tr>
+<tr>
+<td>Heading rhythm</td>
+<td>Generous space above H2 (≈ 2.5–3 em) with a hairline rule beneath (reference treatment); tighter above H3; H4 as small uppercase sans label</td>
+</tr>
+<tr>
+<td>Lists</td>
+<td>Hanging indentation; ≈ 0.35 em between items; nested lists visually indented, not boxed</td>
+</tr>
+<tr>
+<td>Links</td>
+<td>Text color with a subtle accent underline (offset, thin); stronger underline on hover and focus; external links marked with a small arrow glyph plus visually hidden &quot;(external)&quot;</td>
+</tr>
+<tr>
+<td>Emphasis</td>
+<td>Bold in heading color; italics for resource titles (AGENTS convention)</td>
+</tr>
+<tr>
+<td>Breakout content</td>
+<td>Wide tables and large diagrams may extend beyond the measure up to the content maximum (≈ 1100 px) on wide screens, without widening prose</td>
+</tr>
+<tr>
+<td>Document header</td>
+<td>Title (H1), content-kind marker, and explicit metadata only (see <a href="#7-research-experience">7</a>, <a href="#9-topic-and-relationship-model">9</a>)</td>
+</tr>
+<tr>
+<td>End of document</td>
+<td>Previous/next (if in a collection), &quot;Generated from <code>&lt;source path&gt;</code>&quot;, backlinks (Version 2)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="7-research-experience">
+<h2 id="7-research-experience">7. Research Experience<a class="heading-anchor" href="#7-research-experience" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>Primary requirement:</strong> a learner must never mistake &quot;research discovered this area&quot; for &quot;I have decided to learn this area.&quot;</p>
+<p><strong>Distinction mechanisms</strong> (redundant on purpose — no single cue is relied on):</p>
+<ol>
+<li><strong>Area.</strong> Research lives under the <strong>Evidence</strong> area and the <code>research/</code> URL path, never under Learn.</li>
+<li><strong>Persistent context marker.</strong> A thin full-width rule at the top of the content area in the <em>evidence</em> tone, plus a text label in the document header: <strong>&quot;Evidence — research report. Not curriculum.&quot;</strong> The label is text, not color alone.</li>
+<li><strong>Breadcrumb prefix.</strong> <code>Evidence › Research reports › …</code>.</li>
+<li><strong>Distinct accent tone.</strong> Curriculum uses the warm accent. Evidence uses a restrained slate tone (<a href="#11-theme-and-visual-system">11</a>). Both are used sparingly.</li>
+<li><strong>No curriculum affordances.</strong> Research pages never show stage badges, progress controls, &quot;learn this&quot; actions, or previous/next into curriculum pages.</li>
+<li><strong>Cross-context links are labeled.</strong> A link from a research page to the roadmap is decorated &quot;→ Curriculum&quot;. A link from curriculum to research is decorated &quot;→ Evidence&quot;.</li>
+</ol>
+<p><strong>Report header</strong> (explicit metadata only — shown only when present in the source):</p>
+<div class="code-block" data-lang="text"><div class="code-meta" data-chrome><span class="code-lang">TEXT</span></div><pre class="code"><code>EVIDENCE — RESEARCH REPORT · NOT CURRICULUM
+Data &amp; Intelligence Landscape: Independent Baseline Reconstruction
+Research execution date   2026-09-17
+Report type               Independent landscape reconstruction (first baseline)
+Status                    Research evidence only…
+Related report            Roadmap Comparison (2026-09-17)      ← only if linked in source
+</code></pre></div>
+<p>In the current sources these values appear as bold-label paragraphs (<code>**Research execution date:** …</code>). Version 2 would extract them only from a declared pattern: a bold label at the start of a paragraph before the first <code>##</code>. It would display them in a definition list, and the original paragraphs would still render unchanged in the body. If a future front-matter convention is approved (D8), it replaces this heuristic.</p>
+<p><strong>Research index page</strong> (<code>research/</code>):</p>
+<ul>
+<li>chronological list, newest first: title, date (from filename), report type (if explicit), one-line status (if explicit);</li>
+<li>the baseline landscape report pinned with the label &quot;Baseline&quot; only if the report calls itself a baseline (the current one does);</li>
+<li>comparison reports grouped with the report they compare, if the source links to it.</li>
+</ul>
+<p><strong>Maturity classifications:</strong></p>
+<ul>
+<li>Displayed <strong>exactly as written</strong> in the report. The landscape report&#x27;s legend defines them as: Established, Current practice, Emerging, Active research, Experimental, Historically important, Narrowed role, Declining, Superseded.</li>
+<li><strong>Version 1–2:</strong> no badges and no parsing. Table cells render as text.</li>
+<li><strong>Version 3 (optional, requires D11):</strong> if a report declares its vocabulary in a machine-readable form, the generator may render recognized terms with a consistent typographic treatment: small caps, plus a subtle glyph that differs per group (● established family, ◐ current/emerging, ○ research/experimental, ◌ historical/declining/superseded). The word remains visible. Color is never the only signal. Unrecognized terms render as plain text and produce a validation warning.</li>
+<li>Composite labels such as &quot;Established (HPO); NAS narrowed&quot; render as plain text. They are never split or normalized.</li>
+<li><strong>Never inferred.</strong> A report that states no maturity shows none.</li>
+</ul>
+<p><strong>Uncertainty and contested content.</strong> Only explicit content is surfaced. A report section titled &quot;Uncertainties and Disagreements&quot;, or rows marked &quot;Contested&quot;, can be offered as jump links in the report header (&quot;Uncertainties&quot;, &quot;Frontier&quot;, &quot;Sources&quot;) <strong>if those headings exist</strong>. The generator does not scan prose for hedging language.</p>
+<p><strong>Comparison reports.</strong> Rendered like other reports, with one extra element: when a comparison report&#x27;s header links to both compared documents, the header shows &quot;Compares: [A] ↔ [B]&quot; with each link labeled by content kind.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="8-review-and-maintenance-experience">
+<h2 id="8-review-and-maintenance-experience">8. Review and Maintenance Experience<a class="heading-anchor" href="#8-review-and-maintenance-experience" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><code>reviews/</code> is empty today. This section designs for the maintenance model in <a href="../governance/index.html#4-week-modern-ai-scan">AGENTS.md — 4-Week Modern AI Scan</a> and <a href="../governance/index.html#12-week-curriculum-review">12-Week Curriculum Review</a> without assuming a file format that does not exist yet.</p>
+<p><strong>Two cycles with different meanings:</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 8. Review and Maintenance Experience"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Cycle</th>
+<th scope="col">Nature (from governance)</th>
+<th scope="col">Interface treatment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4-week Modern AI Scan</td>
+<td>Observation / discovery; should not normally restructure curriculum</td>
+<td>Evidence tone; marker &quot;Scan — observations&quot;</td>
+</tr>
+<tr>
+<td>12-week Curriculum Review</td>
+<td>Decisions about curriculum</td>
+<td>Curriculum tone; marker &quot;Review — decisions&quot;</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Reviews index</strong> (<code>reviews/</code>):</p>
+<div class="code-block" data-lang="text"><div class="code-meta" data-chrome><span class="code-lang">TEXT</span></div><pre class="code"><code>REVIEWS
+  2026                                   (illustrative structure — no reviews exist yet)
+  ── Dec ●  12-week Curriculum Review    3 decisions recorded
+  ── Nov ○  4-week Modern AI Scan        5 observations
+  ── Oct ○  4-week Modern AI Scan        2 observations
+</code></pre></div>
+<ul>
+<li>A <strong>single vertical timeline</strong> with two marker shapes (● decision review, ○ scan) and text labels. Two separate lanes would waste space and scale poorly.</li>
+<li>Each entry shows only explicit counts or summaries, if the review file declares them. Otherwise it shows title and date.</li>
+<li><strong>Empty state (today):</strong> &quot;No scans or reviews have been recorded yet. The review process is described in Governance.&quot; with links to the relevant AGENTS sections. No fabricated sample entries.</li>
+</ul>
+<p><strong>Review page:</strong></p>
+<ul>
+<li>header with cycle type, period covered, date (explicit only);</li>
+<li>previous/next <strong>within the same cycle type</strong>;</li>
+<li>links to the previous review of the other type.</li>
+</ul>
+<p><strong>Avoiding a changelog dump.</strong> Maintenance views are <em>derived lenses over explicit decision records</em>, not diffs of files:</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 8. Review and Maintenance Experience"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">View</th>
+<th scope="col">Content</th>
+<th scope="col">Source requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Changes since previous review</strong></td>
+<td>The explicit decision entries of the selected 12-week review</td>
+<td>Review file must record decisions in a declared structure (D15)</td>
+</tr>
+<tr>
+<td><strong>Promoted topics</strong></td>
+<td>Decisions with an outcome of &quot;Promote to …&quot;</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><strong>Watchlist</strong></td>
+<td>Topics explicitly recorded as <code>Watching</code> / <code>Discovered</code> with their last-reviewed date</td>
+<td>An explicit watchlist source (file or section)</td>
+</tr>
+<tr>
+<td><strong>Superseded / archived material</strong></td>
+<td>Explicit supersession or archive decisions, with preserved reasons</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><strong>Evidence changes</strong></td>
+<td>Research reports added between two reviews, listed by date</td>
+<td>Dates in filenames (available today)</td>
+</tr>
+<tr>
+<td><strong>Research history</strong></td>
+<td>Chronological list of research reports</td>
+<td>Available today</td>
+</tr>
+</tbody>
+</table></div>
+<p>The site never computes &quot;what changed in the curriculum&quot; by diffing <code>ROADMAP.md</code>. Textual diffs are not decisions and would misrepresent the governance process. If version control is adopted (D13), a <strong>source history</strong> link per document may be offered as secondary, clearly labeled &quot;file history, not decisions&quot;.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="9-topic-and-relationship-model">
+<h2 id="9-topic-and-relationship-model">9. Topic and Relationship Model<a class="heading-anchor" href="#9-topic-and-relationship-model" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p class="section-subnav"><strong>In this section:</strong> <a href="#topic-page-model">Topic Page Model</a> · <a href="#relationship-model">Relationship Model</a> · <a href="#relationship-representations">Relationship Representations</a></p>
+<p><strong>Current state.</strong> No topic-level canonical files, topic identifiers or relationship data exist.</p>
+<ul>
+<li><code>ROADMAP.md</code> contains sections, not topics with metadata.</li>
+<li>The landscape report contains research areas (C1–C19) with rich tables, but these are evidence, not curriculum topics.</li>
+</ul>
+<p>This section therefore defines a <strong>display model</strong> that could work once an approved topic source exists (D9). Until then, Version 1–2 renders documents only.</p>
+<h3 id="topic-page-model">Topic Page Model<a class="heading-anchor" href="#topic-page-model" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>A topic page renders <strong>only fields that exist</strong>. Absent fields produce no heading, no placeholder, no &quot;unknown&quot;.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Topic Page Model"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Field</th>
+<th scope="col">Source of truth</th>
+<th scope="col">Display position</th>
+<th scope="col">If absent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td>Canonical topic source</td>
+<td>H1</td>
+<td>Topic cannot exist without it (validation error)</td>
+</tr>
+<tr>
+<td>Purpose / why it matters</td>
+<td>Canonical topic source</td>
+<td>Lead paragraph</td>
+<td>Omitted</td>
+</tr>
+<tr>
+<td>Learning stage(s)</td>
+<td><strong>Curriculum only</strong></td>
+<td>Header metadata (&quot;Stage: Fundamentals&quot;)</td>
+<td>Omitted — never inferred from research</td>
+</tr>
+<tr>
+<td>Required depth</td>
+<td><strong>Curriculum only</strong> (AGENTS knowledge-depth ladder: Awareness → Research)</td>
+<td>Header metadata, shown as the named level on a six-step text scale</td>
+<td>Omitted</td>
+</tr>
+<tr>
+<td>Prerequisites</td>
+<td>Explicit relationship records</td>
+<td>Relationship panel</td>
+<td>Panel section omitted</td>
+</tr>
+<tr>
+<td>Related concepts, alternatives</td>
+<td>Explicit relationship records</td>
+<td>Relationship panel</td>
+<td>Omitted</td>
+</tr>
+<tr>
+<td>Resources</td>
+<td>Curriculum (explicit resource labels)</td>
+<td>&quot;Resources&quot; section</td>
+<td>Omitted</td>
+</tr>
+<tr>
+<td>Projects</td>
+<td>Curriculum (explicit project links)</td>
+<td>&quot;Projects&quot; section</td>
+<td>Omitted</td>
+</tr>
+<tr>
+<td>Modern AI relevance</td>
+<td>Curriculum (explicit)</td>
+<td>Header metadata</td>
+<td>Omitted</td>
+</tr>
+<tr>
+<td>Maturity</td>
+<td><strong>Evidence</strong> (with source link) or curriculum lifecycle status (Discovered, Watching…) — the two are labeled differently</td>
+<td>Evidence panel (&quot;Research classification, as of &lt;date&gt;&quot;) vs header (&quot;Curriculum status&quot;)</td>
+<td>Omitted</td>
+</tr>
+<tr>
+<td>Evidence / research connections</td>
+<td>Explicit links in either source</td>
+<td>Evidence panel with evidence marker</td>
+<td>Omitted</td>
+</tr>
+<tr>
+<td>Historical lineage</td>
+<td>Explicit lineage records</td>
+<td>Lineage section (ordered list)</td>
+<td>Omitted</td>
+</tr>
+<tr>
+<td>Current status</td>
+<td>Curriculum</td>
+<td>Header metadata</td>
+<td>Omitted</td>
+</tr>
+<tr>
+<td>Learner progress</td>
+<td><strong>Learner state</strong> (Version 4 only)</td>
+<td>Separate personal control, visually distinct from curriculum status</td>
+<td>Not rendered unless feature approved</td>
+</tr>
+</tbody>
+</table></div>
+<p>Layout principle: the <strong>curriculum facts</strong> (stage, depth, resources) appear in the document header. The <strong>evidence</strong> appears in a visually separate panel carrying the evidence marker. <strong>Personal state</strong>, if ever approved, appears in a third, clearly personal control. These three never share a single badge row.</p>
+<h3 id="relationship-model">Relationship Model<a class="heading-anchor" href="#relationship-model" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Relationships are <strong>typed, directed, and provenance-tagged edges</strong>. Each edge is stored in a canonical source and never computed.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Relationship Model"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Relationship type</th>
+<th scope="col">Direction</th>
+<th scope="col">Example (illustrative only)</th>
+<th scope="col">Allowed provenance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prerequisite-of</code></td>
+<td>A → B</td>
+<td>Probability → Machine Learning</td>
+<td>Curriculum only</td>
+</tr>
+<tr>
+<td><code>builds-on</code> / <code>enables</code></td>
+<td>A → B</td>
+<td>Information Retrieval → Retrieval-augmented systems</td>
+<td>Curriculum, or evidence (labeled as research dependency)</td>
+</tr>
+<tr>
+<td><code>related-to</code></td>
+<td>undirected</td>
+<td>Calibration ↔ Evaluation</td>
+<td>Curriculum or evidence</td>
+</tr>
+<tr>
+<td><code>alternative-to</code></td>
+<td>undirected</td>
+<td>Long context ↔ Retrieval</td>
+<td>Curriculum or evidence</td>
+</tr>
+<tr>
+<td><code>lineage</code> (preceded-by)</td>
+<td>A → B in time</td>
+<td>RNN → Transformer</td>
+<td>Curriculum or evidence</td>
+</tr>
+<tr>
+<td><code>cross-cutting</code></td>
+<td>concept → areas</td>
+<td>Evaluation → many</td>
+<td>Evidence</td>
+</tr>
+</tbody>
+</table></div>
+<p>Provenance matters because the landscape report&#x27;s dependency map (section I) contains <strong>research</strong> dependencies. The site may show them on evidence pages as &quot;Research dependency (landscape report, 2026-09-17)&quot;. It must never convert them into curriculum prerequisites.</p>
+<p>Generated backlinks are the exception to &quot;never computed&quot;. They are derived mechanically from actual Markdown links (&quot;Pages linking here&quot;), and they are labeled as links, not as conceptual relationships.</p>
+<h3 id="relationship-representations">Relationship Representations<a class="heading-anchor" href="#relationship-representations" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Relationship Representations"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Representation</th>
+<th scope="col">Use</th>
+<th scope="col">Scaling behavior</th>
+<th scope="col">Phase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Relationship panel (lists grouped by type)</strong></td>
+<td>Default on every topic page</td>
+<td>Scales indefinitely; screen-reader friendly</td>
+<td>Version 3</td>
+</tr>
+<tr>
+<td><strong>Breadcrumbs</strong></td>
+<td>Location, not concept relationships</td>
+<td>Constant</td>
+<td>Version 1</td>
+</tr>
+<tr>
+<td><strong>Generated backlinks</strong></td>
+<td>&quot;Pages linking here&quot;</td>
+<td>Grows linearly, collapsible after ~10</td>
+<td>Version 2</td>
+</tr>
+<tr>
+<td><strong>Local neighborhood diagram</strong></td>
+<td>Optional visual on topic pages: the topic, its direct prerequisites and direct dependents (1 hop, ≤ ~15 nodes), generated as Mermaid from explicit edges; text list always present</td>
+<td>Capped by design; above the cap, the diagram is replaced by the list</td>
+<td>Version 3</td>
+</tr>
+<tr>
+<td><strong>Lineage strip</strong></td>
+<td>Ordered horizontal (desktop) / vertical (mobile) sequence for lineage chains</td>
+<td>Linear</td>
+<td>Version 3</td>
+</tr>
+<tr>
+<td><strong>Area-level dependency view</strong></td>
+<td>A layered list or matrix of <em>areas</em> (not all topics) grouped by provenance</td>
+<td>Bounded by number of areas</td>
+<td>Version 3</td>
+</tr>
+<tr>
+<td><strong>Global force-directed graph</strong></td>
+<td>—</td>
+<td>Becomes unreadable; poor accessibility</td>
+<td>Not planned (non-goal)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="10-search-design">
+<h2 id="10-search-design">10. Search Design<a class="heading-anchor" href="#10-search-design" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>Goal.</strong> Fast local search that tells the learner <em>what kind of content</em> matched and <em>why</em>, with no backend.</p>
+<p><strong>Index granularity.</strong> One record per <strong>section</strong> (heading-bounded chunk), not per page. A 24,000-word report must return the relevant section, not the document.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 10. Search Design"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">Record field</th>
+<th scope="col">Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>url</code> (page + anchor)</td>
+<td>Resolved heading slug</td>
+</tr>
+<tr>
+<td><code>kind</code></td>
+<td>Content kind from path mapping (Curriculum / Evidence / Maintenance / Governance)</td>
+</tr>
+<tr>
+<td><code>doc_title</code>, <code>section_path</code> (H1 › H2 › H3)</td>
+<td>Headings</td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td>Plain text of the section (tables flattened to cell text; code included with lower weight; Mermaid source excluded; citation IDs kept)</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>Only if explicit (filename date or declared metadata)</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td>Explicit fields only (e.g., report type, status)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Result presentation.</strong></p>
+<div class="code-block" data-lang="text"><div class="code-meta" data-chrome><span class="code-lang">TEXT</span></div><pre class="code"><code>⌕  hybrid retrieval                         [All] [Curriculum] [Evidence] [Reviews] [Governance]
+
+EVIDENCE · Data &amp; Intelligence Landscape (2026-09-17)
+  C12. Information Retrieval, Ranking and Recommendation
+  …Hybrid retrieval and reranking | Combining lexical and dense retrieval; cross-encoder…
+
+CURRICULUM · AI Engineer — Data &amp; Intelligence Roadmap
+  5. Modern AI Engineering › Early Modern AI Engineering
+  …model APIs; prompting; structured generation; embeddings; semantic search…
+</code></pre></div>
+<ul>
+<li>The kind label appears first and is always text. Filters are toggle buttons with <code>aria-pressed</code>.</li>
+<li>Matched terms are highlighted in snippets with <code>&lt;mark&gt;</code>.</li>
+<li>The section path shows <em>where</em> in the document the match sits.</li>
+<li>Ranking: exact phrase in heading &gt; term in heading &gt; term in body. A small, fixed boost for Curriculum is optional (D21). No personalization.</li>
+<li>The empty-results state suggests removing filters and lists content kinds.</li>
+</ul>
+<p><strong>Technology options:</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 10. Search Design"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Option</th>
+<th scope="col">Fit</th>
+<th scope="col">Concern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Generated index + small vendored client library (e.g., MiniSearch-class, ~tens of KB)</strong></td>
+<td>Simple, Python-generated index, works from <code>file://</code> if the index is emitted as a JavaScript file rather than fetched JSON</td>
+<td>Entire index loaded at once; fine for tens to low hundreds of documents</td>
+</tr>
+<tr>
+<td><strong>Pagefind</strong></td>
+<td>Excellent static search with chunked index and filters; scales to large sites</td>
+<td>Separate binary build step; loads index chunks via <code>fetch</code>, which fails under <code>file://</code> in some browsers</td>
+</tr>
+<tr>
+<td><strong>Lunr.js</strong></td>
+<td>Mature</td>
+<td>Larger index size; less active</td>
+</tr>
+<tr>
+<td><strong>Server-side search</strong></td>
+<td>—</td>
+<td>Violates local-first / no-backend principle</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Recommendation:</strong> a generated section-level index plus a small vendored client library, loaded <strong>only when search is opened</strong>. Emitting the index as a classic script (<code>search-index.js</code>) keeps search working under <code>file://</code>, where <code>fetch()</code> of local JSON and ES-module imports are blocked in Chromium-based browsers.</p>
+<p>Under <a href="#ad2-local-first-does-not-permanently-mean-file">AD2</a>, <code>file://</code> compatibility is not a permanent constraint. When search is implemented (Version 2 or later), an option that needs a local server — for example, fetched or chunked indexes such as Pagefind — is acceptable if it is better, provided the site stays static and servable with <code>python -m http.server</code>. Revisit Pagefind if the index exceeds ~2–3 MB or build/open times degrade (D21).</p>
+<p><strong>No-JavaScript fallback:</strong> the search page shows a notice plus a generated A–Z index of document and section titles.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="11-theme-and-visual-system">
+<h2 id="11-theme-and-visual-system">11. Theme and Visual System<a class="heading-anchor" href="#11-theme-and-visual-system" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>Theme behavior:</strong></p>
+<ol>
+<li>The default is the system preference (<code>prefers-color-scheme</code>).</li>
+<li>An explicit choice (Light / Dark / System) persists in local storage.</li>
+<li>A tiny inline script in <code>&lt;head&gt;</code> applies the stored choice before first paint, which prevents a flash of the wrong theme. It is the only render-blocking script.</li>
+<li>The toggle is a three-state menu button labeled with text (&quot;Theme: System&quot;), not an icon alone.</li>
+<li>Theme changes re-render Mermaid diagrams and swap code-highlighting token variables. Images are unaffected.</li>
+</ol>
+<p><strong>Token architecture.</strong> Three layers, all CSS custom properties:</p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: 11. Theme and Visual System"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    P[&quot;Primitive palette&lt;br/&gt;(raw values per theme)&quot;] --&gt; S[&quot;Semantic tokens&lt;br/&gt;(text, surface, rule, accent, kind, state)&quot;] --&gt; C[&quot;Component usage&lt;br/&gt;(table header, callout, nav item)&quot;]
+</code></pre></figure>
+<p>Components use only semantic tokens. Themes redefine only primitive/semantic values. No component-level overrides per theme.</p>
+<p><strong>Proposed semantic tokens with starting values.</strong> The values below are proposals. Text contrast against the page background was computed for the proposal; the ratios appear in parentheses.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 11. Theme and Visual System"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Token</th>
+<th scope="col">Role</th>
+<th scope="col">Light</th>
+<th scope="col">Dark</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--bg</code></td>
+<td>Page background</td>
+<td><code>#FBFAF7</code> warm paper</td>
+<td><code>#15171B</code> warm charcoal (not black)</td>
+</tr>
+<tr>
+<td><code>--surface</code></td>
+<td>Raised surfaces (search panel, drawers)</td>
+<td><code>#FFFFFF</code></td>
+<td><code>#1A1D22</code></td>
+</tr>
+<tr>
+<td><code>--panel</code></td>
+<td>Callouts, code, table header band</td>
+<td><code>#F4F1EB</code></td>
+<td><code>#1F2228</code></td>
+</tr>
+<tr>
+<td><code>--text</code></td>
+<td>Body text</td>
+<td><code>#24272C</code> (14.4:1)</td>
+<td><code>#E3E5E9</code> (14.2:1)</td>
+</tr>
+<tr>
+<td><code>--text-soft</code></td>
+<td>Secondary prose, lead paragraphs</td>
+<td><code>#3F444C</code> (9.4:1)</td>
+<td><code>#C3C8D0</code> (10.7:1)</td>
+</tr>
+<tr>
+<td><code>--muted</code></td>
+<td>Metadata, nav, captions</td>
+<td><code>#5C636D</code> (5.8:1)</td>
+<td><code>#9AA2AD</code> (7.0:1)</td>
+</tr>
+<tr>
+<td><code>--faint</code></td>
+<td>Decorative only / large text (≥ 3:1)</td>
+<td><code>#737A84</code> (4.2:1)</td>
+<td><code>#838B96</code> (5.2:1)</td>
+</tr>
+<tr>
+<td><code>--head</code></td>
+<td>Headings, strong emphasis</td>
+<td><code>#15181D</code> (17.1:1)</td>
+<td><code>#F4F5F7</code> (16.5:1)</td>
+</tr>
+<tr>
+<td><code>--rule</code> / <code>--rule-mid</code> / <code>--rule-strong</code></td>
+<td>Hairlines, table borders, emphasized rules</td>
+<td><code>#E6E1D8</code> / <code>#D6D0C5</code> / <code>#8C857A</code> (3.5:1)</td>
+<td><code>#2A2E35</code> / <code>#363C45</code> / <code>#6B7380</code> (3.8:1)</td>
+</tr>
+<tr>
+<td><code>--accent</code></td>
+<td>Curriculum accent: active nav, links underline, numbering</td>
+<td><code>#8A5A24</code> (5.6:1)</td>
+<td><code>#DDBE88</code> (10.1:1)</td>
+</tr>
+<tr>
+<td><code>--accent-soft</code></td>
+<td>Selection, subtle highlight</td>
+<td>accent at ~10%</td>
+<td>accent at ~13%</td>
+</tr>
+<tr>
+<td><code>--kind-evidence</code></td>
+<td>Evidence marker and labels</td>
+<td><code>#3B6480</code> slate (6.1:1)</td>
+<td><code>#9CBAD4</code> (8.9:1)</td>
+</tr>
+<tr>
+<td><code>--kind-governance</code></td>
+<td>Governance marker</td>
+<td><code>--muted</code> (neutral)</td>
+<td><code>--muted</code></td>
+</tr>
+<tr>
+<td><code>--warning</code> / <code>--warning-bg</code></td>
+<td><code>⚠️</code> callouts</td>
+<td><code>#7A4F00</code> (6.8:1) / tinted panel</td>
+<td><code>#E6BF73</code> (10.3:1) / tinted panel</td>
+</tr>
+<tr>
+<td><code>--focus</code></td>
+<td>Focus ring (2 px + offset)</td>
+<td><code>#1F5FBF</code> (5.8:1)</td>
+<td><code>#8AB4F8</code> (8.5:1)</td>
+</tr>
+<tr>
+<td><code>--code-*</code></td>
+<td>Syntax token colors (≈ 8 roles)</td>
+<td>Low-saturation, ≥ 4.5:1 each</td>
+<td>Low-saturation, ≥ 4.5:1 each</td>
+</tr>
+<tr>
+<td><code>--mark</code></td>
+<td>Search hit highlight</td>
+<td>Pale warm</td>
+<td>Muted amber at low opacity</td>
+</tr>
+</tbody>
+</table></div>
+<p>Design rules:</p>
+<ul>
+<li><strong>Dark mode is designed, not inverted.</strong> It uses warm charcoal rather than pure black, and off-white rather than pure-white text. The accent is lightened and desaturated rather than kept at its light-mode value. Rules are raised slightly in lightness to stay visible. Shadows are replaced by borders.</li>
+<li><strong>Accent is scarce.</strong> It is used for the active state, link underlines, heading rules and numbering. It is never used for large fills.</li>
+<li><strong>Content-kind tones</strong> are used only as thin rules and small text labels, never as backgrounds of whole pages.</li>
+<li><strong>No gradients, glass effects, glows or large drop shadows.</strong> Corner radius is small (≈ 4–6 px) for callouts, code and inputs. Most elements have none.</li>
+<li><strong>Motion</strong> is limited to ≤ 150 ms opacity or color transitions. It is disabled entirely with <code>prefers-reduced-motion</code>.</li>
+<li><strong>Iconography</strong> is minimal: search, theme, menu, external link, copy, anchor. Every icon has an accessible name. No decorative icons in headings.</li>
+</ul>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="12-typography">
+<h2 id="12-typography">12. Typography<a class="heading-anchor" href="#12-typography" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>Constraints:</strong> offline and local-first, no remote font services, minimal dependencies, excellent long-form reading, good support for mathematics, tables and code.</p>
+<p><strong>Recommendation for Version 1: system font stacks only (zero font files).</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 12. Typography"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Role</th>
+<th scope="col">Stack (proposal)</th>
+<th scope="col">Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reading (prose, headings)</td>
+<td><code>Charter, &quot;Bitstream Charter&quot;, &quot;Sitka Text&quot;, Cambria, &quot;Iowan Old Style&quot;, Georgia, serif</code></td>
+<td>Charter (bundled with macOS/iOS) and Sitka/Cambria (Windows) were designed for screen reading, with larger x-heights than Times. Georgia is a universal fallback.</td>
+</tr>
+<tr>
+<td>UI (navigation, metadata, buttons, table headers, dense tables, search)</td>
+<td><code>system-ui, -apple-system, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif</code></td>
+<td>Native feel; excellent at small sizes</td>
+</tr>
+<tr>
+<td>Code</td>
+<td><code>ui-monospace, &quot;SF Mono&quot;, SFMono-Regular, Menlo, Consolas, &quot;Liberation Mono&quot;, monospace</code></td>
+<td>Native; distinguishable 0/O and 1/l on major platforms</td>
+</tr>
+<tr>
+<td>Mathematics</td>
+<td>Provided by the math renderer&#x27;s own bundled fonts (see <a href="#13-math-code-diagram-and-table-handling">13</a>), with fallback <code>&quot;STIX Two Math&quot;, &quot;Cambria Math&quot;, &quot;Latin Modern Math&quot;, math</code></td>
+<td>Math needs a math font with glyph coverage and a MATH table</td>
+</tr>
+</tbody>
+</table></div>
+<p>Cross-platform rendering differs with system stacks. If consistent appearance becomes important — for example, when publishing the site — the alternative is to <strong>vendor one open-licensed variable serif</strong> (such as Source Serif 4 or Newsreader, SIL OFL), self-hosted as WOFF2, subset to Latin, in roughly the 150–400 KB range. This is open decision D12.</p>
+<p><strong>Type scale</strong> (rem-based; 1 rem = user default, normally 16 px):</p>
+<p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: 12. Typography"><table class="doc-table table--wide" style="--cols:6">
+<thead>
+<tr>
+<th scope="col">Element</th>
+<th scope="col">Size (desktop)</th>
+<th scope="col">Size (phone)</th>
+<th scope="col">Face</th>
+<th scope="col">Weight / treatment</th>
+<th scope="col">Line height</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Body prose</td>
+<td>1.1875 rem (≈19 px)</td>
+<td>1.0625 rem (≈17 px)</td>
+<td>Serif</td>
+<td>400</td>
+<td>1.65–1.7</td>
+</tr>
+<tr>
+<td>Lead / purpose paragraph</td>
+<td>1.25 rem</td>
+<td>1.125 rem</td>
+<td>Serif</td>
+<td>400, <code>--text-soft</code></td>
+<td>1.6</td>
+</tr>
+<tr>
+<td>H1 (document title)</td>
+<td>2.25–2.5 rem</td>
+<td>1.75 rem</td>
+<td>Serif</td>
+<td>700, tight tracking, no hyphenation</td>
+<td>1.15</td>
+</tr>
+<tr>
+<td>H2</td>
+<td>1.6 rem</td>
+<td>1.35 rem</td>
+<td>Serif</td>
+<td>700, hairline rule below</td>
+<td>1.25</td>
+</tr>
+<tr>
+<td>H3</td>
+<td>1.25 rem</td>
+<td>1.125 rem</td>
+<td>Serif</td>
+<td>700</td>
+<td>1.3</td>
+</tr>
+<tr>
+<td>H4</td>
+<td>0.8125 rem</td>
+<td>0.8125 rem</td>
+<td>Sans</td>
+<td>600, uppercase, +0.08 em tracking, <code>--muted</code></td>
+<td>1.4</td>
+</tr>
+<tr>
+<td>Table headers</td>
+<td>0.75–0.8125 rem</td>
+<td>same</td>
+<td>Sans</td>
+<td>600, uppercase small labels</td>
+<td>1.35</td>
+</tr>
+<tr>
+<td>Dense evidence tables (≥ 5 columns)</td>
+<td>0.875–0.9375 rem</td>
+<td>0.875 rem</td>
+<td>Sans</td>
+<td>400, <code>font-variant-numeric: tabular-nums</code></td>
+<td>1.45</td>
+</tr>
+<tr>
+<td>Prose tables (≤ 4 columns, sentence content)</td>
+<td>1 rem</td>
+<td>0.9375 rem</td>
+<td>Serif</td>
+<td>400</td>
+<td>1.55</td>
+</tr>
+<tr>
+<td>Navigation / metadata</td>
+<td>0.875–0.9375 rem</td>
+<td>1 rem (larger touch targets)</td>
+<td>Sans</td>
+<td>400/600 active</td>
+<td>1.4</td>
+</tr>
+<tr>
+<td>Code blocks</td>
+<td>0.875 rem</td>
+<td>0.8125 rem</td>
+<td>Mono</td>
+<td>400</td>
+<td>1.55</td>
+</tr>
+<tr>
+<td>Inline code</td>
+<td>0.875 em (relative to context)</td>
+<td>same</td>
+<td>Mono</td>
+<td>panel background, small padding</td>
+<td>inherit</td>
+</tr>
+</tbody>
+</table></div>
+<p>Typographic details:</p>
+<ul>
+<li><code>hyphens: auto</code> only on justified prose, with <code>lang=&quot;en&quot;</code> on <code>&lt;html&gt;</code>. Headings, table headers, code and navigation are never hyphenated.</li>
+<li><code>text-wrap: pretty</code> for paragraphs and <code>text-wrap: balance</code> for headings where supported (harmless where not).</li>
+<li>Old-style numerals are avoided in technical prose (lining figures for versions, dates, equations). Tabular figures in tables.</li>
+<li>Optical margin, ligatures: default. Ligatures are disabled in code.</li>
+</ul>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="13-math-code-diagram-and-table-handling">
+<h2 id="13-math-code-diagram-and-table-handling">13. Math, Code, Diagram and Table Handling<a class="heading-anchor" href="#13-math-code-diagram-and-table-handling" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p class="section-subnav"><strong>In this section:</strong> <a href="#mathematics">Mathematics</a> · <a href="#code">Code</a> · <a href="#mermaid-and-diagrams">Mermaid and Diagrams</a> · <a href="#tables">Tables</a> · <a href="#callouts-details-and-other-constructs">Callouts, Details and Other Constructs</a></p>
+<h3 id="mathematics">Mathematics<a class="heading-anchor" href="#mathematics" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>No mathematics exists in the sources yet. The architecture must still reserve a syntax now, so that future Markdown written for GitHub also renders on the site.</p>
+<p><strong>Syntax (reserve now):</strong> GitHub-compatible delimiters — <code>$…$</code> inline, <code>$$…$$</code> display, and fenced <code>```math</code> blocks. The Markdown parser must be configured so that <code>$</code> inside code and in currency-like text is not misread; validation flags ambiguous cases.</p>
+<p><strong>Rendering options:</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Mathematics"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Option</th>
+<th scope="col">Output</th>
+<th scope="col">Pros</th>
+<th scope="col">Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>KaTeX, build-time</strong></td>
+<td>Static HTML + MathML + CSS + bundled fonts</td>
+<td>No runtime JS; fast; prints perfectly; MathML for screen readers</td>
+<td>Requires Node at build time (or a KaTeX port); limited automatic equation numbering (<code>\tag</code> supported; <code>\label</code>/<code>\eqref</code> limited)</td>
+</tr>
+<tr>
+<td><strong>KaTeX, client-side (vendored)</strong></td>
+<td>Same, rendered on load</td>
+<td>No Node needed at build</td>
+<td>Runtime JS; flash of raw TeX without JS</td>
+</tr>
+<tr>
+<td><strong>MathJax 3, build-time (SVG or CHTML)</strong></td>
+<td>Static</td>
+<td>Strongest LaTeX coverage, automatic numbering, <code>\label</code>/<code>\eqref</code>, rich accessibility extension</td>
+<td>Heavier; requires Node at build</td>
+</tr>
+<tr>
+<td><strong>Native MathML (convert TeX → MathML at build, e.g., Python converter)</strong></td>
+<td>MathML Core</td>
+<td>No runtime JS; no Node; browser-native accessibility</td>
+<td>Rendering quality and coverage vary across browsers; converters incomplete for advanced LaTeX</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Recommendation:</strong> defer the engine choice until the first mathematical content is written (open decision D4), but decide the delimiters now. Selection criteria:</p>
+<ol>
+<li>correctness on the curriculum&#x27;s actual derivations;</li>
+<li>equation numbering and cross-references if derivations need them — this favors MathJax;</li>
+<li>no runtime dependency — this favors build-time rendering;</li>
+<li>accessible output (MathML);</li>
+<li>build toolchain size.</li>
+</ol>
+<p>Presentation requirements for any engine:</p>
+<ul>
+<li>inline math matches body size and baseline;</li>
+<li>display math is centered, with horizontal scroll inside its own container for wide matrices, never shrunk;</li>
+<li>numbered equations have right-aligned numbers and stable anchors (<code>#eq-…</code>) derived only from explicit labels;</li>
+<li>math color inherits text tokens in both themes;</li>
+<li>print renders math at full quality;</li>
+<li>a render failure shows the raw TeX source in a monospace block with a visible error note.</li>
+</ul>
+<h3 id="code">Code<a class="heading-anchor" href="#code" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Code"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">Capability</th>
+<th scope="col">Design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Syntax highlighting</td>
+<td><strong>Build-time</strong> (no runtime JS). Output uses token classes mapped to <code>--code-*</code> variables, so both themes work from one render.</td>
+</tr>
+<tr>
+<td>Language label</td>
+<td>From the fence info string (<code>```python</code>), shown as a small uppercase sans label at the block&#x27;s top-left. Blocks with no language are labeled &quot;Text&quot;.</td>
+</tr>
+<tr>
+<td>File name</td>
+<td>Optional explicit convention in the info string, e.g. <code>```python title=&quot;train.py&quot;</code> (convention requires approval, D10). Rendered as a caption bar; the label moves beside it.</td>
+</tr>
+<tr>
+<td>Copy button</td>
+<td>Progressive enhancement: top-right, visible on hover/focus and always visible on touch devices. Accessible name &quot;Copy code&quot;. Announces &quot;Copied&quot; via a live region.</td>
+</tr>
+<tr>
+<td>Shell commands</td>
+<td><code>```bash</code> / <code>```sh</code> = commands only (copy copies all). <code>```console</code> = prompts + output: prompt markers and output lines are styled differently, and <strong>copy excludes prompts and output lines</strong>.</td>
+</tr>
+<tr>
+<td>Output blocks</td>
+<td><code>```text</code> or <code>```output</code> labeled &quot;Output&quot;; no copy button by default; muted background variant.</td>
+</tr>
+<tr>
+<td>Long lines</td>
+<td>Horizontal scroll by default, never silent soft-wrap (wrapping can change the meaning of shell commands). A per-block wrap toggle is optional later. The scroll container is focusable with a label for keyboard scrolling.</td>
+</tr>
+<tr>
+<td>Line highlighting</td>
+<td>Optional later convention, e.g. <code>{2,4-6}</code> in the info string (D10); highlighted lines get a panel tint and a left accent bar, with non-color marking for accessibility.</td>
+</tr>
+<tr>
+<td>Line numbers</td>
+<td>Off by default; optional per block via the same convention. Rendered so that copying text does not include numbers.</td>
+</tr>
+<tr>
+<td>Inline code</td>
+<td>Monospace, panel background, no wrapping inside short identifiers; long inline code may break at punctuation.</td>
+</tr>
+<tr>
+<td>Print</td>
+<td>Wrap long lines (<code>pre-wrap</code>) and use the light code palette.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="mermaid-and-diagrams">Mermaid and Diagrams<a class="heading-anchor" href="#mermaid-and-diagrams" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>All three existing canonical documents (<code>README.md</code>, <code>AGENTS.md</code>, <code>ROADMAP.md</code>) and both research reports contain Mermaid, so diagram support is required in Version 1.</p>
+<p><strong>Rendering approach options:</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Mermaid and Diagrams"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Option</th>
+<th scope="col">Pros</th>
+<th scope="col">Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Client-side, vendored Mermaid library (classic script build), loaded only on pages containing diagrams</strong></td>
+<td>No heavy build tooling; theme-aware re-render; works offline and from <code>file://</code></td>
+<td>Large script (multiple MB); runtime rendering; no diagram without JS</td>
+</tr>
+<tr>
+<td><strong>Build-time SVG (Mermaid CLI)</strong></td>
+<td>No runtime JS; print-perfect; fast page load</td>
+<td>Requires Node + headless Chromium at build (a heavyweight dependency); needs two SVGs per diagram (light/dark) or CSS-variable post-processing</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Recommendation for Version 1:</strong> client-side vendored Mermaid, pinned version, loaded lazily. Revisit build-time SVG in a later phase if JavaScript-free rendering or print fidelity becomes important (D3).</p>
+<p><strong>Markup contract (both options):</strong></p>
+<div class="code-block" data-lang="text"><div class="code-meta" data-chrome><span class="code-lang">TEXT</span></div><pre class="code"><code>&lt;figure class="diagram" aria-labelledby="…"&gt;
+  [rendered SVG — replaces the source when rendering succeeds]
+  &lt;figcaption&gt; accTitle, or nearest heading + "diagram" &lt;/figcaption&gt;
+  &lt;details&gt; &lt;summary&gt;Diagram as text&lt;/summary&gt; &lt;pre&gt;mermaid source&lt;/pre&gt; &lt;/details&gt;
+&lt;/figure&gt;
+</code></pre></div>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Mermaid and Diagrams"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">Concern</th>
+<th scope="col">Design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Light/dark</td>
+<td>Mermaid initialized with <code>themeVariables</code> mapped from semantic tokens (text, rules, panel, accent). On theme change, diagrams re-render from their stored source.</td>
+</tr>
+<tr>
+<td>Responsiveness</td>
+<td>SVG scales to container width down to a minimum legible size. Below that minimum it keeps its natural size inside a horizontally scrollable, focusable container, with a visible &quot;scroll&quot; affordance and an &quot;Open larger&quot; button (a full-viewport dialog) as a later enhancement.</td>
+</tr>
+<tr>
+<td>Accessibility</td>
+<td>Use <code>accTitle</code>/<code>accDescr</code> when present in source. Otherwise <code>figcaption</code> uses the nearest heading. The <strong>text source is always available</strong> in the disclosure. The SVG gets <code>role=&quot;img&quot;</code> and an accessible name. Flowcharts are never the only representation of essential information (governance already expresses diagram content in prose or lists).</td>
+</tr>
+<tr>
+<td>Graceful failure</td>
+<td>No JS → the source text is shown in a styled block under the heading &quot;Diagram (text form)&quot;. Parse error → the same, plus a visible note &quot;This diagram could not be rendered&quot;. The build validator should catch syntax errors earlier where possible (<a href="#20-validation-strategy">20</a>).</td>
+</tr>
+<tr>
+<td>Emoji in labels</td>
+<td>Rendered as text; emoji are allowed in source (README uses them) and are not stripped.</td>
+</tr>
+<tr>
+<td>Print</td>
+<td>Diagrams are forced to the light palette before printing, kept on one page where possible (<code>break-inside: avoid</code>), and scaled to page width. The text-source disclosure is hidden in print when the SVG exists and shown when it does not.</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Diagrams render when they approach the viewport, not all at page load, for documents with many diagrams (AGENTS contains several).</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="tables">Tables<a class="heading-anchor" href="#tables" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Tables in the research reports are wide (up to 7 columns) and long (source registers of ~200 rows). Shrinking text until a table fits is explicitly rejected.</p>
+<p><strong>Table classes, assigned deterministically from structure (never from meaning):</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Tables"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Class</th>
+<th scope="col">Detection rule (structural)</th>
+<th scope="col">Desktop behavior</th>
+<th scope="col">Phone behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Standard</strong></td>
+<td>≤ 4 columns</td>
+<td>Within reading measure; serif prose table style</td>
+<td>Horizontal scroll if needed</td>
+</tr>
+<tr>
+<td><strong>Wide</strong></td>
+<td>≥ 5 columns, or estimated natural width &gt; measure</td>
+<td><strong>Breaks out</strong> of the prose measure up to the content maximum (≈ 1100 px); sans dense style; horizontal scroll inside container if still too wide</td>
+<td>Horizontal scroll; first column sticky</td>
+</tr>
+<tr>
+<td><strong>Long</strong></td>
+<td>&gt; ~40 rows</td>
+<td>Sticky header row <em>within</em> a bounded-height scroll region is <strong>not</strong> used (nested vertical scrolling harms reading). Instead the table flows with the page, and the header row is repeated visually after long runs only in print.</td>
+<td>Same as wide</td>
+</tr>
+<tr>
+<td><strong>Two-column key/value</strong></td>
+<td>Exactly 2 columns with bold first cells, or an empty header row (as used for <code>ROADMAP.md</code>&#x27;s status block)</td>
+<td>Rendered as a definition-style table: no uppercase header band when headers are empty</td>
+<td>Stacks as label above value</td>
+</tr>
+</tbody>
+</table></div>
+<p>Common behavior:</p>
+<ul>
+<li>Wrapper: <code>&lt;div class=&quot;table-scroll&quot; role=&quot;region&quot; aria-labelledby=&quot;&lt;nearest heading id&gt;&quot; tabindex=&quot;0&quot;&gt;</code>. It is focusable only when it actually overflows, which the generator estimates and the enhancement script corrects.</li>
+<li>Overflow affordance: a subtle edge shadow on the scrollable side plus a visually hidden hint &quot;Scroll horizontally to see more columns&quot;.</li>
+<li>Minimum column widths for text-heavy columns (≈ 12–18ch) so cells do not collapse into one-word lines; horizontal scrolling takes over instead.</li>
+<li>Vertical alignment top; zebra striping off; hairline row rules; header row with <code>--rule-strong</code> bottom rule (reference style).</li>
+<li><code>&lt;th scope=&quot;col&quot;&gt;</code> for header cells. GFM tables have no captions, so the nearest preceding heading provides the accessible name.</li>
+<li>Cell text is left-aligned (AGENTS: tables are not justified). Numeric-only columns are right-aligned with tabular numerals.</li>
+<li><strong>Large evidence matrices (later enhancement):</strong> optional &quot;Expand table&quot; opens a full-viewport dialog with the same table. Column filtering is considered only for tables whose header row matches an explicitly declared schema (e.g., a source register), never guessed.</li>
+<li><strong>Source registers:</strong> each row&#x27;s first cell (an ID such as <code>D26</code>) becomes the row&#x27;s anchor (<code>#src-d26</code>) so that citations can link to it (<a href="#14-citation-and-source-experience">14</a>).</li>
+</ul>
+<h3 id="callouts-details-and-other-constructs">Callouts, Details and Other Constructs<a class="heading-anchor" href="#callouts-details-and-other-constructs" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Callouts, Details and Other Constructs"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">Source construct</th>
+<th scope="col">Rendering</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&gt; ⚠️ …</code> blockquote (AGENTS convention)</td>
+<td><strong>Warning callout</strong>: <code>--warning</code> left rule, tinted panel, the ⚠️ kept as source text, <code>role=&quot;note&quot;</code> with visually hidden prefix &quot;Warning:&quot;</td>
+</tr>
+<tr>
+<td>Other blockquotes</td>
+<td><strong>Note callout</strong>: accent left rule, panel (reference <code>.note</code> style), <code>role=&quot;note&quot;</code> only if it is a principle/callout by convention; ordinary quotations as <code>&lt;blockquote&gt;</code></td>
+</tr>
+<tr>
+<td>Blockquote consisting of a single bold statement</td>
+<td>Key-principle style: larger serif, no panel, accent rule</td>
+</tr>
+<tr>
+<td><code>&lt;details&gt;</code> / <code>&lt;summary&gt;</code></td>
+<td>Native disclosure, styled; keyboard operable; expanded in print</td>
+</tr>
+<tr>
+<td><code>&lt;div align=&quot;justify&quot;&gt;</code> wrapper</td>
+<td>Treated as a <strong>presentation directive</strong>: removed from output and replaced by the justified-prose CSS rule (AGENTS requires one stylesheet rule, not inline alignment)</td>
+</tr>
+<tr>
+<td><code>---</code> between sections</td>
+<td>Rendered as spacing plus the H2 rule; not a double rule</td>
+</tr>
+<tr>
+<td>Raw HTML outside an allowlist</td>
+<td>Validation warning; rendered escaped rather than executed</td>
+</tr>
+<tr>
+<td>GitHub alerts (<code>&gt; [!NOTE]</code>)</td>
+<td>Supported if adopted later; not used today</td>
+</tr>
+<tr>
+<td>Footnotes</td>
+<td>Not used today; if adopted, rendered as endnotes with backlinks</td>
+</tr>
+<tr>
+<td>Task lists</td>
+<td>Rendered as static, disabled checkboxes (never used for progress)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="14-citation-and-source-experience">
+<h2 id="14-citation-and-source-experience">14. Citation and Source Experience<a class="heading-anchor" href="#14-citation-and-source-experience" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>Current convention</strong> (landscape report):</p>
+<ul>
+<li>Inline citations are bracketed IDs inside code spans: <code>`[D26]`</code>, lists <code>`[M19, M20]`</code>, and ranges <code>`[X14–X17]`</code>.</li>
+<li>A <strong>source register</strong> (section L) holds tables with columns ID, Source (with URLs), Date, Type, Access.</li>
+<li>The comparison report cites the landscape report&#x27;s register by the same IDs and states that convention in its record table.</li>
+</ul>
+<p><strong>Design principle:</strong> citation linking is <strong>mechanical resolution of IDs that the author wrote</strong>, within an explicitly declared scope. The generator never guesses which source supports a claim, never merges registers, and never renders an unresolved ID as if it were resolved.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 14. Citation and Source Experience"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Capability</th>
+<th scope="col">Behavior</th>
+<th scope="col">Phase</th>
+<th scope="col">Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Readable inline citations</td>
+<td>Code-span citations matching the declared pattern render as quiet superscript-free bracketed links in the sans UI face, not as code</td>
+<td>Version 2</td>
+<td>Pattern declared as a convention (D10)</td>
+</tr>
+<tr>
+<td>Claim → reference link</td>
+<td>Each ID links to its register row anchor (<code>#src-d26</code>). Ranges link each endpoint and expand on hover to list all IDs in the range.</td>
+<td>Version 2</td>
+<td>ID exists in the declared register</td>
+</tr>
+<tr>
+<td>Reference preview</td>
+<td>On hover/focus, a small non-modal popover shows the register row (title, date, type, access code). Escape closes it. It works as a normal link without JS.</td>
+<td>Version 2</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Backlinks</td>
+<td>Each register row shows &quot;Cited in: C5, C7, D (Cross-Cutting Map)…&quot; — links to the sections where the ID appears</td>
+<td>Version 2</td>
+<td>Mechanical</td>
+</tr>
+<tr>
+<td>Unused / unresolved IDs</td>
+<td>Validation warnings (unused register entries) and errors (unresolved citations)</td>
+<td>Version 1 validation</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Cross-document citations</td>
+<td>The comparison report resolves IDs against the landscape report&#x27;s register <strong>only if</strong> a machine-readable declaration exists (e.g., a declared &quot;citation register: &lt;file&gt;&quot; field). Otherwise its citations render as plain text with a note linking to the landscape register section</td>
+<td>Version 2</td>
+<td>D10</td>
+</tr>
+<tr>
+<td>Source metadata display</td>
+<td>Register tables render as tables; the access and type codes stay as written, with the report&#x27;s own legend linked from the table header</td>
+<td>Version 1</td>
+<td>—</td>
+</tr>
+<tr>
+<td>External links</td>
+<td>Opened in the same tab by default; marked as external; <code>rel=&quot;noopener noreferrer&quot;</code>; the domain is shown on hover/focus via the title attribute; full URLs are printed in print output</td>
+<td>Version 1</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Link checking of external URLs</td>
+<td>Optional, manual command only (network use); never part of the default offline build</td>
+<td>Version 2+</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Report-specific source lists</td>
+<td>Each report&#x27;s register remains inside that report; there is no global merged &quot;all sources&quot; page (merging would lose citation scope)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="15-accessibility">
+<h2 id="15-accessibility">15. Accessibility<a class="heading-anchor" href="#15-accessibility" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>Target:</strong> WCAG 2.2 Level AA across all features, verified by automated and manual checks (<a href="#20-validation-strategy">20</a>).</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 15. Accessibility"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">Requirement</th>
+<th scope="col">Design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Semantic HTML</td>
+<td><code>header</code>, <code>nav</code> (labeled: &quot;Primary&quot;, &quot;Area&quot;, &quot;On this page&quot;, &quot;Breadcrumb&quot;, &quot;Contents&quot;), <code>main</code>, <code>article</code>, <code>aside</code>, <code>footer</code>, <code>figure</code>, <code>figcaption</code>, <code>table</code> with <code>thead</code>/<code>th scope</code>, <code>details</code>/<code>summary</code>, <code>dl</code> for metadata</td>
+</tr>
+<tr>
+<td>Skip navigation</td>
+<td>&quot;Skip to content&quot; as the first focusable element; also &quot;Skip to page contents&quot; when the on-this-page nav exists</td>
+</tr>
+<tr>
+<td>Heading hierarchy</td>
+<td>Exactly one <code>h1</code> per page (document title). Generated pages start at <code>h1</code>. Canonical heading levels are preserved; skipped levels are validation warnings, not silently re-leveled (re-leveling would change the source structure).</td>
+</tr>
+<tr>
+<td>Keyboard</td>
+<td>Everything operable by keyboard; drawers and search dialogs trap focus while open and restore focus on close; no hover-only functionality (anchors, copy buttons and previews also appear on focus)</td>
+</tr>
+<tr>
+<td>Focus visibility</td>
+<td>2 px <code>--focus</code> outline with 2 px offset on all interactive elements; never removed; meets WCAG 2.2 focus appearance guidance</td>
+</tr>
+<tr>
+<td>Contrast</td>
+<td>Body and UI text ≥ 4.5:1; large text and non-text UI (rules marking state, icons, focus rings) ≥ 3:1; <code>--faint</code> restricted to decorative or large text; token contrast verified at build</td>
+</tr>
+<tr>
+<td>Color independence</td>
+<td>Content kind, maturity, callout type, active nav state and search hit are each conveyed with text or shape in addition to color</td>
+</tr>
+<tr>
+<td>Reduced motion</td>
+<td>All transitions disabled; smooth scrolling disabled; the top bar does not auto-hide</td>
+</tr>
+<tr>
+<td>Tables</td>
+<td>Header scope; accessible names via nearest heading; scrollable regions focusable with labels; no layout tables</td>
+</tr>
+<tr>
+<td>Diagrams</td>
+<td>Accessible name; text source always available; diagrams never the sole carrier of essential information</td>
+</tr>
+<tr>
+<td>Math</td>
+<td>MathML output (or equivalent) exposed to assistive technology</td>
+</tr>
+<tr>
+<td>Screen-reader labels</td>
+<td>Icon buttons named (&quot;Search&quot;, &quot;Theme: System&quot;, &quot;Copy code&quot;, &quot;Copy link to section&quot;); live regions for copy confirmations and search result counts; external-link indication in text</td>
+</tr>
+<tr>
+<td>Zoom and reflow</td>
+<td>Layout reflows at 320 CSS px width (400% zoom) without two-dimensional scrolling except inside tables, code and diagrams (a permitted exception); all sizes in <code>rem</code>/<code>em</code>; supports text-spacing overrides</td>
+</tr>
+<tr>
+<td>Language</td>
+<td><code>lang=&quot;en&quot;</code> on the root</td>
+</tr>
+<tr>
+<td>Touch targets</td>
+<td>≥ 24×24 CSS px minimum (WCAG 2.2), with a 44 px target for primary mobile controls</td>
+</tr>
+<tr>
+<td>Forced colors</td>
+<td><code>forced-colors: active</code> respected; borders remain visible; custom focus indicators do not disappear</td>
+</tr>
+</tbody>
+</table></div>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="16-responsive-behavior">
+<h2 id="16-responsive-behavior">16. Responsive Behavior<a class="heading-anchor" href="#16-responsive-behavior" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Mobile is designed as its own reading context, not a compressed desktop.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 16. Responsive Behavior"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Width</th>
+<th scope="col">Layout</th>
+<th scope="col">Navigation</th>
+<th scope="col">Secondary information</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>≥ 1440 px</strong> (large monitor)</td>
+<td>Area sidebar + reading column + on-this-page rail; wide tables and diagrams break out to ≈ 1100 px</td>
+<td>All visible</td>
+<td>Metadata in header; backlinks at end</td>
+</tr>
+<tr>
+<td><strong>1200–1439 px</strong> (laptop)</td>
+<td>Same three zones with narrower rails; sidebar collapsible to an icon rail</td>
+<td>Sidebar collapsible; remembering its state is post-core polish (<a href="#ad5-advanced-reading-interactions-are-post-core-polish">AD5</a>)</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><strong>900–1199 px</strong> (small laptop / landscape tablet)</td>
+<td>Reading column + on-this-page rail; area sidebar becomes a drawer</td>
+<td>Top bar menu opens drawer</td>
+<td>Wide tables scroll inside the column</td>
+</tr>
+<tr>
+<td><strong>600–899 px</strong> (tablet portrait)</td>
+<td>Single column</td>
+<td>Drawer for navigation; &quot;On this page&quot; button opens a sheet listing sections</td>
+<td>Document metadata collapses into a disclosure (&quot;Details&quot;) under the title</td>
+</tr>
+<tr>
+<td><strong>&lt; 600 px</strong> (phone)</td>
+<td>Single column, 16 px side gutters, prose <strong>left-aligned</strong> (AGENTS narrow-screen rule)</td>
+<td>Top bar: title, search, menu. Search opens full-screen. &quot;On this page&quot; sheet from a floating button that appears after the first H2.</td>
+<td>Previous/next becomes two full-width buttons; relationship panels (future) become collapsible sections below content; stage progression becomes a vertical list with the parallel track as a labeled rail</td>
+</tr>
+</tbody>
+</table></div>
+<p>Additional rules:</p>
+<ul>
+<li>Breakpoints are based on content measure and are expressed in <code>em</code> so they respond to user font-size settings.</li>
+<li>Touch devices: copy buttons and heading-anchor controls are always visible (no hover), sized for touch.</li>
+<li>The roadmap overview never uses horizontal scrolling. Stages stack vertically below ~900 px, keeping the order and arrows (rotated to ↓).</li>
+<li>No content is hidden on small screens. Only its placement changes.</li>
+<li>Very large monitors do not stretch the reading column. Extra space becomes margin.</li>
+</ul>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="17-print-behavior">
+<h2 id="17-print-behavior">17. Print Behavior<a class="heading-anchor" href="#17-print-behavior" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Individual documents — a roadmap, a research report, a review — should print cleanly.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 17. Print Behavior"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">Aspect</th>
+<th scope="col">Design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chrome</td>
+<td>Top bar, sidebars, on-this-page, breadcrumbs, search, theme control, copy buttons, heading-anchor icons, back-to-top, focus mode, previous/next: hidden</td>
+</tr>
+<tr>
+<td>Theme</td>
+<td>Always light print palette, pure white background, near-black text, regardless of the screen theme</td>
+</tr>
+<tr>
+<td>Content-kind marker</td>
+<td>Kept as a text line under the title (&quot;Evidence — research report. Not curriculum.&quot;) so printed evidence cannot be mistaken for curriculum</td>
+</tr>
+<tr>
+<td>Page setup</td>
+<td><code>@page</code> size <code>auto</code> (A4 or Letter by printer), margins ≈ 20 mm; page numbers via page margin boxes where supported, omitted gracefully elsewhere</td>
+</tr>
+<tr>
+<td>Typography</td>
+<td>Serif 11–11.5 pt body, line height ≈ 1.45; headings avoid breaking after (<code>break-after: avoid</code>); widows/orphans 3</td>
+</tr>
+<tr>
+<td>In-document Contents</td>
+<td>Kept; target page numbers added where supported (the reference uses <code>target-counter</code>)</td>
+</tr>
+<tr>
+<td>&quot;Back to Contents&quot; links</td>
+<td>Hidden in print (navigation aids with no function on paper)</td>
+</tr>
+<tr>
+<td>Links</td>
+<td>Internal links print as text; external links print their URL after the link text, <strong>except</strong> where the URL is already visible text (source registers)</td>
+</tr>
+<tr>
+<td>Tables</td>
+<td>May break across pages; header row repeats (<code>thead</code> as table-header-group); rows avoid splitting; wide tables wrap cell text rather than overflow; minimum print font ≈ 8.5 pt for dense tables</td>
+</tr>
+<tr>
+<td>Code</td>
+<td>Wrapped (<code>pre-wrap</code>), light palette, language label kept</td>
+</tr>
+<tr>
+<td>Diagrams</td>
+<td>Rendered SVG in light palette, scaled to page width, <code>break-inside: avoid</code></td>
+</tr>
+<tr>
+<td>Details / disclosures</td>
+<td>Expanded for print (a <code>beforeprint</code> handler opens them and restores their state afterwards; with no JS, the canonical <code>details open</code> state applies)</td>
+</tr>
+<tr>
+<td>Math</td>
+<td>Printed at full vector quality</td>
+</tr>
+<tr>
+<td>Print scope</td>
+<td>&quot;Print&quot; prints the current document. For future split views, printing the full canonical document is the supported path.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="18-static-site-and-generator-architecture">
+<h2 id="18-static-site-and-generator-architecture">18. Static-Site and Generator Architecture<a class="heading-anchor" href="#18-static-site-and-generator-architecture" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p class="section-subnav"><strong>In this section:</strong> <a href="#technology-recommendation">Technology Recommendation</a> · <a href="#pipeline">Pipeline</a> · <a href="#document-model">Document Model</a> · <a href="#separation-of-concerns">Separation of Concerns</a> · <a href="#runtime-enhancements">Runtime Enhancements</a></p>
+<h3 id="technology-recommendation">Technology Recommendation<a class="heading-anchor" href="#technology-recommendation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p><strong>Recommendation:</strong> a small <strong>Python</strong> generator in <code>scripts/</code> with a handful of pinned dependencies, producing plain static files in <code>site/</code>.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Technology Recommendation"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Layer</th>
+<th scope="col">Choice</th>
+<th scope="col">Justification</th>
+<th scope="col">Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language/runtime</td>
+<td>Python 3.11+</td>
+<td>Available locally; <code>tomllib</code> built in for config; straightforward scripting; no framework</td>
+<td>Node.js with unified/remark/rehype (richer Mermaid/KaTeX ecosystem at build time, but larger dependency tree)</td>
+</tr>
+<tr>
+<td>Markdown parsing</td>
+<td><code>markdown-it-py</code> + <code>mdit-py-plugins</code></td>
+<td>CommonMark-compliant with GFM tables and a <strong>token stream</strong>, which makes validation, heading extraction and word-preservation checks straightforward</td>
+<td>Python-Markdown (less strict CommonMark fidelity)</td>
+</tr>
+<tr>
+<td>Heading slugs</td>
+<td>Small internal implementation of the <strong>GitHub slug algorithm</strong>, including duplicate suffixes, tested against the repository&#x27;s existing anchors</td>
+<td>AGENTS requires identical, interchangeable anchors</td>
+<td>Third-party slugger (must match GitHub exactly)</td>
+</tr>
+<tr>
+<td>Templates</td>
+<td><code>Jinja2</code></td>
+<td>Keeps HTML structure out of Python code; widely known; auto-escaping</td>
+<td>Hand-written string templates (fewer deps, harder to maintain)</td>
+</tr>
+<tr>
+<td>Code highlighting</td>
+<td><code>Pygments</code> at build time</td>
+<td>No runtime JS; many lexers; class-based output compatible with theme tokens</td>
+<td>Client-side highlighter (runtime cost)</td>
+</tr>
+<tr>
+<td>Config</td>
+<td>One TOML file (e.g., <code>scripts/site.toml</code>)</td>
+<td>Built-in parser; declarative content-kind mapping and navigation ordering rules</td>
+<td>YAML (extra dependency)</td>
+</tr>
+<tr>
+<td>Mermaid</td>
+<td>Vendored client library (pinned)</td>
+<td>See <a href="#13-math-code-diagram-and-table-handling">13</a></td>
+<td>Build-time Mermaid CLI</td>
+</tr>
+<tr>
+<td>Search</td>
+<td>Generated index + small vendored client library</td>
+<td>See <a href="#10-search-design">10</a></td>
+<td>Pagefind</td>
+</tr>
+<tr>
+<td>Math</td>
+<td>Deferred (D4)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Dev server</td>
+<td>No custom server. The site must be servable with <code>python -m http.server</code>; opening <code>site/index.html</code> directly is supported in Version 1 where reasonably practical (<a href="#ad2-local-first-does-not-permanently-mean-file">AD2</a>)</td>
+<td>Local-first, static</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>Dependency budget principle: each addition must replace meaningful hand-written code or deliver a capability that cannot be delivered simply. Every added dependency is recorded in the generator&#x27;s documentation, with its reason.</p>
+<h3 id="pipeline">Pipeline<a class="heading-anchor" href="#pipeline" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<figure class="diagram" data-diagram aria-label="Diagram: Pipeline"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart TD
+    A[&quot;1. Discover canonical files&lt;br/&gt;(config roots, sorted)&quot;] --&gt; B[&quot;2. Parse Markdown&lt;br/&gt;(token stream)&quot;]
+    B --&gt; C[&quot;3. Normalize presentation directives&lt;br/&gt;(justify wrapper, Contents, callouts)&quot;]
+    C --&gt; D[&quot;4. Extract explicit metadata&lt;br/&gt;(H1, declared label patterns, filename dates)&quot;]
+    D --&gt; E[&quot;5. Build document model&lt;br/&gt;(sections, slugs, blocks)&quot;]
+    E --&gt; F[&quot;6. Resolve internal links and citations&quot;]
+    F --&gt; G[&quot;7. Build site model&lt;br/&gt;(navigation, collections, backlinks)&quot;]
+    G --&gt; H[&quot;8. Validate model&lt;br/&gt;(pre-render checks)&quot;]
+    H --&gt; I[&quot;9. Render templates&quot;]
+    I --&gt; J[&quot;10. Build search index&quot;]
+    J --&gt; K[&quot;11. Copy assets&lt;br/&gt;(CSS, JS, vendored libs)&quot;]
+    K --&gt; L[&quot;12. Validate output&lt;br/&gt;(post-render checks)&quot;]
+    L --&gt; M[&quot;13. Atomic write to site/&lt;br/&gt;+ build manifest&quot;]
+</code></pre></figure>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Pipeline"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Stage</th>
+<th scope="col">Responsibility</th>
+<th scope="col">Must not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Discover</td>
+<td>Enumerate files under configured roots (<code>README.md</code>, <code>AGENTS.md</code>, <code>ROADMAP.md</code>, <code>research/</code>, <code>reviews/</code>, <code>prompts/</code>, optionally <code>design/</code>); ignore <code>site/</code>, <code>scripts/</code>; sort paths</td>
+<td>Read content to decide inclusion</td>
+</tr>
+<tr>
+<td>Parse</td>
+<td>Produce tokens per file</td>
+<td>Modify source files</td>
+</tr>
+<tr>
+<td>Normalize</td>
+<td>Tag conventions: remove the justify wrapper, mark the Contents nav block, callout types, back-to-contents links</td>
+<td>Delete or reword content</td>
+</tr>
+<tr>
+<td>Extract metadata</td>
+<td>Title from H1; label/value pairs from declared patterns; date from <code>YYYY-MM-DD-</code> filename prefix; content kind from path mapping</td>
+<td>Infer stage, maturity, relationships</td>
+</tr>
+<tr>
+<td>Document model</td>
+<td>Section tree with slugs, block list, word inventory</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Resolve</td>
+<td>Map <code>*.md</code> links to output URLs; verify anchors; resolve citation IDs within declared scope</td>
+<td>Guess missing targets</td>
+</tr>
+<tr>
+<td>Site model</td>
+<td>Navigation trees, ordered collections, backlinks, generated views&#x27; inputs</td>
+<td>Reorder canonical sequences</td>
+</tr>
+<tr>
+<td>Validate (model)</td>
+<td>Structural checks (<a href="#20-validation-strategy">20</a>)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Render</td>
+<td>Templates per page type: home, area index, document, research report, review (future), topic (future), search, 404</td>
+<td>Contain curriculum text</td>
+</tr>
+<tr>
+<td>Search index</td>
+<td>Section records</td>
+<td>Index learner state</td>
+</tr>
+<tr>
+<td>Assets</td>
+<td>Copy versioned CSS/JS; copy vendored libs with checksums</td>
+<td>Fetch from network</td>
+</tr>
+<tr>
+<td>Validate (output)</td>
+<td>HTML-level checks</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Write</td>
+<td>Build into a temporary directory, then replace <code>site/</code>; write <code>build-manifest.json</code> (source hashes, generator version, dependency versions, output hashes)</td>
+<td>Leave partial output on failure</td>
+</tr>
+</tbody>
+</table></div>
+<p>Stages 8, 10 and 12 are scaled down in Version 1:</p>
+<ul>
+<li>Validation (stages 8 and 12) covers only the <a href="#ad3-simplified-version-1-validation">AD3</a> checks.</li>
+<li>The search index (stage 10) is not built until search is implemented.</li>
+<li>The build manifest may start minimal (source list and hashes), since byte-identity proofs are not a Version 1 objective (<a href="#ad4-deterministic-content-not-byte-identity">AD4</a>).</li>
+</ul>
+<h3 id="document-model">Document Model<a class="heading-anchor" href="#document-model" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<div class="code-block" data-lang="text"><div class="code-meta" data-chrome><span class="code-lang">TEXT</span></div><pre class="code"><code>SiteModel
+ ├─ documents: [Document]
+ ├─ nav: { primary: [...], areas: { learn, evidence, maintain, about } }
+ ├─ collections: { research_reports (by date), reviews (by date), roadmap_sections (source order) }
+ ├─ link_graph: edges from actual links (for backlinks)
+ └─ search_records: [SectionRecord]
+
+Document
+ ├─ source_path            e.g. research/2026-09-17-roadmap-comparison.md
+ ├─ source_hash
+ ├─ kind                   curriculum | evidence | maintenance | governance
+ ├─ url                    research/2026-09-17-roadmap-comparison/
+ ├─ title                  from H1
+ ├─ date                   from filename (optional)
+ ├─ explicit_metadata      [(label, value, source_location)]   (optional)
+ ├─ sections               tree of { level, text, slug, children, blocks }
+ ├─ contents_block         reference to canonical Contents nav (optional)
+ ├─ citations              [{ ids, location }] + register { id → row } (optional)
+ ├─ diagrams               [{ source, location }]
+ └─ word_inventory         normalized words of canonical text (for preservation check)
+</code></pre></div>
+<p>Future topic support (Version 3) would add <code>Topic</code> and <code>Relationship</code> entities loaded <strong>only</strong> from approved canonical topic sources. It would not be derived from headings.</p>
+<h3 id="separation-of-concerns">Separation of Concerns<a class="heading-anchor" href="#separation-of-concerns" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: Separation of Concerns"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    SRC[&quot;Canonical Markdown&quot;] --&gt; PARSE[&quot;Parsing&quot;]
+    PARSE --&gt; XFORM[&quot;Content transformation&lt;br/&gt;(normalize, resolve)&quot;]
+    XFORM --&gt; MODEL[&quot;Site model&quot;]
+    CFG[&quot;Presentation config&lt;br/&gt;(kinds by path, nav labels)&quot;] --&gt; MODEL
+    MODEL --&gt; TPL[&quot;Templates (structure)&quot;]
+    TOK[&quot;CSS tokens + styles&quot;] --&gt; OUT[&quot;site/&quot;]
+    TPL --&gt; OUT
+    JS[&quot;JS enhancements&quot;] --&gt; OUT
+    MODEL --&gt; VAL[&quot;Validation&quot;]
+    OUT --&gt; VAL
+</code></pre></figure>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Separation of Concerns"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Concern</th>
+<th scope="col">Lives in</th>
+<th scope="col">Contains</th>
+<th scope="col">Never contains</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Parsing</td>
+<td>Generator module</td>
+<td>Markdown → tokens</td>
+<td>Presentation decisions</td>
+</tr>
+<tr>
+<td>Content transformation</td>
+<td>Generator module</td>
+<td>Convention recognition, link/citation resolution</td>
+<td>Curriculum decisions, wording changes</td>
+</tr>
+<tr>
+<td>Navigation generation</td>
+<td>Generator module + config</td>
+<td>Area assignment by path, label text for UI chrome, ordering <em>rules</em> (source order, date order)</td>
+<td>Lists of topics or stages typed by hand</td>
+</tr>
+<tr>
+<td>Presentation templates</td>
+<td><code>templates/</code></td>
+<td>HTML structure, landmarks, UI strings (&quot;On this page&quot;)</td>
+<td>Curriculum or research prose</td>
+</tr>
+<tr>
+<td>CSS / theme</td>
+<td><code>assets/css/</code></td>
+<td>Tokens, layout, components, print</td>
+<td>Content</td>
+</tr>
+<tr>
+<td>JavaScript enhancements</td>
+<td><code>assets/js/</code></td>
+<td>Theme persistence, search, copy, section highlight, diagram rendering, drawers</td>
+<td>Content, network calls</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>Generator module</td>
+<td>Checks and reports</td>
+<td>Auto-fixes to canonical sources</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Guard against presentation-driven curriculum.</strong> If a presentation feature needs data that the sources do not contain — for example, stage per topic — the feature waits for an approved canonical source. Nobody adds the data to config or templates to fill the gap.</p>
+<h3 id="runtime-enhancements">Runtime Enhancements<a class="heading-anchor" href="#runtime-enhancements" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>All JavaScript is optional enhancement. In Version 1 it is written as classic scripts (no ES modules, no <code>fetch</code>) so the site also works from <code>file://</code> where reasonably practical. Later versions may use ES modules, <code>fetch</code> or other capabilities that require serving over localhost or static hosting (<a href="#ad2-local-first-does-not-permanently-mean-file">AD2</a>).</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Runtime Enhancements"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Script</th>
+<th scope="col">Loaded</th>
+<th scope="col">Size goal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Theme bootstrap (inline)</td>
+<td>Every page, in <code>&lt;head&gt;</code></td>
+<td>&lt; 1 KB</td>
+</tr>
+<tr>
+<td>Core enhancements (nav drawers, section highlight, heading-link copy, code copy, back-to-top, details-for-print)</td>
+<td>Every page, deferred</td>
+<td>&lt; 10 KB</td>
+</tr>
+<tr>
+<td>Search client + index</td>
+<td>On first search open</td>
+<td>Library tens of KB; index proportional to content</td>
+</tr>
+<tr>
+<td>Mermaid</td>
+<td>Pages with diagrams, when a diagram nears the viewport</td>
+<td>Vendored, pinned</td>
+</tr>
+<tr>
+<td>Math runtime (only if client-side option chosen)</td>
+<td>Pages with math</td>
+<td>Vendored, pinned</td>
+</tr>
+<tr>
+<td>Learner state (Version 4, if approved)</td>
+<td>Pages with topics</td>
+<td>&lt; 10 KB</td>
+</tr>
+</tbody>
+</table></div>
+<p>No analytics, no telemetry, no third-party requests.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="19-proposed-generated-file-and-url-structure">
+<h2 id="19-proposed-generated-file-and-url-structure">19. Proposed Generated File and URL Structure<a class="heading-anchor" href="#19-proposed-generated-file-and-url-structure" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>Rules:</strong></p>
+<ol>
+<li><strong>URLs derive from canonical source paths</strong> through one declared mapping, so they stay stable when presentation changes.</li>
+<li>Every page is a directory containing <code>index.html</code>.</li>
+<li>All internal links are <strong>relative</strong>, so the site works from any local server (including <code>python -m http.server</code>), from a hosting sub-path, and — in Version 1, where reasonably practical — from <code>file://</code>.</li>
+<li><strong>Link style</strong> (D14, resolved by <a href="#ad2-local-first-does-not-permanently-mean-file">AD2</a>): the durable requirement is a static site servable locally. In Version 1, links may point explicitly to <code>…/index.html</code> so that direct <code>file://</code> opening keeps working, because browsers do not resolve directory indexes on the file system. Links ending in <code>/</code> are acceptable whenever <code>file://</code> support is no longer judged practical. <code>file://</code> compatibility must not block later technology choices.</li>
+<li>Dated sources keep their date in the slug, which prevents collisions and keeps chronology visible.</li>
+<li>Renaming or moving a canonical file requires a declared redirect entry. The generator then emits a small redirect page at the old URL, and validation fails if an old URL disappears without one.</li>
+<li>Heading anchors are identical to GitHub slugs of the canonical headings.</li>
+</ol>
+<div class="code-block" data-lang="text"><div class="code-meta" data-chrome><span class="code-lang">TEXT</span></div><pre class="code"><code>site/
+├── index.html                                  Home (generated hub)
+├── roadmap/
+│   ├── index.html                              Roadmap overview (generated from explicit structure)
+│   └── document/index.html                     ROADMAP.md, full canonical rendering
+├── research/
+│   ├── index.html                              Evidence index (generated list)
+│   ├── 2026-09-17-data-intelligence-landscape/index.html
+│   └── 2026-09-17-roadmap-comparison/index.html
+├── reviews/
+│   └── index.html                              Reviews index (empty state today)
+├── about/
+│   ├── index.html                              About index (generated)
+│   ├── philosophy/index.html                   README.md
+│   ├── governance/index.html                   AGENTS.md
+│   ├── methodology/
+│   │   └── landscape-research/index.html       prompts/landscape-research.md
+│   ├── site-design/index.html                  design/site-architecture.md (only if D17 approves)
+│   └── keyboard/index.html                     Generated help page (UI only)
+├── search/index.html                           Search page (+ no-JS title index)
+├── 404.html
+├── assets/
+│   ├── css/  (tokens, base, layout, components, print)
+│   ├── js/   (core, search, diagrams)
+│   ├── vendor/ (pinned third-party libraries with licenses)
+│   └── search-index.js
+└── build-manifest.json
+</code></pre></div>
+<p><strong>Anticipated future paths</strong> (created only when canonical sources exist):</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 19. Proposed Generated File and URL Structure"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">Future canonical source</th>
+<th scope="col">URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stage-level curriculum files (if curriculum is split canonically)</td>
+<td><code>roadmap/fundamentals/</code>, <code>roadmap/advanced/</code>, <code>roadmap/mastery/</code>, <code>roadmap/research-stage/</code>, <code>roadmap/modern-ai-engineering/</code></td>
+</tr>
+<tr>
+<td>Topic files</td>
+<td><code>roadmap/topics/&lt;topic-slug&gt;/</code></td>
+</tr>
+<tr>
+<td>Project files</td>
+<td><code>roadmap/projects/&lt;project-slug&gt;/</code></td>
+</tr>
+<tr>
+<td>4-week scans</td>
+<td><code>reviews/&lt;YYYY-MM-DD&gt;-modern-ai-scan/</code></td>
+</tr>
+<tr>
+<td>12-week reviews</td>
+<td><code>reviews/&lt;YYYY-MM-DD&gt;-curriculum-review/</code></td>
+</tr>
+<tr>
+<td>Watchlist / change records</td>
+<td><code>reviews/watchlist/</code>, <code>reviews/changes/</code></td>
+</tr>
+<tr>
+<td>Topic research</td>
+<td><code>research/&lt;YYYY-MM-DD&gt;-&lt;slug&gt;/</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The stage URL is <code>research-stage/</code>, not <code>research/</code>, which avoids a collision with the evidence area (see <a href="#3-information-architecture">3</a>).</p>
+<p><strong>Why <code>about/</code> rather than <code>governance/</code>:</strong></p>
+<ul>
+<li>It is a shorter label.</li>
+<li>The area contains philosophy and methodology as well as rules.</li>
+<li>The AGENTS document itself keeps the &quot;governance&quot; name in its page URL.</li>
+</ul>
+<p>If &quot;Governance&quot; is preferred as the primary label, the only change is renaming the <code>about/</code> segment (D5).</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="20-validation-strategy">
+<h2 id="20-validation-strategy">20. Validation Strategy<a class="heading-anchor" href="#20-validation-strategy" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Validation is part of the build, not a separate afterthought. Findings have three severities:</p>
+<ul>
+<li><strong>Error</strong> — build fails; <code>site/</code> is not replaced;</li>
+<li><strong>Warning</strong> — build succeeds; reported;</li>
+<li><strong>Info.</strong></li>
+</ul>
+<p>A <code>check</code> mode runs every check without writing output.</p>
+<p><strong>Phasing of validation (<a href="#ad3-simplified-version-1-validation">AD3</a>).</strong> The table below is the <strong>long-term target</strong>, not mandatory Version 1 scope. Version 1 implements only the lightweight checks that cover the nine required verifications. The rest are progressive capabilities, added when justified. A dedicated <code>check</code> mode and detailed report formatting are also progressive.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 20. Validation Strategy"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">Required Version 1 verification (AD3)</th>
+<th scope="col">Covered by (simple form)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Every intended canonical source generates successfully</td>
+<td>V5 (page exists per intended source)</td>
+</tr>
+<tr>
+<td>Internal document links resolve</td>
+<td>V1</td>
+</tr>
+<tr>
+<td>Heading anchors resolve</td>
+<td>V2</td>
+</tr>
+<tr>
+<td>Generated navigation resolves</td>
+<td>V5 / V6 (navigation entries point to generated pages)</td>
+</tr>
+<tr>
+<td>Canonical learner-facing wording not silently changed</td>
+<td>V10 (word preservation; a straightforward word comparison is sufficient)</td>
+</tr>
+<tr>
+<td>Valid basic HTML structure</td>
+<td>V13 subset (one <code>h1</code>, one <code>main</code>, <code>lang</code>, well-formed landmarks)</td>
+</tr>
+<tr>
+<td>Basic accessibility requirements</td>
+<td>V13 subset (labeled navigation, table header scopes, button names, image <code>alt</code>)</td>
+</tr>
+<tr>
+<td>Required assets work locally/offline</td>
+<td>V17 (revised): no remote asset URLs; all referenced assets present in <code>site/</code></td>
+</tr>
+<tr>
+<td>Output not an independent content source</td>
+<td>Generated from canonical sources on every build; a simple source-hash record in the manifest (V11, minimal form)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Checks that are <strong>progressive</strong> (not required for Version 1):</p>
+<ul>
+<li>V3 (duplicate slugs);</li>
+<li>V4 skipped-level warnings;</li>
+<li>V7 (Mermaid syntax at build time);</li>
+<li>V8 (metadata, relevant from Version 2);</li>
+<li>V9 (citations, Version 2);</li>
+<li>V11 full drift/hand-edit detection;</li>
+<li>V12 (unsupported constructs);</li>
+<li>V14 (automated token contrast; contrast is still checked manually in Version 1);</li>
+<li>V15 (dynamic accessibility audit);</li>
+<li>V16 (byte-identity — optional later, see <a href="#ad4-deterministic-content-not-byte-identity">AD4</a>);</li>
+<li>V18 (redirect coverage, relevant once URLs change);</li>
+<li>V19 (convention lint).</li>
+</ul>
+<p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: 20. Validation Strategy"><table class="doc-table table--wide" style="--cols:5">
+<thead>
+<tr>
+<th scope="col">#</th>
+<th scope="col">Check</th>
+<th scope="col">Stage</th>
+<th scope="col">Severity</th>
+<th scope="col">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V1</td>
+<td>Broken internal links (file targets)</td>
+<td>Model</td>
+<td>Error</td>
+<td>Relative <code>*.md</code> links must map to generated pages</td>
+</tr>
+<tr>
+<td>V2</td>
+<td>Broken anchors (in-page and cross-page)</td>
+<td>Model</td>
+<td>Error</td>
+<td>Including canonical Contents, &quot;In this section&quot; and &quot;Back to Contents&quot; links</td>
+</tr>
+<tr>
+<td>V3</td>
+<td>Duplicate heading slugs within a document</td>
+<td>Model</td>
+<td>Warning</td>
+<td>GitHub adds suffixes, so links may silently target the wrong section; AGENTS asks authors to avoid duplicates</td>
+</tr>
+<tr>
+<td>V4</td>
+<td>Heading structure: exactly one H1; no skipped levels</td>
+<td>Model</td>
+<td>Error (no/multiple H1) / Warning (skips)</td>
+<td>Never auto-re-leveled</td>
+</tr>
+<tr>
+<td>V5</td>
+<td>Missing generated pages: every discovered canonical file has exactly one output page; every nav entry resolves</td>
+<td>Output</td>
+<td>Error</td>
+<td></td>
+</tr>
+<tr>
+<td>V6</td>
+<td>Invalid navigation references in config (path that does not exist)</td>
+<td>Model</td>
+<td>Error</td>
+<td></td>
+</tr>
+<tr>
+<td>V7</td>
+<td>Mermaid syntax</td>
+<td>Model</td>
+<td>Warning (Error optional)</td>
+<td>Uses a Mermaid parser if one is available in the toolchain; otherwise the runtime failure fallback applies and the check is reported as &quot;skipped&quot;</td>
+</tr>
+<tr>
+<td>V8</td>
+<td>Malformed explicit metadata (declared label pattern with empty value, unparsable date in filename, unknown front-matter keys if front matter is adopted)</td>
+<td>Model</td>
+<td>Error</td>
+<td></td>
+</tr>
+<tr>
+<td>V9</td>
+<td>Citation integrity: unresolved IDs (error), unused register entries (warning), malformed ranges (error)</td>
+<td>Model</td>
+<td>As listed</td>
+<td>Only for documents with declared citation convention</td>
+</tr>
+<tr>
+<td>V10</td>
+<td><strong>Word preservation</strong>: the normalized word multiset of canonical text equals that of the rendered <code>main</code> content, excluding generated chrome</td>
+<td>Output</td>
+<td>Error</td>
+<td>Directly enforces AGENTS: HTML &quot;must not add, remove, or reword curriculum content&quot;</td>
+</tr>
+<tr>
+<td>V11</td>
+<td><strong>Source/output drift</strong>: <code>build-manifest.json</code> source hashes vs current sources; output hashes vs files in <code>site/</code></td>
+<td>Check mode</td>
+<td>Warning (stale) / Error (hand-edited output)</td>
+<td>Detects both stale builds and manual edits to generated HTML</td>
+</tr>
+<tr>
+<td>V12</td>
+<td>Unsupported Markdown constructs: raw HTML outside allowlist, unknown fence info conventions, math delimiters without math engine</td>
+<td>Model</td>
+<td>Warning</td>
+<td></td>
+</tr>
+<tr>
+<td>V13</td>
+<td>Accessibility (static): landmarks present, one <code>main</code>, labeled <code>nav</code>s, <code>th</code> scopes, image <code>alt</code>, button names, <code>lang</code> attribute</td>
+<td>Output</td>
+<td>Error</td>
+<td>Implemented in the generator without heavy tooling</td>
+</tr>
+<tr>
+<td>V14</td>
+<td>Token contrast: semantic text/background pairs meet stated ratios in both themes</td>
+<td>Build</td>
+<td>Error</td>
+<td>Computed from the token file</td>
+</tr>
+<tr>
+<td>V15</td>
+<td>Accessibility (dynamic, optional): automated audit in a headless browser (e.g., axe-core) plus manual keyboard and screen-reader checklist for each release</td>
+<td>Manual / optional</td>
+<td>Report</td>
+<td>Optional dev dependency, not required for normal builds</td>
+</tr>
+<tr>
+<td>V16</td>
+<td>Determinism: two consecutive builds produce identical output hashes</td>
+<td>Optional later check (not a Version 1 objective, AD4)</td>
+<td>Warning</td>
+<td>Avoiding timestamps and random IDs in output is expected from the start; proving byte identity is not</td>
+</tr>
+<tr>
+<td>V17</td>
+<td>Local/offline asset portability: relative internal links; no remote (<code>http(s)</code>) assets for ordinary reading; all referenced assets present</td>
+<td>Output</td>
+<td>Error</td>
+<td>Protects local and offline use. Checking for <code>fetch</code>/module usage applies only while Version 1 targets <code>file://</code> (AD2)</td>
+</tr>
+<tr>
+<td>V18</td>
+<td>Redirect coverage: URLs present in the previous manifest must still exist or be redirected</td>
+<td>Output</td>
+<td>Error</td>
+<td>URL stability</td>
+</tr>
+<tr>
+<td>V19</td>
+<td>Convention lint (AGENTS formatting): Contents block present, &quot;Back to Contents&quot; at the end of each H2, justify wrapper present</td>
+<td>Model</td>
+<td>Info / Warning</td>
+<td>Reports convention drift without blocking builds</td>
+</tr>
+</tbody>
+</table></div>
+<p>Validation output is a readable report: file, line, check ID, message, and a suggested <em>source</em> fix. The generator never modifies canonical files automatically.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="21-progressive-implementation-phases">
+<h2 id="21-progressive-implementation-phases">21. Progressive Implementation Phases<a class="heading-anchor" href="#21-progressive-implementation-phases" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Phases are <strong>capability- and trigger-based</strong>, not date-based. Each phase must leave a complete, useful site.</p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: 21. Progressive Implementation Phases"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    P0[&quot;Phase 0&lt;br/&gt;Decisions&quot;] --&gt; M1[&quot;First implementation milestone&lt;br/&gt;(visual validation)&quot;]
+    M1 --&gt; RV[&quot;Owner visual review&quot;]
+    RV --&gt; V1[&quot;Version 1&lt;br/&gt;Readable portal&quot;]
+    V1 --&gt; V2[&quot;Version 2&lt;br/&gt;Connected repository&quot;]
+    V2 --&gt; V3[&quot;Version 3&lt;br/&gt;Curriculum structure and relationships&quot;]
+    V3 -.-&gt; V4[&quot;Version 4 (optional)&lt;br/&gt;Learner state&quot;]
+</code></pre></figure>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 21. Progressive Implementation Phases"><table class="doc-table" style="--cols:4">
+<thead>
+<tr>
+<th scope="col">Phase</th>
+<th scope="col">Goal</th>
+<th scope="col">Includes</th>
+<th scope="col">Trigger / prerequisite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase 0 — Decisions</strong></td>
+<td>Approve this specification&#x27;s open decisions needed for the first milestone and Version 1</td>
+<td>Before the first milestone: D1–D3, D5–D7, D12, D22. Before completing Version 1: D16, D17. D14 resolved by AD2.</td>
+<td>Architecture approved; <a href="#approved-implementation-decisions">Approved Implementation Decisions</a> recorded</td>
+</tr>
+<tr>
+<td><strong>First implementation milestone</strong></td>
+<td>Visual validation of the core interface (<a href="#first-implementation-milestone">First Implementation Milestone</a>)</td>
+<td>Global site shell; Home with roadmap overview; one representative long-form canonical document page; core design system (typography, themes, tables, code, Mermaid, callouts, print, responsive navigation, heading anchors)</td>
+<td>Phase 0 decisions for the milestone</td>
+</tr>
+<tr>
+<td><strong>Version 1 — Readable portal</strong></td>
+<td>Every canonical document rendered to reference-level reading quality, with safe structure; roadmap overview on Home (AD1)</td>
+<td>See <a href="#24-recommended-version-1-scope">24</a></td>
+<td>Human owner&#x27;s visual review of the first milestone</td>
+</tr>
+<tr>
+<td><strong>Post-core polish</strong></td>
+<td>Optional reading-mode enhancements (<a href="#ad5-advanced-reading-interactions-are-post-core-polish">AD5</a>)</td>
+<td>Focus mode; top-bar auto-hide; persistent sidebar state; advanced keyboard shortcuts; refined navigation motion</td>
+<td>Core interface visually reviewed; scheduled alongside or after Version 1 as judged useful</td>
+</tr>
+<tr>
+<td><strong>Version 2 — Connected repository</strong></td>
+<td>Find, orient, and trace evidence</td>
+<td>Section-level search with content-kind filters; explicit metadata headers (declared label patterns); research index with dates; citation linking, previews and register backlinks (in-document); generated backlinks; previous/next within collections; reviews index and timeline (as soon as the first review exists); code filename and line-highlight conventions if approved; optional dynamic accessibility audit</td>
+<td>D8, D10, D15, D21 as needed; first review file for the reviews views</td>
+</tr>
+<tr>
+<td><strong>Version 3 — Curriculum structure and relationships</strong></td>
+<td>Topic-level learning navigation</td>
+<td>Topic pages; relationship panels; local neighborhood diagrams; lineage strips; area-level dependency views; stage pages (if curriculum is split canonically); watchlist and change views from explicit records; maturity vocabulary rendering (if declared); math rendering (or earlier, as soon as math appears); table expand dialog</td>
+<td><strong>Approved canonical topic and relationship sources (D9)</strong> — without them this phase does not start</td>
+</tr>
+<tr>
+<td><strong>Version 4 — Learner state (optional)</strong></td>
+<td>Personal progress and notes, kept separate from curriculum</td>
+<td>See below</td>
+<td><strong>Explicit approval (D19)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Math is <strong>trigger-based</strong>: whenever the first mathematical content is committed, math rendering moves into the next build regardless of phase.</p>
+<p><strong>Version 4 — learner state design (for approval only):</strong></p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: 21. Progressive Implementation Phases"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    CUR[&quot;Canonical curriculum&lt;br/&gt;(Markdown, read-only to site)&quot;] --&gt; SITE[&quot;Generated site&quot;]
+    LS[&quot;Learner state&lt;br/&gt;(browser storage)&quot;] &lt;--&gt; SITE
+    LS &lt;--&gt; EXP[&quot;Export / import&lt;br/&gt;(JSON file chosen by learner)&quot;]
+</code></pre></figure>
+<ul>
+<li><strong>Storage:</strong> browser local storage (or IndexedDB), namespaced by site identity. There is no server. It is never written into Markdown and never part of <code>site/</code> output.</li>
+<li><strong>Model:</strong> <code>{ schema_version, entries: { &lt;stable topic id&gt;: { status, updated, note } } }</code>, with statuses <em>Not started, Learning, Completed, Revisiting</em>. Notes are plain text.</li>
+<li><strong>Identity:</strong> keyed by stable topic IDs from canonical topic sources, never by headings or URLs (which can change).</li>
+<li><strong>Orphans:</strong> entries whose topic no longer exists are shown in a &quot;Previous topics&quot; list. They are never silently deleted.</li>
+<li><strong>Portability:</strong> manual export/import to a JSON file. An optional learner-owned file location (outside <code>site/</code>, excluded from canonical content and search) is an open decision.</li>
+<li><strong>Visual separation:</strong> the personal status control is labeled &quot;My progress&quot;. It sits apart from curriculum metadata and never alters curriculum status, stage or search results.</li>
+<li><strong>Caveat:</strong> on <code>file://</code>, some browsers share one storage area across all local files, and clearing browser data erases state. Export/import mitigates this.</li>
+</ul>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="22-explicit-non-goals">
+<h2 id="22-explicit-non-goals">22. Explicit Non-Goals<a class="heading-anchor" href="#22-explicit-non-goals" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The site will <strong>not</strong>:</p>
+<ol>
+<li>make, suggest, or infer curriculum decisions (stages, depths, promotions, prerequisites, maturity);</li>
+<li>contain or maintain any curriculum, research, review or governance text outside canonical sources;</li>
+<li>require a server, database, authentication, cloud service, or network access at build or read time;</li>
+<li>use a heavyweight frontend framework or single-page-application router;</li>
+<li>load remote fonts, CDN scripts, analytics, or telemetry;</li>
+<li>offer in-browser editing of content or a CMS;</li>
+<li>auto-generate topic pages, relationships or metadata from headings or prose;</li>
+<li>merge source registers across reports or infer which sources support which claims;</li>
+<li>render a global force-directed knowledge graph of all content;</li>
+<li>compute curriculum changes by diffing files and present them as decisions;</li>
+<li>display progress percentages, streaks, gamification or learning-time estimates;</li>
+<li>become a news feed or model-release tracker;</li>
+<li>provide comments, sharing, accounts or multi-user features;</li>
+<li>split, merge or reword canonical documents for presentation convenience;</li>
+<li>modify canonical Markdown to make presentation easier (including adding progress markers);</li>
+<li>rely on JavaScript for access to any canonical content.</li>
+</ol>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="23-open-design-decisions">
+<h2 id="23-open-design-decisions">23. Open Design Decisions<a class="heading-anchor" href="#23-open-design-decisions" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Decisions marked <strong>V1</strong> block Version 1. Decisions marked <strong>M1</strong> also block the <a href="#first-implementation-milestone">First Implementation Milestone</a>. Each has a recommendation.</p>
+<p>Approval of the overall architecture (<a href="#approved-implementation-decisions">Approved Implementation Decisions</a>) resolved <strong>D14</strong> only. The other decisions remain open until explicitly decided.</p>
+<p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: 23. Open Design Decisions"><table class="doc-table table--wide" style="--cols:5">
+<thead>
+<tr>
+<th scope="col">ID</th>
+<th scope="col">Decision</th>
+<th scope="col">Options</th>
+<th scope="col">Recommendation</th>
+<th scope="col">Blocks</th>
+</tr>
+</thead>
+<tbody>
+<tr id="src-d1">
+<td><strong>D1</strong></td>
+<td>Location of design documents</td>
+<td><code>design/</code> · <code>docs/design/</code> · inside <code>scripts/</code></td>
+<td><code>design/</code> (this file&#x27;s location): top-level, mirrors <code>prompts/</code>, <code>research/</code>, <code>reviews/</code>; separate from evidence, curriculum and output</td>
+<td>M1, V1</td>
+</tr>
+<tr id="src-d2">
+<td><strong>D2</strong></td>
+<td>Generator language and core stack</td>
+<td>Python (markdown-it-py, mdit-py-plugins, Jinja2, Pygments) · Node (unified/remark/rehype)</td>
+<td>Python</td>
+<td>M1, V1</td>
+</tr>
+<tr id="src-d3">
+<td><strong>D3</strong></td>
+<td>Mermaid rendering</td>
+<td>Client-side vendored · build-time SVG</td>
+<td>Client-side vendored for Version 1; revisit later</td>
+<td>M1, V1</td>
+</tr>
+<tr id="src-d4">
+<td><strong>D4</strong></td>
+<td>Math engine and rendering time</td>
+<td>KaTeX build-time · KaTeX client · MathJax build-time · native MathML</td>
+<td>Defer until math exists; reserve GitHub-compatible delimiters now</td>
+<td>Math trigger</td>
+</tr>
+<tr id="src-d5">
+<td><strong>D5</strong></td>
+<td>Primary navigation labels</td>
+<td>&quot;Roadmap · Evidence · Reviews · About&quot; · &quot;Learn · Knowledge · Maintain · Governance&quot; · &quot;Roadmap · Research · Reviews · Governance&quot;</td>
+<td>&quot;Roadmap · Evidence · Reviews · About&quot;, avoiding the &quot;Research&quot; stage collision</td>
+<td>M1, V1</td>
+</tr>
+<tr id="src-d6">
+<td><strong>D6</strong></td>
+<td>Rendering of canonical navigation constructs (Contents block, &quot;In this section&quot;, &quot;Back to Contents&quot;) alongside generated navigation</td>
+<td>Render in place (styled quietly) · convert into generated navigation only</td>
+<td>Render in place; generated navigation is additional. This preserves canonical content and word-preservation validation.</td>
+<td>M1, V1</td>
+</tr>
+<tr id="src-d7">
+<td><strong>D7</strong></td>
+<td>Justified text on screen</td>
+<td>Keep (AGENTS rule) with hyphenation and narrow-screen fallback · left-align on screen, justify in print</td>
+<td>Keep as AGENTS specifies; changing it requires a governance change</td>
+<td>M1, V1</td>
+</tr>
+<tr id="src-d8">
+<td><strong>D8</strong></td>
+<td>Explicit document metadata format</td>
+<td>Declared bold-label patterns (current) · YAML/TOML front matter in canonical files</td>
+<td>Use declared bold-label patterns in V2; consider front matter only via governance approval, since it changes canonical files</td>
+<td>V2</td>
+</tr>
+<tr id="src-d9">
+<td><strong>D9</strong></td>
+<td>Machine-readable curriculum topics and relationships</td>
+<td>Topic Markdown files with front matter · single structured data file · keep prose-only</td>
+<td>Curriculum-governance decision outside this spec; Version 3 depends on it</td>
+<td>V3</td>
+</tr>
+<tr id="src-d10">
+<td><strong>D10</strong></td>
+<td>Formal conventions: citation pattern and cross-document register declaration; code block <code>title=</code> and line-highlight syntax</td>
+<td>Adopt · defer</td>
+<td>Adopt the existing <code>`[ID]`</code> citation pattern as a documented convention; add an explicit register declaration for cross-document citation; defer code conventions until code appears</td>
+<td>V2</td>
+</tr>
+<tr id="src-d11">
+<td><strong>D11</strong></td>
+<td>Maturity vocabulary rendering</td>
+<td>Plain text only · declared vocabulary with typographic treatment</td>
+<td>Plain text until a report declares vocabulary machine-readably</td>
+<td>V3</td>
+</tr>
+<tr id="src-d12">
+<td><strong>D12</strong></td>
+<td>Fonts</td>
+<td>System stacks only · vendor one OFL serif</td>
+<td>System stacks for Version 1</td>
+<td>M1, V1</td>
+</tr>
+<tr id="src-d13">
+<td><strong>D13</strong></td>
+<td>Version control</td>
+<td>Adopt git · remain unversioned</td>
+<td>Adopt git: enables file history, drift detection across builds, and review traceability. The repository currently has none.</td>
+<td>Recommended before V2</td>
+</tr>
+<tr id="src-d14">
+<td><strong>D14</strong></td>
+<td>URL style</td>
+<td><code>file://</code>-first (explicit <code>index.html</code> links) with hosted-mode flag · hosted pretty URLs only</td>
+<td><strong>Resolved by <a href="#ad2-local-first-does-not-permanently-mean-file">AD2</a>:</strong> local-first static site servable with <code>python -m http.server</code>. Direct <code>file://</code> operation is supported in Version 1 where reasonably practical, but it is not a permanent constraint.</td>
+<td>Resolved</td>
+</tr>
+<tr id="src-d15">
+<td><strong>D15</strong></td>
+<td>Review file naming and decision-record structure</td>
+<td>Define convention now · when the first review is written</td>
+<td>Define together with the first review, and before building review views</td>
+<td>V2 (reviews views)</td>
+</tr>
+<tr id="src-d16">
+<td><strong>D16</strong></td>
+<td>Include <code>prompts/</code> in the site</td>
+<td>Include under About → Methodology · exclude</td>
+<td>Include (methodology transparency)</td>
+<td>V1</td>
+</tr>
+<tr id="src-d17">
+<td><strong>D17</strong></td>
+<td>Include <code>design/</code> documents in the site</td>
+<td>Include under About → Site design · exclude</td>
+<td>Include, clearly labeled as site design, not governance of curriculum</td>
+<td>V1</td>
+</tr>
+<tr id="src-d18">
+<td><strong>D18</strong></td>
+<td>Publishing target</td>
+<td>Local only · static hosting (e.g., GitHub Pages)</td>
+<td>Local-first; keep hosted mode possible</td>
+<td>Later</td>
+</tr>
+<tr id="src-d19">
+<td><strong>D19</strong></td>
+<td>Learner progress tracking</td>
+<td>Not approved · approve browser-local design · approve with learner-owned file</td>
+<td>Not approved until curriculum topics exist (D9)</td>
+<td>V4</td>
+</tr>
+<tr id="src-d20">
+<td><strong>D20</strong></td>
+<td>Stage-level pages</td>
+<td>Presentation split of <code>ROADMAP.md</code> · canonical split into curriculum files · single document</td>
+<td>Single document in V1; prefer a canonical split if/when curriculum grows</td>
+<td>V3</td>
+</tr>
+<tr id="src-d21">
+<td><strong>D21</strong></td>
+<td>Search implementation and ranking boost</td>
+<td>Generated index + small client library · Pagefind; with or without a curriculum boost</td>
+<td>Generated index + small client library; no boost initially. Server-dependent options are acceptable under AD2.</td>
+<td>V2</td>
+</tr>
+<tr id="src-d22">
+<td><strong>D22</strong></td>
+<td>Representative long-form document for the first implementation milestone</td>
+<td><code>ROADMAP.md</code> · <code>AGENTS.md</code> · <code>research/2026-09-17-data-intelligence-landscape.md</code></td>
+<td>The landscape report: it exercises the hardest cases (length, wide evidence tables, many Mermaid diagrams, callouts, a source register). It is evidence, so the milestone would show the evidence treatment rather than a curriculum page — the owner may prefer <code>AGENTS.md</code> or <code>ROADMAP.md</code> for that reason. None of the current documents contains code blocks, so code-block rendering cannot be reviewed on real content without an additional sample.</td>
+<td>M1</td>
+</tr>
+</tbody>
+</table></div>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="24-recommended-version-1-scope">
+<h2 id="24-recommended-version-1-scope">24. Recommended Version 1 Scope<a class="heading-anchor" href="#24-recommended-version-1-scope" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Version 1 should be small, complete, and excellent at the one thing that matters first: <strong>reading the canonical documents correctly and comfortably.</strong></p>
+<p>Version 1 is delivered in two steps (<a href="#first-implementation-milestone">First Implementation Milestone</a>):</p>
+<ol>
+<li><strong>First implementation milestone</strong> — the global site shell, the Home page with the roadmap overview, one representative long-form canonical document page (D22), and the core design system needed to render them. The purpose is visual validation by the human owner, not repository coverage.</li>
+<li><strong>Complete Version 1</strong> — only after that visual review: the scope below applied to all intended canonical documents.</li>
+</ol>
+<p><strong>In scope</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 24. Recommended Version 1 Scope"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">Area</th>
+<th scope="col">Version 1 capability</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sources</td>
+<td><code>README.md</code>, <code>AGENTS.md</code>, <code>ROADMAP.md</code>, <code>research/*.md</code>, <code>prompts/*.md</code>, <code>design/*.md</code> (per D16/D17); <code>reviews/</code> discovered (empty state)</td>
+</tr>
+<tr>
+<td>Pages</td>
+<td>One page per canonical file; generated Home (title, README lead paragraph verbatim, <strong>roadmap overview visualization</strong> per <a href="#5-roadmap-experience">5</a> and <a href="#ad1-roadmap-overview-is-part-of-version-1">AD1</a>, entry links to the four areas, latest research report by filename date); area index pages; 404</td>
+</tr>
+<tr>
+<td>Roadmap overview</td>
+<td>Stage sequence Fundamentals → Advanced → Mastery → Research with Modern AI Engineering as a parallel track, derived only from canonical structure; clear, polished and responsive; no sophisticated interaction required</td>
+</tr>
+<tr>
+<td>Structure</td>
+<td>Top bar with primary navigation; area sidebar; on-this-page TOC with current-section highlight; breadcrumbs; canonical Contents / &quot;In this section&quot; / &quot;Back to Contents&quot; rendered in place; heading anchors with copy link; back-to-top; responsive navigation (drawers/sheets)</td>
+</tr>
+<tr>
+<td>Content-kind distinction</td>
+<td>Path-based kind mapping; evidence marker and text label on research pages; labeled cross-context links</td>
+</tr>
+<tr>
+<td>Reading</td>
+<td>Typography system (system font stacks), measure, justified prose with hyphenation and narrow-screen fallback, callouts (<code>⚠️</code> warning, note, key principle), details/summary</td>
+</tr>
+<tr>
+<td>Themes</td>
+<td>Light, dark, system; persistent selection; no flash; token system with verified contrast</td>
+</tr>
+<tr>
+<td>Tables</td>
+<td>Standard / wide / key-value classes; scroll regions with affordances and accessible names; breakout on wide screens; register row anchors</td>
+</tr>
+<tr>
+<td>Code</td>
+<td>Build-time highlighting, language labels, copy buttons, horizontal scroll, <code>console</code> prompt handling</td>
+</tr>
+<tr>
+<td>Diagrams</td>
+<td>Client-side vendored Mermaid, theme-aware, lazy, with text fallback and failure handling</td>
+</tr>
+<tr>
+<td>Responsive</td>
+<td>All breakpoints in <a href="#16-responsive-behavior">16</a>, drawers and sheets on small screens</td>
+</tr>
+<tr>
+<td>Print</td>
+<td>Print stylesheet per <a href="#17-print-behavior">17</a></td>
+</tr>
+<tr>
+<td>Accessibility</td>
+<td>Requirements in <a href="#15-accessibility">15</a></td>
+</tr>
+<tr>
+<td>Portability</td>
+<td>Local-first static output servable with <code>python -m http.server</code>; relative links; no network or external runtime dependency for reading; direct <code>file://</code> opening supported where reasonably practical (classic scripts) (<a href="#ad2-local-first-does-not-permanently-mean-file">AD2</a>)</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>The nine lightweight verifications in <a href="#ad3-simplified-version-1-validation">AD3</a>, implemented as described in <a href="#20-validation-strategy">20</a>; minimal source record; no sophisticated validation framework</td>
+</tr>
+<tr>
+<td>Determinism</td>
+<td>Deterministic content and structure (no random IDs, no meaningless timestamps); byte identity not required (<a href="#ad4-deterministic-content-not-byte-identity">AD4</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Out of scope for Version 1</strong></p>
+<ul>
+<li>search (Version 2);</li>
+<li>extracted metadata headers;</li>
+<li>post-core reading polish — focus mode, top-bar auto-hide, persistent sidebar state, advanced keyboard shortcuts, sophisticated navigation animation (<a href="#ad5-advanced-reading-interactions-are-post-core-polish">AD5</a>);</li>
+<li>progressive validation checks listed in <a href="#20-validation-strategy">20</a>;</li>
+<li>citation linking and previews;</li>
+<li>backlinks;</li>
+<li>review timeline;</li>
+<li>previous/next collections;</li>
+<li>topics and relationships;</li>
+<li>maturity rendering;</li>
+<li>math (unless math content appears first);</li>
+<li>learner state.</li>
+</ul>
+<p><strong>The first implementation milestone is done when</strong> the shell, Home with roadmap overview, the representative document page and the core design system render correctly in light and dark themes and at phone, tablet and desktop widths, and the human owner has reviewed them visually. Generator expansion to the full repository waits for that review.</p>
+<p><strong>Version 1 is done when:</strong></p>
+<ol>
+<li>every intended canonical document builds into a page that passes the Version 1 verifications (<a href="#ad3-simplified-version-1-validation">AD3</a>), including the wording check;</li>
+<li>every link and anchor that works on GitHub also works on the site;</li>
+<li>the site navigates correctly when served with <code>python -m http.server</code> with networking disabled, and direct <code>file://</code> opening works where reasonably practical;</li>
+<li>both themes, print output and a phone-width layout have been manually reviewed for the two longest documents (the landscape report and <code>AGENTS.md</code>);</li>
+<li>keyboard-only and screen-reader walkthroughs of one curriculum page and one research page have been completed;</li>
+<li>generated output contains no random identifiers or meaningless timestamps (byte-identical rebuilds are not required).</li>
+</ol>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+</section>
+
+    </article>
+  </main>
+
+  <aside class="toc-rail drawer drawer--right" id="page-toc" aria-label="On this page" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">On this page</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close contents</span></button>
+    </div>
+    <nav class="page-toc" aria-labelledby="toc-title">
+      <p class="rail-title" id="toc-title">On this page</p>
+      <ol class="toc-list">
+        <li class="toc-item">
+          <a href="#contents" data-toc-link>Contents</a>
+        </li>
+        <li class="toc-item has-children">
+          <a href="#approved-implementation-decisions" data-toc-link>Approved Implementation Decisions</a>
+          <ol class="toc-sublist">
+            <li><a href="#ad1-roadmap-overview-is-part-of-version-1" data-toc-link>AD1. Roadmap Overview Is Part of Version 1</a></li>
+            <li><a href="#ad2-local-first-does-not-permanently-mean-file" data-toc-link>AD2. Local-First Does Not Permanently Mean file://</a></li>
+            <li><a href="#ad3-simplified-version-1-validation" data-toc-link>AD3. Simplified Version 1 Validation</a></li>
+            <li><a href="#ad4-deterministic-content-not-byte-identity" data-toc-link>AD4. Deterministic Content, Not Byte Identity</a></li>
+            <li><a href="#ad5-advanced-reading-interactions-are-post-core-polish" data-toc-link>AD5. Advanced Reading Interactions Are Post-Core Polish</a></li>
+            <li><a href="#first-implementation-milestone" data-toc-link>First Implementation Milestone</a></li>
+            <li><a href="#principles-that-remain-unchanged" data-toc-link>Principles That Remain Unchanged</a></li>
+          </ol>
+        </li>
+        <li class="toc-item">
+          <a href="#1-product-vision" data-toc-link>1. Product Vision</a>
+        </li>
+        <li class="toc-item has-children">
+          <a href="#2-design-principles" data-toc-link>2. Design Principles</a>
+          <ol class="toc-sublist">
+            <li><a href="#the-three-layer-rule" data-toc-link>The Three-Layer Rule</a></li>
+            <li><a href="#principles" data-toc-link>Principles</a></li>
+            <li><a href="#what-the-repository-contains-today" data-toc-link>What the Repository Contains Today</a></li>
+          </ol>
+        </li>
+        <li class="toc-item has-children">
+          <a href="#3-information-architecture" data-toc-link>3. Information Architecture</a>
+          <ol class="toc-sublist">
+            <li><a href="#content-kinds" data-toc-link>Content Kinds</a></li>
+            <li><a href="#placement-decisions" data-toc-link>Placement Decisions</a></li>
+          </ol>
+        </li>
+        <li class="toc-item has-children">
+          <a href="#4-navigation-model" data-toc-link>4. Navigation Model</a>
+          <ol class="toc-sublist">
+            <li><a href="#page-anatomy" data-toc-link>Page Anatomy</a></li>
+            <li><a href="#navigation-elements" data-toc-link>Navigation Elements</a></li>
+            <li><a href="#quiet-reading" data-toc-link>Quiet Reading</a></li>
+            <li><a href="#keyboard-model" data-toc-link>Keyboard Model</a></li>
+          </ol>
+        </li>
+        <li class="toc-item">
+          <a href="#5-roadmap-experience" data-toc-link>5. Roadmap Experience</a>
+        </li>
+        <li class="toc-item">
+          <a href="#6-long-form-reading-experience" data-toc-link>6. Long-Form Reading Experience</a>
+        </li>
+        <li class="toc-item">
+          <a href="#7-research-experience" data-toc-link>7. Research Experience</a>
+        </li>
+        <li class="toc-item">
+          <a href="#8-review-and-maintenance-experience" data-toc-link>8. Review and Maintenance Experience</a>
+        </li>
+        <li class="toc-item has-children">
+          <a href="#9-topic-and-relationship-model" data-toc-link>9. Topic and Relationship Model</a>
+          <ol class="toc-sublist">
+            <li><a href="#topic-page-model" data-toc-link>Topic Page Model</a></li>
+            <li><a href="#relationship-model" data-toc-link>Relationship Model</a></li>
+            <li><a href="#relationship-representations" data-toc-link>Relationship Representations</a></li>
+          </ol>
+        </li>
+        <li class="toc-item">
+          <a href="#10-search-design" data-toc-link>10. Search Design</a>
+        </li>
+        <li class="toc-item">
+          <a href="#11-theme-and-visual-system" data-toc-link>11. Theme and Visual System</a>
+        </li>
+        <li class="toc-item">
+          <a href="#12-typography" data-toc-link>12. Typography</a>
+        </li>
+        <li class="toc-item has-children">
+          <a href="#13-math-code-diagram-and-table-handling" data-toc-link>13. Math, Code, Diagram and Table Handling</a>
+          <ol class="toc-sublist">
+            <li><a href="#mathematics" data-toc-link>Mathematics</a></li>
+            <li><a href="#code" data-toc-link>Code</a></li>
+            <li><a href="#mermaid-and-diagrams" data-toc-link>Mermaid and Diagrams</a></li>
+            <li><a href="#tables" data-toc-link>Tables</a></li>
+            <li><a href="#callouts-details-and-other-constructs" data-toc-link>Callouts, Details and Other Constructs</a></li>
+          </ol>
+        </li>
+        <li class="toc-item">
+          <a href="#14-citation-and-source-experience" data-toc-link>14. Citation and Source Experience</a>
+        </li>
+        <li class="toc-item">
+          <a href="#15-accessibility" data-toc-link>15. Accessibility</a>
+        </li>
+        <li class="toc-item">
+          <a href="#16-responsive-behavior" data-toc-link>16. Responsive Behavior</a>
+        </li>
+        <li class="toc-item">
+          <a href="#17-print-behavior" data-toc-link>17. Print Behavior</a>
+        </li>
+        <li class="toc-item has-children">
+          <a href="#18-static-site-and-generator-architecture" data-toc-link>18. Static-Site and Generator Architecture</a>
+          <ol class="toc-sublist">
+            <li><a href="#technology-recommendation" data-toc-link>Technology Recommendation</a></li>
+            <li><a href="#pipeline" data-toc-link>Pipeline</a></li>
+            <li><a href="#document-model" data-toc-link>Document Model</a></li>
+            <li><a href="#separation-of-concerns" data-toc-link>Separation of Concerns</a></li>
+            <li><a href="#runtime-enhancements" data-toc-link>Runtime Enhancements</a></li>
+          </ol>
+        </li>
+        <li class="toc-item">
+          <a href="#19-proposed-generated-file-and-url-structure" data-toc-link>19. Proposed Generated File and URL Structure</a>
+        </li>
+        <li class="toc-item">
+          <a href="#20-validation-strategy" data-toc-link>20. Validation Strategy</a>
+        </li>
+        <li class="toc-item">
+          <a href="#21-progressive-implementation-phases" data-toc-link>21. Progressive Implementation Phases</a>
+        </li>
+        <li class="toc-item">
+          <a href="#22-explicit-non-goals" data-toc-link>22. Explicit Non-Goals</a>
+        </li>
+        <li class="toc-item">
+          <a href="#23-open-design-decisions" data-toc-link>23. Open Design Decisions</a>
+        </li>
+        <li class="toc-item">
+          <a href="#24-recommended-version-1-scope" data-toc-link>24. Recommended Version 1 Scope</a>
+        </li>
+      </ol>
+    </nav>
+  </aside>
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>design/site-architecture.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+<script src="../../assets/js/diagrams.js?v=ce213ccecc" defer data-mermaid-src="../../assets/vendor/mermaid/mermaid.min.js"></script>
+</body>
+</html>

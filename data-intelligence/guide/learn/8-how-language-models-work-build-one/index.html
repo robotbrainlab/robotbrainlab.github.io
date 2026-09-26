@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>How Language Models Work: Build One · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><span>Part 1 — Fundamentals</span></li>
+      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part">Part 1 — Fundamentals</span><span aria-hidden="true"> · </span><span>Step 8 of 19</span></p>
+<h1 id="8-how-language-models-work-build-one" class="guide-title">8. How Language Models Work: Build One</h1>
+<div class="guide-body">
+<p>A language model does one thing: given a stretch of text, it predicts what comes next, a piece at a time, and then repeats. Everything else it appears to do — answering, summarizing, writing code, following instructions — is that single ability applied to text you supply. What you supply is called the model&#x27;s <strong>context</strong>, and <em>conditioning</em> a model means choosing that context so the continuation you want becomes the likely one. This is why prompting, retrieval and context management later turn out to be the main levers you have over a model you did not train.</p>
+<p>From the outside, all of this stays opaque: why the model costs what it costs, why it repeats itself, why it loses the middle of a long input, what fine-tuning actually changes. This step replaces those unknowns with mechanism, by building one small language model from scratch — the only full model you build in this guide.</p>
+<section class="guide-block guide-block--where-you-are" aria-label="Where you are">
+<p class="guide-label"><strong>Where you are</strong></p>
+<p>You can train neural networks and you have seen a transformer block (step 7). But a language model in use is still mostly opaque: why it costs what it costs, why it repeats itself, why it forgets the middle of a long input, what fine-tuning actually changes. This step replaces those unknowns with mechanism — by building one.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#text-as-the-model-sees-it">Text as the model sees it</a>
+<ol class="unit-toc-sublist">
+<li><a href="#tokenization">Tokenization</a></li>
+<li><a href="#the-linguistic-units-models-operate-on">The linguistic units models operate on</a></li>
+<li><a href="#consequences-for-cost-and-languages">Consequences for cost and languages</a></li>
+</ol>
+</li>
+<li><a href="#the-model-itself">The model itself</a>
+<ol class="unit-toc-sublist">
+<li><a href="#the-language-modelling-formulation">The language-modelling formulation</a></li>
+<li><a href="#positional-information">Positional information</a></li>
+<li><a href="#the-attention-stack-end-to-end">The attention stack, end to end</a></li>
+</ol>
+</li>
+<li><a href="#training-it">Training it</a>
+<ol class="unit-toc-sublist">
+<li><a href="#the-pretraining-objective">The pretraining objective</a></li>
+<li><a href="#the-training-loop">The training loop</a></li>
+</ol>
+</li>
+<li><a href="#getting-output-from-it">Getting output from it</a>
+<ol class="unit-toc-sublist">
+<li><a href="#decoding-and-sampling">Decoding and sampling</a></li>
+<li><a href="#context-limits">Context limits</a></li>
+</ol>
+</li>
+<li><a href="#changing-it">Changing it</a>
+<ol class="unit-toc-sublist">
+<li><a href="#what-fine-tuning-changes">What fine-tuning changes</a></li>
+<li><a href="#prompt-retrieve-or-fine-tune">Prompt, retrieve or fine-tune</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-you-ll-learn" aria-label="What you&#x27;ll learn">
+<p class="guide-label"><strong>What you&#x27;ll learn</strong></p>
+<p>By the end you should be able to implement and train a small transformer language model, explain how tokenization affects cost and quality across languages, diagnose a generation pathology from its decoding settings, and justify a choice between prompting, retrieval and fine-tuning.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>Follow one sentence through the model and the step explains itself. Text becomes tokens — which fixes the cost, and quietly penalizes languages the tokenizer was not built for. Tokens become vectors with positions, and attention lets every position draw on the others, which is why the context window is finite and why cost grows the way it does. Training is the likelihood maximization of step 2, applied to predicting the next token. Decoding turns the resulting distribution into text, so sampling settings, not the model alone, explain many &quot;failures&quot;. Fine-tuning shifts those weights — and once you have seen how little of the model it touches, the prompt-retrieve-or-tune decision stops being a matter of taste.</p>
+</section>
+<section class="unit-area" aria-labelledby="text-as-the-model-sees-it">
+<h2 id="text-as-the-model-sees-it">Text as the model sees it<a class="heading-anchor" href="#text-as-the-model-sees-it" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The model never sees characters or words. What it sees is the first design decision, and it propagates into cost, quality and fairness across languages.</p>
+</section>
+<section class="unit-concept" aria-labelledby="tokenization">
+<h3 id="tokenization">Tokenization<a class="heading-anchor" href="#tokenization" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Subword vocabularies: how text is split, why the split is learned, and what happens at the boundaries. <strong>Studied in:</strong> <em>Build a Large Language Model (From Scratch)</em> ch 2; <em>Speech and Language Processing</em> ch 2.</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-linguistic-units-models-operate-on">
+<h3 id="the-linguistic-units-models-operate-on">The linguistic units models operate on<a class="heading-anchor" href="#the-linguistic-units-models-operate-on" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What tokens correspond to linguistically, and why they are not words. <strong>Studied in:</strong> <em>Speech and Language Processing</em> ch 2.</p>
+</section>
+<section class="unit-concept" aria-labelledby="consequences-for-cost-and-languages">
+<h3 id="consequences-for-cost-and-languages">Consequences for cost and languages<a class="heading-anchor" href="#consequences-for-cost-and-languages" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Why the same sentence costs more in one language than another, and what that means for latency, price and quality. <strong>Studied in:</strong> <em>Speech and Language Processing</em> ch 2; your own tokenization exercise.</p>
+</section>
+<section class="unit-area" aria-labelledby="the-model-itself">
+<h2 id="the-model-itself">The model itself<a class="heading-anchor" href="#the-model-itself" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The architecture, built rather than described — the part of this step that cannot be replaced by reading.</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-language-modelling-formulation">
+<h3 id="the-language-modelling-formulation">The language-modelling formulation<a class="heading-anchor" href="#the-language-modelling-formulation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Predicting the next token as a probability distribution, and why that single objective produces such general behaviour. <strong>Studied in:</strong> <em>Build a Large Language Model (From Scratch)</em> ch 2.</p>
+</section>
+<section class="unit-concept" aria-labelledby="positional-information">
+<h3 id="positional-information">Positional information<a class="heading-anchor" href="#positional-information" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>How order is represented when attention itself is order-blind. <strong>Studied in:</strong> <em>Build a Large Language Model (From Scratch)</em> ch 3.</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-attention-stack-end-to-end">
+<h3 id="the-attention-stack-end-to-end">The attention stack, end to end<a class="heading-anchor" href="#the-attention-stack-end-to-end" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Queries, keys and values; multiple heads; residual connections and normalization; the full decoder block. <strong>Studied in:</strong> <em>Build a Large Language Model (From Scratch)</em> chs 3–4.</p>
+</section>
+<section class="unit-area" aria-labelledby="training-it">
+<h2 id="training-it">Training it<a class="heading-anchor" href="#training-it" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Where the mathematics of step 2 becomes a running training loop you own.</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-pretraining-objective">
+<h3 id="the-pretraining-objective">The pretraining objective<a class="heading-anchor" href="#the-pretraining-objective" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Cross-entropy on next-token prediction — the likelihood maximization of step 2 in its most consequential application. <strong>Studied in:</strong> <em>Build a Large Language Model (From Scratch)</em> ch 5.</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-training-loop">
+<h3 id="the-training-loop">The training loop<a class="heading-anchor" href="#the-training-loop" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Batching, loss curves, checkpoints, and loading real pretrained weights into your own implementation to check it. <strong>Studied in:</strong> <em>Build a Large Language Model (From Scratch)</em> ch 5.</p>
+</section>
+<section class="unit-area" aria-labelledby="getting-output-from-it">
+<h2 id="getting-output-from-it">Getting output from it<a class="heading-anchor" href="#getting-output-from-it" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The model produces a distribution; text is what you do with it. Many apparent model failures live here.</p>
+</section>
+<section class="unit-concept" aria-labelledby="decoding-and-sampling">
+<h3 id="decoding-and-sampling">Decoding and sampling<a class="heading-anchor" href="#decoding-and-sampling" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Greedy decoding, temperature, top-k and nucleus sampling, and the pathologies each produces. <strong>Studied in:</strong> <em>Build a Large Language Model (From Scratch)</em> ch 5, with your own decoding experiments.</p>
+</section>
+<section class="unit-concept" aria-labelledby="context-limits">
+<h3 id="context-limits">Context limits<a class="heading-anchor" href="#context-limits" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Why the window is finite, what happens at its edge, and the cost of filling it. Step 11 turns this into the context budget. <strong>Studied in:</strong> <em>Build a Large Language Model (From Scratch)</em> chs 3–5.</p>
+</section>
+<section class="unit-area" aria-labelledby="changing-it">
+<h2 id="changing-it">Changing it<a class="heading-anchor" href="#changing-it" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The first encounter with adaptation, which step 10 then treats as a lifecycle.</p>
+</section>
+<section class="unit-concept" aria-labelledby="what-fine-tuning-changes">
+<h3 id="what-fine-tuning-changes">What fine-tuning changes<a class="heading-anchor" href="#what-fine-tuning-changes" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Fine-tuning your own model for classification and for following instructions, and seeing exactly which weights move. <strong>Studied in:</strong> <em>Build a Large Language Model (From Scratch)</em> chs 6–7.</p>
+</section>
+<section class="unit-concept" aria-labelledby="prompt-retrieve-or-fine-tune">
+<h3 id="prompt-retrieve-or-fine-tune">Prompt, retrieve or fine-tune<a class="heading-anchor" href="#prompt-retrieve-or-fine-tune" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The decision that governs most applied work, made here on mechanism rather than fashion. <strong>Studied in:</strong> <em>AI Engineering</em> ch 7, &quot;Finetuning Overview&quot; and &quot;When to Finetune&quot; (pp. 307–319).</p>
+</section>
+<section class="guide-block guide-block--where-this-fits-in-ai" aria-label="Where this fits in AI">
+<p class="guide-label"><strong>Where this fits in AI</strong></p>
+<p>This is the mechanism under most of contemporary AI engineering. The context window you meet here becomes the context <em>budget</em> of step 11; tokenization becomes the token economics of step 16; decoding becomes structured generation in the Modern track; pretraining and fine-tuning become the lifecycle of step 10. Building the model once is what lets all of those be reasoned about rather than guessed at.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary</strong></span><span class="study-title"><a href="https://github.com/rasbt/LLMs-from-scratch" class="external" rel="noopener noreferrer"><em>Build a Large Language Model (From Scratch)</em><span class="visually-hidden" data-chrome> (external link)</span></a> (Raschka)</span><span class="study-task"><strong>read:</strong> the complete book, in order. Chapters 2–5 are the build (a library tokenizer is fine); chapters 6 and 7 fine-tune your model for classification and to follow instructions; Appendix E, on low-rank adaptation (LoRA), returns in step 10.</span><span class="study-why"><strong>Why:</strong> you build every part yourself, and check it by loading real model weights into your own code. <strong>Access:</strong> the book is paid; its code is free.</span></li>
+<li><span class="study-role"><strong>Supplement</strong></span><span class="study-title"><em>Speech and Language Processing</em></span><span class="study-task"><strong>read:</strong> chapter 2 (words and tokens).</span><span class="study-why"><strong>Why:</strong> what tokens are, linguistically and statistically — the build book takes tokenization as given.</span></li>
+<li><span class="study-role"><strong>Supplement · continuing</strong></span><span class="study-title"><em>AI Engineering</em></span><span class="study-task"><strong>revisit:</strong> (begun in <a href="../working-with-models/index.html">Working with Models</a>, the topic you took before this step) chapter 7, &quot;Finetuning Overview&quot; and &quot;When to Finetune&quot; (pp. 307–319).</span><span class="study-why"><strong>Why:</strong> the engineering decision of when adaptation is worth it, now that you have built a model. You began this book in the Modern track; here you return to one section of it.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--where-you-study-each-concept" aria-label="Where you study each concept">
+<p class="guide-label"><strong>Where you study each concept</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Prompt, retrieve or fine-tune"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">What you study</th>
+<th scope="col">Where you study it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tokenization and its consequences</td>
+<td><em>Build a Large Language Model (From Scratch)</em> ch 2; <em>Speech and Language Processing</em> ch 2</td>
+</tr>
+<tr>
+<td>Attention stack, positions, the model end to end</td>
+<td><em>Build a Large Language Model (From Scratch)</em> chs 3–4</td>
+</tr>
+<tr>
+<td>Pretraining objective and loop; decoding</td>
+<td><em>Build a Large Language Model (From Scratch)</em> ch 5</td>
+</tr>
+<tr>
+<td>What fine-tuning changes</td>
+<td><em>Build a Large Language Model (From Scratch)</em> chs 6–7</td>
+</tr>
+<tr>
+<td>Prompt, retrieve or fine-tune</td>
+<td><em>AI Engineering</em> ch 7, pp. 307–319</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<p>Build the model. Compare several tokenizations of the same text. Run decoding experiments.</p>
+</section>
+<section class="guide-block guide-block--you-re-ready-to-continue-when-you-can" aria-label="You&#x27;re ready to continue when you can">
+<p class="guide-label"><strong>You&#x27;re ready to continue when you can</strong></p>
+<ul class="guide-list guide-list--you-re-ready-to-continue-when-you-can">
+<li>implement and train a small transformer language model;</li>
+<li>explain how tokenization affects cost and quality across languages;</li>
+<li>diagnose a generation problem from its decoding settings;</li>
+<li>justify a choice between prompting, retrieval and fine-tuning.</li>
+</ul>
+</section>
+<p class="guide-note">Optional depth: a hand-written byte-pair-encoding tokenizer, loading real pretrained weights, and modern architecture variants, from the book&#x27;s companion repository.</p>
+<section class="guide-block guide-block--what-comes-next" aria-label="What comes next">
+<p class="guide-label"><strong>What comes next</strong></p>
+<p>A language model knows only what its weights encode, and its context window is small. Step 9 addresses that directly: how to find the right information and put it in front of the model — the other half of almost every contemporary AI application.</p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev guide-pager-link--modern" href="../embeddings-and-semantic-search/index.html" rel="prev"><span class="guide-pager-label">← Previous · Modern AI Engineering · recommended</span><span class="guide-pager-title">Embeddings and Semantic Search</span></a>
+  <a class="guide-pager-link guide-pager-link--next" href="../9-retrieval-and-search/index.html" rel="next"><span class="guide-pager-label">Next →</span><span class="guide-pager-title">9. Retrieval and Search</span></a>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+</body>
+</html>

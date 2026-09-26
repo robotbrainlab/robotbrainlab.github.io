@@ -1,0 +1,28 @@
+<nav class="area-nav area-nav--{{ area_nav.key }}" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">{{ area_nav.label }}</p>
+  {% for group in area_nav.groups %}
+  {% if group.get("track") %}<p class="rail-track">{{ group.track }}</p>{% endif %}
+  {% if group.label %}<p class="rail-group">{{ group.label }}</p>{% endif %}
+  {% if group.entries %}
+  <ul class="area-list">
+    {% for entry in group.entries %}
+    <li{% if entry.children %} class="has-children"{% endif %}>
+      <a class="area-link{% if entry.cls %} {{ entry.cls }}{% endif %}{% if entry.current %} is-current{% endif %}" href="{{ entry.href }}"{% if entry.current %} aria-current="page"{% endif %}{% if entry.toc %} data-toc-link{% endif %}>
+        <span class="area-link-title">{% if entry.number %}<span class="area-link-num">{{ entry.number }}</span>{% endif %}<span>{{ entry.title }}</span></span>
+        {% if entry.date %}<span class="area-link-date">{{ entry.date }}</span>{% endif %}
+      </a>
+      {% if entry.children %}
+      <ul class="area-sublist">
+        {% for child in entry.children %}
+        <li><a class="area-sublink" href="{{ child.href }}"{% if child.toc %} data-toc-link{% endif %}>{{ child.title }}</a></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% elif group.get("empty") %}
+  <p class="area-empty">{{ group.empty }}</p>
+  {% endif %}
+  {% endfor %}
+</nav>

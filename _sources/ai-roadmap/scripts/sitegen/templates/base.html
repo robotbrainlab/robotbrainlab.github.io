@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>{{ page_title }}{% if not is_home %} · {{ site_title }}{% endif %}</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="{{ root }}assets/css/tokens.css?v={{ assets }}">
+<link rel="stylesheet" href="{{ root }}assets/css/site.css?v={{ assets }}">
+<link rel="stylesheet" href="{{ root }}assets/css/print.css?v={{ assets }}" media="print">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+{% include "partials/topbar.html" %}
+{% block page %}{% endblock %}
+{% include "partials/footer.html" %}
+<div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="{{ root }}assets/js/site.js?v={{ assets }}" defer></script>
+{% if has_mermaid %}
+<script src="{{ root }}assets/js/diagrams.js?v={{ assets }}" defer data-mermaid-src="{{ root }}assets/vendor/mermaid/mermaid.min.js"></script>
+{% endif %}
+</body>
+</html>

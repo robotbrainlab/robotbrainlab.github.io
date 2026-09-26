@@ -1,0 +1,26 @@
+{{ marker }}
+<h1 data-chrome>Evidence</h1>
+<p class="landing-lead" data-chrome>The research reports and audits the curriculum was built from, newest first. They record evidence and reasoning; they do not change what to learn. To learn, follow the <a href="{{ guide_href }}">learning guide</a>; the detailed curriculum is the <a href="{{ spec_href }}">specification</a>.</p>
+{% if registers %}
+<section class="overview-section" aria-labelledby="current-practice">
+  <h2 id="current-practice" data-chrome>How current practice is evaluated</h2>
+  {% for r in registers %}
+  <div class="landing-item landing-item--evidence">
+    <p class="landing-item-meta" data-chrome><code>{{ r.path }}</code></p>
+    <h3 class="landing-item-title"><a href="{{ r.href }}">{{ r.title }}</a></h3>
+    <div class="landing-item-text">{{ r.lead }}</div>
+  </div>
+  {% endfor %}
+  {% if scans %}<p class="landing-item-text" data-chrome>Maintenance reports: {% for s in scans %}<a href="{{ s.href }}">{{ s.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+</section>
+<h2 data-chrome>Research reports</h2>
+{% endif %}
+<ol class="landing-list">
+  {% for r in reports %}
+  <li class="landing-item landing-item--evidence">
+    <p class="landing-item-meta" data-chrome>{% if r.date %}<time datetime="{{ r.date }}">{{ r.date }}</time>{% endif %}<code>{{ r.path }}</code></p>
+    <h2 class="landing-item-title"><a href="{{ r.href }}">{{ r.title }}</a></h2>
+    {% if r.type %}<p class="landing-item-text"><span class="landing-item-label" data-chrome>{{ r.type_label }}:</span> {{ r.type }}</p>{% endif %}
+  </li>
+  {% endfor %}
+</ol>

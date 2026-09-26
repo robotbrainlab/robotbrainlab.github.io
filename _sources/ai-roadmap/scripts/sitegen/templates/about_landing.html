@@ -1,0 +1,20 @@
+<p class="doc-kind doc-kind--project" data-chrome><span class="doc-kind-label">About this project</span></p>
+<h1 data-chrome>About</h1>
+<p class="landing-lead" data-chrome>The detailed curriculum specification, why the roadmap exists, the rules that govern and maintain it, and the records of how it was designed. To learn, follow the <a href="{{ guide_href }}">learning guide</a>.</p>
+<div class="about-summary prose">
+{{ summary }}
+</div>
+{% for group in groups %}
+<section class="overview-section" aria-labelledby="{{ group.id }}">
+  <h2 id="{{ group.id }}" data-chrome>{{ group.label }}</h2>
+  <ul class="landing-list">
+    {% for e in group.entries %}
+    <li class="landing-item">
+      <p class="landing-item-meta" data-chrome><span>{{ e.kind }}</span>{% if e.path %}<code>{{ e.path }}</code>{% endif %}</p>
+      <h3 class="landing-item-title"><a href="{{ e.href }}">{{ e.title }}</a></h3>
+      {% if e.note %}<p class="landing-item-text" data-chrome>{{ e.note }}</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endfor %}

@@ -1,0 +1,6 @@
+<p class="guide-kicker" data-chrome>{% if part %}<span class="guide-kicker-part">{{ part }}</span><span aria-hidden="true"> · </span>{% endif %}<span>{{ position }}</span></p>
+<h1 id="{{ slug }}" class="guide-title{% if checkpoint %} guide-title--checkpoint{% endif %}">{{ heading }}</h1>
+<div class="guide-body{% if checkpoint %} guide-body--checkpoint{% endif %}">
+{{ content }}
+</div>
+{% include "partials/journey_pager.html" %}

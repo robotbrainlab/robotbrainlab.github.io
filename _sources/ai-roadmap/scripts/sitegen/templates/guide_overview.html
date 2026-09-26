@@ -1,0 +1,38 @@
+<p class="doc-kind doc-kind--guide" data-chrome><span class="doc-kind-label">Learning guide</span></p>
+<h1>{{ title }}</h1>
+<div class="guide-preamble">
+{{ preamble }}
+</div>
+<p class="overview-actions" data-chrome><a class="button button--primary" href="{{ start_href }}">Start with step 1: {{ start_title }} <span aria-hidden="true">→</span></a> <a class="button button--modern" href="{{ modern_href }}">Explore {{ modern_title }} <span aria-hidden="true">→</span></a></p>
+
+<section class="guide-intro" aria-labelledby="{{ intro_slug }}">
+  <h2 id="{{ intro_slug }}">{{ intro_title }}</h2>
+  {{ intro }}
+</section>
+
+{% for part in parts %}
+<section class="path-part" aria-labelledby="{{ part.slug }}">
+  <h2 id="{{ part.slug }}">{{ part.title }}</h2>
+  {{ part.intro }}
+  <ol class="path-steps">
+    {% for s in part.steps %}
+    <li class="path-step{% if s.checkpoint %} path-step--checkpoint{% endif %}{% if s.modern %} path-step--topic{% endif %}">
+      <a class="path-step-link" href="{{ s.href }}"><span class="path-num" data-chrome>{% if s.number %}{{ s.number }}{% elif s.modern %}<span aria-hidden="true">◇</span>{% else %}<span aria-hidden="true">✓</span>{% endif %}</span><span class="path-title">{{ s.title }}</span></a>
+      {% if s.meta %}<p class="path-meta" data-chrome>{{ s.meta }}</p>{% endif %}
+      {% if s.lead and not s.checkpoint %}<p class="path-lead">{{ s.lead }}</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endfor %}
+
+<section class="path-part path-part--modern" aria-labelledby="{{ modern_slug }}">
+  <p class="kicker" data-chrome>Alongside the path</p>
+  <h2 id="{{ modern_slug }}"><a href="{{ modern_href }}">{{ modern_title }}</a></h2>
+  {{ modern_lead }}
+  <ul class="topic-list">
+    {% for st in stages %}
+    <li><a href="{{ st.href }}"><span class="topic-title">{{ st.title }}</span><span class="topic-opens" data-chrome>{{ st.opens }}</span></a></li>
+    {% endfor %}
+  </ul>
+</section>

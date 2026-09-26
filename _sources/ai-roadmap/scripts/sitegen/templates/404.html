@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block body_class %}page-home page-404{% endblock %}
+{% block page %}
+<div class="drawer drawer--left home-drawer" id="site-drawer" role="dialog" aria-label="Navigation" data-chrome>
+  <div class="drawer-head">
+    <span class="drawer-title">Navigation</span>
+    <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+  </div>
+  {% with drawer=true %}{% include "partials/primary_nav.html" %}{% endwith %}
+</div>
+<main id="main" class="home" tabindex="-1" data-chrome>
+  <header class="home-hero">
+    <p class="eyebrow">Not found</p>
+    <h1 class="home-title">Page not found</h1>
+    <p class="home-lead">This page is not part of the generated site. Continue from one of the areas below.</p>
+    <p class="home-actions">
+      <a class="button button--primary" href="{{ home_href }}">Home</a>
+      {% for link in links %}<a class="button" href="{{ link.href }}">{{ link.label }}</a>{% endfor %}
+    </p>
+  </header>
+</main>
+{% endblock %}

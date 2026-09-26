@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block body_class %}page-home{% endblock %}
+{% block page %}
+<div class="drawer drawer--left home-drawer" id="site-drawer" role="dialog" aria-label="Navigation" data-chrome>
+  <div class="drawer-head">
+    <span class="drawer-title">Navigation</span>
+    <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+  </div>
+  {% with drawer=true %}{% include "partials/primary_nav.html" %}{% endwith %}
+</div>
+
+<main id="main" class="home" tabindex="-1">
+
+  <header class="home-hero">
+    <h1 class="home-title">{{ site_title }}</h1>
+    {% if lead %}<p class="home-lead">{{ lead }}</p>{% endif %}
+    <div class="home-dimensions">{{ dimensions }}</div>
+    <p class="home-actions" data-chrome>
+      <a class="button button--primary" href="{{ start_href }}">Start Fundamentals: {{ start_title }} <span aria-hidden="true">→</span></a>
+      <a class="button button--modern" href="{{ modern_href }}">Explore {{ modern_title }} <span aria-hidden="true">→</span></a>
+    </p>
+  </header>
+
+  <section class="tracks" aria-label="The two dimensions of the roadmap">
+    <div class="track track--depth">
+      <div class="track-head" data-chrome>
+        <p class="kicker">{{ depth_label }}</p>
+        <h2 class="track-title">{% for d in depth %}<span>{{ d }}</span>{% if not loop.last %}<span class="organized-arrow" aria-hidden="true"> → </span>{% endif %}{% endfor %}</h2>
+      </div>
+      <ol class="path-parts">
+        {% for part in parts %}
+        <li class="path-part-card">
+          <h3 class="path-part-title">{{ part.title }}</h3>
+          <div class="path-part-intro">{{ part.intro }}</div>
+          <ol class="path-part-steps">
+            {% for s in part.steps %}
+            <li><a href="{{ s.href }}"><span class="path-num" data-chrome>{{ s.number }}</span><span>{{ s.title }}</span></a></li>
+            {% endfor %}
+          </ol>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+    <div class="track track--modern">
+      <div class="track-head" data-chrome>
+        <p class="kicker">Alongside the path</p>
+        <h2 class="track-title"><a href="{{ modern_href }}">{{ modern_title }}</a></h2>
+      </div>
+      <div class="track-lead">{{ modern_lead }}</div>
+      <ul class="topic-list">
+        {% for t in topics %}
+        <li><a href="{{ t.href }}"><span class="topic-title">{{ t.title }}</span><span class="topic-opens" data-chrome>{{ t.opens }}</span></a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+
+  <section class="behind" aria-labelledby="behind-title" data-chrome>
+    <div class="home-section-head">
+      <p class="kicker">Behind the guide</p>
+      <h2 id="behind-title" class="home-section-title">Research-backed, and kept current</h2>
+    </div>
+    <ul class="behind-list">
+      <li><a href="{{ evidence_href }}"><span class="behind-title">Evidence</span><span class="behind-text">{{ report_count }} research reports and audits behind the curriculum, and the register of current practice. Evidence, not curriculum.</span></a></li>
+      <li><a href="{{ spec_href }}"><span class="behind-title">Curriculum specification</span><span class="behind-text">The detailed accepted curriculum this guide presents: every requirement and dependency.</span></a></li>
+      <li><a href="{{ about_href }}"><span class="behind-title">About</span><span class="behind-text">Purpose, scope, governance, and how the roadmap is reviewed every four and twelve weeks.</span></a></li>
+    </ul>
+  </section>
+
+</main>
+{% endblock %}

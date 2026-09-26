@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>How Foundation Models Are Made and Adapted · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><span>Part 2 — Advanced</span></li>
+      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part">Part 2 — Advanced</span><span aria-hidden="true"> · </span><span>Step 10 of 19</span></p>
+<h1 id="10-how-foundation-models-are-made-and-adapted" class="guide-title">10. How Foundation Models Are Made and Adapted</h1>
+<div class="guide-body">
+<p>The models you build on are not trained for your task. A <strong>foundation model</strong> is trained once, at great expense, on a very large amount of general data, and is then pointed at many different tasks it was never specifically taught — by prompting, by retrieval, or by a little further training. That is the economic fact underneath most contemporary AI engineering: you use capability that someone else paid to create, and your work is to shape and check it.</p>
+<p>You continue here from the model you built in step 8, which had only the first half of that story. This step covers the rest: how pretraining puts knowledge into the weights, how post-training turns &quot;predicts the next token&quot; into &quot;follows instructions, refuses some requests, and reasons before answering&quot;, and what happens when you adapt a model yourself — including the changes you did not intend and would only find by looking.</p>
+<section class="guide-block guide-block--where-you-are" aria-label="Where you are">
+<p class="guide-label"><strong>Where you are</strong></p>
+<p>You built a small language model (step 8), so you know what the weights are and what training does to them. What you have not seen is how the models you actually use were made: what happens between &quot;predicts the next token&quot; and &quot;follows instructions, refuses some requests and reasons before answering&quot; — and what you are really doing when you adapt one.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#where-capability-comes-from">Where capability comes from</a>
+<ol class="unit-toc-sublist">
+<li><a href="#pretraining-data-as-a-quality-lever">Pretraining data as a quality lever</a></li>
+<li><a href="#scaling-relationships-and-why-they-are-contested">Scaling relationships, and why they are contested</a></li>
+</ol>
+</li>
+<li><a href="#a-short-reinforcement-learning-arc">A short reinforcement-learning arc</a>
+<ol class="unit-toc-sublist">
+<li><a href="#decision-problems-policies-and-rewards">Decision problems, policies and rewards</a></li>
+<li><a href="#credit-assignment-and-policy-gradients">Credit assignment and policy gradients</a></li>
+<li><a href="#why-a-kl-regularized-objective-keeps-a-tuned-model-near-its-base">Why a KL-regularized objective keeps a tuned model near its base</a></li>
+<li><a href="#bandits-and-exploration">Bandits and exploration</a></li>
+</ol>
+</li>
+<li><a href="#post-training">Post-training</a>
+<ol class="unit-toc-sublist">
+<li><a href="#supervised-fine-tuning">Supervised fine-tuning</a></li>
+<li><a href="#preference-optimization">Preference optimization</a></li>
+<li><a href="#reinforcement-learning-from-verifiable-rewards">Reinforcement learning from verifiable rewards</a></li>
+</ol>
+</li>
+<li><a href="#other-ways-to-move-capability">Other ways to move capability</a>
+<ol class="unit-toc-sublist">
+<li><a href="#distillation">Distillation</a></li>
+<li><a href="#test-time-compute-and-the-limits-of-chain-of-thought">Test-time compute, and the limits of chain of thought</a></li>
+</ol>
+</li>
+<li><a href="#adapting-a-model-yourself">Adapting a model yourself</a>
+<ol class="unit-toc-sublist">
+<li><a href="#parameter-efficient-adaptation">Parameter-efficient adaptation</a></li>
+<li><a href="#model-merging-and-multi-task-tuning">Model merging and multi-task tuning</a></li>
+<li><a href="#side-effects-forgetting-and-emergent-misalignment">Side effects: forgetting and emergent misalignment</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-you-ll-learn" aria-label="What you&#x27;ll learn">
+<p class="guide-label"><strong>What you&#x27;ll learn</strong></p>
+<p>By the end you should be able to explain why post-training algorithms are derived from reinforcement learning and what they assume, implement one adaptation of the model you built in step 8, diagnose what else that adaptation changed, and judge a scaling or capability claim against its evidence.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>Pretraining sets what a model knows; post-training sets how it behaves — and post-training is reinforcement learning wearing engineering clothes, which is why the short RL arc comes before it rather than as background reading. Once you can read a policy-gradient update, preference optimization stops being a black box, and the KL term has an obvious job: keep the tuned model near the one that already works. The same lens explains the rest. Distillation moves capability into a smaller model; test-time compute buys capability with inference tokens instead of training; low-rank adaptation moves a little of it cheaply. The last group is the honest part: every one of these changes something you did not measure, which is why an adaptation is not finished until you have checked what <em>else</em> moved.</p>
+</section>
+<section class="unit-area" aria-labelledby="where-capability-comes-from">
+<h2 id="where-capability-comes-from">Where capability comes from<a class="heading-anchor" href="#where-capability-comes-from" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Before you can reason about adapting a model, you need an account of how it got its behaviour in the first place.</p>
+</section>
+<section class="unit-concept" aria-labelledby="pretraining-data-as-a-quality-lever">
+<h3 id="pretraining-data-as-a-quality-lever">Pretraining data as a quality lever<a class="heading-anchor" href="#pretraining-data-as-a-quality-lever" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What goes into pretraining, and why data curation is one of the strongest determinants of what a model can do. <strong>Studied in:</strong> <em>AI Engineering</em> ch 2, &quot;Training Data&quot; (pp. 50–58).</p>
+</section>
+<section class="unit-concept" aria-labelledby="scaling-relationships-and-why-they-are-contested">
+<h3 id="scaling-relationships-and-why-they-are-contested">Scaling relationships, and why they are contested<a class="heading-anchor" href="#scaling-relationships-and-why-they-are-contested" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What scaling results actually show, how they are read in practice, and where the disagreement lies. A good first exercise in holding a claim as contested. <strong>Studied in:</strong> <em>AI Engineering</em> ch 2, &quot;Model Size&quot; (pp. 67–78).</p>
+</section>
+<section class="unit-area" aria-labelledby="a-short-reinforcement-learning-arc">
+<h2 id="a-short-reinforcement-learning-arc">A short reinforcement-learning arc<a class="heading-anchor" href="#a-short-reinforcement-learning-arc" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Just enough reinforcement learning to read post-training as engineering rather than magic.</p>
+</section>
+<section class="unit-concept" aria-labelledby="decision-problems-policies-and-rewards">
+<h3 id="decision-problems-policies-and-rewards">Decision problems, policies and rewards<a class="heading-anchor" href="#decision-problems-policies-and-rewards" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Markov decision processes, policies and reward signals — the framing that post-training borrows. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 19, Markov decision processes.</p>
+</section>
+<section class="unit-concept" aria-labelledby="credit-assignment-and-policy-gradients">
+<h3 id="credit-assignment-and-policy-gradients">Credit assignment and policy gradients<a class="heading-anchor" href="#credit-assignment-and-policy-gradients" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Attributing an outcome to earlier actions, and the gradient estimate that makes learning from it possible. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 19, policy gradients.</p>
+</section>
+<section class="unit-concept" aria-labelledby="why-a-kl-regularized-objective-keeps-a-tuned-model-near-its-base">
+<h3 id="why-a-kl-regularized-objective-keeps-a-tuned-model-near-its-base">Why a KL-regularized objective keeps a tuned model near its base<a class="heading-anchor" href="#why-a-kl-regularized-objective-keeps-a-tuned-model-near-its-base" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The KL term — a penalty for drifting away from the model you started with, named after the Kullback–Leibler divergence that measures that drift. Why tuning needs it, and what happens when it is too weak. <strong>Studied in:</strong> <a href="../materials/reinforcement-learning-arc/index.html">this roadmap&#x27;s note on the reinforcement-learning arc</a>.</p>
+</section>
+<section class="unit-concept" aria-labelledby="bandits-and-exploration">
+<h3 id="bandits-and-exploration">Bandits and exploration<a class="heading-anchor" href="#bandits-and-exploration" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Awareness of the simplest decision problems and the exploration–exploitation trade-off, which returns in routing and online evaluation. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 19; cross-reference: step 4&#x27;s controlled experiments.</p>
+</section>
+<section class="unit-area" aria-labelledby="post-training">
+<h2 id="post-training">Post-training<a class="heading-anchor" href="#post-training" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>How a next-token predictor becomes something that follows instructions and refuses some requests.</p>
+</section>
+<section class="unit-concept" aria-labelledby="supervised-fine-tuning">
+<h3 id="supervised-fine-tuning">Supervised fine-tuning<a class="heading-anchor" href="#supervised-fine-tuning" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Training on demonstrations: the first and most predictable stage. <strong>Studied in:</strong> <em>AI Engineering</em> ch 2, &quot;Post-Training&quot; (pp. 78–88).</p>
+</section>
+<section class="unit-concept" aria-labelledby="preference-optimization">
+<h3 id="preference-optimization">Preference optimization<a class="heading-anchor" href="#preference-optimization" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Learning from comparisons rather than demonstrations, and what a reward model is standing in for. <strong>Studied in:</strong> <em>AI Engineering</em> ch 2, &quot;Post-Training&quot; (pp. 78–88).</p>
+</section>
+<section class="unit-concept" aria-labelledby="reinforcement-learning-from-verifiable-rewards">
+<h3 id="reinforcement-learning-from-verifiable-rewards">Reinforcement learning from verifiable rewards<a class="heading-anchor" href="#reinforcement-learning-from-verifiable-rewards" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Training against programmatic checks, how reasoning models are produced, and why the details here are contested and move quickly. <strong>Studied in:</strong> <a href="../materials/foundation-model-lifecycle/index.html">this roadmap&#x27;s lifecycle brief</a>.</p>
+</section>
+<section class="unit-area" aria-labelledby="other-ways-to-move-capability">
+<h2 id="other-ways-to-move-capability">Other ways to move capability<a class="heading-anchor" href="#other-ways-to-move-capability" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Not every capability change is a weight update, and knowing the alternatives is what makes the lever choice deliberate.</p>
+</section>
+<section class="unit-concept" aria-labelledby="distillation">
+<h3 id="distillation">Distillation<a class="heading-anchor" href="#distillation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Training a smaller model on a larger one&#x27;s behaviour, and what survives the transfer. <strong>Studied in:</strong> <em>AI Engineering</em> ch 2; <a href="../materials/foundation-model-lifecycle/index.html">this roadmap&#x27;s lifecycle brief</a>.</p>
+</section>
+<section class="unit-concept" aria-labelledby="test-time-compute-and-the-limits-of-chain-of-thought">
+<h3 id="test-time-compute-and-the-limits-of-chain-of-thought">Test-time compute, and the limits of chain of thought<a class="heading-anchor" href="#test-time-compute-and-the-limits-of-chain-of-thought" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Spending inference computation on intermediate reasoning, and why the written reasoning is not a reliable account of how the answer was produced. <strong>Studied in:</strong> <em>AI Engineering</em> ch 2, &quot;Test Time Compute&quot; (pp. 96–99).</p>
+</section>
+<section class="unit-area" aria-labelledby="adapting-a-model-yourself">
+<h2 id="adapting-a-model-yourself">Adapting a model yourself<a class="heading-anchor" href="#adapting-a-model-yourself" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The part you do with your own hands, on the model you built.</p>
+</section>
+<section class="unit-concept" aria-labelledby="parameter-efficient-adaptation">
+<h3 id="parameter-efficient-adaptation">Parameter-efficient adaptation<a class="heading-anchor" href="#parameter-efficient-adaptation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Low-rank adaptation: what it touches, what it leaves alone, and why it is the default when you adapt at all. You implement it. <strong>Studied in:</strong> <em>Build a Large Language Model (From Scratch)</em> Appendix E; <em>AI Engineering</em> ch 7 (pp. 347–361).</p>
+</section>
+<section class="unit-concept" aria-labelledby="model-merging-and-multi-task-tuning">
+<h3 id="model-merging-and-multi-task-tuning">Model merging and multi-task tuning<a class="heading-anchor" href="#model-merging-and-multi-task-tuning" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Combining adapted models, and where that helps rather than blurs. <strong>Studied in:</strong> <em>AI Engineering</em> ch 7, &quot;Model Merging and Multi-Task Finetuning&quot;.</p>
+</section>
+<section class="unit-concept" aria-labelledby="side-effects-forgetting-and-emergent-misalignment">
+<h3 id="side-effects-forgetting-and-emergent-misalignment">Side effects: forgetting and emergent misalignment<a class="heading-anchor" href="#side-effects-forgetting-and-emergent-misalignment" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What an adaptation changes beyond its target — including behaviour far from the tuning data — and why evaluating only the target task is not enough. <strong>Studied in:</strong> <a href="../materials/foundation-model-lifecycle/index.html">this roadmap&#x27;s lifecycle brief</a>; your own adaptation investigation.</p>
+</section>
+<section class="guide-block guide-block--where-this-fits-in-ai" aria-label="Where this fits in AI">
+<p class="guide-label"><strong>Where this fits in AI</strong></p>
+<p>The model box in your picture now has a history behind it and three ways in:</p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: Side effects: forgetting and emergent misalignment"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    D[&quot;A very large&lt;br/&gt;general text collection&quot;] --&gt; PT[&quot;Pretraining&lt;br/&gt;what it knows&quot;]
+    PT --&gt; B[&quot;Base model&quot;]
+    B --&gt; PO[&quot;Post-training&lt;br/&gt;how it behaves&quot;]
+    PO --&gt; F[&quot;The model you call&quot;]
+    F --&gt; L1[&quot;Prompting&lt;br/&gt;change what you ask&quot;]
+    F --&gt; L2[&quot;Retrieval&lt;br/&gt;change what it is given&quot;]
+    F --&gt; L3[&quot;Adaptation&lt;br/&gt;change the weights&quot;]
+</code></pre></figure>
+<p>The three levers are in increasing order of cost and of consequence, and choosing between them is one of the decisions this roadmap keeps returning to. This is the supply side of every foundation-model system you will build: it explains why the model you call behaves as it does, what a provider may have changed when quality shifts after an upgrade, and which lever — prompt, retrieval or adaptation — is the right one for a given problem. Its contested parts are also an honest first encounter with a fast-moving literature, which step 13 teaches you to read properly.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary · continuing</strong></span><span class="study-title"><em>AI Engineering</em></span><span class="study-task"><strong>revisit:</strong> (you began this book in <a href="../working-with-models/index.html">Working with Models</a>, before step 8) from chapter 2, &quot;Training Data&quot; (pp. 50–58), &quot;Model Size&quot; (pp. 67–78), &quot;Post-Training&quot; (pp. 78–88) and &quot;Test Time Compute&quot; (pp. 96–99); from chapter 7, &quot;Model Merging and Multi-Task Finetuning&quot; and &quot;Finetuning Tactics&quot; (pp. 347–361).</span><span class="study-why"><strong>Why:</strong> a clear, framework-free account of how foundation models are trained and adapted.</span></li>
+<li><span class="study-role"><strong>Practice · continuing</strong></span><span class="study-title"><em>Build a Large Language Model (From Scratch)</em></span><span class="study-task"><strong>revisit:</strong> (the book you built with in <a href="../8-how-language-models-work-build-one/index.html">8. How Language Models Work: Build One</a>) Appendix E (LoRA).</span><span class="study-why"><strong>Why:</strong> you now add low-rank adaptation to your own model, which is the only way to see what an adaptation really touches.</span></li>
+<li><span class="study-role"><strong>Supplement · continuing</strong></span><span class="study-title"><em>Hands-On ML with Scikit-Learn and PyTorch</em></span><span class="study-task"><strong>revisit:</strong> (begun in <a href="../3-machine-learning-framing-problems-and-building-models/index.html">3. Machine Learning: Framing Problems and Building Models</a>) from chapter 19, Markov decision processes and policy gradients.</span><span class="study-why"><strong>Why:</strong> the reinforcement-learning ideas that post-training is built on. <strong>Selected reading:</strong> the rest of that chapter is deep reinforcement learning, an extension path rather than part of the universal core.</span></li>
+<li><span class="study-role"><strong>Curriculum material</strong></span><span class="study-title"><a href="../materials/reinforcement-learning-arc/index.html">The Reinforcement-Learning Arc Behind Post-Training</a> and <a href="../materials/foundation-model-lifecycle/index.html">Reading the Foundation-Model Lifecycle</a></span><span class="study-task"><strong>read:</strong> both, the arc note first.</span><span class="study-why"><strong>Why:</strong> no assigned source bridges the deep-reinforcement-learning chapter to language-model post-training, and the newest claims move faster than books.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--where-you-study-each-concept" aria-label="Where you study each concept">
+<p class="guide-label"><strong>Where you study each concept</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Side effects: forgetting and emergent misalignment"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">What you study</th>
+<th scope="col">Where you study it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pretraining data, scaling, post-training, test-time compute</td>
+<td><em>AI Engineering</em> ch 2, pp. 50–99</td>
+</tr>
+<tr>
+<td>Parameter-efficient adaptation, merging, finetuning tactics</td>
+<td><em>AI Engineering</em> ch 7, pp. 347–361</td>
+</tr>
+<tr>
+<td>Markov decision processes, policy gradients</td>
+<td><em>Hands-On ML</em> ch 19</td>
+</tr>
+<tr>
+<td>Low-rank adaptation, by construction</td>
+<td><em>Build a Large Language Model (From Scratch)</em> Appendix E</td>
+</tr>
+<tr>
+<td>The reinforcement-learning arc; verifiable rewards, distillation, contested claims</td>
+<td>This roadmap&#x27;s planned note and brief</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<p>Adapt your model and investigate what <em>else</em> changed.</p>
+</section>
+<section class="guide-block guide-block--you-re-ready-to-continue-when-you-can" aria-label="You&#x27;re ready to continue when you can">
+<p class="guide-label"><strong>You&#x27;re ready to continue when you can</strong></p>
+<ul class="guide-list guide-list--you-re-ready-to-continue-when-you-can">
+<li>explain why post-training algorithms are derived from reinforcement learning, and what they assume;</li>
+<li>implement one adaptation and diagnose a regression it introduced;</li>
+<li>evaluate a scaling or capability claim against its evidence, treating contested claims as contested.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--what-comes-next" aria-label="What comes next">
+<p class="guide-label"><strong>What comes next</strong></p>
+<p>You can now reason about a single model, however it was made. But almost no useful system is a single model call. Step 11 composes models with retrieval, tools and checks — and asks how much autonomy that composition should be given.</p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev" href="../checkpoint-ready-for-advanced/index.html" rel="prev"><span class="guide-pager-label">← Previous</span><span class="guide-pager-title">Checkpoint: Ready for Advanced</span></a>
+  <a class="guide-pager-link guide-pager-link--next" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html" rel="next"><span class="guide-pager-label">Next →</span><span class="guide-pager-title">11. Compound AI Systems: Tools, Retrieval and Verification</span></a>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+<script src="../../assets/js/diagrams.js?v=ce213ccecc" defer data-mermaid-src="../../assets/vendor/mermaid/mermaid.min.js"></script>
+</body>
+</html>

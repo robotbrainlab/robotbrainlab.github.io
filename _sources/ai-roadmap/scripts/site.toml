@@ -1,0 +1,392 @@
+# Presentation configuration for the generated learner site.
+#
+# This file holds source paths, the source → page routes, area and navigation
+# order, and presentation options. It holds no curriculum content: steps,
+# resources and dates are read from the canonical Markdown at build time.
+
+[output]
+dir = "site"
+
+[sources]
+site = "README.md"                  # site title and lead
+guide = "LEARNING-GUIDE.md"         # the learner's path (presentation of ROADMAP.md)
+curriculum = "ROADMAP.md"           # the accepted curriculum specification
+maintenance = "MAINTENANCE.md"      # maintenance procedure
+maintenance_state = "reviews/maintenance-state.json"
+
+# ----- Areas and primary navigation ------------------------------------------
+
+[nav]
+primary = ["learn", "evidence", "about"]
+
+[areas.learn]
+label = "Learn"
+landing = "learn/index.html"
+
+[areas.evidence]
+label = "Evidence"
+landing = "research/index.html"
+
+[areas.about]
+label = "About"
+landing = "about/index.html"
+
+# ----- Routes: canonical source → page ----------------------------------------
+# Ordered; the first matching pattern wins. {stem} is the file name without
+# extension. `group` orders documents inside the About navigation. The guide is
+# split into one page per step under learn/.
+
+[[routes]]
+source = "LEARNING-GUIDE.md"
+page = "learn/index.html"
+area = "learn"
+kind = "guide"
+
+[[routes]]
+source = "ROADMAP.md"
+page = "about/curriculum/index.html"
+area = "about"
+kind = "curriculum"
+group = "Curriculum specification"
+
+# Materials this curriculum writes itself, where no assigned resource does the job.
+# They are learner-facing: they live in Learn, beside the steps that send learners to them.
+[[routes]]
+source = "materials/*.md"
+page = "learn/materials/{stem}/index.html"
+area = "learn"
+kind = "material"
+
+[[routes]]
+source = "research/*.md"
+page = "research/{stem}/index.html"
+area = "evidence"
+kind = "evidence"
+
+[[routes]]
+source = "reviews/modern-practice-register.md"
+page = "evidence/current-practice/index.html"
+area = "evidence"
+kind = "register"
+
+[[routes]]
+source = "reviews/*.md"
+page = "reviews/{stem}/index.html"
+area = "about"
+kind = "review"
+group = "Maintenance and reviews"
+
+[[routes]]
+source = "README.md"
+page = "about/philosophy/index.html"
+area = "about"
+kind = "project"
+group = "Project"
+
+[[routes]]
+source = "PROJECT-STATE.md"
+page = "about/project-state/index.html"
+area = "about"
+kind = "project"
+group = "Project"
+
+[[routes]]
+source = "AGENTS.md"
+page = "about/governance/index.html"
+area = "about"
+kind = "governance"
+group = "Maintenance and reviews"
+
+[[routes]]
+source = "MAINTENANCE.md"
+page = "about/maintenance/index.html"
+area = "about"
+kind = "governance"
+group = "Maintenance and reviews"
+
+[[routes]]
+source = "design/site-architecture.md"
+page = "about/site-design/index.html"
+area = "about"
+kind = "design"
+group = "Design records"
+
+[[routes]]
+source = "design/*.md"
+page = "about/design/{stem}/index.html"
+area = "about"
+kind = "design"
+group = "Design records"
+
+[[routes]]
+source = "prompts/*.md"
+page = "about/methodology/{stem}/index.html"
+area = "about"
+kind = "methodology"
+group = "Methodology"
+
+[[routes]]
+source = "history/*.md"
+page = "about/history/{stem}/index.html"
+area = "about"
+kind = "history"
+group = "History"
+
+# Links to non-Markdown paths that have a meaningful page.
+[aliases]
+"reviews/maintenance-state.json" = "reviews/index.html"
+"reviews" = "reviews/index.html"
+"research" = "research/index.html"
+"history" = "about/index.html"
+"design" = "about/index.html"
+"site" = "index.html"
+
+# Extra About entries that are generated pages rather than documents.
+[[about_links]]
+group = "Maintenance and reviews"
+title = "Maintenance status and review reports"
+page = "reviews/index.html"
+kind = "review"
+
+# ----- Document kinds: the marker shown above each document's title -----------
+
+[kinds.material]
+label = "Curriculum material"
+note = "Written for this roadmap — the guide sends you here"
+
+[kinds.guide]
+label = "Learning guide"
+note = ""
+
+[kinds.curriculum]
+label = "Curriculum specification"
+note = "Accepted baseline"
+
+[kinds.evidence]
+label = "Evidence — research report"
+note = "Not curriculum"
+
+[kinds.review]
+label = "Maintenance analysis / proposal"
+note = "Not automatically canonical"
+
+[kinds.register]
+label = "Current-practice register"
+note = "Maintenance record — not curriculum"
+
+[kinds.governance]
+label = "Governance"
+note = "How the roadmap is maintained"
+
+[kinds.project]
+label = "Project"
+note = "About this repository"
+
+[kinds.design]
+label = "Design record"
+note = "Reasoning — not the curriculum itself"
+
+[kinds.methodology]
+label = "Methodology"
+note = "Research prompt — not curriculum"
+
+[kinds.history]
+label = "Historical baseline"
+note = "Superseded — not the current curriculum"
+
+# Labels on links that lead from one kind of document into another.
+[xref]
+curriculum = "Specification"
+evidence = "Evidence"
+history = "Historical"
+
+# ----- Learner guide ----------------------------------------------------------------
+
+[guide]
+intro_section = "How to Use This Guide"
+part_prefix = "Part "
+checkpoint_prefix = "Checkpoint"
+# The guide's section on Modern AI Engineering: a parallel curriculum of topics, shown in Learn
+# as its own track beside the Depth path — never a fifth depth level.
+modern_section = "Modern AI Engineering"
+modern_nav_title = "Overview"
+depth_track_label = "Depth path"
+# What the pager says when a detour ends and the numbered path resumes.
+return_note = "back on the numbered path"
+# The paragraph of "How to Use This Guide" that states the two dimensions (shown on Home).
+dimensions_label = "Two dimensions, studied together."
+
+# What every Modern topic must contain, so that it teaches knowledge rather than point back to
+# the Depth path. Orientation (Phase 0) has nothing to study yet.
+# The shape every learning unit follows: context and concepts before resources.
+[guide.unit_labels]
+context_label = "Where you are"
+modern_context_label = "Opens when"
+toc_label = "What you'll learn"
+connect_label = "How these ideas connect"
+fits_label = "Where this fits in AI"
+study_label = "Study"
+map_label = "Where you study each concept"
+practice_label = "Practise and build"
+ready_labels = ["You're ready to continue when you can", "You've arrived when you can",
+                "How deeply to know it now"]
+next_labels = ["What comes next", "Where this leaves you", "When to revisit"]
+stage_labels = ["What this stage asks", "What you should be able to do by the end"]
+# The unit's own contents, generated from its H4 areas and H5 concepts and placed before them.
+toc_title = "In this unit"
+# The contents are placed immediately before this label, so orientation comes first.
+toc_before_label = "What you'll learn"
+modern_toc_before_label = "What to understand today"
+# The concept hierarchy ends where the back matter begins.
+back_labels = ["Where this fits in AI", "Study", "Practise and build", "How deeply to know it now",
+               "You're ready to continue when you can", "You've arrived when you can", "What lasts and what changes",
+               "What comes next", "When to revisit", "Where this leaves you", "Open problems to study",
+               "Broadly valuable areas"]
+min_areas = 3
+min_concepts = 2
+concept_source_label = "Studied in"
+# A unit whose subject is a choice among paths, not a body of knowledge, carries no hierarchy.
+no_hierarchy = ["18. Choose Your Depth"]
+# Fundamentals and Advanced units carry the full shape; Mastery, Research and the Modern
+# topics keep the parts that fit them (the Modern topics have their own labels below).
+full_shape_parts = ["Part 1 — Fundamentals", "Part 2 — Advanced"]
+modern_part = "Modern AI Engineering"
+min_concept_groups = 3
+
+[guide.topic_labels]
+required = ["Opens when", "How to take it", "Return to the numbered path",
+            "What to understand today", "Study", "Practise and build",
+            "How deeply to know it now", "What lasts and what changes", "When to revisit"]
+orientation = ["Opens when", "How to take it", "Return to the numbered path",
+               "What to understand today", "Practise and build",
+               "How deeply to know it now", "What lasts and what changes", "When to revisit"]
+knowledge = "What to understand today"
+practice = "Practise and build"
+study = "Study"
+map = "Where you study each concept"
+depth = "How deeply to know it now"
+lasting = "What lasts and what changes"
+min_knowledge_words = 150
+status = "How to take it"
+back = "Return to the numbered path"
+statuses = ["Required", "Recommended", "Available"]
+hub_columns = ["Where you are", "Topic", "How to take it", "Return to"]
+
+# ----- Current-practice register (maintained by the 4-week scan) -----------------------
+
+[register]
+source = "reviews/modern-practice-register.md"
+practices_section = "Practices"
+references_section = "Current References"
+statuses = ["Discovered", "Watching", "Current Practice", "Established", "Superseded", "Declined", "Archived"]
+teachable = ["Current Practice", "Established"]
+
+# ----- About summary ------------------------------------------------------------------
+
+[about]
+boundary_phrase = "Computer Science & Engineering"
+current_section = "Keeping the Roadmap Current"
+
+# ----- Specification labels the guide is checked against -----------------------------
+# Names of canonical labels in ROADMAP.md. Changing a label there means changing
+# it here too; the build fails loudly otherwise.
+
+[curriculum]
+dependency_section = "Dependency Map"
+readiness_section = "Readiness Gates"
+resource_row = "Assigned resources"
+prerequisites_label = "Prerequisites"
+track_resources_label = "Where you practise"
+reading_plan_label = "Reading plan"
+resource_map_section = "Resource Map"
+optional_label = "Not counted as mandatory"
+# Books the owner approved for complete-book study; the build fails if the
+# reading plan or the guide stops presenting them that way.
+required_complete = [
+  "Practical SQL",
+  "Hands-On ML with Scikit-Learn and PyTorch",
+  "Build a Large Language Model (From Scratch)",
+  "Hands-On Large Language Models",
+  "Designing Machine Learning Systems",
+]
+named_sections = ["Important Extensions", "Specializations", "Research Frontiers"]
+emphasis_rows = ["Practice", "Readiness"]
+resource_rows = ["Assigned resources"]
+roles_label = "Resource roles"
+usage_section = "How to Use This Roadmap"
+role_column = "Role"
+
+# ----- Maintenance state labels (presentation of reviews/maintenance-state.json)
+
+[maintenance_state]
+next_modern_ai_scan_due = "Next 4-week Modern AI Scan"
+next_curriculum_review_due = "Next 12-week Curriculum Review"
+last_modern_ai_scan = "Last Modern AI Scan"
+last_curriculum_review = "Last Curriculum Review"
+scan_section = "4-Week Modern AI Scan"
+review_section = "12-Week Curriculum Review"
+command_section = "Normal Maintenance Command"
+
+# ----- Validation ----------------------------------------------------------------
+
+[validation]
+# Wording that must not appear on learner pages or in any interface text.
+# Typography: the only selectors allowed to justify text. Everything else is ragged right,
+# and this prose falls back to ragged right below the measure where justification reads evenly.
+justified_selectors = [".prose p, .prose li, .prose dd, .prose blockquote"]
+
+stale_phrases = [
+  "not generated in this milestone",
+  "first visual milestone",
+  "not generated yet",
+  "not yet designed",
+  "Not designed",
+  "not whole books",
+  "named parts, not",
+  "cover to cover",
+  "cover-to-cover",
+  "not books to finish",
+  # Materials this curriculum promised and has now written: the guide must link them, not promise them.
+  "planned material",
+  "(planned)",
+  # Model C wording that reduced Modern AI Engineering to applications of the Depth path
+  "Modern practice now available",
+  "This stage does not reteach",
+  "This track applies them",
+  "applies current practice on top of them",
+  "application of durable",
+  "applications of the durable",
+]
+# Claims of adoption, consensus or superiority that the evidence would have to carry; the
+# learner guide states what the evidence shows instead.
+overclaim_phrases = [
+  "industry standard", "industry-standard", "best practice", "state of the art", "state-of-the-art",
+  "de facto", "everyone uses", "widely adopted", "widely used", "the norm", "cutting-edge",
+  "game-changer", "the future of", "always use", "never fails",
+]
+# The accepted learning path: what each step and checkpoint delivers, in order.
+# Changing the path means changing this list deliberately.
+expected_sequence = [
+  "E1", "E2", "E4", "E3", "E9", "E10", "E5", "E7", "E8", "Entering Advanced",
+  "F1", "F2", "F3", "H1", "F6", "F4", "F5", "Entering Mastery",
+  "G1, G2, G3", "G4", "Entering Research contribution", "H2",
+]
+baseline = "2"
+# Learn shows two tracks side by side in its navigation: the Depth path, whose sections are the
+# four depth levels, and Modern AI Engineering. Then the top-level navigation.
+learn_tracks = ["Depth path", "Modern AI Engineering"]
+learn_sections = ["Fundamentals", "Advanced", "Mastery", "Research"]
+top_navigation = ["Learn", "Evidence", "About"]
+# SHA-256 of the accepted ROADMAP.md (Baseline 2) with only the §7 current-practice column blanked:
+# the 4-week scan may update that column (MAINTENANCE.md §4); any other change needs an accepted
+# curriculum change, after which this value is updated.
+current_practice_column = "Current practice (in this track only)"
+roadmap_protected_sha256 = "5402a945390118ea3ddcedacc069cb17c089a459614f668facf0a94ce34ee93e"
+# Internal curriculum identifiers that must not be visible on learner pages.
+internal_ids = '\b(?:E(?:10|[1-9])|F[1-6]|G[1-4]|H[12]|EX[1-9]|SP(?:10|[1-9])|RF[1-8]|UC(?:1[0-2]|[1-9])|MP-\d\d)\b'
+
+# ----- Evidence presentation -----------------------------------------------------
+# Header labels research reports use to state what kind of report they are.
+
+[evidence]
+type_labels = ["Report type", "Research type", "Audit phase"]

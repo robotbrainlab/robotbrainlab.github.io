@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Retrieval and Search · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><span>Part 1 — Fundamentals</span></li>
+      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part">Part 1 — Fundamentals</span><span aria-hidden="true"> · </span><span>Step 9 of 19</span></p>
+<h1 id="9-retrieval-and-search" class="guide-title">9. Retrieval and Search</h1>
+<div class="guide-body">
+<p>A model knows what its training left in its weights: nothing about your documents, nothing that happened afterwards, nothing private. Retrieval is the other way to supply knowledge — search a collection for the few passages that bear on the question, and put them into the model&#x27;s context so the answer is grounded in something you can point at.</p>
+<p>Finding the right passages is a discipline of its own, older than language models, and it has two families. <strong>Lexical</strong> search matches the words that are actually present. <strong>Dense</strong> search matches meaning, using the learned representations of step 7, so that &quot;cancel my plan&quot; can find a passage about subscription termination. They fail in opposite ways, which is why serious systems use both. This step teaches how to retrieve well, how to measure whether you did, and how to recognize retrieval as the reason a system is wrong — because a confidently wrong answer built on the wrong passage looks exactly like a right one.</p>
+<section class="guide-block guide-block--where-you-are" aria-label="Where you are">
+<p class="guide-label"><strong>Where you are</strong></p>
+<p>You have a model that generates fluent text from what is in its context (step 8), and you know what embeddings are (step 7). What you cannot yet do is decide <em>what goes into that context</em> from a large collection of documents — and get it right often enough that the answers are grounded rather than plausible.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#the-retrieval-problem">The retrieval problem</a>
+<ol class="unit-toc-sublist">
+<li><a href="#matching-an-information-need-to-documents">Matching an information need to documents</a></li>
+<li><a href="#lexical-retrieval-and-why-it-stays-competitive">Lexical retrieval, and why it stays competitive</a></li>
+</ol>
+</li>
+<li><a href="#ways-to-retrieve">Ways to retrieve</a>
+<ol class="unit-toc-sublist">
+<li><a href="#dense-retrieval">Dense retrieval</a></li>
+<li><a href="#late-interaction-retrieval">Late-interaction retrieval</a></li>
+<li><a href="#hybrid-retrieval-and-two-stage-reranking">Hybrid retrieval and two-stage reranking</a></li>
+</ol>
+</li>
+<li><a href="#judging-retrieval">Judging retrieval</a>
+<ol class="unit-toc-sublist">
+<li><a href="#relevance-judgments">Relevance judgments</a></li>
+<li><a href="#ranking-metrics">Ranking metrics</a></li>
+</ol>
+</li>
+<li><a href="#retrieval-at-scale">Retrieval at scale</a>
+<ol class="unit-toc-sublist">
+<li><a href="#approximate-nearest-neighbour-indexes">Approximate nearest-neighbour indexes</a></li>
+<li><a href="#the-recalllatency-trade-off">The recall–latency trade-off</a></li>
+</ol>
+</li>
+<li><a href="#preparing-the-collection">Preparing the collection</a>
+<ol class="unit-toc-sublist">
+<li><a href="#chunking">Chunking</a></li>
+<li><a href="#document-preparation">Document preparation</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-you-ll-learn" aria-label="What you&#x27;ll learn">
+<p class="guide-label"><strong>What you&#x27;ll learn</strong></p>
+<p>By the end you should be able to build and evaluate a hybrid retriever, explain why retrieval quality bounds answer quality, choose an index with the recall–latency trade-off in mind, and tell a retrieval failure from a generation failure.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>Lexical and dense retrieval fail in opposite directions — one matches words that are present, the other matches meanings but can miss an exact identifier — which is why combining them and then reranking the survivors is stronger than either alone. Evaluation is what makes that claim checkable rather than folklore: ranking metrics score an ordered list, not a single answer, and they are the reason you can tell a retrieval failure from a generation failure later. Indexing is where the same ideas meet scale, and the trade-off is explicit: approximate search buys latency with recall. Chunking is the quiet decision that governs all of it, because a passage that splits an idea in half can never be retrieved whole.</p>
+</section>
+<section class="unit-area" aria-labelledby="the-retrieval-problem">
+<h2 id="the-retrieval-problem">The retrieval problem<a class="heading-anchor" href="#the-retrieval-problem" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>What retrieval is for, and why the oldest method in the area is still a serious baseline.</p>
+</section>
+<section class="unit-concept" aria-labelledby="matching-an-information-need-to-documents">
+<h3 id="matching-an-information-need-to-documents">Matching an information need to documents<a class="heading-anchor" href="#matching-an-information-need-to-documents" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The problem statement: a query, a collection, and a ranking — and why relevance is a judgment rather than a property. <strong>Studied in:</strong> <em>Speech and Language Processing</em> ch 11.</p>
+</section>
+<section class="unit-concept" aria-labelledby="lexical-retrieval-and-why-it-stays-competitive">
+<h3 id="lexical-retrieval-and-why-it-stays-competitive">Lexical retrieval, and why it stays competitive<a class="heading-anchor" href="#lexical-retrieval-and-why-it-stays-competitive" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Inverted indexes and BM25: cheap, interpretable, and hard to beat on exact terms, names and codes. <strong>Studied in:</strong> <em>Speech and Language Processing</em> ch 11.</p>
+</section>
+<section class="unit-area" aria-labelledby="ways-to-retrieve">
+<h2 id="ways-to-retrieve">Ways to retrieve<a class="heading-anchor" href="#ways-to-retrieve" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Three families with different failure modes, and the combination that current practice relies on.</p>
+</section>
+<section class="unit-concept" aria-labelledby="dense-retrieval">
+<h3 id="dense-retrieval">Dense retrieval<a class="heading-anchor" href="#dense-retrieval" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Encoding query and document into vectors and searching by similarity — the embeddings of step 7 put to work. <strong>Studied in:</strong> <em>Speech and Language Processing</em> ch 11.</p>
+</section>
+<section class="unit-concept" aria-labelledby="late-interaction-retrieval">
+<h3 id="late-interaction-retrieval">Late-interaction retrieval<a class="heading-anchor" href="#late-interaction-retrieval" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Matching at the token level rather than collapsing a document into one vector, as a concept and a trade-off. <strong>Studied in:</strong> <em>Speech and Language Processing</em> ch 11.</p>
+</section>
+<section class="unit-concept" aria-labelledby="hybrid-retrieval-and-two-stage-reranking">
+<h3 id="hybrid-retrieval-and-two-stage-reranking">Hybrid retrieval and two-stage reranking<a class="heading-anchor" href="#hybrid-retrieval-and-two-stage-reranking" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Retrieving cheaply and broadly, then reranking precisely — the architecture most systems converge on, and the one step 14 tunes. <strong>Studied in:</strong> <em>Speech and Language Processing</em> ch 11.</p>
+</section>
+<section class="unit-area" aria-labelledby="judging-retrieval">
+<h2 id="judging-retrieval">Judging retrieval<a class="heading-anchor" href="#judging-retrieval" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>A retriever cannot be improved by intuition; this is the measurement that makes it improvable.</p>
+</section>
+<section class="unit-concept" aria-labelledby="relevance-judgments">
+<h3 id="relevance-judgments">Relevance judgments<a class="heading-anchor" href="#relevance-judgments" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Deciding what counts as relevant for your queries, which is the labelling problem of step 5 in another form. <strong>Studied in:</strong> <em>Speech and Language Processing</em> ch 11; your own evaluation set.</p>
+</section>
+<section class="unit-concept" aria-labelledby="ranking-metrics">
+<h3 id="ranking-metrics">Ranking metrics<a class="heading-anchor" href="#ranking-metrics" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>MAP, nDCG and MRR: what each rewards in an ordered list, and when to use which. <strong>Studied in:</strong> <a href="../materials/ranking-metrics/index.html">this roadmap&#x27;s note on measuring an ordered list</a>, with <em>Introduction to Information Retrieval</em> ch 8 as a reference for the definitions in full.</p>
+</section>
+<section class="unit-area" aria-labelledby="retrieval-at-scale">
+<h2 id="retrieval-at-scale">Retrieval at scale<a class="heading-anchor" href="#retrieval-at-scale" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Exact search stops being affordable; this is what you trade for speed, and how to say it out loud.</p>
+</section>
+<section class="unit-concept" aria-labelledby="approximate-nearest-neighbour-indexes">
+<h3 id="approximate-nearest-neighbour-indexes">Approximate nearest-neighbour indexes<a class="heading-anchor" href="#approximate-nearest-neighbour-indexes" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Graph- and quantization-based indexes, and how to choose one. <strong>Studied in:</strong> <em>Natural Language Processing in Action</em> §10.3.2–10.3.6.</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-recalllatency-trade-off">
+<h3 id="the-recalllatency-trade-off">The recall–latency trade-off<a class="heading-anchor" href="#the-recalllatency-trade-off" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What approximation costs in recall, and how to measure that cost rather than assume it. <strong>Studied in:</strong> <em>Natural Language Processing in Action</em> §10.3.2–10.3.6; your own measurements.</p>
+</section>
+<section class="unit-area" aria-labelledby="preparing-the-collection">
+<h2 id="preparing-the-collection">Preparing the collection<a class="heading-anchor" href="#preparing-the-collection" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The decisions made before any query arrives, which set the ceiling on everything after.</p>
+</section>
+<section class="unit-concept" aria-labelledby="chunking">
+<h3 id="chunking">Chunking<a class="heading-anchor" href="#chunking" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Splitting documents so that a retrievable unit contains a complete idea — the quiet determinant of retrieval quality. <strong>Studied in:</strong> <em>Speech and Language Processing</em> ch 11, applied in your own build.</p>
+</section>
+<section class="unit-concept" aria-labelledby="document-preparation">
+<h3 id="document-preparation">Document preparation<a class="heading-anchor" href="#document-preparation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Getting clean text out of real documents, and noticing what the parser silently dropped. Step 14 returns to this as an upstream bottleneck. <strong>Studied in:</strong> your own build; cross-reference: step 14.</p>
+</section>
+<section class="guide-block guide-block--where-this-fits-in-ai" aria-label="Where this fits in AI">
+<p class="guide-label"><strong>Where this fits in AI</strong></p>
+<p>Retrieval adds a second source of knowledge next to the model&#x27;s weights:</p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: Document preparation"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    Q[&quot;Question&quot;] --&gt; R[&quot;Retrieval&lt;br/&gt;over a document collection&quot;]
+    R --&gt; C[&quot;Context given to the model&quot;]
+    Q --&gt; C
+    C --&gt; M[&quot;Model&quot;] --&gt; A[&quot;Answer&quot;]
+    A --&gt; E[&quot;Evaluation&lt;br/&gt;retrieval and answer, separately&quot;]
+</code></pre></figure>
+<p>This is the shape of most contemporary AI applications, and the reason the roadmap puts retrieval in Fundamentals: its quality bounds the quality of everything built on top. Step 14 deepens it, and the Modern topics on search and retrieval-augmented systems are where you build one with current tools.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary</strong></span><span class="study-title"><em>Speech and Language Processing</em></span><span class="study-task"><strong>read:</strong> chapter 11.</span><span class="study-why"><strong>Why:</strong> the science of retrieval — BM25, dense retrieval, late interaction, reranking and retrieval evaluation.</span></li>
+<li><span class="study-role"><strong>Supplement</strong></span><span class="study-title"><a href="https://gitlab.com/tangibleai/nlpia2" class="external" rel="noopener noreferrer"><em>Natural Language Processing in Action</em><span class="visually-hidden" data-chrome> (external link)</span></a> (Lane, Dyshel)</span><span class="study-task"><strong>read:</strong> §10.3.2–10.3.6.</span><span class="study-why"><strong>Why:</strong> the engineering of search indexes — choosing an approximate nearest-neighbour index and quantizing vectors, with code, which the textbook does not cover. <strong>Selected reading:</strong> the rest of the book rebuilds classical and neural NLP on dated framework versions, which <em>Hands-On ML</em> and the from-scratch book already give you; one later chapter returns as a specialization in step 18.</span></li>
+<li><span class="study-role"><strong>Curriculum material</strong></span><span class="study-title"><a href="../materials/ranking-metrics/index.html">Measuring an Ordered List</a></span><span class="study-task"><strong>read:</strong> the whole note and run its comparison.</span><span class="study-why"><strong>Why:</strong> the textbook covers precision, recall and mean average precision, but not nDCG or MRR, and the point is less the formulas than what each metric rewards. <em>Introduction to Information Retrieval</em> chapter 8 has the definitions in full if you want them.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--where-you-study-each-concept" aria-label="Where you study each concept">
+<p class="guide-label"><strong>Where you study each concept</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Document preparation"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">What you study</th>
+<th scope="col">Where you study it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lexical, dense and late-interaction retrieval; reranking</td>
+<td><em>Speech and Language Processing</em> ch 11</td>
+</tr>
+<tr>
+<td>Retrieval evaluation; ranking metrics</td>
+<td><em>Speech and Language Processing</em> ch 11; <a href="../materials/ranking-metrics/index.html">this roadmap&#x27;s note on measuring an ordered list</a></td>
+</tr>
+<tr>
+<td>Approximate nearest-neighbour indexing, quantization</td>
+<td><em>Natural Language Processing in Action</em> §10.3.2–10.3.6</td>
+</tr>
+<tr>
+<td>Chunking and document preparation</td>
+<td><em>Speech and Language Processing</em> ch 11, applied in your own build</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<p>Build a hybrid retriever, measure it with ranking metrics, and show that changing the retrieval changes the quality of your system end to end.</p>
+<p><em>End to end</em> means one comparison: hold the generator fixed and change only the retrieval. If you have already taken <a href="../retrieval-augmented-systems/index.html">Retrieval-Augmented Systems</a>, the generator is the served model that topic has you call. If you have not, use the small model you trained in <a href="../8-how-language-models-work-build-one/index.html">step 8</a> and judge its answers by hand against a handful of questions you wrote before you saw the output. The second version is cruder, and it is enough: what you are measuring is the difference between two retrievals, not the quality of the generator.</p>
+</section>
+<section class="guide-block guide-block--you-re-ready-to-continue-when-you-can" aria-label="You&#x27;re ready to continue when you can">
+<p class="guide-label"><strong>You&#x27;re ready to continue when you can</strong></p>
+<ul class="guide-list guide-list--you-re-ready-to-continue-when-you-can">
+<li>explain why retrieval quality limits answer quality;</li>
+<li>compare lexical and dense retrieval on one collection of documents;</li>
+<li>evaluate a ranker with appropriate metrics;</li>
+<li>explain the recall–latency trade-off of an approximate nearest-neighbour index;</li>
+<li>diagnose whether a wrong answer came from retrieval or from generation.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--also-open-now-in-modern-ai-engineering" aria-label="Also open now in Modern AI Engineering">
+<p class="guide-label"><strong>Also open now in Modern AI Engineering</strong></p>
+<p><a href="../retrieval-augmented-systems/index.html">Retrieval-Augmented Systems</a> and <a href="../evaluating-and-observing-ai-applications/index.html">Evaluating and Observing AI Applications</a> open now, and both are <strong>recommended</strong> here: your evolving system becomes a retrieval-augmented application that you evaluate and trace, and the search engineering deferred from the embeddings topic is done properly now that you can measure it. Take them together, then return to the checkpoint below and on to step 10; step 11 composes what you build.</p>
+</section>
+<section class="guide-block guide-block--what-comes-next" aria-label="What comes next">
+<p class="guide-label"><strong>What comes next</strong></p>
+<p>Fundamentals is complete: you can frame, build, measure, ground and defend a system. The checkpoint below is where you confirm that — and Advanced then changes the question from <em>can I build this?</em> to <em>which design should I choose, and what will it do when it fails?</em></p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev" href="../8-how-language-models-work-build-one/index.html" rel="prev"><span class="guide-pager-label">← Previous</span><span class="guide-pager-title">8. How Language Models Work: Build One</span></a>
+  <a class="guide-pager-link guide-pager-link--next guide-pager-link--modern" href="../retrieval-augmented-systems/index.html" rel="next"><span class="guide-pager-label">Next → Modern AI Engineering · recommended</span><span class="guide-pager-title">Retrieval-Augmented Systems</span></a>
+  <p class="guide-pager-aside">Taking it later? The numbered path continues at <a class="guide-pager-skip" href="../checkpoint-ready-for-advanced/index.html">Checkpoint: Ready for Advanced</a>.</p>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+<script src="../../assets/js/diagrams.js?v=ce213ccecc" defer data-mermaid-src="../../assets/vendor/mermaid/mermaid.min.js"></script>
+</body>
+</html>

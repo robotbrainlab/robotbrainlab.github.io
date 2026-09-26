@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Operating AI Systems in Production · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><span>Part 2 — Advanced</span></li>
+      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part">Part 2 — Advanced</span><span aria-hidden="true"> · </span><span>Step 16 of 19</span></p>
+<h1 id="16-operating-ai-systems-in-production" class="guide-title">16. Operating AI Systems in Production</h1>
+<div class="guide-body">
+<p>Everything so far has been measured in an experiment, where you control the inputs and nothing costs anything except your time. Production is the opposite: other people send the requests, every request costs money and takes time, load arrives unevenly, and the system keeps running while the world moves — providers change the model underneath you, users ask things nobody anticipated, and quality drifts without anyone reporting a fault.</p>
+<p>This step is about that world. What actually determines cost and latency when a model is served; how to buy quality with money and money with quality, deliberately; what to watch so that a slow decline becomes visible before a user finds it; and the decision that ends every release — ship it, or roll it back — made from evidence that will always be less complete than you would like.</p>
+<section class="guide-block guide-block--where-you-are" aria-label="Where you are">
+<p class="guide-label"><strong>Where you are</strong></p>
+<p>You have a compound system that is measured, grounded and contained — and that has never been run for anyone but you. Everything this step adds is a property of the running system rather than of the model inside it.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#what-serving-costs-and-why">What serving costs, and why</a>
+<ol class="unit-toc-sublist">
+<li><a href="#the-kv-cache-and-batching">The KV cache and batching</a></li>
+<li><a href="#prefill-versus-decode">Prefill versus decode</a></li>
+<li><a href="#speculative-decoding-and-quantization">Speculative decoding and quantization</a></li>
+<li><a href="#latency-and-throughput-as-separate-goals">Latency and throughput as separate goals</a></li>
+</ol>
+</li>
+<li><a href="#spending-less">Spending less</a>
+<ol class="unit-toc-sublist">
+<li><a href="#token-economics-and-caching">Token economics and caching</a></li>
+<li><a href="#routing-and-cascades">Routing and cascades</a></li>
+</ol>
+</li>
+<li><a href="#getting-it-out-safely">Getting it out safely</a>
+<ol class="unit-toc-sublist">
+<li><a href="#deployment-patterns">Deployment patterns</a></li>
+<li><a href="#testing-in-production">Testing in production</a></li>
+<li><a href="#release-and-rollback-judgment">Release and rollback judgment</a></li>
+</ol>
+</li>
+<li><a href="#keeping-it-honest-once-it-runs">Keeping it honest once it runs</a>
+<ol class="unit-toc-sublist">
+<li><a href="#monitoring-design-and-operational-response">Monitoring design and operational response</a></li>
+<li><a href="#continuity-between-evaluation-and-monitoring">Continuity between evaluation and monitoring</a></li>
+</ol>
+</li>
+<li><a href="#living-with-the-system">Living with the system</a>
+<ol class="unit-toc-sublist">
+<li><a href="#technical-debt-in-learned-systems">Technical debt in learned systems</a></li>
+<li><a href="#lineage-and-versioning">Lineage and versioning</a></li>
+<li><a href="#continual-learning-and-data-flywheels">Continual learning and data flywheels</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-you-ll-learn" aria-label="What you&#x27;ll learn">
+<p class="guide-label"><strong>What you&#x27;ll learn</strong></p>
+<p>By the end you should be able to explain what determines serving memory and latency, evaluate a cost-versus-quality trade-off quantitatively, design monitoring that would catch a realistic silent failure, and decide release or rollback from imperfect evidence — and explain that decision to someone who is not an engineer.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>Serving mechanics come first because they explain the bill and the latency: the KV cache and batching decide throughput, prefill and decode explain why the first token is slow and the rest are fast, and quantization trades quality for both. Those facts are what make cost engineering possible rather than guesswork — caching a stable prompt prefix and routing easy requests to cheaper models are only sensible once you know what you are paying for. Release practice is the same evidence discipline from step 6 applied to a live system: a canary is an experiment, monitoring is evaluation that never stops, and a rollback trigger is a decision made in advance so it does not have to be made under pressure. Technical debt and lineage are the long tail: in a learned system the prompt, the configuration, the data and the model version are one entangled artefact, and if you cannot say which versions produced a result, you cannot debug it or roll it back.</p>
+</section>
+<section class="unit-area" aria-labelledby="what-serving-costs-and-why">
+<h2 id="what-serving-costs-and-why">What serving costs, and why<a class="heading-anchor" href="#what-serving-costs-and-why" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The mechanics that decide your bill and your latency — the arithmetic behind every cost conversation.</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-kv-cache-and-batching">
+<h3 id="the-kv-cache-and-batching">The KV cache and batching<a class="heading-anchor" href="#the-kv-cache-and-batching" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The key–value cache is the attention state a model keeps for the tokens it has already processed, so it does not recompute them for every new token. What it holds, why it dominates the memory a served model needs, and how batching several requests together trades latency for throughput. <strong>Studied in:</strong> <em>AI Engineering</em> ch 9 (pp. 405–447); <em>How To Scale Your Model</em>, inference §§1–2.</p>
+</section>
+<section class="unit-concept" aria-labelledby="prefill-versus-decode">
+<h3 id="prefill-versus-decode">Prefill versus decode<a class="heading-anchor" href="#prefill-versus-decode" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Why the first token costs differently from the rest, and what that means for the latency a user perceives. <strong>Studied in:</strong> <em>How To Scale Your Model</em>, inference §§1–2, with problems 1–3.</p>
+</section>
+<section class="unit-concept" aria-labelledby="speculative-decoding-and-quantization">
+<h3 id="speculative-decoding-and-quantization">Speculative decoding and quantization<a class="heading-anchor" href="#speculative-decoding-and-quantization" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Two standard ways to buy speed, and what each costs in complexity or quality. <strong>Studied in:</strong> <em>AI Engineering</em> ch 9; <em>How To Scale Your Model</em>, inference §4.</p>
+</section>
+<section class="unit-concept" aria-labelledby="latency-and-throughput-as-separate-goals">
+<h3 id="latency-and-throughput-as-separate-goals">Latency and throughput as separate goals<a class="heading-anchor" href="#latency-and-throughput-as-separate-goals" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Which one your product actually needs, and why optimizing the wrong one wastes money. <strong>Studied in:</strong> <em>AI Engineering</em> ch 9.</p>
+</section>
+<section class="unit-area" aria-labelledby="spending-less">
+<h2 id="spending-less">Spending less<a class="heading-anchor" href="#spending-less" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The levers that reduce cost without reducing the system to uselessness.</p>
+</section>
+<section class="unit-concept" aria-labelledby="token-economics-and-caching">
+<h3 id="token-economics-and-caching">Token economics and caching<a class="heading-anchor" href="#token-economics-and-caching" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Where the tokens go, and why a stable prompt prefix is worth designing for. <strong>Studied in:</strong> <em>AI Engineering</em> ch 10, router, gateway and caches (pp. 456–463).</p>
+</section>
+<section class="unit-concept" aria-labelledby="routing-and-cascades">
+<h3 id="routing-and-cascades">Routing and cascades<a class="heading-anchor" href="#routing-and-cascades" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Sending each request to the cheapest model that can handle it, and escalating when a check fails. <strong>Studied in:</strong> Moslem and Kelleher §§1–3 and the cascades section.</p>
+</section>
+<section class="unit-area" aria-labelledby="getting-it-out-safely">
+<h2 id="getting-it-out-safely">Getting it out safely<a class="heading-anchor" href="#getting-it-out-safely" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Release as an evidence-based decision rather than an event.</p>
+</section>
+<section class="unit-concept" aria-labelledby="deployment-patterns">
+<h3 id="deployment-patterns">Deployment patterns<a class="heading-anchor" href="#deployment-patterns" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Online and batch prediction, and what each implies for freshness and cost. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 7.</p>
+</section>
+<section class="unit-concept" aria-labelledby="testing-in-production">
+<h3 id="testing-in-production">Testing in production<a class="heading-anchor" href="#testing-in-production" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Shadow deployments, canaries and staged rollouts — experiments run on the live system. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 9.</p>
+</section>
+<section class="unit-concept" aria-labelledby="release-and-rollback-judgment">
+<h3 id="release-and-rollback-judgment">Release and rollback judgment<a class="heading-anchor" href="#release-and-rollback-judgment" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Deciding go or no-go from imperfect evidence, setting rollback triggers in advance, and explaining the decision to a non-specialist. <strong>Studied in:</strong> <a href="../materials/release-and-rollback-cases/index.html">this roadmap&#x27;s release and rollback cases</a>; cross-reference: step 6.</p>
+</section>
+<section class="unit-area" aria-labelledby="keeping-it-honest-once-it-runs">
+<h2 id="keeping-it-honest-once-it-runs">Keeping it honest once it runs<a class="heading-anchor" href="#keeping-it-honest-once-it-runs" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Evaluation that never stops, which is what monitoring actually is.</p>
+</section>
+<section class="unit-concept" aria-labelledby="monitoring-design-and-operational-response">
+<h3 id="monitoring-design-and-operational-response">Monitoring design and operational response<a class="heading-anchor" href="#monitoring-design-and-operational-response" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Choosing signals that would reveal a realistic silent failure, and deciding in advance who does what when one fires. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 8, monitoring toolbox and observability (pp. 253–258); <em>AI Engineering</em> ch 10, monitoring and observability (pp. 465–472).</p>
+</section>
+<section class="unit-concept" aria-labelledby="continuity-between-evaluation-and-monitoring">
+<h3 id="continuity-between-evaluation-and-monitoring">Continuity between evaluation and monitoring<a class="heading-anchor" href="#continuity-between-evaluation-and-monitoring" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Using the same definitions of quality offline and online, so a monitored drop means something. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 8; cross-reference: step 6.</p>
+</section>
+<section class="unit-area" aria-labelledby="living-with-the-system">
+<h2 id="living-with-the-system">Living with the system<a class="heading-anchor" href="#living-with-the-system" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The properties that decide whether the system is still maintainable a year later.</p>
+</section>
+<section class="unit-concept" aria-labelledby="technical-debt-in-learned-systems">
+<h3 id="technical-debt-in-learned-systems">Technical debt in learned systems<a class="heading-anchor" href="#technical-debt-in-learned-systems" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Entanglement, hidden feedback loops and configuration debt — the debt that compounds faster than code debt. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 10.</p>
+</section>
+<section class="unit-concept" aria-labelledby="lineage-and-versioning">
+<h3 id="lineage-and-versioning">Lineage and versioning<a class="heading-anchor" href="#lineage-and-versioning" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Versioning data, models, prompts and configuration together, so a result can be traced and reverted. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 10; cross-reference: step 6&#x27;s reproducibility.</p>
+</section>
+<section class="unit-concept" aria-labelledby="continual-learning-and-data-flywheels">
+<h3 id="continual-learning-and-data-flywheels">Continual learning and data flywheels<a class="heading-anchor" href="#continual-learning-and-data-flywheels" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Feeding production experience back into the system deliberately, with the feedback-loop risks of step 5 in view. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 9.</p>
+</section>
+<section class="guide-block guide-block--where-this-fits-in-ai" aria-label="Where this fits in AI">
+<p class="guide-label"><strong>Where this fits in AI</strong></p>
+<p>This closes the loop the guide has been building since step 3:</p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: Continual learning and data flywheels"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    S[&quot;Compound system&quot;] --&gt; D[&quot;Deployment&lt;br/&gt;shadow, canary, staged&quot;] --&gt; P[&quot;Production&quot;]
+    P --&gt; Mon[&quot;Monitoring&lt;br/&gt;quality, cost, latency&quot;]
+    Mon --&gt; R[&quot;Release or rollback decision&quot;]
+    R --&gt; S
+    P -. &quot;traces and feedback&quot; .-&gt; Data[&quot;Data&quot;]
+    Data --&gt; S
+</code></pre></figure>
+<p>With this step, your evolving system has been framed, built, measured, grounded, composed, evaluated, secured, deployed and watched — the whole life of an AI system, which is what Fundamentals and Advanced together were for.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary · continuing</strong></span><span class="study-title"><em>AI Engineering</em></span><span class="study-task"><strong>revisit:</strong> (begun in <a href="../working-with-models/index.html">Working with Models</a>; this is where its inference and architecture chapters finally land) chapter 9 (pp. 405–447); from chapter 10, steps 3 and 4, &quot;Router and Gateway&quot; and caches (pp. 456–463), and &quot;Monitoring and Observability&quot; (pp. 465–472).</span><span class="study-why"><strong>Why:</strong> serving and operating foundation-model applications.</span></li>
+<li><span class="study-role"><strong>Primary (operations) · continuing</strong></span><span class="study-title"><em>Designing Machine Learning Systems</em></span><span class="study-task"><strong>revisit:</strong> (you began this book in <a href="../3-machine-learning-framing-problems-and-building-models/index.html">3. Machine Learning: Framing Problems and Building Models</a>; these are the chapters it was building towards) chapter 7 (deployment and prediction service); from chapter 8, &quot;Monitoring Toolbox&quot; and &quot;Observability&quot; (pp. 253–258); chapter 9 (continual learning and testing in production); chapter 10 (infrastructure and tooling for MLOps — the parts about learned systems).</span><span class="study-why"><strong>Why:</strong> the durable operations discipline for learned systems, which predates language models and outlives each generation of them. You first met these chapters in step 3; now you apply them to a system you run.</span></li>
+<li><span class="study-role"><strong>Supplement</strong></span><span class="study-title"><a href="https://jax-ml.github.io/scaling-book/inference/" class="external" rel="noopener noreferrer"><em>How To Scale Your Model</em>, &quot;All About Transformer Inference&quot;<span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>read:</strong> §§1, 2 and 4, and problems 1–3.</span><span class="study-why"><strong>Why:</strong> the arithmetic of serving memory and latency, with worked problems — where the numbers in your cost estimates come from. <strong>Selected reading:</strong> the rest of the book teaches training at scale on accelerators, which belongs to a machine-learning-systems specialization.</span></li>
+<li><span class="study-role"><strong>Supplement</strong></span><span class="study-title"><a href="https://arxiv.org/abs/2603.04445" class="external" rel="noopener noreferrer">Moslem and Kelleher, routing and cascading survey<span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>read:</strong> §§1–3 and the cascades section.</span><span class="study-why"><strong>Why:</strong> sending each request to the cheapest model that can handle it, surveyed rather than asserted. <strong>Selected reading:</strong> it is a survey; the named sections are the part this roadmap needs.</span></li>
+<li><span class="study-role"><strong>Curriculum material</strong></span><span class="study-title"><a href="../materials/release-and-rollback-cases/index.html">Release and Rollback: Four Decisions Under Imperfect Evidence</a></span><span class="study-task"><strong>do:</strong> all four cases, deciding and justifying before you read each discussion.</span><span class="study-why"><strong>Why:</strong> judgment under imperfect evidence is learned from cases, and no assigned resource provides them.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--where-you-study-each-concept" aria-label="Where you study each concept">
+<p class="guide-label"><strong>Where you study each concept</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Continual learning and data flywheels"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">What you study</th>
+<th scope="col">Where you study it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Serving mechanics, inference optimization</td>
+<td><em>AI Engineering</em> ch 9; <em>How To Scale Your Model</em> §§1, 2, 4</td>
+</tr>
+<tr>
+<td>Token economics, caching, routers and gateways</td>
+<td><em>AI Engineering</em> ch 10, pp. 456–463</td>
+</tr>
+<tr>
+<td>Routing and cascades</td>
+<td>Moslem and Kelleher §§1–3 and cascades</td>
+</tr>
+<tr>
+<td>Deployment, testing in production, continual learning</td>
+<td><em>Designing Machine Learning Systems</em> chs 7, 9</td>
+</tr>
+<tr>
+<td>Monitoring, observability, technical debt, lineage</td>
+<td><em>Designing Machine Learning Systems</em> chs 8, 10; <em>AI Engineering</em> ch 10, pp. 465–472</td>
+</tr>
+<tr>
+<td>Release and rollback judgment</td>
+<td><a href="../materials/release-and-rollback-cases/index.html">This roadmap&#x27;s release and rollback cases</a></td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<p>Deploy your evolving system. Size its cost and latency. Define the triggers for rolling it back, and carry out one rollback.</p>
+</section>
+<section class="guide-block guide-block--you-re-ready-to-continue-when-you-can" aria-label="You&#x27;re ready to continue when you can">
+<p class="guide-label"><strong>You&#x27;re ready to continue when you can</strong></p>
+<ul class="guide-list guide-list--you-re-ready-to-continue-when-you-can">
+<li>explain what determines serving memory and latency;</li>
+<li>evaluate a cost-versus-quality trade-off quantitatively;</li>
+<li>design monitoring that would detect a realistic silent failure;</li>
+<li>decide go or no-go, and rollback, from imperfect evidence — and explain the decision to a non-specialist.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--also-open-now-in-modern-ai-engineering" aria-label="Also open now in Modern AI Engineering">
+<p class="guide-label"><strong>Also open now in Modern AI Engineering</strong></p>
+<p>This is the point the deferred <a href="../inference-cost-and-production/index.html">Inference, Cost and Production</a> was waiting for: how contemporary language-model systems are served, paid for and run, applied to your system. It also starts the <em>LLM Engineer&#x27;s Handbook</em>, so take it before you leave Advanced, and return to the checkpoint below.</p>
+</section>
+<section class="guide-block guide-block--what-comes-next" aria-label="What comes next">
+<p class="guide-label"><strong>What comes next</strong></p>
+<p>Advanced ends here. You have built, secured and operated a complete system — with the roadmap telling you which method to use at each point. Mastery removes that support: the question stops being <em>how do I do this?</em> and becomes <em>given an unfamiliar problem, what should be done, and can I defend it?</em></p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev guide-pager-link--modern" href="../securing-ai-systems-in-practice/index.html" rel="prev"><span class="guide-pager-label">← Previous · Modern AI Engineering · available</span><span class="guide-pager-title">Securing AI Systems in Practice</span></a>
+  <a class="guide-pager-link guide-pager-link--next guide-pager-link--modern" href="../inference-cost-and-production/index.html" rel="next"><span class="guide-pager-label">Next → Modern AI Engineering · required</span><span class="guide-pager-title">Inference, Cost and Production</span></a>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+<script src="../../assets/js/diagrams.js?v=ce213ccecc" defer data-mermaid-src="../../assets/vendor/mermaid/mermaid.min.js"></script>
+</body>
+</html>

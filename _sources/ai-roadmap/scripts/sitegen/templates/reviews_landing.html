@@ -1,0 +1,43 @@
+{{ marker }}
+<h1 data-chrome>Reviews</h1>
+<p class="landing-lead" data-chrome>How the roadmap is kept current. Review reports are maintenance analysis and proposals — the curriculum changes only through the human approval described in the <a href="{{ maintenance_href }}">{{ maintenance_title }}</a>.</p>
+
+<section class="overview-section" aria-labelledby="maintenance-command">
+  <h2 id="maintenance-command">{{ command_title }}</h2>
+  {{ command_html }}
+  <p class="overview-more" data-chrome><a href="{{ command_href }}">Full procedure</a></p>
+</section>
+
+<section class="overview-section" aria-labelledby="review-cycles">
+  <h2 id="review-cycles" data-chrome>Review cycles</h2>
+  <ul class="cycle-cards">
+    {% for c in cycles %}
+    <li class="cycle-card">
+      <h3 class="cycle-card-title"><a href="{{ c.href }}">{{ c.title }}</a></h3>
+      {% if c.purpose %}<p>{{ c.purpose }}</p>{% endif %}
+      <dl class="state-list" data-chrome>
+        {% for s in c.state %}
+        <div><dt>{{ s.label }}</dt><dd>{% if s.value %}<time datetime="{{ s.value }}">{{ s.value }}</time>{% else %}None recorded{% endif %}</dd></div>
+        {% endfor %}
+      </dl>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="state-source" data-chrome>Dates from <code>{{ state_path }}</code>{% if baseline %} · Baseline {{ baseline }}{% if baseline_date %}, {{ baseline_date }}{% endif %}{% endif %}. Operational metadata, not curriculum.</p>
+</section>
+
+<section class="overview-section" aria-labelledby="review-reports">
+  <h2 id="review-reports" data-chrome>Review reports</h2>
+  {% if reviews %}
+  <ol class="landing-list">
+    {% for r in reviews %}
+    <li class="landing-item landing-item--review">
+      <p class="landing-item-meta" data-chrome>{% if r.date %}<time datetime="{{ r.date }}">{{ r.date }}</time>{% endif %}</p>
+      <h3 class="landing-item-title"><a href="{{ r.href }}">{{ r.title }}</a></h3>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="landing-empty" data-chrome>No review reports have been recorded yet. Each completed scan or review adds a dated report here.</p>
+  {% endif %}
+</section>

@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>The Reinforcement-Learning Arc Behind Post-Training · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-material">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../../research/index.html">Evidence</a></li>
+    <li><a href="../../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button toc-toggle" type="button" aria-controls="page-toc" aria-expanded="false" data-drawer-toggle="page-toc">
+        <span class="toc-glyph" aria-hidden="true"></span><span class="tool-label">On this page</span>
+      </button>
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../../research/index.html">Evidence</a></li>
+    <li><a href="../../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Learn</a></li>
+<li><span aria-current="page">The Reinforcement-Learning Arc Behind Post-Training</span></li>      </ol>
+    </nav>
+    <article class="prose doc doc--material">
+<p class="doc-kind doc-kind--material" data-chrome><span class="doc-kind-label">Curriculum material</span><span class="doc-kind-divider" aria-hidden="true"></span><span class="doc-kind-note">Written for this roadmap — the guide sends you here</span></p><h1 id="the-reinforcement-learning-arc-behind-post-training">The Reinforcement-Learning Arc Behind Post-Training</h1>
+<dl class="doc-meta" data-chrome>
+  <div class="doc-meta-item"><dt>Canonical source</dt><dd><code>materials/reinforcement-learning-arc.md</code></dd></div>
+</dl><div class="table-wrap" role="region" tabindex="0" aria-label="Table: The Reinforcement-Learning Arc Behind Post-Training"><table class="doc-table table--kv" style="--cols:2">
+<thead>
+<tr>
+<th scope="col"></th>
+<th scope="col"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="kv-row kv-row--type">
+<td><strong>Type</strong></td>
+<td>Conceptual note — a bridge between two things the assigned reading treats separately</td>
+</tr>
+<tr class="kv-row kv-row--for">
+<td><strong>For</strong></td>
+<td><a href="../../10-how-foundation-models-are-made-and-adapted/index.html#10-how-foundation-models-are-made-and-adapted">10. How Foundation Models Are Made and Adapted</a></td>
+</tr>
+<tr class="kv-row kv-row--you-should-already-have">
+<td><strong>You should already have</strong></td>
+<td>The gradient reasoning of step 2, a model you trained in step 3, the language-model mechanism you built in step 8, and <em>Hands-On ML</em> chapter 19 on Markov decision processes and policy gradients</td>
+</tr>
+<tr class="kv-row kv-row--what-it-is-not">
+<td><strong>What it is not</strong></td>
+<td>A reinforcement-learning course. It explains why RL vocabulary appears in post-training and what each borrowed term does there; the algorithms themselves belong to the extension path</td>
+</tr>
+<tr class="kv-row kv-row--sources">
+<td><strong>Sources</strong></td>
+<td><em>Hands-On ML with Scikit-Learn and PyTorch</em> ch 19 · Huyen, <em>AI Engineering</em> ch 2, post-training</td>
+</tr>
+</tbody>
+</table></div>
+<p>The assigned reading leaves a gap you will notice immediately. <em>Hands-On ML</em> teaches reinforcement learning with agents, states and rewards. <em>AI Engineering</em> describes post-training with prompts, responses and preferences, and uses words like <em>policy</em>, <em>reward model</em> and <em>KL penalty</em> as if you already knew why they were there. Nothing in between says why a method built for an agent walking through a maze ends up training a model that answers questions. That sentence is what this note supplies.</p>
+<nav class="doc-contents" aria-labelledby="contents">
+<h2 id="contents">Contents<a class="heading-anchor" href="#contents" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<details open>
+<summary><b>Click to expand / collapse</b></summary>
+<ol>
+<li><a href="#1-the-shape-of-the-problem">The Shape of the Problem</a></li>
+<li><a href="#2-what-each-borrowed-term-becomes">What Each Borrowed Term Becomes</a></li>
+<li><a href="#3-why-there-is-a-kl-term">Why There Is a KL Term</a></li>
+<li><a href="#4-what-changes-when-the-reward-is-a-program">What Changes When the Reward Is a Program</a></li>
+<li><a href="#5-check-yourself">Check Yourself</a></li>
+</ol>
+</details>
+<hr class="section-break">
+</nav>
+<section class="doc-section" aria-labelledby="1-the-shape-of-the-problem">
+<h2 id="1-the-shape-of-the-problem">1. The Shape of the Problem<a class="heading-anchor" href="#1-the-shape-of-the-problem" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Supervised training needs a right answer for every input. That is exactly what you do not have for most of what you want a model to do. Nobody can write the single correct reply to <em>&quot;explain this error message to a junior colleague&quot;</em>, and asking annotators to write one produces a narrow target that rewards imitation of the annotator rather than usefulness to the reader.</p>
+<p>But something weaker is available: given two replies, a person can usually say which is better. That is a <em>comparison</em>, not a label, and it is the reason reinforcement learning enters the picture. Reinforcement learning is the branch of machine learning built for the case where you cannot say what the right action was, only how good the outcome turned out to be. It is the only well-developed body of method for learning from a signal of that shape.</p>
+<p>So post-training is not RL because language modelling is secretly a maze. It is RL because the supervision has the shape RL was invented for: a score on what the model did, not a target for what it should have done.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="2-what-each-borrowed-term-becomes">
+<h2 id="2-what-each-borrowed-term-becomes">2. What Each Borrowed Term Becomes<a class="heading-anchor" href="#2-what-each-borrowed-term-becomes" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Every term you met in chapter 19 has a counterpart here, and the counterparts are unusually simple because this problem is a degenerate case of the one RL usually solves.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 2. What Each Borrowed Term Becomes"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">In chapter 19</th>
+<th scope="col">In post-training</th>
+<th scope="col">Why it collapses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Policy — what the agent does in a state</td>
+<td>The model itself: given a prompt, a distribution over next tokens</td>
+<td>The model <em>is</em> the policy; training the policy means changing the weights you have been studying since step 7</td>
+</tr>
+<tr>
+<td>State</td>
+<td>The prompt plus the tokens generated so far</td>
+<td>The state is just the context window you built in step 8</td>
+</tr>
+<tr>
+<td>Action</td>
+<td>The next token</td>
+<td>The action space is the vocabulary</td>
+</tr>
+<tr>
+<td>Episode</td>
+<td>One complete response</td>
+<td>Episodes are short and always terminate</td>
+</tr>
+<tr>
+<td>Reward</td>
+<td>A score for the finished response</td>
+<td>Usually one number at the end, not a reward at each step</td>
+</tr>
+<tr>
+<td>Value function, discounting, exploration over long horizons</td>
+<td>Mostly absent or simplified</td>
+<td>With one reward at the end of a short episode, the long-horizon machinery RL needs for mazes has little to do</td>
+</tr>
+</tbody>
+</table></div>
+<p>Read that table twice. It is the whole translation. The reason post-training papers look intimidating is that they keep the RL notation while discarding most of the RL difficulty.</p>
+<p>The one genuinely new part is where the reward comes from. In a maze the environment supplies it. Here, someone has to. Three answers are in use, and step 10&#x27;s reading covers them: a <strong>reward model</strong> trained on human comparisons to predict which response a person would prefer; <strong>direct preference methods</strong>, which skip the separate reward model and optimize the comparisons directly; and <strong>programmatic checks</strong>, treated in <a href="#4-what-changes-when-the-reward-is-a-program">4</a>.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="3-why-there-is-a-kl-term">
+<h2 id="3-why-there-is-a-kl-term">3. Why There Is a KL Term<a class="heading-anchor" href="#3-why-there-is-a-kl-term" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Here is the failure the KL term exists to prevent, and it is worth predicting before you read the answer: what would a model do if you optimized nothing but a learned reward?</p>
+<p>It would find the reward model&#x27;s mistakes. A reward model is a model: it is accurate on the kind of responses it was trained on and unreliable elsewhere. Optimize against it hard enough and the policy drifts into regions where the reward model is confidently wrong — producing text that scores highly and reads like nothing a person would want. This is Goodhart&#x27;s law (step 6) wearing a different hat, and it is the reason the objective carries a second term.</p>
+<p>That second term measures how far the model being trained has moved from the model it started as. <strong>KL divergence</strong> — named after Kullback and Leibler — is the standard measure of how different two probability distributions are; applied here, it compares the trained model&#x27;s distribution over next tokens with the original&#x27;s. Adding it to the objective says: improve the reward, <em>and stay recognizably the model you were</em>.</p>
+<p>The trade-off is visible from both ends:</p>
+<ul>
+<li><strong>Too weak a penalty.</strong> The model wanders, the reward keeps rising, and the outputs get worse. If a system&#x27;s scores improve while its users complain, suspect this.</li>
+<li><strong>Too strong a penalty.</strong> The model barely moves, and training achieves nothing.</li>
+</ul>
+<p>This is also why post-training is described as <em>steering</em> a model rather than <em>teaching</em> it. The KL term is the leash, and choosing its strength is an engineering decision made on measurements, not a constant handed down.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="4-what-changes-when-the-reward-is-a-program">
+<h2 id="4-what-changes-when-the-reward-is-a-program">4. What Changes When the Reward Is a Program<a class="heading-anchor" href="#4-what-changes-when-the-reward-is-a-program" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>For some tasks the reward does not need a model or a person at all: a unit test passes or fails, a solution matches a known answer, a program compiles. Training against that kind of automatic check is what recent work calls reinforcement learning from verifiable rewards, and the <a href="../foundation-model-lifecycle/index.html">lifecycle brief</a> covers its current status and the claims around it.</p>
+<p>Conceptually it changes one thing and leaves the rest: the reward is now exact, cheap and unfakeable <em>within its domain</em>, so the Goodhart pressure of <a href="#3-why-there-is-a-kl-term">3</a> moves rather than disappears. A model optimized against tests does not learn to deceive a reward model; it learns to satisfy tests, which is the same thing one level down — and whether satisfying tests generalizes to the capability you cared about is exactly the construct-validity question step 12 makes rigorous.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="5-check-yourself">
+<h2 id="5-check-yourself">5. Check Yourself<a class="heading-anchor" href="#5-check-yourself" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>You have what this note exists to give you if you can answer these without looking back. Write the answers down; two of them come back in step 12 and step 15.</p>
+<ol>
+<li>Why is post-training posed as reinforcement learning rather than as supervised learning? Answer in terms of the supervision available, not the algorithms.</li>
+<li>What is the policy, and what does one episode consist of?</li>
+<li>A team reports that their reward model&#x27;s scores rose steadily during post-training and that human raters now prefer the <em>older</em> model. What single hypothesis explains this, and what would you measure to test it?</li>
+<li>A colleague proposes raising the KL penalty until scores stop rising. Why is that a bad rule, and what would you measure instead?</li>
+<li>A model is trained against an automatic checker. Name one capability claim that this training would support and one that it would not.</li>
+</ol>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+</section>
+
+    </article>
+  </main>
+
+  <aside class="toc-rail drawer drawer--right" id="page-toc" aria-label="On this page" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">On this page</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close contents</span></button>
+    </div>
+    <nav class="page-toc" aria-labelledby="toc-title">
+      <p class="rail-title" id="toc-title">On this page</p>
+      <ol class="toc-list">
+        <li class="toc-item">
+          <a href="#contents" data-toc-link>Contents</a>
+        </li>
+        <li class="toc-item">
+          <a href="#1-the-shape-of-the-problem" data-toc-link>1. The Shape of the Problem</a>
+        </li>
+        <li class="toc-item">
+          <a href="#2-what-each-borrowed-term-becomes" data-toc-link>2. What Each Borrowed Term Becomes</a>
+        </li>
+        <li class="toc-item">
+          <a href="#3-why-there-is-a-kl-term" data-toc-link>3. Why There Is a KL Term</a>
+        </li>
+        <li class="toc-item">
+          <a href="#4-what-changes-when-the-reward-is-a-program" data-toc-link>4. What Changes When the Reward Is a Program</a>
+        </li>
+        <li class="toc-item">
+          <a href="#5-check-yourself" data-toc-link>5. Check Yourself</a>
+        </li>
+      </ol>
+    </nav>
+  </aside>
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>materials/reinforcement-learning-arc.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../../assets/js/site.js?v=ce213ccecc" defer></script>
+</body>
+</html>

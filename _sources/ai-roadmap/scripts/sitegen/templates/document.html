@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block body_class %}page-doc kind-{{ doc_kind }}{% endblock %}
+{% block page %}
+<div class="shell{% if not has_toc %} shell--no-toc{% endif %}">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+    {% with drawer=true %}{% include "partials/primary_nav.html" %}{% endwith %}
+    {% include "partials/area_nav.html" %}
+  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        {% for crumb in breadcrumbs %}
+        <li>{% if crumb.href %}<a href="{{ crumb.href }}">{{ crumb.label }}</a>{% else %}<span>{{ crumb.label }}</span>{% endif %}</li>
+        {% endfor %}
+        {% if breadcrumbs[-1].href %}<li><span aria-current="page">{{ page_title }}</span></li>{% endif %}
+      </ol>
+    </nav>
+    <article class="prose doc doc--{{ doc_kind }}">
+{{ body }}
+    </article>
+  </main>
+
+  {% if has_toc %}
+  <aside class="toc-rail drawer drawer--right" id="page-toc" aria-label="On this page" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">On this page</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close contents</span></button>
+    </div>
+    <nav class="page-toc" aria-labelledby="toc-title">
+      <p class="rail-title" id="toc-title">On this page</p>
+      <ol class="toc-list">
+        {% for item in toc %}
+        <li class="toc-item{% if item.children %} has-children{% endif %}">
+          <a href="#{{ item.slug }}" data-toc-link>{{ item.text }}</a>
+          {% if item.children %}
+          <ol class="toc-sublist">
+            {% for child in item.children %}
+            <li><a href="#{{ child.slug }}" data-toc-link>{{ child.text }}</a></li>
+            {% endfor %}
+          </ol>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ol>
+    </nav>
+  </aside>
+  {% endif %}
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+{% endblock %}

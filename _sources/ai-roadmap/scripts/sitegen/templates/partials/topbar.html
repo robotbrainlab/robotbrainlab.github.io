@@ -1,0 +1,21 @@
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="{{ home_href }}"{% if is_home %} aria-current="page"{% endif %}>
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">{{ site_title }}</span>
+    </a>
+    {% with drawer=false %}{% include "partials/primary_nav.html" %}{% endwith %}
+    <div class="topbar-tools">
+      {% if has_toc %}
+      <button class="tool-button toc-toggle" type="button" aria-controls="page-toc" aria-expanded="false" data-drawer-toggle="page-toc">
+        <span class="toc-glyph" aria-hidden="true"></span><span class="tool-label">On this page</span>
+      </button>
+      {% endif %}
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header>

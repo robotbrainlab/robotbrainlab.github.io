@@ -1,0 +1,7 @@
+<nav class="primary-nav{% if drawer %} primary-nav--drawer{% endif %}" aria-label="{{ 'Primary (menu)' if drawer else 'Primary' }}" data-chrome>
+  <ul>
+    {% for item in primary_nav %}
+    <li><a href="{{ item.href }}"{% if item.current %} class="is-current" aria-current="true"{% endif %}>{{ item.label }}</a></li>
+    {% endfor %}
+  </ul>
+</nav>

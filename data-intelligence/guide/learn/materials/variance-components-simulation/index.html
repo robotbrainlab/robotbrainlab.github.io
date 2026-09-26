@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Where the Variance Comes From · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-material">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../../research/index.html">Evidence</a></li>
+    <li><a href="../../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button toc-toggle" type="button" aria-controls="page-toc" aria-expanded="false" data-drawer-toggle="page-toc">
+        <span class="toc-glyph" aria-hidden="true"></span><span class="tool-label">On this page</span>
+      </button>
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../../research/index.html">Evidence</a></li>
+    <li><a href="../../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Learn</a></li>
+<li><span aria-current="page">Where the Variance Comes From</span></li>      </ol>
+    </nav>
+    <article class="prose doc doc--material">
+<p class="doc-kind doc-kind--material" data-chrome><span class="doc-kind-label">Curriculum material</span><span class="doc-kind-divider" aria-hidden="true"></span><span class="doc-kind-note">Written for this roadmap — the guide sends you here</span></p><h1 id="where-the-variance-comes-from">Where the Variance Comes From</h1>
+<dl class="doc-meta" data-chrome>
+  <div class="doc-meta-item"><dt>Canonical source</dt><dd><code>materials/variance-components-simulation.md</code></dd></div>
+</dl><div class="table-wrap" role="region" tabindex="0" aria-label="Table: Where the Variance Comes From"><table class="doc-table table--kv" style="--cols:2">
+<thead>
+<tr>
+<th scope="col"></th>
+<th scope="col"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="kv-row kv-row--type">
+<td><strong>Type</strong></td>
+<td>Simulation — decompose a score, then decide where to spend</td>
+</tr>
+<tr class="kv-row kv-row--for">
+<td><strong>For</strong></td>
+<td><a href="../../12-evaluation-science/index.html#12-evaluation-science">12. Evaluation Science</a></td>
+</tr>
+<tr class="kv-row kv-row--you-should-already-have">
+<td><strong>You should already have</strong></td>
+<td>Repeated trials (<a href="../repeated-trial-simulation/index.html">the step 4 simulation</a>), judge validation against human labels, and the reliability and measurement-theory material of <em>AI Measurement Science</em></td>
+</tr>
+<tr class="kv-row kv-row--needs">
+<td><strong>Needs</strong></td>
+<td>Python, standard library only</td>
+</tr>
+<tr class="kv-row kv-row--sources">
+<td><strong>Sources</strong></td>
+<td><em>AI Measurement Science</em> chs 5 and 13 · Miller, &quot;Adding Error Bars to Evals&quot;</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>AI Measurement Science</em> formalizes this as generalizability theory: a score varies across several <strong>facets</strong> at once, and reliability depends on which facet you intend to generalize over. The formalism is exact and hard to feel. This simulation makes it concrete by building a world where you know the truth, measuring it the way you would measure a real system, and then asking the question a budget forces on you: <strong>more items, more repeats, or more judges?</strong></p>
+<nav class="doc-contents" aria-labelledby="contents">
+<h2 id="contents">Contents<a class="heading-anchor" href="#contents" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<details open>
+<summary><b>Click to expand / collapse</b></summary>
+<ol>
+<li><a href="#1-the-three-facets">The Three Facets</a></li>
+<li><a href="#2-predict-first">Predict First</a></li>
+<li><a href="#3-the-simulation">The Simulation</a></li>
+<li><a href="#4-reading-the-result">Reading the Result</a></li>
+<li><a href="#5-designing-your-own-evaluation">Designing Your Own Evaluation</a></li>
+</ol>
+</details>
+<hr class="section-break">
+</nav>
+<section class="doc-section" aria-labelledby="1-the-three-facets">
+<h2 id="1-the-three-facets">1. The Three Facets<a class="heading-anchor" href="#1-the-three-facets" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>When you evaluate a generative system with a model-based judge, a score moves for at least three reasons that have nothing to do with the system being better or worse:</p>
+<ul>
+<li><strong>Items.</strong> You sampled these questions, not others. Some are harder.</li>
+<li><strong>Generation.</strong> The system answers differently each run, even on the same question.</li>
+<li><strong>Judging.</strong> The judge scores the same answer differently across runs, prompts or versions — and may be systematically generous or harsh.</li>
+</ul>
+<p>A single number hides all three. Worse, the usual instinct — <em>collect more data</em> — is only right for one of them at a time, and which one is an empirical question about your system, not a general truth.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="2-predict-first">
+<h2 id="2-predict-first">2. Predict First<a class="heading-anchor" href="#2-predict-first" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Write these down before running the code.</p>
+<ol>
+<li>Your evaluation uses 100 items, one generation each, one judge pass. You double the items. By roughly what factor does the run-to-run spread of the overall score shrink?</li>
+<li>Instead you keep 100 items and generate three answers per item, averaging them. Which facet does that shrink, and what happens to the total spread?</li>
+<li>The judge has a small systematic bias — it is 0.04 generous on every answer. How much does averaging over more items reduce that bias?</li>
+</ol>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="3-the-simulation">
+<h2 id="3-the-simulation">3. The Simulation<a class="heading-anchor" href="#3-the-simulation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<div class="code-block" data-lang="python"><div class="code-meta" data-chrome><span class="code-lang">PYTHON</span></div><pre class="code"><code><span class="sd">"""Which facet drives the variation in an evaluation score?"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">statistics</span>
+
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1234</span><span class="p">)</span>
+
+<span class="n">N_ITEMS_POOL</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">ITEM_DIFFICULTY</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">gauss</span><span class="p">(</span><span class="mf">0.70</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_ITEMS_POOL</span><span class="p">)]</span>   <span class="c1"># true per item</span>
+<span class="n">GENERATION_SD</span> <span class="o">=</span> <span class="mf">0.12</span>    <span class="c1"># the system answers the same item differently each run</span>
+<span class="n">JUDGE_SD</span> <span class="o">=</span> <span class="mf">0.08</span>         <span class="c1"># the judge scores the same answer differently each pass</span>
+<span class="n">JUDGE_BIAS</span> <span class="o">=</span> <span class="mf">0.04</span>       <span class="c1"># and is systematically generous</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">score_once</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">generations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">judge_passes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Evaluate one item: average over generations, each scored by judge passes."""</span>
+    <span class="n">per_generation</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">generations</span><span class="p">):</span>
+        <span class="n">answer_quality</span> <span class="o">=</span> <span class="n">ITEM_DIFFICULTY</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">gauss</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GENERATION_SD</span><span class="p">)</span>
+        <span class="n">judged</span> <span class="o">=</span> <span class="p">[</span><span class="n">answer_quality</span> <span class="o">+</span> <span class="n">JUDGE_BIAS</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">gauss</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">JUDGE_SD</span><span class="p">)</span>
+                  <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">judge_passes</span><span class="p">)]</span>
+        <span class="n">per_generation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">judged</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">per_generation</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">evaluation</span><span class="p">(</span><span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">generations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">judge_passes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N_ITEMS_POOL</span><span class="p">),</span> <span class="n">n_items</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">score_once</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">generations</span><span class="p">,</span> <span class="n">judge_passes</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">items</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">spread</span><span class="p">(</span><span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">generations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">judge_passes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+           <span class="n">repeats</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">400</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="n">evaluation</span><span class="p">(</span><span class="n">n_items</span><span class="p">,</span> <span class="n">generations</span><span class="p">,</span> <span class="n">judge_passes</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeats</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">runs</span><span class="p">),</span> <span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"what one evaluation reports, and how much it moves between runs"</span><span class="p">)</span>
+<span class="n">designs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">"100 items, 1 generation, 1 judge pass"</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"200 items, 1 generation, 1 judge pass"</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"400 items, 1 generation, 1 judge pass"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"100 items, 3 generations, 1 judge pass"</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"100 items, 1 generation, 3 judge passes"</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"100 items, 3 generations, 3 judge passes"</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">designs</span><span class="p">:</span>
+    <span class="n">mean</span><span class="p">,</span> <span class="n">sd</span> <span class="o">=</span> <span class="n">spread</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">label</span><span class="si">:</span><span class="s2">42s</span><span class="si">}</span><span class="s2"> mean </span><span class="si">{</span><span class="n">mean</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   run-to-run sd </span><span class="si">{</span><span class="n">sd</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Which facet contributes what, holding the others fixed.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">facet_variance</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">same_item_many_generations</span> <span class="o">=</span> <span class="p">[</span><span class="n">score_once</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">)]</span>
+    <span class="n">same_answer_many_judgings</span> <span class="o">=</span> <span class="p">[</span><span class="n">ITEM_DIFFICULTY</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+</span> <span class="n">JUDGE_BIAS</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">gauss</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">JUDGE_SD</span><span class="p">)</span>
+                                 <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">)]</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"variation from each facet, one item at a time"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  across items (true difficulty): sd </span><span class="si">{</span><span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="n">ITEM_DIFFICULTY</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  one item, generation + judging: sd </span><span class="si">{</span><span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="n">same_item_many_generations</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  one answer, judging only:       sd </span><span class="si">{</span><span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="n">same_answer_many_judgings</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="n">facet_variance</span><span class="p">()</span>
+
+<span class="c1"># The bias does not average away.</span>
+<span class="n">mean_100</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spread</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mean_400</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spread</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"true mean quality of the pool: </span><span class="si">{</span><span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ITEM_DIFFICULTY</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  reported by a small design:  </span><span class="si">{</span><span class="n">mean_100</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  reported by a large design:  </span><span class="si">{</span><span class="n">mean_400</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="4-reading-the-result">
+<h2 id="4-reading-the-result">4. Reading the Result<a class="heading-anchor" href="#4-reading-the-result" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Three lessons, in the order they usually bite.</p>
+<p><strong>More items is not always the answer.</strong> Compare the designs. Adding items shrinks the part of the spread that comes from <em>which questions you sampled</em>; repeating generations shrinks the part that comes from <em>the system&#x27;s own randomness</em>; repeating judge passes shrinks the part that comes from <em>the judge&#x27;s noise</em>. If the dominant facet is generation, doubling your evaluation set buys you less than re-running the same set twice — and costs more.</p>
+<p><strong>Bias is not variance.</strong> Look at the last block. Every design reports a number above the pool&#x27;s true mean, and the large design reports it just as confidently as the small one. Averaging fixes noise; it does nothing to a judge that is generous to everyone. That is why step 12 makes you validate a judge against human labels <em>before</em> using it, and why &quot;we ran more items&quot; is not an answer to &quot;is your judge right&quot;.</p>
+<p><strong>Now decide.</strong> Suppose one item costs one model call to generate and one to judge, and your budget is 600 calls. Using the numbers above, which design gives the tightest estimate? Write the design and the reasoning; then change <code>GENERATION_SD</code> and <code>JUDGE_SD</code> to values that fit a system you have actually measured and see whether your answer changes. The point is not the answer — it is that the answer depends on facts about your system that you can measure.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="5-designing-your-own-evaluation">
+<h2 id="5-designing-your-own-evaluation">5. Designing Your Own Evaluation<a class="heading-anchor" href="#5-designing-your-own-evaluation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>On your evolving system, estimate the three facets crudely but honestly:</p>
+<ol>
+<li><strong>Items.</strong> Score your evaluation set once. Take the spread across items.</li>
+<li><strong>Generation.</strong> Pick ten items. Generate three answers each. Take the spread within items.</li>
+<li><strong>Judging.</strong> Take ten fixed answers. Judge each three times. Take the spread within answers. Then compare the judge with your own labels on those ten to estimate bias, not just noise.</li>
+</ol>
+<p>Write a short evaluation design that states how many items, how many generations and how many judge passes you will use, and <em>why</em>, given what you measured. Note what you are generalizing over — this system on this kind of question, judged this way — because that sentence is the real claim your score supports.</p>
+<p><strong>Completion criterion.</strong> You can say which facet dominates your system&#x27;s evaluation, defend where the next hundred model calls should go, and explain why a tighter interval does not make a biased judge correct.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+</section>
+
+    </article>
+  </main>
+
+  <aside class="toc-rail drawer drawer--right" id="page-toc" aria-label="On this page" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">On this page</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close contents</span></button>
+    </div>
+    <nav class="page-toc" aria-labelledby="toc-title">
+      <p class="rail-title" id="toc-title">On this page</p>
+      <ol class="toc-list">
+        <li class="toc-item">
+          <a href="#contents" data-toc-link>Contents</a>
+        </li>
+        <li class="toc-item">
+          <a href="#1-the-three-facets" data-toc-link>1. The Three Facets</a>
+        </li>
+        <li class="toc-item">
+          <a href="#2-predict-first" data-toc-link>2. Predict First</a>
+        </li>
+        <li class="toc-item">
+          <a href="#3-the-simulation" data-toc-link>3. The Simulation</a>
+        </li>
+        <li class="toc-item">
+          <a href="#4-reading-the-result" data-toc-link>4. Reading the Result</a>
+        </li>
+        <li class="toc-item">
+          <a href="#5-designing-your-own-evaluation" data-toc-link>5. Designing Your Own Evaluation</a>
+        </li>
+      </ol>
+    </nav>
+  </aside>
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>materials/variance-components-simulation.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../../assets/js/site.js?v=ce213ccecc" defer></script>
+</body>
+</html>

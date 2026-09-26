@@ -1,0 +1,9 @@
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    {% if sources %}
+    <p class="footer-sources">Generated from canonical Markdown:
+      {% for source in sources %}<code>{{ source }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+    {% endif %}
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer>
