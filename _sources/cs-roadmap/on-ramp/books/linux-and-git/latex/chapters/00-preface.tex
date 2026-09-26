@@ -1,0 +1,97 @@
+\bookchapter{Preface}{ch:00-preface}
+
+\begin{chapterintro}
+
+Every tutorial says ``open the terminal'', and I don't know what I'm typing. When my code breaks, I can't get the old version back.
+
+\end{chapterintro}
+
+If that sounds like you, this book is for you. It answers one question: \emph{how do I use the tools every developer uses every day, and never lose my work?}
+
+The tools are the command line (the shell, on Linux, macOS, or Windows with WSL) and Git. They are not glamorous. But nearly every other skill in software sits on top of them, and once they stop feeling like magic spells, everything else gets easier.
+
+\section{Who This Book Is For}\label{00-preface:who-this-book-is-for}
+
+You know basic Python: variables, functions, loops, lists, and dictionaries, and you have run a \texttt{.py} file. You do not need to know anything about Linux, the terminal, or Git. If you have copied commands from tutorials without knowing what they do, this book is written for you. Everything is explained when it's needed, in the order you need it.
+
+\section{How This Book Is Organized}\label{00-preface:how-this-book-is-organized}
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Part I, Understand}, gives you the mental model. What the terminal is, what the shell does with the words you type, how files and permissions work, and why code needs a history. There is very little to type yet.
+\item
+  \emph{Part II, Use}, makes you a confident everyday user: finding and searching files, keeping programs running, installing software, working on remote machines, and the Git commands you'll use every single day.
+\item
+  \emph{Part III, Apply}, is three guided labs. You automate a chore with a script, try a risky idea on a Git branch, and work on a shared project with a second person.
+\item
+  \emph{Part IV, What Next}, looks at security, speed, failure, and cost for these tools, then tells you what to learn next and what to skip for now.
+\item
+  \emph{The appendices} hold a command cheat sheet, a Git cheat sheet, and a glossary.
+\end{itemize}
+
+\section{How to Use This Book}\label{00-preface:how-to-use-this-book}
+
+Read Part I in order. It is short, and the rest of the book leans on it. After that, keep a terminal open next to the book and type the commands yourself. Typing is slower than pasting, and that is the point: your fingers learn what your eyes skim.
+
+Every chapter in Parts I and II ends with a lab, and the chapters of Part III are labs. Each lab step says what you should see, so you can check your work. Do the labs in a throwaway folder such as \texttt{\textasciitilde{}/sandbox}, never inside a project you care about. The sample files the labs use are in the book's lab files: download \emph{Linux and Git from Zero Lab Files.zip} from this book's entry on the Towards Intelligence CS \& Engineering on-ramp (\href{https://robotbrainlab.github.io/cse/on-ramp.html}{robotbrainlab.github.io/cse/on-ramp.html}) and unzip it. It unpacks to a folder called \texttt{labs/}.
+
+When you meet a word you don't know, look it up in Appendix C (Glossary). Every bold term in the book is defined there in a line.
+
+\section{What You Need Installed}\label{00-preface:what-you-need-installed}
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{A terminal.} Linux and macOS have one built in. On Windows, install WSL (Windows Subsystem for Linux) with \texttt{wsl\ -\/-install} in PowerShell, then use the Ubuntu terminal it gives you. Chapter 1 explains what WSL is.
+\item
+  \emph{Git 2.28 or newer} (check with \texttt{git\ -\/-version}). On macOS, running \texttt{git} the first time offers to install it. On Ubuntu or WSL, run \texttt{sudo\ apt\ install\ git}.
+\item
+  \emph{Python 3.10 or newer} (check with \texttt{python3\ -\/-version}).
+\item
+  \emph{jq} and \emph{shellcheck}, two small tools used in Chapters 5 and 9. Install them with \texttt{sudo\ apt\ install\ jq\ shellcheck} on Ubuntu or WSL, or \texttt{brew\ install\ jq\ shellcheck} on macOS.
+\item
+  \emph{A text editor.} VS Code is the usual choice, but any editor that saves plain text will do.
+\end{itemize}
+
+You do not need a GitHub account or a server. The labs use a shared folder on your own computer to stand in for GitHub.
+
+The examples were tested with Git 2.52, bash 5.2 on Debian 13, zsh on macOS 26, Python 3.14, jq 1.8, and ShellCheck 0.11.
+
+\section{Conventions Used in This Book}\label{00-preface:conventions-used-in-this-book}
+
+\begin{itemize}
+\tightlist
+\item
+  Bold type marks a new term the first time it is explained. Every bold term is also in Appendix C.
+\item
+  \texttt{Constant\ width} marks commands, file names, and anything else you would type exactly.
+\item
+  Code blocks show commands, output, or Python. Commands are shown without a prompt, so you can paste them as they are. When a block mixes commands and their results, the result follows in its own block.
+\item
+  Output was copied from real runs. Your user name, dates, sizes, and Git commit IDs will differ. The example user is \texttt{ada}, with a home folder of \texttt{/home/ada}. On macOS your home folder is \texttt{/Users/\textless{}you\textgreater{}} instead.
+\item
+  A line containing only \texttt{…} means some output was left out.
+\item
+  Where Linux and macOS behave differently, the text shows both.
+\item
+  Three kinds of callout appear in the text:
+\end{itemize}
+
+\begin{callout}{tip}
+
+A suggestion that saves you time or trouble.
+
+\end{callout}
+
+\begin{callout}{note}
+
+Something to be aware of, or a detail that explains what you're seeing.
+
+\end{callout}
+
+\begin{callout}{warning}
+
+A mistake that can cost you data, money, or security. Read these twice.
+
+\end{callout}

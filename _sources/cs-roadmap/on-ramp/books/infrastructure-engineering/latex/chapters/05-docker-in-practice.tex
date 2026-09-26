@@ -1,0 +1,507 @@
+\bookchapter{Docker in Practice}{ch:05-docker-in-practice}
+
+\begin{chapterintro}
+
+This chapter turns Chapter 2's ideas into skills: write a Dockerfile for a small Python web app, build and run it, reach it through a port, keep its data in a volume, pass it configuration, make the image smaller and safer, and run it next to a database with Docker Compose.
+
+\end{chapterintro}
+
+\emph{The problem.} I understand containers, but I've never built one.
+
+\emph{The question.} How do I describe my app to Docker, build it into an image, and run it the way a server would?
+
+\section{Meet tinyapp}\label{05-docker-in-practice:meet-tinyapp}
+
+The labs from here on use one very small web app, called tinyapp. It is written with FastAPI and has two addresses: \texttt{/health} says the app is alive and which version it is, and \texttt{/visits} counts visitors. It stores the count in a file, or in PostgreSQL when it is given a database address. Here is \texttt{main.py}:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""tinyapp: a very small web app for the labs in this book."""}
+\ImportTok{import}\NormalTok{ os}
+\ImportTok{from}\NormalTok{ pathlib }\ImportTok{import}\NormalTok{ Path}
+
+\ImportTok{from}\NormalTok{ fastapi }\ImportTok{import}\NormalTok{ FastAPI}
+
+\NormalTok{VERSION }\OperatorTok{=}\NormalTok{ os.environ.get(}\StringTok{"APP\_VERSION"}\NormalTok{, }\StringTok{"dev"}\NormalTok{)}
+\NormalTok{DATABASE\_URL }\OperatorTok{=}\NormalTok{ os.environ.get(}\StringTok{"DATABASE\_URL"}\NormalTok{, }\StringTok{""}\NormalTok{)}
+\NormalTok{DATA\_FILE }\OperatorTok{=}\NormalTok{ Path(os.environ.get(}\StringTok{"DATA\_DIR"}\NormalTok{, }\StringTok{"/tmp"}\NormalTok{)) }\OperatorTok{/} \StringTok{"visits.txt"}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ FastAPI()}
+
+
+\AttributeTok{@app.get}\NormalTok{(}\StringTok{"/health"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ health():}
+    \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"status"}\NormalTok{: }\StringTok{"ok"}\NormalTok{, }\StringTok{"version"}\NormalTok{: VERSION\}}
+
+
+\AttributeTok{@app.get}\NormalTok{(}\StringTok{"/visits"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ visits():}
+    \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"visits"}\NormalTok{: count\_visit()\}}
+
+
+\KeywordTok{def}\NormalTok{ count\_visit() }\OperatorTok{{-}\textgreater{}} \BuiltInTok{int}\NormalTok{:}
+    \ControlFlowTok{if}\NormalTok{ DATABASE\_URL:}
+        \ControlFlowTok{return}\NormalTok{ count\_visit\_in\_postgres()}
+\NormalTok{    count }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(DATA\_FILE.read\_text()) }\ControlFlowTok{if}\NormalTok{ DATA\_FILE.exists() }\ControlFlowTok{else} \DecValTok{0}
+\NormalTok{    DATA\_FILE.write\_text(}\BuiltInTok{str}\NormalTok{(count }\OperatorTok{+} \DecValTok{1}\NormalTok{))}
+    \ControlFlowTok{return}\NormalTok{ count }\OperatorTok{+} \DecValTok{1}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+The file ends with \texttt{count\_}\allowbreak{}\texttt{visit\_}\allowbreak{}\texttt{in\_}\allowbreak{}\texttt{postgres()}, a few lines that do the same count in a database table. Notice that every setting comes from an \textbf{environment variable}\index{environment variable}: a named value that the operating system hands to a process when it starts. \texttt{os.}\allowbreak{}\texttt{environ.}\allowbreak{}\texttt{get("APP\_}\allowbreak{}\texttt{VERSION",}\allowbreak{}\texttt{\ "dev")} reads one, with a default. That is how one image can get a different configuration in each environment.
+
+\codeneed{6}
+
+The app's libraries are listed in \texttt{requirements.txt}:
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+fastapi==0.141.1
+uvicorn==0.54.0
+psycopg[binary]==3.3.6
+\end{Verbatim}
+\end{codeblock}
+
+Uvicorn is the web server that runs a FastAPI app. Make a fresh folder, \texttt{\textasciitilde{}/infra-labs/ch05}, and copy into it \texttt{main.py}, \texttt{test\_main.py}, and both requirements files from the book's \texttt{labs/tinyapp/} folder. The tests are for Chapter 6.
+
+\codeneed{10}
+
+\section{The Dockerfile}\label{05-docker-in-practice:the-dockerfile}
+
+A \textbf{Dockerfile}\index{dockerfile@Dockerfile} is the recipe for an image: a text file of instructions that Docker follows from top to bottom, each one adding a layer. Create \texttt{Dockerfile} in the \texttt{ch05} folder:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{FROM}\NormalTok{ python:3.12{-}slim}
+
+\KeywordTok{WORKDIR}\NormalTok{ /app}
+
+\KeywordTok{COPY}\NormalTok{ requirements.txt .}
+\KeywordTok{RUN} \ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}{-}no{-}cache{-}dir} \AttributeTok{{-}r}\NormalTok{ requirements.txt}
+
+\KeywordTok{COPY}\NormalTok{ main.py .}
+
+\KeywordTok{RUN} \ExtensionTok{useradd} \AttributeTok{{-}{-}create{-}home}\NormalTok{ appuser }\KeywordTok{\&\&} \FunctionTok{mkdir}\NormalTok{ /data }\KeywordTok{\&\&} \FunctionTok{chown}\NormalTok{ appuser /data}
+\KeywordTok{USER}\NormalTok{ appuser}
+\KeywordTok{ENV}\NormalTok{ DATA\_DIR=/data}
+
+\KeywordTok{EXPOSE}\NormalTok{ 8000}
+\KeywordTok{CMD}\NormalTok{ [}\StringTok{"uvicorn"}\NormalTok{, }\StringTok{"main:app"}\NormalTok{, }\StringTok{"{-}{-}host"}\NormalTok{, }\StringTok{"0.0.0.0"}\NormalTok{, }\StringTok{"{-}{-}port"}\NormalTok{, }\StringTok{"8000"}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\Needspace{12\baselineskip}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1899\linewidth-1.6203\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.8101\linewidth-0.3797\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Instruction} & \thead{What it does here} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Instruction} & \thead{What it does here} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{FROM} & Starts from the base image \texttt{python:3.12-slim}: Debian plus Python \\
+\texttt{WORKDIR} & Makes \texttt{/app} the current folder for the following steps \\
+\texttt{COPY} & Copies files from your folder into the image \\
+\texttt{RUN} & Runs a command at build time, here \texttt{pip\ install} and creating a
+user \\
+\texttt{USER} & Runs the app as \texttt{appuser} instead of the all-powerful root user \\
+\texttt{ENV} & Sets an environment variable baked into the image \\
+\texttt{EXPOSE} & Documents that the app listens on port 8000 \\
+\texttt{CMD} & The command that runs when a container starts \\
+\end{longtable}
+\end{booktable}
+
+Two details matter. \texttt{requirements.txt} is copied and installed \emph{before} \texttt{main.py}, which makes rebuilds fast (see below). And \texttt{-\/-host\ 0.0.0.0} makes Uvicorn listen on all of the container's network interfaces. The default, \texttt{127.0.0.1}, means \texttt{localhost} only, and inside a container \texttt{localhost} is the container itself, so nothing outside could reach the app.
+
+\codeneed{9}
+
+Next to it, create \texttt{.dockerignore}, the list of files never to send to Docker:
+
+\codeneed{6}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+.git
+.venv
+__pycache__
+.pytest_cache
+.env
+*.tar
+\end{Verbatim}
+\end{codeblock}
+
+\section{Building and the Cache}\label{05-docker-in-practice:building-and-the-cache}
+
+\texttt{docker\ build\ -}\allowbreak{}\texttt{t\ tinyapp:}\allowbreak{}\texttt{1.}\allowbreak{}\texttt{0\ .} builds the image and names it \texttt{tinyapp:1.0}. The final \texttt{.} is the build context: the folder whose files \texttt{COPY} can see. Docker runs each instruction and saves a layer. When you rebuild, it reuses a layer from its build cache if the instruction and its input files haven't changed, and it rebuilds everything after the first change.
+
+That is why the order matters. Your code changes all the time; your requirements rarely do. With requirements first, editing \texttt{main.py} rebuilds only the last few cheap layers, and the slow \texttt{pip\ install} step says \texttt{CACHED}. Put \texttt{COPY\ .\ .} first and every one-line change reinstalls every library.
+
+\section{Running, Ports, and Logs}\label{05-docker-in-practice:running-ports-and-logs}
+
+\texttt{docker\ run\ -}\allowbreak{}\texttt{d\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{name\ tinyapp\ -}\allowbreak{}\texttt{p\ 8080:}\allowbreak{}\texttt{8000\ tinyapp:}\allowbreak{}\texttt{1.}\allowbreak{}\texttt{0} starts a container. \texttt{-d} runs it detached, in the background. \texttt{-\/-name} gives it a name to use in other commands. \texttt{-p\ 8080:8000} is a port mapping: connections to port 8080 on your machine are forwarded to port 8000 inside the container.
+
+\codeneed{5}\begin{codeblock}
+\begin{Verbatim}[breaklines=false, fontsize=\fontsize{8.8}{8.68}\selectfont, fontfamily=diagrammono, formatcom=\diagramlines]
+   your machine                    container "tinyapp"
+  ┌──────────────────────┐        ┌─────────────────────────┐
+  │ curl localhost:8080  │──────► │ port 8000: uvicorn      │
+  └──────────────────────┘        └─────────────────────────┘
+           -p 8080:8000 forwards 8080 to 8000
+\end{Verbatim}
+\end{codeblock}
+
+A few commands you will use every day: \texttt{docker\ ps} lists running containers, \texttt{docker\ logs\ tinyapp} shows what the app printed, \texttt{docker\ exec\ tinyapp\ whoami} runs a command inside it, and \texttt{docker\ rm\ -f\ tinyapp} stops and removes it.
+
+\section{Volumes: Data That Survives}\label{05-docker-in-practice:volumes-data-that-survives}
+
+A container's own files vanish when it is removed, and the visit count lives in a file. A \textbf{volume}\index{volume} is storage that Docker manages outside any container, which you attach to a folder inside one. Replace the container, attach the same volume, and the data is still there. It's like parking the food truck but keeping the pantry in a warehouse.
+
+\texttt{docker\ volume\ create\ tinyapp-}\allowbreak{}\texttt{data} creates one, and \texttt{-v\ tinyapp-data:/}\allowbreak{}\texttt{data} attaches it at \texttt{/data}, where the app writes its file. A bind mount is the other kind: \texttt{-v\ "\$PWD":/work} attaches a folder from your own machine, which is handy in development, as in Chapter 1.
+
+\section{Configuration and Secrets}\label{05-docker-in-practice:configuration-and-secrets}
+
+Pass configuration when the container starts, never when the image is built. \texttt{-e\ APP\_VERSION=}\allowbreak{}\texttt{1.0} sets one environment variable; \texttt{-\/-env-file\ .env} reads many from a file. The same image then runs in every environment with different settings.
+
+A \textbf{secret}\index{secret} is configuration that must stay private: passwords, API keys, tokens. Secrets need extra care.
+
+\begin{callout}{warning}
+
+Never put a secret in a Dockerfile, with \texttt{ENV} or by copying a file. Anyone who can pull the image can read every layer, and \texttt{docker\ history} prints \texttt{ENV} values in plain text. Pass secrets at run time, keep \texttt{.env} files out of git and out of the image (that is why \texttt{.env} is in \texttt{.dockerignore}), and in production use your platform's secret store.
+
+\end{callout}
+
+\section{Smaller and Safer Images}\label{05-docker-in-practice:smaller-and-safer-images}
+
+Every megabyte is downloaded on every deploy, and every extra program is something an attacker might use. Some habits give you most of the benefit:
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Start slim.} The full \texttt{python:3.12} image uses 1.62 GB of disk; \texttt{python:3.12-slim} uses 205 MB. Slim leaves out compilers and tools most apps never need.
+\item
+  \emph{Don't keep caches.} \texttt{pip\ install\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{no-}\allowbreak{}\texttt{cache-}\allowbreak{}\texttt{dir} stops pip saving downloads inside the image.
+\item
+  \emph{Ignore what you don't need.} \texttt{.dockerignore} keeps \texttt{.git}, virtual environments, and secrets out.
+\item
+  \emph{Don't run as root.} If an attacker breaks into your app, they get only what \texttt{appuser} can do.
+\item
+  \emph{Pin versions.} \texttt{python:3.12-slim} and \texttt{fastapi==0.141.1} rebuild the same way next month.
+\end{itemize}
+
+Larger projects also use multi-stage builds, where one stage compiles things and a second, clean stage receives only the results. tinyapp doesn't need one.
+
+\section{Compose: Several Containers Together}\label{05-docker-in-practice:compose-several-containers-together}
+
+Real apps rarely run alone. tinyapp can use PostgreSQL, which would mean a network, a volume, a database container with the right settings, and the app container, started in the right order. Docker Compose lets you describe all of that in one file, \texttt{compose.yaml}, and start it with one command:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{name}\KeywordTok{:}\AttributeTok{ tinyapp}
+
+\FunctionTok{services}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{app}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{build}\KeywordTok{:}\AttributeTok{ .}
+\AttributeTok{    }\FunctionTok{ports}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\StringTok{"8080:8000"}
+\AttributeTok{    }\FunctionTok{environment}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{APP\_VERSION}\KeywordTok{:}\AttributeTok{ }\StringTok{"1.0"}
+\AttributeTok{      }\FunctionTok{DATABASE\_URL}\KeywordTok{:}\AttributeTok{ postgresql://tinyapp:$\{DB\_PASSWORD\}@db:5432/tinyapp}
+\AttributeTok{    }\FunctionTok{depends\_on}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{db}\KeywordTok{:}
+\AttributeTok{        }\FunctionTok{condition}\KeywordTok{:}\AttributeTok{ service\_healthy}
+
+\AttributeTok{  }\FunctionTok{db}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{image}\KeywordTok{:}\AttributeTok{ postgres:16{-}alpine}
+\AttributeTok{    }\FunctionTok{environment}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{POSTGRES\_USER}\KeywordTok{:}\AttributeTok{ tinyapp}
+\AttributeTok{      }\FunctionTok{POSTGRES\_PASSWORD}\KeywordTok{:}\AttributeTok{ $\{DB\_PASSWORD\}}
+\AttributeTok{      }\FunctionTok{POSTGRES\_DB}\KeywordTok{:}\AttributeTok{ tinyapp}
+\AttributeTok{    }\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ db{-}data:/var/lib/postgresql/data}
+\AttributeTok{    }\FunctionTok{healthcheck}\KeywordTok{:}
+\AttributeTok{      }\FunctionTok{test}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\StringTok{"CMD"}\KeywordTok{,}\AttributeTok{ }\StringTok{"pg\_isready"}\KeywordTok{,}\AttributeTok{ }\StringTok{"{-}U"}\KeywordTok{,}\AttributeTok{ }\StringTok{"tinyapp"}\KeywordTok{]}
+\AttributeTok{      }\FunctionTok{interval}\KeywordTok{:}\AttributeTok{ 2s}
+\AttributeTok{      }\FunctionTok{retries}\KeywordTok{:}\AttributeTok{ }\DecValTok{10}
+
+\FunctionTok{volumes}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{db{-}data}\KeywordTok{:}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\texttt{name} is the project's name, which Compose puts in front of everything it creates. Each entry under \texttt{services} becomes a container. Compose puts them on a private network where each one can reach the others by service name, which is why the app connects to host \texttt{db}. \texttt{depends\_on} with \texttt{service\_healthy} waits until PostgreSQL answers before starting the app. \texttt{\$\{DB\_PASSWORD\}} is filled in from a file called \texttt{.env} in the same folder, so the password is not written in \texttt{compose.yaml}.
+
+\section{Lab: Build, Run, and Compose}\label{05-docker-in-practice:lab-build-run-and-compose}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  In \texttt{\textasciitilde{}/infra-labs/ch05}, with \texttt{Dockerfile} and \texttt{.dockerignore} created as above, build the image. Docker draws a live progress display in the terminal; the steps are the same as these lines:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ build }\AttributeTok{{-}t}\NormalTok{ tinyapp:1.0 .}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{9}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  #4 [1/6] FROM docker.io/library/python:3.12-slim@sha256:f77ac9e4…
+  …
+  #7 [3/6] COPY requirements.txt .
+  #8 [4/6] RUN pip install --no-cache-dir -r requirements.txt
+  #8 DONE 4.7s
+  #9 [5/6] COPY main.py .
+  #10 [6/6] RUN useradd --create-home appuser && mkdir /data && chown…
+  …
+  #11 naming to docker.io/library/tinyapp:1.0 done
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Add a comment line to the end of \texttt{main.py} and build again as \texttt{tinyapp:1.1}. The install step is now \texttt{\#8\ CACHED}, and only steps 5 and 6 run. Remove the comment afterwards.
+\item
+  Run the app and call it:
+
+  \codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name}\NormalTok{ tinyapp }\AttributeTok{{-}p}\NormalTok{ 8080:8000 tinyapp:1.0}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/health}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/visits}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/visits}
+\ExtensionTok{docker}\NormalTok{ exec tinyapp whoami}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{4}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  {"status":"ok","version":"dev"}
+  {"visits":1}
+  {"visits":2}
+  appuser
+  \end{Verbatim}
+  \end{codeblock}
+
+  \texttt{docker\ run} also prints the container's long ID; from here on such lines are left out. \texttt{curl} doesn't end with a new line, so your prompt may appear right after the JSON.
+\item
+  Replace the container and call \texttt{/visits} again:
+
+  \codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f}\NormalTok{ tinyapp}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name}\NormalTok{ tinyapp }\AttributeTok{{-}p}\NormalTok{ 8080:8000 tinyapp:1.0}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/visits}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{1}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  {"visits":1}
+  \end{Verbatim}
+  \end{codeblock}
+
+  The count was lost with the old container.
+\item
+  Now use a volume. Call \texttt{/visits} three times, replace the container, and call it once more:
+
+  \codeneed{9}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f}\NormalTok{ tinyapp}
+\ExtensionTok{docker}\NormalTok{ volume create tinyapp{-}data}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name}\NormalTok{ tinyapp }\AttributeTok{{-}p}\NormalTok{ 8080:8000 }\AttributeTok{{-}v}\NormalTok{ tinyapp{-}data:/data tinyapp:1.0}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/visits}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/visits}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/visits}
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f}\NormalTok{ tinyapp}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name}\NormalTok{ tinyapp }\AttributeTok{{-}p}\NormalTok{ 8080:8000 }\AttributeTok{{-}v}\NormalTok{ tinyapp{-}data:/data tinyapp:1.0}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/visits}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{4}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  {"visits":1}
+  {"visits":2}
+  {"visits":3}
+  {"visits":4}
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Pass configuration at run time:
+
+  \codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f}\NormalTok{ tinyapp}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name}\NormalTok{ tinyapp }\AttributeTok{{-}p}\NormalTok{ 8080:8000 }\AttributeTok{{-}e}\NormalTok{ APP\_VERSION=1.0 tinyapp:1.0}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/health}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{1}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  {"status":"ok","version":"1.0"}
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Remove it, then start the app with PostgreSQL. Create \texttt{.env} containing \texttt{DB\_}\allowbreak{}\texttt{PASSWORD=}\allowbreak{}\texttt{change-}\allowbreak{}\texttt{me-}\allowbreak{}\texttt{locally}, save \texttt{compose.yaml} as shown, and run:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f}\NormalTok{ tinyapp}
+\ExtensionTok{docker}\NormalTok{ compose up }\AttributeTok{{-}d}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{8}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  …
+   Network tinyapp_default Created
+  …
+   Volume tinyapp_db-data Created
+  …
+   Container tinyapp-db-1 Started
+   Container tinyapp-db-1 Healthy
+   Container tinyapp-app-1 Started
+  \end{Verbatim}
+  \end{codeblock}
+
+  (Before these lines, Compose builds the image.) Wait two seconds for the app to start, then call \texttt{/visits} twice: you get 1, then 2.
+\item
+  Stop everything and start it again. The containers and network are removed, but the database volume stays:
+
+  \codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ compose down}
+\ExtensionTok{docker}\NormalTok{ compose up }\AttributeTok{{-}d}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/visits}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{1}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  {"visits":3}
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Clean up. \texttt{-v} also deletes the database volume:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ compose down }\AttributeTok{{-}v}
+\ExtensionTok{docker}\NormalTok{ volume rm tinyapp{-}data}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+\end{enumerate}
+
+\textbf{Expected results:} the second build reuses the cached install layer; the app runs as \texttt{appuser}; the count resets when the container is replaced without a volume and survives with one; \texttt{APP\_VERSION} changes without rebuilding; and with Compose the count lives in PostgreSQL and survives \texttt{down} and \texttt{up}.
+
+\section{Summary, Key Terms, and Review Questions}\label{05-docker-in-practice:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{05-docker-in-practice:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  A Dockerfile is an image's recipe. Each instruction adds a layer; copy requirements before code so rebuilds are fast.
+\item
+  \texttt{docker\ run\ -}\allowbreak{}\texttt{d\ -}\allowbreak{}\texttt{p\ 8080:}\allowbreak{}\texttt{8000} runs a container in the background and forwards a port. Apps in containers must listen on \texttt{0.0.0.0}.
+\item
+  Volumes keep data when containers are replaced.
+\item
+  Configuration arrives as environment variables at run time. Secrets never go into images.
+\item
+  Slim bases, no caches, \texttt{.dockerignore}, a non-root user, and pinned versions make images smaller and safer.
+\item
+  Docker Compose describes several containers, their network, and their volumes in one file.
+\end{itemize}
+
+\Needspace{11\baselineskip}
+
+\subsection*{Key Terms}\label{05-docker-in-practice:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3158\linewidth-1.3684\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6842\linewidth-0.6316\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Environment variable & A named value given to a process when it starts \\
+Dockerfile & The text recipe Docker follows to build an image \\
+Volume & Docker-managed storage that outlives containers \\
+Secret & Private configuration such as a password or key \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{05-docker-in-practice:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Why does the Dockerfile copy \texttt{requirements.txt} before \texttt{main.py}?
+\item
+  What does \texttt{-p\ 8080:8000} do, and why must the app listen on \texttt{0.0.0.0}?
+\item
+  Why should a password never be set with \texttt{ENV} in a Dockerfile?
+\item
+  Name four habits that make an image smaller or safer.
+\item
+  How does the app container find the database in the Compose file?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can write a Dockerfile for a small Python app from memory, run it with a port and a volume, and explain what survives when the container is replaced.
+
+\end{understandbox}

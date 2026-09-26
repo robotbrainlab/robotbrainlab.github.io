@@ -1,0 +1,229 @@
+\bookchapter{The Back End: What Runs Where You Can't See}{ch:03-the-back-end}
+
+\begin{chapterintro}
+
+This chapter walks into the kitchen: what the back end does with each request, where your data ends up, how the server remembers you, and how the two sides agree on what they may ask each other.
+
+\end{chapterintro}
+
+\emph{The problem.} Where does my data go when I press Save?
+
+\emph{The question.} What happens on the far side of the app, and how does it keep my data and remember me?
+
+\section{A Computer That Never Sleeps}\label{03-the-back-end:a-computer-that-never-sleeps}
+
+A back end runs on a server: usually a computer with no screen in a \emph{data centre}, a warehouse full of such computers. Most companies rent these machines from a cloud company.
+
+The back-end program \emph{listens}: it waits for a request, answers it, and waits again. For each request it does three jobs, like a kitchen handling an order slip:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \emph{Routing:} send the order to the right station. Which piece of code handles ``save a note''?
+\item
+  \emph{Business logic:} follow the recipe and the house rules. Is this allowed? Does it make sense?
+\item
+  \emph{Storing and fetching:} get ingredients from the store room. Read or write the database.
+\end{enumerate}
+
+Then it builds a response and sends it back.
+
+\section{Back-End Frameworks}\label{03-the-back-end:back-end-frameworks}
+
+Every back end needs the same plumbing: receive requests, find the right code, send responses. A \textbf{back-end framework}\index{back-end framework} provides it, so developers write only what is special to their app. Here is a complete, tiny back end written with FastAPI, a Python framework:
+
+\codeneed{13}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ fastapi }\ImportTok{import}\NormalTok{ FastAPI}
+
+\NormalTok{app }\OperatorTok{=}\NormalTok{ FastAPI()}
+\NormalTok{notes }\OperatorTok{=}\NormalTok{ []  }\CommentTok{\# the app\textquotesingle{}s memory, for now}
+
+\AttributeTok{@app.post}\NormalTok{(}\StringTok{"/notes"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ save\_note(note: }\BuiltInTok{dict}\NormalTok{):}
+\NormalTok{    notes.append(note[}\StringTok{"text"}\NormalTok{])}
+    \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"saved"}\NormalTok{: }\VariableTok{True}\NormalTok{, }\StringTok{"count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(notes)\}}
+
+\AttributeTok{@app.get}\NormalTok{(}\StringTok{"/notes"}\NormalTok{)}
+\KeywordTok{def}\NormalTok{ list\_notes():}
+    \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"notes"}\NormalTok{: notes\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+The two functions are ordinary Python. The line above each, starting with \texttt{@}, is a \textbf{route}\index{route}: it tells the framework, ``when a request to save a note (\texttt{POST\ /notes}) arrives, run this function.'' A function that answers a request is a \textbf{handler}\index{handler}. Whatever it returns becomes the response.
+
+You don't need to run this; it is here to show how small a handler can be. Saved as \texttt{app.py} and started with \texttt{uvicorn\ app:app} (a program that runs FastAPI apps), it listens on your own computer, called \texttt{localhost}. \texttt{curl}, a terminal program that sends one request and prints the response, can then play the client:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl} \AttributeTok{{-}X}\NormalTok{ POST http://localhost:8000/notes }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"text": "Buy milk"\}\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+{"saved":true,"count":1}
+\end{Verbatim}
+\end{codeblock}
+
+\section{Business Logic: The House Rules}\label{03-the-back-end:business-logic-the-house-rules}
+
+The \textbf{business logic}\index{business logic} is the set of rules that makes an app \emph{this} app:
+
+\begin{itemize}
+\tightlist
+\item
+  A cinema can't sell the same seat twice.
+\item
+  A bank can't let you send more money than you have.
+\item
+  Only the person who wrote a post can edit it.
+\item
+  The shop, not your browser, adds up the price of your cart.
+\end{itemize}
+
+These rules live on the back end because it is the one place the company fully controls.
+
+\codeneed{9}
+
+\section{The Database: Where Your Data Lives}\label{03-the-back-end:the-database-where-your-data-lives}
+
+Our tiny back end keeps notes in a Python list. Stop the server, start it again, and ask for the list:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ http://localhost:8000/notes}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+{"notes":[]}
+\end{Verbatim}
+\end{codeblock}
+
+The milk is gone: a list in memory vanishes when the program stops. Real apps use a \textbf{database}\index{database}: a program built to keep data safely on disk, find any piece of it quickly, and let many users read and write at once. Picture a huge filing room with a fast, careful clerk. PostgreSQL, MySQL, and MongoDB are well-known ones.
+
+So here is the answer to this chapter's problem. When you press Save, your data travels to the back end, which checks it against the rules and hands it to the database. Your phone may keep a copy for speed, but the real copy lives there.
+
+\section{How the Server Remembers You}\label{03-the-back-end:how-the-server-remembers-you}
+
+The server greets every request like a stranger. So how does it know this request comes from \emph{you}, who logged in ten minutes ago?
+
+Think of a cloakroom. You hand over your coat and get a numbered ticket. Later you show the ticket, not your face, and get your coat back.
+
+When you log in, the back end checks your password and writes down a \textbf{session}\index{session}: a record saying ``ticket 7f3a9c belongs to Priya, logged in at 9:14.'' It gives the ticket to your browser as a \textbf{cookie}\index{cookie}: a small piece of text the browser stores and sends back with every later request to that site. Mobile apps use a similar ticket, usually called a token.
+
+\begin{callout}{warning}
+
+Whoever holds your ticket \emph{is} you, as far as the server knows. Never paste cookie values anywhere, and log out on shared computers: that tears up the ticket.
+
+\end{callout}
+
+\section{APIs: The Contract Between the Two Sides}\label{03-the-back-end:apis-the-contract-between-the-two-sides}
+
+The front end and the back end are often built by different people. They need an agreement: which requests the back end accepts, what each must contain, and what comes back. That agreement is the \textbf{API}\index{api@API} (Application Programming Interface). Each thing it offers, such as ``save a note'' at \texttt{POST\ /notes}, is an \textbf{endpoint}\index{endpoint}. The data usually travels as \textbf{JSON}\index{json@JSON}: plain text that looks almost exactly like a Python dictionary, such as \texttt{\{"text":\ "Buy\ milk"\}}.
+
+The API is the restaurant's menu. As long as the menu stays the same, the kitchen can buy new stoves and the dining room can be repainted without breaking each other. And a website, an iPhone app, and an Android app can share one back end: they all order from the same menu.
+
+\section{Try It}\label{03-the-back-end:try-it}
+
+Look at the cloakroom tickets your browser holds for a site.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Open a private (incognito) window and log in to a site you use, such as web email.
+\item
+  Open the developer tools. In Chrome or Edge, go to \emph{Application}, then \emph{Cookies}; in Firefox, \emph{Storage}, then \emph{Cookies}. Click the site's name.
+\item
+  Right-click the site's name, choose \emph{Clear} (Chrome, Edge) or \emph{Delete All} (Firefox), and reload the page.
+\end{enumerate}
+
+\emph{Expected result:} In step 2 you see several cookies, each a name and a value; the login one usually has a long, random value. In step 3 you are suddenly logged out: you threw away your tickets, so the server no longer knows you.
+
+\section{Summary, Key Terms, and Review Questions}\label{03-the-back-end:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{03-the-back-end:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  A back end listens for requests on a server. For each one it routes, applies business logic, and reads or writes the database.
+\item
+  Back-end frameworks provide the plumbing; developers write handlers.
+\item
+  Data in memory vanishes; a database keeps it safe and shared.
+\item
+  A session and a cookie let the server know who you are on every request.
+\item
+  The API is the contract between the two sides, usually spoken in JSON.
+\end{itemize}
+
+\Needspace{17\baselineskip}
+
+\subsection*{Key Terms}\label{03-the-back-end:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2683\linewidth-1.4634\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7317\linewidth-0.5366\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Back-end framework & Ready-made plumbing for answering requests \\
+Route & A rule linking a kind of request to its handler \\
+Handler & A function that answers one kind of request \\
+Business logic & The app's own rules \\
+Database & A program that stores data safely and shares it \\
+Session & The server's record of who is logged in \\
+Cookie & A small piece of text the browser keeps and sends back \\
+API & The agreement on what the front end may ask the back end \\
+Endpoint & One thing an API offers, such as \texttt{POST\ /notes} \\
+JSON & A plain-text data format, like a Python dictionary \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{03-the-back-end:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  What three jobs does a back end do for every request?
+\item
+  In the tiny FastAPI app, what is the route and what is the handler for saving a note?
+\item
+  Why did the note disappear when the server restarted, and what fixes that?
+\item
+  Explain sessions and cookies using the cloakroom picture.
+\item
+  How can a company rebuild its back end without breaking the apps that use it?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can answer ``where does my data go when I press Save?'' for any app, naming the handler, the rules it checks, and the database, and explain how the server knows it was you.
+
+\end{understandbox}

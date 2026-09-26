@@ -1,0 +1,486 @@
+\bookchapter{Lab: Deploy on Every Push}{ch:10-lab-deploy-on-every-push}
+
+\begin{chapterintro}
+
+In this lab you build continuous deployment. Every push to \texttt{main} runs the tests, builds and publishes an image, and replaces the running app with it. Then you break a release on purpose and watch the pipeline notice and put the previous version back on its own. Finally, you roll back by hand and fix forward.
+
+\end{chapterintro}
+
+\emph{The problem.} I want every change on \texttt{main} to go live on its own, safely.
+
+\emph{The question.} How do I build a pipeline that deploys every push, notices a bad release, and puts the good one back?
+
+\codeneed{17}
+
+\section{The Plan}\label{10-lab-deploy-on-every-push:the-plan}
+
+``Production'' in this lab is the container named \texttt{tinyapp} on port 8080 of your machine. The pipeline has three jobs:
+
+\codeneed{11}\begin{codeblock}
+\begin{Verbatim}[breaklines=false, fontsize=\fontsize{8.8}{8.68}\selectfont, fontfamily=diagrammono, formatcom=\diagramlines]
+ git commit + act push
+        │
+        ▼
+ ┌────────┐    ┌──────────────────┐    ┌───────────────────┐
+ │ test   │ ─► │ publish          │ ─► │ deploy            │
+ │ pytest │    │ build + push     │    │ remember current  │
+ └────────┘    │ localhost:5001/  │    │ start new, wait   │
+               │ tinyapp:<commit> │    │ for healthy, else │
+               └──────────────────┘    │ put old one back  │
+                                       │ and fail          │
+                                       └───────────────────┘
+\end{Verbatim}
+\end{codeblock}
+
+The deploy job uses the recreate strategy from Chapter 4, with an \textbf{automatic rollback}\index{automatic rollback}: if the new container isn't healthy in time, the old image goes back and the pipeline turns red.
+
+Start in a fresh folder, \texttt{\textasciitilde{}/infra-labs/ch10}, with the app's four files, Chapter 9's \texttt{Dockerfile} (the one with the \texttt{HEALTHCHECK}), \texttt{.dockerignore}, and \texttt{.gitignore}, all from the book's \texttt{labs/tinyapp/} folder, plus Chapter 6's \texttt{.actrc} from \texttt{labs/ch06/}. Make it a repository with \texttt{git\ init\ -b\ main}. The registry on port 5001 must be running, as in Chapter 9.
+
+\section{Step 1: The Deploy Script}\label{10-lab-deploy-on-every-push:step-1-the-deploy-script}
+
+Deploying is several commands with decisions between them, so it lives in a script, \texttt{deploy.sh}, in the repository. The workflow calls it, and so can you.
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#!/usr/bin/env bash}
+\CommentTok{\# Replace the running tinyapp container with a new image.}
+\CommentTok{\# If the new one is not healthy in time, put the old one back.}
+\BuiltInTok{set} \AttributeTok{{-}euo}\NormalTok{ pipefail}
+
+\VariableTok{NEW\_IMAGE}\OperatorTok{=}\StringTok{"}\VariableTok{$1}\StringTok{"}
+\VariableTok{NAME}\OperatorTok{=}\StringTok{"tinyapp"}
+
+\FunctionTok{start()} \KeywordTok{\{}
+  \ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f} \StringTok{"}\VariableTok{$NAME}\StringTok{"} \OperatorTok{\textgreater{}}\NormalTok{/dev/null }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{||} \FunctionTok{true}
+  \ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name} \StringTok{"}\VariableTok{$NAME}\StringTok{"} \AttributeTok{{-}p}\NormalTok{ 8080:8000 }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}e}\NormalTok{ APP\_VERSION=}\StringTok{"}\VariableTok{$\{1}\OperatorTok{\#\#}\PreprocessorTok{*}\NormalTok{:}\VariableTok{\}}\StringTok{"} \StringTok{"}\VariableTok{$1}\StringTok{"} \OperatorTok{\textgreater{}}\NormalTok{/dev/null}
+\KeywordTok{\}}
+
+\FunctionTok{wait\_until\_healthy()} \KeywordTok{\{}
+  \ControlFlowTok{for}\NormalTok{ \_ }\KeywordTok{in} \VariableTok{$(}\FunctionTok{seq}\NormalTok{ 1 30}\VariableTok{)}\KeywordTok{;} \ControlFlowTok{do}
+    \VariableTok{status}\OperatorTok{=}\StringTok{"}\VariableTok{$(}\ExtensionTok{docker}\NormalTok{ inspect }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}\{\{.State.Health.Status\}\}\textquotesingle{}} \StringTok{"}\VariableTok{$NAME}\StringTok{"}\VariableTok{)}\StringTok{"}
+    \BuiltInTok{echo} \StringTok{"  health: }\VariableTok{$status}\StringTok{"}
+    \ControlFlowTok{case} \StringTok{"}\VariableTok{$status}\StringTok{"} \KeywordTok{in}
+      \SpecialStringTok{healthy}\KeywordTok{)} \ControlFlowTok{return} \DecValTok{0} \ControlFlowTok{;;}
+      \SpecialStringTok{unhealthy}\KeywordTok{)} \ControlFlowTok{return} \DecValTok{1} \ControlFlowTok{;;}
+    \ControlFlowTok{esac}
+    \FunctionTok{sleep}\NormalTok{ 2}
+  \ControlFlowTok{done}
+  \ControlFlowTok{return} \DecValTok{1}
+\KeywordTok{\}}
+
+\VariableTok{OLD\_IMAGE}\OperatorTok{=}\StringTok{"}\VariableTok{$(}\ExtensionTok{docker}\NormalTok{ inspect }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}\{\{.Config.Image\}\}\textquotesingle{}} \StringTok{"}\VariableTok{$NAME}\StringTok{"} \DecValTok{2}\OperatorTok{\textgreater{}}\NormalTok{/dev/null }\KeywordTok{||} \FunctionTok{true}\VariableTok{)}\StringTok{"}
+\BuiltInTok{echo} \StringTok{"Running now: }\VariableTok{$\{OLD\_IMAGE}\OperatorTok{:{-}}\NormalTok{nothing}\VariableTok{\}}\StringTok{"}
+\BuiltInTok{echo} \StringTok{"Deploying:   }\VariableTok{$NEW\_IMAGE}\StringTok{"}
+\ExtensionTok{start} \StringTok{"}\VariableTok{$NEW\_IMAGE}\StringTok{"}
+
+\ControlFlowTok{if} \ExtensionTok{wait\_until\_healthy}\KeywordTok{;} \ControlFlowTok{then}
+  \BuiltInTok{echo} \StringTok{"Deploy succeeded: }\VariableTok{$NEW\_IMAGE}\StringTok{ is healthy"}
+  \BuiltInTok{exit}\NormalTok{ 0}
+\ControlFlowTok{fi}
+
+\BuiltInTok{echo} \StringTok{"Deploy FAILED: }\VariableTok{$NEW\_IMAGE}\StringTok{ is not healthy"}
+\ControlFlowTok{if} \BuiltInTok{[} \OtherTok{{-}n} \StringTok{"}\VariableTok{$OLD\_IMAGE}\StringTok{"} \BuiltInTok{]}\KeywordTok{;} \ControlFlowTok{then}
+  \BuiltInTok{echo} \StringTok{"Rolling back to }\VariableTok{$OLD\_IMAGE}\StringTok{"}
+  \ExtensionTok{start} \StringTok{"}\VariableTok{$OLD\_IMAGE}\StringTok{"}
+  \ExtensionTok{wait\_until\_healthy} \KeywordTok{\&\&} \BuiltInTok{echo} \StringTok{"Rollback succeeded"}
+\ControlFlowTok{fi}
+\BuiltInTok{exit}\NormalTok{ 1}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+Reading it from the bottom half up:
+
+\begin{itemize}
+\tightlist
+\item
+  Before touching anything, it asks Docker which image the current \texttt{tinyapp} container runs, and remembers it as \texttt{OLD\_IMAGE}. If there is no container yet, that's empty.
+\item
+  \texttt{start} removes the old container and runs a new one. \texttt{\$\{1\#\#*:\}} is the part of the image name after the last colon, the tag, which becomes \texttt{APP\_VERSION}.
+\item
+  \texttt{wait\_until\_healthy} asks for the health status every 2 seconds, for up to a minute, and stops as soon as it's \texttt{healthy} or \texttt{unhealthy}.
+\item
+  On failure, it starts \texttt{OLD\_IMAGE} again and exits with 1, which makes the pipeline step fail. A rollback that works still leaves the pipeline red, because the release didn't go out.
+\end{itemize}
+
+Make it executable with \texttt{chmod\ +x\ deploy.sh}.
+
+\codeneed{10}
+
+\section{Step 2: The Workflow}\label{10-lab-deploy-on-every-push:step-2-the-workflow}
+
+The workflow does everything Chapter 6's \texttt{ci.yml} did (apart from the secret check) and adds the deploy job. Save it as \texttt{.}\allowbreak{}\texttt{github/}\allowbreak{}\texttt{workflows/}\allowbreak{}\texttt{deploy.}\allowbreak{}\texttt{yml}:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Deploy}
+
+\FunctionTok{on}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{push}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{branches}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{main}\KeywordTok{]}
+
+\FunctionTok{concurrency}\KeywordTok{:}\AttributeTok{ deploy}
+
+\FunctionTok{env}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{IMAGE}\KeywordTok{:}\AttributeTok{ localhost:5001/tinyapp}
+
+\FunctionTok{jobs}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{test}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{runs{-}on}\KeywordTok{:}\AttributeTok{ ubuntu{-}latest}
+\AttributeTok{    }\FunctionTok{steps}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/checkout@v4}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/setup{-}python@v5}
+\AttributeTok{        }\FunctionTok{with}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{python{-}version}\KeywordTok{:}\AttributeTok{ }\StringTok{"3.12"}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ pip install {-}r requirements{-}dev.txt}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ pytest {-}q}
+
+\AttributeTok{  }\FunctionTok{publish}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{needs}\KeywordTok{:}\AttributeTok{ test}
+\AttributeTok{    }\FunctionTok{runs{-}on}\KeywordTok{:}\AttributeTok{ ubuntu{-}latest}
+\AttributeTok{    }\FunctionTok{steps}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/checkout@v4}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Build and push the image}
+\FunctionTok{        run}\KeywordTok{: }\CharTok{|}
+\NormalTok{          TAG="$\{GITHUB\_SHA::7\}"}
+\NormalTok{          docker build {-}t "$IMAGE:$TAG" .}
+\NormalTok{          docker push "$IMAGE:$TAG"}
+
+\AttributeTok{  }\FunctionTok{deploy}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{needs}\KeywordTok{:}\AttributeTok{ publish}
+\AttributeTok{    }\FunctionTok{runs{-}on}\KeywordTok{:}\AttributeTok{ ubuntu{-}latest}
+\AttributeTok{    }\FunctionTok{steps}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/checkout@v4}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Replace the running container}
+\AttributeTok{        }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ ./deploy.sh "$IMAGE:$\{GITHUB\_SHA::7\}"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\texttt{GITHUB\_SHA} is the commit hash, and \texttt{\$\{GITHUB\_SHA::7\}} keeps its first seven characters, the short form git itself shows. \texttt{concurrency:\ deploy} tells GitHub never to run two of these workflows at once, so two quick pushes can't deploy over each other.
+
+\codeneed{10}
+
+\section{Step 3: The First Deploy}\label{10-lab-deploy-on-every-push:step-3-the-first-deploy}
+
+Remove any \texttt{tinyapp} container left over from Chapter 9, so the pipeline starts from nothing, then commit and push:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f}\NormalTok{ tinyapp}
+\FunctionTok{git}\NormalTok{ add }\AttributeTok{{-}A}
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}m} \StringTok{"Deploy on every push"}
+\ExtensionTok{act}\NormalTok{ push}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{15}
+
+The interesting lines of act's output:
+
+\codeneed{12}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+[Deploy/test]   | 2 passed in 0.12s
+[Deploy/test] 🏁  Job succeeded
+[Deploy/publish]   | 11e42a4: digest: sha256:03d58610… size: 856
+[Deploy/publish] 🏁  Job succeeded
+[Deploy/deploy ]   | Running now: nothing
+[Deploy/deploy ]   | Deploying:   localhost:5001/tinyapp:11e42a4
+[Deploy/deploy ]   |   health: starting
+[Deploy/deploy ]   |   health: starting
+[Deploy/deploy ]   |   health: starting
+[Deploy/deploy ]   |   health: healthy
+[Deploy/deploy ]   | Deploy succeeded: localhost:5001/tinyapp:11e42a4 is healthy
+[Deploy/deploy ] 🏁  Job succeeded
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{6}
+
+Production is live:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ localhost:8080/health}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+{"status":"ok","version":"11e42a4"}
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{10}
+
+\section{Step 4: A Good Change Goes Live}\label{10-lab-deploy-on-every-push:step-4-a-good-change-goes-live}
+
+In \texttt{main.py}, make \texttt{/health} name the app:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"status"}\NormalTok{: }\StringTok{"ok"}\NormalTok{, }\StringTok{"version"}\NormalTok{: VERSION, }\StringTok{"app"}\NormalTok{: }\StringTok{"tinyapp"}\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}am} \StringTok{"Name the app in /health"}
+\ExtensionTok{act}\NormalTok{ push}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{7}
+
+In act's output:
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+[Deploy/deploy ]   | Running now: localhost:5001/tinyapp:11e42a4
+[Deploy/deploy ]   | Deploying:   localhost:5001/tinyapp:6c357a4
+…
+[Deploy/deploy ]   | Deploy succeeded: localhost:5001/tinyapp:6c357a4 is healthy
+\end{Verbatim}
+\end{codeblock}
+
+\texttt{curl\ localhost:}\allowbreak{}\texttt{8080/}\allowbreak{}\texttt{health} now returns \texttt{\{"status":}\allowbreak{}\texttt{"ok",}\allowbreak{}\texttt{"version":}\allowbreak{}\texttt{"6c357a4",}\allowbreak{}\texttt{"app":}\allowbreak{}\texttt{"tinyapp"\}}. You changed code and committed; the machine did the rest.
+
+\codeneed{10}
+
+\section{Step 5: A Bad Deploy, Caught and Rolled Back}\label{10-lab-deploy-on-every-push:step-5-a-bad-deploy-caught-and-rolled-back}
+
+Now a change that passes every test but breaks production. Someone edits the Dockerfile's last line to serve on port 8001, forgetting that the health check (and the \texttt{-p} mapping) expect 8000:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{CMD}\NormalTok{ [}\StringTok{"uvicorn"}\NormalTok{, }\StringTok{"main:app"}\NormalTok{, }\StringTok{"{-}{-}host"}\NormalTok{, }\StringTok{"0.0.0.0"}\NormalTok{, }\StringTok{"{-}{-}port"}\NormalTok{, }\StringTok{"8001"}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}am} \StringTok{"Serve on port 8001"}
+\ExtensionTok{act}\NormalTok{ push}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{7}
+
+In act's output:
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+[Deploy/test]   | 2 passed in 0.12s
+[Deploy/test] 🏁  Job succeeded
+[Deploy/publish] 🏁  Job succeeded
+[Deploy/deploy ]   | Running now: localhost:5001/tinyapp:6c357a4
+[Deploy/deploy ]   | Deploying:   localhost:5001/tinyapp:17541b3
+[Deploy/deploy ]   |   health: starting
+…
+[Deploy/deploy ]   |   health: unhealthy
+[Deploy/deploy ]   | Deploy FAILED: localhost:5001/tinyapp:17541b3 is not healthy
+[Deploy/deploy ]   | Rolling back to localhost:5001/tinyapp:6c357a4
+[Deploy/deploy ]   |   health: starting
+[Deploy/deploy ]   |   health: starting
+[Deploy/deploy ]   |   health: starting
+[Deploy/deploy ]   |   health: healthy
+[Deploy/deploy ]   | Rollback succeeded
+[Deploy/deploy ]   ❌  Failure - Main Replace the running container [23.091493666s]
+[Deploy/deploy ] 🏁  Job failed
+Error: Job 'deploy' failed
+\end{Verbatim}
+\end{codeblock}
+
+The tests passed because they never look at the Dockerfile. The image built and was published. Only the health check, in the real environment, caught the problem. Users saw a few seconds of downtime while the broken version was tried, and then the previous version was back:
+
+\codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ ps }\AttributeTok{{-}{-}filter}\NormalTok{ name=tinyapp }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}table \{\{.Names\}\}\textbackslash{}t\{\{.Image\}\}\textbackslash{}t\{\{.Status\}\}\textquotesingle{}}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/health}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+NAMES     IMAGE                            STATUS
+tinyapp   localhost:5001/tinyapp:6c357a4   Up 6 seconds (healthy)
+{"status":"ok","version":"6c357a4","app":"tinyapp"}
+\end{Verbatim}
+\end{codeblock}
+
+\begin{callout}{tip}
+
+A blue-green or rolling deployment would avoid even those few seconds: the new version starts next to the old one, and traffic moves only when it is healthy. The idea is the same; the platform does more of the work.
+
+\end{callout}
+
+\codeneed{9}
+
+\section{Step 6: Roll Back by Hand}\label{10-lab-deploy-on-every-push:step-6-roll-back-by-hand}
+
+Sometimes a release is healthy but wrong, and you decide to go back. Every version the pipeline ever built is still in the registry:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ localhost:5001/v2/tinyapp/tags/list}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+{"name":"tinyapp","tags":["6c357a4","53ba61aa33f5…","11e42a4","1.0.0","10ff8b9d01b5…","17541b3"]}
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{12}
+
+Rolling back is just deploying an older tag. The same script works from your terminal:
+
+\codeneed{9}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./deploy.sh}\NormalTok{ localhost:5001/tinyapp:11e42a4}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{7}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Running now: localhost:5001/tinyapp:6c357a4
+Deploying:   localhost:5001/tinyapp:11e42a4
+  health: starting
+  health: starting
+  health: starting
+  health: healthy
+Deploy succeeded: localhost:5001/tinyapp:11e42a4 is healthy
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{8}
+
+\section{Step 7: Fix Forward}\label{10-lab-deploy-on-every-push:step-7-fix-forward}
+
+The real fix belongs in git, so that \texttt{main} describes what should run. \texttt{git\ revert} makes a new commit that undoes the bad one, and the pipeline deploys it like any other change:
+
+\codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ revert }\AttributeTok{{-}{-}no{-}edit}\NormalTok{ HEAD}
+\ExtensionTok{act}\NormalTok{ push}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+The deploy job replaces the hand-picked image with one built from the revert commit, and ends with \texttt{Deploy\ succeeded}. The history in \texttt{git\ log\ -\/-oneline} now tells the whole story: the good change, the bad one, and its revert.
+
+\section{How act Reaches Your Docker}\label{10-lab-deploy-on-every-push:how-act-reaches-your-docker}
+
+The deploy job runs inside act's runner, yet \texttt{tinyapp} appears on your own port 8080. Through the Docker socket (Chapter 6), the job's \texttt{docker\ run} asks \emph{your} Docker daemon to start the container, beside the runner rather than inside it.
+
+\begin{callout}{warning}
+
+Access to the Docker socket is access to the whole machine: anything that can talk to it can start containers with any files mounted. That is fine on your laptop. On shared CI, deploy jobs instead call the target platform with a narrowly scoped credential, for example a cloud deploy command, or SSH to a server that runs \texttt{docker\ compose\ up\ -d}.
+
+\end{callout}
+
+\section{Summary, Key Terms, and Review Questions}\label{10-lab-deploy-on-every-push:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{10-lab-deploy-on-every-push:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  Continuous deployment chains test, publish, and deploy; every passing push to \texttt{main} goes live.
+\item
+  The deploy script remembers the running image, starts the new one, and waits for it to become healthy.
+\item
+  Tests can pass while a release is broken. A health check in the real environment is the last line of defence, and it triggers the automatic rollback.
+\item
+  Kept images make a manual rollback one command; \texttt{git\ revert} fixes forward and keeps \texttt{main} truthful.
+\end{itemize}
+
+\Needspace{9\baselineskip}
+
+\subsection*{Key Terms}\label{10-lab-deploy-on-every-push:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2558\linewidth-1.4884\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7442\linewidth-0.5116\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Automatic rollback & Restoring the previous version when the new one fails its health check \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{10-lab-deploy-on-every-push:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  What does \texttt{deploy.sh} remember before it changes anything, and why?
+\item
+  Why did the bad release pass the test and publish jobs?
+\item
+  The rollback in step 5 succeeded. Why is the pipeline still red?
+\item
+  What is the difference between rolling back (step 6) and fixing forward (step 7)?
+\item
+  How does a job inside act start a container on your machine, and why is that risky?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can push a change and predict, before act finishes, which image will be running on port 8080 and what the pipeline's final colour will be.
+
+\end{understandbox}

@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Calibration: Does &#34;70% Confident&#34; Mean Anything? · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-material">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../../research/index.html">Evidence</a></li>
+    <li><a href="../../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button toc-toggle" type="button" aria-controls="page-toc" aria-expanded="false" data-drawer-toggle="page-toc">
+        <span class="toc-glyph" aria-hidden="true"></span><span class="tool-label">On this page</span>
+      </button>
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../../research/index.html">Evidence</a></li>
+    <li><a href="../../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Learn</a></li>
+<li><span aria-current="page">Calibration: Does &#34;70% Confident&#34; Mean Anything?</span></li>      </ol>
+    </nav>
+    <article class="prose doc doc--material">
+<p class="doc-kind doc-kind--material" data-chrome><span class="doc-kind-label">Curriculum material</span><span class="doc-kind-divider" aria-hidden="true"></span><span class="doc-kind-note">Written for this roadmap — the guide sends you here</span></p><h1 id="calibration-does-70-confident-mean-anything">Calibration: Does &quot;70% Confident&quot; Mean Anything?</h1>
+<dl class="doc-meta" data-chrome>
+  <div class="doc-meta-item"><dt>Canonical source</dt><dd><code>materials/calibration-exercise.md</code></dd></div>
+</dl><div class="table-wrap" role="region" tabindex="0" aria-label="Table: Calibration: Does &quot;70% Confident&quot; Mean Anything?"><table class="doc-table table--kv" style="--cols:2">
+<thead>
+<tr>
+<th scope="col"></th>
+<th scope="col"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="kv-row kv-row--type">
+<td><strong>Type</strong></td>
+<td>Exercise — build the diagnostic, then break it</td>
+</tr>
+<tr class="kv-row kv-row--for">
+<td><strong>For</strong></td>
+<td><a href="../../4-statistics-is-the-difference-real/index.html#4-statistics-is-the-difference-real">4. Statistics: Is the Difference Real?</a></td>
+</tr>
+<tr class="kv-row kv-row--you-should-already-have">
+<td><strong>You should already have</strong></td>
+<td>Metrics and threshold curves (<em>Hands-On ML</em> ch 3), sampling variability (<em>Computational and Inferential Thinking</em> chs 10–13), and the scikit-learn User Guide section on probability calibration</td>
+</tr>
+<tr class="kv-row kv-row--needs">
+<td><strong>Needs</strong></td>
+<td>Python, standard library only</td>
+</tr>
+<tr class="kv-row kv-row--sources">
+<td><strong>Sources</strong></td>
+<td>scikit-learn User Guide §1.16 · <em>Hands-On ML</em> ch 3</td>
+</tr>
+</tbody>
+</table></div>
+<p>The scikit-learn guide explains what calibration is and how to fix it. What it does not do is put you in the position of an engineer who has two models, both of which report probabilities, and has to work out which reported number can be believed — and then discover that the measurement of calibration is itself a choice with consequences. That is this exercise.</p>
+<nav class="doc-contents" aria-labelledby="contents">
+<h2 id="contents">Contents<a class="heading-anchor" href="#contents" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<details open>
+<summary><b>Click to expand / collapse</b></summary>
+<ol>
+<li><a href="#1-two-different-questions">Two Different Questions</a></li>
+<li><a href="#2-predict-first">Predict First</a></li>
+<li><a href="#3-the-exercise">The Exercise</a></li>
+<li><a href="#4-the-part-everyone-gets-wrong">The Part Everyone Gets Wrong</a></li>
+<li><a href="#5-carry-it-into-your-own-system">Carry It Into Your Own System</a></li>
+</ol>
+</details>
+<hr class="section-break">
+</nav>
+<section class="doc-section" aria-labelledby="1-two-different-questions">
+<h2 id="1-two-different-questions">1. Two Different Questions<a class="heading-anchor" href="#1-two-different-questions" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>A model that outputs probabilities is answering two questions at once, and they can be answered with very different quality.</p>
+<ul>
+<li><strong>Discrimination.</strong> Does the model rank positives above negatives? This is what accuracy, ROC and precision–recall curves measure. A model can be perfect here while every probability it reports is wrong.</li>
+<li><strong>Calibration.</strong> Among the cases where the model says 0.7, do about 70% turn out positive? This is what a reliability diagram measures. A model can be perfectly calibrated while ranking no better than a coin toss.</li>
+</ul>
+<p>You need the first when you are choosing what to act on, and the second whenever the number itself enters a decision: routing anything below a confidence threshold to a human, combining a model&#x27;s probability with a cost, or deferring when uncertain — which is where step 6&#x27;s costed errors will send you.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="2-predict-first">
+<h2 id="2-predict-first">2. Predict First<a class="heading-anchor" href="#2-predict-first" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<ol>
+<li>Model A ranks every positive above every negative, but reports probabilities squashed towards 0.5. Model B ranks less well but reports probabilities much closer to the observed frequencies. Which has the better AUC? Which has the better calibration error? Which would you rather deploy, and for what decision?</li>
+<li>You measure calibration error by binning predictions into 10 equal-width bins. What happens to that number if you use 5 bins instead? If you use 50?</li>
+<li>You have 200 labelled examples. How much of the calibration error you measure do you expect to be real, and how much an artefact of having 200 examples?</li>
+</ol>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="3-the-exercise">
+<h2 id="3-the-exercise">3. The Exercise<a class="heading-anchor" href="#3-the-exercise" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<div class="code-block" data-lang="python"><div class="code-meta" data-chrome><span class="code-lang">PYTHON</span></div><pre class="code"><code><span class="sd">"""Calibration: ranking quality and probability honesty are different things."""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Ground truth: each case has a true probability; the label is drawn from it."""</span>
+    <span class="n">cases</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">true_p</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+        <span class="n">cases</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">true_p</span><span class="p">,</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">true_p</span> <span class="k">else</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">cases</span>
+
+<span class="n">cases</span> <span class="o">=</span> <span class="n">sample</span><span class="p">()</span>
+
+<span class="c1"># Model A: perfect ranking, squashed probabilities (never confident).</span>
+<span class="n">model_a</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span> <span class="o">+</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.4</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">cases</span><span class="p">]</span>
+<span class="c1"># Model B: honest probabilities, but noisy ranking.</span>
+<span class="n">model_b</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">p</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">gauss</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">))),</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">cases</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">auc</span><span class="p">(</span><span class="n">pred</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">pairs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Probability that a random positive outranks a random negative."""</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">pred</span> <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">neg</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">pred</span> <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">wins</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">neg</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pairs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">wins</span> <span class="o">/</span> <span class="n">pairs</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">reliability</span><span class="p">(</span><span class="n">pred</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+                <span class="n">bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Predicted probability against observed frequency, bin by bin."""</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">bins</span><span class="p">):</span>
+        <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">b</span> <span class="o">/</span> <span class="n">bins</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">bins</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">pred</span> <span class="k">if</span> <span class="n">lo</span> <span class="o">&lt;=</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">hi</span> <span class="ow">or</span> <span class="p">(</span><span class="n">b</span> <span class="o">==</span> <span class="n">bins</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">p</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">said</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="n">happened</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">y</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lo</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">hi</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">),</span> <span class="n">said</span><span class="p">,</span> <span class="n">happened</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">rows</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">ece</span><span class="p">(</span><span class="n">pred</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Average gap between claim and reality, weighted by how many cases each bin holds."""</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">reliability</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">count</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">count</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">said</span> <span class="o">-</span> <span class="n">happened</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">said</span><span class="p">,</span> <span class="n">happened</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">pred</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"A (perfect ranking, squashed)"</span><span class="p">,</span> <span class="n">model_a</span><span class="p">),</span>
+                   <span class="p">(</span><span class="s2">"B (closer probabilities, noisy ranking)"</span><span class="p">,</span> <span class="n">model_b</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">:  AUC </span><span class="si">{</span><span class="n">auc</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   ECE </span><span class="si">{</span><span class="n">ece</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="s1">'bin'</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'n'</span><span class="si">:</span><span class="s2">&gt;5</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'says'</span><span class="si">:</span><span class="s2">&gt;7</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'happens'</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">said</span><span class="p">,</span> <span class="n">happened</span> <span class="ow">in</span> <span class="n">reliability</span><span class="p">(</span><span class="n">pred</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">label</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">count</span><span class="si">:</span><span class="s2">5d</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">said</span><span class="si">:</span><span class="s2">7.2f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">happened</span><span class="si">:</span><span class="s2">9.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># The measurement is a choice: the same model, measured three ways.</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"same models, different bin counts"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">bins</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">50</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  bins=</span><span class="si">{</span><span class="n">bins</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">   A: </span><span class="si">{</span><span class="n">ece</span><span class="p">(</span><span class="n">model_a</span><span class="p">,</span><span class="w"> </span><span class="n">bins</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   B: </span><span class="si">{</span><span class="n">ece</span><span class="p">(</span><span class="n">model_b</span><span class="p">,</span><span class="w"> </span><span class="n">bins</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># And with less data.</span>
+<span class="n">small</span> <span class="o">=</span> <span class="n">cases</span><span class="p">[:</span><span class="mi">200</span><span class="p">]</span>
+<span class="n">model_a_small</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.5</span> <span class="o">+</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.4</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">small</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"the same model A on 200 cases instead of 4000"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">bins</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  bins=</span><span class="si">{</span><span class="n">bins</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">   ECE </span><span class="si">{</span><span class="n">ece</span><span class="p">(</span><span class="n">model_a_small</span><span class="p">,</span><span class="w"> </span><span class="n">bins</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="4-the-part-everyone-gets-wrong">
+<h2 id="4-the-part-everyone-gets-wrong">4. The Part Everyone Gets Wrong<a class="heading-anchor" href="#4-the-part-everyone-gets-wrong" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Read the reliability table for model A before reading on. The &quot;says&quot; column and the &quot;happens&quot; column diverge in a specific direction: in the low bins the model says more than happens, in the high bins it says less. That is what under-confidence looks like as a shape rather than as a number, and it is why the diagram is worth more than the single error figure.</p>
+<p>Then look at what happened to the numbers when the bin count changed. <strong>Expected calibration error is not a property of the model alone; it is a property of the model and your binning.</strong> With few bins, real miscalibration hides inside wide bins. With many bins, each bin holds few cases and the noise in those small denominators inflates the error. On 200 cases the effect is severe enough that a model can look badly calibrated because you measured it that way.</p>
+<p>So the answers to write down are:</p>
+<ol>
+<li>Which model would you deploy for <em>ranking tickets by urgency</em>, and which for <em>deciding automatically when the model&#x27;s confidence exceeds 0.9</em>? Justify each in one sentence.</li>
+<li>Report model A&#x27;s calibration error as you would to a colleague, in a way that cannot be misread. (Hint: one number is not enough.)</li>
+<li>You are asked to compare two teams&#x27; calibration figures. What must you establish before the comparison means anything?</li>
+<li>A colleague fixes calibration by post-processing the scores and reports that the model is now well calibrated on the same data used to fit the correction. What have they actually shown?</li>
+</ol>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="5-carry-it-into-your-own-system">
+<h2 id="5-carry-it-into-your-own-system">5. Carry It Into Your Own System<a class="heading-anchor" href="#5-carry-it-into-your-own-system" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Take any component of your evolving system that reports a confidence — a classifier from step 3, a retrieval score you have turned into a probability, or a model-based judge later on — and build its reliability table on held-out data. Then decide, explicitly, whether that number is allowed into a decision or is only allowed to rank.</p>
+<p><strong>Completion criterion.</strong> You can look at a reliability table and say what it implies for a threshold you were about to set, and you can defend your choice of bins to someone who chose differently.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+</section>
+
+    </article>
+  </main>
+
+  <aside class="toc-rail drawer drawer--right" id="page-toc" aria-label="On this page" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">On this page</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close contents</span></button>
+    </div>
+    <nav class="page-toc" aria-labelledby="toc-title">
+      <p class="rail-title" id="toc-title">On this page</p>
+      <ol class="toc-list">
+        <li class="toc-item">
+          <a href="#contents" data-toc-link>Contents</a>
+        </li>
+        <li class="toc-item">
+          <a href="#1-two-different-questions" data-toc-link>1. Two Different Questions</a>
+        </li>
+        <li class="toc-item">
+          <a href="#2-predict-first" data-toc-link>2. Predict First</a>
+        </li>
+        <li class="toc-item">
+          <a href="#3-the-exercise" data-toc-link>3. The Exercise</a>
+        </li>
+        <li class="toc-item">
+          <a href="#4-the-part-everyone-gets-wrong" data-toc-link>4. The Part Everyone Gets Wrong</a>
+        </li>
+        <li class="toc-item">
+          <a href="#5-carry-it-into-your-own-system" data-toc-link>5. Carry It Into Your Own System</a>
+        </li>
+      </ol>
+    </nav>
+  </aside>
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>materials/calibration-exercise.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../../assets/js/site.js?v=ce213ccecc" defer></script>
+</body>
+</html>

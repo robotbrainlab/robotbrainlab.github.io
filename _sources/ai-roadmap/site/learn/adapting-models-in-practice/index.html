@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Adapting Models in Practice · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><a href="../modern-ai-engineering/index.html">Modern AI Engineering</a></li>
+<li><span aria-current="page">Adapting Models in Practice</span></li>      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part guide-kicker-part--modern">Modern AI Engineering</span><span aria-hidden="true"> · </span><span>Opens: After step 11</span></p>
+<h1 id="adapting-models-in-practice" class="guide-title">Adapting Models in Practice</h1>
+<div class="guide-body guide-body--modern">
+<p>You have two ways to change what a model does without touching it: change what you ask (prompting) and change what it is given (retrieval). <strong>Fine-tuning</strong> is the third and heaviest: you continue training a pretrained model on examples of the behaviour you want, until that behaviour sits in the weights instead of in the instructions.</p>
+<p>It is the lever to reach for last, and the study of deployed agents cited in <a href="../orientation-contemporary-ai-systems/index.html">Orientation</a> is one reason why — 70% of those systems used off-the-shelf models with prompting. Fine-tuning earns its cost on a narrow, high-volume task that prompting and retrieval handle badly, and it brings a bill you only see if you look: a model tuned for one behaviour can quietly change on everything else. This topic is when it is worth it, how it is done now, and how to find out what else moved.</p>
+<section class="guide-block guide-block--opens-when" aria-label="Opens when">
+<p class="guide-label"><strong>Opens when</strong></p>
+<p>After <a href="../10-how-foundation-models-are-made-and-adapted/index.html">10. How Foundation Models Are Made and Adapted</a> and <a href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">11. Compound AI Systems: Tools, Retrieval and Verification</a>. Step 10, where you adapt your own model by hand, comes first.</p>
+<p>The best time is after <a href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">11. Compound AI Systems: Tools, Retrieval and Verification</a>, once you have a system worth improving; it can run alongside <a href="../12-evaluation-science/index.html">12. Evaluation Science</a>.</p>
+</section>
+<section class="guide-block guide-block--how-to-take-it" aria-label="How to take it">
+<p class="guide-label"><strong>How to take it</strong></p>
+<p><strong>Recommended, and easy to postpone.</strong> Most systems are not improved by fine-tuning, and step 10 has already shown you what an adaptation touches. Take it when your own system has a narrow, high-volume task that prompting and retrieval handle badly — that is the honest trigger.</p>
+</section>
+<section class="guide-block guide-block--return-to-the-numbered-path" aria-label="Return to the numbered path">
+<p class="guide-label"><strong>Return to the numbered path</strong></p>
+<p>Return to <a href="../12-evaluation-science/index.html">12. Evaluation Science</a>.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#deciding-whether-to-adapt">Deciding whether to adapt</a>
+<ol class="unit-toc-sublist">
+<li><a href="#prompt-retrieve-or-tune">Prompt, retrieve or tune</a></li>
+<li><a href="#what-it-costs-to-own-a-tuned-model">What it costs to own a tuned model</a></li>
+</ol>
+</li>
+<li><a href="#how-adaptation-is-done-today">How adaptation is done today</a>
+<ol class="unit-toc-sublist">
+<li><a href="#parameter-efficient-fine-tuning">Parameter-efficient fine-tuning</a></li>
+<li><a href="#supervised-fine-tuning-then-preference-optimization">Supervised fine-tuning, then preference optimization</a></li>
+<li><a href="#distillation-into-smaller-models">Distillation into smaller models</a></li>
+</ol>
+</li>
+<li><a href="#what-else-changed">What else changed</a>
+<ol class="unit-toc-sublist">
+<li><a href="#side-effects-beyond-the-target-task">Side effects beyond the target task</a></li>
+<li><a href="#evaluation-gated-release">Evaluation-gated release</a></li>
+<li><a href="#synthetic-data-accumulated-not-substituted">Synthetic data, accumulated not substituted</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-to-understand-today" aria-label="What to understand today">
+<p class="guide-label"><strong>What to understand today</strong></p>
+<p>When adapting a model is worth it, how it is done with current libraries, and what an adaptation costs you beyond the task you tuned for.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>The topic is one decision followed by its consequences. First, whether to adapt at all — prompting and retrieval are cheaper and reversible, so fine-tuning has to earn its place. Then, how: parameter-efficient adaptation, and the stages of post-training in the order they are normally applied. Then, what it cost you that nobody measured — forgetting, drifted behaviour outside the target task — which is why an adapted model is released through the same regression suite as any other change, and why production traces feeding the next round have to be treated as data with all the problems step 5 described.</p>
+</section>
+<section class="unit-area" aria-labelledby="deciding-whether-to-adapt">
+<h2 id="deciding-whether-to-adapt">Deciding whether to adapt<a class="heading-anchor" href="#deciding-whether-to-adapt" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The decision of step 8, now made with a real system and real numbers.</p>
+</section>
+<section class="unit-concept" aria-labelledby="prompt-retrieve-or-tune">
+<h3 id="prompt-retrieve-or-tune">Prompt, retrieve or tune<a class="heading-anchor" href="#prompt-retrieve-or-tune" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Retrieval supplies knowledge; fine-tuning changes behaviour — format, style, a narrow skill. Current practice prompts first and fine-tunes for narrow, high-volume tasks where the gain justifies the cost. <strong>Studied in:</strong> the <a href="../../evidence/current-practice/index.html">current-practice register</a>, with its evidence; <em>AI Engineering</em> ch 7.</p>
+</section>
+<section class="unit-concept" aria-labelledby="what-it-costs-to-own-a-tuned-model">
+<h3 id="what-it-costs-to-own-a-tuned-model">What it costs to own a tuned model<a class="heading-anchor" href="#what-it-costs-to-own-a-tuned-model" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Data preparation, evaluation, serving and the obligation to re-tune when the base model changes. <strong>Studied in:</strong> <em>AI Engineering</em> ch 7.</p>
+</section>
+<section class="unit-area" aria-labelledby="how-adaptation-is-done-today">
+<h2 id="how-adaptation-is-done-today">How adaptation is done today<a class="heading-anchor" href="#how-adaptation-is-done-today" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The methods you will actually use, and the order they are applied in.</p>
+</section>
+<section class="unit-concept" aria-labelledby="parameter-efficient-fine-tuning">
+<h3 id="parameter-efficient-fine-tuning">Parameter-efficient fine-tuning<a class="heading-anchor" href="#parameter-efficient-fine-tuning" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Low-rank adaptation through current libraries is current practice; evidence indicates that, configured well — applied to all layers, with a higher learning rate than full fine-tuning — it matches full fine-tuning in most post-training settings while learning less and forgetting less. <strong>Studied in:</strong> <em>Hands-On Large Language Models</em> ch 12; the <a href="../../evidence/current-practice/index.html">current-practice register</a>, with its evidence.</p>
+</section>
+<section class="unit-concept" aria-labelledby="supervised-fine-tuning-then-preference-optimization">
+<h3 id="supervised-fine-tuning-then-preference-optimization">Supervised fine-tuning, then preference optimization<a class="heading-anchor" href="#supervised-fine-tuning-then-preference-optimization" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Demonstrations first, preference data after — the sequence most pipelines follow. <strong>Studied in:</strong> <em>Hands-On Large Language Models</em> ch 12; the <a href="../../evidence/current-practice/index.html">current-practice register</a>.</p>
+</section>
+<section class="unit-concept" aria-labelledby="distillation-into-smaller-models">
+<h3 id="distillation-into-smaller-models">Distillation into smaller models<a class="heading-anchor" href="#distillation-into-smaller-models" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Training a smaller model on a larger one&#x27;s outputs, as a way to cut serving cost. <strong>Studied in:</strong> the <a href="../../evidence/current-practice/index.html">current-practice register</a>, with its evidence; cross-reference: step 10.</p>
+</section>
+<section class="unit-area" aria-labelledby="what-else-changed">
+<h2 id="what-else-changed">What else changed<a class="heading-anchor" href="#what-else-changed" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The part that separates an adaptation from a release.</p>
+</section>
+<section class="unit-concept" aria-labelledby="side-effects-beyond-the-target-task">
+<h3 id="side-effects-beyond-the-target-task">Side effects beyond the target task<a class="heading-anchor" href="#side-effects-beyond-the-target-task" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Narrow fine-tuning can change behaviour far from the task, including forgetting and emergent misalignment; evaluate the tuned model on more than what you tuned it for. <strong>Studied in:</strong> cross-reference: step 10&#x27;s side effects; your own adaptation.</p>
+</section>
+<section class="unit-concept" aria-labelledby="evaluation-gated-release">
+<h3 id="evaluation-gated-release">Evaluation-gated release<a class="heading-anchor" href="#evaluation-gated-release" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Current practice collects examples from production traces and feedback, and releases an adapted model only after it passes the regression suite. <strong>Studied in:</strong> the <a href="../../evidence/current-practice/index.html">current-practice register</a>, with its evidence; cross-reference: step 6.</p>
+</section>
+<section class="unit-concept" aria-labelledby="synthetic-data-accumulated-not-substituted">
+<h3 id="synthetic-data-accumulated-not-substituted">Synthetic data, accumulated not substituted<a class="heading-anchor" href="#synthetic-data-accumulated-not-substituted" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Synthetic data is current practice in this loop: models degrade when generated data replaces real data, much less when it is added to it. <strong>Studied in:</strong> the <a href="../../evidence/current-practice/index.html">current-practice register</a>, with its evidence; cross-reference: step 5.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary · continuing</strong></span><span class="study-title"><em>Hands-On Large Language Models</em></span><span class="study-task"><strong>revisit:</strong> (begun in <a href="../working-with-models/index.html">Working with Models</a>) chapter 12 (fine-tuning generation models).</span><span class="study-why"><strong>Why:</strong> fine-tuning and preference tuning with today&#x27;s libraries — the practical counterpart to adapting your own model by hand in step 10.</span></li>
+<li><span class="study-role"><strong>Supplement · continuing</strong></span><span class="study-title"><em>AI Engineering</em></span><span class="study-task"><strong>revisit:</strong> (begun in <a href="../working-with-models/index.html">Working with Models</a>; step 8 read its &quot;When to Finetune&quot; pages) chapter 7 (fine-tuning).</span><span class="study-why"><strong>Why:</strong> when to fine-tune, parameter-efficient methods and model merging, as engineering decisions.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--where-you-study-each-concept" aria-label="Where you study each concept">
+<p class="guide-label"><strong>Where you study each concept</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Synthetic data, accumulated not substituted"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">What you study</th>
+<th scope="col">Where you study it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fine-tuning and preference tuning with current libraries</td>
+<td><em>Hands-On Large Language Models</em> ch 12</td>
+</tr>
+<tr>
+<td>When to fine-tune; parameter-efficient methods; merging</td>
+<td><em>AI Engineering</em> ch 7</td>
+</tr>
+<tr>
+<td>What adaptation does to a model you built yourself</td>
+<td>Cross-reference: step 10</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<p>Choose a narrow task from your evolving system. Establish a prompting baseline and, if it applies, a retrieval baseline. Fine-tune a pretrained open model with LoRA using a current library, and compare all three on your evaluation. Then test the tuned model on behaviour outside the task and record what changed. Compare the experience with adapting your own model in step 10.</p>
+</section>
+<section class="guide-block guide-block--how-deeply-to-know-it-now" aria-label="How deeply to know it now">
+<p class="guide-label"><strong>How deeply to know it now</strong></p>
+<p>Use. You can:</p>
+<ul class="guide-list guide-list--how-deeply-to-know-it-now">
+<li>fine-tune a pretrained model with a current library and explain what changed;</li>
+<li>justify prompting, retrieval or fine-tuning for a task on measurements;</li>
+<li>detect a side effect of fine-tuning outside the target task.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--what-lasts-and-what-changes" aria-label="What lasts and what changes">
+<p class="guide-label"><strong>What lasts and what changes</strong></p>
+<ul class="guide-list guide-list--what-lasts-and-what-changes">
+<li><strong>Lasting:</strong> the prompt-retrieve-or-tune decision (<a href="../8-how-language-models-work-build-one/index.html">8. How Language Models Work: Build One</a>); post-training stages, low-rank adaptation and fine-tuning side effects (<a href="../10-how-foundation-models-are-made-and-adapted/index.html">10. How Foundation Models Are Made and Adapted</a>); feedback loops in data (<a href="../5-data-you-can-defend/index.html">5. Data You Can Defend</a>).</li>
+<li><strong>Current convention:</strong> LoRA through current libraries; supervised fine-tuning then preference tuning; distillation into smaller models; evaluation-gated data flywheels.</li>
+<li><strong>Likely to change:</strong> library interfaces, hyperparameter recipes, and hosted fine-tuning services.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--when-to-revisit" aria-label="When to revisit">
+<p class="guide-label"><strong>When to revisit</strong></p>
+<p>At step 16, when production traces start feeding your data flywheel, and after each four-week review.</p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev guide-pager-link--modern" href="../agents-tools-and-context/index.html" rel="prev"><span class="guide-pager-label">← Previous · Modern AI Engineering · recommended</span><span class="guide-pager-title">Agents, Tools and Context</span></a>
+  <a class="guide-pager-link guide-pager-link--next" href="../12-evaluation-science/index.html" rel="next"><span class="guide-pager-label">Next → back on the numbered path</span><span class="guide-pager-title">12. Evaluation Science</span></a>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+</body>
+</html>

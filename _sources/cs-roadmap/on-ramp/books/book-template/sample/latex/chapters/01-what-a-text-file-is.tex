@@ -1,0 +1,156 @@
+\bookchapter{What a Text File Is}{ch:01-what-a-text-file-is}
+
+\begin{chapterintro}
+
+Before you can process a text file, you need a clear picture of what one is. This chapter gives you that picture: bytes on a disk, an encoding that turns them into characters, and the newline that turns characters into lines.
+
+\end{chapterintro}
+
+\emph{The problem.} I open \texttt{notes.txt} in an editor and see three short lines. A hex viewer\index{hex viewer} shows the same file as a row of numbers.
+
+\emph{The question.} Which one is the file, and why does a program that counts lines sometimes disagree with my eyes?
+
+\section{Bytes First}\label{01-what-a-text-file-is:bytes-first}
+
+A \textbf{file}\index{file} is a named sequence of \textbf{bytes}\index{bytes} stored on a disk. A byte is a number from 0 to 255; nothing more. The file system remembers the name and the length, and it doesn't care what the numbers mean.
+
+A \textbf{text file}\index{text file} is a file whose bytes are meant to be read as characters. The rule that maps bytes to characters is the file's \textbf{encoding}\index{encoding}. Today that is almost always \textbf{UTF-8}\index{utf-8@UTF-8}, which uses one byte for plain English letters and two to four bytes for everything else.
+
+\begin{callout}{note}
+
+``Plain text'' is not a format of its own. It's an agreement between whoever wrote the bytes and whoever reads them: \emph{use UTF-8}. When the two sides disagree, you see garbage such as \texttt{cafÃ©} instead of \texttt{café}.
+
+\end{callout}
+
+\codeneed{13}
+
+Here is the whole idea in one picture. The same three lines, as the disk stores them and as an editor shows them:
+
+\codeneed{10}\begin{codeblock}
+\begin{Verbatim}[breaklines=false, fontsize=\fontsize{8.8}{8.68}\selectfont, fontfamily=diagrammono, formatcom=\diagramlines]
+┌──────────────────────── notes.txt (31 bytes on disk) ────────────────────────┐
+│ 74 68 65 20 63 61 74 20 73 61 74 0a 6f 6e 20 74 68 65 20 6d 61 74 0a 74 68 … │
+└──────────────────────────────────────┬───────────────────────────────────────┘
+                                       │  decode as UTF-8
+                                       ▼
+                      ┌─────────────────────────────────┐
+                      │ the cat sat\n                   │
+                      │ on the mat\n                    │
+                      │ the end\n                       │
+                      └─────────────────────────────────┘
+\end{Verbatim}
+\end{codeblock}
+
+\section{Lines Are a Convention Too}\label{01-what-a-text-file-is:lines-are-a-convention-too}
+
+A \textbf{line}\index{line} is the text between two \textbf{newline}\index{newline} characters.\index{line ending} The newline is an ordinary byte (\texttt{0a}, written \texttt{\textbackslash{}n} in code). Editors hide it and start a new row instead; to a program it's just another character.
+
+\begin{callout}{tip}
+
+When a line count looks one short, check whether the file ends with a newline. \texttt{wc\ -l} counts newline characters, not rows, so a last line without one isn't counted.
+
+\end{callout}
+
+\Needspace{13\baselineskip}
+
+Different systems historically chose different line endings. You'll meet all three:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2650\linewidth-1.4699\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.1242\linewidth-1.7515\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.0807\linewidth-1.8386\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5301\linewidth-0.9399\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{System} & \thead{Line ending} & \thead{Bytes} & \thead{Where you still see it} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{System} & \thead{Line ending} & \thead{Bytes} & \thead{Where you still see it} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Unix, Linux, macOS & LF\index{line ending!LF} & \texttt{0a} & Almost every file on a server, every Git repository by default \\
+Windows & CR LF\index{line ending!CR LF} & \texttt{0d\ 0a} & Files created by Notepad and older Windows tools; some CSV exports from
+spreadsheets \\
+Classic Mac OS (before 2001) & CR & \texttt{0d} & Very old files only; treat it as a curiosity \\
+\end{longtable}
+\end{booktable}
+
+\begin{callout}{warning}
+
+Never ``fix'' line endings on a file you don't own by saving it in another editor. A shell script with \texttt{CR\ LF} endings fails on Linux with a confusing \texttt{bad\ interpreter} error, and a changed file can silently break a checksum or a signature.
+
+\end{callout}
+
+\section{Lab: See the Bytes for Yourself}\label{01-what-a-text-file-is:lab-see-the-bytes-for-yourself}
+
+\texttt{xxd} prints any file's bytes in hexadecimal, next to their characters.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Run \texttt{xxd\ notes.txt}. \textbf{Expected:}
+
+  \codeneed{2}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  00000000: 7468 6520 6361 7420 7361 740a 6f6e 2074  the cat sat.on t
+  00000010: 6865 206d 6174 0a74 6865 2065 6e64 0a    he mat.the end.
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Count the \texttt{0a} bytes. \textbf{Expected:} three. Each \texttt{0a} is a newline, which \texttt{xxd} prints as a dot on the right, so the file has three lines.
+\end{enumerate}
+
+\section{Summary, Key Terms, and Review Questions}\label{01-what-a-text-file-is:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{01-what-a-text-file-is:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  A file is a named sequence of bytes; the disk stores numbers, not letters.
+\item
+  An \textbf{encoding} maps bytes to characters. Use \textbf{UTF-8} unless you have a reason not to.
+\item
+  A line ends at a \textbf{newline} byte. Line endings differ between systems.
+\end{itemize}
+
+\Needspace{10\baselineskip}
+
+\subsection*{Key Terms}\label{01-what-a-text-file-is:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1667\linewidth-1.6667\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.8333\linewidth-0.3333\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+File & A named sequence of bytes stored on a disk \\
+Encoding & The rule that turns bytes into characters, such as UTF-8 \\
+Newline & The character (\texttt{\textbackslash{}n}, byte \texttt{0a}) that ends a
+line \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{01-what-a-text-file-is:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Why can a text editor and a hex viewer show the ``same'' file so differently?
+\item
+  What does \texttt{wc\ -l} actually count?
+\item
+  What goes wrong when a writer and a reader disagree about the encoding?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can explain why \texttt{café} takes 4 characters but 5 bytes in UTF-8.
+
+\end{understandbox}

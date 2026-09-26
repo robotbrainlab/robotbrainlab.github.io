@@ -1,0 +1,63 @@
+\bookchapter{Where to Go from Here}{ch:13-where-to-go-from-here}
+
+\begin{chapterintro}
+
+You can now open a terminal and know what you're typing. You can find, read, and change files, keep programs running, write a script you trust, and use Git to save your work, try ideas safely, and share a project with other people. This last chapter suggests what to learn next, and just as usefully, what you can safely ignore for a while.
+
+\end{chapterintro}
+
+\section{Make It a Habit First}\label{13-where-to-go-from-here:make-it-a-habit-first}
+
+The fastest way to get good at these tools is to use them for everything, starting today:
+
+\begin{itemize}
+\tightlist
+\item
+  Put every project in a Git repository from its first file, and push it to a remote.
+\item
+  Do small jobs in the terminal even when a mouse would be quicker at first: moving files, searching logs, renaming things.
+\item
+  When you type the same commands twice, make them a script, with \texttt{set\ -euo\ pipefail} and a pass through shellcheck.
+\item
+  When a command surprises you, read its \texttt{man} page instead of searching for a fix to paste.
+\end{itemize}
+
+A month of this does more than any course.
+
+\section{What to Learn Next}\label{13-where-to-go-from-here:what-to-learn-next}
+
+\emph{More Git, as you need it.} A few commands earn their place once the basics feel natural. \texttt{git\ stash} puts half-finished work aside so you can switch branches. \texttt{git\ tag} marks releases. \texttt{git\ rebase\ -i} (interactive rebase) lets you tidy your own commits before you open a pull request. \texttt{git\ bisect} finds the commit that introduced a bug by testing halfway points. Learn each one when a real problem calls for it.
+
+\emph{Automated checks.} Hosting sites can run your tests on every push and every pull request, and block merging when they fail. On GitHub this is GitHub Actions. It's the natural next step after pull requests, and it's covered in \emph{Infrastructure Engineering from Zero}.
+
+\emph{A terminal editor.} Sooner or later you'll edit a file on a server with no graphical editor. Learn enough \texttt{nano} to edit and save, or enough Vim to edit, save, and quit (\texttt{:wq}).
+
+\emph{What's under the shell.} This book explained only as much about the kernel, processes, and memory as the terminal needs. \emph{Operating Systems from Zero} goes underneath: system calls, how processes and threads really run, virtual memory, and file systems.
+
+\emph{The network.} SSH, \texttt{git\ push}, and \texttt{curl} all cross a network you've treated as a pipe. \emph{Networking from Zero} explains what happens on the way: addresses, ports, DNS, TCP, and HTTP. It's the book to read when ``it works on my machine'' but nobody else can reach it.
+
+\emph{Building with these tools.} \emph{Web Applications from Zero} and \emph{APIs to FastAPI} put the terminal and Git to work on real programs, and \emph{The Complete Software Engineering Guide} takes one project from an idea all the way to production, using everything here along the way.
+
+\section{What to Skip for Now}\label{13-where-to-go-from-here:what-to-skip-for-now}
+
+Plenty of material online is correct but not yet useful to you. It's safe to skip:
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Git's internals.} How objects, trees, and packfiles are stored is fascinating, and you don't need it to use Git well. The same goes for ``plumbing'' commands like \texttt{git\ cat-file} and \texttt{git\ update-ref}.
+\item
+  \emph{Complex branching strategies.} Models with many long-lived branches (develop, release, hotfix) solve problems of large teams shipping versioned software. A \texttt{main} branch plus short feature branches serves almost everyone else.
+\item
+  \emph{Submodules and hooks.} Useful in specific situations; you'll know when you reach one.
+\item
+  \emph{Every option of every command.} Learn the handful you use, and look the rest up when you need them.
+\item
+  \emph{Advanced \texttt{awk} and \texttt{sed} programs.} Past a few lines, write the job in Python instead. It's easier to read and test.
+\item
+  \emph{Shell customisation rabbit holes.} Fancy prompts, plugin frameworks, and elaborate dotfiles are fun, but they don't make you more capable. A plain shell you understand is better than a clever one you don't.
+\end{itemize}
+
+\section{One Last Thing}\label{13-where-to-go-from-here:one-last-thing}
+
+Every developer you admire once typed \texttt{ls} and wondered what it would do. The difference between them and a beginner isn't talent; it's hours in the terminal and a history of commits. Open a terminal, start a repository, and make your first commit today. Then make another one tomorrow.

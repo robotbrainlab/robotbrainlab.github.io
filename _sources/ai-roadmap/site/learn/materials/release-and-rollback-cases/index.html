@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Release and Rollback: Four Decisions Under Imperfect Evidence · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-material">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../../research/index.html">Evidence</a></li>
+    <li><a href="../../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button toc-toggle" type="button" aria-controls="page-toc" aria-expanded="false" data-drawer-toggle="page-toc">
+        <span class="toc-glyph" aria-hidden="true"></span><span class="tool-label">On this page</span>
+      </button>
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../../research/index.html">Evidence</a></li>
+    <li><a href="../../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Learn</a></li>
+<li><span aria-current="page">Release and Rollback: Four Decisions Under Imperfect Evidence</span></li>      </ol>
+    </nav>
+    <article class="prose doc doc--material">
+<p class="doc-kind doc-kind--material" data-chrome><span class="doc-kind-label">Curriculum material</span><span class="doc-kind-divider" aria-hidden="true"></span><span class="doc-kind-note">Written for this roadmap — the guide sends you here</span></p><h1 id="release-and-rollback-four-decisions-under-imperfect-evidence">Release and Rollback: Four Decisions Under Imperfect Evidence</h1>
+<dl class="doc-meta" data-chrome>
+  <div class="doc-meta-item"><dt>Canonical source</dt><dd><code>materials/release-and-rollback-cases.md</code></dd></div>
+</dl><div class="table-wrap" role="region" tabindex="0" aria-label="Table: Release and Rollback: Four Decisions Under Imperfect Evidence"><table class="doc-table table--kv" style="--cols:2">
+<thead>
+<tr>
+<th scope="col"></th>
+<th scope="col"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="kv-row kv-row--type">
+<td><strong>Type</strong></td>
+<td>Case set — decisions to make and defend, not exercises with answers</td>
+</tr>
+<tr class="kv-row kv-row--for">
+<td><strong>For</strong></td>
+<td><a href="../../6-evaluation-and-testing/index.html#6-evaluation-and-testing">6. Evaluation and Testing</a> (cases 1 and 2, after you have written a success specification) and <a href="../../16-operating-ai-systems-in-production/index.html#16-operating-ai-systems-in-production">16. Operating AI Systems in Production</a> (all four)</td>
+</tr>
+<tr class="kv-row kv-row--you-should-already-have">
+<td><strong>You should already have</strong></td>
+<td>Success specification with costed errors (step 6), paired comparison and intervals (step 4), evaluation validity (step 12, for cases 3 and 4), monitoring and rollback mechanics (<em>Designing Machine Learning Systems</em> chs 7–9)</td>
+</tr>
+<tr class="kv-row kv-row--how-to-use-it">
+<td><strong>How to use it</strong></td>
+<td>For each case, decide <strong>ship · hold · roll back · gather more evidence</strong>, and write the justification before reading the discussion. The discussion does not contain the answer; it contains what experienced engineers would argue about</td>
+</tr>
+<tr class="kv-row kv-row--sources">
+<td><strong>Sources</strong></td>
+<td><em>Designing Machine Learning Systems</em> chs 6–9 · Miller, &quot;Adding Error Bars to Evals&quot; · your own step 6 specification</td>
+</tr>
+</tbody>
+</table></div>
+<p>Deployment mechanics are taught well by the assigned reading: shadow deployment, canaries, staged rollout, rollback triggers. What no resource supplies is practice at the decision those mechanics exist to serve — made with evidence that is always partial, under time pressure, with a cost on every option including waiting. That is a judgment, and judgment is built on cases.</p>
+<p><strong>Rules of engagement.</strong> Every case is decidable: you have enough to defend a position. None has a single right answer; two competent engineers can disagree and both be defensible. What is not defensible is a decision that ignores the specification, treats absence of evidence as evidence of absence, or forgets that <em>not shipping</em> is also a decision with costs.</p>
+<nav class="doc-contents" aria-labelledby="contents">
+<h2 id="contents">Contents<a class="heading-anchor" href="#contents" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<details open>
+<summary><b>Click to expand / collapse</b></summary>
+<ol>
+<li><a href="#1-case-1--the-improvement-that-might-not-be-one">Case 1 — The Improvement That Might Not Be One</a></li>
+<li><a href="#2-case-2--the-slice-that-got-worse">Case 2 — The Slice That Got Worse</a></li>
+<li><a href="#3-case-3--the-provider-changed-the-model">Case 3 — The Provider Changed the Model</a></li>
+<li><a href="#4-case-4--the-quiet-decline">Case 4 — The Quiet Decline</a></li>
+<li><a href="#5-writing-your-own-rollback-triggers">Writing Your Own Rollback Triggers</a></li>
+</ol>
+</details>
+<hr class="section-break">
+</nav>
+<section class="doc-section" aria-labelledby="1-case-1--the-improvement-that-might-not-be-one">
+<h2 id="1-case-1--the-improvement-that-might-not-be-one">1. Case 1 — The Improvement That Might Not Be One<a class="heading-anchor" href="#1-case-1--the-improvement-that-might-not-be-one" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>The situation.</strong> Your support-triage classifier routes incoming tickets. The current model is in production and meets the specification: at most 8% of urgent tickets misrouted, measured on a fixed evaluation set of 600 tickets. A colleague has trained a replacement. On the same 600 tickets it misroutes 6.5% of urgent tickets. They would like to ship it today, ahead of a busy week.</p>
+<p><strong>What you also know.</strong> The evaluation set was assembled eight months ago. The two models were compared on it once. The new model is four times more expensive to run and was trained on data that includes the last two months, which the old model never saw. Nobody has computed an interval on the difference.</p>
+<p><strong>Your decision:</strong> ship · hold · roll back · gather more evidence. Write it down with the reason, then continue.</p>
+<p><strong>What is worth arguing about.</strong> A 1.5-point difference on 600 items, of which perhaps 150 are urgent, is a handful of tickets; step 4 tells you how to put an interval on that, and the paired form of the comparison is available for free because both models scored the same items. The cost increase is not a detail — the specification named error costs, and it did not name a budget, which is a gap in the specification rather than a licence to ignore cost. And the training window makes the comparison suspect in a way the interval cannot capture: the newer model saw the recent past, and the evaluation set is from the older past, so a fair comparison needs data neither model has seen. The busy week cuts both ways: it raises the cost of a bad deployment and the cost of a delayed improvement.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="2-case-2--the-slice-that-got-worse">
+<h2 id="2-case-2--the-slice-that-got-worse">2. Case 2 — The Slice That Got Worse<a class="heading-anchor" href="#2-case-2--the-slice-that-got-worse" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>The situation.</strong> A retrieval-augmented assistant answers policy questions for employees. Your new version improves overall answer accuracy from 71% to 78% on a 400-question evaluation. On the 40 questions that concern parental leave, accuracy falls from 85% to 62%.</p>
+<p><strong>What you also know.</strong> Parental-leave questions are 4% of the evaluation set and, by the traffic logs, about 3% of real questions. Their answers are the ones most often escalated to a human, and the policy behind them changed six weeks ago. The improvement elsewhere is broad, not concentrated in one topic.</p>
+<p><strong>Your decision, with a justification, before reading on.</strong></p>
+<p><strong>What is worth arguing about.</strong> The aggregate number and the slice number are both real; the specification you wrote in step 6 is what decides which one governs, and if it is silent on slices then this case has just shown you a defect in it. Forty questions is a small denominator — the fall could be a dozen items — so an interval matters here as much as in case 1. The policy change six weeks ago raises a different possibility: that the new version is right and the <em>evaluation labels</em> are stale, which would reverse the sign of the finding. Note what that means practically: the cheapest next step may be to re-label 40 questions rather than to retrain anything.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="3-case-3--the-provider-changed-the-model">
+<h2 id="3-case-3--the-provider-changed-the-model">3. Case 3 — The Provider Changed the Model<a class="heading-anchor" href="#3-case-3--the-provider-changed-the-model" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>The situation.</strong> Your production system calls a hosted model behind a version alias. This morning the provider moved that alias to a new version. Your regression suite — 120 cases with automated checks — passes at 116/120, against 119/120 yesterday. Latency is down 20%. Cost per request is down 30%. Two of the four new failures are in cases about numeric limits; the others look like formatting.</p>
+<p><strong>What you also know.</strong> You did not choose this change and cannot postpone it, though you can pin the previous version for a period. The system is used by about 300 people internally. Nobody has complained yet — it is 09:40.</p>
+<p><strong>Your decision, and when you would revisit it.</strong></p>
+<p><strong>What is worth arguing about.</strong> Pinning buys time at a price (you will have to move eventually, and pinned versions are retired). Three failures out of 120 may be noise if any of your checks are stochastic — do you know which are? The numeric-limit failures deserve separate treatment from the formatting ones: one class is a correctness change, the other may be a contract your parser can absorb. The absence of complaints at 09:40 is not evidence of quality, which is exactly the trap step 6 warned about; the question is which monitoring signal would show this as harm, and how long it takes to move.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="4-case-4--the-quiet-decline">
+<h2 id="4-case-4--the-quiet-decline">4. Case 4 — The Quiet Decline<a class="heading-anchor" href="#4-case-4--the-quiet-decline" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>The situation.</strong> Nothing has been deployed for five weeks. Your weekly quality measurement — a model-based judge validated against human labels — reads 0.82, 0.81, 0.83, 0.79, 0.77. The specification&#x27;s floor is 0.75. Support escalations are up slightly; the sample is small.</p>
+<p><strong>What you also know.</strong> The judge prompt was updated four weeks ago to handle a new answer format. Traffic mix has shifted towards a new customer segment. The human-label validation of the judge was done five weeks ago and has not been repeated.</p>
+<p><strong>Your decision: roll back to what? And if not, what do you do instead?</strong></p>
+<p><strong>What is worth arguing about.</strong> This case has no deployment to roll back, which is the point: a decline can come from the world rather than from a change you made. Three explanations fit the numbers — the system is worse, the <em>measurement</em> is worse (the judge changed), or the <em>input</em> is different (the traffic did) — and they demand different responses. Step 12&#x27;s methods separate them, and the order you test them in is a cost decision: re-validating the judge on 50 human labels is cheap; re-segmenting the metric by customer type is cheaper still and may resolve it in an hour.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="5-writing-your-own-rollback-triggers">
+<h2 id="5-writing-your-own-rollback-triggers">5. Writing Your Own Rollback Triggers<a class="heading-anchor" href="#5-writing-your-own-rollback-triggers" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Now apply all four cases to your evolving system. Write a short release note containing, in this order:</p>
+<ol>
+<li><strong>What would make you ship.</strong> The measurement, the threshold, the slice conditions, and the interval you require.</li>
+<li><strong>What would make you roll back</strong>, stated so that it can be checked without you: a named metric, a threshold, a window and a person who acts.</li>
+<li><strong>What you will not know at decision time</strong>, listed honestly. This is the part most teams skip and every one of these cases turned on.</li>
+<li><strong>How you would explain the decision to someone who does not work in AI</strong> — in four sentences, no metric names.</li>
+</ol>
+<p>Completion criterion: you can hand that note to a colleague and they can execute the rollback decision without asking you what you meant. Step 16 asks you to carry out one rollback against this note; the note is what makes that exercise a test of your judgment rather than of your reflexes.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+</section>
+
+    </article>
+  </main>
+
+  <aside class="toc-rail drawer drawer--right" id="page-toc" aria-label="On this page" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">On this page</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close contents</span></button>
+    </div>
+    <nav class="page-toc" aria-labelledby="toc-title">
+      <p class="rail-title" id="toc-title">On this page</p>
+      <ol class="toc-list">
+        <li class="toc-item">
+          <a href="#contents" data-toc-link>Contents</a>
+        </li>
+        <li class="toc-item">
+          <a href="#1-case-1--the-improvement-that-might-not-be-one" data-toc-link>1. Case 1 — The Improvement That Might Not Be One</a>
+        </li>
+        <li class="toc-item">
+          <a href="#2-case-2--the-slice-that-got-worse" data-toc-link>2. Case 2 — The Slice That Got Worse</a>
+        </li>
+        <li class="toc-item">
+          <a href="#3-case-3--the-provider-changed-the-model" data-toc-link>3. Case 3 — The Provider Changed the Model</a>
+        </li>
+        <li class="toc-item">
+          <a href="#4-case-4--the-quiet-decline" data-toc-link>4. Case 4 — The Quiet Decline</a>
+        </li>
+        <li class="toc-item">
+          <a href="#5-writing-your-own-rollback-triggers" data-toc-link>5. Writing Your Own Rollback Triggers</a>
+        </li>
+      </ol>
+    </nav>
+  </aside>
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>materials/release-and-rollback-cases.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../../assets/js/site.js?v=ce213ccecc" defer></script>
+</body>
+</html>

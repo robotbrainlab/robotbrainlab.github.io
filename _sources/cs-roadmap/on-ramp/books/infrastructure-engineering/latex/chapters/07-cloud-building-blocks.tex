@@ -1,0 +1,419 @@
+\bookchapter{Cloud Building Blocks}{ch:07-cloud-building-blocks}
+
+\begin{chapterintro}
+
+A cloud provider's menu is enormous, but a small app uses only a handful of dishes: accounts and access control, virtual machines, object storage, managed databases, firewalls, serverless functions, and cost alerts. In the lab you run an S3-compatible object store locally and give an app a key that can do only what it needs.
+
+\end{chapterintro}
+
+\emph{The problem.} The cloud console has 200 services, and I need three.
+
+\emph{The question.} Which few building blocks does a small app actually need, and how do I use them safely?
+
+\section{The Few You Actually Need}\label{07-cloud-building-blocks:the-few-you-actually-need}
+
+A console is the provider's website for managing things by clicking, and it lists hundreds of services. For a small web app, this short list covers nearly everything:
+
+\Needspace{10\baselineskip}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3636\linewidth-1.2727\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6364\linewidth-0.7273\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Need} & \thead{Building block} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Need} & \thead{Building block} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Who may do what & Accounts and IAM \\
+Somewhere to run code & A virtual machine, a container service, or functions \\
+Somewhere to keep files & Object storage \\
+Somewhere to keep records & A managed database \\
+Control over who can connect & Firewalls \\
+No surprises on the bill & Budgets and cost alerts \\
+\end{longtable}
+\end{booktable}
+
+\section{Accounts and IAM}\label{07-cloud-building-blocks:accounts-and-iam}
+
+When you sign up, you get an account: the container for everything you create and pay for. The login you signed up with is the \textbf{root user}\index{root user}, and it can do anything, including closing the account. Protect it with multi-factor authentication (MFA), a second proof such as a code from your phone, and don't use it for daily work.
+
+\textbf{Identity and access management}\index{identity and access management} (IAM) decides who may do what. Picture a hotel key card that opens your room and the gym, but not other rooms or the safe. IAM hands out key cards:
+
+\begin{itemize}
+\tightlist
+\item
+  An IAM user is a person or program with long-term credentials.
+\item
+  A \textbf{role}\index{role} is a set of permissions that a machine or service takes on, receiving short-lived credentials automatically. An app on a cloud VM should use a role, not a stored password.
+\item
+  A \textbf{policy}\index{policy} is a document listing what is allowed: which actions, on which resources.
+\end{itemize}
+
+\codeneed{13}
+
+Here is a policy that allows reading and writing objects in one bucket, called \texttt{uploads}, and nothing else:
+
+\codeneed{10}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\{}
+  \DataTypeTok{"Version"}\FunctionTok{:} \StringTok{"2012{-}10{-}17"}\FunctionTok{,}
+  \DataTypeTok{"Statement"}\FunctionTok{:} \OtherTok{[}
+    \FunctionTok{\{}
+      \DataTypeTok{"Effect"}\FunctionTok{:} \StringTok{"Allow"}\FunctionTok{,}
+      \DataTypeTok{"Action"}\FunctionTok{:} \OtherTok{[}\StringTok{"s3:GetObject"}\OtherTok{,} \StringTok{"s3:PutObject"}\OtherTok{]}\FunctionTok{,}
+      \DataTypeTok{"Resource"}\FunctionTok{:} \OtherTok{[}\StringTok{"arn:aws:s3:::uploads/*"}\OtherTok{]}
+    \FunctionTok{\}}
+  \OtherTok{]}
+\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+Anything not explicitly allowed is denied. \texttt{arn:aws:s3:::uploads/}\allowbreak{}\texttt{*} is how AWS names ``every object in the bucket \texttt{uploads}''.
+
+The rule behind good IAM is \textbf{least privilege}\index{least privilege}: give each person and program only the permissions it needs. If the app's key leaks, the thief can touch only the app's own bucket.
+
+Programs that can't use a role sign their requests with an \textbf{access key}\index{access key}: a pair of a key ID (like a username) and a secret key (like a password).
+
+\begin{callout}{warning}
+
+Leaked access keys are the most common way cloud accounts get abused. Never commit them to git, never put them in an image, and prefer roles, whose credentials expire on their own.
+
+\end{callout}
+
+\section{Virtual Machines}\label{07-cloud-building-blocks:virtual-machines}
+
+Launching a VM means choosing a region, a disk image (such as Ubuntu Linux), an instance type, firewall rules, and an SSH key, which proves it's you when you open a terminal on it. A minute later you can log in, install Docker, and run your container as on your laptop. A \emph{stopped} VM still pays for its disk; only a \emph{terminated} (deleted) one costs nothing.
+
+\section{Object Storage}\label{07-cloud-building-blocks:object-storage}
+
+New buckets are private: only identities with permission can read them. Keep it that way; a bucket accidentally made public is one of the most common causes of data leaks.
+
+Many products speak S3's interface, including MinIO, a storage server you can run yourself. In the lab, MinIO plays the cloud's object storage, and \texttt{boto3}, the official AWS library for Python, talks to it exactly as it would to S3.
+
+\begin{callout}{note}
+
+MinIO no longer publishes ready-made images for its free edition, so the lab uses free builds of its open-source code from Chainguard: \texttt{cgr.}\allowbreak{}\texttt{dev/}\allowbreak{}\texttt{chainguard/}\allowbreak{}\texttt{minio} and \texttt{cgr.}\allowbreak{}\texttt{dev/}\allowbreak{}\texttt{chainguard/}\allowbreak{}\texttt{minio-}\allowbreak{}\texttt{client}.
+
+\end{callout}
+
+\section{Managed Databases}\label{07-cloud-building-blocks:managed-databases}
+
+A \textbf{managed database}\index{managed database} is a database, such as PostgreSQL, that the provider installs, updates, backs up, and can copy to a second availability zone. You connect with a host name, port, user, and password as usual. It costs more than running PostgreSQL yourself, and for almost every small team it's worth it. Keep it in a private subnet, reachable only by the app.
+
+\section{Firewalls}\label{07-cloud-building-blocks:firewalls}
+
+In the cloud, firewall rules are usually called security groups: lists of what may come in, attached to machines or databases. Everything not listed is blocked.
+
+\Needspace{11\baselineskip}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.5699\linewidth-0.8602\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.4301\linewidth-1.1398\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Rule} & \thead{Why} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Rule} & \thead{Why} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Allow port 443 from anywhere to the load balancer & Users reach the app over HTTPS \\
+Allow port 8000 from the load balancer to the app & Only the front door talks to the app \\
+Allow port 5432 from the app to the database & Only the app talks to the database \\
+Allow port 22 (SSH) from your own IP address only & Nobody else can even try to log in \\
+\end{longtable}
+\end{booktable}
+
+\begin{callout}{warning}
+
+``Allow 0.0.0.0/0'' means ``allow the whole internet''. Automated scanners find open database and SSH ports within minutes of them appearing.
+
+\end{callout}
+
+\section{Serverless Functions}\label{07-cloud-building-blocks:serverless-functions}
+
+A function service runs your code whenever an event happens: an HTTP request, a file landing in a bucket, a nightly timer. There is nothing to patch and nothing to pay while it's idle, but functions have a maximum run time (often 15 minutes) and cold starts. They shine for glue work, such as resizing each uploaded image.
+
+\section{Cost Alerts}\label{07-cloud-building-blocks:cost-alerts}
+
+Before you create anything in a real account, create a budget alert: in the billing section, set a monthly amount, say \$10, and ask for an email at 50\%, 80\%, and 100\% of it, or when the forecast says you'll pass it. An alert doesn't stop spending; it tells you in time to stop it yourself. Label what you create, so the bill shows what each thing costs, and delete experiments when you're done.
+
+\section{Lab: Least Privilege with Local Object Storage}\label{07-cloud-building-blocks:lab-least-privilege-with-local-object-storage}
+
+You'll run MinIO, create two buckets, and give an ``app'' an access key that can read and write one bucket only. Then you'll prove what it can and cannot do.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Create a folder and a private network, and start MinIO with a volume for its data:
+
+  \codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ \textasciitilde{}/infra{-}labs/ch07 }\KeywordTok{\&\&} \BuiltInTok{cd}\NormalTok{ \textasciitilde{}/infra{-}labs/ch07}
+\ExtensionTok{docker}\NormalTok{ network create cloudlab}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name}\NormalTok{ minio }\AttributeTok{{-}{-}network}\NormalTok{ cloudlab }\AttributeTok{{-}p}\NormalTok{ 9000:9000 }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}v}\NormalTok{ minio{-}data:/data }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}e}\NormalTok{ MINIO\_ROOT\_USER=admin }\AttributeTok{{-}e}\NormalTok{ MINIO\_ROOT\_PASSWORD=change{-}me{-}please }\DataTypeTok{\textbackslash{}}
+\NormalTok{  cgr.dev/chainguard/minio server /data}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \texttt{admin} is MinIO's root user, like the cloud account's owner.
+\item
+  The MinIO client, \texttt{mc}, is the admin tool. It runs in a container on the same network, so define a small shell function that runs it for you. \texttt{MC\_HOST\_local} tells it where the server is and how to log in, and \texttt{"\$@"} passes along whatever you type after \texttt{mc}:
+
+  \codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mc()} \KeywordTok{\{}
+  \ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}{-}rm} \AttributeTok{{-}{-}network}\NormalTok{ cloudlab }\AttributeTok{{-}v} \StringTok{"}\VariableTok{$PWD}\StringTok{"}\NormalTok{:/work }\AttributeTok{{-}w}\NormalTok{ /work }\DataTypeTok{\textbackslash{}}
+    \AttributeTok{{-}e}\NormalTok{ MC\_HOST\_local=http://admin:change{-}me{-}please@minio:9000 }\DataTypeTok{\textbackslash{}}
+\NormalTok{    cgr.dev/chainguard/minio{-}client }\StringTok{"}\VariableTok{$@}\StringTok{"}
+\KeywordTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+\item
+  Create two buckets, and put a ``private'' file in one of them:
+
+  \codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{printf} \StringTok{\textquotesingle{}name,amount\textbackslash{}nAsha,1200\textbackslash{}n\textquotesingle{}} \OperatorTok{\textgreater{}}\NormalTok{ report.csv}
+\ExtensionTok{mc}\NormalTok{ mb local/uploads}
+\ExtensionTok{mc}\NormalTok{ mb local/billing}
+\ExtensionTok{mc}\NormalTok{ cp report.csv local/billing/}
+\ExtensionTok{mc}\NormalTok{ ls local}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{6}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  Bucket created successfully `local/uploads`.
+  Bucket created successfully `local/billing`.
+  `/work/report.csv` -> `local/billing/report.csv`
+  …
+  [2026-09-26 14:38:42 UTC]     0B billing/
+  [2026-09-26 14:38:42 UTC]     0B uploads/
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Save the policy from ``Accounts and IAM'' as \texttt{uploads-only.json}. Create it in MinIO, create a user for the app, and attach the policy:
+
+  \codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{mc}\NormalTok{ admin policy create local uploads{-}only uploads{-}only.json}
+\ExtensionTok{mc}\NormalTok{ admin user add local app{-}uploader uploader{-}secret{-}123}
+\ExtensionTok{mc}\NormalTok{ admin policy attach local uploads{-}only }\AttributeTok{{-}{-}user}\NormalTok{ app{-}uploader}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{4}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  Created policy `uploads-only` successfully.
+  Added user `app-uploader` successfully.
+  Attached Policies: [uploads-only]
+  To User: app-uploader
+  \end{Verbatim}
+  \end{codeblock}
+
+  In MinIO, the user name and password serve as the access key ID and secret key.
+\item
+  Create a virtual environment, install \texttt{boto3}, and save this as \texttt{s3\_demo.py}:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ venv .venv }\KeywordTok{\&\&} \BuiltInTok{.}\NormalTok{ .venv/bin/activate }\KeywordTok{\&\&} \ExtensionTok{pip}\NormalTok{ install boto3==1.43.103}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""Use object storage the way an app would: with a limited access key."""}
+\ImportTok{import}\NormalTok{ os}
+
+\ImportTok{import}\NormalTok{ boto3}
+\ImportTok{from}\NormalTok{ botocore.exceptions }\ImportTok{import}\NormalTok{ ClientError}
+
+\NormalTok{s3 }\OperatorTok{=}\NormalTok{ boto3.client(}
+    \StringTok{"s3"}\NormalTok{,}
+\NormalTok{    endpoint\_url}\OperatorTok{=}\StringTok{"http://localhost:9000"}\NormalTok{,}
+\NormalTok{    aws\_access\_key\_id}\OperatorTok{=}\NormalTok{os.environ[}\StringTok{"S3\_ACCESS\_KEY"}\NormalTok{],}
+\NormalTok{    aws\_secret\_access\_key}\OperatorTok{=}\NormalTok{os.environ[}\StringTok{"S3\_SECRET\_KEY"}\NormalTok{],}
+\NormalTok{    region\_name}\OperatorTok{=}\StringTok{"us{-}east{-}1"}\NormalTok{,}
+\NormalTok{)}
+
+
+\KeywordTok{def}\NormalTok{ read(bucket, key):}
+    \ControlFlowTok{return}\NormalTok{ s3.get\_object(Bucket}\OperatorTok{=}\NormalTok{bucket, Key}\OperatorTok{=}\NormalTok{key)[}\StringTok{"Body"}\NormalTok{].read().decode()}
+
+
+\KeywordTok{def}\NormalTok{ attempt(label, action):}
+    \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{        result }\OperatorTok{=}\NormalTok{ action()}
+    \ControlFlowTok{except}\NormalTok{ ClientError }\ImportTok{as}\NormalTok{ error:}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"DENIED  }\SpecialCharTok{\{}\NormalTok{label}\SpecialCharTok{\}}\SpecialStringTok{: }\SpecialCharTok{\{}\NormalTok{error}\SpecialCharTok{.}\NormalTok{response[}\StringTok{\textquotesingle{}Error\textquotesingle{}}\NormalTok{][}\StringTok{\textquotesingle{}Code\textquotesingle{}}\NormalTok{]}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+        \ControlFlowTok{return}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"OK      }\SpecialCharTok{\{}\NormalTok{label}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, result }\ControlFlowTok{if} \BuiltInTok{isinstance}\NormalTok{(result, (}\BuiltInTok{str}\NormalTok{, }\BuiltInTok{list}\NormalTok{)) }\ControlFlowTok{else} \StringTok{""}\NormalTok{)}
+
+
+\NormalTok{attempt(}\StringTok{"upload uploads/hello.txt"}\NormalTok{,}
+        \KeywordTok{lambda}\NormalTok{: s3.put\_object(Bucket}\OperatorTok{=}\StringTok{"uploads"}\NormalTok{, Key}\OperatorTok{=}\StringTok{"hello.txt"}\NormalTok{, Body}\OperatorTok{=}\StringTok{b"hi!"}\NormalTok{))}
+\NormalTok{attempt(}\StringTok{"read uploads/hello.txt"}\NormalTok{, }\KeywordTok{lambda}\NormalTok{: read(}\StringTok{"uploads"}\NormalTok{, }\StringTok{"hello.txt"}\NormalTok{))}
+\NormalTok{attempt(}\StringTok{"read billing/report.csv"}\NormalTok{, }\KeywordTok{lambda}\NormalTok{: read(}\StringTok{"billing"}\NormalTok{, }\StringTok{"report.csv"}\NormalTok{))}
+\NormalTok{attempt(}\StringTok{"delete uploads/hello.txt"}\NormalTok{,}
+        \KeywordTok{lambda}\NormalTok{: s3.delete\_object(Bucket}\OperatorTok{=}\StringTok{"uploads"}\NormalTok{, Key}\OperatorTok{=}\StringTok{"hello.txt"}\NormalTok{))}
+\NormalTok{attempt(}\StringTok{"list all buckets"}\NormalTok{,}
+        \KeywordTok{lambda}\NormalTok{: [bucket[}\StringTok{"Name"}\NormalTok{] }\ControlFlowTok{for}\NormalTok{ bucket }\KeywordTok{in}\NormalTok{ s3.list\_buckets()[}\StringTok{"Buckets"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+\item
+  Run it with the app's limited key:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\VariableTok{S3\_ACCESS\_KEY}\OperatorTok{=}\NormalTok{app{-}uploader }\VariableTok{S3\_SECRET\_KEY}\OperatorTok{=}\NormalTok{uploader{-}secret{-}123 }\ExtensionTok{python3}\NormalTok{ s3\_demo.py}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{5}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  OK      upload uploads/hello.txt
+  OK      read uploads/hello.txt hi!
+  DENIED  read billing/report.csv: AccessDenied
+  DENIED  delete uploads/hello.txt: AccessDenied
+  DENIED  list all buckets: AccessDenied
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Run it again with the root credentials (\texttt{S3\_}\allowbreak{}\texttt{ACCESS\_}\allowbreak{}\texttt{KEY=}\allowbreak{}\texttt{admin\ S3\_}\allowbreak{}\texttt{SECRET\_}\allowbreak{}\texttt{KEY=}\allowbreak{}\texttt{change-}\allowbreak{}\texttt{me-}\allowbreak{}\texttt{please}). Every line now says \texttt{OK}: the root user reads the report, deletes the upload, and lists \texttt{{[}\textquotesingle{}billing\textquotesingle{},}\allowbreak{}\texttt{\ \textquotesingle{}uploads\textquotesingle{}{]}}.
+\item
+  Try reading the private file with no credentials at all:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl} \AttributeTok{{-}s} \AttributeTok{{-}o}\NormalTok{ /dev/null }\AttributeTok{{-}w} \StringTok{\textquotesingle{}\%\{http\_code\}\textbackslash{}n\textquotesingle{}}\NormalTok{ http://localhost:9000/billing/report.csv}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{1}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  403
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Clean up:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f}\NormalTok{ minio }\KeywordTok{\&\&} \ExtensionTok{docker}\NormalTok{ volume rm minio{-}data }\KeywordTok{\&\&} \ExtensionTok{docker}\NormalTok{ network rm cloudlab}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+\end{enumerate}
+
+\textbf{Expected results:} the app's key can put and get objects in \texttt{uploads}, and nothing else, not even deleting its own upload or listing buckets; the root user can do everything; and an anonymous request gets \texttt{403\ Forbidden}, because buckets are private by default.
+
+\section{Summary, Key Terms, and Review Questions}\label{07-cloud-building-blocks:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{07-cloud-building-blocks:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  A small app needs identity, compute, storage, a database, firewalls, and a budget.
+\item
+  Lock the root user away with MFA. Policies decide who may do what; prefer roles to stored keys, and grant least privilege.
+\item
+  A VM costs money until it is terminated; buckets are private by default; managed databases buy you tested backups.
+\item
+  Firewalls block everything not listed. Never open databases or SSH to the whole internet. Budget alerts warn you before the bill does.
+\end{itemize}
+
+\Needspace{18\baselineskip}
+
+\subsection*{Key Terms}\label{07-cloud-building-blocks:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.4255\linewidth-1.1489\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5745\linewidth-0.8511\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Root user & An account's all-powerful owner login \\
+Identity and access management (IAM) & The service that decides who may do what \\
+Role & Permissions taken on with short-lived credentials \\
+Policy & A document listing allowed actions on resources \\
+Least privilege & Giving each identity only the permissions it needs \\
+Access key & A key ID and secret a program signs requests with \\
+Managed database & A database the provider runs and backs up \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{07-cloud-building-blocks:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Why should you not use the root user for everyday work?
+\item
+  How do an IAM user and a role differ, and which should an app on a VM use?
+\item
+  Write the firewall rules for an app behind a load balancer, with a database.
+\item
+  Does a budget alert stop spending? What should you do when one arrives?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can write a policy that gives a program exactly one bucket.
+
+\end{understandbox}

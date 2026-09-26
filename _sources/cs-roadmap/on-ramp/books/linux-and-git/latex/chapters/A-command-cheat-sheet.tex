@@ -1,0 +1,121 @@
+\bookchapter{Command Cheat Sheet}{ch:A-command-cheat-sheet}
+
+\begin{chapterintro}
+
+The commands from this book, grouped by job. Where Linux and macOS differ, both are shown.
+
+\end{chapterintro}
+
+\Needspace{22\baselineskip}
+
+\section{Files, Folders, and Text}\label{A-command-cheat-sheet:files-folders-and-text}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.4128\linewidth-1.1743\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5872\linewidth-0.8257\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{pwd}, \texttt{ls\ -la}, \texttt{cd\ dir} & Where am I; list everything; go into \texttt{dir} (\texttt{cd\ ..} up,
+\texttt{cd} home) \\
+\texttt{mkdir\ -p\ a/b}, \texttt{touch\ f} & Make folders with parents; create an empty file \\
+\texttt{cp\ a\ b}, \texttt{mv\ a\ b}, \texttt{rm\ f} & Copy, move or rename, remove (\texttt{-r} for folders; no undo) \\
+\texttt{cat\ f}, \texttt{less\ f}, \texttt{head}/\texttt{tail\ -n\ 5\ f} & Print, page through, first or last lines (\texttt{tail\ -f} follows) \\
+\texttt{du\ -sh\ d}, \texttt{df\ -h} & Size of a folder; free space on each disk \\
+\texttt{find\ .\ -name\ \textquotesingle{}*.py\textquotesingle{}} & Find files by name (also \texttt{-type}, \texttt{-mtime},
+\texttt{-size}) \\
+\texttt{grep\ -rn\ word\ .} & Search inside files, with line numbers (\texttt{-c}, \texttt{-i},
+\texttt{-v}, \texttt{-E}) \\
+\texttt{sed\ \textquotesingle{}s/a/b/g\textquotesingle{}\ f} & Print a changed copy; \texttt{-i} edits in place (macOS:
+\texttt{-i\ \textquotesingle{}\textquotesingle{}}) \\
+\texttt{cut\ -}\allowbreak{}\texttt{d\textquotesingle{}\ \textquotesingle{}\ -}\allowbreak{}\texttt{f5\ \textbar{}\ sort\ \textbar{}\ uniq\ -}\allowbreak{}\texttt{c\ \textbar{}\ sort\ -}\allowbreak{}\texttt{rn} & Keep a column, then count and rank its values \\
+\texttt{jq\ \textquotesingle{}.key\textquotesingle{}\ f.json} & Pull fields out of JSON; \texttt{jq\ .} pretty-prints \\
+\end{longtable}
+\end{booktable}
+
+\Needspace{13\baselineskip}
+
+\section{The Shell, Permissions, and Settings}\label{A-command-cheat-sheet:the-shell-permissions-and-settings}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3614\linewidth-1.2771\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6386\linewidth-0.7229\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{cmd\ \textgreater{}\ f},
+\texttt{\textgreater{}\textgreater{}\ f}, \texttt{2\textgreater{}\ f},
+\texttt{a\ \textbar{}\ b} & Output to a file; append; errors; feed \texttt{a} into \texttt{b} \\
+\texttt{echo\ \$PATH}, \texttt{which\ cmd} & Where commands are looked up; which one runs \\
+\texttt{export\ NAME=value} & Pass a setting to programs (keep it in
+\texttt{\textasciitilde{}/.bashrc}) \\
+\texttt{id}, \texttt{ls\ -l\ f} & Who you are; a file's owner and permissions \\
+\texttt{chmod\ u+x\ f}, \texttt{chmod\ 600\ f} & Let the owner run it; make it private (\texttt{644}, \texttt{755}) \\
+\texttt{sudo\ cmd} & Run one command as root \\
+\end{longtable}
+\end{booktable}
+
+\Needspace{16\baselineskip}
+
+\section{Processes, Software, and Remote Work}\label{A-command-cheat-sheet:processes-software-and-remote-work}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.4348\linewidth-1.1304\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5652\linewidth-0.8696\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{ps\ aux}, \texttt{pgrep\ -af\ name} & List processes; find one by name (macOS: \texttt{-fl}) \\
+\texttt{cmd\ \&},
+\texttt{nohup\ cmd\ \textgreater{}\ log\ 2\textgreater{}\&}\allowbreak{}\texttt{1\ \&} & Run in the background; outlive the terminal \\
+\texttt{kill\ PID}, \texttt{kill\ -9\ PID} & Ask to stop (SIGTERM); force stop (SIGKILL) \\
+\texttt{crontab\ -e} & Schedule a job \\
+\texttt{sudo\ apt\ install\ x}, \texttt{brew\ install\ x} & Install software (Debian/Ubuntu; macOS) \\
+\texttt{python3\ -m\ venv\ .venv} & Create a virtual environment \\
+\texttt{ssh-keygen\ -t\ ed25519}, \texttt{ssh\ user@host} & Make a key pair; open a shell on another machine \\
+\texttt{rsync\ -av\ src/}\allowbreak{}\texttt{\ dst/},
+\texttt{tmux\ new\ -s\ x} & Copy only what changed; a lasting session \\
+\end{longtable}
+\end{booktable}
+
+\Needspace{13\baselineskip}
+
+\section{Scripts}\label{A-command-cheat-sheet:scripts}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.4375\linewidth-1.1250\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5625\linewidth-0.8750\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Syntax} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Syntax} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{\#!/}\allowbreak{}\texttt{usr/}\allowbreak{}\texttt{bin/}\allowbreak{}\texttt{env\ bash},
+\texttt{set\ -euo\ pipefail} & Run with bash; stop at the first error \\
+\texttt{"\$name"}, \texttt{\$(cmd)}, \texttt{\$\{1:-default\}} & A quoted variable; a command's output; an argument \\
+\texttt{if\ {[}{[}\ -f\ "\$f"\ {]}{]}}, \texttt{for\ f\ in\ *.md} & Test and branch; repeat for each item \\
+\texttt{exit\ 1}, \texttt{\textgreater{}\&2}, \texttt{shellcheck\ s.sh} & Fail with a code; write to stderr; check for bugs \\
+\end{longtable}
+\end{booktable}

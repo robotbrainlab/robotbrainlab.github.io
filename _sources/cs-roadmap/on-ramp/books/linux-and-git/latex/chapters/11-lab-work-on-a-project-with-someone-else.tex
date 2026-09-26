@@ -1,0 +1,467 @@
+\bookchapter{Lab: Work on a Project with Someone Else}{ch:11-lab-work-on-a-project-with-someone-else}
+
+\begin{chapterintro}
+
+In this lab you play two people, Ada and Ben, sharing one project through a remote. You'll see how Git refuses to let one person's push wipe out another's work, how \texttt{fetch} and \texttt{pull} bring changes together, and how teams use feature branches and pull requests to review work before it lands. You'll finish with forks, the open-source workflow, and licences.
+
+\end{chapterintro}
+
+\emph{The problem.} Two of us edited the same file, and someone's work vanished.
+
+\emph{The question.} How do several people change one project at the same time without losing anyone's work?
+
+You need no accounts. A bare repository on your own disk plays the part of GitHub, and two folders play Ada's and Ben's laptops. Paths in the output show \texttt{/home/ada} because one person runs the whole lab.
+
+\codeneed{12}
+
+\section{Step 1: Set Up the Shared Remote}\label{11-lab-work-on-a-project-with-someone-else:step-1-set-up-the-shared-remote}
+
+Create the shared repository, then Ada's copy:
+
+\codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ \textasciitilde{}/collab }\KeywordTok{\&\&} \BuiltInTok{cd}\NormalTok{ \textasciitilde{}/collab}
+\FunctionTok{git}\NormalTok{ init }\AttributeTok{{-}{-}bare}\NormalTok{ \textasciitilde{}/remotes/team.git}
+\FunctionTok{git}\NormalTok{ clone \textasciitilde{}/remotes/team.git ada}
+\BuiltInTok{cd}\NormalTok{ ada}
+\FunctionTok{git}\NormalTok{ config user.name }\StringTok{"Ada"}
+\FunctionTok{git}\NormalTok{ config user.email }\StringTok{"ada@example.com"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\texttt{git\ config} without \texttt{-\/-global} sets the name for this repository only. That's how one computer can pretend to be two people. Git warns \texttt{You\ appear\ to\ have\ cloned\ an\ empty\ repository}, which is true and harmless.
+
+\codeneed{11}
+
+Ada writes \texttt{shop.py}:
+
+\codeneed{8}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{PRICES }\OperatorTok{=}\NormalTok{ \{}\StringTok{"apple"}\NormalTok{: }\FloatTok{0.5}\NormalTok{, }\StringTok{"bread"}\NormalTok{: }\FloatTok{2.0}\NormalTok{\}}
+
+
+\KeywordTok{def}\NormalTok{ total(items):}
+    \ControlFlowTok{return} \BuiltInTok{sum}\NormalTok{(PRICES[item] }\ControlFlowTok{for}\NormalTok{ item }\KeywordTok{in}\NormalTok{ items)}
+
+
+\BuiltInTok{print}\NormalTok{(total([}\StringTok{"apple"}\NormalTok{, }\StringTok{"bread"}\NormalTok{]))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{6}
+
+She commits and pushes:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ add shop.py}
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}m} \StringTok{"Add shop total"}
+\FunctionTok{git}\NormalTok{ push}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\textbf{Expected:} \texttt{*\ {[}new\ branch{]}\ \ \ \ \ \ main\ -}\allowbreak{}\texttt{\textgreater{}\ main}.
+
+Now make Ben's copy the same way: from \texttt{\textasciitilde{}/collab}, run \texttt{git\ clone\ \textasciitilde{}/}\allowbreak{}\texttt{remotes/}\allowbreak{}\texttt{team.}\allowbreak{}\texttt{git\ ben}, then set \texttt{user.name} to \texttt{Ben} and \texttt{user.email} to \texttt{ben@example.com} inside it. \textbf{Expected:} \texttt{git\ log\ -\/-oneline} in \texttt{ben} shows Ada's commit.
+
+\codeneed{13}
+
+\section{Step 2: Both Work at Once}\label{11-lab-work-on-a-project-with-someone-else:step-2-both-work-at-once}
+
+Ada adds milk to the prices in \texttt{shop.py}, commits, and pushes. It goes through. Meanwhile Ben, who hasn't seen Ada's change, adds a \texttt{README.md}, commits, and pushes:
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ push}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{5}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+To /home/ada/remotes/team.git
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to '/home/ada/remotes/team.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. …
+\end{Verbatim}
+\end{codeblock}
+
+This is the answer to the chapter's problem. When files are shared by email or a synced folder, the last person to save wins, and the other's work silently vanishes. Git refuses instead. Ben's push would have replaced Ada's commit, so the remote rejects it until Ben has Ada's work too.
+
+\section{Step 3: Fetch, Look, Then Pull}\label{11-lab-work-on-a-project-with-someone-else:step-3-fetch-look-then-pull}
+
+\texttt{git\ fetch} downloads new commits from the remote without touching your files or your branches. They land in a \textbf{remote-tracking branch}\index{remote-tracking branch}, \texttt{origin/main}: Git's record of where \texttt{main} was on the remote when you last checked.
+
+\codeneed{12}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ fetch}
+\FunctionTok{git}\NormalTok{ status}
+\FunctionTok{git}\NormalTok{ log }\AttributeTok{{-}{-}oneline} \AttributeTok{{-}{-}graph} \AttributeTok{{-}{-}all}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{8}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+On branch main
+Your branch and 'origin/main' have diverged,
+and have 1 and 1 different commits each, respectively.
+…
+* 193c83f Add README
+| * b2f7c97 Add milk to prices
+|/  
+* 04da6ba Add shop total
+\end{Verbatim}
+\end{codeblock}
+
+History has forked, just like two branches. \texttt{git\ pull} is simply \texttt{git\ fetch} followed by a merge of \texttt{origin/main} into your branch. When the histories have diverged, Git wants you to choose once how pulls should combine them. Pick merging, which you already know:
+
+\codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ config }\AttributeTok{{-}{-}global}\NormalTok{ pull.rebase false}
+\FunctionTok{git}\NormalTok{ pull}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Merge made by the 'ort' strategy.
+ shop.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+\end{Verbatim}
+\end{codeblock}
+
+Git opens your editor with a merge message; save and close it. Now Ben has both changes, and \texttt{git\ push} succeeds. Back in \texttt{ada}, a \texttt{git\ pull} fast-forwards and brings in Ben's README.
+
+\textbf{Expected:} both folders contain \texttt{README.md} and the milk price, and \texttt{git\ log\ -\/-oneline} shows the same commit at the top in both.
+
+If Ada and Ben had changed the same line, \texttt{git\ pull} would have stopped with a conflict. You'd resolve it exactly as in Chapter 10: edit, \texttt{git\ add}, commit, then push.
+
+\begin{callout}{tip}
+
+Pull before you start work and before you push. The less time your copy spends out of date, the smaller any conflict will be.
+
+\end{callout}
+
+\codeneed{7}
+
+\section{Step 4: A Feature Branch}\label{11-lab-work-on-a-project-with-someone-else:step-4-a-feature-branch}
+
+Pushing straight to \texttt{main} works for two people. Teams usually protect \texttt{main} and make every change on a \textbf{feature branch}\index{feature branch} first, so someone can review it before it lands. Ben wants to add discounts:
+
+\codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ switch }\AttributeTok{{-}c}\NormalTok{ add{-}discount}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{5}
+
+He appends a function to \texttt{shop.py}:
+
+\codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ with\_discount(amount, percent):}
+    \ControlFlowTok{return} \BuiltInTok{round}\NormalTok{(amount }\OperatorTok{*}\NormalTok{ (}\DecValTok{1} \OperatorTok{{-}}\NormalTok{ percent }\OperatorTok{/} \DecValTok{100}\NormalTok{), }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{8}
+
+He commits it as ``Add percentage discount'' and pushes the branch, not \texttt{main}:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ push }\AttributeTok{{-}u}\NormalTok{ origin add{-}discount}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+To /home/ada/remotes/team.git
+ * [new branch]      add-discount -> add-discount
+branch 'add-discount' set up to track 'origin/add-discount'.
+\end{Verbatim}
+\end{codeblock}
+
+\section{Step 5: The Pull Request and the Review}\label{11-lab-work-on-a-project-with-someone-else:step-5-the-pull-request-and-the-review}
+
+On GitHub, this is where Ben opens a \textbf{pull request}\index{pull request}: a web page that proposes ``please merge \texttt{add-discount} into \texttt{main}'', with a place to discuss it. Pull requests are a feature of hosting sites, not of Git. Here's what Ben would see:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  A yellow banner on the repository page says his branch had recent pushes, with a \emph{Compare \& pull request} button.
+\item
+  He picks the target (\texttt{main}) and his branch, writes a title and a description of what changed and why, and clicks \emph{Create pull request}.
+\item
+  The pull request page has tabs. \emph{Conversation} holds the discussion. \emph{Commits} lists his commits. \emph{Files changed} shows the diff.
+\end{enumerate}
+
+\codeneed{13}
+
+Ada does a code review: she reads the change and leaves comments on specific lines. She can then choose \emph{Comment}, \emph{Approve}, or \emph{Request changes}. You can do the same review from the terminal:
+
+\codeneed{10}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/collab/ada}
+\FunctionTok{git}\NormalTok{ fetch}
+\FunctionTok{git}\NormalTok{ diff main...origin/add{-}discount}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{6}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+…
+ print(total(["apple", "bread"]))
++
++
++def with_discount(amount, percent):
++    return round(amount * (1 - percent / 100), 2)
+\end{Verbatim}
+\end{codeblock}
+
+The three dots mean ``what the branch changed since it split from \texttt{main}''. Ada asks for an example of the function in use. Ben adds \texttt{print(with\_}\allowbreak{}\texttt{discount(10,}\allowbreak{}\texttt{\ 15))}, commits ``Show a discount example'', and runs \texttt{git\ push} again. On GitHub, the new commit simply appears in the same pull request. There's no need to open a new one.
+
+\codeneed{9}
+
+\section{Step 6: Merge and Clean Up}\label{11-lab-work-on-a-project-with-someone-else:step-6-merge-and-clean-up}
+
+Satisfied, Ada merges. On GitHub she'd click \emph{Merge pull request}, then \emph{Delete branch}. Locally, the same thing is:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ merge }\AttributeTok{{-}{-}no{-}ff} \AttributeTok{{-}{-}no{-}edit}\NormalTok{ origin/add{-}discount}
+\FunctionTok{git}\NormalTok{ push}
+\FunctionTok{git}\NormalTok{ push origin }\AttributeTok{{-}{-}delete}\NormalTok{ add{-}discount}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{7}
+
+\texttt{-\/-no-ff} makes a merge commit even though a fast-forward was possible, as GitHub's button does, so the history records that a reviewed branch came in. Ben then updates and tidies his copy:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/collab/ben}
+\FunctionTok{git}\NormalTok{ switch main}
+\FunctionTok{git}\NormalTok{ pull}
+\FunctionTok{git}\NormalTok{ branch }\AttributeTok{{-}d}\NormalTok{ add{-}discount}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\textbf{Expected:} \texttt{python3\ shop.py} prints \texttt{2.5} and \texttt{8.5} in both folders.
+
+\section{Step 7: Forks}\label{11-lab-work-on-a-project-with-someone-else:step-7-forks}
+
+You can't push to a stranger's project. So on GitHub you click \textbf{Fork}\index{fork}, which makes your own full copy of their repository under your account. You push to your fork, then open a pull request from your fork to theirs. The original project is called \textbf{upstream}\index{upstream}.
+
+\codeneed{14}
+
+Simulate it with a third person, Cy. A fork is just a bare clone:
+
+\codeneed{11}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/collab}
+\FunctionTok{git}\NormalTok{ clone }\AttributeTok{{-}{-}bare}\NormalTok{ \textasciitilde{}/remotes/team.git \textasciitilde{}/remotes/cy{-}fork.git}
+\FunctionTok{git}\NormalTok{ clone \textasciitilde{}/remotes/cy{-}fork.git cy}
+\BuiltInTok{cd}\NormalTok{ cy}
+\FunctionTok{git}\NormalTok{ remote add upstream \textasciitilde{}/remotes/team.git}
+\FunctionTok{git}\NormalTok{ remote }\AttributeTok{{-}v}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+origin  /home/ada/remotes/cy-fork.git (fetch)
+origin  /home/ada/remotes/cy-fork.git (push)
+upstream    /home/ada/remotes/team.git (fetch)
+upstream    /home/ada/remotes/team.git (push)
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{6}
+
+Cy's \texttt{origin} is her fork, which she can push to. \texttt{upstream} is the original. When the original moves on, she keeps her fork current like this:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ fetch upstream}
+\FunctionTok{git}\NormalTok{ merge upstream/main}
+\FunctionTok{git}\NormalTok{ push origin main}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\textbf{Expected:} after Ada pushes a new commit to \texttt{team.git}, these three commands bring it into Cy's copy and her fork.
+
+\section{The Open-Source Workflow}\label{11-lab-work-on-a-project-with-someone-else:the-open-source-workflow}
+
+\textbf{Open source}\index{open source} means the code is public and anyone may use, study, change, and share it, under the terms of its licence. Contributing to a project usually goes like this:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Read the \texttt{README} and any \texttt{CONTRIBUTING} file. They explain how the project wants to work.
+\item
+  Find or open an issue, the project's to-do and bug list on GitHub. Say what you plan to do before writing code, so nobody's effort is wasted.
+\item
+  Fork, clone, create a feature branch, commit, and push to your fork.
+\item
+  Open a pull request to upstream, respond to review, and push fixes to the same branch.
+\end{enumerate}
+
+\Needspace{10\baselineskip}
+
+A \textbf{licence}\index{licence} is the file, usually \texttt{LICENSE}, that says what others may do with the code. Three are common:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1892\linewidth-1.6216\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.8108\linewidth-0.3784\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Licence} & \thead{In short} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Licence} & \thead{In short} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+MIT & Do almost anything; keep the copyright notice \\
+Apache 2.0 & Like MIT, plus explicit patent terms \\
+GPL 3.0 & You may share changes, but shared versions must stay GPL \\
+\end{longtable}
+\end{booktable}
+
+\begin{callout}{warning}
+
+Public code with no licence is not free to use. By default, copyright means all rights are reserved. Check the licence before you copy code into your project, and add one to anything you publish.
+
+\end{callout}
+
+\section{Summary, Key Terms, and Review Questions}\label{11-lab-work-on-a-project-with-someone-else:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{11-lab-work-on-a-project-with-someone-else:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  A shared remote is the meeting point. Git rejects a push that would overwrite someone else's commits.
+\item
+  \texttt{git\ fetch} downloads commits into remote-tracking branches like \texttt{origin/main}; \texttt{git\ pull} fetches and merges.
+\item
+  Teams make changes on feature branches, push them, and open pull requests for code review before merging.
+\item
+  More commits pushed to the branch update the same pull request. After merging, delete the branch.
+\item
+  A fork is your own copy of someone else's repository; \texttt{upstream} points at the original.
+\item
+  Open-source work flows through issues, forks, and pull requests. The licence decides what you may do with the code.
+\end{itemize}
+
+\Needspace{16\baselineskip}
+
+\subsection*{Key Terms}\label{11-lab-work-on-a-project-with-someone-else:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2889\linewidth-1.4222\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7111\linewidth-0.5778\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Remote-tracking branch & Git's record of a remote branch, such as \texttt{origin/main} \\
+Feature branch & A branch holding one change, to be reviewed and merged \\
+Pull request & A hosting site's proposal and discussion page for merging a branch \\
+Fork & Your own copy of someone else's repository on a hosting site \\
+Upstream & The original repository a fork was copied from \\
+Open source & Code anyone may use, change, and share under its licence \\
+Licence & The terms that say what others may do with the code \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{11-lab-work-on-a-project-with-someone-else:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Why did Git reject Ben's push, and what would have happened to Ada's work if it hadn't?
+\item
+  What's the difference between \texttt{git\ fetch} and \texttt{git\ pull}?
+\item
+  Why do teams use feature branches and pull requests instead of pushing to \texttt{main}?
+\item
+  How do you update an open pull request after a reviewer asks for changes?
+\item
+  In a fork, what do \texttt{origin} and \texttt{upstream} point to?
+\item
+  You find useful code on GitHub with no licence. May you copy it into your project?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can take a change from a feature branch, through review, into a shared \texttt{main}, without anyone's work being lost.
+
+\end{understandbox}

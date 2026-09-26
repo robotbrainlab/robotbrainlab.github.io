@@ -1,0 +1,31 @@
+% ================================================================
+%  copyright.tex — title, copyright, revision history, tested versions,
+%  no-warranty line, typesetting note. Set at the foot of the page.
+% ================================================================
+\thispagestyle{empty}
+\vspace*{\fill}
+\begingroup
+\fontsize{7.5}{9.6}\selectfont
+\setlength{\parskip}{5pt}
+\textbf{\BookTitle: \BookSubtitle}
+
+Copyright \textcopyright\ \BookYear\ \BookCopyrightHolder. All rights reserved.
+
+\textbf{Revision History for the \BookEdition}\\[1pt]
+\begin{tabular}{@{}l@{\hspace{1.2em}}l@{}}
+\BookRevisions
+\end{tabular}
+
+The programs in this book are included for their instructional value. They have been tested
+with \BookTestedWith, but no warranty, express or implied, is offered with respect to them, and
+no liability is accepted for any damages arising from their use. Third-party services and tools
+described here change over time; check their current documentation.
+
+\ifx\BookCodeNote\empty\else \BookCodeNote\par\fi
+
+\vspace{14pt}
+{\color{muted}Typeset in Crimson Pro, Source Sans 3, and Source Code Pro with XeLaTeX.
+Source: Markdown, converted with pandoc.\par}
+\endgroup
+\vspace*{36pt}
+\clearpage

@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Compound AI Systems: Tools, Retrieval and Verification · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><span>Part 2 — Advanced</span></li>
+      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part">Part 2 — Advanced</span><span aria-hidden="true"> · </span><span>Step 11 of 19</span></p>
+<h1 id="11-compound-ai-systems-tools-retrieval-and-verification" class="guide-title">11. Compound AI Systems: Tools, Retrieval and Verification</h1>
+<div class="guide-body">
+<p>Almost nothing that reaches real users is a single model call. A <strong>compound AI system</strong> is an application in which the model is one component among several: retrieval supplies the facts it does not hold, <strong>tools</strong> let it act — a function it can call to look something up, file a ticket, run code — checks verify what comes back, memory carries state from one turn to the next, and ordinary software decides the order in which all of that happens.</p>
+<p>Composing parts creates problems none of the parts had. Each component can fail; a failure in one appears as nonsense from another; and the more freedom the model has to choose its own next step — its <strong>autonomy</strong> — the more paths the system can take and the harder it is to say which part went wrong. This step is about designing these systems on purpose: what each component is for, how to give a model a tool it uses correctly, what belongs in the context and what does not, how to find the component that actually failed, and how to choose the least autonomy that solves the problem rather than the most the model can manage.</p>
+<section class="guide-block guide-block--where-you-are" aria-label="Where you are">
+<p class="guide-label"><strong>Where you are</strong></p>
+<p>You have the parts: a model whose mechanism you understand (step 8), retrieval (step 9), evaluation (step 6) and the statistics of stochastic systems (step 4). The limitation now is architectural. A single model call cannot look things up reliably, cannot act, and cannot check itself — and the moment you connect it to tools and let it choose its own steps, the failure modes multiply.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#composition-and-autonomy">Composition and autonomy</a>
+<ol class="unit-toc-sublist">
+<li><a href="#workflow-composition">Workflow composition</a></li>
+<li><a href="#the-least-autonomy-that-solves-the-problem">The least autonomy that solves the problem</a></li>
+<li><a href="#release-judgment-for-a-compound-system">Release judgment for a compound system</a></li>
+</ol>
+</li>
+<li><a href="#grounding-and-contracts">Grounding and contracts</a>
+<ol class="unit-toc-sublist">
+<li><a href="#retrieval-augmented-composition">Retrieval-augmented composition</a></li>
+<li><a href="#output-contracts">Output contracts</a></li>
+</ol>
+</li>
+<li><a href="#acting-on-the-world">Acting on the world</a>
+<ol class="unit-toc-sublist">
+<li><a href="#tool-interfaces-and-least-privilege">Tool interfaces and least privilege</a></li>
+<li><a href="#verification-and-generate-and-verify">Verification and generate-and-verify</a></li>
+<li><a href="#human-checkpoints-and-approval-gates">Human checkpoints and approval gates</a></li>
+</ol>
+</li>
+<li><a href="#the-context-budget">The context budget</a>
+<ol class="unit-toc-sublist">
+<li><a href="#context-is-finite-and-not-used-uniformly">Context is finite and not used uniformly</a></li>
+<li><a href="#choosing-what-enters-the-context">Choosing what enters the context</a></li>
+<li><a href="#diagnosing-context-failures">Diagnosing context failures</a></li>
+</ol>
+</li>
+<li><a href="#diagnosing-a-system-of-parts">Diagnosing a system of parts</a>
+<ol class="unit-toc-sublist">
+<li><a href="#failure-decomposition-across-components">Failure decomposition across components</a></li>
+<li><a href="#trajectory-evaluation">Trajectory evaluation</a></li>
+</ol>
+</li>
+<li><a href="#patterns-to-know-not-to-reach-for-by-default">Patterns to know, not to reach for by default</a>
+<ol class="unit-toc-sublist">
+<li><a href="#multi-agent-orchestration-and-the-evidence-about-it">Multi-agent orchestration, and the evidence about it</a></li>
+<li><a href="#agent-memory-architectures">Agent memory architectures</a></li>
+<li><a href="#interoperability-standards-as-a-concept">Interoperability standards as a concept</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-you-ll-learn" aria-label="What you&#x27;ll learn">
+<p class="guide-label"><strong>What you&#x27;ll learn</strong></p>
+<p>By the end you should be able to design a compound system and justify every autonomy decision in it, implement a tool interface and a context strategy and measure their effects, diagnose which component caused a failure, and decide whether the system is ready to release. The roadmap&#x27;s required depths differ across this block — design depth for composition, understanding for the newer agentic patterns — and each area below says which applies.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>Least autonomy is the organizing principle, and the rest is what makes it practical. A fixed workflow is easier to verify than an agent, so autonomy has to be earned with evidence; output contracts make one component&#x27;s result something the next can rely on; tool interfaces decide what the system can do at all — and, with least privilege, what it can do when something goes wrong; verification catches the model being confidently wrong before a user does. Context management is the constraint underneath all of it: the window is finite and is not used uniformly, so what you put in it is a design decision with measurable consequences. Failure decomposition is what makes the whole thing operable — with several components, &quot;it gave a bad answer&quot; is not a diagnosis, and knowing whether retrieval, context, the tool or the model failed is what turns a demonstration into a system you can fix.</p>
+</section>
+<section class="unit-area" aria-labelledby="composition-and-autonomy">
+<h2 id="composition-and-autonomy">Composition and autonomy<a class="heading-anchor" href="#composition-and-autonomy" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Design depth. The decisions that determine what the system is before any component is chosen.</p>
+</section>
+<section class="unit-concept" aria-labelledby="workflow-composition">
+<h3 id="workflow-composition">Workflow composition<a class="heading-anchor" href="#workflow-composition" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Fixed code paths that call models: how work is decomposed, sequenced and recombined. <strong>Studied in:</strong> <em>AI Engineering</em> ch 10, steps 1, 2 and 5 and &quot;AI Pipeline Orchestration&quot; (pp. 449–474).</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-least-autonomy-that-solves-the-problem">
+<h3 id="the-least-autonomy-that-solves-the-problem">The least autonomy that solves the problem<a class="heading-anchor" href="#the-least-autonomy-that-solves-the-problem" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Treating autonomy as a cost rather than a goal, and deciding it on measured evidence rather than ambition. <strong>Studied in:</strong> Kapoor et al., &quot;AI Agents That Matter&quot;; <a href="../materials/autonomy-rubric/index.html">this roadmap&#x27;s autonomy rubric</a>.</p>
+</section>
+<section class="unit-concept" aria-labelledby="release-judgment-for-a-compound-system">
+<h3 id="release-judgment-for-a-compound-system">Release judgment for a compound system<a class="heading-anchor" href="#release-judgment-for-a-compound-system" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Deciding that a system of interacting parts is ready — the framing strand of steps 3 and 6, applied where no single metric covers the system. <strong>Studied in:</strong> <em>AI Engineering</em> ch 10; cross-reference: step 6.</p>
+</section>
+<section class="unit-area" aria-labelledby="grounding-and-contracts">
+<h2 id="grounding-and-contracts">Grounding and contracts<a class="heading-anchor" href="#grounding-and-contracts" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Design depth. Making components that can be relied on by the next component.</p>
+</section>
+<section class="unit-concept" aria-labelledby="retrieval-augmented-composition">
+<h3 id="retrieval-augmented-composition">Retrieval-augmented composition<a class="heading-anchor" href="#retrieval-augmented-composition" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Putting your step-9 retriever inside a system, and the architectural decisions that come with it. <strong>Studied in:</strong> <em>AI Engineering</em> ch 6, &quot;RAG Architecture&quot; and &quot;Retrieval Optimization&quot; (pp. 256–273).</p>
+</section>
+<section class="unit-concept" aria-labelledby="output-contracts">
+<h3 id="output-contracts">Output contracts<a class="heading-anchor" href="#output-contracts" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Structured generation and constrained decoding: designing the contract at design depth, understanding the mechanism well enough to know its limits. <strong>Studied in:</strong> <em>AI Engineering</em> ch 2, &quot;Structured Outputs&quot; (pp. 99–105).</p>
+</section>
+<section class="unit-area" aria-labelledby="acting-on-the-world">
+<h2 id="acting-on-the-world">Acting on the world<a class="heading-anchor" href="#acting-on-the-world" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Design depth. The point where a system stops answering and starts doing.</p>
+</section>
+<section class="unit-concept" aria-labelledby="tool-interfaces-and-least-privilege">
+<h3 id="tool-interfaces-and-least-privilege">Tool interfaces and least privilege<a class="heading-anchor" href="#tool-interfaces-and-least-privilege" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Designing an interface a model can use correctly, and granting it the least access that still solves the problem. Step 15 attacks exactly this surface. <strong>Studied in:</strong> <em>AI Engineering</em> ch 6, &quot;Agents&quot; (pp. 275–300).</p>
+</section>
+<section class="unit-concept" aria-labelledby="verification-and-generate-and-verify">
+<h3 id="verification-and-generate-and-verify">Verification and generate-and-verify<a class="heading-anchor" href="#verification-and-generate-and-verify" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Checking output with something other than the model that produced it — tests, solvers, validators — and designing the loop around that check. <strong>Studied in:</strong> Kambhampati et al., &quot;LLMs Can&#x27;t Plan, But Can Help Planning in LLM-Modulo Frameworks&quot;.</p>
+</section>
+<section class="unit-concept" aria-labelledby="human-checkpoints-and-approval-gates">
+<h3 id="human-checkpoints-and-approval-gates">Human checkpoints and approval gates<a class="heading-anchor" href="#human-checkpoints-and-approval-gates" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Where a person must approve, and how to place those gates without making the system useless. Understanding depth. <strong>Studied in:</strong> <em>AI Engineering</em> ch 6; cross-reference: step 15.</p>
+</section>
+<section class="unit-area" aria-labelledby="the-context-budget">
+<h2 id="the-context-budget">The context budget<a class="heading-anchor" href="#the-context-budget" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Understand, then implement and measure. The constraint that shapes every compound system built on language models.</p>
+</section>
+<section class="unit-concept" aria-labelledby="context-is-finite-and-not-used-uniformly">
+<h3 id="context-is-finite-and-not-used-uniformly">Context is finite and not used uniformly<a class="heading-anchor" href="#context-is-finite-and-not-used-uniformly" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The measured evidence that more context is not better, and that position within the context matters. <strong>Studied in:</strong> Liu et al., &quot;Lost in the Middle&quot;; <em>AI Engineering</em> ch 5, &quot;Context Length and Context Efficiency&quot; (pp. 218–220).</p>
+</section>
+<section class="unit-concept" aria-labelledby="choosing-what-enters-the-context">
+<h3 id="choosing-what-enters-the-context">Choosing what enters the context<a class="heading-anchor" href="#choosing-what-enters-the-context" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Retrieval, selection and compaction as explicit decisions with measurable effects, rather than defaults inherited from a framework. <strong>Studied in:</strong> <em>AI Engineering</em> ch 6, &quot;Memory&quot; (pp. 300–305); the Modern topic on agents, tools and context.</p>
+</section>
+<section class="unit-concept" aria-labelledby="diagnosing-context-failures">
+<h3 id="diagnosing-context-failures">Diagnosing context failures<a class="heading-anchor" href="#diagnosing-context-failures" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Recognizing when the failure was the context rather than the model — and proving it. <strong>Studied in:</strong> <a href="../materials/fault-injection-lab/index.html">this roadmap&#x27;s fault-injection lab</a>.</p>
+</section>
+<section class="unit-area" aria-labelledby="diagnosing-a-system-of-parts">
+<h2 id="diagnosing-a-system-of-parts">Diagnosing a system of parts<a class="heading-anchor" href="#diagnosing-a-system-of-parts" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Design depth. The capability that separates a demonstration from a system anyone can operate.</p>
+</section>
+<section class="unit-concept" aria-labelledby="failure-decomposition-across-components">
+<h3 id="failure-decomposition-across-components">Failure decomposition across components<a class="heading-anchor" href="#failure-decomposition-across-components" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Attributing a bad output to retrieval, context, tool use or generation, with evidence rather than intuition. <strong>Studied in:</strong> <a href="../materials/fault-injection-lab/index.html">this roadmap&#x27;s fault-injection lab</a>.</p>
+</section>
+<section class="unit-concept" aria-labelledby="trajectory-evaluation">
+<h3 id="trajectory-evaluation">Trajectory evaluation<a class="heading-anchor" href="#trajectory-evaluation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Judging the path a system took, not only its final answer — understood here, and questioned properly in step 12. <strong>Studied in:</strong> <em>AI Engineering</em> ch 6; cross-reference: step 12.</p>
+</section>
+<section class="unit-area" aria-labelledby="patterns-to-know-not-to-reach-for-by-default">
+<h2 id="patterns-to-know-not-to-reach-for-by-default">Patterns to know, not to reach for by default<a class="heading-anchor" href="#patterns-to-know-not-to-reach-for-by-default" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Understanding depth. Each of these is sometimes right and often reached for too early.</p>
+</section>
+<section class="unit-concept" aria-labelledby="multi-agent-orchestration-and-the-evidence-about-it">
+<h3 id="multi-agent-orchestration-and-the-evidence-about-it">Multi-agent orchestration, and the evidence about it<a class="heading-anchor" href="#multi-agent-orchestration-and-the-evidence-about-it" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>When several agents help, what they cost, and why the evidence does not support them as a default. <strong>Studied in:</strong> Kapoor et al., &quot;AI Agents That Matter&quot;; the Modern topic on agents, tools and context.</p>
+</section>
+<section class="unit-concept" aria-labelledby="agent-memory-architectures">
+<h3 id="agent-memory-architectures">Agent memory architectures<a class="heading-anchor" href="#agent-memory-architectures" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What persists between sessions, where it lives, and what it does to reliability. <strong>Studied in:</strong> <em>AI Engineering</em> ch 6, &quot;Memory&quot; (pp. 300–305).</p>
+</section>
+<section class="unit-concept" aria-labelledby="interoperability-standards-as-a-concept">
+<h3 id="interoperability-standards-as-a-concept">Interoperability standards as a concept<a class="heading-anchor" href="#interoperability-standards-as-a-concept" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Standard interfaces between models and capabilities, understood as an idea independent of any particular specification. The Modern track carries the current one. <strong>Studied in:</strong> <a href="../materials/tool-interfaces/index.html">this roadmap&#x27;s note on tool interfaces</a>; the Modern topic on agents, tools and context.</p>
+</section>
+<section class="guide-block guide-block--where-this-fits-in-ai" aria-label="Where this fits in AI">
+<p class="guide-label"><strong>Where this fits in AI</strong></p>
+<p>The single model box is now one component among several:</p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: Interoperability standards as a concept"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    U[&quot;Request&quot;] --&gt; C[&quot;Controller&lt;br/&gt;workflow or agent&quot;]
+    C --&gt; R[&quot;Retrieval&quot;]
+    C --&gt; T[&quot;Tools&quot;]
+    R --&gt; X[&quot;Context&lt;br/&gt;a finite budget&quot;]
+    T --&gt; X
+    X --&gt; M[&quot;Model&quot;]
+    M --&gt; V[&quot;Verification&quot;]
+    V --&gt; O[&quot;Answer or action&quot;]
+    V -. &quot;failed check&quot; .-&gt; C
+    H[&quot;Human checkpoint&quot;] --- C
+</code></pre></figure>
+<p>This is the architecture most contemporary AI products have. Step 15 attacks it, step 16 operates it, and the Modern topic on agents, tools and context is where you build it with today&#x27;s patterns and protocols.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary · continuing</strong></span><span class="study-title"><em>AI Engineering</em></span><span class="study-task"><strong>revisit:</strong> (begun in <a href="../working-with-models/index.html">Working with Models</a>) from chapter 2, &quot;Structured Outputs&quot; (pp. 99–105); from chapter 5, &quot;Context Length and Context Efficiency&quot; (pp. 218–220); from chapter 6, &quot;RAG Architecture&quot; (pp. 256–257), &quot;Retrieval Optimization&quot; (pp. 268–273), &quot;Agents&quot; (pp. 275–300) and &quot;Memory&quot; (pp. 300–305); from chapter 10, steps 1, 2 and 5 and &quot;AI Pipeline Orchestration&quot; (pp. 449–456, 463–465, 472–474).</span><span class="study-why"><strong>Why:</strong> the durable design ideas, independent of any framework.</span></li>
+<li><span class="study-role"><strong>Paper</strong></span><span class="study-title"><a href="https://aclanthology.org/2024.tacl-1.9/" class="external" rel="noopener noreferrer">Liu et al., &quot;Lost in the Middle&quot;<span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>read:</strong> the whole paper.</span><span class="study-why"><strong>Why:</strong> the measured evidence that models do not use their context uniformly, and that more context can make answers worse. The design advice elsewhere rests on this result.</span></li>
+<li><span class="study-role"><strong>Paper</strong></span><span class="study-title"><a href="https://arxiv.org/abs/2402.01817" class="external" rel="noopener noreferrer">Kambhampati et al., &quot;LLMs Can&#x27;t Plan, But Can Help Planning in LLM-Modulo Frameworks&quot;<span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>read:</strong> the whole paper.</span><span class="study-why"><strong>Why:</strong> why planning needs an external verifier, put as an argument you can check rather than a claim to accept.</span></li>
+<li><span class="study-role"><strong>Paper</strong></span><span class="study-title"><a href="https://arxiv.org/abs/2407.01502" class="external" rel="noopener noreferrer">Kapoor et al., &quot;AI Agents That Matter&quot;<span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>read:</strong> the whole paper.</span><span class="study-why"><strong>Why:</strong> simple baselines are competitive, and cost must be measured — the evidence behind choosing the least autonomy.</span></li>
+<li><span class="study-role"><strong>Curriculum material</strong></span><span class="study-title"><a href="../materials/agent-loop-exercise/index.html">Build the Loop Yourself</a>, <a href="../materials/fault-injection-lab/index.html">Fault Injection</a>, <a href="../materials/autonomy-rubric/index.html">How Much Freedom Does This Task Need?</a> and <a href="../materials/tool-interfaces/index.html">A Tool Is an Interface</a></span><span class="study-task"><strong>do:</strong> the loop first, then the lab on what you built; read the rubric and the interface note as you design.</span><span class="study-why"><strong>Why:</strong> no assigned resource teaches building an agent loop without a framework, or failure decomposition as a method.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--where-you-study-each-concept" aria-label="Where you study each concept">
+<p class="guide-label"><strong>Where you study each concept</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Interoperability standards as a concept"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">What you study</th>
+<th scope="col">Where you study it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Composition, retrieval-augmented architecture, agents, memory</td>
+<td><em>AI Engineering</em> ch 6, pp. 256–305</td>
+</tr>
+<tr>
+<td>Output contracts and structured generation</td>
+<td><em>AI Engineering</em> ch 2, pp. 99–105</td>
+</tr>
+<tr>
+<td>Context as a finite, uneven budget</td>
+<td><em>AI Engineering</em> ch 5, pp. 218–220; Liu et al.</td>
+</tr>
+<tr>
+<td>Verification and generate-and-verify</td>
+<td>Kambhampati et al.</td>
+</tr>
+<tr>
+<td>Autonomy decisions and cost-controlled evaluation</td>
+<td>Kapoor et al.; <a href="../materials/autonomy-rubric/index.html">this roadmap&#x27;s autonomy rubric</a></td>
+</tr>
+<tr>
+<td>Building an agent loop; decomposing failures</td>
+<td><a href="../materials/agent-loop-exercise/index.html">This roadmap&#x27;s agent-loop exercise</a> and <a href="../materials/fault-injection-lab/index.html">fault-injection lab</a></td>
+</tr>
+<tr>
+<td>Orchestration inside a real architecture</td>
+<td><em>AI Engineering</em> ch 10, pp. 449–474</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<p>Extend your evolving system into a compound system. Write an agent loop from scratch, without a framework. Inject faults into components and trace their effects. Compare two architectures on evidence.</p>
+<p>Use <a href="../materials/agent-loop-exercise/index.html">the agent-loop exercise</a> for the loop, <a href="../materials/fault-injection-lab/index.html">the fault-injection lab</a> to break what you built and diagnose it from evidence, and <a href="../materials/autonomy-rubric/index.html">the autonomy rubric</a> to decide — task by task, in writing — how much freedom each part of the system has earned.</p>
+</section>
+<section class="guide-block guide-block--you-re-ready-to-continue-when-you-can" aria-label="You&#x27;re ready to continue when you can">
+<p class="guide-label"><strong>You&#x27;re ready to continue when you can</strong></p>
+<ul class="guide-list guide-list--you-re-ready-to-continue-when-you-can">
+<li>design a compound system and justify each decision about autonomy;</li>
+<li>implement a tool interface that a model uses correctly;</li>
+<li>implement a context-management strategy and measure its effect;</li>
+<li>diagnose whether a failure started in retrieval, context, tool use or generation;</li>
+<li>evaluate a trajectory across repeated trials;</li>
+<li>justify rejecting a multi-agent design;</li>
+<li>decide whether the system is ready to release.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--also-open-now-in-modern-ai-engineering" aria-label="Also open now in Modern AI Engineering">
+<p class="guide-label"><strong>Also open now in Modern AI Engineering</strong></p>
+<p><a href="../agents-tools-and-context/index.html">Agents, Tools and Context</a> opens now and is <strong>recommended</strong> straight away, while these design decisions are fresh; <a href="../adapting-models-in-practice/index.html">Adapting Models in Practice</a> is <strong>recommended</strong> too, and easy to postpone until your system has a task that needs it. Return to step 12 afterwards.</p>
+<p><a href="../securing-ai-systems-in-practice/index.html">Securing AI Systems in Practice</a> and <a href="../inference-cost-and-production/index.html">Inference, Cost and Production</a> also open here, but <strong>wait</strong>: take them with steps 15 and 16, whose principles they apply.</p>
+</section>
+<section class="guide-block guide-block--what-comes-next" aria-label="What comes next">
+<p class="guide-label"><strong>What comes next</strong></p>
+<p>You can build a compound system and measure it with the evaluation of step 6. Step 12 turns the instrument on itself: whether your measurements mean what you think they mean — the question that decides whether any evidence you have collected is worth anything.</p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev" href="../10-how-foundation-models-are-made-and-adapted/index.html" rel="prev"><span class="guide-pager-label">← Previous</span><span class="guide-pager-title">10. How Foundation Models Are Made and Adapted</span></a>
+  <a class="guide-pager-link guide-pager-link--next guide-pager-link--modern" href="../agents-tools-and-context/index.html" rel="next"><span class="guide-pager-label">Next → Modern AI Engineering · recommended</span><span class="guide-pager-title">Agents, Tools and Context</span></a>
+  <p class="guide-pager-aside">Taking it later? The numbered path continues at <a class="guide-pager-skip" href="../12-evaluation-science/index.html">12. Evaluation Science</a>.</p>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+<script src="../../assets/js/diagrams.js?v=ce213ccecc" defer data-mermaid-src="../../assets/vendor/mermaid/mermaid.min.js"></script>
+</body>
+</html>

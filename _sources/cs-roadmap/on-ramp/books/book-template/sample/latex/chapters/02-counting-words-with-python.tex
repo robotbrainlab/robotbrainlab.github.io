@@ -1,0 +1,179 @@
+\bookchapter{Counting Words with Python}{ch:02-counting-words-with-python}
+
+\begin{chapterintro}
+
+Now that you know a text file is bytes plus an encoding, you can read one correctly from Python. This chapter builds a ten-line program that counts words, runs it from the shell, and shows what its errors mean.
+
+\end{chapterintro}
+
+\emph{The problem.} I want to know which words appear most in a file, and counting by hand is hopeless.
+
+\emph{The question.} How do I read a text file correctly from Python and count what's in it?
+
+\section{Reading a File the Right Way}\label{02-counting-words-with-python:reading-a-file-the-right-way}
+
+Python's \textbf{\texttt{pathlib}}\index{pathlib@\texttt{pathlib}} module represents a file path as an object. Its \texttt{read\_text()} method reads the bytes and decodes them in one step. Always pass the encoding; the default depends on the operating system.
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""Count how often each word appears in a text file."""}
+\ImportTok{import}\NormalTok{ sys}
+\ImportTok{from}\NormalTok{ collections }\ImportTok{import}\NormalTok{ Counter}
+\ImportTok{from}\NormalTok{ pathlib }\ImportTok{import}\NormalTok{ Path}
+
+
+\KeywordTok{def}\NormalTok{ count\_words(path: Path) }\OperatorTok{{-}\textgreater{}}\NormalTok{ Counter:}
+\NormalTok{    text }\OperatorTok{=}\NormalTok{ path.read\_text(encoding}\OperatorTok{=}\StringTok{"utf{-}8"}\NormalTok{)}
+    \ControlFlowTok{return}\NormalTok{ Counter(text.lower().split())  }\CommentTok{\# split() breaks on any whitespace}
+
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    counts }\OperatorTok{=}\NormalTok{ count\_words(Path(sys.argv[}\DecValTok{1}\NormalTok{]))}
+    \ControlFlowTok{for}\NormalTok{ word, n }\KeywordTok{in}\NormalTok{ counts.most\_common(}\DecValTok{3}\NormalTok{):}
+        \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{word}\SpecialCharTok{:\textless{}6\}}\SpecialStringTok{ }\SpecialCharTok{\{}\NormalTok{n}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+A \textbf{\texttt{Counter}}\index{Counter (collections)} is a dictionary that counts things: give it a list, and it maps each item to how many times it appeared. \texttt{most\_common(3)} returns the three largest counts.
+
+\codeneed{11}
+
+\section{Running It}\label{02-counting-words-with-python:running-it}
+
+Save the program as \texttt{count\_words.py} next to \texttt{notes.txt}, then run:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3}\NormalTok{ count\_words.py notes.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+the    3
+cat    1
+sat    1
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{6}
+
+For a quick total, a one-liner is enough. It's long, so the book wraps it; paste it as one line:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3} \AttributeTok{{-}c} \StringTok{"from pathlib import Path; print(sum(len(line.split()) for line in Path(\textquotesingle{}notes.txt\textquotesingle{}).read\_text(encoding=\textquotesingle{}utf{-}8\textquotesingle{}).splitlines()))"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+8
+\end{Verbatim}
+\end{codeblock}
+
+\begin{callout}{tip}
+
+\texttt{python3\ -c} runs a string as a program. It's handy for checks like this one, but anything you'll run twice belongs in a file.
+
+\end{callout}
+
+\section{When It Fails}\label{02-counting-words-with-python:when-it-fails}
+
+If the file doesn't exist, Python stops with a \textbf{traceback}\index{traceback}: the chain of calls that led to the error, with the error itself on the last line. Read tracebacks from the bottom up.
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+FileNotFoundError: [Errno 2] No such file or directory: 'missing.txt'
+\end{Verbatim}
+\end{codeblock}
+
+\begin{callout}{warning}
+
+Don't hide this error with a bare \texttt{except:}. A program that silently prints nothing when its input is missing looks like it worked, and its empty output can overwrite a good report.
+
+\end{callout}
+
+\section{Lab: Count the Words in Your Own File}\label{02-counting-words-with-python:lab-count-the-words-in-your-own-file}
+
+Pick any text file you have, or create one with three lines of your own. Then:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Run \texttt{wc\ -w\ yourfile.txt} and note the number of words.
+\item
+  Run \texttt{python3\ count\_}\allowbreak{}\texttt{words.}\allowbreak{}\texttt{py\ yourfile.}\allowbreak{}\texttt{txt} and compare the top three words with what you expect.
+\item
+  Add a line with capital letters (\texttt{The\ Cat}) and run it again.
+\end{enumerate}
+
+\textbf{Expected result:} the counts for \texttt{the} and \texttt{cat} go up by one each, because the program lowercases the text before counting. \texttt{wc\ -w} and the sum of all counts from the program should agree.
+
+\section{Summary, Key Terms, and Review Questions}\label{02-counting-words-with-python:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{02-counting-words-with-python:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{Path.}\allowbreak{}\texttt{read\_}\allowbreak{}\texttt{text(encoding=}\allowbreak{}\texttt{"utf-}\allowbreak{}\texttt{8")} reads and decodes a file in one step.
+\item
+  A \textbf{\texttt{Counter}} counts items; \texttt{most\_common(n)} gives the top \emph{n}.
+\item
+  A \textbf{traceback} reads bottom-up: the last line is the error.
+\end{itemize}
+
+\Needspace{10\baselineskip}
+
+\subsection*{Key Terms}\label{02-counting-words-with-python:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1831\linewidth-1.6338\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.8169\linewidth-0.3662\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+pathlib & The standard-library module for file paths \\
+Counter & A dictionary subclass that counts items \\
+Traceback & The report Python prints when an error stops a program \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{02-counting-words-with-python:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Why should you pass \texttt{encoding="utf-8"} to \texttt{read\_text()}?
+\item
+  Why does the program call \texttt{lower()} before \texttt{split()}?
+\item
+  Which line of a traceback do you read first?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can predict the output of \texttt{count\_words.py} for a file you wrote yourself, before you run it.
+
+\end{understandbox}

@@ -1,0 +1,374 @@
+\bookchapter{Pipelines: From a Commit to Production}{ch:04-pipelines-from-a-commit-to-production}
+
+\begin{chapterintro}
+
+A pipeline turns ``I changed some code'' into ``the change is running for users'', with checks at every step. This chapter covers continuous integration and delivery, stages and artifacts, environments, deployment strategies, and rollback. In the lab you build a tiny pipeline from a shell script.
+
+\end{chapterintro}
+
+\emph{The problem.} Every release is a nervous afternoon of manual steps.
+
+\emph{The question.} How can a machine take my change from a commit to production the same safe way every time?
+
+\section{The Nervous Afternoon}\label{04-pipelines-from-a-commit-to-production:the-nervous-afternoon}
+
+A manual release means pulling the code, running the tests (if you remember), building, copying to the server, and restarting, all from memory. One forgotten step means a broken site on a Friday evening, so releases become rare, and each one bigger and scarier.
+
+Factories solved this with the assembly line: every car passes the same stations in the same order, and an inspection station can stop the line when it finds a fault. A pipeline is an assembly line for code.
+
+\section{Just Enough Git}\label{04-pipelines-from-a-commit-to-production:just-enough-git}
+
+Pipelines start from git, the tool almost every team uses to track changes to code. A commit is one saved snapshot of a project, with a message such as ``Fix the greeting'' and an ID like \texttt{53ba61a…}. The main line of history is usually called \texttt{main}. Pushing sends your commits to a shared copy of the project, on a service such as GitHub, and that push is the moment a pipeline wakes up.
+
+\section{The Pipeline}\label{04-pipelines-from-a-commit-to-production:the-pipeline}
+
+A \textbf{pipeline}\index{pipeline} is an automated sequence of stages that every change passes through. Each stage must succeed before the next one starts. If any stage fails, the line stops, and nobody gets the broken change.
+
+\codeneed{7}\begin{codeblock}
+\begin{Verbatim}[breaklines=false, fontsize=\fontsize{8.8}{8.68}\selectfont, fontfamily=diagrammono, formatcom=\diagramlines]
+ git push
+    │
+    ▼
+ ┌───────┐  ┌──────┐  ┌─────────┐  ┌─────────┐  ┌────────────┐
+ │ build │─►│ test │─►│ package │─►│ staging │─►│ production │
+ └───────┘  └──────┘  └─────────┘  └─────────┘  └────────────┘
+   a red stage stops the line and tells you why
+\end{Verbatim}
+\end{codeblock}
+
+A pipeline runs on a runner: a fresh container or VM that follows the pipeline's instructions and is thrown away afterwards. Starting clean each time, it catches the ``works on my machine'' problems your laptop hides.
+
+\section{Continuous Integration}\label{04-pipelines-from-a-commit-to-production:continuous-integration}
+
+\textbf{Continuous integration}\index{continuous integration} (CI) means that everyone merges their work into the shared branch often, at least daily, and that every change is built and tested automatically. The result is a simple signal: green (it passed) or red (it didn't, and here is the log).
+
+Good CI is fast: aim for minutes, or people start ignoring it.
+
+\Needspace{14\baselineskip}
+
+\section{Continuous Delivery and Continuous Deployment}\label{04-pipelines-from-a-commit-to-production:continuous-delivery-and-continuous-deployment}
+
+After CI, the change has passed its tests. What happens next has two names that sound almost the same:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1770\linewidth-1.6460\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.4159\linewidth-1.1681\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.4071\linewidth-1.1858\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{} & \thead{Continuous delivery} & \thead{Continuous deployment} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{} & \thead{Continuous delivery} & \thead{Continuous deployment} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+After tests pass & Ready to release; a person presses a button & Released to production automatically \\
+Good for & Teams that want a human decision & Teams with strong tests and quick rollback \\
+\end{longtable}
+\end{booktable}
+
+Both are called CD, so people say CI/CD. With \textbf{continuous delivery}\index{continuous delivery}, every passing change \emph{could} go live at any moment. With \textbf{continuous deployment}\index{continuous deployment}, it \emph{does}. You will build continuous deployment in Chapter 10.
+
+\section{Artifacts: Build Once, Deploy Many}\label{04-pipelines-from-a-commit-to-production:artifacts-build-once-deploy-many}
+
+The package stage produces an \textbf{artifact}\index{artifact}: the built, ready-to-run output, stored and labelled with a version. For container apps it is an image in a registry, tagged with the commit hash.
+
+The rule is build once, deploy many: build the artifact one time and send that exact artifact to staging, then to production. A rebuild for production could pick up a newer library, and then staging tested something other than what production runs.
+
+Keep old artifacts, too. They are what makes going back possible.
+
+\section{Environments in a Pipeline}\label{04-pipelines-from-a-commit-to-production:environments-in-a-pipeline}
+
+The same artifact moves through the environments from Chapter 1, with a different configuration in each. Many teams move it to staging automatically, and to production only after a check: automatic tests on staging, or a person clicking ``approve''.
+
+\Needspace{18\baselineskip}
+
+\section{Deployment Strategies}\label{04-pipelines-from-a-commit-to-production:deployment-strategies}
+
+Deploying means swapping the running old version for the new one. There are four common ways, and each is a \textbf{deployment strategy}\index{deployment strategy}:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1402\linewidth-1.7196\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.3871\linewidth-1.2259\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.1164\linewidth-1.7672\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.1167\linewidth-1.7665\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.2396\linewidth-1.5208\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Strategy} & \thead{How it works} & \thead{Downtime} & \thead{Extra cost} & \thead{Risk} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Strategy} & \thead{How it works} & \thead{Downtime} & \thead{Extra cost} & \thead{Risk} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Recreate & Stop the old version, start the new one & A few seconds & None & Everyone gets a bad release at once \\
+Rolling & Replace copies one at a time & None & Little & A bad release spreads gradually \\
+Blue-green & Run the new version beside the old, then switch all traffic & None & Double, briefly & Switching back is instant \\
+Canary & Send a small share of users to the new version first & None & Little & Only a few users meet a bad release \\
+\end{longtable}
+\end{booktable}
+
+The canary is named after the birds miners carried underground as an early warning of bad air. A canary release lets a few per cent of users try the new version while you watch the error rate.
+
+A \textbf{health check}\index{health check} is what makes all of these safe: a quick automatic test, such as calling the app's \texttt{/health} address, that says whether a copy is working. A deployment should wait for the new version to report healthy before treating it as live. Chapter 9 adds one to a container.
+
+\section{Rollback}\label{04-pipelines-from-a-commit-to-production:rollback}
+
+A \textbf{rollback}\index{rollback} means going back to the previous good version. Because the old artifact is still in the registry, rolling back is just a deployment of an older version, and it should take seconds. The alternative is to roll forward: fix the bug and push a new version through the pipeline. Rolling back first and fixing calmly afterwards is usually the kinder option for your users.
+
+\begin{callout}{warning}
+
+Code rolls back easily; data doesn't. If the new version changed the database's structure, the old version may not understand it any more. Make database changes in small steps that both the old and new code can live with.
+
+\end{callout}
+
+\section{Lab: A Pipeline in Twenty Lines}\label{04-pipelines-from-a-commit-to-production:lab-a-pipeline-in-twenty-lines}
+
+You'll build a three-stage pipeline (test, build, deploy) as a shell script, watch a failing test stop the line, and roll back to an older artifact. The ``server'' is just a folder called \texttt{staging}.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Create a folder with a tiny module and its test:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ \textasciitilde{}/infra{-}labs/ch04 }\KeywordTok{\&\&} \BuiltInTok{cd}\NormalTok{ \textasciitilde{}/infra{-}labs/ch04}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \texttt{greet.py}:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ greet(name):}
+    \ControlFlowTok{return} \SpecialStringTok{f"Hello, }\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{!"}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \texttt{test\_greet.py}:
+
+  \codeneed{12}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ unittest}
+
+\ImportTok{from}\NormalTok{ greet }\ImportTok{import}\NormalTok{ greet}
+
+
+\KeywordTok{class}\NormalTok{ GreetTest(unittest.TestCase):}
+    \KeywordTok{def}\NormalTok{ test\_greet(}\VariableTok{self}\NormalTok{):}
+        \VariableTok{self}\NormalTok{.assertEqual(greet(}\StringTok{"Asha"}\NormalTok{), }\StringTok{"Hello, Asha!"}\NormalTok{)}
+
+
+\ControlFlowTok{if} \VariableTok{\_\_name\_\_} \OperatorTok{==} \StringTok{"\_\_main\_\_"}\NormalTok{:}
+\NormalTok{    unittest.main()}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+\item
+  Create \texttt{deploy.sh}, which installs one artifact on the ``server'':
+
+  \codeneed{9}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#!/usr/bin/env bash}
+\CommentTok{\# Deploy one built artifact (a version) to the staging folder.}
+\BuiltInTok{set} \AttributeTok{{-}euo}\NormalTok{ pipefail}
+\VariableTok{VERSION}\OperatorTok{=}\StringTok{"}\VariableTok{$1}\StringTok{"}
+
+\FunctionTok{rm} \AttributeTok{{-}rf}\NormalTok{ staging }\KeywordTok{\&\&} \FunctionTok{mkdir}\NormalTok{ staging}
+\FunctionTok{tar} \AttributeTok{{-}xzf} \StringTok{"artifacts/greet{-}}\VariableTok{$VERSION}\StringTok{.tar.gz"} \AttributeTok{{-}C}\NormalTok{ staging}
+\BuiltInTok{echo} \StringTok{"}\VariableTok{$VERSION}\StringTok{"} \OperatorTok{\textgreater{}}\NormalTok{ staging/VERSION}
+\BuiltInTok{echo} \StringTok{"staging now runs version }\VariableTok{$VERSION}\StringTok{"}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  And \texttt{pipeline.sh}, which runs the stages in order:
+
+  \codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#!/usr/bin/env bash}
+\CommentTok{\# A tiny pipeline: test, build, deploy. Any failure stops the line.}
+\BuiltInTok{set} \AttributeTok{{-}euo}\NormalTok{ pipefail}
+\VariableTok{VERSION}\OperatorTok{=}\StringTok{"}\VariableTok{$1}\StringTok{"}
+
+\BuiltInTok{echo} \StringTok{"== Stage 1: test"}
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ unittest }\AttributeTok{{-}q}
+
+\BuiltInTok{echo} \StringTok{"== Stage 2: build"}
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ artifacts}
+\FunctionTok{tar} \AttributeTok{{-}czf} \StringTok{"artifacts/greet{-}}\VariableTok{$VERSION}\StringTok{.tar.gz"}\NormalTok{ greet.py}
+\BuiltInTok{echo} \StringTok{"built artifacts/greet{-}}\VariableTok{$VERSION}\StringTok{.tar.gz"}
+
+\BuiltInTok{echo} \StringTok{"== Stage 3: deploy to staging"}
+\ExtensionTok{./deploy.sh} \StringTok{"}\VariableTok{$VERSION}\StringTok{"}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \texttt{set\ -euo\ pipefail} is the ``stop the line'' switch: the script exits at the first command that fails. \texttt{\$1} is the first argument, the version.
+\item
+  Make both scripts executable and run the pipeline:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{chmod}\NormalTok{ +x pipeline.sh deploy.sh}
+\ExtensionTok{./pipeline.sh}\NormalTok{ 1.0.0}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{9}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  == Stage 1: test
+  ----------------------------------------------------------------------
+  Ran 1 test in 0.000s
+
+  OK
+  == Stage 2: build
+  built artifacts/greet-1.0.0.tar.gz
+  == Stage 3: deploy to staging
+  staging now runs version 1.0.0
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Break the code: in \texttt{greet.py}, change \texttt{Hello} to \texttt{Hi}. Run the pipeline for a new version, then check what staging runs:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./pipeline.sh}\NormalTok{ 1.1.0}
+\FunctionTok{cat}\NormalTok{ staging/VERSION}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{8}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  == Stage 1: test
+  ======================================================================
+  FAIL: test_greet (test_greet.GreetTest.test_greet)
+  …
+  AssertionError: 'Hi, Asha!' != 'Hello, Asha!'
+  …
+  FAILED (failures=1)
+  1.0.0
+  \end{Verbatim}
+  \end{codeblock}
+
+  The line stopped at stage 1. No \texttt{1.1.0} artifact was built, and staging still runs \texttt{1.0.0}.
+\item
+  Change \texttt{Hi} back to \texttt{Hello} and run \texttt{./}\allowbreak{}\texttt{pipeline.sh\ 1.1.0} again. This time all three stages pass and the last line is \texttt{staging\ now\ runs\ version\ 1.}\allowbreak{}\texttt{1.}\allowbreak{}\texttt{0}.
+\item
+  Suppose users dislike 1.1.0. Roll back by deploying the older artifact, which is still on the shelf:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./deploy.sh}\NormalTok{ 1.0.0}
+\FunctionTok{ls}\NormalTok{ artifacts}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{3}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  staging now runs version 1.0.0
+  greet-1.0.0.tar.gz
+  greet-1.1.0.tar.gz
+  \end{Verbatim}
+  \end{codeblock}
+\end{enumerate}
+
+\textbf{Expected results:} a passing run goes through all three stages; a failing test stops the line before anything is built or deployed; and rollback is just \texttt{deploy.sh} with an older version, taking well under a second, because the old artifact was kept.
+
+\section{Summary, Key Terms, and Review Questions}\label{04-pipelines-from-a-commit-to-production:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{04-pipelines-from-a-commit-to-production:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  Manual releases are slow and risky because people forget steps. A pipeline runs the same stages, in the same order, for every change.
+\item
+  CI builds and tests every change automatically. Continuous delivery makes every passing change ready to release; continuous deployment releases it.
+\item
+  Build an artifact once, version it, and promote the same artifact through every environment.
+\item
+  Recreate, rolling, blue-green, and canary deployments trade downtime, cost, and risk. Health checks make them safe.
+\item
+  Rollback redeploys an older artifact. Database changes need extra care.
+\end{itemize}
+
+\Needspace{18\baselineskip}
+
+\subsection*{Key Terms}\label{04-pipelines-from-a-commit-to-production:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3263\linewidth-1.3474\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6737\linewidth-0.6526\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Pipeline & An automated sequence of stages every change passes through \\
+Continuous integration (CI) & Building and testing every change automatically \\
+Continuous delivery & Every passing change is ready to release at the press of a button \\
+Continuous deployment & Every passing change is released automatically \\
+Artifact & The built, versioned output of a pipeline \\
+Deployment strategy & Recreate, rolling, blue-green, or canary: how the new version replaces
+the old \\
+Health check & A quick automatic test of whether an app copy is working \\
+Rollback & Returning to the previous good version \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{04-pipelines-from-a-commit-to-production:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Why do manual releases tend to become rarer and riskier over time?
+\item
+  What is the difference between continuous delivery and continuous deployment?
+\item
+  Why should the artifact that reached staging be the one deployed to production, rather than a fresh build?
+\item
+  Compare blue-green and canary deployments. What does each protect you from?
+\item
+  Why is rolling back code easier than rolling back a database change?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can draw the pipeline for a small app, name what each stage produces, and explain how you would roll back if production broke after the last stage.
+
+\end{understandbox}

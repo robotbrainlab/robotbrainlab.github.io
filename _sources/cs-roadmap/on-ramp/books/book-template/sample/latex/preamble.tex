@@ -1,0 +1,344 @@
+% ================================================================
+%  preamble.tex — the whole design of the "from Zero" series.
+%  O'Reilly style, matched to "APIs to FastAPI":
+%    trim 7 x 9.1875 in (504 x 661.5 pt), Crimson Pro / Source Sans 3 /
+%    Source Code Pro, right-aligned chapter openers, icon callouts.
+%  Book-specific text (title, versions, …) lives in book-meta.tex, not here.
+% ================================================================
+
+% ---- Page geometry ----------------------------------------------
+% PDF points (bp): page 504 x 661.5, text block 378 x 523 (42 lines), 63 margins.
+\usepackage[paperwidth=504bp, paperheight=661.5bp,
+            textwidth=378bp, inner=63bp, top=66bp, textheight=523bp,
+            headheight=12bp, headsep=23bp, footskip=34bp]{geometry}
+
+% ---- Fonts (all ship with TeX Live; loaded by file name) -----------
+\usepackage{fix-cm}   % scalable math fonts (the \hookrightarrow in wrapped code)
+\usepackage{fontspec}
+\defaultfontfeatures[\rmfamily,\sffamily]{Ligatures=TeX}   % never in code: " and -- stay as typed
+\setmainfont{CrimsonPro}[
+  Extension=.ttf, Scale=1.07,
+  UprightFont=*-Regular, BoldFont=*-SemiBold,
+  ItalicFont=*-Italic,   BoldItalicFont=*-SemiBoldItalic]
+\setsansfont{SourceSans3}[
+  Extension=.otf,
+  UprightFont=*-Regular,  BoldFont=*-Semibold,
+  ItalicFont=*-RegularIt, BoldItalicFont=*-SemiboldIt]
+\setmonofont{SourceCodePro}[
+  Extension=.otf, Scale=0.85,
+  UprightFont=*-Regular,  BoldFont=*-Semibold,
+  ItalicFont=*-RegularIt, BoldItalicFont=*-SemiboldIt]
+% Box-drawing diagrams: DejaVu Sans Mono (the face Menlo is built on), whose box glyphs
+% fill the whole line so vertical strokes join. Same advance as Source Code Pro (0.6 em).
+\newfontfamily\diagramfont{DejaVuSansMono.ttf}[Scale=0.85, NFSSFamily=diagrammono]
+\newfontfamily\coverfont{EBGaramond}[
+  Extension=.otf, UprightFont=*-Regular, ItalicFont=*-Italic]
+\newfontfamily\symbolfont{SourceSans3}[Extension=.otf, UprightFont=*-Regular, BoldFont=*-Semibold]
+\newfontfamily\dejavufont{DejaVuSans.ttf}
+
+% Glyphs Crimson Pro lacks (arrows, check marks, shapes) come from Source Sans 3.
+% Inside code and diagrams the mono glyph is kept so columns stay aligned.
+\usepackage{newunicodechar}
+\makeatletter
+\def\diagram@family{diagrammono}
+\newcommand{\sym}[1]{\begingroup\edef\@tempa{\f@family}\edef\@tempb{\ttdefault}%
+  \ifx\@tempa\@tempb #1\else\ifx\@tempa\diagram@family #1\else{\symbolfont #1}\fi\fi\endgroup}
+\newcommand{\symdv}[1]{\begingroup\edef\@tempa{\f@family}\edef\@tempb{\ttdefault}%
+  \ifx\@tempa\@tempb #1\else\ifx\@tempa\diagram@family #1\else{\dejavufont #1}\fi\fi\endgroup}
+\makeatother
+% Emoji (colour, drawn from Apple Color Emoji into assets/emoji/<codepoint>.png).
+% Add a line here, and the PNG, for any new emoji a book uses.
+\newcommand{\emoji}[1]{\raisebox{-0.12em}{\includegraphics[height=0.95em]{assets/emoji/#1.png}}}
+\newunicodechar{✅}{\emoji{2705}}  \newunicodechar{❌}{\emoji{274c}}
+\newunicodechar{⭐}{\emoji{2b50}}  \newunicodechar{🏁}{\emoji{1f3c1}}
+\newunicodechar{✨}{\emoji{2728}}  \newunicodechar{🎉}{\emoji{1f389}}
+\newunicodechar{🚀}{\emoji{1f680}}
+\newunicodechar{→}{\sym{→}}  \newunicodechar{←}{\sym{←}}
+\newunicodechar{↑}{\sym{↑}}  \newunicodechar{↓}{\sym{↓}}
+\newunicodechar{↔}{\sym{↔}}  \newunicodechar{↕}{\sym{↕}}
+\newunicodechar{⇒}{\sym{⇒}}  \newunicodechar{⇐}{\sym{⇐}}
+\newunicodechar{⇔}{\sym{⇔}}  \newunicodechar{✓}{\sym{✓}}
+\newunicodechar{✔}{\sym{✔}}  \newunicodechar{✗}{\sym{✗}}
+\newunicodechar{✘}{\sym{✘}}  \newunicodechar{■}{\sym{■}}
+\newunicodechar{□}{\sym{□}}  \newunicodechar{▲}{\sym{▲}}
+\newunicodechar{▶}{\sym{▶}}  \newunicodechar{▼}{\sym{▼}}
+\newunicodechar{◀}{\sym{◀}}  \newunicodechar{●}{\sym{●}}
+\newunicodechar{○}{\sym{○}}  \newunicodechar{★}{\symdv{★}}
+\newunicodechar{‑}{-}        % non-breaking hyphen: Crimson Pro has no glyph for it
+
+% ---- Colour ---------------------------------------------------------
+\usepackage[table]{xcolor}
+\definecolor{brand}{HTML}{135C6A}      % the series teal (cover bands, "You understand" box)
+\definecolor{ink}{HTML}{1A1A1A}
+\definecolor{muted}{HTML}{6B7178}
+\definecolor{rulegray}{HTML}{8A8F94}
+\definecolor{tablehead}{HTML}{E6E6E6}
+
+% ---- Core packages ----------------------------------------------------
+\usepackage{amssymb}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{calc}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{etoolbox}
+\usepackage{enumitem}
+\usepackage{fvextra}
+\usepackage{float}
+\usepackage[font={small,it}, labelfont={small,it}, labelsep=period, skip=6pt]{caption}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{fancyhdr}
+\usepackage{emptypage}
+\usepackage{needspace}
+\usepackage{imakeidx}
+\makeindex[intoc, columns=2, columnsep=24pt, noautomatic]  % latexmkrc runs makeindex with tools/index.ist
+% The index title sits where the Preface's does (a little lower than "Contents", as in the API book)
+\newcommand{\indexchapter}[1]{\titlespacing*{name=\chapter, numberless}{0pt}{24pt}{23pt}\chapter*{#1}}
+\indexsetup{level=\indexchapter, headers={\MakeUppercase{\indexname}}{\MakeUppercase{\indexname}}}
+
+\graphicspath{{../markdown/}{./}}      % images are referenced relative to the Markdown folder
+\floatplacement{figure}{H}             % figures stay where the author put them
+\renewcommand{\thefigure}{\thechapter-\arabic{figure}}
+% pandoc wraps images in \pandocbounded: shrink to the text width, never enlarge
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{%
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}\else\usebox{\pandoc@box}\fi}
+\makeatother
+\providecommand{\tightlist}{\setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}}
+\newcounter{none}   % pandoc may set \LTcaptype{none}
+
+% ---- Paragraphs and lists ----------------------------------------------
+% Body: Crimson Pro 10.7 pt on 12.43 pt, no indent, a small gap between paragraphs.
+\linespread{1.041}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt}
+\setlength{\emergencystretch}{2em}
+\tolerance=1000
+\frenchspacing
+\raggedbottom
+\color{ink}
+\setlist{itemsep=1.5pt, topsep=3pt, parsep=0pt, partopsep=0pt}
+\setlist[itemize]{label={\small\textbullet}, leftmargin=1.2em, labelsep=0.5em}
+\setlist[enumerate]{leftmargin=1.6em, labelsep=0.45em}
+\setlist[itemize,2]{label={\footnotesize\textendash}}
+
+% ---- Code --------------------------------------------------------------
+% Source Code Pro at 7.5 pt (8.8 x Scale 0.85) on 11 pt, indented, no frame, no prompt.
+% Long lines wrap (after / . , = ? : & _ - or a space) with a small hook in the margin.
+\input{generated/highlighting}
+\newcommand{\codesize}{\fontsize{8.8}{11.04}\selectfont}
+\newcommand{\codeindent}{10.66pt}
+\newcommand{\codebreaksymbol}{\textcolor{muted}{\tiny\ensuremath{\hookrightarrow}}}
+\fvset{fontsize=\codesize, xleftmargin=\codeindent, breaklines, breaknonspaceingroup,
+  breakafter={/.,=?:\&\_-}, breakaftersymbolpre={}, breaksymbolleft={\codebreaksymbol},
+  breaksymbolsepleft=3pt, breakindent=1.2em}
+\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{}
+\newenvironment{Shaded}{}{}
+% Space around every code, output and diagram block (the filter wraps them in this).
+\newenvironment{codeblock}{\par\addvspace{11pt}\begingroup\setlength{\parskip}{0pt}}
+  {\endgroup\par\addvspace{10pt}}
+% Keep a short block (and the line that introduces it) on one page.
+\newcommand{\codeneed}[1]{\Needspace{\dimexpr #1\dimexpr 11.04pt\relax + 14pt\relax}}
+% Diagram lines may overlap by a hair (the filter sets the line skip just under the glyph
+% height); without this TeX would push them apart and the vertical strokes would break.
+\newcommand{\diagramlines}{\lineskiplimit=-\maxdimen\lineskip=0pt\relax}
+\newcommand{\outputstyle}{\color{ink!80}}   % program output: same face, a shade lighter
+
+% ---- Tables ------------------------------------------------------------
+% The filter writes every table as a full-width longtable: grey header band,
+% top/middle/bottom rules, serif body, sans header. Columns are sized from content.
+\setlength{\tabcolsep}{4pt}
+\setlength{\LTleft}{-\tabcolsep}
+\setlength{\LTright}{-\tabcolsep plus 1fil}   % stretch absorbs rounding of the column widths
+\setlength{\LTpre}{8pt}
+\setlength{\LTpost}{6pt}
+\setlength{\aboverulesep}{0pt}
+\setlength{\belowrulesep}{0pt}
+\newcommand{\tablefont}{\fontsize{9}{11}\selectfont}
+\newcommand{\thead}[1]{{\sffamily\bfseries\fontsize{8}{10}\selectfont #1}}
+\newcommand{\tabletop}{\arrayrulecolor{rulegray}\specialrule{0.5pt}{0pt}{0pt}}
+\newcommand{\tablemid}{\arrayrulecolor{rulegray}\specialrule{0.4pt}{0pt}{0pt}}
+\newcommand{\tablebottom}{\arrayrulecolor{rulegray}\specialrule{0.5pt}{0pt}{0pt}}
+\newenvironment{booktable}{\par\begingroup\tablefont\renewcommand{\arraystretch}{1.3}}
+  {\endgroup\par}
+
+% ---- Callouts: tip, note, warning (icon left, text right) --------------
+% Outline icons drawn in TikZ, the same three as the API book's "Conventions".
+\tikzset{calloutline/.style={line width=0.6pt, line cap=round, line join=round, draw=ink}}
+\newcommand{\tipicon}{%
+  \begin{tikzpicture}[x=1pt, y=1pt, calloutline]
+    \draw (0,0) circle (7);                                   % bulb
+    \draw (-2.6,-2.2) -- (-2.6,1.4) arc (180:0:2.6) -- (2.6,-2.2); % filament
+    \draw (-3.2,-9.5) -- (-3.2,-12.8) -- (3.2,-12.8) -- (3.2,-9.5); % base
+    \draw (-3.2,-15) -- (3.2,-15);
+    \foreach \a in {90, 55, 125, 20, 160}
+      \draw (\a:10.5) -- (\a:13.5);                           % rays
+  \end{tikzpicture}}
+\newcommand{\noteicon}{%
+  \begin{tikzpicture}[x=1pt, y=1pt, calloutline]
+    \draw (-8,-11) -- (-8,11) -- (3.5,11) -- (8,6.5) -- (8,-11) -- cycle;   % page
+    \draw (3.5,11) -- (3.5,6.5) -- (8,6.5);                              % folded corner
+    \foreach \y in {3, -0.5, -4, -7.5} \draw (-4.8,\y) -- (4.8,\y);
+    \draw (-4.8,6.5) -- (0.5,6.5);
+  \end{tikzpicture}}
+\newcommand{\warningicon}{%
+  \begin{tikzpicture}[x=1pt, y=1pt, calloutline]
+    \draw (0,11) -- (12,-9.5) -- (-12,-9.5) -- cycle;
+    \draw[line width=1.1pt] (0,4.2) -- (0,-3);
+    \fill[ink] (0,-6) circle (0.9);
+  \end{tikzpicture}}
+\newcommand{\callouticon}[1]{\csname #1icon\endcsname}
+% Unbreakable, and never shorter than its icon (so one-line callouts can follow each other).
+\newtcolorbox{callout}[1]{blank, parbox=false,
+  left=46pt, before skip=10pt plus 2pt, after skip=10pt plus 2pt,
+  height from=31pt to \maxdimen,
+  fontupper=\small, before upper={\setlength{\parskip}{3pt plus 1pt}},
+  overlay={\node[anchor=north, inner sep=0pt]
+    at ([xshift=12pt, yshift=1pt]frame.north west) {\callouticon{#1}};}}
+
+% "You understand this when…" — the chapter's self-check, a small tinted box.
+\newtcolorbox{understandbox}{enhanced, breakable, parbox=false,
+  colback=brand!7, colframe=brand!7, arc=0pt, boxrule=0pt,
+  borderline west={2pt}{0pt}{brand},
+  left=9pt, right=8pt, top=5pt, bottom=5pt,
+  before skip=10pt plus 2pt, after skip=10pt plus 2pt,
+  fontupper=\small, before upper={\setlength{\parskip}{3pt plus 1pt}}}
+
+% Ordinary block quotations (a > quote that is not a callout)
+\renewenvironment{quote}{\list{}{\leftmargin=1.5em\rightmargin=1.5em\topsep=4pt}\item\relax\itshape}{\endlist}
+
+% Chapter intro paragraph (first paragraph under the # title). Plain, like the API book.
+\newenvironment{chapterintro}{}{\par}
+
+% Glossary / Key Terms entries (Markdown definition lists): "Term: definition"
+\newcommand{\glossentry}[2]{\par\noindent{\bfseries #1}: #2\par}
+\newenvironment{glossarylist}{\par\begingroup\setlength{\parskip}{5pt plus 1pt}}{\endgroup\par}
+
+% ---- Headings --------------------------------------------------------
+\setcounter{secnumdepth}{0}   % chapters are numbered (they are not affected); sections are not
+\setcounter{tocdepth}{1}      % contents: parts, chapters, sections
+
+\newcommand{\chapterlabelfont}{\sffamily\bfseries\fontsize{11.5}{13.5}\selectfont\addfontfeature{LetterSpace=10}}
+\newcommand{\chaptertitlefont}{\sffamily\bfseries\fontsize{27}{32}\selectfont}
+\titleformat{\chapter}[display]
+  {\normalfont\raggedleft\hyphenpenalty=10000}
+  {\chapterlabelfont\MakeUppercase{\chaptertitlename}\ \thechapter}
+  {9pt}
+  {\chaptertitlefont}
+  [\vspace{15pt}{\color{ink}\titlerule[1.2pt]}]
+\titleformat{name=\chapter, numberless}[display]
+  {\normalfont\raggedleft\hyphenpenalty=10000}{}{0pt}
+  {\chaptertitlefont}
+  [\vspace{15pt}{\color{ink}\titlerule[1.2pt]}]
+\titlespacing*{\chapter}{0pt}{14pt}{23pt}
+\titlespacing*{name=\chapter, numberless}{0pt}{16pt}{23pt}
+
+\titleformat{\section}
+  {\normalfont\sffamily\bfseries\fontsize{14.9}{17.5}\selectfont\raggedright}{}{0pt}{}
+\titleformat{\subsection}
+  {\normalfont\sffamily\bfseries\fontsize{11.5}{14}\selectfont\raggedright}{}{0pt}{}
+\titleformat{\subsubsection}
+  {\normalfont\sffamily\bfseries\fontsize{10}{12}\selectfont\raggedright}{}{0pt}{}
+\titlespacing*{\section}{0pt}{22pt plus 4pt minus 2pt}{6pt}
+\titlespacing*{\subsection}{0pt}{12pt plus 3pt minus 2pt}{3pt}
+\titlespacing*{\subsubsection}{0pt}{9pt plus 2pt}{2pt}
+
+% Chapter command used by the filter: \bookchapter{<title>}{<label>}
+% (adds the "Appendices" group line to the contents before the first appendix)
+\newif\ifappendixpending
+\appto\appendix{\global\appendixpendingtrue}
+\newcommand{\bookchapter}[2]{%
+  \clearpage
+  \ifappendixpending
+    \phantomsection\addcontentsline{toc}{part}{Appendices}\global\appendixpendingfalse
+  \fi
+  \chapter{#1}\label{#2}}
+
+% ---- Running heads ----------------------------------------------------
+% left:  "12 | Chapter 1: What an API Is"      right: "Section Title | 13"
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\newcommand{\headfont}{\normalfont\sffamily\fontsize{7.5}{9}\selectfont}
+\newcommand{\headbar}{\hspace{0.7em}{\color{rulegray}\rule[-1.6pt]{0.4pt}{8.5pt}}\hspace{0.7em}}
+\fancyhead[LE]{\headfont\thepage\headbar\leftmark}
+\fancyhead[RO]{\headfont\rightmark\headbar\thepage}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\normalfont\fontsize{8}{10}\selectfont\thepage}}
+\makeatletter
+\renewcommand{\chaptermark}[1]{%
+  \markboth{\if@mainmatter\ifnum\c@secnumdepth>\m@ne\@chapapp\ \thechapter: \fi\fi#1}{#1}}
+\makeatother
+\renewcommand{\sectionmark}[1]{\markright{#1}}
+
+% ---- Contents -----------------------------------------------------------
+\titlecontents{part}[0pt]
+  {\addvspace{14pt}\sffamily\bfseries\fontsize{10.5}{13}\selectfont}
+  {}{}{\hfill\contentspage}[\addvspace{5pt}]
+\titlecontents{chapter}[1.7em]
+  {\addvspace{8pt}\sffamily\bfseries\fontsize{9}{11.5}\selectfont}
+  {\contentslabel[\thecontentslabel.]{1.7em}}{\hspace*{-1.7em}}
+  {\titlerule*[0.4pc]{.}\contentspage}[\addvspace{1pt}]
+\titlecontents{section}[1.7em]
+  {\fontsize{9}{11}\selectfont}
+  {}{}{\titlerule*[0.4pc]{.}\contentspage}
+\makeatletter
+\renewcommand{\@pnumwidth}{1.8em}
+\renewcommand{\@tocrmarg}{2.8em}
+\makeatother
+\contentsmargin{1.8em}
+% entries are paragraphs: no paragraph gap between them
+\let\booktableofcontents\tableofcontents
+\renewcommand{\tableofcontents}{\begingroup\setlength{\parskip}{0pt}\booktableofcontents\endgroup}
+
+% ---- Part opener -----------------------------------------------------------
+% \bookpart{I}{Understand}{networking theory, the history of the web, …}
+% The third argument is the "What to ignore for now" note (leave it empty for none).
+\newcommand{\bookpart}[3]{%
+  \clearpage
+  \thispagestyle{empty}\markboth{}{}%
+  \phantomsection
+  \addcontentsline{toc}{part}{Part #1.\hspace{0.6em}#2}%
+  \vspace*{82pt}%
+  \begingroup\raggedleft
+    {\chapterlabelfont PART #1\par}\vspace{13pt}%
+    {\chaptertitlefont #2\par}\vspace{15pt}%
+  \endgroup
+  {\color{ink}\titlerule[1.2pt]}\par
+  \ifstrempty{#3}{}{%
+    \vspace{40pt}%
+    \begin{callout}{note}\textit{What to ignore for now:} #3\end{callout}}%
+  \clearpage}
+
+% ---- Index --------------------------------------------------------------------
+% Letter groups in Source Sans 3 (see tools/index.ist); entries in the body face.
+\newcommand{\indexletter}[1]{\par\addvspace{9pt}{\sffamily\bfseries\fontsize{10}{12}\selectfont #1}\par\nobreak\vspace{1pt}}
+\makeatletter
+\renewcommand{\@idxitem}{\par\hangindent 1.5em}
+\makeatother
+\AtBeginEnvironment{theindex}{\setlength{\parskip}{0pt}}
+\renewcommand{\indexspace}{}   % the letter heading already opens the group
+% Index entries from Markdown: [text]{.idx} or [text]{idx="key"} (see README)
+
+% ---- Links & PDF metadata ------------------------------------------------------
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{xurl}
+\hypersetup{
+  colorlinks=true, linkcolor=ink, urlcolor=ink, citecolor=ink,
+  pdftitle={\BookTitle: \BookSubtitle},
+  pdfsubject={\BookPDFSubject},
+  pdfauthor={\BookAuthor},
+  pdfkeywords={\BookKeywords},
+  pdflang={en}, pdfdisplaydoctitle=true,
+  bookmarksnumbered=true, pdfpagemode=UseOutlines}

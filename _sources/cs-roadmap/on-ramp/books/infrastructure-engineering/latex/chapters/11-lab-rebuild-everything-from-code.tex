@@ -1,0 +1,575 @@
+\bookchapter{Lab: Rebuild Everything from Code}{ch:11-lab-rebuild-everything-from-code}
+
+\begin{chapterintro}
+
+In this lab Terraform builds a complete small system: tinyapp, a PostgreSQL database, a private network between them, and a volume for the data. Then you change it, ``lose the server'', get it all back with one command, and finally destroy and recreate everything, learning on the way what code can rebuild and what it can't.
+
+\end{chapterintro}
+
+\emph{The problem.} My server died. Can I get it all back in five minutes?
+
+\emph{The question.} If everything is described in code, can I delete it all and rebuild it with one command?
+
+\section{What You'll Build}\label{11-lab-rebuild-everything-from-code:what-youll-build}
+
+\codeneed{12}\begin{codeblock}
+\begin{Verbatim}[breaklines=false, fontsize=\fontsize{8.8}{8.68}\selectfont, fontfamily=diagrammono, formatcom=\diagramlines]
+            your machine, port 8090
+                     │
+ ┌───────────────────┼─ network: tinyapp-net ──────────────┐
+ │                   ▼                                     │
+ │  ┌──────────────────────┐      ┌─────────────────────┐  │
+ │  │ tinyapp-web          │ ───► │ tinyapp-db          │  │
+ │  │ localhost:5001/      │ 5432 │ postgres:16-alpine  │  │
+ │  │   tinyapp:1.0.0      │      └──────────┬──────────┘  │
+ │  └──────────────────────┘                 │             │
+ └───────────────────────────────────────────┼─────────────┘
+                                             ▼
+                                volume: tinyapp-db-data
+\end{Verbatim}
+\end{codeblock}
+
+Six resources: two images, two containers, one network, one volume. The app image is the \texttt{1.0.0} you pushed in Chapter 9, so the registry must be running. If \texttt{curl\ localhost:}\allowbreak{}\texttt{5001/}\allowbreak{}\texttt{v2/}\allowbreak{}\texttt{tinyapp/}\allowbreak{}\texttt{tags/}\allowbreak{}\texttt{list} doesn't list \texttt{1.0.0}, build and push it from the book's \texttt{labs/tinyapp/} folder with \texttt{docker\ build\ -}\allowbreak{}\texttt{t\ localhost:}\allowbreak{}\texttt{5001/}\allowbreak{}\texttt{tinyapp:}\allowbreak{}\texttt{1.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0\ .} and \texttt{docker\ push\ localhost:}\allowbreak{}\texttt{5001/}\allowbreak{}\texttt{tinyapp:}\allowbreak{}\texttt{1.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0}. This system uses port 8090 and its own names, so it doesn't disturb Chapter 10's \texttt{tinyapp} on port 8080.
+
+\codeneed{10}
+
+\section{Step 1: Describe the System}\label{11-lab-rebuild-everything-from-code:step-1-describe-the-system}
+
+Create \texttt{\textasciitilde{}/}\allowbreak{}\texttt{infra-}\allowbreak{}\texttt{labs/}\allowbreak{}\texttt{ch11/}\allowbreak{}\texttt{main.}\allowbreak{}\texttt{tf}. It starts like Chapter 8's file, then declares two inputs:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{terraform \{}
+\NormalTok{  required\_providers \{}
+\NormalTok{    docker = \{}
+\NormalTok{      source  = "kreuzwerker/docker"}
+\NormalTok{      version = "\textasciitilde{}\textgreater{} 4.6"}
+\NormalTok{    \}}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\NormalTok{provider "docker" \{\}}
+
+\NormalTok{variable "app\_version" \{}
+\NormalTok{  type    = string}
+\NormalTok{  default = "1.0.0"}
+\NormalTok{\}}
+
+\NormalTok{variable "db\_password" \{}
+\NormalTok{  type      = string}
+\NormalTok{  sensitive = true}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+A \textbf{variable}\index{variable} is an input to a configuration. \texttt{app\_version} has a default. \texttt{db\_password} has none, so Terraform must be given it, and \texttt{sensitive\ =\ true} stops Terraform printing it. Terraform reads any environment variable called \texttt{TF\_VAR\_\textless{}name\textgreater{}}, so the password never has to be written in a file.
+
+\codeneed{7}
+
+Next, the network, the volume, and the two images:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{resource "docker\_network" "lab" \{}
+\NormalTok{  name = "tinyapp{-}net"}
+\NormalTok{\}}
+
+\NormalTok{resource "docker\_volume" "db\_data" \{}
+\NormalTok{  name = "tinyapp{-}db{-}data"}
+\NormalTok{\}}
+
+\NormalTok{resource "docker\_image" "postgres" \{}
+\NormalTok{  name         = "postgres:16{-}alpine"}
+\NormalTok{  keep\_locally = true}
+\NormalTok{\}}
+
+\NormalTok{resource "docker\_image" "app" \{}
+\NormalTok{  name         = "localhost:5001/tinyapp:1.0.0"}
+\NormalTok{  keep\_locally = true}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{7}
+
+The database container joins the network, keeps its files in the volume, and has a health check. \texttt{wait\ =\ true} makes Terraform wait until the container is healthy before moving on:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{resource "docker\_container" "db" \{}
+\NormalTok{  name  = "tinyapp{-}db"}
+\NormalTok{  image = docker\_image.postgres.image\_id}
+\NormalTok{  env = [}
+\NormalTok{    "POSTGRES\_USER=tinyapp",}
+\NormalTok{    "POSTGRES\_PASSWORD=$\{var.db\_password\}",}
+\NormalTok{    "POSTGRES\_DB=tinyapp",}
+\NormalTok{  ]}
+
+\NormalTok{  networks\_advanced \{}
+\NormalTok{    name = docker\_network.lab.name}
+\NormalTok{  \}}
+
+\NormalTok{  volumes \{}
+\NormalTok{    volume\_name    = docker\_volume.db\_data.name}
+\NormalTok{    container\_path = "/var/lib/postgresql/data"}
+\NormalTok{  \}}
+
+\NormalTok{  healthcheck \{}
+\NormalTok{    test     = ["CMD", "pg\_isready", "{-}U", "tinyapp"]}
+\NormalTok{    interval = "2s"}
+\NormalTok{    retries  = 10}
+\NormalTok{  \}}
+\NormalTok{  wait = true}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{7}
+
+Finally, the app and an output:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{resource "docker\_container" "app" \{}
+\NormalTok{  name  = "tinyapp{-}web"}
+\NormalTok{  image = docker\_image.app.image\_id}
+\NormalTok{  env = [}
+\NormalTok{    "APP\_VERSION=$\{var.app\_version\}",}
+\NormalTok{    "DATABASE\_URL=postgresql://tinyapp:$\{var.db\_password\}@$\{docker\_container.db.name\}:5432/tinyapp",}
+\NormalTok{  ]}
+
+\NormalTok{  networks\_advanced \{}
+\NormalTok{    name = docker\_network.lab.name}
+\NormalTok{  \}}
+
+\NormalTok{  ports \{}
+\NormalTok{    internal = 8000}
+\NormalTok{    external = 8090}
+\NormalTok{  \}}
+\NormalTok{  wait = true}
+\NormalTok{\}}
+
+\NormalTok{output "url" \{}
+\NormalTok{  value = "http://localhost:8090"}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\texttt{\$\{docker\_}\allowbreak{}\texttt{container.}\allowbreak{}\texttt{db.}\allowbreak{}\texttt{name\}} is a reference inside the database address. It gives the app the database's name on the network, and it tells Terraform to create the database first. \texttt{wait\ =\ true} here waits for the image's own \texttt{HEALTHCHECK} from Chapter 9. An \textbf{output}\index{output} is a value Terraform prints after \texttt{apply} and shows again with \texttt{terraform\ output}.
+
+\section{Step 2: Build It}\label{11-lab-rebuild-everything-from-code:step-2-build-it}
+
+\codeneed{17}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/infra{-}labs/ch11}
+\BuiltInTok{export} \VariableTok{TF\_VAR\_db\_password}\OperatorTok{=}\NormalTok{change{-}me{-}locally}
+\ExtensionTok{terraform}\NormalTok{ init}
+\ExtensionTok{terraform}\NormalTok{ plan}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{12}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+…
+  # docker_container.app will be created
+  # docker_container.db will be created
+  # docker_image.app will be created
+  # docker_image.postgres will be created
+  # docker_network.lab will be created
+  # docker_volume.db_data will be created
+…
+Plan: 6 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + url = "http://localhost:8090"
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{17}
+
+(These lines are picked out of a longer plan.) Apply it, answering \texttt{yes}. Putting \texttt{time} in front measures how long it takes:
+
+\codeneed{14}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{time}\NormalTok{ terraform apply}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{12}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+…
+docker_network.lab: Creation complete after 2s [id=309f6b4865e3…]
+docker_container.db: Creating...
+docker_container.db: Creation complete after 4s [id=0506b66e5fb6…]
+docker_container.app: Creating...
+docker_container.app: Creation complete after 6s [id=19b358f8dfa7…]
+
+Apply complete! Resources: 6 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+url = "http://localhost:8090"
+\end{Verbatim}
+\end{codeblock}
+
+It took about 12 seconds; \texttt{time} adds its own lines, which differ between shells. Notice the order: Terraform created the network, volume, and images together, then the database, and only when the database was healthy, the app. Try it:
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ localhost:8090/health}
+\ExtensionTok{curl}\NormalTok{ localhost:8090/visits}
+\ExtensionTok{curl}\NormalTok{ localhost:8090/visits}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+{"status":"ok","version":"1.0.0"}
+{"visits":1}
+{"visits":2}
+\end{Verbatim}
+\end{codeblock}
+
+The count is now stored in PostgreSQL.
+
+\codeneed{11}
+
+\section{Step 3: Change Something}\label{11-lab-rebuild-everything-from-code:step-3-change-something}
+
+In \texttt{main.tf}, change the default of \texttt{app\_version} from \texttt{"1.0.0"} to \texttt{"1.1.0"}, and plan:
+
+\codeneed{5}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+  # docker_container.app must be replaced
+…
+      ~ env                                         = (sensitive value) # forces replacement
+…
+Plan: 1 to add, 0 to change, 1 to destroy.
+\end{Verbatim}
+\end{codeblock}
+
+Only the app container changes. Its environment is shown as \texttt{(sensitive\ value)} because it contains the password. Apply it, and Terraform destroys and re-creates just that container.
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ localhost:8090/health}
+\ExtensionTok{curl}\NormalTok{ localhost:8090/visits}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+{"status":"ok","version":"1.1.0"}
+{"visits":3}
+\end{Verbatim}
+\end{codeblock}
+
+A new app container, and the count carried on, because it lives in the database, not in the app.
+
+\codeneed{8}
+
+\section{Step 4: The Server Dies}\label{11-lab-rebuild-everything-from-code:step-4-the-server-dies}
+
+Simulate losing the machine's containers and network all at once:
+
+\codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f}\NormalTok{ tinyapp{-}web tinyapp{-}db}
+\ExtensionTok{docker}\NormalTok{ network rm tinyapp{-}net}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\texttt{curl\ localhost:}\allowbreak{}\texttt{8090/}\allowbreak{}\texttt{health} now fails with a connection error: nothing is listening any more.
+
+\codeneed{16}
+
+Ask Terraform what it thinks:
+
+\codeneed{13}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{terraform}\NormalTok{ plan}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{11}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Note: Objects have changed outside of Terraform
+…
+  # docker_container.db has been deleted
+…
+  # docker_network.lab has been deleted
+…
+  # docker_container.app will be created
+  # docker_container.db will be created
+  # docker_network.lab will be created
+…
+Plan: 3 to add, 0 to change, 0 to destroy.
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{7}
+
+Terraform compared its state with reality, found what was missing, and plans to put back exactly that. Apply it:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{time}\NormalTok{ terraform apply}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+…
+Apply complete! Resources: 3 added, 0 changed, 0 destroyed.
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{6}
+
+About 14 seconds later:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ localhost:8090/visits}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+{"visits":4}
+\end{Verbatim}
+\end{codeblock}
+
+Everything is back, and so is the data, because the volume was never deleted. That is the answer to the chapter's question: yes, in seconds, provided the data survives.
+
+\codeneed{13}
+
+\section{Step 5: Destroy and Recreate from Nothing}\label{11-lab-rebuild-everything-from-code:step-5-destroy-and-recreate-from-nothing}
+
+Now remove everything Terraform manages, volume included, answering \texttt{yes}:
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{terraform}\NormalTok{ destroy}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{5}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Plan: 0 to add, 0 to change, 6 to destroy.
+…
+docker_volume.db_data: Destruction complete after 2s
+docker_network.lab: Destruction complete after 2s
+Destroy complete! Resources: 6 destroyed.
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{10}
+
+Build it again from nothing:
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{terraform}\NormalTok{ apply}
+\ExtensionTok{curl}\NormalTok{ localhost:8090/visits}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+…
+Apply complete! Resources: 6 added, 0 changed, 0 destroyed.
+…
+{"visits":1}
+\end{Verbatim}
+\end{codeblock}
+
+The whole system is back in about 12 seconds, but the count starts again at 1. The code described an empty database, and that is what you got.
+
+\begin{callout}{warning}
+
+Infrastructure as code rebuilds infrastructure, not data. Data needs backups, stored somewhere else, and restores that you have actually tested. In a real cloud, managed databases take the backups for you; your job is to switch them on and try a restore.
+
+\end{callout}
+
+\codeneed{13}
+
+\section{Step 6: Protect the Data from Yourself}\label{11-lab-rebuild-everything-from-code:step-6-protect-the-data-from-yourself}
+
+Terraform can refuse to destroy a resource. Add a \texttt{lifecycle} block to the volume:
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{resource "docker\_volume" "db\_data" \{}
+\NormalTok{  name = "tinyapp{-}db{-}data"}
+
+\NormalTok{  lifecycle \{}
+\NormalTok{    prevent\_destroy = true}
+\NormalTok{  \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{8}
+
+and try \texttt{terraform\ destroy} again:
+
+\codeneed{5}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Error: Instance cannot be destroyed
+…
+Resource docker_volume.db_data has lifecycle.prevent_destroy set, but the
+plan calls for this resource to be destroyed.
+…
+\end{Verbatim}
+\end{codeblock}
+
+Nothing was destroyed. Use this for anything whose loss would hurt: databases, buckets, volumes.
+
+\codeneed{9}
+
+\section{Step 7: See Where the Password Went}\label{11-lab-rebuild-everything-from-code:step-7-see-where-the-password-went}
+
+The password never appeared in \texttt{main.tf} or on screen. But look in the state file:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{grep} \AttributeTok{{-}c}\NormalTok{ change{-}me{-}locally terraform.tfstate}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+2
+\end{Verbatim}
+\end{codeblock}
+
+It is stored there twice, in plain text. This is why state must never go into git, and why teams keep it in encrypted, access-controlled remote state.
+
+To finish, remove the \texttt{lifecycle} block, then run \texttt{terraform\ destroy} and answer \texttt{yes}.
+
+\section{Summary, Key Terms, and Review Questions}\label{11-lab-rebuild-everything-from-code:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{11-lab-rebuild-everything-from-code:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  One Terraform configuration can describe a whole system: images, containers, a network, and a volume, with references deciding the order.
+\item
+  Variables take inputs such as passwords from \texttt{TF\_VAR\_} environment variables; outputs print useful values.
+\item
+  A change replaces only what it must. Data kept in a volume or database survives app replacements.
+\item
+  When things vanish, \texttt{plan} detects it and \texttt{apply} rebuilds exactly what is missing, in seconds.
+\item
+  Code rebuilds infrastructure, not data. Back data up, and use \texttt{prevent\_destroy} for anything precious.
+\item
+  State stores secrets in plain text; keep it private.
+\end{itemize}
+
+\Needspace{9\baselineskip}
+
+\subsection*{Key Terms}\label{11-lab-rebuild-everything-from-code:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3582\linewidth-1.2836\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6418\linewidth-0.7164\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Variable (Terraform) & An input to a Terraform configuration \\
+Output (Terraform) & A value Terraform prints after applying \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{11-lab-rebuild-everything-from-code:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  How does Terraform know to create the database before the app?
+\item
+  After the ``server died'', how did Terraform decide what to create, and why was the data still there?
+\item
+  What does \texttt{prevent\_destroy} protect against, and what doesn't it protect against?
+\item
+  Where did the database password end up, even though it was never in a file?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can delete every container and network of a system without worrying, because you know exactly what one \texttt{terraform\ apply} will bring back, and what it won't.
+
+\end{understandbox}

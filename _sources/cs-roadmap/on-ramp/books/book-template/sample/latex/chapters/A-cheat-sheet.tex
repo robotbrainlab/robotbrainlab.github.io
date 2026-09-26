@@ -1,0 +1,54 @@
+\bookchapter{Command Cheat Sheet}{ch:A-cheat-sheet}
+
+\begin{chapterintro}
+
+The commands used in this book, in one place.
+
+\end{chapterintro}
+
+\Needspace{13\baselineskip}
+
+\section{Files and Bytes}\label{A-cheat-sheet:files-and-bytes}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2195\linewidth-1.5610\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7805\linewidth-0.4390\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{wc\ -l\ file} & Count newline characters (lines) \\
+\texttt{wc\ -w\ file} & Count words (runs of non-whitespace) \\
+\texttt{wc\ -c\ file} & Count bytes \\
+\texttt{xxd\ file} & Show the bytes in hexadecimal, with their characters \\
+\texttt{file\ notes.txt} & Guess what kind of data a file holds (\texttt{ASCII\ text},
+\texttt{UTF-8\ Unicode\ text}, \ldots) \\
+\end{longtable}
+\end{booktable}
+
+\Needspace{10\baselineskip}
+
+\section{Python}\label{A-cheat-sheet:python}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.5769\linewidth-0.8462\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.4231\linewidth-1.1538\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Snippet} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Snippet} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{Path("f.}\allowbreak{}\texttt{txt").}\allowbreak{}\texttt{read\_}\allowbreak{}\texttt{text(encoding=}\allowbreak{}\texttt{"utf-}\allowbreak{}\texttt{8")} & Read and decode a whole file \\
+\texttt{Counter(words).}\allowbreak{}\texttt{most\_}\allowbreak{}\texttt{common(3)} & The three most frequent items \\
+\texttt{python3\ -c\ "…"} & Run a one-line program \\
+\end{longtable}
+\end{booktable}

@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Statistics: Is the Difference Real? · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><span>Part 1 — Fundamentals</span></li>
+      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part">Part 1 — Fundamentals</span><span aria-hidden="true"> · </span><span>Step 4 of 19</span></p>
+<h1 id="4-statistics-is-the-difference-real" class="guide-title">4. Statistics: Is the Difference Real?</h1>
+<div class="guide-body">
+<p>Your model scored 84% and the other one scored 81%. Is the first model better, or did it get an easier draw of test examples? You cannot tell from the two numbers, because each was measured on one finite sample of cases and a different sample would have given different numbers.</p>
+<p>Statistics is how that question is answered: reasoning from the sample you happened to collect back to the thing you actually want to know. This step teaches you to decide whether an observed difference is real, to say how uncertain your own measurements are, and to design comparisons that answer the question you meant to ask — now with models of your own to compare.</p>
+<section class="guide-block guide-block--where-you-are" aria-label="Where you are">
+<p class="guide-label"><strong>Where you are</strong></p>
+<p>Step 2 gave you probability: the mathematics of uncertainty, used forwards — given a process, what outcomes should we expect? Step 3 gave you a model and a test-set score. This step runs probability backwards: given the finite sample you actually observed, what can you conclude about the world it came from? That is the difference between probability and statistics, and it is the difference between &quot;my model scored 84%&quot; and &quot;my model is better&quot;.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#samples-and-estimation">Samples and estimation</a>
+<ol class="unit-toc-sublist">
+<li><a href="#populations-and-samples">Populations and samples</a></li>
+<li><a href="#sampling-variability-and-the-bootstrap">Sampling variability and the bootstrap</a></li>
+<li><a href="#confidence-intervals-and-what-they-do-not-assert">Confidence intervals, and what they do not assert</a></li>
+<li><a href="#the-central-limit-theorem-and-sample-size">The central limit theorem and sample size</a></li>
+</ol>
+</li>
+<li><a href="#deciding-whether-a-difference-is-real">Deciding whether a difference is real</a>
+<ol class="unit-toc-sublist">
+<li><a href="#hypothesis-testing-and-error-probabilities">Hypothesis testing and error probabilities</a></li>
+<li><a href="#comparing-two-samples">Comparing two samples</a></li>
+<li><a href="#paired-comparison-of-two-models">Paired comparison of two models</a></li>
+<li><a href="#power-and-the-smallest-difference-worth-detecting">Power and the smallest difference worth detecting</a></li>
+<li><a href="#items-that-are-not-independent">Items that are not independent</a></li>
+</ol>
+</li>
+<li><a href="#systems-that-behave-randomly">Systems that behave randomly</a>
+<ol class="unit-toc-sublist">
+<li><a href="#variance-across-repeated-runs">Variance across repeated runs</a></li>
+<li><a href="#passk-versus-passk">pass@k versus pass^k</a></li>
+</ol>
+</li>
+<li><a href="#measuring-probabilities-and-people">Measuring probabilities and people</a>
+<ol class="unit-toc-sublist">
+<li><a href="#calibration-and-reliability-diagrams">Calibration and reliability diagrams</a></li>
+<li><a href="#agreement-between-labellers">Agreement between labellers</a></li>
+</ol>
+</li>
+<li><a href="#designing-comparisons">Designing comparisons</a>
+<ol class="unit-toc-sublist">
+<li><a href="#randomization-and-the-overall-evaluation-criterion">Randomization and the overall evaluation criterion</a></li>
+<li><a href="#why-offline-and-online-results-disagree">Why offline and online results disagree</a></li>
+<li><a href="#confounding">Confounding</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-you-ll-learn" aria-label="What you&#x27;ll learn">
+<p class="guide-label"><strong>What you&#x27;ll learn</strong></p>
+<p>By the end you should be able to say what a finite sample supports, compare two models as a paired experiment, judge reliability across repeated runs, read a predicted probability correctly, and recognize a comparison that answers the wrong question — implementing the bootstrap and a repeated-trial simulation yourself.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>One idea sits underneath the whole step: a measurement is a sample, and a sample would have come out differently. Sampling variability is why an interval is more honest than a point; the bootstrap is how you obtain an interval without assuming a formula; a paired comparison removes the variation the two models share, so the difference you are testing stands out; power tells you in advance whether your test set is even large enough to detect the difference you care about; and clustering warns you that a thousand questions drawn from twenty documents are not a thousand independent observations. Repeated trials extend the same reasoning from data to the system itself, which is the form the problem takes with modern models: a system that succeeds once in five attempts and a system that succeeds every time can report the same average. Calibration and agreement apply it to the two remaining sources of doubt — the probabilities a model reports, and the humans whose labels you are scoring against. Experiment design closes the loop: confounding is what makes a comparison answer a different question from the one you asked.</p>
+</section>
+<section class="unit-area" aria-labelledby="samples-and-estimation">
+<h2 id="samples-and-estimation">Samples and estimation<a class="heading-anchor" href="#samples-and-estimation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Statistics begins where probability stops: you have one finite sample, and you want to say something about the world that produced it.</p>
+</section>
+<section class="unit-concept" aria-labelledby="populations-and-samples">
+<h3 id="populations-and-samples">Populations and samples<a class="heading-anchor" href="#populations-and-samples" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What a population is, what a sample is, and why every number you report is a property of the second used to speak about the first. <strong>Studied in:</strong> <em>Computational and Inferential Thinking</em> ch 10.</p>
+</section>
+<section class="unit-concept" aria-labelledby="sampling-variability-and-the-bootstrap">
+<h3 id="sampling-variability-and-the-bootstrap">Sampling variability and the bootstrap<a class="heading-anchor" href="#sampling-variability-and-the-bootstrap" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Why a statistic changes if you sample again, and how resampling your own data estimates that variability without a formula. You implement this. <strong>Studied in:</strong> <em>Computational and Inferential Thinking</em> chs 10, 13.</p>
+</section>
+<section class="unit-concept" aria-labelledby="confidence-intervals-and-what-they-do-not-assert">
+<h3 id="confidence-intervals-and-what-they-do-not-assert">Confidence intervals, and what they do not assert<a class="heading-anchor" href="#confidence-intervals-and-what-they-do-not-assert" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Reading an interval correctly — and the common misreadings that turn an honest result into an overclaim. <strong>Studied in:</strong> <em>Computational and Inferential Thinking</em> ch 13.</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-central-limit-theorem-and-sample-size">
+<h3 id="the-central-limit-theorem-and-sample-size">The central limit theorem and sample size<a class="heading-anchor" href="#the-central-limit-theorem-and-sample-size" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Why averages behave predictably even when the data does not, and how that determines how much data a comparison needs. <strong>Studied in:</strong> <em>Computational and Inferential Thinking</em> §§14.4–14.6.</p>
+</section>
+<section class="unit-area" aria-labelledby="deciding-whether-a-difference-is-real">
+<h2 id="deciding-whether-a-difference-is-real">Deciding whether a difference is real<a class="heading-anchor" href="#deciding-whether-a-difference-is-real" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The question you will ask hundreds of times: is this model better, or did the test set happen to favour it?</p>
+</section>
+<section class="unit-concept" aria-labelledby="hypothesis-testing-and-error-probabilities">
+<h3 id="hypothesis-testing-and-error-probabilities">Hypothesis testing and error probabilities<a class="heading-anchor" href="#hypothesis-testing-and-error-probabilities" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Null and alternative, what a p-value is and is not, and the two ways a test can be wrong. <strong>Studied in:</strong> <em>Computational and Inferential Thinking</em> ch 11.</p>
+</section>
+<section class="unit-concept" aria-labelledby="comparing-two-samples">
+<h3 id="comparing-two-samples">Comparing two samples<a class="heading-anchor" href="#comparing-two-samples" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Permutation and A/B comparisons, and what randomization buys you. <strong>Studied in:</strong> <em>Computational and Inferential Thinking</em> ch 12.</p>
+</section>
+<section class="unit-concept" aria-labelledby="paired-comparison-of-two-models">
+<h3 id="paired-comparison-of-two-models">Paired comparison of two models<a class="heading-anchor" href="#paired-comparison-of-two-models" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Evaluating both models on the same items and analysing the differences, which removes the variation the two share and is the correct form for nearly every model comparison you will run. <strong>Studied in:</strong> Miller, &quot;Adding Error Bars to Evals&quot;.</p>
+</section>
+<section class="unit-concept" aria-labelledby="power-and-the-smallest-difference-worth-detecting">
+<h3 id="power-and-the-smallest-difference-worth-detecting">Power and the smallest difference worth detecting<a class="heading-anchor" href="#power-and-the-smallest-difference-worth-detecting" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Deciding in advance whether your evaluation set can detect the improvement you care about — the check that prevents months of inconclusive comparisons. <strong>Studied in:</strong> Miller, &quot;Adding Error Bars to Evals&quot;; <em>Computational and Inferential Thinking</em> §14.6.</p>
+</section>
+<section class="unit-concept" aria-labelledby="items-that-are-not-independent">
+<h3 id="items-that-are-not-independent">Items that are not independent<a class="heading-anchor" href="#items-that-are-not-independent" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Clustered items — many questions from the same document, many turns from the same conversation — and why ignoring the clustering overstates certainty. <strong>Studied in:</strong> Miller, &quot;Adding Error Bars to Evals&quot;.</p>
+</section>
+<section class="unit-area" aria-labelledby="systems-that-behave-randomly">
+<h2 id="systems-that-behave-randomly">Systems that behave randomly<a class="heading-anchor" href="#systems-that-behave-randomly" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Classical statistics assumes the system is fixed and the data varies. With modern models, the system varies too.</p>
+</section>
+<section class="unit-concept" aria-labelledby="variance-across-repeated-runs">
+<h3 id="variance-across-repeated-runs">Variance across repeated runs<a class="heading-anchor" href="#variance-across-repeated-runs" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Running the same input many times and treating the spread as data about the system, not noise to be averaged away. <strong>Studied in:</strong> <a href="../materials/repeated-trial-simulation/index.html">this roadmap&#x27;s repeated-trial simulation</a>, on your own system.</p>
+</section>
+<section class="unit-concept" aria-labelledby="passk-versus-passk">
+<h3 id="passk-versus-passk">pass@k versus pass^k<a class="heading-anchor" href="#passk-versus-passk" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Succeeding at least once in k attempts is a capability claim; succeeding every time is a reliability claim. Confusing them is the most common error in agent evaluation, and step 11 depends on the distinction. <strong>Studied in:</strong> <a href="../materials/repeated-trial-simulation/index.html">this roadmap&#x27;s repeated-trial simulation</a>.</p>
+</section>
+<section class="unit-area" aria-labelledby="measuring-probabilities-and-people">
+<h2 id="measuring-probabilities-and-people">Measuring probabilities and people<a class="heading-anchor" href="#measuring-probabilities-and-people" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Two remaining sources of doubt: what the model&#x27;s confidence means, and how much to trust the labels you score against.</p>
+</section>
+<section class="unit-concept" aria-labelledby="calibration-and-reliability-diagrams">
+<h3 id="calibration-and-reliability-diagrams">Calibration and reliability diagrams<a class="heading-anchor" href="#calibration-and-reliability-diagrams" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What &quot;70% confident&quot; should mean, how to check whether it means it, and the two standard corrections. This is also the basis for deferring when uncertain. <strong>Studied in:</strong> scikit-learn User Guide §1.16; <a href="../materials/calibration-exercise/index.html">this roadmap&#x27;s calibration exercise</a>.</p>
+</section>
+<section class="unit-concept" aria-labelledby="agreement-between-labellers">
+<h3 id="agreement-between-labellers">Agreement between labellers<a class="heading-anchor" href="#agreement-between-labellers" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Cohen&#x27;s and Fleiss&#x27; κ and Krippendorff&#x27;s α — and why raw percentage agreement flatters, especially when one label dominates. <strong>Studied in:</strong> <em>AI Measurement Science</em> ch 5, agreement-coefficient sections.</p>
+</section>
+<section class="unit-area" aria-labelledby="designing-comparisons">
+<h2 id="designing-comparisons">Designing comparisons<a class="heading-anchor" href="#designing-comparisons" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The design decides what a comparison can mean; no analysis rescues a comparison that was set up to answer a different question.</p>
+</section>
+<section class="unit-concept" aria-labelledby="randomization-and-the-overall-evaluation-criterion">
+<h3 id="randomization-and-the-overall-evaluation-criterion">Randomization and the overall evaluation criterion<a class="heading-anchor" href="#randomization-and-the-overall-evaluation-criterion" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What a controlled experiment randomizes, over what unit, and the single criterion a decision is made on. <strong>Studied in:</strong> Kohavi, Tang and Xu ch 1.</p>
+</section>
+<section class="unit-concept" aria-labelledby="why-offline-and-online-results-disagree">
+<h3 id="why-offline-and-online-results-disagree">Why offline and online results disagree<a class="heading-anchor" href="#why-offline-and-online-results-disagree" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The gap between a held-out set and a live system — and why a win in one can be a loss in the other. <strong>Studied in:</strong> Kohavi, Tang and Xu ch 1.</p>
+</section>
+<section class="unit-concept" aria-labelledby="confounding">
+<h3 id="confounding">Confounding<a class="heading-anchor" href="#confounding" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The variable that explains your effect better than your explanation does, and how to spot it before publishing a claim. <strong>Studied in:</strong> <em>Computational and Inferential Thinking</em> ch 2.</p>
+</section>
+<section class="guide-block guide-block--where-this-fits-in-ai" aria-label="Where this fits in AI">
+<p class="guide-label"><strong>Where this fits in AI</strong></p>
+<p>This is the middle of the arc that carries uncertainty through the whole roadmap — probability is the language of uncertainty, statistics says what a finite sample supports, evaluation measures a system honestly, and evaluation science asks whether the measurement is valid:</p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: Confounding"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    P[&quot;Probability&lt;br/&gt;step 2&quot;] --&gt; S[&quot;Statistics&lt;br/&gt;step 4&quot;] --&gt; E[&quot;Evaluation&lt;br/&gt;step 6&quot;] --&gt; V[&quot;Evaluation science&lt;br/&gt;step 12&quot;]
+</code></pre></figure>
+<p>Nothing in AI escapes it. A benchmark score, an A/B test, an agent that passes eight of ten trials, a judge model agreeing with human raters — each is an inference from a sample, and each can be read wrongly in exactly the ways this step teaches you to spot.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary</strong></span><span class="study-title"><a href="https://inferentialthinking.com/" class="external" rel="noopener noreferrer"><em>Computational and Inferential Thinking</em><span class="visually-hidden" data-chrome> (external link)</span></a> (Data 8)</span><span class="study-task"><strong>read:</strong> chapters 2, 10–13 and 14.4–14.6.</span><span class="study-why"><strong>Why:</strong> statistical inference taught through simulation in Python: sampling, testing, comparing two samples, estimation and the bootstrap, then the central limit theorem and sample size. <strong>Selected reading:</strong> chapters 3–9 teach Python and tables with a course-specific library, which step 1 covers, and chapters 15–18 teach prediction, regression and classification, which <em>Hands-On ML</em> covers in more depth.</span></li>
+<li><span class="study-role"><strong>Paper</strong></span><span class="study-title"><a href="https://arxiv.org/abs/2411.00640" class="external" rel="noopener noreferrer">Miller, &quot;Adding Error Bars to Evals&quot;<span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>read:</strong> the whole paper.</span><span class="study-why"><strong>Why:</strong> the same statistics applied directly to model evaluations — standard errors, clustered items, paired comparison of two models on shared questions, and power. It is the only assigned source that treats a model comparison as the paired experiment it is.</span></li>
+<li><span class="study-role"><strong>Supplement</strong></span><span class="study-title"><a href="https://scikit-learn.org/stable/modules/calibration.html" class="external" rel="noopener noreferrer">scikit-learn User Guide §1.16 Probability calibration<span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>read:</strong> the whole section.</span><span class="study-why"><strong>Why:</strong> what a predicted probability should mean, reliability diagrams, and the two standard ways to correct miscalibration. Inference texts do not cover it; it lives in the machine-learning literature.</span></li>
+<li><span class="study-role"><strong>Supplement</strong></span><span class="study-title"><a href="https://aimslab.stanford.edu/textbook" class="external" rel="noopener noreferrer"><em>AI Measurement Science</em><span class="visually-hidden" data-chrome> (external link)</span></a> (Truong, Koyejo)</span><span class="study-task"><strong>read:</strong> the agreement-coefficient sections of chapter 5.</span><span class="study-why"><strong>Why:</strong> how to measure agreement between labellers properly, and why raw percentage agreement flatters. <strong>Selected reading:</strong> the rest of this living textbook is measurement theory that step 12 returns to.</span></li>
+<li><span class="study-role"><strong>Supplement</strong></span><span class="study-title"><a href="https://experimentguide.com/" class="external" rel="noopener noreferrer">Kohavi, Tang and Xu, <em>Trustworthy Online Controlled Experiments</em><span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>read:</strong> chapter 1 only (free).</span><span class="study-why"><strong>Why:</strong> what a controlled experiment is, and why an online result can overturn an offline one. <strong>Selected reading:</strong> the remaining chapters are paid and teach running experiments at scale, which is optional depth for this roadmap.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--where-you-study-each-concept" aria-label="Where you study each concept">
+<p class="guide-label"><strong>Where you study each concept</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Confounding"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">What you study</th>
+<th scope="col">Where you study it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sampling, estimation, confidence intervals, the bootstrap</td>
+<td><em>Computational and Inferential Thinking</em> chs 10, 13</td>
+</tr>
+<tr>
+<td>Hypothesis testing, comparing two samples</td>
+<td><em>Computational and Inferential Thinking</em> chs 11–12</td>
+</tr>
+<tr>
+<td>Central limit theorem, choosing a sample size</td>
+<td><em>Computational and Inferential Thinking</em> 14.4–14.6</td>
+</tr>
+<tr>
+<td>Paired model comparison, clustered items, power</td>
+<td>Miller, &quot;Adding Error Bars to Evals&quot;</td>
+</tr>
+<tr>
+<td>Calibration and reliability diagrams</td>
+<td>scikit-learn User Guide §1.16</td>
+</tr>
+<tr>
+<td>Agreement between labellers</td>
+<td><em>AI Measurement Science</em> ch 5</td>
+</tr>
+<tr>
+<td>Randomization, controlled experiments, confounding</td>
+<td>Kohavi, Tang and Xu ch 1; <em>Computational and Inferential Thinking</em> ch 2</td>
+</tr>
+<tr>
+<td>Repeated stochastic trials, pass@k versus pass^k</td>
+<td><a href="../materials/repeated-trial-simulation/index.html">This roadmap&#x27;s repeated-trial simulation</a></td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<p>Investigations: decide whether a difference between two of your models is real; compute the agreement between two labellers; then work <a href="../materials/repeated-trial-simulation/index.html">the repeated-trial simulation</a> and <a href="../materials/calibration-exercise/index.html">the calibration exercise</a>, which ask you to predict the result before you run them and to carry both back to your own system.</p>
+</section>
+<section class="guide-block guide-block--you-re-ready-to-continue-when-you-can" aria-label="You&#x27;re ready to continue when you can">
+<p class="guide-label"><strong>You&#x27;re ready to continue when you can</strong></p>
+<ul class="guide-list guide-list--you-re-ready-to-continue-when-you-can">
+<li>explain what a confidence interval does and does not assert;</li>
+<li>compute a paired interval for a model comparison;</li>
+<li>explain why ignoring clustered items overstates certainty;</li>
+<li>evaluate whether an average success rate predicts reliability;</li>
+<li>compute and interpret an agreement coefficient;</li>
+<li>diagnose a confounded comparison.</li>
+</ul>
+</section>
+<p class="guide-note">Running and analysing online experiments on your own is optional depth: the rest of Kohavi, Tang and Xu.</p>
+<section class="guide-block guide-block--what-comes-next" aria-label="What comes next">
+<p class="guide-label"><strong>What comes next</strong></p>
+<p>You can now judge a difference. But every statistic you compute inherits the quality of the data underneath it, and a leak or a biased sample produces confident nonsense. Step 5 makes that data defensible.</p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev" href="../3-machine-learning-framing-problems-and-building-models/index.html" rel="prev"><span class="guide-pager-label">← Previous</span><span class="guide-pager-title">3. Machine Learning: Framing Problems and Building Models</span></a>
+  <a class="guide-pager-link guide-pager-link--next" href="../5-data-you-can-defend/index.html" rel="next"><span class="guide-pager-label">Next →</span><span class="guide-pager-title">5. Data You Can Defend</span></a>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+<script src="../../assets/js/diagrams.js?v=ce213ccecc" defer data-mermaid-src="../../assets/vendor/mermaid/mermaid.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+\bookchapter{The Cloud: Renting Computers by the Minute}{ch:03-the-cloud-renting-computers-by-the-minute}
+
+\begin{chapterintro}
+
+This chapter explains what ``the cloud'' actually sells: three ways to rent computing power, regions and zones, the building blocks every app uses (compute, storage, and networking), and how the bill is calculated. The lab is a small Python cost model, because in the cloud every design decision is also a pricing decision.
+
+\end{chapterintro}
+
+\emph{The problem.} I don't own a server, and buying one feels wrong.
+
+\emph{The question.} How do I get a computer on the internet without buying one, and what exactly am I paying for?
+
+\section{Renting Instead of Buying}\label{03-the-cloud-renting-computers-by-the-minute:renting-instead-of-buying}
+
+You could buy a car to get to the airport twice a year, or take a taxi. The taxi costs more per kilometre, but you pay only when you ride and someone else fixes the engine. Owning servers is owning the car: you pay up front, you buy enough for your busiest day so the machine is mostly idle, and a disk failing at 3 a.m. is your problem.
+
+The cloud is the taxi. You rent on-demand: ask for a machine and get it in about a minute, then give it back and stop paying. You can also grow and shrink as traffic changes, which is called elasticity. The price per hour is higher than owning, but you never pay for the idle years.
+
+Renting also splits the work. Under the \textbf{shared responsibility model}\index{shared responsibility model}, the provider secures the buildings, the hardware, and its own services. You secure what you put on top: your code, your data, your settings, and who gets access. Most cloud security incidents happen on the customer's side of that line, usually through a setting left open.
+
+\Needspace{18\baselineskip}
+
+\section{Three Ways to Rent: IaaS, PaaS, and Serverless}\label{03-the-cloud-renting-computers-by-the-minute:three-ways-to-rent-iaas-paas-and-serverless}
+
+Think of pizza: make it at home, rent an equipped kitchen and cook it yourself, have a bakery bake your recipe, or buy one slice only when you're hungry.
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1575\linewidth-1.6850\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.2992\linewidth-1.4016\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.2598\linewidth-1.4803\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.2835\linewidth-1.4331\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{} & \thead{You manage} & \thead{The provider manages} & \thead{Examples} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{} & \thead{You manage} & \thead{The provider manages} & \thead{Examples} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Your own servers & Everything, including the building & Nothing & A server in your office \\
+IaaS & OS, runtime, app, data & Hardware, network, buildings & AWS EC2, Google Compute Engine \\
+PaaS & App and data & Also the OS, runtime, scaling & Render, Heroku, Google Cloud Run \\
+Serverless & Just your functions & Also servers, scaling to zero & AWS Lambda, Azure Functions \\
+\end{longtable}
+\end{booktable}
+
+\textbf{Infrastructure as a Service (IaaS)} rents you virtual machines, disks, and networks. You get a bare Linux machine and do everything else: updates, containers, security. It is the most flexible option and the most work.
+
+\textbf{Platform as a Service (PaaS)} runs your code or container image for you: ``run this image with 512 MB of memory and send it traffic''. The platform handles the machines, restarts crashes, and adds copies when traffic grows.
+
+\textbf{Serverless}\index{serverless} goes further: the provider runs your code only when a request or event arrives. The best-known form is function as a service (FaaS), where each request runs one function. When nothing happens, nothing runs, and you pay nothing. The catch is the cold start: if your function hasn't run for a while, the first request waits while it starts, from a fraction of a second to several seconds.
+
+\begin{callout}{note}
+
+Containers fit all three. You can run them yourself on an IaaS machine, hand them to a PaaS, and several serverless services accept container images too. That is one reason this book starts with containers.
+
+\end{callout}
+
+\section{Regions and Zones}\label{03-the-cloud-renting-computers-by-the-minute:regions-and-zones}
+
+A \textbf{region}\index{region} is a geographic area, such as Frankfurt or Mumbai, containing several data centres. Pick one close to your users, because distance adds delay, and one where the law allows your data to live.
+
+Inside each region are several \textbf{availability zones}\index{availability zones}. A zone is one or more data centres with their own power, cooling, and network, a few kilometres from the others. A fire or power cut in one zone should not affect the others.
+
+\codeneed{8}\begin{codeblock}
+\begin{Verbatim}[breaklines=false, fontsize=\fontsize{8.8}{8.68}\selectfont, fontfamily=diagrammono, formatcom=\diagramlines]
+  Region: eu-central (Frankfurt)
+  ┌──────────────────────────────────────────────────┐
+  │ ┌────────────┐   ┌────────────┐   ┌────────────┐ │
+  │ │   Zone a   │   │   Zone b   │   │   Zone c   │ │
+  │ │ app copy 1 │   │ app copy 2 │   │  (spare)   │ │
+  │ └────────────┘   └────────────┘   └────────────┘ │
+  │   each zone: own power, cooling, and network     │
+  └──────────────────────────────────────────────────┘
+\end{Verbatim}
+\end{codeblock}
+
+To survive a zone failing, run copies of your app in at least two zones. Surviving a whole region failing, which is rare, needs two regions and is well beyond this book.
+
+\section{Compute: Where Code Runs}\label{03-the-cloud-renting-computers-by-the-minute:compute-where-code-runs}
+
+Compute is the cloud's word for processing power, in the three shapes you just met:
+
+\begin{itemize}
+\tightlist
+\item
+  An instance is a virtual machine you rent (IaaS). You choose an instance type, a fixed size such as ``2 virtual CPUs and 4 GB of memory'', and a starting disk image with an operating system on it.
+\item
+  A container service (PaaS) runs your images and adds or removes copies as needed.
+\item
+  A function service (serverless) runs your code per request.
+\end{itemize}
+
+\Needspace{16\baselineskip}
+
+\section{Storage: Where Data Lives}\label{03-the-cloud-renting-computers-by-the-minute:storage-where-data-lives}
+
+Apps store three kinds of thing, and the cloud has a different service for each:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1562\linewidth-1.6875\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5000\linewidth-1.0000\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.3438\linewidth-1.3125\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Kind} & \thead{What it is} & \thead{Good for} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Kind} & \thead{What it is} & \thead{Good for} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Block storage & A virtual disk attached to one machine & The operating system, a database's files \\
+\textbf{Object storage}\index{object storage} & Files (``objects'') stored by name in buckets, read and written over
+HTTP & Uploads, images, backups, logs \\
+Managed database & A database the provider runs and backs up for you & Your app's records \\
+\end{longtable}
+\end{booktable}
+
+Object storage is the least like your laptop: no folders, no disk to mount. You send ``store these bytes as \texttt{photos/cat.jpg} in bucket \texttt{uploads}'' and later ``give me \texttt{photos/cat.jpg}''. In return it is cheap, practically endless, and very durable. Amazon's version, S3, is so common that other products copy its interface, which is how you'll try it locally in Chapter 7.
+
+\section{Networking: How Traffic Reaches It}\label{03-the-cloud-renting-computers-by-the-minute:networking-how-traffic-reaches-it}
+
+Just enough networking first. Every machine on a network has an IP address, such as \texttt{10.0.1.5}, which works like a street address. One machine runs many programs, so each program that accepts connections listens on a numbered \textbf{port}\index{port}, like a flat number in a building. A web app might listen on port 8000; a PostgreSQL database uses port 5432.
+
+A cloud network is built from a few pieces:
+
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{virtual private cloud}\index{virtual private cloud} (VPC) is your own private network inside the provider, split into subnets. A public subnet can be reached from the internet; a private one cannot, which is where databases belong.
+\item
+  A \textbf{firewall}\index{firewall} decides which traffic may pass: for example, ``allow port 443 from anyone, and allow port 5432 only from the app's machines''. Many clouds call these rules security groups.
+\item
+  A \textbf{load balancer}\index{load balancer} is the front door. It receives all incoming requests and spreads them across healthy copies of your app, skipping any that stop answering.
+\end{itemize}
+
+Picture a gated community: the VPC is the wall, the firewall is the guard with a list of who may enter, and the load balancer is the receptionist sending each visitor to a free desk.
+
+\Needspace{14\baselineskip}
+
+\section{Paying for What You Use}\label{03-the-cloud-renting-computers-by-the-minute:paying-for-what-you-use}
+
+Every cloud service has a meter. The common units are:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2179\linewidth-1.5641\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7821\linewidth-0.4359\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Unit} & \thead{Example} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Unit} & \thead{Example} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Time running & \$0.02 per hour for a small instance, billed by the second \\
+Storage held & \$0.023 per GB per month in object storage \\
+Requests & \$0.20 per million function calls \\
+Data sent out & Egress, around \$0.09 per GB leaving the provider \\
+\end{longtable}
+\end{booktable}
+
+(These are round example figures. Real prices vary by provider, region, and year.)
+
+Two things surprise every beginner. The meter runs whether or not anyone uses the thing, so a forgotten test machine costs the same as a busy one. And small prices multiply: a tiny per-request price can become the biggest line on the bill at high traffic.
+
+\begin{callout}{warning}
+
+Cloud bills have no upper limit by default. Before you create anything in a real account, set a budget alert (Chapter 7) and learn how to delete what you create (Chapter 8).
+
+\end{callout}
+
+\section{Lab: Pay-per-Use on Paper (and in Python)}\label{03-the-cloud-renting-computers-by-the-minute:lab-pay-per-use-on-paper-and-in-python}
+
+You'll compare two ways to pay for the same small app: one small instance running all month, or serverless functions billed per request. The prices are round example numbers, not any provider's real price list.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Create \texttt{\textasciitilde{}/}\allowbreak{}\texttt{infra-}\allowbreak{}\texttt{labs/}\allowbreak{}\texttt{ch03/}\allowbreak{}\texttt{cost.}\allowbreak{}\texttt{py}:
+
+  \codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{"""Compare two ways to pay for the same small app.}
+
+\CommentTok{The prices are round example numbers, close to what big clouds}
+\CommentTok{charge, but not any provider\textquotesingle{}s real price list.}
+\CommentTok{"""}
+
+\NormalTok{HOURS\_PER\_MONTH }\OperatorTok{=} \DecValTok{730}
+
+\CommentTok{\# Option 1: a small virtual machine that runs all month.}
+\NormalTok{VM\_PRICE\_PER\_HOUR }\OperatorTok{=} \FloatTok{0.02}
+
+\CommentTok{\# Option 2: serverless, billed per request and per unit of work.}
+\NormalTok{PRICE\_PER\_MILLION\_REQUESTS }\OperatorTok{=} \FloatTok{0.20}
+\NormalTok{PRICE\_PER\_GB\_SECOND }\OperatorTok{=} \FloatTok{0.0000167}
+\NormalTok{MEMORY\_GB }\OperatorTok{=} \FloatTok{0.5}          \CommentTok{\# memory given to each run}
+\NormalTok{SECONDS\_PER\_REQUEST }\OperatorTok{=} \FloatTok{0.1}
+
+
+\KeywordTok{def}\NormalTok{ vm\_cost(requests):}
+    \ControlFlowTok{return}\NormalTok{ VM\_PRICE\_PER\_HOUR }\OperatorTok{*}\NormalTok{ HOURS\_PER\_MONTH  }\CommentTok{\# same price at any traffic}
+
+
+\KeywordTok{def}\NormalTok{ serverless\_cost(requests):}
+\NormalTok{    per\_request }\OperatorTok{=}\NormalTok{ requests }\OperatorTok{/} \DecValTok{1\_000\_000} \OperatorTok{*}\NormalTok{ PRICE\_PER\_MILLION\_REQUESTS}
+\NormalTok{    work }\OperatorTok{=}\NormalTok{ requests }\OperatorTok{*}\NormalTok{ SECONDS\_PER\_REQUEST }\OperatorTok{*}\NormalTok{ MEMORY\_GB }\OperatorTok{*}\NormalTok{ PRICE\_PER\_GB\_SECOND}
+    \ControlFlowTok{return}\NormalTok{ per\_request }\OperatorTok{+}\NormalTok{ work}
+
+
+\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\StringTok{\textquotesingle{}requests/month\textquotesingle{}}\SpecialCharTok{:\textgreater{}15\}}\SpecialStringTok{ }\SpecialCharTok{\{}\StringTok{\textquotesingle{}VM\textquotesingle{}}\SpecialCharTok{:\textgreater{}9\}}\SpecialStringTok{ }\SpecialCharTok{\{}\StringTok{\textquotesingle{}serverless\textquotesingle{}}\SpecialCharTok{:\textgreater{}11\}}\SpecialStringTok{"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ requests }\KeywordTok{in}\NormalTok{ [}\DecValTok{10\_000}\NormalTok{, }\DecValTok{1\_000\_000}\NormalTok{, }\DecValTok{10\_000\_000}\NormalTok{, }\DecValTok{50\_000\_000}\NormalTok{]:}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{requests}\SpecialCharTok{:\textgreater{}15,\}}\SpecialStringTok{ }\SpecialCharTok{\{}\NormalTok{vm\_cost(requests)}\SpecialCharTok{:\textgreater{}9.2f\}}\SpecialStringTok{ "}
+          \SpecialStringTok{f"}\SpecialCharTok{\{}\NormalTok{serverless\_cost(requests)}\SpecialCharTok{:\textgreater{}11.2f\}}\SpecialStringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  A GB-second is one gigabyte of memory held for one second, the usual way serverless work is measured.
+\item
+  Run it:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/infra{-}labs/ch03 }\KeywordTok{\&\&} \ExtensionTok{python3}\NormalTok{ cost.py}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{5}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+   requests/month        VM  serverless
+           10,000     14.60        0.01
+        1,000,000     14.60        1.03
+       10,000,000     14.60       10.35
+       50,000,000     14.60       51.75
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Find the break-even point. Change the list of request counts to \texttt{{[}14\_}\allowbreak{}\texttt{000\_}\allowbreak{}\texttt{000,}\allowbreak{}\texttt{\ 15\_}\allowbreak{}\texttt{000\_}\allowbreak{}\texttt{000{]}} and run it again:
+
+  \codeneed{3}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+   requests/month        VM  serverless
+       14,000,000     14.60       14.49
+       15,000,000     14.60       15.53
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Put the list back, change \texttt{MEMORY\_GB} to \texttt{1.0}, and run it once more. The 10-million row now shows \texttt{18.70} for serverless, above the instance's \texttt{14.60}.
+\end{enumerate}
+
+\textbf{Expected results:} serverless is almost free at low traffic and grows in a straight line with use; the instance costs the same at any traffic. With these prices they cross at about 14 million requests a month, and giving each function twice the memory makes serverless roughly twice as expensive per request. The lesson isn't which option wins. It's that you can, and should, work the numbers out before you build.
+
+\section{Summary, Key Terms, and Review Questions}\label{03-the-cloud-renting-computers-by-the-minute:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{03-the-cloud-renting-computers-by-the-minute:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  The cloud rents computing on demand. You pay more per hour than owning, but never for idle capacity, and you can grow and shrink quickly.
+\item
+  The provider secures the platform; you secure what you put on it.
+\item
+  IaaS rents machines, PaaS runs your app or container, and serverless runs your functions per request, with cold starts as the trade-off.
+\item
+  Regions are places; availability zones are separate data centres within a region. Spread copies across zones to survive one failing.
+\item
+  Apps use compute, storage (block, object, database), and networking (VPCs, subnets, firewalls, load balancers).
+\item
+  Everything has a meter, including data sent out. Small prices multiply.
+\end{itemize}
+
+\Needspace{25\baselineskip}
+
+\subsection*{Key Terms}\label{03-the-cloud-renting-computers-by-the-minute:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3725\linewidth-1.2549\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6275\linewidth-0.7451\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Shared responsibility model & The provider secures the platform; you secure what you put on it \\
+Infrastructure as a Service (IaaS) & Renting virtual machines, disks, and networks \\
+Platform as a Service (PaaS) & A service that runs your code or container for you \\
+Serverless & Running code only when events arrive, without managing servers \\
+Region & A geographic area containing a provider's data centres \\
+Availability zone & An independent data centre (or group) within a region \\
+Object storage & Files stored by name in buckets and used over HTTP \\
+Port & A number that picks which program on a machine receives traffic \\
+Virtual private cloud (VPC) & Your private network inside a cloud \\
+Firewall & Rules that decide which network traffic may pass \\
+Load balancer & The front door that spreads requests across healthy copies \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{03-the-cloud-renting-computers-by-the-minute:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Why is renting from the cloud usually cheaper than owning for a small app, even though the hourly price is higher?
+\item
+  Explain IaaS, PaaS, and serverless using the pizza picture.
+\item
+  What is a cold start, and which kind of service has it?
+\item
+  Why run copies of an app in two availability zones?
+\item
+  When would you use object storage instead of block storage?
+\item
+  In the lab, at roughly what traffic did the instance become cheaper than serverless?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can look at a new cloud service and say whether it is compute, storage, or networking, and what its meter counts.
+
+\end{understandbox}

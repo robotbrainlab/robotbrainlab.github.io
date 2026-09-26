@@ -1,0 +1,406 @@
+\bookchapter{Files, Folders, and Who May Touch Them}{ch:03-files-folders-and-who-may-touch-them}
+
+\begin{chapterintro}
+
+This chapter gives you a map and a set of keys. The map is the single tree that every file on a Unix system hangs from, so you know where things live. The keys are users, groups, and permissions, so you know who may read, change, or run each file, and how to fix ``Permission denied'' without making things worse.
+
+\end{chapterintro}
+
+\emph{The problem.} It says ``Permission denied'', and I don't know whose permission I need.
+
+\emph{The question.} Who decides what I'm allowed to do with a file, and how do I get permission the right way?
+
+\section{\texorpdfstring{One Tree from \texttt{/}}{One Tree from /}}\label{03-files-folders-and-who-may-touch-them:one-tree-from-}
+
+Windows gives each drive a letter: \texttt{C:}, \texttt{D:}. Unix doesn't. Everything hangs from one tree, and the top of that tree is the root directory, written \texttt{/}. Every disk, every USB stick, every device appears somewhere under it.
+
+\Needspace{16\baselineskip}
+
+Programs follow a shared convention about where things go, so once you know the map, you can guess where to look:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3288\linewidth-1.3425\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6712\linewidth-0.6575\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Path} & \thead{What lives there} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Path} & \thead{What lives there} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{/home/ada} & Your home folder (on macOS, \texttt{/Users/ada}) \\
+\texttt{/root} & The home folder of the administrator account \\
+\texttt{/etc} & System-wide settings, as plain text files \\
+\texttt{/bin}, \texttt{/usr/bin} & Programs: \texttt{ls}, \texttt{cat}, \texttt{python3} \\
+\texttt{/usr/local/bin}, \texttt{/opt} & Programs you installed yourself \\
+\texttt{/var/log} & Log files that programs write as they run \\
+\texttt{/tmp} & Temporary files, often wiped at restart \\
+\texttt{/dev} & Devices, shown as files \\
+\texttt{/proc} & Live information from the kernel (Linux only) \\
+\end{longtable}
+\end{booktable}
+
+macOS adds its own folders (\texttt{/Applications}, \texttt{/Users}, \texttt{/Library}), and Homebrew installs programs under \texttt{/opt/homebrew} on Apple silicon Macs. The idea is the same.
+
+\codeneed{9}
+
+\section{Hidden Files}\label{03-files-folders-and-who-may-touch-them:hidden-files}
+
+A file whose name starts with a dot is a \textbf{hidden file}\index{hidden file}, often called a dotfile. Plain \texttt{ls} skips them. \texttt{ls\ -a} shows everything:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ls} \AttributeTok{{-}a}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+.  ..  .bash_logout  .bashrc  .profile  sandbox
+\end{Verbatim}
+\end{codeblock}
+
+Dotfiles are mostly settings. \texttt{.bashrc} configures bash each time it starts; \texttt{.zshrc} does the same for zsh. Later you'll meet \texttt{.ssh} (your keys), \texttt{.gitconfig}, and \texttt{.gitignore}. They're hidden to keep them out of your way, not to keep them secret.
+
+\section{Users and Groups}\label{03-files-folders-and-who-may-touch-them:users-and-groups}
+
+Unix was built for many people sharing one machine, so every file and every running program belongs to someone. A user is an account: a name, a numeric UID (user ID), and a home folder. A group is a named set of users, handy for sharing files with a team.
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{whoami}
+\FunctionTok{id}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+ada
+uid=1000(ada) gid=1000(ada) groups=1000(ada)
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{6}
+
+Users are listed in the text file \texttt{/etc/passwd} (it holds no passwords, despite the name):
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{grep}\NormalTok{ ada /etc/passwd}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+ada:x:1000:1000::/home/ada:/bin/bash
+\end{Verbatim}
+\end{codeblock}
+
+The fields are separated by colons: name, a placeholder for the password, UID, group ID, a comment, home folder, and login shell.
+
+One user is special. \textbf{root}\index{root}, UID 0, is the superuser. The kernel skips permission checks for root, so root can read, change, or delete anything. That's exactly why you don't use it for everyday work.
+
+\codeneed{14}
+
+\section{Reading Permissions}\label{03-files-folders-and-who-may-touch-them:reading-permissions}
+
+Every file has an owner (a user), a group, and a set of \textbf{permissions}\index{permissions} saying who may do what. \texttt{ls\ -l} shows all three:
+
+\codeneed{8}\begin{codeblock}
+\begin{Verbatim}[breaklines=false, fontsize=\fontsize{8.8}{8.68}\selectfont, fontfamily=diagrammono, formatcom=\diagramlines]
+-rwxr--r--  1  ada  ada  27  Sep 26 14:31  hello.sh
+│└┬┘└┬┘└┬┘      │    │
+│ │  │  │       │    └ group
+│ │  │  │       └ owner
+│ │  │  └ others: r-- (read only)
+│ │  └ group:  r-- (read only)
+│ └ owner:  rwx (read, write, run)
+└ type: - file, d directory, l link
+\end{Verbatim}
+\end{codeblock}
+
+There are three permissions, given separately to three classes of people: the owner, members of the file's group, and everyone else. A dash means ``not allowed''.
+
+\Needspace{7\baselineskip}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1667\linewidth-1.6667\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.2949\linewidth-1.4103\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5385\linewidth-0.9231\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Letter} & \thead{On a file} & \thead{On a directory} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Letter} & \thead{On a file} & \thead{On a directory} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{r} read & Read its contents & List what's inside \\
+\texttt{w} write & Change its contents & Add, delete, or rename files inside \\
+\texttt{x} execute & Run it as a program & Enter it with \texttt{cd} or reach files inside \\
+\end{longtable}
+\end{booktable}
+
+So \texttt{rwxr-\/-r-\/-} means: the owner can do everything; group members and others can only read.
+
+\codeneed{8}
+
+\section{Changing Permissions with chmod}\label{03-files-folders-and-who-may-touch-them:changing-permissions-with-chmod}
+
+\texttt{chmod} (change mode) changes permissions. The readable form names who (\texttt{u} user/owner, \texttt{g} group, \texttt{o} others, \texttt{a} all), then \texttt{+} to add or \texttt{-} to remove, then the letters:
+
+\codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{chmod}\NormalTok{ u+x hello.sh}
+\FunctionTok{chmod}\NormalTok{ go{-}r secret.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+The first lets you run \texttt{hello.sh}. The second stops group members and others from reading \texttt{secret.txt}.
+
+\Needspace{11\baselineskip}
+
+The short form uses numbers. Each permission has a value (read 4, write 2, execute 1), and you add them up for each class, in the order owner, group, others:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1515\linewidth-1.6970\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.1970\linewidth-1.6061\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6515\linewidth-0.6970\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Number} & \thead{Letters} & \thead{Common use} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Number} & \thead{Letters} & \thead{Common use} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{600} & \texttt{rw-\/-\/-\/-\/-\/-\/-} & Secrets: only you can read or write \\
+\texttt{644} & \texttt{rw-r-\/-r-\/-} & Normal files: you write, everyone reads \\
+\texttt{700} & \texttt{rwx-\/-\/-\/-\/-\/-} & Private folders and personal scripts \\
+\texttt{755} & \texttt{rwxr-xr-x} & Programs and shared folders \\
+\end{longtable}
+\end{booktable}
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{chmod}\NormalTok{ 600 secret.txt}
+\FunctionTok{ls} \AttributeTok{{-}l}\NormalTok{ secret.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+-rw------- 1 ada ada 15 Sep 26 14:31 secret.txt
+\end{Verbatim}
+\end{codeblock}
+
+To change who owns a file, use \texttt{chown}, as in \texttt{sudo\ chown\ ada:}\allowbreak{}\texttt{ada\ report.}\allowbreak{}\texttt{txt}. Giving files away is an administrator's job, so it needs \texttt{sudo}, which is explained below.
+
+\section{Three Reasons for ``Permission Denied''}\label{03-files-folders-and-who-may-touch-them:three-reasons-for-permission-denied}
+
+Almost every ``Permission denied'' you'll meet has one of three causes.
+
+\codeneed{8}
+
+\emph{It isn't yours.} Files under \texttt{/etc} belong to root. You may read most of them, but not change them, and a few you may not even read:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ls} \AttributeTok{{-}l}\NormalTok{ /etc/shadow}
+\FunctionTok{cat}\NormalTok{ /etc/shadow}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+-rw-r----- 1 root shadow 524 Sep 26 14:31 /etc/shadow
+cat: /etc/shadow: Permission denied
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{9}
+
+\emph{It isn't executable.} A new file never has the \texttt{x} permission. To run a script as a program, you must add it:
+
+\codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./hello.sh}
+\FunctionTok{chmod}\NormalTok{ u+x hello.sh}
+\ExtensionTok{./hello.sh}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+bash: ./hello.sh: Permission denied
+Hello from a script
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{4}
+
+\emph{You can't get through the folder.} To reach a file, you need \texttt{x} on every folder along its path. Here, a second user, \texttt{ben}, tries to look into Ada's home folder, which is \texttt{drwx-\/-\/-\/-\/-\/-}:
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+ls: cannot open directory '/home/ada': Permission denied
+\end{Verbatim}
+\end{codeblock}
+
+Each time, \texttt{ls\ -l} on the file and its folders shows you which rule said no.
+
+\section{sudo: Borrowing Root for One Command}\label{03-files-folders-and-who-may-touch-them:sudo-borrowing-root-for-one-command}
+
+Sometimes you really do need to change a system file or install software for the whole machine. For that, you use \textbf{sudo}\index{sudo} (``superuser do''). It runs one command as root, after asking for \emph{your} password, and records that you did it.
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{sudo}\NormalTok{ apt install tree}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+[sudo] password for ada:
+\end{Verbatim}
+\end{codeblock}
+
+Type your password (nothing appears as you type) and press Enter. On macOS the prompt is just \texttt{Password:}. Only users an administrator has allowed may use \texttt{sudo}; on your own laptop, that's you.
+
+\begin{callout}{warning}
+
+\texttt{sudo} switches off every safety check. Use it only when a command must change the system. Never use it to fix ``Permission denied'' on files in your own home folder; that usually means something was created with \texttt{sudo} earlier and now belongs to root. And never ``fix'' errors with \texttt{chmod\ 777}, which lets every user and every program change the file.
+
+\end{callout}
+
+\section{Least Privilege}\label{03-files-folders-and-who-may-touch-them:least-privilege}
+
+The rule behind all of this is \textbf{least privilege}\index{least privilege}: give each person and each program exactly the access it needs, and no more. Your notes don't need to be readable by others, so make them \texttt{600}. A script needs \texttt{x} only for you, so use \texttt{u+x}, not \texttt{777}. A web app needs to read its code and write its data folder; it doesn't need root.
+
+Least privilege limits the damage when something goes wrong. A buggy script running as you can hurt your files. The same script running as root can wreck the whole machine.
+
+\section{Lab: Lock It Down}\label{03-files-folders-and-who-may-touch-them:lab-lock-it-down}
+
+Make a fresh folder for this lab and work there: \texttt{mkdir\ -p\ \textasciitilde{}/}\allowbreak{}\texttt{sandbox/}\allowbreak{}\texttt{ch3}, then \texttt{cd\ \textasciitilde{}/sandbox/ch3}.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  List your home folder with hidden files: \texttt{ls\ -a\ \textasciitilde{}}. \textbf{Expected:} entries starting with a dot, such as \texttt{.bashrc} (Linux) or \texttt{.zshrc} (macOS).
+\item
+  Check who you are: \texttt{id}. \textbf{Expected:} your name, your UID, and your groups. On macOS your UID is usually \texttt{501} and your groups include \texttt{staff} and \texttt{admin}.
+\item
+  Create a secret: \texttt{echo\ "API\_}\allowbreak{}\texttt{KEY=}\allowbreak{}\texttt{abc123"\ \textgreater{}\ secret.}\allowbreak{}\texttt{txt}, then \texttt{ls\ -l\ secret.txt}. \textbf{Expected:} \texttt{-rw-r-\/-r-\/-}, readable by everyone.
+\item
+  Lock it: \texttt{chmod\ 600\ secret.txt}, then \texttt{ls\ -l\ secret.txt}. \textbf{Expected:} \texttt{-rw-\/-\/-\/-\/-\/-\/-}.
+\item
+  Make a script: \texttt{echo\ \textquotesingle{}echo\ "Hello\ from\ a\ script"\textquotesingle{}\ \textgreater{}\ hello.}\allowbreak{}\texttt{sh}, then run \texttt{./hello.sh}. \textbf{Expected:} \texttt{Permission\ denied}.
+\item
+  Make it runnable: \texttt{chmod\ u+x\ hello.sh}, then \texttt{./hello.sh}. \textbf{Expected:} \texttt{Hello\ from\ a\ script}, and \texttt{ls\ -l\ hello.sh} shows \texttt{-rwxr-\/-r-\/-}.
+\item
+  Block a folder: \texttt{mkdir\ box}, \texttt{chmod\ u-x\ box}, then \texttt{cd\ box}. \textbf{Expected:} a ``Permission denied'' error (bash and zsh word it slightly differently). Restore it with \texttt{chmod\ u+x\ box}.
+\item
+  Try a system file: \texttt{touch\ /}\allowbreak{}\texttt{etc/}\allowbreak{}\texttt{myapp.conf}. \textbf{Expected:} \texttt{Permission\ denied}. Don't fix it; it's supposed to fail.
+\end{enumerate}
+
+\section{Summary, Key Terms, and Review Questions}\label{03-files-folders-and-who-may-touch-them:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{03-files-folders-and-who-may-touch-them:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  Everything hangs from one tree rooted at \texttt{/}; settings live in \texttt{/etc}, programs in \texttt{/usr/bin}, logs in \texttt{/var/log}, your files in your home folder.
+\item
+  Names starting with a dot are hidden; \texttt{ls\ -a} shows them.
+\item
+  Every file has an owner, a group, and \texttt{rwx} permissions for owner, group, and others. On folders, \texttt{x} means ``may enter''.
+\item
+  \texttt{chmod} changes permissions, in letters (\texttt{u+x}) or numbers (\texttt{600}, \texttt{644}, \texttt{755}).
+\item
+  ``Permission denied'' means it isn't yours, it isn't executable, or a folder on the way is closed.
+\item
+  \texttt{sudo} runs one command as root. Use it rarely, and follow least privilege.
+\end{itemize}
+
+\Needspace{12\baselineskip}
+
+\subsection*{Key Terms}\label{03-files-folders-and-who-may-touch-them:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3049\linewidth-1.3902\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6951\linewidth-0.6098\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Hidden file (dotfile) & A file whose name starts with \texttt{.}, usually settings \\
+root & The superuser (UID 0), who bypasses permission checks \\
+Permissions & The \texttt{rwx} rules for owner, group, and others \\
+sudo & Runs one command as root after checking your password \\
+Least privilege & Give each user or program only the access it needs \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{03-files-folders-and-who-may-touch-them:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Where would you look for a program's system-wide settings? For its log files?
+\item
+  Read \texttt{-rw-r-\/-\/-\/-\/-} aloud: who can do what?
+\item
+  What number would you give \texttt{chmod} for a file only you may read and write? For a script everyone may run?
+\item
+  Why do you need \texttt{x} on a folder to open a file inside it?
+\item
+  Why is ``just use \texttt{sudo}'' a poor fix for a permission error in your own home folder?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can look at any ``Permission denied'', run \texttt{ls\ -l} on the file and its folders, and say which rule refused you.
+
+\end{understandbox}

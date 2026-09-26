@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Evaluation and Testing · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><span>Part 1 — Fundamentals</span></li>
+      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part">Part 1 — Fundamentals</span><span aria-hidden="true"> · </span><span>Step 6 of 19</span></p>
+<h1 id="6-evaluation-and-testing" class="guide-title">6. Evaluation and Testing</h1>
+<div class="guide-body">
+<p>A system is only as good as the evidence that it works — and &quot;it scored 0.91&quot; is not that evidence until someone has said what score, on which cases, compared against what, and what result would have been bad enough to stop.</p>
+<p>Two related activities do that work. <strong>Evaluation</strong> asks how well the system performs at the thing you actually care about, which is why it starts with writing down what success means before you measure anything. <strong>Testing</strong> asks whether the machinery behaves: whether the data arriving is what you expect, whether the model still handles the cases it handled last month, and whether a change broke something quietly. Ordinary software tests assume a fixed right answer, and a learned system rarely gives you one, so its tests have a shape of their own. This step teaches both, and what to watch after release — because an evaluation describes a moment that has already passed.</p>
+<section class="guide-block guide-block--where-you-are" aria-label="Where you are">
+<p class="guide-label"><strong>Where you are</strong></p>
+<p>You can frame a problem (step 3), judge whether a difference is real (step 4) and defend your data (step 5). What you cannot yet do is say, before you start, what &quot;good enough&quot; means — and then produce evidence that survives someone else&#x27;s scrutiny. Until that exists, every later decision in this guide (deploy, roll back, choose an architecture, trust an agent) rests on impressions.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#specifying-success">Specifying success</a>
+<ol class="unit-toc-sublist">
+<li><a href="#acceptance-criteria-and-costed-errors">Acceptance criteria and costed errors</a></li>
+<li><a href="#the-population-success-must-hold-on">The population success must hold on</a></li>
+<li><a href="#the-metric-and-the-decision-it-informs">The metric and the decision it informs</a></li>
+<li><a href="#what-evidence-would-justify-deployment-or-rollback">What evidence would justify deployment or rollback</a></li>
+</ol>
+</li>
+<li><a href="#measuring-honestly">Measuring honestly</a>
+<ol class="unit-toc-sublist">
+<li><a href="#metric-choice-what-it-rewards-and-distorts">Metric choice: what it rewards and distorts</a></li>
+<li><a href="#baselines-and-validation-protocols">Baselines and validation protocols</a></li>
+<li><a href="#error-analysis-and-failure-taxonomies">Error analysis and failure taxonomies</a></li>
+<li><a href="#slices-and-subgroups">Slices and subgroups</a></li>
+<li><a href="#test-set-hygiene-and-contamination">Test-set hygiene and contamination</a></li>
+<li><a href="#reporting-variability">Reporting variability</a></li>
+</ol>
+</li>
+<li><a href="#testing-a-learned-system">Testing a learned system</a>
+<ol class="unit-toc-sublist">
+<li><a href="#data-validation-and-leakage-tests">Data-validation and leakage tests</a></li>
+<li><a href="#behavioural-checks">Behavioural checks</a></li>
+<li><a href="#evaluation-regression-tests">Evaluation regression tests</a></li>
+<li><a href="#testing-systems-that-behave-randomly">Testing systems that behave randomly</a></li>
+<li><a href="#reproducibility">Reproducibility</a></li>
+</ol>
+</li>
+<li><a href="#running-it-outside-the-notebook">Running it outside the notebook</a>
+<ol class="unit-toc-sublist">
+<li><a href="#from-notebook-to-module">From notebook to module</a></li>
+<li><a href="#running-your-tests">Running your tests</a></li>
+<li><a href="#a-small-dataset-you-test-against">A small dataset you test against</a></li>
+<li><a href="#an-environment-you-can-reconstruct">An environment you can reconstruct</a></li>
+</ol>
+</li>
+<li><a href="#after-release">After release</a>
+<ol class="unit-toc-sublist">
+<li><a href="#why-an-offline-evaluation-is-not-enough">Why an offline evaluation is not enough</a></li>
+<li><a href="#monitoring-signals-and-silent-degradation">Monitoring signals and silent degradation</a></li>
+<li><a href="#upstream-model-and-api-changes-as-shift">Upstream model and API changes as shift</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-you-ll-learn" aria-label="What you&#x27;ll learn">
+<p class="guide-label"><strong>What you&#x27;ll learn</strong></p>
+<p>By the end you should be able to state what success means for a decision with unequal error costs, build an evaluation whose result survives someone else&#x27;s scrutiny, test a learned system the way its failure modes require, and say what would make you deploy it or take it back.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>Specification comes first because measurement without it is arbitrary: a metric only means something once you have said what decision it informs and what an error costs. Measurement then has to be built so it cannot flatter you — honest baselines, slices that reveal where the average hides failure, uncontaminated test sets, reported variability (the statistics of step 4 in daily use). Testing extends the same scepticism from the metric to the machinery: data-validation and leakage tests protect the inputs, behavioural checks protect against the model being right for the wrong reason, and regression tests keep past failures from returning. The last group admits the limit of all of it: any offline number is a measurement from a frozen moment, so monitoring is not an operations afterthought but the continuation of evaluation into the running system.</p>
+</section>
+<section class="unit-area" aria-labelledby="specifying-success">
+<h2 id="specifying-success">Specifying success<a class="heading-anchor" href="#specifying-success" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Deciding, before you measure, what &quot;good enough&quot; means — the step most teams skip and then argue about later.</p>
+</section>
+<section class="unit-concept" aria-labelledby="acceptance-criteria-and-costed-errors">
+<h3 id="acceptance-criteria-and-costed-errors">Acceptance criteria and costed errors<a class="heading-anchor" href="#acceptance-criteria-and-costed-errors" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What the system must achieve, and what a false positive costs compared with a false negative. Unequal costs change which model wins. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 6; <a href="../materials/release-and-rollback-cases/index.html">this roadmap&#x27;s release and rollback cases</a>, whose first two turn a specification into a decision.</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-population-success-must-hold-on">
+<h3 id="the-population-success-must-hold-on">The population success must hold on<a class="heading-anchor" href="#the-population-success-must-hold-on" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Which users, inputs and conditions the claim covers — and which it silently excludes. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 6.</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-metric-and-the-decision-it-informs">
+<h3 id="the-metric-and-the-decision-it-informs">The metric and the decision it informs<a class="heading-anchor" href="#the-metric-and-the-decision-it-informs" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Why an offline score is evidence for a decision rather than the decision itself. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 6.</p>
+</section>
+<section class="unit-concept" aria-labelledby="what-evidence-would-justify-deployment-or-rollback">
+<h3 id="what-evidence-would-justify-deployment-or-rollback">What evidence would justify deployment or rollback<a class="heading-anchor" href="#what-evidence-would-justify-deployment-or-rollback" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Writing the threshold down in advance, so the decision is not made by whoever is most confident in the room. Step 16 exercises this on a running system. <strong>Studied in:</strong> <a href="../materials/release-and-rollback-cases/index.html">this roadmap&#x27;s release and rollback cases</a>.</p>
+</section>
+<section class="unit-area" aria-labelledby="measuring-honestly">
+<h2 id="measuring-honestly">Measuring honestly<a class="heading-anchor" href="#measuring-honestly" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Building a measurement that could show you are wrong.</p>
+</section>
+<section class="unit-concept" aria-labelledby="metric-choice-what-it-rewards-and-distorts">
+<h3 id="metric-choice-what-it-rewards-and-distorts">Metric choice: what it rewards and distorts<a class="heading-anchor" href="#metric-choice-what-it-rewards-and-distorts" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Each metric optimizes something; knowing what it neglects is how you avoid optimizing the wrong thing. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 3; <em>Designing Machine Learning Systems</em> ch 8, ML-specific metrics.</p>
+</section>
+<section class="unit-concept" aria-labelledby="baselines-and-validation-protocols">
+<h3 id="baselines-and-validation-protocols">Baselines and validation protocols<a class="heading-anchor" href="#baselines-and-validation-protocols" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What you compare against, and the protocol that makes the comparison fair. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 6, model offline evaluation.</p>
+</section>
+<section class="unit-concept" aria-labelledby="error-analysis-and-failure-taxonomies">
+<h3 id="error-analysis-and-failure-taxonomies">Error analysis and failure taxonomies<a class="heading-anchor" href="#error-analysis-and-failure-taxonomies" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Reading the errors, grouping them into named failure modes, and letting those modes decide what to measure next. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 3.</p>
+</section>
+<section class="unit-concept" aria-labelledby="slices-and-subgroups">
+<h3 id="slices-and-subgroups">Slices and subgroups<a class="heading-anchor" href="#slices-and-subgroups" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Where the average hides a failure that matters — by user group, input type, length or source. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 6.</p>
+</section>
+<section class="unit-concept" aria-labelledby="test-set-hygiene-and-contamination">
+<h3 id="test-set-hygiene-and-contamination">Test-set hygiene and contamination<a class="heading-anchor" href="#test-set-hygiene-and-contamination" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Keeping the evaluation set uncontaminated, and recognizing when a benchmark has stopped measuring anything. <strong>Studied in:</strong> <em>Speech and Language Processing</em> §1.9.</p>
+</section>
+<section class="unit-concept" aria-labelledby="reporting-variability">
+<h3 id="reporting-variability">Reporting variability<a class="heading-anchor" href="#reporting-variability" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Attaching uncertainty to every claim — step 4, applied daily. <strong>Studied in:</strong> cross-reference: step 4, with Miller, &quot;Adding Error Bars to Evals&quot;.</p>
+</section>
+<section class="unit-area" aria-labelledby="testing-a-learned-system">
+<h2 id="testing-a-learned-system">Testing a learned system<a class="heading-anchor" href="#testing-a-learned-system" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Software tests assume deterministic behaviour and known outputs. Learned systems break both assumptions, so they need their own tests.</p>
+</section>
+<section class="unit-concept" aria-labelledby="data-validation-and-leakage-tests">
+<h3 id="data-validation-and-leakage-tests">Data-validation and leakage tests<a class="heading-anchor" href="#data-validation-and-leakage-tests" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Automated checks on the inputs — schema, ranges, distributions — and tests that would catch leakage reappearing. <strong>Studied in:</strong> Breck et al., &quot;The ML Test Score&quot;; <a href="../materials/ml-testing-checklist/index.html">this roadmap&#x27;s testing and reproducibility checklist</a>.</p>
+</section>
+<section class="unit-concept" aria-labelledby="behavioural-checks">
+<h3 id="behavioural-checks">Behavioural checks<a class="heading-anchor" href="#behavioural-checks" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Perturbation, invariance and directional-expectation tests: asserting how the output should change when the input changes in a known way. <strong>Studied in:</strong> Breck et al., &quot;The ML Test Score&quot;.</p>
+</section>
+<section class="unit-concept" aria-labelledby="evaluation-regression-tests">
+<h3 id="evaluation-regression-tests">Evaluation regression tests<a class="heading-anchor" href="#evaluation-regression-tests" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Keeping past failures in a suite that runs on every change, so fixed problems stay fixed. <strong>Studied in:</strong> Breck et al.; <em>Designing Machine Learning Systems</em> ch 6.</p>
+</section>
+<section class="unit-concept" aria-labelledby="testing-systems-that-behave-randomly">
+<h3 id="testing-systems-that-behave-randomly">Testing systems that behave randomly<a class="heading-anchor" href="#testing-systems-that-behave-randomly" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Repeated trials and tolerances instead of exact assertions — the testing counterpart of step 4&#x27;s repeated-trial reasoning. <strong>Studied in:</strong> cross-reference: step 4; <a href="../materials/ml-testing-checklist/index.html">this roadmap&#x27;s testing and reproducibility checklist</a>.</p>
+</section>
+<section class="unit-concept" aria-labelledby="reproducibility">
+<h3 id="reproducibility">Reproducibility<a class="heading-anchor" href="#reproducibility" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Seeds, recorded environments, versioned data and models, and experiment tracking — so a result can be reproduced, and a regression attributed. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 6, experiment tracking and versioning.</p>
+</section>
+<section class="unit-area" aria-labelledby="running-it-outside-the-notebook">
+<h2 id="running-it-outside-the-notebook">Running it outside the notebook<a class="heading-anchor" href="#running-it-outside-the-notebook" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The tests above are things you have to be able to <em>run</em>, repeatedly, on a system that changes. That takes a small amount of Python engineering — enough that your evolving system can be executed by someone else, or by you in three months. Version control for your code, continuous integration and general software engineering belong to the Computer Science &amp; Engineering roadmap. What belongs here is the part that is specific to a system that learns: keeping track of which data, model and configuration produced a given result, and being able to run the whole thing again. The reference for the mechanics is a book you have already read.</p>
+</section>
+<section class="unit-concept" aria-labelledby="from-notebook-to-module">
+<h3 id="from-notebook-to-module">From notebook to module<a class="heading-anchor" href="#from-notebook-to-module" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Moving the code out of the notebook into importable modules, so that the same function can be called by an experiment, by a test, and by whatever runs the system later. A notebook whose cells must be run in the right order cannot be tested. <strong>Studied in:</strong> <em>The Python Tutorial</em> ch 6, revisited from step 1.</p>
+</section>
+<section class="unit-concept" aria-labelledby="running-your-tests">
+<h3 id="running-your-tests">Running your tests<a class="heading-anchor" href="#running-your-tests" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Tests as functions that fail loudly, kept where a test runner finds them, and run as one suite with one command. This is the difference between the data-validation, behavioural and regression tests above being a suite and being a set of intentions. <strong>Studied in:</strong> <em>The Python Tutorial</em> §10.11 (quality control); <a href="../materials/ml-testing-checklist/index.html">this roadmap&#x27;s testing and reproducibility checklist</a>.</p>
+</section>
+<section class="unit-concept" aria-labelledby="a-small-dataset-you-test-against">
+<h3 id="a-small-dataset-you-test-against">A small dataset you test against<a class="heading-anchor" href="#a-small-dataset-you-test-against" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Tests for a learned system need inputs, and using live data makes them slow and unrepeatable. A fixture — a handful of examples kept with the tests, including the awkward ones you have already been bitten by — is what makes a data-validation or regression test run in a second and mean the same thing tomorrow. <strong>Studied in:</strong> Breck et al., &quot;The ML Test Score&quot;; cross-reference: the evaluation dataset you built in step 5.</p>
+</section>
+<section class="unit-concept" aria-labelledby="an-environment-you-can-reconstruct">
+<h3 id="an-environment-you-can-reconstruct">An environment you can reconstruct<a class="heading-anchor" href="#an-environment-you-can-reconstruct" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Recording the dependencies and versions a result was produced with, in an environment isolated from everything else on your machine — the mechanics of the reproducibility above, and the rest of the promise made in step 1. <strong>Studied in:</strong> <em>The Python Tutorial</em> ch 12; <em>Designing Machine Learning Systems</em> ch 6.</p>
+</section>
+<section class="unit-area" aria-labelledby="after-release">
+<h2 id="after-release">After release<a class="heading-anchor" href="#after-release" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Evaluation does not end at deployment; it changes form.</p>
+</section>
+<section class="unit-concept" aria-labelledby="why-an-offline-evaluation-is-not-enough">
+<h3 id="why-an-offline-evaluation-is-not-enough">Why an offline evaluation is not enough<a class="heading-anchor" href="#why-an-offline-evaluation-is-not-enough" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The frozen-moment problem: the measurement describes a world that has already started to move. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 8.</p>
+</section>
+<section class="unit-concept" aria-labelledby="monitoring-signals-and-silent-degradation">
+<h3 id="monitoring-signals-and-silent-degradation">Monitoring signals and silent degradation<a class="heading-anchor" href="#monitoring-signals-and-silent-degradation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What to watch so that a slow decline becomes visible before a user reports it. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 8, ML-specific metrics.</p>
+</section>
+<section class="unit-concept" aria-labelledby="upstream-model-and-api-changes-as-shift">
+<h3 id="upstream-model-and-api-changes-as-shift">Upstream model and API changes as shift<a class="heading-anchor" href="#upstream-model-and-api-changes-as-shift" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>A dependency you do not control changing underneath you — the form of shift that is unique to systems built on other people&#x27;s models. Step 16 turns this into version pinning and regression gates. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 8.</p>
+</section>
+<section class="guide-block guide-block--where-this-fits-in-ai" aria-label="Where this fits in AI">
+<p class="guide-label"><strong>Where this fits in AI</strong></p>
+<p>Evaluation is the arrow between prediction and decision in the picture from step 3 — and it now has a return path:</p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: Upstream model and API changes as shift"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    D[&quot;Data&quot;] --&gt; M[&quot;Model&quot;] --&gt; P[&quot;Prediction&quot;] --&gt; E[&quot;Evaluation&lt;br/&gt;against a specification&quot;] --&gt; A[&quot;Decision or action&quot;]
+    A --&gt; Mon[&quot;Monitoring&quot;]
+    Mon -. &quot;shift, degradation&quot; .-&gt; D
+</code></pre></figure>
+<p>This is the fundamental loop of AI engineering. Everything you add later — deep networks, language models, retrieval, tools, agents — changes what sits in the model box, and makes the evaluation box harder, but never removes it. Step 12 examines the evaluation box itself; the Modern topic on evaluating applications is how practitioners do this for generative systems today.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary · continuing</strong></span><span class="study-title"><em>Designing Machine Learning Systems</em></span><span class="study-task"><strong>revisit:</strong> (begun in <a href="../3-machine-learning-framing-problems-and-building-models/index.html">3. Machine Learning: Framing Problems and Building Models</a>; step 5 studied its data chapters) from chapter 6, &quot;Experiment Tracking and Versioning&quot; (pp. 160–165) and &quot;Model Offline Evaluation&quot; (baselines and evaluation methods, pp. 176–186); from chapter 8, &quot;ML-Specific Metrics&quot; (pp. 248–253).</span><span class="study-why"><strong>Why:</strong> evaluation and tracking as practised in production.</span></li>
+<li><span class="study-role"><strong>Paper</strong></span><span class="study-title"><a href="https://research.google/pubs/the-ml-test-score-a-rubric-for-ml-production-readiness-and-technical-debt-reduction/" class="external" rel="noopener noreferrer">Breck et al., &quot;The ML Test Score&quot;<span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>read:</strong> the whole paper.</span><span class="study-why"><strong>Why:</strong> a compact checklist of the tests a learned system needs — data, model, infrastructure and monitoring. No textbook assembles this list.</span></li>
+<li><span class="study-role"><strong>Supplement · first use</strong></span><span class="study-title"><a href="https://web.stanford.edu/~jurafsky/slp3/" class="external" rel="noopener noreferrer"><em>Speech and Language Processing</em><span class="visually-hidden" data-chrome> (external link)</span></a> (Jurafsky, Martin)</span><span class="study-task"><strong>read:</strong> §1.9.</span><span class="study-why"><strong>Why:</strong> benchmarks, contamination, model-based judges and Goodhart&#x27;s law, explained by researchers. <strong>Selected reading:</strong> this is a large living textbook, read only in the sections each step needs rather than as a whole. This one section is your first contact with it; steps 7, 8, 9, 14 and 15 each take the sections they need.</span></li>
+<li><span class="study-role"><strong>Supplement · continuing</strong></span><span class="study-title"><em>Hands-On ML with Scikit-Learn and PyTorch</em></span><span class="study-task"><strong>revisit:</strong> (begun in <a href="../3-machine-learning-framing-problems-and-building-models/index.html">3. Machine Learning: Framing Problems and Building Models</a>) the metrics and error-analysis material of chapter 3.</span><span class="study-why"><strong>Why:</strong> you apply it now to your own system&#x27;s evaluation.</span></li>
+<li><span class="study-role"><strong>Supplement</strong></span><span class="study-title"><a href="https://docs.python.org/3/tutorial/" class="external" rel="noopener noreferrer"><em>The Python Tutorial</em><span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>revisit:</strong> chapter 6, §10.11 and chapter 12, read as part of the complete tutorial in <a href="../1-python-sql-and-data-analysis/index.html">step 1</a>.</span><span class="study-why"><strong>Why:</strong> modules, the test runner and isolated environments are the mechanics this step&#x27;s tests and reproducibility ask for. You read these sections before you had a system that needed them; nothing new to acquire, only to apply.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--where-you-study-each-concept" aria-label="Where you study each concept">
+<p class="guide-label"><strong>Where you study each concept</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Upstream model and API changes as shift"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">What you study</th>
+<th scope="col">Where you study it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Success specification, costed errors, release evidence</td>
+<td><em>Designing Machine Learning Systems</em> ch 6; <a href="../materials/release-and-rollback-cases/index.html">this roadmap&#x27;s release and rollback cases</a></td>
+</tr>
+<tr>
+<td>Metrics, baselines, error analysis, slices</td>
+<td><em>Hands-On ML</em> ch 3; <em>Designing Machine Learning Systems</em> chs 6, 8</td>
+</tr>
+<tr>
+<td>Benchmarks, contamination, judges, Goodhart&#x27;s law</td>
+<td><em>Speech and Language Processing</em> §1.9</td>
+</tr>
+<tr>
+<td>Tests for learned systems, reproducibility</td>
+<td>Breck et al.; <a href="../materials/ml-testing-checklist/index.html">this roadmap&#x27;s testing and reproducibility checklist</a></td>
+</tr>
+<tr>
+<td>Modules, running a test suite, isolated environments</td>
+<td><em>The Python Tutorial</em> ch 6, §10.11, ch 12, revisited from step 1</td>
+</tr>
+<tr>
+<td>Monitoring signals and silent degradation</td>
+<td><em>Designing Machine Learning Systems</em> ch 8</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<p>For your evolving system: write a success specification with costed errors; build its evaluation suite, with slice analysis and tests specific to learned systems; move the code out of the notebook so that the suite runs from one command in an environment you can reconstruct; define the monitoring signals that would reveal degradation.</p>
+<p>Work <a href="../materials/ml-testing-checklist/index.html">the testing and reproducibility checklist</a> against that system, item by item, and keep it for later releases. Then take the first two of <a href="../materials/release-and-rollback-cases/index.html">the release and rollback cases</a>: they turn the specification you have just written into a decision someone has to make with incomplete evidence.</p>
+</section>
+<section class="guide-block guide-block--you-re-ready-to-continue-when-you-can" aria-label="You&#x27;re ready to continue when you can">
+<p class="guide-label"><strong>You&#x27;re ready to continue when you can</strong></p>
+<ul class="guide-list guide-list--you-re-ready-to-continue-when-you-can">
+<li>specify success, with unequal error costs, for a stated decision;</li>
+<li>design and implement an evaluation for it;</li>
+<li>implement data-validation, leakage and regression tests;</li>
+<li>run that evaluation and those tests from a single command, in an environment you can reconstruct;</li>
+<li>explain why an offline result may not hold after release;</li>
+<li>state what evidence would justify deployment and what would trigger a rollback.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--what-comes-next" aria-label="What comes next">
+<p class="guide-label"><strong>What comes next</strong></p>
+<p>You have now completed one whole arc: a system that is framed, built on defensible data, measured honestly and watched after release. Everything up to here works without neural networks. Step 7 changes the model box — and with it, what can be learned from raw text, images and audio at all.</p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev" href="../5-data-you-can-defend/index.html" rel="prev"><span class="guide-pager-label">← Previous</span><span class="guide-pager-title">5. Data You Can Defend</span></a>
+  <a class="guide-pager-link guide-pager-link--next" href="../7-deep-learning/index.html" rel="next"><span class="guide-pager-label">Next →</span><span class="guide-pager-title">7. Deep Learning</span></a>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+<script src="../../assets/js/diagrams.js?v=ce213ccecc" defer data-mermaid-src="../../assets/vendor/mermaid/mermaid.min.js"></script>
+</body>
+</html>

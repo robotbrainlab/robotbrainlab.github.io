@@ -1,0 +1,18 @@
+% ================================================================
+%  backcover.tex — category line, title, blurb (\BookBlurb in book-meta.tex).
+% ================================================================
+\clearpage
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay]
+  \fill[brand] (current page.north west) rectangle ([yshift=-23pt]current page.north east);
+  \fill[brand] (current page.south west) rectangle ([yshift=23pt]current page.south east);
+\end{tikzpicture}%
+\vspace*{-8pt}
+{\sffamily\bfseries\fontsize{6.5}{8}\selectfont\addfontfeature{LetterSpace=18}\MakeUppercase{\BookCategory}\par}
+\vspace{30pt}
+\providecommand{\BookTitleLines}{\BookTitle}  % where a long title breaks; set in book-meta.tex
+{\raggedright\coverfont\fontsize{30}{34}\selectfont \BookTitleLines\par}
+\vspace{16pt}
+\begingroup\fontsize{10}{12.6}\selectfont\setlength{\parskip}{6pt}
+\BookBlurb\par
+\endgroup

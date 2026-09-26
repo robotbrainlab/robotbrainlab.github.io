@@ -1,0 +1,424 @@
+\bookchapter{Your First Pipeline}{ch:06-your-first-pipeline}
+
+\begin{chapterintro}
+
+In this chapter you write a real CI pipeline with GitHub Actions: it runs the tests on every push, builds the image, and publishes it to a registry, using a secret on the way. You will run it on your own machine with act, so you need no GitHub account.
+
+\end{chapterintro}
+
+\emph{The problem.} I keep forgetting to run the tests before I push.
+
+\emph{The question.} How do I make a machine run my checks on every push, so that forgetting is no longer possible?
+
+\section{GitHub Actions in One Picture}\label{06-your-first-pipeline:github-actions-in-one-picture}
+
+GitHub Actions is the pipeline service built into GitHub. You describe a pipeline in a YAML file inside your repository, and GitHub runs it for you whenever something happens. Think of it as a robot assistant that watches the repository: ``whenever someone pushes to \texttt{main}, do these things, in this order, and tell me if anything fails.''
+
+\Needspace{12\baselineskip}
+
+Five words cover almost everything:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1348\linewidth-1.7303\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6629\linewidth-0.6742\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.2022\linewidth-1.5955\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Word} & \thead{Meaning} & \thead{In the file} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Word} & \thead{Meaning} & \thead{In the file} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\textbf{Workflow}\index{workflow} & One pipeline, in one YAML file under
+\texttt{.github/}\allowbreak{}\texttt{workflows/} & the whole file \\
+Event & What starts the workflow, such as a push & \texttt{on:} \\
+Job & A group of steps that runs on one fresh runner & \texttt{jobs:} \\
+Step & One command, or one action & \texttt{steps:} \\
+Action & A reusable, ready-made step someone else wrote & \texttt{uses:} \\
+\end{longtable}
+\end{booktable}
+
+\codeneed{9}\begin{codeblock}
+\begin{Verbatim}[breaklines=false, fontsize=\fontsize{8.8}{8.68}\selectfont, fontfamily=diagrammono, formatcom=\diagramlines]
+ workflow  (.github/workflows/ci.yml, started by a push)
+ ├── job: test      (runner 1)
+ │    ├── step: check out the code
+ │    ├── step: set up Python
+ │    ├── step: pip install
+ │    └── step: pytest
+ └── job: publish   (runner 2, only after "test" passes)
+      ├── step: build the image
+      └── step: push the image
+\end{Verbatim}
+\end{codeblock}
+
+Jobs run at the same time unless one says \texttt{needs:} another. Steps inside a job run in order, and the first failing step fails the job.
+
+YAML is the file format. It is Python-like in one important way: indentation matters. \texttt{key:\ value} sets a value, an indented block belongs to the line above it, and lines starting with \texttt{-} form a list.
+
+\section{Running Workflows Locally with act}\label{06-your-first-pipeline:running-workflows-locally-with-act}
+
+On GitHub, each job runs on a fresh virtual machine. act imitates that on your computer: it reads your workflow files and runs each job in a Docker container that looks like GitHub's runner. The image it uses, \texttt{catthehacker/}\allowbreak{}\texttt{ubuntu:}\allowbreak{}\texttt{act-}\allowbreak{}\texttt{latest}, is over 2 GB, so the first run takes a while to download it.
+
+\codeneed{5}
+
+Put a file called \texttt{.actrc} in your repository. act reads its options from there, so you don't have to type them each time:
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+--pull=false
+\end{Verbatim}
+\end{codeblock}
+
+The first line picks the image for \texttt{ubuntu-latest} jobs; the second stops act checking for a newer one on every run.
+
+To build and push images, a job needs Docker. act shares yours with each job by attaching the Docker socket, the file through which the \texttt{docker} command talks to the Docker daemon. So a \texttt{docker\ build} inside a job builds on your own Docker, and the image appears in your own \texttt{docker\ images}.
+
+\begin{callout}{note}
+
+If act can't reach your Docker, point it at the socket with \texttt{-}\allowbreak{}\texttt{-}\allowbreak{}\texttt{container-}\allowbreak{}\texttt{daemon-}\allowbreak{}\texttt{socket\ unix:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{path/}\allowbreak{}\texttt{to/}\allowbreak{}\texttt{docker.}\allowbreak{}\texttt{sock}.
+
+\end{callout}
+
+\codeneed{10}
+
+\section{A Workflow That Runs the Tests}\label{06-your-first-pipeline:a-workflow-that-runs-the-tests}
+
+tinyapp has two small tests in \texttt{test\_main.py}. They call the app in memory, without a server:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ fastapi.testclient }\ImportTok{import}\NormalTok{ TestClient}
+
+\ImportTok{import}\NormalTok{ main}
+
+\NormalTok{client }\OperatorTok{=}\NormalTok{ TestClient(main.app)}
+
+
+\KeywordTok{def}\NormalTok{ test\_health():}
+\NormalTok{    response }\OperatorTok{=}\NormalTok{ client.get(}\StringTok{"/health"}\NormalTok{)}
+    \ControlFlowTok{assert}\NormalTok{ response.status\_code }\OperatorTok{==} \DecValTok{200}
+    \ControlFlowTok{assert}\NormalTok{ response.json()[}\StringTok{"status"}\NormalTok{] }\OperatorTok{==} \StringTok{"ok"}
+
+
+\KeywordTok{def}\NormalTok{ test\_visits\_count\_up(tmp\_path, monkeypatch):}
+\NormalTok{    monkeypatch.}\BuiltInTok{setattr}\NormalTok{(main, }\StringTok{"DATA\_FILE"}\NormalTok{, tmp\_path }\OperatorTok{/} \StringTok{"visits.txt"}\NormalTok{)}
+    \ControlFlowTok{assert}\NormalTok{ client.get(}\StringTok{"/visits"}\NormalTok{).json() }\OperatorTok{==}\NormalTok{ \{}\StringTok{"visits"}\NormalTok{: }\DecValTok{1}\NormalTok{\}}
+    \ControlFlowTok{assert}\NormalTok{ client.get(}\StringTok{"/visits"}\NormalTok{).json() }\OperatorTok{==}\NormalTok{ \{}\StringTok{"visits"}\NormalTok{: }\DecValTok{2}\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{7}
+
+The first half of the workflow runs them on every push to \texttt{main}:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{name}\KeywordTok{:}\AttributeTok{ CI}
+
+\FunctionTok{on}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{push}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{branches}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{main}\KeywordTok{]}
+\AttributeTok{  }\FunctionTok{pull\_request}\KeywordTok{:}
+
+\FunctionTok{env}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{IMAGE}\KeywordTok{:}\AttributeTok{ localhost:5001/tinyapp}
+
+\FunctionTok{jobs}\KeywordTok{:}
+\AttributeTok{  }\FunctionTok{test}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{runs{-}on}\KeywordTok{:}\AttributeTok{ ubuntu{-}latest}
+\AttributeTok{    }\FunctionTok{steps}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/checkout@v4}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/setup{-}python@v5}
+\AttributeTok{        }\FunctionTok{with}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{python{-}version}\KeywordTok{:}\AttributeTok{ }\StringTok{"3.12"}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ pip install {-}r requirements{-}dev.txt}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ pytest {-}q}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\texttt{on:} lists the events: pushes to \texttt{main}, and pull requests. \texttt{runs-on:} picks the runner. \texttt{actions/checkout} copies the repository into the runner, and \texttt{actions/}\allowbreak{}\texttt{setup-python} installs the Python version you ask for. \texttt{requirements-dev.txt} adds the test tools to the app's own requirements:
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+-r requirements.txt
+pytest==9.1.1
+httpx2==2.13.1
+\end{Verbatim}
+\end{codeblock}
+
+The first line pulls in \texttt{requirements.txt}; \texttt{httpx2} is the HTTP client FastAPI's test client needs. The \texttt{env:} block sets a variable every job can use.
+
+\section{Building and Publishing the Image}\label{06-your-first-pipeline:building-and-publishing-the-image}
+
+Once the tests pass, the second job builds the image and pushes it to a registry. You'll run your own registry: Docker's \texttt{registry:2} image is a complete registry in one container.
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\AttributeTok{  }\FunctionTok{publish}\KeywordTok{:}
+\AttributeTok{    }\FunctionTok{needs}\KeywordTok{:}\AttributeTok{ test}
+\AttributeTok{    }\FunctionTok{runs{-}on}\KeywordTok{:}\AttributeTok{ ubuntu{-}latest}
+\AttributeTok{    }\FunctionTok{steps}\KeywordTok{:}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{uses}\KeywordTok{:}\AttributeTok{ actions/checkout@v4}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Check the registry token}
+\AttributeTok{        }\FunctionTok{env}\KeywordTok{:}
+\AttributeTok{          }\FunctionTok{REGISTRY\_TOKEN}\KeywordTok{:}\AttributeTok{ $\{\{ secrets.REGISTRY\_TOKEN \}\}}
+\FunctionTok{        run}\KeywordTok{: }\CharTok{|}
+\NormalTok{          test {-}n "$REGISTRY\_TOKEN" || \{ echo "REGISTRY\_TOKEN is missing"; exit 1; \}}
+\NormalTok{          echo "Using token $REGISTRY\_TOKEN"}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Build the image}
+\AttributeTok{        }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ docker build {-}t $IMAGE:$\{\{ github.sha \}\} .}
+\AttributeTok{      }\KeywordTok{{-}}\AttributeTok{ }\FunctionTok{name}\KeywordTok{:}\AttributeTok{ Push the image}
+\AttributeTok{        }\FunctionTok{run}\KeywordTok{:}\AttributeTok{ docker push $IMAGE:$\{\{ github.sha \}\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\texttt{needs:\ test} means ``only if the test job passed''. \texttt{\$\{\{\ github.sha\ \}\}} is filled in with the commit hash, so every image is tagged with the exact commit it was built from. That is the build-once artifact from Chapter 4.
+
+\begin{callout}{note}
+
+The registry listens on port 5001, not the usual 5000, because on macOS port 5000 is taken by the AirPlay Receiver. Docker trusts registries on \texttt{localhost} without HTTPS, which is fine for a lab and never for anything real.
+
+\end{callout}
+
+\section{Secrets in CI}\label{06-your-first-pipeline:secrets-in-ci}
+
+Pipelines need secrets, such as a registry password. They never go in the workflow file, which is in git for everyone to read.
+
+On GitHub, you store secrets in the repository's settings (Settings, then Secrets and variables, then Actions). A workflow reads one as \texttt{\$\{\{\ secrets.}\allowbreak{}\texttt{REGISTRY\_}\allowbreak{}\texttt{TOKEN\ \}\}}, and GitHub replaces the value with \texttt{***} anywhere it would appear in the logs. act reads secrets from a file called \texttt{.secrets} in the same \texttt{NAME=value} format, and masks them the same way.
+
+Our ``Check the registry token'' step stands in for \texttt{docker\ login}: it fails if the secret is missing, and prints it only so you can watch the masking. Never print a secret in a real workflow.
+
+\begin{callout}{warning}
+
+Add \texttt{.secrets} and \texttt{.env} to \texttt{.gitignore} before your first commit. Masking protects the logs, not the repository, and it can't stop a step from sending the secret somewhere else. Only use actions you trust in workflows that can see secrets.
+
+\end{callout}
+
+\section{Lab: Tests on Every Push}\label{06-your-first-pipeline:lab-tests-on-every-push}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Start the local registry and check that it is empty:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name}\NormalTok{ registry }\AttributeTok{{-}p}\NormalTok{ 5001:5000 registry:2}
+\ExtensionTok{curl}\NormalTok{ localhost:5001/v2/\_catalog}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{1}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  {"repositories":[]}
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Make a fresh folder, \texttt{\textasciitilde{}/infra-labs/ch06}, and copy in the app's four files (from \texttt{labs/tinyapp/}) and Chapter 5's \texttt{Dockerfile} and \texttt{.dockerignore} (from \texttt{labs/ch05/} and \texttt{labs/tinyapp/}). Then create \texttt{.gitignore} (with \texttt{.env}, \texttt{.secrets}, \texttt{\_\_pycache\_\_/}, \texttt{.pytest\_cache/}, and \texttt{.venv/}), \texttt{.actrc} as above, \texttt{.secrets} containing \texttt{REGISTRY\_}\allowbreak{}\texttt{TOKEN=}\allowbreak{}\texttt{not-}\allowbreak{}\texttt{a-}\allowbreak{}\texttt{real-}\allowbreak{}\texttt{token-}\allowbreak{}\texttt{123}, and \texttt{.}\allowbreak{}\texttt{github/}\allowbreak{}\texttt{workflows/}\allowbreak{}\texttt{ci.}\allowbreak{}\texttt{yml} with both jobs. Then make it a git repository and commit:
+
+  \codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ init }\AttributeTok{{-}b}\NormalTok{ main}
+\FunctionTok{git}\NormalTok{ add }\AttributeTok{{-}A}
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}m} \StringTok{"tinyapp with CI"}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  If git asks who you are, set \texttt{user.name} and \texttt{user.email} with \texttt{git\ config} inside the folder, then commit again.
+\item
+  List the jobs act found:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{act} \AttributeTok{{-}l}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{3}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  Stage  Job ID   Job name  Workflow name  Workflow file  Events
+  0      test     test      CI             ci.yml         push,pull_request
+  1      publish  publish   CI             ci.yml         push,pull_request
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Run the workflow as if you had pushed. The first run downloads the runner image and the actions:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{act}\NormalTok{ push}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{10}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  [CI/test]   | 2 passed in 0.13s
+  …
+  [CI/test] 🏁  Job succeeded
+  …
+  [CI/publish]   | Using token ***
+  …
+  [CI/publish]   | 53ba61aa33f5…: digest: sha256:cdc5d934… size: 856
+  [CI/publish]   ✅  Success - Main Push the image [736.652791ms]
+  …
+  [CI/publish] 🏁  Job succeeded
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Break a test on purpose: in \texttt{main.py}, change \texttt{"status":\ "ok"} to \texttt{"status":\ "OK"}, commit, and run act again:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}am} \StringTok{"Shout the status"}
+\ExtensionTok{act}\NormalTok{ push}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{6}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  …
+  [CI/test]   | FAILED test_main.py::test_health - AssertionError: assert 'OK' == 'ok'
+  [CI/test]   | 1 failed, 1 passed in 0.13s
+  [CI/test]   ❌  Failure - Main pytest -q [334.395125ms]
+  [CI/test] 🏁  Job failed
+  Error: Job 'test' failed
+  \end{Verbatim}
+  \end{codeblock}
+
+  The publish job never ran, so no broken image reached the registry.
+\item
+  Undo the change with a new commit, then run once without the secrets file to see the check fail:
+
+  \codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ revert }\AttributeTok{{-}{-}no{-}edit}\NormalTok{ HEAD}
+\FunctionTok{mv}\NormalTok{ .secrets ../secrets.bak}
+\ExtensionTok{act}\NormalTok{ push}
+\FunctionTok{mv}\NormalTok{ ../secrets.bak .secrets}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{4}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  …
+  [CI/publish]   | REGISTRY_TOKEN is missing
+  [CI/publish] 🏁  Job failed
+  Error: Job 'publish' failed
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Run \texttt{act\ push} once more. Both jobs succeed. Ask the registry what it holds:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ localhost:5001/v2/tinyapp/tags/list}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{1}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  {"name":"tinyapp","tags":["53ba61aa33f5…","10ff8b9d…"]}
+  \end{Verbatim}
+  \end{codeblock}
+\end{enumerate}
+
+\textbf{Expected results:} a clean push runs the tests and publishes an image tagged with the commit hash; a failing test stops the workflow before anything is built; a missing secret stops the publish job; and the secret shows as \texttt{***} in logs. Leave the registry running for the next chapters. Your commit hashes will differ.
+
+\section{Summary, Key Terms, and Review Questions}\label{06-your-first-pipeline:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{06-your-first-pipeline:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  A GitHub Actions workflow is a YAML file of jobs and steps, started by an event.
+\item
+  Jobs run on fresh runners; \texttt{needs:} orders them; a failing step stops the line.
+\item
+  Tag images with the commit hash. Secrets live in the CI system and are masked in logs.
+\end{itemize}
+
+\Needspace{8\baselineskip}
+
+\subsection*{Key Terms}\label{06-your-first-pipeline:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1622\linewidth-1.6757\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.8378\linewidth-0.3243\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Workflow & One pipeline, defined in a YAML file in
+\texttt{.github/}\allowbreak{}\texttt{workflows/} \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{06-your-first-pipeline:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  What is the difference between a job and a step?
+\item
+  What does \texttt{needs:\ test} do, and what would happen without it?
+\item
+  Why tag the image with \texttt{\$\{\{\ github.sha\ \}\}} rather than \texttt{latest}?
+\item
+  Where should a CI secret live, and what does masking protect against?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can read a workflow and say what runs, when, and what a failing test stops.
+
+\end{understandbox}

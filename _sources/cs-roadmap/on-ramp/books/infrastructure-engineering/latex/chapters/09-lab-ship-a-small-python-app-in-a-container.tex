@@ -1,0 +1,416 @@
+\bookchapter{Lab: Ship a Small Python App in a Container}{ch:09-lab-ship-a-small-python-app-in-a-container}
+
+\begin{chapterintro}
+
+This whole chapter is a lab. You take tinyapp from source code to a versioned image that knows how to report its own health, watch a healthy and an unhealthy container side by side, publish the image to a registry, and run it from there on a machine that doesn't have it yet.
+
+\end{chapterintro}
+
+\emph{The problem.} I have a working app and want it to run anywhere.
+
+\emph{The question.} What does it take to turn my app into one tested image that any machine can pull and run?
+
+\section{What You'll Build}\label{09-lab-ship-a-small-python-app-in-a-container:what-youll-build}
+
+\codeneed{7}\begin{codeblock}
+\begin{Verbatim}[breaklines=false, fontsize=\fontsize{8.8}{8.68}\selectfont, fontfamily=diagrammono, formatcom=\diagramlines]
+ source ──► tests ──► docker build ──► tinyapp:1.0.0
+                                           │
+                                   docker run: healthy?
+                                           │
+                     docker push ──► localhost:5001 registry
+                                           │
+         "another machine" ◄── docker pull + docker run
+\end{Verbatim}
+\end{codeblock}
+
+Start in a fresh folder, \texttt{\textasciitilde{}/infra-labs/ch09}, holding the app's four files and Chapter 5's \texttt{Dockerfile} and \texttt{.dockerignore}, copied from the book's \texttt{labs/} folder. You also need the registry from Chapter 6: if it is stopped, \texttt{docker\ start\ registry} starts it again, and if you removed it, run \texttt{docker\ run\ -}\allowbreak{}\texttt{d\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{name\ registry\ -}\allowbreak{}\texttt{p\ 5001:}\allowbreak{}\texttt{5000\ registry:}\allowbreak{}\texttt{2}. If a container called \texttt{tinyapp} is still running from an earlier chapter, remove it with \texttt{docker\ rm\ -f\ tinyapp}.
+
+\codeneed{13}
+
+\section{Step 1: Test the App Before You Package It}\label{09-lab-ship-a-small-python-app-in-a-container:step-1-test-the-app-before-you-package-it}
+
+An image is only as good as the code inside it, so run the tests first. In \texttt{\textasciitilde{}/infra-labs/ch09}:
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3} \AttributeTok{{-}m}\NormalTok{ venv .venv}
+\BuiltInTok{.}\NormalTok{ .venv/bin/activate}
+\ExtensionTok{pip}\NormalTok{ install }\AttributeTok{{-}r}\NormalTok{ requirements{-}dev.txt}
+\ExtensionTok{pytest} \AttributeTok{{-}q}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+..                                                                       [100%]
+2 passed in 0.29s
+\end{Verbatim}
+\end{codeblock}
+
+\texttt{.venv} is listed in \texttt{.dockerignore}, so the virtual environment never ends up in the image.
+
+\section{Step 2: Teach the Image to Report Its Health}\label{09-lab-ship-a-small-python-app-in-a-container:step-2-teach-the-image-to-report-its-health}
+
+A running process is not the same as a working app. The process can be alive while the app is stuck, misconfigured, or listening on the wrong port. A health check asks the app itself.
+
+Docker supports this with the \texttt{HEALTHCHECK} instruction: a command that Docker runs inside the container every few seconds. If it succeeds (exit code 0), the container is healthy; after a few failures in a row, it is unhealthy. Add two lines to the Dockerfile, just before \texttt{CMD}:
+
+\codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{HEALTHCHECK} \OperatorTok{{-}{-}interval=5s} \OperatorTok{{-}{-}timeout=3s} \OperatorTok{{-}{-}start{-}period=5s} \OperatorTok{{-}{-}retries=3}\NormalTok{ \textbackslash{}}
+  \KeywordTok{CMD} \ExtensionTok{python} \AttributeTok{{-}c} \StringTok{"import urllib.request; urllib.request.urlopen(\textquotesingle{}http://localhost:8000/health\textquotesingle{}, timeout=2)"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\Needspace{9\baselineskip}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2471\linewidth-1.5059\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7529\linewidth-0.4941\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Option} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Option} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{-\/-interval=5s} & Check every 5 seconds \\
+\texttt{-\/-timeout=3s} & A check that takes longer than 3 seconds counts as failed \\
+\texttt{-\/-start-period=5s} & Failures in the first 5 seconds don't count; the app is starting \\
+\texttt{-\/-retries=3} & Three failures in a row mark the container unhealthy \\
+\end{longtable}
+\end{booktable}
+
+The check uses Python's own \texttt{urllib}, because the slim image doesn't include \texttt{curl}. \texttt{urlopen} raises an error on a failed connection or an error status, which makes Python exit with code 1. Real services use longer intervals, such as 30 seconds; 5 seconds keeps the lab quick.
+
+\section{Step 3: Build a Versioned Image}\label{09-lab-ship-a-small-python-app-in-a-container:step-3-build-a-versioned-image}
+
+Give each release a version. A common scheme is \textbf{semantic versioning}\index{semantic versioning}. A version has three numbers, \texttt{MAJOR.MINOR.PATCH}: raise PATCH for bug fixes, MINOR for new features, and MAJOR for changes that break something for users. This is version \texttt{1.0.0}:
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ build }\AttributeTok{{-}t}\NormalTok{ tinyapp:1.0.0 .}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{5}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+…
+#7 [4/6] RUN pip install --no-cache-dir -r requirements.txt
+…
+#10 [6/6] RUN useradd --create-home appuser && mkdir /data && chown…
+#11 naming to docker.io/library/tinyapp:1.0.0 done
+\end{Verbatim}
+\end{codeblock}
+
+\section{Step 4: Run It and Watch It Become Healthy}\label{09-lab-ship-a-small-python-app-in-a-container:step-4-run-it-and-watch-it-become-healthy}
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name}\NormalTok{ tinyapp }\AttributeTok{{-}p}\NormalTok{ 8080:8000 }\AttributeTok{{-}e}\NormalTok{ APP\_VERSION=1.0.0 tinyapp:1.0.0}
+\ExtensionTok{docker}\NormalTok{ ps }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}table \{\{.Names\}\}\textbackslash{}t\{\{.Status\}\}\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+NAMES     STATUS
+tinyapp   Up Less than a second (health: starting)
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{11}
+
+Wait about seven seconds and ask again:
+
+\codeneed{8}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ ps }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}table \{\{.Names\}\}\textbackslash{}t\{\{.Status\}\}\textquotesingle{}}
+\ExtensionTok{docker}\NormalTok{ inspect }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}\{\{.State.Health.Status\}\}\textquotesingle{}}\NormalTok{ tinyapp}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/health}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+NAMES     STATUS
+tinyapp   Up 7 seconds (healthy)
+healthy
+{"status":"ok","version":"1.0.0"}
+\end{Verbatim}
+\end{codeblock}
+
+\texttt{docker\ inspect} prints everything Docker knows about a container as JSON; \texttt{-\/-format} picks out one field. Scripts use exactly this command to wait for a new version to become healthy, as you'll see in Chapter 10.
+
+\section{Step 5: See What Unhealthy Looks Like}\label{09-lab-ship-a-small-python-app-in-a-container:step-5-see-what-unhealthy-looks-like}
+
+Start a second container from the same image, but override its command so the app listens on port 9999 instead of 8000. The process runs perfectly well. It just isn't where the health check (or any user) expects it:
+
+\codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name}\NormalTok{ tinyapp{-}broken tinyapp:1.0.0 uvicorn main:app }\AttributeTok{{-}{-}port}\NormalTok{ 9999}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{10}
+
+Wait about 20 seconds, then look:
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ ps }\AttributeTok{{-}{-}filter}\NormalTok{ name=tinyapp{-}broken }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}table \{\{.Names\}\}\textbackslash{}t\{\{.Status\}\}\textquotesingle{}}
+\ExtensionTok{docker}\NormalTok{ inspect }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}\{\{(index .State.Health.Log 0).Output\}\}\textquotesingle{}}\NormalTok{ tinyapp{-}broken }\KeywordTok{|} \FunctionTok{grep}\NormalTok{ URLError}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+NAMES            STATUS
+tinyapp-broken   Up 22 seconds (unhealthy)
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [Errno 111] Connection refused>
+\end{Verbatim}
+\end{codeblock}
+
+Docker keeps the output of the last few checks, and here it says exactly what went wrong: nothing answered on port 8000. Without a health check, this container would look fine in \texttt{docker\ ps}. Remove it:
+
+\codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f}\NormalTok{ tinyapp{-}broken}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\begin{callout}{note}
+
+On its own, Docker only \emph{reports} an unhealthy container; it doesn't restart it. Platforms built on containers, such as cloud container services and Kubernetes, act on health checks: they stop sending traffic to unhealthy copies and replace them. Chapter 12 returns to this.
+
+\end{callout}
+
+\codeneed{17}
+
+\section{Step 6: Push the Image to the Registry}\label{09-lab-ship-a-small-python-app-in-a-container:step-6-push-the-image-to-the-registry}
+
+To push, the image's name must start with the registry's address. \texttt{docker\ tag} adds a second name to the same image; nothing is copied:
+
+\codeneed{11}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ tag tinyapp:1.0.0 localhost:5001/tinyapp:1.0.0}
+\ExtensionTok{docker}\NormalTok{ push localhost:5001/tinyapp:1.0.0}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{8}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+The push refers to repository [localhost:5001/tinyapp]
+…
+b59ec4124c64: Layer already exists
+e91e57f70610: Layer already exists
+…
+826b96dc18b7: Pushed
+d122ce05d523: Layer already exists
+1.0.0: digest: sha256:8615741e44becf529f9830f67909fedec585c424cc931db80f5df3e74a65d2ae size: 856
+\end{Verbatim}
+\end{codeblock}
+
+Only one layer was uploaded. The others were already in the registry from Chapter 6, because both images share the same base and libraries. That is layer sharing saving you time and space.
+
+\codeneed{6}
+
+Ask the registry which tags it holds:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl}\NormalTok{ localhost:5001/v2/tinyapp/tags/list}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+{"name":"tinyapp","tags":["53ba61aa33f5…","1.0.0","10ff8b9d01b5…"]}
+\end{Verbatim}
+\end{codeblock}
+
+The long tags are the commit hashes from Chapter 6's pipeline. Yours will differ.
+
+\section{Step 7: Run It ``Somewhere Else''}\label{09-lab-ship-a-small-python-app-in-a-container:step-7-run-it-somewhere-else}
+
+A real second machine would log in to a registry it can reach over the network and pull from it. You can get the same effect on your machine by deleting every local copy of the image first, so Docker has to fetch it:
+
+\codeneed{14}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f}\NormalTok{ tinyapp}
+\ExtensionTok{docker}\NormalTok{ rmi tinyapp:1.0.0 localhost:5001/tinyapp:1.0.0}
+\ExtensionTok{docker}\NormalTok{ run }\AttributeTok{{-}d} \AttributeTok{{-}{-}name}\NormalTok{ tinyapp }\AttributeTok{{-}p}\NormalTok{ 8080:8000 }\AttributeTok{{-}e}\NormalTok{ APP\_VERSION=1.0.0 localhost:5001/tinyapp:1.0.0}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{10}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+…
+Untagged: tinyapp:1.0.0
+Untagged: localhost:5001/tinyapp:1.0.0
+Deleted: sha256:8615741e44becf529f9830f67909fedec585c424cc931db80f5df3e74a65d2ae
+Unable to find image 'localhost:5001/tinyapp:1.0.0' locally
+1.0.0: Pulling from tinyapp
+826b96dc18b7: Download complete
+Digest: sha256:8615741e44becf529f9830f67909fedec585c424cc931db80f5df3e74a65d2ae
+Status: Downloaded newer image for localhost:5001/tinyapp:1.0.0
+5b5efbbac133aa3edcade642bf004fc9edf08de1cdde20c7708813c16ad8433c
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{9}
+
+The digest after the pull is the same as the digest printed by the push: the bytes you run are exactly the bytes you built. After a few seconds:
+
+\codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ ps }\AttributeTok{{-}{-}format} \StringTok{\textquotesingle{}table \{\{.Names\}\}\textbackslash{}t\{\{.Image\}\}\textbackslash{}t\{\{.Status\}\}\textquotesingle{}}
+\ExtensionTok{curl}\NormalTok{ localhost:8080/health}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+NAMES     IMAGE                          STATUS
+tinyapp   localhost:5001/tinyapp:1.0.0   Up 7 seconds (healthy)
+{"status":"ok","version":"1.0.0"}
+\end{Verbatim}
+\end{codeblock}
+
+Leave it running if you're going straight on to Chapter 10, which replaces it.
+
+\Needspace{17\baselineskip}
+
+\section{When Something Goes Wrong}\label{09-lab-ship-a-small-python-app-in-a-container:when-something-goes-wrong}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.4839\linewidth-1.0323\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5161\linewidth-0.9677\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{You see} & \thead{It usually means} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{You see} & \thead{It usually means} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{Bind\ for\ 0.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0:}\allowbreak{}\texttt{8080\ failed:}\allowbreak{}\texttt{\ port\ is\ already\ allocated} & Another container already uses port 8080. Remove it, or pick another
+host port \\
+\texttt{curl} fails to connect to port 8080 & The container isn't running (check \texttt{docker\ ps\ -a} and
+\texttt{docker\ logs}), or \texttt{-p} is missing \\
+\texttt{(unhealthy)} in \texttt{docker\ ps} & The app doesn't answer on port 8000; read the health log as in step 5 \\
+\texttt{…tinyapp:}\allowbreak{}\texttt{9.}\allowbreak{}\texttt{9.}\allowbreak{}\texttt{9:}\allowbreak{}\texttt{\ not\ found}
+when pulling & That tag was never pushed; list the tags with \texttt{curl} \\
+\texttt{pull\ access\ denied\ for\ tinyap,}\allowbreak{}\texttt{\ repository\ does\ not\ exist} & A typo in the image name, so Docker looked for it on Docker Hub \\
+\end{longtable}
+\end{booktable}
+
+\section{Summary, Key Terms, and Review Questions}\label{09-lab-ship-a-small-python-app-in-a-container:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{09-lab-ship-a-small-python-app-in-a-container:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  Test first, then package. The image should contain only code that has passed its tests.
+\item
+  A \texttt{HEALTHCHECK} lets Docker tell a running container from a working one.
+\item
+  Tag images with a version, and with the registry's address so they can be pushed.
+\item
+  Pushing uploads only missing layers; pulling by tag gives the same digest, so the same image.
+\end{itemize}
+
+\Needspace{8\baselineskip}
+
+\subsection*{Key Terms}\label{09-lab-ship-a-small-python-app-in-a-container:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3194\linewidth-1.3611\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6806\linewidth-0.6389\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Semantic versioning & Version numbers in the form MAJOR.MINOR.PATCH \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{09-lab-ship-a-small-python-app-in-a-container:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Why is ``the process is running'' not enough to know the app works?
+\item
+  What do the four \texttt{HEALTHCHECK} options control?
+\item
+  Why did the push upload only one layer?
+\item
+  How can you be sure that the image you pulled is the one you built?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can ship a small web app, with a health check, through a registry.
+
+\end{understandbox}

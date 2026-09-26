@@ -1,0 +1,454 @@
+\bookchapter{The Everyday Command Line}{ch:05-the-everyday-command-line}
+
+\begin{chapterintro}
+
+This chapter gives you the handful of tools you'll use every day: finding files, reading them, searching inside them, reshaping text, and pulling facts out of JSON. You'll then join them into pipelines that answer real questions in one line. Last, you'll meet environment variables, the settings every program inherits from the shell.
+
+\end{chapterintro}
+
+\emph{The problem.} I can move around, but finding a file or reading a log still feels like guessing.
+
+\emph{The question.} How do I find what I need, in files and inside them, without opening everything?
+
+\codeneed{6}
+
+The examples use two sample files from \texttt{labs/ch05/} in the book's lab files (see the preface): \texttt{app.log}, a web server's log, and \texttt{team.json}. From the folder that holds \texttt{labs/}, copy them into your sandbox:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ \textasciitilde{}/sandbox/logs}
+\FunctionTok{cp}\NormalTok{ labs/ch05/app.log \textasciitilde{}/sandbox/logs/}
+\FunctionTok{cp}\NormalTok{ labs/ch05/team.json \textasciitilde{}/sandbox/}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+Then \texttt{cd\ \textasciitilde{}/sandbox}.
+
+\section{Finding Files}\label{05-the-everyday-command-line:finding-files}
+
+\texttt{find} walks down a folder tree and prints every path that matches your conditions. Its shape is \texttt{find\ \textless{}where\textgreater{}\ \textless{}conditions\textgreater{}}:
+
+\texttt{find\ .\ -name\ \textquotesingle{}*.txt\textquotesingle{}} lists every \texttt{.txt} file under the current folder. The \texttt{*} is a wildcard meaning ``any characters'', so \texttt{\textquotesingle{}*.txt\textquotesingle{}} matches every name ending in \texttt{.txt}. Keep the quotes; they stop the shell from expanding the \texttt{*} itself before \texttt{find} sees it. Other useful conditions:
+
+\Needspace{8\baselineskip}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3889\linewidth-1.2222\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6111\linewidth-0.7778\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Condition} & \thead{Matches} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Condition} & \thead{Matches} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{-name\ \textquotesingle{}*.py\textquotesingle{}} & Names matching a pattern \\
+\texttt{-type\ f} / \texttt{-type\ d} & Only files / only directories \\
+\texttt{-mtime\ -1} & Modified in the last day \\
+\texttt{-size\ +10M} & Bigger than 10 megabytes \\
+\end{longtable}
+\end{booktable}
+
+To see how much space something takes, use \texttt{du\ -sh} (``disk usage, summary, human units''): \texttt{du\ -sh\ logs} prints \texttt{8.0K\ \ \ \ logs}.
+
+\section{Viewing Files}\label{05-the-everyday-command-line:viewing-files}
+
+\texttt{cat} prints a whole file, which is fine for short files and useless for long ones. For those:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{head\ -n\ 3\ file} shows the first three lines; \texttt{tail\ -n\ 3\ file} the last three.
+\item
+  \texttt{wc\ -l\ file} counts lines.
+\item
+  \texttt{less\ file} opens a pager: a viewer that shows one screen at a time. Space goes forward, \texttt{b} goes back, \texttt{/word} searches, \texttt{q} quits.
+\item
+  \texttt{tail\ -f\ file} keeps the file open and prints new lines as they're added. It's how you watch a running program's log. Press Ctrl-C to stop.
+\end{itemize}
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{wc} \AttributeTok{{-}l}\NormalTok{ logs/app.log}
+\FunctionTok{head} \AttributeTok{{-}n}\NormalTok{ 3 logs/app.log}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+60 logs/app.log
+2026-09-25 09:14:35 INFO POST /cart 200 user=cy
+2026-09-25 09:15:45 INFO POST /login 200 user=ada
+2026-09-25 09:15:54 INFO GET /books 200 user=dee
+\end{Verbatim}
+\end{codeblock}
+
+Each line has a date, a time, a level (\texttt{INFO}, \texttt{WARN}, or \texttt{ERROR}), a request method and path, a status code, and a user.
+
+\codeneed{13}
+
+\section{Searching Inside Files with grep}\label{05-the-everyday-command-line:searching-inside-files-with-grep}
+
+\texttt{grep} prints the lines that contain a pattern. It's the tool you'll reach for most:
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{grep}\NormalTok{ ERROR logs/app.log}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{5}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+2026-09-25 09:17:50 ERROR POST /cart 500 user=ada
+2026-09-25 09:21:27 ERROR POST /cart 500 user=ben
+2026-09-25 09:28:01 ERROR GET /books/42 500 user=ben
+…
+2026-09-25 09:43:30 ERROR POST /cart 500 user=cy
+\end{Verbatim}
+\end{codeblock}
+
+\Needspace{13\baselineskip}
+
+A few options cover most needs:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1695\linewidth-1.6610\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.8305\linewidth-0.3390\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Option} & \thead{Effect} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Option} & \thead{Effect} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{-i} & Ignore upper and lower case \\
+\texttt{-n} & Show line numbers \\
+\texttt{-c} & Count matching lines instead of printing them \\
+\texttt{-v} & Invert: lines that don't match \\
+\texttt{-r} & Search every file under a folder \\
+\texttt{-E} & Use extended patterns (see below) \\
+\end{longtable}
+\end{booktable}
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{grep} \AttributeTok{{-}c}\NormalTok{ ERROR logs/app.log}
+\FunctionTok{grep} \AttributeTok{{-}r}\NormalTok{ milk .}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+8
+./todo.txt:buy milk
+\end{Verbatim}
+\end{codeblock}
+
+\Needspace{11\baselineskip}
+
+The pattern is a \textbf{regular expression}\index{regular expression}: a small language for describing text. Plain words match themselves, and a few characters have special meanings:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2200\linewidth-1.5600\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7800\linewidth-0.4400\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Pattern} & \thead{Matches} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Pattern} & \thead{Matches} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{.} & Any single character \\
+\texttt{*} & Zero or more of the thing before it \\
+\texttt{\^{}} and \texttt{\$} & The start and the end of a line \\
+\texttt{{[}0-9{]}} & One character from a range \\
+\end{longtable}
+\end{booktable}
+
+With \texttt{-E}, a vertical bar means ``or'': \texttt{grep\ -E\ \textquotesingle{}WARN\textbar{}ERROR\textquotesingle{}} finds both kinds of line. And \texttt{grep\ -}\allowbreak{}\texttt{E\ \textquotesingle{}\^{}2026-}\allowbreak{}\texttt{09-}\allowbreak{}\texttt{25\ 09:}\allowbreak{}\texttt{4\textquotesingle{}} finds lines that \emph{start} with times from 09:40 to 09:49. Put patterns in single quotes so the shell leaves them alone.
+
+\codeneed{10}
+
+\section{Changing Text with sed}\label{05-the-everyday-command-line:changing-text-with-sed}
+
+\texttt{sed} (stream editor) edits text as it flows past. Its most common use is find and replace, written \texttt{s/old/new/}:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{sed} \StringTok{\textquotesingle{}s/user=/by /\textquotesingle{}}\NormalTok{ logs/app.log }\KeywordTok{|} \FunctionTok{head} \AttributeTok{{-}2}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+2026-09-25 09:14:35 INFO POST /cart 200 by cy
+2026-09-25 09:15:45 INFO POST /login 200 by ada
+\end{Verbatim}
+\end{codeblock}
+
+This doesn't change the file; it prints a changed copy. Add \texttt{g} at the end (\texttt{s/a/b/g}) to replace every match on a line, not just the first.
+
+To edit a file in place, add \texttt{-i}. Here the GNU and BSD versions differ: on Linux write \texttt{sed\ -}\allowbreak{}\texttt{i\ \textquotesingle{}s/}\allowbreak{}\texttt{milk/}\allowbreak{}\texttt{bread/}\allowbreak{}\texttt{\textquotesingle{}\ todo.}\allowbreak{}\texttt{txt}; on macOS write \texttt{sed\ -}\allowbreak{}\texttt{i\ \textquotesingle{}\textquotesingle{}\ \textquotesingle{}s/}\allowbreak{}\texttt{milk/}\allowbreak{}\texttt{bread/}\allowbreak{}\texttt{\textquotesingle{}\ todo.}\allowbreak{}\texttt{txt}. The macOS version fails with a confusing error if you leave out the \texttt{\textquotesingle{}\textquotesingle{}}.
+
+\begin{callout}{warning}
+
+\texttt{sed\ -i} overwrites the file with no undo. Run the command without \texttt{-i} first, check the output, then add \texttt{-i}.
+
+\end{callout}
+
+\section{Sorting and Counting}\label{05-the-everyday-command-line:sorting-and-counting}
+
+Three more tools turn lists into answers. \texttt{cut} picks columns: \texttt{cut\ -d\textquotesingle{}\ \textquotesingle{}\ -f5} means ``split on spaces and keep field 5''. \texttt{sort} puts lines in order (\texttt{-n} for numbers, \texttt{-r} to reverse). \texttt{uniq\ -c} collapses repeated neighbouring lines into one and counts them, which is why you always \texttt{sort} first.
+
+\codeneed{11}
+
+\section{Building a Pipeline}\label{05-the-everyday-command-line:building-a-pipeline}
+
+Now join them. Which pages are requested most? Build the answer one stage at a time, checking the output as you go. First, keep only the path column:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cut} \AttributeTok{{-}d}\StringTok{\textquotesingle{} \textquotesingle{}} \AttributeTok{{-}f5}\NormalTok{ logs/app.log }\KeywordTok{|} \FunctionTok{head} \AttributeTok{{-}3}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+/cart
+/login
+/books
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{8}
+
+Sort the paths so duplicates sit together, count them, then sort by the count, largest first, and keep the top three:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cut} \AttributeTok{{-}d}\StringTok{\textquotesingle{} \textquotesingle{}} \AttributeTok{{-}f5}\NormalTok{ logs/app.log }\KeywordTok{|} \FunctionTok{sort} \KeywordTok{|} \FunctionTok{uniq} \AttributeTok{{-}c} \KeywordTok{|} \FunctionTok{sort} \AttributeTok{{-}rn} \KeywordTok{|} \FunctionTok{head} \AttributeTok{{-}3}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+     15 /cart
+     13 /login
+     12 /books
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{8}
+
+The same pattern answers ``who hit the most errors?'':
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{grep}\NormalTok{ ERROR logs/app.log }\KeywordTok{|} \FunctionTok{cut} \AttributeTok{{-}d}\StringTok{\textquotesingle{} \textquotesingle{}} \AttributeTok{{-}f7} \KeywordTok{|} \FunctionTok{sort} \KeywordTok{|} \FunctionTok{uniq} \AttributeTok{{-}c} \KeywordTok{|} \FunctionTok{sort} \AttributeTok{{-}rn}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+      4 user=ben
+      2 user=cy
+      2 user=ada
+\end{Verbatim}
+\end{codeblock}
+
+That's the Unix idea from Chapter 1 at work: five small tools, one question answered, no program written.
+
+\begin{callout}{tip}
+
+Build pipelines one stage at a time, adding \texttt{\textbar{}\ head} to peek at each step. When the output looks right, add the next stage.
+
+\end{callout}
+
+\codeneed{16}
+
+\section{JSON with jq}\label{05-the-everyday-command-line:json-with-jq}
+
+Many tools and web APIs speak \textbf{JSON}\index{json@JSON}, a text format of objects in \texttt{\{\}} and lists in \texttt{{[}{]}}, like Python dictionaries and lists. \texttt{grep} sees JSON only as lines; \texttt{jq} understands its structure:
+
+\codeneed{10}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{jq} \AttributeTok{{-}r} \StringTok{\textquotesingle{}.[].name\textquotesingle{}}\NormalTok{ team.json}
+\ExtensionTok{jq} \StringTok{\textquotesingle{}.[] | select(.active) | .email\textquotesingle{}}\NormalTok{ team.json}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{7}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Ada
+Ben
+Cy
+Dee
+"ada@example.com"
+"cy@example.com"
+"dee@example.com"
+\end{Verbatim}
+\end{codeblock}
+
+\texttt{.{[}{]}} means ``each item in the list'' and \texttt{.name} picks a field; \texttt{-r} prints plain text without quotes. \texttt{select(.active)} keeps only items whose \texttt{active} is true. \texttt{jq\ .\ file.json} pretty-prints any JSON file, which alone makes it worth installing.
+
+\section{Environment Variables}\label{05-the-everyday-command-line:environment-variables}
+
+Every program starts with a set of named settings called \textbf{environment variables}\index{environment variables}. The shell has some already: \texttt{HOME} is your home folder, \texttt{USER} your name, and \texttt{PATH} the folder list from Chapter 2. Read one with \texttt{\$}: \texttt{echo\ \$HOME} prints \texttt{/home/ada}.
+
+\codeneed{10}
+
+You can create your own, but by default a variable stays inside the current shell. \texttt{export} marks it to be passed down to every program the shell starts:
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\VariableTok{GREETING}\OperatorTok{=}\NormalTok{hello}
+\FunctionTok{bash} \AttributeTok{{-}c} \StringTok{\textquotesingle{}echo "child sees: $GREETING"\textquotesingle{}}
+\BuiltInTok{export} \VariableTok{GREETING}
+\FunctionTok{bash} \AttributeTok{{-}c} \StringTok{\textquotesingle{}echo "child sees: $GREETING"\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+child sees: 
+child sees: hello
+\end{Verbatim}
+\end{codeblock}
+
+Python reads them through \texttt{os.environ}. This is how programs get settings without hard-coding them: a database address, a debug switch, an API key.
+
+Settings typed at the prompt vanish when you close the terminal. To keep them, put the \texttt{export} lines in your shell's startup file: \texttt{\textasciitilde{}/.bashrc} for bash, \texttt{\textasciitilde{}/.zshrc} for zsh. The shell runs it every time it starts.
+
+\section{Lab: Interrogate a Log}\label{05-the-everyday-command-line:lab-interrogate-a-log}
+
+Copy the two sample files into \texttt{\textasciitilde{}/sandbox} as shown at the start of this chapter, then \texttt{cd\ \textasciitilde{}/sandbox}.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Count the lines: \texttt{wc\ -l\ logs/}\allowbreak{}\texttt{app.log}. \textbf{Expected:} \texttt{60\ logs/app.log}.
+\item
+  Count the warnings: \texttt{grep\ -}\allowbreak{}\texttt{c\ WARN\ logs/}\allowbreak{}\texttt{app.}\allowbreak{}\texttt{log}. \textbf{Expected:} \texttt{6}.
+\item
+  Show only problems: \texttt{grep\ -}\allowbreak{}\texttt{v\ INFO\ logs/}\allowbreak{}\texttt{app.}\allowbreak{}\texttt{log\ \textbar{}\ wc\ -}\allowbreak{}\texttt{l}. \textbf{Expected:} \texttt{14} (six warnings and eight errors).
+\item
+  Find where Cy's requests start failing: \texttt{grep\ -}\allowbreak{}\texttt{n\ \textquotesingle{}ERROR.}\allowbreak{}\texttt{*user=}\allowbreak{}\texttt{cy\textquotesingle{}\ logs/}\allowbreak{}\texttt{app.}\allowbreak{}\texttt{log}. \textbf{Expected:} two lines, numbered \texttt{40} and \texttt{44}.
+\item
+  Which path causes the errors? \texttt{grep\ ERROR\ logs/}\allowbreak{}\texttt{app.}\allowbreak{}\texttt{log\ \textbar{}\ cut\ -}\allowbreak{}\texttt{d\textquotesingle{}\ \textquotesingle{}\ -}\allowbreak{}\texttt{f5\ \textbar{}\ sort\ \textbar{}\ uniq\ -}\allowbreak{}\texttt{c}. \textbf{Expected:} \texttt{1\ /books/42} and \texttt{7\ /cart}.
+\item
+  Find every JSON file under your sandbox: \texttt{find\ \textasciitilde{}/}\allowbreak{}\texttt{sandbox\ -}\allowbreak{}\texttt{name\ \textquotesingle{}*.}\allowbreak{}\texttt{json\textquotesingle{}}. \textbf{Expected:} the path to \texttt{team.json}.
+\item
+  Count the active team members: \texttt{jq\ \textquotesingle{}{[}.}\allowbreak{}\texttt{{[}{]}\ \textbar{}\ select(.}\allowbreak{}\texttt{active){]}\ \textbar{}\ length\textquotesingle{}\ team.}\allowbreak{}\texttt{json}. \textbf{Expected:} \texttt{3}.
+\item
+  Export a variable and read it from Python: \texttt{export\ COLOUR=}\allowbreak{}\texttt{blue}, then \texttt{python3\ -}\allowbreak{}\texttt{c\ \textquotesingle{}import\ os;\ print(os.}\allowbreak{}\texttt{environ{[}"COLOUR"{]})\textquotesingle{}}. \textbf{Expected:} \texttt{blue}.
+\end{enumerate}
+
+\section{Summary, Key Terms, and Review Questions}\label{05-the-everyday-command-line:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{05-the-everyday-command-line:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{find} locates files by name, type, age, or size; \texttt{du\ -sh} shows how big they are.
+\item
+  \texttt{head}, \texttt{tail}, \texttt{less}, and \texttt{wc} let you look at files without opening an editor. \texttt{tail\ -f} follows a growing log.
+\item
+  \texttt{grep} finds lines matching a regular expression; \texttt{sed} rewrites text as it flows; \texttt{cut}, \texttt{sort}, and \texttt{uniq\ -c} turn lines into counts.
+\item
+  Pipelines join these tools. Build them one stage at a time.
+\item
+  \texttt{jq} reads and filters JSON.
+\item
+  Environment variables pass settings to programs. \texttt{export} passes them to children; startup files make them permanent.
+\end{itemize}
+
+\Needspace{11\baselineskip}
+
+\subsection*{Key Terms}\label{05-the-everyday-command-line:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2727\linewidth-1.4545\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7273\linewidth-0.5455\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Regular expression & A pattern language for matching text \\
+JSON & A text format of objects and lists, used by many tools and APIs \\
+Environment variable & A named setting a program inherits when it starts \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{05-the-everyday-command-line:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Write a \texttt{find} command that lists all Python files under your home folder.
+\item
+  What's the difference between \texttt{grep\ -c\ ERROR} and \texttt{grep\ ERROR\ \textbar{}\ wc\ -l}?
+\item
+  Why must you \texttt{sort} before \texttt{uniq\ -c}?
+\item
+  Why can't your Python program see a variable you set at the prompt, and what fixes it?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can answer ``who caused the most errors?'' with a pipeline.
+
+\end{understandbox}

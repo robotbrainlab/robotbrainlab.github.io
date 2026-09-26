@@ -1,0 +1,490 @@
+\bookchapter{Lab: Automate a Daily Chore}{ch:09-lab-automate-a-daily-chore}
+
+\begin{chapterintro}
+
+In this lab you turn five commands you'd type every morning into a shell script you can trust to run on its own. Along the way you meet everything a beginner needs for scripting: the shebang, a safety line that stops a script at the first error, variables and quoting, conditions, loops, arguments, exit codes, a checker that finds bugs for you, and a schedule.
+
+\end{chapterintro}
+
+\emph{The problem.} I type the same five commands every morning.
+
+\emph{The question.} How do I turn commands I type into a script I can trust to run by itself?
+
+The finished script is in \texttt{labs/}\allowbreak{}\texttt{ch09/}\allowbreak{}\texttt{morning.sh}. Type it yourself as you go, and use the copy only to check your work.
+
+\section{Step 1: Do the Chore by Hand}\label{09-lab-automate-a-daily-chore:step-1-do-the-chore-by-hand}
+
+Ada keeps plain-text notes in a \texttt{notes} folder, one file per day. Every morning she creates today's note, backs up the folder to a \texttt{backups} folder, deletes backups older than a week, and checks how much she has written. Set up the same folders inside your sandbox, so nothing touches your real files:
+
+\codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ \textasciitilde{}/sandbox/notes \textasciitilde{}/sandbox/backups}
+\BuiltInTok{printf} \StringTok{\textquotesingle{}\# Ideas\textbackslash{}nLearn Git branches.\textbackslash{}nTry tmux.\textbackslash{}n\textquotesingle{}} \OperatorTok{\textgreater{}}\NormalTok{ \textasciitilde{}/sandbox/notes/ideas.md}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{12}
+
+Now the five commands. \texttt{\$(date\ +\%F)} is replaced by today's date, such as \texttt{2026-09-26}; this is called command substitution:
+
+\codeneed{9}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/sandbox/notes}
+\BuiltInTok{echo} \StringTok{"\# Notes for }\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%F}\VariableTok{)}\StringTok{"} \OperatorTok{\textgreater{}} \StringTok{"}\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%F}\VariableTok{)}\StringTok{.md"}
+\FunctionTok{tar} \AttributeTok{{-}czf}\NormalTok{ \textasciitilde{}/sandbox/backups/notes{-}}\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%F}\VariableTok{)}\NormalTok{.tar.gz .}
+\FunctionTok{find}\NormalTok{ \textasciitilde{}/sandbox/backups }\AttributeTok{{-}name} \StringTok{\textquotesingle{}notes{-}*.tar.gz\textquotesingle{}} \AttributeTok{{-}mtime}\NormalTok{ +7 }\AttributeTok{{-}delete}
+\FunctionTok{wc} \AttributeTok{{-}w} \PreprocessorTok{*}\NormalTok{.md}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+ 4 2026-09-26.md
+ 7 ideas.md
+11 total
+\end{Verbatim}
+\end{codeblock}
+
+\texttt{tar\ -czf} packs the folder into one compressed file, and \texttt{find\ .}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{\ -}\allowbreak{}\texttt{mtime\ +7\ -}\allowbreak{}\texttt{delete} removes backups more than seven days old.
+
+\textbf{Expected:} a new note named after today's date, and a backup in \texttt{\textasciitilde{}/sandbox/backups}. Check with \texttt{ls\ \textasciitilde{}/}\allowbreak{}\texttt{sandbox/}\allowbreak{}\texttt{backups}.
+
+\codeneed{12}
+
+\section{Step 2: Put the Commands in a File}\label{09-lab-automate-a-daily-chore:step-2-put-the-commands-in-a-file}
+
+A \textbf{script}\index{script} is just commands saved in a file. Create \texttt{\textasciitilde{}/}\allowbreak{}\texttt{sandbox/}\allowbreak{}\texttt{morning.sh} in your editor with the same five lines, plus one line at the top:
+
+\codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#!/usr/bin/env bash}
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/sandbox/notes}
+\BuiltInTok{echo} \StringTok{"\# Notes for }\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%F}\VariableTok{)}\StringTok{"} \OperatorTok{\textgreater{}} \StringTok{"}\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%F}\VariableTok{)}\StringTok{.md"}
+\FunctionTok{tar} \AttributeTok{{-}czf}\NormalTok{ \textasciitilde{}/sandbox/backups/notes{-}}\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%F}\VariableTok{)}\NormalTok{.tar.gz .}
+\FunctionTok{find}\NormalTok{ \textasciitilde{}/sandbox/backups }\AttributeTok{{-}name} \StringTok{\textquotesingle{}notes{-}*.tar.gz\textquotesingle{}} \AttributeTok{{-}mtime}\NormalTok{ +7 }\AttributeTok{{-}delete}
+\FunctionTok{wc} \AttributeTok{{-}w} \PreprocessorTok{*}\NormalTok{.md}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+The first line is the \textbf{shebang}\index{shebang}. \texttt{\#!} tells the kernel which program should run this file; \texttt{/usr/bin/env\ bash} means ``whichever bash is first on my PATH''. Now make it executable and run it, as in Chapter 3:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/sandbox}
+\FunctionTok{chmod}\NormalTok{ +x morning.sh}
+\ExtensionTok{./morning.sh}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\textbf{Expected:} the same word counts as Step 1. The \texttt{./} matters: your sandbox isn't on your PATH, so you must say where the script is.
+
+\codeneed{15}
+
+\section{Step 3: Watch It Fail Badly}\label{09-lab-automate-a-daily-chore:step-3-watch-it-fail-badly}
+
+Scripts run without you watching, so ask: what if something goes wrong? Rename the notes folder, then run the script from an empty folder so the damage stays small:
+
+\codeneed{9}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mv}\NormalTok{ \textasciitilde{}/sandbox/notes \textasciitilde{}/sandbox/notes{-}old}
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ \textasciitilde{}/sandbox/empty}
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/sandbox/empty}
+\ExtensionTok{\textasciitilde{}/sandbox/morning.sh}
+\BuiltInTok{echo} \VariableTok{$?}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+/home/ada/sandbox/morning.sh: line 2: cd: /home/ada/sandbox/notes: No such file or directory
+4 2026-09-26.md
+0
+\end{Verbatim}
+\end{codeblock}
+
+The \texttt{cd} failed, and the script carried on regardless. It created a stray note in the empty folder, backed up that folder instead of your notes, and then reported success. Run from your home folder, it would have backed up your entire home folder. \texttt{\$?} holds the \textbf{exit code}\index{exit code} of the last command: \texttt{0} means success, anything else means failure. Every command sets one, and so does every script.
+
+Clean up the damage: \texttt{rm\ \textasciitilde{}/}\allowbreak{}\texttt{sandbox/}\allowbreak{}\texttt{empty/}\allowbreak{}\texttt{*.}\allowbreak{}\texttt{md\ \textasciitilde{}/}\allowbreak{}\texttt{sandbox/}\allowbreak{}\texttt{backups/}\allowbreak{}\texttt{notes-}\allowbreak{}\texttt{\$(date\ +\%F).}\allowbreak{}\texttt{tar.}\allowbreak{}\texttt{gz}. Leave the notes folder renamed for Step 4.
+
+\codeneed{7}
+
+\section{Step 4: Add the Safety Line}\label{09-lab-automate-a-daily-chore:step-4-add-the-safety-line}
+
+Add this as the second line of the script, right after the shebang:
+
+\codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{set} \AttributeTok{{-}euo}\NormalTok{ pipefail}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+This is often called \textbf{strict mode}\index{strict mode}. \texttt{-e} stops the script at the first failing command. \texttt{-u} treats a misspelled or unset variable as an error instead of silently using an empty string. \texttt{-o\ pipefail} makes a pipeline fail if any stage fails, not just the last one. Repeat Step 3's experiment:
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+/home/ada/sandbox/morning.sh: line 3: cd: /home/ada/sandbox/notes: No such file or directory
+1
+\end{Verbatim}
+\end{codeblock}
+
+\textbf{Expected:} the script stops at \texttt{cd}, touches nothing, and returns \texttt{1}. Put the notes folder back before continuing: \texttt{cd\ \textasciitilde{}/sandbox}, then \texttt{mv\ notes-old\ notes}.
+
+\begin{callout}{tip}
+
+Start every bash script with \texttt{set\ -euo\ pipefail}. It turns silent disasters into loud, early stops.
+
+\end{callout}
+
+\codeneed{9}
+
+\section{Step 5: Use Variables, and Quote Them}\label{09-lab-automate-a-daily-chore:step-5-use-variables-and-quote-them}
+
+Repeating \texttt{\textasciitilde{}/sandbox/notes} and \texttt{\$(date\ +\%F)} is fragile. Store them in a \textbf{variable}\index{variable} instead: a name that holds a value. Write it with no spaces around \texttt{=}, and read it back with \texttt{\$}:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\VariableTok{notes\_dir}\OperatorTok{=}\StringTok{"}\VariableTok{$HOME}\StringTok{/sandbox/notes"}
+\VariableTok{today}\OperatorTok{=}\StringTok{"}\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%F}\VariableTok{)}\StringTok{"}
+\VariableTok{note}\OperatorTok{=}\StringTok{"}\VariableTok{$notes\_dir}\StringTok{/}\VariableTok{$today}\StringTok{.md"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{9}
+
+Now quoting. Always put double quotes around a variable when you use it. Here's why. Suppose the folder were called \texttt{my\ notes}:
+
+\codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\VariableTok{notes\_dir}\OperatorTok{=}\StringTok{"}\VariableTok{$HOME}\StringTok{/sandbox/my notes"}
+\FunctionTok{ls} \VariableTok{$notes\_dir}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+ls: cannot access '/home/ada/sandbox/my': No such file or directory
+notes:
+2026-09-26.md  ideas.md
+\end{Verbatim}
+\end{codeblock}
+
+Without quotes, the shell split the value at the space into two arguments, \texttt{/}\allowbreak{}\texttt{home/}\allowbreak{}\texttt{ada/}\allowbreak{}\texttt{sandbox/}\allowbreak{}\texttt{my} and \texttt{notes}. The first didn't exist. The second happened to match a different folder (you ran this from \texttt{\textasciitilde{}/sandbox}), which \texttt{ls} listed as if nothing were wrong. With \texttt{rm} instead of \texttt{ls}, that's how scripts delete the wrong files. Written as \texttt{ls\ "\$notes\_dir"}, the value stays one argument.
+
+Double quotes still expand variables; single quotes don't. \texttt{echo\ "\$HOME"} prints your home folder; \texttt{echo\ \textquotesingle{}\$HOME\textquotesingle{}} prints \texttt{\$HOME}. And \texttt{-u} catches typos. Here a tiny script, run with \texttt{bash\ -c}, misspells \texttt{notes\_dir}:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{bash} \AttributeTok{{-}c} \StringTok{\textquotesingle{}set {-}u; notes\_dir=\textasciitilde{}/sandbox/notes; ls "$note\_dir"\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+bash: line 1: note_dir: unbound variable
+\end{Verbatim}
+\end{codeblock}
+
+\section{Step 6: Make Decisions with if}\label{09-lab-automate-a-daily-chore:step-6-make-decisions-with-if}
+
+Running the script twice would overwrite today's note. A script that's safe to run again and again, leaving the same result, is \textbf{idempotent}\index{idempotent}, and scheduled scripts should always be. An \texttt{if} statement makes it so:
+
+\codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{if} \KeywordTok{[[} \OtherTok{{-}f} \StringTok{"}\VariableTok{$note}\StringTok{"} \KeywordTok{]];} \ControlFlowTok{then}
+  \BuiltInTok{echo} \StringTok{"Today\textquotesingle{}s note already exists"}
+\ControlFlowTok{else}
+  \BuiltInTok{echo} \StringTok{"\# Notes for }\VariableTok{$today}\StringTok{"} \OperatorTok{\textgreater{}} \StringTok{"}\VariableTok{$note}\StringTok{"}
+  \BuiltInTok{echo} \StringTok{"Created }\VariableTok{$note}\StringTok{"}
+\ControlFlowTok{fi}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\Needspace{12\baselineskip}
+
+\texttt{{[}{[}\ ...\ {]}{]}} is a test. Common ones:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3478\linewidth-1.3043\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6522\linewidth-0.6957\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Test} & \thead{True when} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Test} & \thead{True when} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{-f\ "\$x"} & \texttt{\$x} is an existing file \\
+\texttt{-d\ "\$x"} & \texttt{\$x} is an existing folder \\
+\texttt{-z\ "\$x"} & \texttt{\$x} is empty \\
+\texttt{"\$a"\ ==\ "\$b"} & The two strings are equal \\
+\texttt{!\ ...} & The test after it is false \\
+\end{longtable}
+\end{booktable}
+
+Spaces inside the brackets are required: \texttt{{[}{[}-f\ "\$note"{]}{]}} is an error.
+
+\codeneed{9}
+
+\section{Step 7: Repeat with a Loop}\label{09-lab-automate-a-daily-chore:step-7-repeat-with-a-loop}
+
+Replace \texttt{wc\ -w\ *.md} with a \texttt{for} loop that reports each note on its own line. The loop runs its body once per matching file, with \texttt{file} holding each name in turn:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{for}\NormalTok{ file }\KeywordTok{in} \StringTok{"}\VariableTok{$notes\_dir}\StringTok{"}\NormalTok{/}\PreprocessorTok{*}\NormalTok{.md}\KeywordTok{;} \ControlFlowTok{do}
+  \BuiltInTok{echo} \StringTok{"}\VariableTok{$(}\FunctionTok{wc} \AttributeTok{{-}w} \OperatorTok{\textless{}} \StringTok{"}\VariableTok{$file}\StringTok{"}\VariableTok{)}\StringTok{ words in }\VariableTok{$(}\FunctionTok{basename} \StringTok{"}\VariableTok{$file}\StringTok{"}\VariableTok{)}\StringTok{"}
+\ControlFlowTok{done}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\texttt{basename} strips the folder from a path, leaving just the file name.
+
+\section{Step 8: Accept an Argument and Fail Clearly}\label{09-lab-automate-a-daily-chore:step-8-accept-an-argument-and-fail-clearly}
+
+A script can take \textbf{arguments}\index{argument} just like a command. Inside, the first is \texttt{\$1}, the second \texttt{\$2}. \texttt{\$\{1:}\allowbreak{}\texttt{-}\allowbreak{}\texttt{\$HOME/}\allowbreak{}\texttt{sandbox/}\allowbreak{}\texttt{notes\}} means ``the first argument, or \texttt{\textasciitilde{}/sandbox/notes} if none was given''. If the folder is missing, the script should say so on stderr (\texttt{\textgreater{}\&2}) and exit with a non-zero code, so whatever runs it knows it failed. Here is the finished script:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#!/usr/bin/env bash}
+\CommentTok{\# morning.sh: start the day. Make today\textquotesingle{}s note, back up all notes,}
+\CommentTok{\# and delete backups older than a week.}
+\BuiltInTok{set} \AttributeTok{{-}euo}\NormalTok{ pipefail}
+
+\VariableTok{notes\_dir}\OperatorTok{=}\StringTok{"}\VariableTok{$\{1}\OperatorTok{:{-}}\VariableTok{$HOME}\NormalTok{/sandbox/notes}\VariableTok{\}}\StringTok{"}
+\VariableTok{backup\_dir}\OperatorTok{=}\StringTok{"}\VariableTok{$HOME}\StringTok{/sandbox/backups"}
+\VariableTok{today}\OperatorTok{=}\StringTok{"}\VariableTok{$(}\FunctionTok{date}\NormalTok{ +\%F}\VariableTok{)}\StringTok{"}
+\VariableTok{note}\OperatorTok{=}\StringTok{"}\VariableTok{$notes\_dir}\StringTok{/}\VariableTok{$today}\StringTok{.md"}
+
+\ControlFlowTok{if} \KeywordTok{[[} \OtherTok{!} \OtherTok{{-}d} \StringTok{"}\VariableTok{$notes\_dir}\StringTok{"} \KeywordTok{]];} \ControlFlowTok{then}
+  \BuiltInTok{echo} \StringTok{"morning: no notes folder at }\VariableTok{$notes\_dir}\StringTok{"} \OperatorTok{\textgreater{}\&}\DecValTok{2}
+  \BuiltInTok{exit}\NormalTok{ 1}
+\ControlFlowTok{fi}
+
+\ControlFlowTok{if} \KeywordTok{[[} \OtherTok{{-}f} \StringTok{"}\VariableTok{$note}\StringTok{"} \KeywordTok{]];} \ControlFlowTok{then}
+  \BuiltInTok{echo} \StringTok{"Today\textquotesingle{}s note already exists"}
+\ControlFlowTok{else}
+  \BuiltInTok{echo} \StringTok{"\# Notes for }\VariableTok{$today}\StringTok{"} \OperatorTok{\textgreater{}} \StringTok{"}\VariableTok{$note}\StringTok{"}
+  \BuiltInTok{echo} \StringTok{"Created }\VariableTok{$note}\StringTok{"}
+\ControlFlowTok{fi}
+
+\FunctionTok{mkdir} \AttributeTok{{-}p} \StringTok{"}\VariableTok{$backup\_dir}\StringTok{"}
+\VariableTok{archive}\OperatorTok{=}\StringTok{"}\VariableTok{$backup\_dir}\StringTok{/notes{-}}\VariableTok{$today}\StringTok{.tar.gz"}
+\FunctionTok{tar} \AttributeTok{{-}czf} \StringTok{"}\VariableTok{$archive}\StringTok{"} \AttributeTok{{-}C} \StringTok{"}\VariableTok{$notes\_dir}\StringTok{"}\NormalTok{ .}
+\BuiltInTok{echo} \StringTok{"Backed up to }\VariableTok{$archive}\StringTok{"}
+
+\FunctionTok{find} \StringTok{"}\VariableTok{$backup\_dir}\StringTok{"} \AttributeTok{{-}name} \StringTok{\textquotesingle{}notes{-}*.tar.gz\textquotesingle{}} \AttributeTok{{-}mtime}\NormalTok{ +7 }\AttributeTok{{-}print} \AttributeTok{{-}delete}
+
+\ControlFlowTok{for}\NormalTok{ file }\KeywordTok{in} \StringTok{"}\VariableTok{$notes\_dir}\StringTok{"}\NormalTok{/}\PreprocessorTok{*}\NormalTok{.md}\KeywordTok{;} \ControlFlowTok{do}
+  \BuiltInTok{echo} \StringTok{"}\VariableTok{$(}\FunctionTok{wc} \AttributeTok{{-}w} \OperatorTok{\textless{}} \StringTok{"}\VariableTok{$file}\StringTok{"}\VariableTok{)}\StringTok{ words in }\VariableTok{$(}\FunctionTok{basename} \StringTok{"}\VariableTok{$file}\StringTok{"}\VariableTok{)}\StringTok{"}
+\ControlFlowTok{done}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{11}
+
+\texttt{tar\ -C\ "\$notes\_dir"} means ``change into that folder first'', so the script no longer needs \texttt{cd} at all. \texttt{-print} makes \texttt{find} name each backup it deletes. Run it twice:
+
+\codeneed{8}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Created /home/ada/sandbox/notes/2026-09-26.md
+Backed up to /home/ada/sandbox/backups/notes-2026-09-26.tar.gz
+4 words in 2026-09-26.md
+7 words in ideas.md
+Today's note already exists
+Backed up to /home/ada/sandbox/backups/notes-2026-09-26.tar.gz
+4 words in 2026-09-26.md
+7 words in ideas.md
+\end{Verbatim}
+\end{codeblock}
+
+The first run created the note; the second changed nothing it shouldn't. Once you have backups more than a week old, their paths appear after the ``Backed up'' line as they're deleted. (On macOS, \texttt{wc} pads the numbers with spaces.) Now give it a folder that doesn't exist:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./morning.sh}\NormalTok{ /nope}
+\BuiltInTok{echo} \VariableTok{$?}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+morning: no notes folder at /nope
+1
+\end{Verbatim}
+\end{codeblock}
+
+Exit codes let you chain commands: \texttt{a\ \&\&\ b} runs \texttt{b} only if \texttt{a} succeeded, and \texttt{a\ \textbar{}\textbar{}\ b} runs \texttt{b} only if \texttt{a} failed. So \texttt{.}\allowbreak{}\texttt{/}\allowbreak{}\texttt{morning.}\allowbreak{}\texttt{sh\ \textbar{}\textbar{}\ echo\ "morning\ failed"} prints a warning when something goes wrong.
+
+\codeneed{15}
+
+\section{Step 9: Let shellcheck Review It}\label{09-lab-automate-a-daily-chore:step-9-let-shellcheck-review-it}
+
+\texttt{shellcheck} reads a script and points out common bugs, especially missing quotes. Run it on the first version from Step 2:
+
+\codeneed{9}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{shellcheck}\NormalTok{ morning.sh}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{7}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+In morning.sh line 2:
+cd ~/sandbox/notes
+^----------------^ SC2164 (warning): Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
+…
+In morning.sh line 4:
+tar -czf ~/sandbox/backups/notes-$(date +%F).tar.gz .
+                                 ^---------^ SC2046 (warning): Quote this to prevent word splitting.
+\end{Verbatim}
+\end{codeblock}
+
+It found exactly the two problems you fixed by hand: the unchecked \texttt{cd} and the unquoted substitution. On the finished script it prints nothing, which, as always, means success. Run shellcheck on every script you write. To see each command as it runs, use \texttt{bash\ -x\ morning.sh}.
+
+\codeneed{7}
+
+\section{Step 10: Schedule It}\label{09-lab-automate-a-daily-chore:step-10-schedule-it}
+
+Finally, let the computer remember. Open your crontab with \texttt{crontab\ -e} and add one line (Chapter 6 explains the five time fields):
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+0 7 * * 1-5 /home/ada/sandbox/morning.sh >> /home/ada/sandbox/morning.log 2>&1
+\end{Verbatim}
+\end{codeblock}
+
+At 07:00 every weekday, cron runs the script and appends everything it prints, including errors, to \texttt{morning.log}. Use full paths: cron doesn't read your shell's startup files. Check the log the next morning.
+
+\begin{callout}{note}
+
+On macOS, cron works but may need permission to reach your files (System Settings, Privacy \& Security, Full Disk Access). macOS's own scheduler is launchd. On WSL, cron runs only while WSL itself is running. Remove the line with \texttt{crontab\ -e} when you're done with this lab.
+
+\end{callout}
+
+\section{Summary, Key Terms, and Review Questions}\label{09-lab-automate-a-daily-chore:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{09-lab-automate-a-daily-chore:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  A script is commands in a file. The shebang picks the interpreter; \texttt{chmod\ +x} makes it runnable.
+\item
+  \texttt{set\ -euo\ pipefail} stops a script at the first error, unset variable, or failed pipeline stage.
+\item
+  Store values in variables, and always double-quote them when you use them.
+\item
+  \texttt{if\ {[}{[}\ ...\ {]}{]}} makes decisions; \texttt{for} repeats work; \texttt{\$1} reads arguments.
+\item
+  Every command returns an exit code: \texttt{0} for success. \texttt{exit\ 1} and \texttt{\textgreater{}\&2} report failure properly.
+\item
+  Scheduled scripts should be idempotent. shellcheck catches bugs before they bite, and cron runs the script on time.
+\end{itemize}
+
+\Needspace{14\baselineskip}
+
+\subsection*{Key Terms}\label{09-lab-automate-a-daily-chore:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1899\linewidth-1.6203\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.8101\linewidth-0.3797\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Script & A file of commands the shell runs in order \\
+Shebang & The \texttt{\#!} first line naming the program that runs a script \\
+Exit code & A number every command returns: \texttt{0} success, non-zero failure \\
+Strict mode & \texttt{set\ -euo\ pipefail}: stop on errors, unset variables, and
+failed pipes \\
+Variable & A name that holds a value, read with \texttt{\$name} \\
+Idempotent & Safe to run many times with the same result \\
+Argument & A value passed to a script, read as \texttt{\$1}, \texttt{\$2}, \ldots{} \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{09-lab-automate-a-daily-chore:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  What does the shebang line do, and why \texttt{/usr/bin/env\ bash} rather than a fixed path?
+\item
+  In Step 3, the script ``succeeded'' while doing damage. Which part of strict mode prevents that?
+\item
+  Why does \texttt{ls\ \$dir} misbehave when \texttt{dir} contains a space, and what's the fix?
+\item
+  What makes a script idempotent, and why does that matter for scheduled jobs?
+\item
+  What does \texttt{.}\allowbreak{}\texttt{/}\allowbreak{}\texttt{morning.}\allowbreak{}\texttt{sh\ \textbar{}\textbar{}\ echo\ "failed"} print when the script succeeds? When it fails?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can take any sequence of commands you type often and turn it into a strict, quoted, idempotent script that shellcheck approves of.
+
+\end{understandbox}

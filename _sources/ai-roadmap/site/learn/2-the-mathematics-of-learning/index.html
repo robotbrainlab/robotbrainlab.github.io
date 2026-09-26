@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>The Mathematics of Learning · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><span>Part 1 — Fundamentals</span></li>
+      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part">Part 1 — Fundamentals</span><span aria-hidden="true"> · </span><span>Step 2 of 19</span></p>
+<h1 id="2-the-mathematics-of-learning" class="guide-title">2. The Mathematics of Learning</h1>
+<div class="guide-body">
+<p>A learning method is a procedure for adjusting numbers until a model&#x27;s answers improve, and that procedure is written in mathematics. <strong>Linear algebra</strong> is the notation for the data and the model itself — examples, features and parameters held as vectors and matrices, so that an operation on millions of numbers can be written in one line. <strong>Calculus</strong> answers the question the adjustment depends on: if I nudge this parameter, does the answer get better or worse, and by how much? <strong>Probability</strong> is the language for everything uncertain — what the data might have been, and how confident a model&#x27;s output is.</p>
+<p>You are not becoming a mathematician. You are learning to read these definitions when they appear — a loss, a gradient, a likelihood — and to reason about why training succeeds or fails, so that later steps are mechanisms you understand rather than recipes you copy. This step has no formal prerequisite and can overlap with step 1; you need enough Python to implement two small mechanisms yourself.</p>
+<section class="guide-block guide-block--where-you-are" aria-label="Where you are">
+<p class="guide-label"><strong>Where you are</strong></p>
+<p>You can obtain and inspect data. What you cannot yet do is read what a method <em>is</em>: a loss function, a gradient, a likelihood. Without that, later steps become recipes to copy rather than mechanisms to reason about — and when training misbehaves, you would have no way to tell why.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#linear-algebra">Linear algebra</a>
+<ol class="unit-toc-sublist">
+<li><a href="#vectors-matrices-and-their-operations">Vectors, matrices and their operations</a></li>
+<li><a href="#length-angle-and-similarity">Length, angle and similarity</a></li>
+</ol>
+</li>
+<li><a href="#calculus-and-gradients">Calculus and gradients</a>
+<ol class="unit-toc-sublist">
+<li><a href="#derivatives-and-the-chain-rule">Derivatives and the chain rule</a></li>
+<li><a href="#partial-derivatives-and-gradients">Partial derivatives and gradients</a></li>
+</ol>
+</li>
+<li><a href="#automatic-differentiation">Automatic differentiation</a>
+<ol class="unit-toc-sublist">
+<li><a href="#computational-graphs">Computational graphs</a></li>
+<li><a href="#reverse-mode-differentiation">Reverse-mode differentiation</a></li>
+</ol>
+</li>
+<li><a href="#probability">Probability</a>
+<ol class="unit-toc-sublist">
+<li><a href="#probability-conditioning-and-bayes">Probability, conditioning and Bayes</a></li>
+<li><a href="#random-variables-expectation-and-variance">Random variables, expectation and variance</a></li>
+<li><a href="#common-distributions">Common distributions</a></li>
+<li><a href="#joint-and-marginal-distributions">Joint and marginal distributions</a></li>
+<li><a href="#likelihood-and-parameter-estimation">Likelihood and parameter estimation</a></li>
+</ol>
+</li>
+<li><a href="#optimization-behaviour">Optimization behaviour</a>
+<ol class="unit-toc-sublist">
+<li><a href="#what-optimization-means-in-deep-learning">What optimization means in deep learning</a></li>
+<li><a href="#convexity-and-why-deep-learning-is-not-convex">Convexity, and why deep learning is not convex</a></li>
+<li><a href="#gradient-descent-and-its-stochastic-form">Gradient descent and its stochastic form</a></li>
+<li><a href="#learning-rates-divergence-and-conditioning">Learning rates, divergence and conditioning</a></li>
+</ol>
+</li>
+<li><a href="#information">Information</a>
+<ol class="unit-toc-sublist">
+<li><a href="#entropy-and-surprise">Entropy and surprise</a></li>
+<li><a href="#cross-entropy-as-a-loss">Cross-entropy as a loss</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-you-ll-learn" aria-label="What you&#x27;ll learn">
+<p class="guide-label"><strong>What you&#x27;ll learn</strong></p>
+<p>By the end you should be able to read the definitions learning methods are written in, explain why training behaves as it does, and implement gradient descent and reverse-mode differentiation on a small computation graph. This is not a proof course: the target is fluency with the language, not theorem-proving.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>There is one chain running through this step, and it is worth holding on to: a model defines a probability of the data (likelihood); maximizing that likelihood is the same as minimizing a cross-entropy loss; the loss is minimized by following its gradient; and the gradient of a deep composition of functions is computed by the chain rule, applied backwards — which is exactly what reverse-mode differentiation automates. Optimization behaviour is what happens when that chain meets a real loss surface: too large a step diverges, and badly scaled inputs make progress crawl. Probability also has a second life here. It is the language of uncertainty, and step 4 turns it towards a different question: not <em>what does the model believe</em>, but <em>what can I conclude from a finite sample</em>.</p>
+</section>
+<section class="unit-area" aria-labelledby="linear-algebra">
+<h2 id="linear-algebra">Linear algebra<a class="heading-anchor" href="#linear-algebra" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The language for representing data and parameters. Everything a model holds — a batch of examples, a weight matrix, an embedding — is an array, and the operations on those arrays are what a forward pass is made of.</p>
+</section>
+<section class="unit-concept" aria-labelledby="vectors-matrices-and-their-operations">
+<h3 id="vectors-matrices-and-their-operations">Vectors, matrices and their operations<a class="heading-anchor" href="#vectors-matrices-and-their-operations" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Scalars, vectors, matrices and higher-order tensors, and the operations that combine them: products, sums along an axis, and reshaping. These are the moves every model definition is written in. <strong>Studied in:</strong> <em>Dive into Deep Learning</em> §2.3.</p>
+</section>
+<section class="unit-concept" aria-labelledby="length-angle-and-similarity">
+<h3 id="length-angle-and-similarity">Length, angle and similarity<a class="heading-anchor" href="#length-angle-and-similarity" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The geometric reading of the same objects: norms as length, inner products as angle, projection. This is what makes &quot;similar vectors&quot; a meaningful phrase, and it returns as the basis of embedding search in steps 7 and 9. <strong>Studied in:</strong> <em>Dive into Deep Learning</em> §22.1.</p>
+</section>
+<section class="unit-area" aria-labelledby="calculus-and-gradients">
+<h2 id="calculus-and-gradients">Calculus and gradients<a class="heading-anchor" href="#calculus-and-gradients" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Training changes parameters in the direction that reduces a loss. Calculus is how that direction is defined, and the chain rule is what makes it computable through many layers.</p>
+</section>
+<section class="unit-concept" aria-labelledby="derivatives-and-the-chain-rule">
+<h3 id="derivatives-and-the-chain-rule">Derivatives and the chain rule<a class="heading-anchor" href="#derivatives-and-the-chain-rule" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The derivative as a rate of change, and the chain rule for composed functions — the single mathematical fact that makes deep networks trainable. <strong>Studied in:</strong> <em>Dive into Deep Learning</em> §2.4.</p>
+</section>
+<section class="unit-concept" aria-labelledby="partial-derivatives-and-gradients">
+<h3 id="partial-derivatives-and-gradients">Partial derivatives and gradients<a class="heading-anchor" href="#partial-derivatives-and-gradients" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Functions of many variables, partial derivatives, and the gradient as the vector of them: what it points at, and what a gradient of zero does and does not tell you. <strong>Studied in:</strong> <em>Dive into Deep Learning</em> §22.4.</p>
+</section>
+<section class="unit-area" aria-labelledby="automatic-differentiation">
+<h2 id="automatic-differentiation">Automatic differentiation<a class="heading-anchor" href="#automatic-differentiation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Nobody differentiates a network by hand. This area is about how a framework does it for you, and why you should understand the mechanism rather than trust it.</p>
+</section>
+<section class="unit-concept" aria-labelledby="computational-graphs">
+<h3 id="computational-graphs">Computational graphs<a class="heading-anchor" href="#computational-graphs" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>A computation written as a graph of elementary operations, which is the form that makes mechanical differentiation possible. <strong>Studied in:</strong> <em>Hands-On ML with Scikit-Learn and PyTorch</em> Appendix A.</p>
+</section>
+<section class="unit-concept" aria-labelledby="reverse-mode-differentiation">
+<h3 id="reverse-mode-differentiation">Reverse-mode differentiation<a class="heading-anchor" href="#reverse-mode-differentiation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Applying the chain rule backwards through the graph, so that all gradients cost about one extra pass rather than one pass per parameter. This is the mechanism you implement yourself in this step, and the reason training a large model is feasible at all. <strong>Studied in:</strong> <em>Hands-On ML with Scikit-Learn and PyTorch</em> Appendix A, then <em>Dive into Deep Learning</em> §2.5 for the framework&#x27;s version.</p>
+</section>
+<section class="unit-area" aria-labelledby="probability">
+<h2 id="probability">Probability<a class="heading-anchor" href="#probability" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The language of uncertainty, used forwards: given a process, what outcomes should we expect? It is also where training objectives come from.</p>
+</section>
+<section class="unit-concept" aria-labelledby="probability-conditioning-and-bayes">
+<h3 id="probability-conditioning-and-bayes">Probability, conditioning and Bayes<a class="heading-anchor" href="#probability-conditioning-and-bayes" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Events, conditional probability, independence and Bayes&#x27; rule — the vocabulary in which every later statement about uncertainty is phrased. <strong>Studied in:</strong> Piech, <em>Probability for Computer Scientists</em>, Part 1.</p>
+</section>
+<section class="unit-concept" aria-labelledby="random-variables-expectation-and-variance">
+<h3 id="random-variables-expectation-and-variance">Random variables, expectation and variance<a class="heading-anchor" href="#random-variables-expectation-and-variance" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Random variables and their summaries: expectation as the long-run average, variance as spread. These two quantities carry most of the weight in step 4. <strong>Studied in:</strong> Piech Part 2; <em>Dive into Deep Learning</em> §2.6.</p>
+</section>
+<section class="unit-concept" aria-labelledby="common-distributions">
+<h3 id="common-distributions">Common distributions<a class="heading-anchor" href="#common-distributions" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Bernoulli, binomial, Poisson, categorical, uniform, exponential and normal: the small set of shapes that model most of what you will meet, and what each assumes about the world. <strong>Studied in:</strong> Piech Part 2.</p>
+</section>
+<section class="unit-concept" aria-labelledby="joint-and-marginal-distributions">
+<h3 id="joint-and-marginal-distributions">Joint and marginal distributions<a class="heading-anchor" href="#joint-and-marginal-distributions" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Several random variables at once: joint distributions, marginalization, and what conditioning does to them — the step from single quantities to models with structure. <strong>Studied in:</strong> Piech Part 3, to joint and marginal distributions.</p>
+</section>
+<section class="unit-concept" aria-labelledby="likelihood-and-parameter-estimation">
+<h3 id="likelihood-and-parameter-estimation">Likelihood and parameter estimation<a class="heading-anchor" href="#likelihood-and-parameter-estimation" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The likelihood of data under a model, and maximizing it to choose parameters. This is the bridge from probability to training: the objective you minimize in step 3 and step 8 is a likelihood in disguise. <strong>Studied in:</strong> Piech Part 5; <em>Dive into Deep Learning</em> §22.7.</p>
+</section>
+<section class="unit-area" aria-labelledby="optimization-behaviour">
+<h2 id="optimization-behaviour">Optimization behaviour<a class="heading-anchor" href="#optimization-behaviour" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Knowing the gradient is not the same as knowing what happens when you follow it. This area is about the behaviour of training, and it is what you will recognize later when a model refuses to learn.</p>
+</section>
+<section class="unit-concept" aria-labelledby="what-optimization-means-in-deep-learning">
+<h3 id="what-optimization-means-in-deep-learning">What optimization means in deep learning<a class="heading-anchor" href="#what-optimization-means-in-deep-learning" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Why the objective you optimize is a proxy for the goal you care about, and what that mismatch implies. <strong>Studied in:</strong> <em>Dive into Deep Learning</em> §12.1.</p>
+</section>
+<section class="unit-concept" aria-labelledby="convexity-and-why-deep-learning-is-not-convex">
+<h3 id="convexity-and-why-deep-learning-is-not-convex">Convexity, and why deep learning is not convex<a class="heading-anchor" href="#convexity-and-why-deep-learning-is-not-convex" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The well-behaved case, used as a reference point for the badly behaved one. <strong>Studied in:</strong> <em>Dive into Deep Learning</em> §12.2.</p>
+</section>
+<section class="unit-concept" aria-labelledby="gradient-descent-and-its-stochastic-form">
+<h3 id="gradient-descent-and-its-stochastic-form">Gradient descent and its stochastic form<a class="heading-anchor" href="#gradient-descent-and-its-stochastic-form" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Full-batch descent and the stochastic version that real training uses, with the noise that comes with it. You implement this yourself in this step. <strong>Studied in:</strong> <em>Dive into Deep Learning</em> §12.3–§12.4.</p>
+</section>
+<section class="unit-concept" aria-labelledby="learning-rates-divergence-and-conditioning">
+<h3 id="learning-rates-divergence-and-conditioning">Learning rates, divergence and conditioning<a class="heading-anchor" href="#learning-rates-divergence-and-conditioning" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Why too large a step diverges, why too small a step crawls, what a schedule does, and how poor conditioning slows everything down. <strong>Studied in:</strong> <em>Dive into Deep Learning</em> §12.11.</p>
+</section>
+<section class="unit-area" aria-labelledby="information">
+<h2 id="information">Information<a class="heading-anchor" href="#information" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The quantities that turn a probabilistic model into a loss function, and that reappear whenever two distributions are compared.</p>
+</section>
+<section class="unit-concept" aria-labelledby="entropy-and-surprise">
+<h3 id="entropy-and-surprise">Entropy and surprise<a class="heading-anchor" href="#entropy-and-surprise" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Information content and entropy: how much uncertainty a distribution carries. <strong>Studied in:</strong> <em>Dive into Deep Learning</em> §22.11; Piech&#x27;s information-theory chapter.</p>
+</section>
+<section class="unit-concept" aria-labelledby="cross-entropy-as-a-loss">
+<h3 id="cross-entropy-as-a-loss">Cross-entropy as a loss<a class="heading-anchor" href="#cross-entropy-as-a-loss" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Cross-entropy between the model&#x27;s distribution and the data&#x27;s, and why minimizing it is the same as maximizing likelihood — the loss almost every classifier and language model is trained with. <strong>Studied in:</strong> <em>Dive into Deep Learning</em> §22.11.</p>
+</section>
+<section class="guide-block guide-block--where-this-fits-in-ai" aria-label="Where this fits in AI">
+<p class="guide-label"><strong>Where this fits in AI</strong></p>
+<p>This is the layer underneath everything else: the same gradients train a logistic regression in step 3, a neural network in step 7 and a transformer in step 8; the same likelihood becomes the next-token objective a language model is trained on. You are not learning mathematics for its own sake but acquiring the reading ability that keeps later steps from becoming a sequence of library calls.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary</strong></span><span class="study-title"><a href="https://d2l.ai/" class="external" rel="noopener noreferrer"><em>Dive into Deep Learning</em><span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>read:</strong> §2.3–2.6, §12.1–12.4, §12.11, §22.1, §22.4, §22.7 and §22.11.</span><span class="study-why"><strong>Why:</strong> the linear algebra, calculus, optimization and probability you need, explained alongside code. <strong>Selected reading:</strong> this is a reference-scale textbook whose deep-learning chapters duplicate <em>Hands-On ML</em>, which you read whole from step 3; the sections named here are its mathematical preliminaries and its optimization and information-theory chapters.</span></li>
+<li><span class="study-role"><strong>Supplement</strong></span><span class="study-title"><a href="https://chrispiech.github.io/probabilityForComputerScientists/en/index.html" class="external" rel="noopener noreferrer">Piech, <em>Probability for Computer Scientists</em><span class="visually-hidden" data-chrome> (external link)</span></a></span><span class="study-task"><strong>read:</strong> Parts 1–3 (up to joint and marginal distributions), Part 5 and the information-theory chapter. Stop before sampling, the bootstrap and the central limit theorem, which step 4 teaches.</span><span class="study-why"><strong>Why:</strong> probability explained for programmers, ending in parameter estimation and the models it justifies. <strong>Selected reading:</strong> the omitted chapters are the probability-to-statistics bridge, which step 4 teaches with simulation in Python instead. (Whether reading Piech whole would serve you better than this split is an open question, recorded with its evidence in the <a href="../../reviews/2026-09-20-learner-experience-review/index.html">learner-experience review</a> and awaiting a decision.)</span></li>
+<li><span class="study-role"><strong>Supplement</strong></span><span class="study-title"><a href="https://github.com/ageron/handson-mlp" class="external" rel="noopener noreferrer"><em>Hands-On ML with Scikit-Learn and PyTorch</em><span class="visually-hidden" data-chrome> (external link)</span></a> (Géron)</span><span class="study-task"><strong>read first:</strong> Appendix A only.</span><span class="study-why"><strong>Why:</strong> it builds reverse-mode differentiation on a toy computation graph, so you see the mechanism working. You start the whole book, in order, in step 3; this appendix stands on its own, and you need it now.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--where-you-study-each-concept" aria-label="Where you study each concept">
+<p class="guide-label"><strong>Where you study each concept</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Cross-entropy as a loss"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">What you study</th>
+<th scope="col">Where you study it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linear algebra, calculus, optimization behaviour</td>
+<td><em>Dive into Deep Learning</em> §2.3–2.6, §12.1–12.4, §12.11</td>
+</tr>
+<tr>
+<td>Distributions, expectation, variance, conditioning, likelihood</td>
+<td>Piech Parts 1–3 and Part 5; <em>Dive into Deep Learning</em> §22.1, §22.4, §22.7</td>
+</tr>
+<tr>
+<td>Entropy and cross-entropy</td>
+<td><em>Dive into Deep Learning</em> §22.11; Piech&#x27;s information-theory chapter</td>
+</tr>
+<tr>
+<td>Reverse-mode differentiation, by construction</td>
+<td><em>Hands-On ML</em> Appendix A</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<p>Implement gradient descent and reverse-mode differentiation yourself. Otherwise, work the exercises.</p>
+</section>
+<section class="guide-block guide-block--you-re-ready-to-continue-when-you-can" aria-label="You&#x27;re ready to continue when you can">
+<p class="guide-label"><strong>You&#x27;re ready to continue when you can</strong></p>
+<ul class="guide-list guide-list--you-re-ready-to-continue-when-you-can">
+<li>explain what a gradient tells you about a loss surface;</li>
+<li>implement gradient descent and diagnose why it diverges;</li>
+<li>explain why maximizing likelihood works as a training objective.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--what-comes-next" aria-label="What comes next">
+<p class="guide-label"><strong>What comes next</strong></p>
+<p>You can now read what a learning method does. Step 3 puts that to work on the decision that comes before any method: what problem are you solving, and should it be solved by learning at all?</p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev guide-pager-link--modern" href="../orientation-contemporary-ai-systems/index.html" rel="prev"><span class="guide-pager-label">← Previous · Modern AI Engineering · recommended</span><span class="guide-pager-title">Orientation: Contemporary AI Systems</span></a>
+  <a class="guide-pager-link guide-pager-link--next" href="../3-machine-learning-framing-problems-and-building-models/index.html" rel="next"><span class="guide-pager-label">Next →</span><span class="guide-pager-title">3. Machine Learning: Framing Problems and Building Models</span></a>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+</body>
+</html>

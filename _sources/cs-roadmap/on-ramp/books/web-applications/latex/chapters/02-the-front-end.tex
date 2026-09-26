@@ -1,0 +1,205 @@
+\bookchapter{The Front End: What Runs on Your Screen}{ch:02-the-front-end}
+
+\begin{chapterintro}
+
+This chapter looks at the side of the app you can see: who draws the screen, the three languages every web page is made of, what a front-end framework adds, and why a phone app is a front end too.
+
+\end{chapterintro}
+
+\emph{The problem.} The same app looks right on my laptop and my phone, but who draws it?
+
+\emph{The question.} How does an app become the picture on my screen, and how does that picture fit every size of screen?
+
+\section{The Server Sends Instructions, Not a Picture}\label{02-the-front-end:the-server-sends-instructions-not-a-picture}
+
+When you open a website, the server does not send a finished picture of the page. It sends \emph{instructions}, and your device draws the page itself.
+
+Think of flat-pack furniture. The shop doesn't deliver a built bookcase. It sends the parts and an instruction sheet, and you assemble it at home. A good sheet even says: ``If your wall is narrow, stack the shelves in one column.''
+
+The program that does the assembling is the \textbf{browser}\index{browser}: Chrome, Safari, Firefox, or Edge. It downloads the instructions, follows them, and draws the result. That is why the same app looks right on a laptop and a phone: each device builds the page to fit its own screen.
+
+\Needspace{13\baselineskip}
+
+\section{Three Languages, Three Jobs}\label{02-the-front-end:three-languages-three-jobs}
+
+The instructions come in three languages:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1573\linewidth-1.6854\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5169\linewidth-0.9663\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.3258\linewidth-1.3483\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Language} & \thead{Its job} & \thead{In the furniture picture} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Language} & \thead{Its job} & \thead{In the furniture picture} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\textbf{HTML}\index{html@HTML} & What is on the page: text, buttons, images & The list of parts \\
+\textbf{CSS}\index{css@CSS} & How it looks: colours, fonts, layout & The paint and arrangement \\
+\textbf{JavaScript}\index{javascript@JavaScript} & What happens when you touch it & The drawers that slide \\
+\end{longtable}
+\end{booktable}
+
+\codeneed{7}
+
+Here is a tiny but complete page that uses all three:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DataTypeTok{\textless{}!DOCTYPE}\NormalTok{ html}\DataTypeTok{\textgreater{}}
+\DataTypeTok{\textless{}}\KeywordTok{html}\DataTypeTok{\textgreater{}}
+\DataTypeTok{\textless{}}\KeywordTok{head}\DataTypeTok{\textgreater{}}
+  \DataTypeTok{\textless{}}\KeywordTok{style}\DataTypeTok{\textgreater{}}
+\NormalTok{    h1 \{ }\KeywordTok{font{-}family}\CharTok{:} \DecValTok{sans{-}serif}\OperatorTok{;}\NormalTok{ \}}
+\NormalTok{    button \{ }\KeywordTok{background}\CharTok{:} \ConstantTok{royalblue}\OperatorTok{;} \KeywordTok{color}\CharTok{:} \ConstantTok{white}\OperatorTok{;}\NormalTok{ \}}
+  \DataTypeTok{\textless{}/}\KeywordTok{style}\DataTypeTok{\textgreater{}}
+\DataTypeTok{\textless{}/}\KeywordTok{head}\DataTypeTok{\textgreater{}}
+\DataTypeTok{\textless{}}\KeywordTok{body}\DataTypeTok{\textgreater{}}
+  \DataTypeTok{\textless{}}\KeywordTok{h1}\DataTypeTok{\textgreater{}}\NormalTok{My Notes}\DataTypeTok{\textless{}/}\KeywordTok{h1}\DataTypeTok{\textgreater{}}
+  \DataTypeTok{\textless{}}\KeywordTok{button}\OtherTok{ id}\OperatorTok{=}\StringTok{"save"}\DataTypeTok{\textgreater{}}\NormalTok{Save}\DataTypeTok{\textless{}/}\KeywordTok{button}\DataTypeTok{\textgreater{}}
+  \DataTypeTok{\textless{}}\KeywordTok{p}\OtherTok{ id}\OperatorTok{=}\StringTok{"status"}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{p}\DataTypeTok{\textgreater{}}
+  \DataTypeTok{\textless{}}\KeywordTok{script}\DataTypeTok{\textgreater{}}
+    \KeywordTok{const}\NormalTok{ button }\OperatorTok{=} \BuiltInTok{document}\OperatorTok{.}\FunctionTok{getElementById}\NormalTok{(}\StringTok{"save"}\NormalTok{)}\OperatorTok{;}
+\NormalTok{    button}\OperatorTok{.}\AttributeTok{onclick} \OperatorTok{=} \KeywordTok{function}\NormalTok{ () \{}
+      \BuiltInTok{document}\OperatorTok{.}\FunctionTok{getElementById}\NormalTok{(}\StringTok{"status"}\NormalTok{)}\OperatorTok{.}\AttributeTok{textContent} \OperatorTok{=} \StringTok{"Saved!"}\OperatorTok{;}
+\NormalTok{    \}}\OperatorTok{;}
+  \DataTypeTok{\textless{}/}\KeywordTok{script}\DataTypeTok{\textgreater{}}
+\DataTypeTok{\textless{}/}\KeywordTok{body}\DataTypeTok{\textgreater{}}
+\DataTypeTok{\textless{}/}\KeywordTok{html}\DataTypeTok{\textgreater{}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+The CSS inside \texttt{\textless{}style\textgreater{}} makes the heading plain and the button blue. The HTML inside \texttt{\textless{}body\textgreater{}} lists a heading, a button, and an empty paragraph. The JavaScript inside \texttt{\textless{}script\textgreater{}} says: when someone clicks the button, put \emph{Saved!} in the empty paragraph. Open this file in a browser and click \emph{Save}, and \emph{Saved!} appears under the button.
+
+\begin{callout}{note}
+
+This button is a fake. It changed the page, but nothing left your computer, so nothing was saved. A real Save button must send a request to a back end. Chapter 4 shows this same button doing exactly that.
+
+\end{callout}
+
+\section{One Page, Every Screen}\label{02-the-front-end:one-page-every-screen}
+
+A phone screen is narrow; a laptop screen is wide. Designers don't build two websites. They write CSS rules that change the layout to fit the space: ``on a wide screen, show the menu on the left; on a narrow one, hide it behind a button.'' This is \textbf{responsive design}\index{responsive design}: the ``stack the shelves if the wall is narrow'' line of the instruction sheet.
+
+\section{Front-End Frameworks}\label{02-the-front-end:front-end-frameworks}
+
+The example page has one button. An online shop has thousands, and changing one number can mean five places on the screen must change with it. Doing that by hand in JavaScript is slow and error-prone.
+
+A \textbf{front-end framework}\index{front-end framework} is ready-made code that does this bookkeeping. React, Vue, Angular, and Svelte are well-known ones. The developer describes what the screen should look like for the current data (``the cart shows these three items''), and the framework updates the page whenever the data changes.
+
+Frameworks build screens from \textbf{components}\index{components}: small, reusable pieces such as a product card or a like button. Like building bricks, one component can appear hundreds of times on a page.
+
+\begin{callout}{note}
+
+A framework helps the developer; it is not a new language for the browser. A React app still reaches your browser as HTML, CSS, and JavaScript, the only three languages a browser draws.
+
+\end{callout}
+
+\section{Mobile Apps Are Front Ends Too}\label{02-the-front-end:mobile-apps-are-front-ends-too}
+
+Apps you install from an app store are usually \textbf{native apps}\index{native apps}: programs written for one kind of phone, in languages like Swift (iPhone) or Kotlin (Android). They draw their own screens without a browser.
+
+The tools differ, but the role is the same. A native app shows screens, reacts to taps, and asks a back end for anything it doesn't have. Often one back end serves the website, the iPhone app, and the Android app together.
+
+\section{What the Front End Can't Do}\label{02-the-front-end:what-the-front-end-cant-do}
+
+Everything in the front end travels to the user's device, where the user can read it and change it. So the front end can't keep secrets, and it can't make final decisions. It can say ``this coupon looks valid'', but only the back end can accept it.
+
+\begin{callout}{warning}
+
+Never put a password, a secret key, or a price the customer must not change in front-end code. The back end must check everything the front end sends.
+
+\end{callout}
+
+\section{Try It}\label{02-the-front-end:try-it}
+
+See the instructions behind a real page, and change them.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Open any website on a computer. Right-click a heading and choose \emph{Inspect}. The \emph{Elements} tab shows the page's HTML, with your heading highlighted.
+\item
+  Double-click the heading's text in that panel, type something new, and press Enter. Then reload the page.
+\item
+  Click the phone-and-tablet icon at the top of the developer tools (the device toolbar) and pick a phone.
+\end{enumerate}
+
+\emph{Expected result:} In step 2 the heading changes to your text, then goes back when you reload. You changed only your own copy of the instructions; the server never knew. In step 3 the page rearranges itself for a narrow screen: responsive design at work.
+
+\section{Summary, Key Terms, and Review Questions}\label{02-the-front-end:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{02-the-front-end:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  The server sends instructions; the browser follows them and draws the page.
+\item
+  HTML says what is on the page, CSS says how it looks, and JavaScript says what it does.
+\item
+  Responsive design lets one page fit any screen.
+\item
+  Front-end frameworks keep large screens up to date, built from reusable components.
+\item
+  Native apps are front ends too, often sharing one back end with the website.
+\item
+  The front end can't keep secrets or make final decisions.
+\end{itemize}
+
+\Needspace{15\baselineskip}
+
+\subsection*{Key Terms}\label{02-the-front-end:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2738\linewidth-1.4524\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7262\linewidth-0.5476\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Browser & The program that downloads and draws web pages \\
+HTML & The language for what is on a page \\
+CSS & The language for how a page looks \\
+JavaScript & The language for what a page does \\
+Responsive design & One layout that adapts to any screen size \\
+Front-end framework & Ready-made code that keeps a screen in step with its data \\
+Component & A small, reusable piece of a screen \\
+Native app & An app written for one kind of phone \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{02-the-front-end:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Why can the same website look right on a laptop and a phone?
+\item
+  For a \emph{Like} button, what does the HTML do, what does the CSS do, and what does the JavaScript do?
+\item
+  What problem does a front-end framework solve?
+\item
+  In what way is an iPhone app the same thing as a website?
+\item
+  Why can't a shop let the front end decide the final price?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can look at any screen in any app and say what the front end drew by itself and what it must have asked the back end for.
+
+\end{understandbox}

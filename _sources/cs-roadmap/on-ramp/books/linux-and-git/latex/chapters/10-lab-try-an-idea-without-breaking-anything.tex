@@ -1,0 +1,444 @@
+\bookchapter{Lab: Try an Idea Without Breaking Anything}{ch:10-lab-try-an-idea-without-breaking-anything}
+
+\begin{chapterintro}
+
+In this lab you use a branch as a safe place to experiment. You'll hit a real merge conflict and resolve it, see what rebasing does to history, and rescue a commit you thought you'd deleted. After this, branches stop being scary and become the first thing you reach for.
+
+\end{chapterintro}
+
+\emph{The problem.} I want to try an idea without risking the version that works.
+
+\emph{The question.} How do I experiment on a copy of my code and bring back only what works?
+
+\codeneed{9}
+
+\section{Step 1: A Project That Works}\label{10-lab-try-an-idea-without-breaking-anything:step-1-a-project-that-works}
+
+Make a new repository with one working file:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ \textasciitilde{}/projects/greeter}
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/projects/greeter}
+\FunctionTok{git}\NormalTok{ init}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{8}
+
+Create \texttt{greet.py}:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ greet(name):}
+    \ControlFlowTok{return} \StringTok{"Hello, "} \OperatorTok{+}\NormalTok{ name }\OperatorTok{+} \StringTok{"!"}
+
+
+\BuiltInTok{print}\NormalTok{(greet(}\StringTok{"Ada"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{6}
+
+Check it runs, then commit:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3}\NormalTok{ greet.py}
+\FunctionTok{git}\NormalTok{ add greet.py}
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}m} \StringTok{"Add greeting"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\textbf{Expected:} \texttt{Hello,\ Ada!}, then a \texttt{root-commit} line.
+
+\codeneed{7}
+
+\section{Step 2: Try the Idea on a Branch}\label{10-lab-try-an-idea-without-breaking-anything:step-2-try-the-idea-on-a-branch}
+
+The idea: a friendlier greeting. Create a branch for it, so \texttt{main} stays exactly as it is:
+
+\codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ switch }\AttributeTok{{-}c}\NormalTok{ friendly}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{5}
+
+On this branch, change the \texttt{return} line to \texttt{return\ "Hi\ there,}\allowbreak{}\texttt{\ "\ +\ name\ +\ "!"}, run the script, and commit:
+
+\codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3}\NormalTok{ greet.py}
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}am} \StringTok{"Use a friendlier greeting"}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\textbf{Expected:} \texttt{Hi\ there,\ Ada!}. Now switch back with \texttt{git\ switch\ main} and run \texttt{python3\ greet.py} again. \textbf{Expected:} \texttt{Hello,\ Ada!}. The working version is untouched; Git swapped the file back when you switched.
+
+\codeneed{13}
+
+\section{Step 3: Meanwhile, main Moves On}\label{10-lab-try-an-idea-without-breaking-anything:step-3-meanwhile-main-moves-on}
+
+Real projects don't stand still while you experiment. On \texttt{main}, tidy the same line into an f-string, \texttt{return\ f"Hello,}\allowbreak{}\texttt{\ \{name\}!"}, and commit:
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}am} \StringTok{"Use an f{-}string for the greeting"}
+\FunctionTok{git}\NormalTok{ log }\AttributeTok{{-}{-}oneline} \AttributeTok{{-}{-}graph} \AttributeTok{{-}{-}all}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+* 165c65b Use a friendlier greeting
+| * c2ed7e4 Use an f-string for the greeting
+|/  
+* 180f173 Add greeting
+\end{Verbatim}
+\end{codeblock}
+
+\texttt{-\/-all} shows every branch. The history has forked: both branches changed the same line in different ways.
+
+\codeneed{11}
+
+\section{Step 4: Merge, and Meet a Conflict}\label{10-lab-try-an-idea-without-breaking-anything:step-4-merge-and-meet-a-conflict}
+
+The idea worked, so bring it into \texttt{main}:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ merge friendly}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Auto-merging greet.py
+CONFLICT (content): Merge conflict in greet.py
+Automatic merge failed; fix conflicts and then commit the result.
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{12}
+
+Nothing is broken. Git has paused the merge because it can't guess which version of that line you want. \texttt{git\ status} says so, and lists the file under \texttt{both\ modified}. Open \texttt{greet.py}:
+
+\codeneed{9}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+def greet(name):
+<<<<<<< HEAD
+    return f"Hello, {name}!"
+=======
+    return "Hi there, " + name + "!"
+>>>>>>> friendly
+
+
+print(greet("Ada"))
+\end{Verbatim}
+\end{codeblock}
+
+Git wrote both versions into the file between conflict markers. Everything between \texttt{\textless{}\textless{}\textless{}\textless{}\textless{}\textless{}\textless{}\ HEAD} and \texttt{=======} is your current branch's version. Everything between \texttt{=======} and \texttt{\textgreater{}\textgreater{}\textgreater{}\textgreater{}\textgreater{}\textgreater{}\textgreater{}\ friendly} is the incoming branch's version.
+
+\section{Step 5: Resolve It}\label{10-lab-try-an-idea-without-breaking-anything:step-5-resolve-it}
+
+Resolving means editing the file into what it should be, and deleting all three marker lines. You can keep one side, the other, or combine them. Here the best answer combines both ideas: the f-string and the friendlier words.
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ greet(name):}
+    \ControlFlowTok{return} \SpecialStringTok{f"Hi there, }\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{!"}
+
+
+\BuiltInTok{print}\NormalTok{(greet(}\StringTok{"Ada"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{16}
+
+Run it to make sure it works, then tell Git the conflict is resolved by staging the file, and finish the merge:
+
+\codeneed{13}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3}\NormalTok{ greet.py}
+\FunctionTok{git}\NormalTok{ add greet.py}
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}{-}no{-}edit}
+\FunctionTok{git}\NormalTok{ log }\AttributeTok{{-}{-}oneline} \AttributeTok{{-}{-}graph}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{8}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Hi there, Ada!
+[main beb0c29] Merge branch 'friendly'
+*   beb0c29 Merge branch 'friendly'
+|\  
+| * 165c65b Use a friendlier greeting
+* | c2ed7e4 Use an f-string for the greeting
+|/  
+* 180f173 Add greeting
+\end{Verbatim}
+\end{codeblock}
+
+\texttt{-\/-no-edit} accepts Git's ready-made message. The idea is now in \texttt{main}, so delete its branch with \texttt{git\ branch\ -d\ friendly}.
+
+\begin{callout}{tip}
+
+If a conflict gets confusing, \texttt{git\ merge\ -\/-abort} puts everything back to how it was before the merge. Nothing is lost, and you can try again.
+
+\end{callout}
+
+\section{Step 6: Rebasing, in Brief}\label{10-lab-try-an-idea-without-breaking-anything:step-6-rebasing-in-brief}
+
+A merge keeps history exactly as it happened, forks and all. There's a second way to bring a branch up to date: \textbf{rebase}\index{rebase}. It lifts your branch's commits off and replays them on top of the latest \texttt{main}, as if you'd started the branch just now.
+
+\codeneed{7}
+
+Make a branch, commit on it, then let \texttt{main} move on:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ switch }\AttributeTok{{-}c}\NormalTok{ shout}
+\BuiltInTok{echo} \StringTok{\textquotesingle{}print(greet("Ben").upper())\textquotesingle{}} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ greet.py}
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}am} \StringTok{"Shout at Ben"}
+\FunctionTok{git}\NormalTok{ switch main}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{7}
+
+On \texttt{main}, add the line \texttt{"""A\ tiny\ greeter."""} at the top of \texttt{greet.py} and commit it as ``Add a docstring''. The history has forked again:
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+* 2ebbb10 Add a docstring
+| * eeb1248 Shout at Ben
+|/  
+*   beb0c29 Merge branch 'friendly'
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{11}
+
+Now rebase \texttt{shout} onto \texttt{main}:
+
+\codeneed{8}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ switch shout}
+\FunctionTok{git}\NormalTok{ rebase main}
+\FunctionTok{git}\NormalTok{ log }\AttributeTok{{-}{-}oneline} \AttributeTok{{-}{-}graph} \AttributeTok{{-}{-}all} \AttributeTok{{-}3}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Successfully rebased and updated refs/heads/shout.
+* 88709a8 Shout at Ben
+* 2ebbb10 Add a docstring
+*   beb0c29 Merge branch 'friendly'
+\end{Verbatim}
+\end{codeblock}
+
+The fork is gone. ``Shout at Ben'' now sits on top of the docstring commit, with a new ID (\texttt{88709a8} instead of \texttt{eeb1248}), because it's technically a new commit. Merging it into \texttt{main} is now a simple fast-forward: \texttt{git\ switch\ main}, then \texttt{git\ merge\ shout}. \texttt{python3\ greet.py} prints \texttt{Hi\ there,\ Ada!} and \texttt{HI\ THERE,\ BEN!}.
+
+\begin{callout}{warning}
+
+Rebase only commits that nobody else has. Rebasing rewrites commits into new ones, so if you rebase commits you've already pushed, everyone who pulled the old ones ends up with two conflicting histories. Rebase your own local work; merge shared work.
+
+\end{callout}
+
+\codeneed{10}
+
+\section{Step 7: Lose a Commit, Then Find It}\label{10-lab-try-an-idea-without-breaking-anything:step-7-lose-a-commit-then-find-it}
+
+Last, the rescue. Make an experiment and commit it:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ switch }\AttributeTok{{-}c}\NormalTok{ experiment}
+\BuiltInTok{echo} \StringTok{\textquotesingle{}print(greet("World"))\textquotesingle{}} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ greet.py}
+\FunctionTok{git}\NormalTok{ commit }\AttributeTok{{-}am} \StringTok{"Greet the whole world"}
+\FunctionTok{git}\NormalTok{ switch main}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{6}
+
+Now delete the branch. Git refuses with \texttt{-d}, because the commit isn't merged anywhere, which is a good warning. Force it with \texttt{-D}:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ branch }\AttributeTok{{-}D}\NormalTok{ experiment}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Deleted branch experiment (was 207ad9c).
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{8}
+
+\texttt{git\ log\ -\/-all} no longer shows ``Greet the whole world''. It looks gone. But the reflog remembers every place HEAD has been:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ reflog }\AttributeTok{{-}3}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+88709a8 HEAD@{0}: checkout: moving from experiment to main
+207ad9c HEAD@{1}: commit: Greet the whole world
+88709a8 HEAD@{2}: checkout: moving from main to experiment
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{7}
+
+There it is: \texttt{207ad9c}, one step back, at \texttt{HEAD@\{1\}}. A branch is just a bookmark, so put a new bookmark on it:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{git}\NormalTok{ branch experiment 207ad9c}
+\FunctionTok{git}\NormalTok{ log }\AttributeTok{{-}{-}oneline} \AttributeTok{{-}1}\NormalTok{ experiment}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+207ad9c Greet the whole world
+\end{Verbatim}
+\end{codeblock}
+
+The commit is back. The same trick undoes an unwanted \texttt{git\ reset\ -\/-hard\ HEAD\textasciitilde{}1}: find the old position in \texttt{git\ reflog}, then \texttt{git\ reset\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{hard\ HEAD@\{1\}}.
+
+\begin{callout}{note}
+
+Git only keeps unreachable commits for a while (normally at least 30 days) before cleaning them up. The reflog is a safety net, not an archive. And it only knows about commits: uncommitted edits you throw away are gone for good.
+
+\end{callout}
+
+\section{Summary, Key Terms, and Review Questions}\label{10-lab-try-an-idea-without-breaking-anything:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{10-lab-try-an-idea-without-breaking-anything:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  A branch is a safe place to try an idea. Switching back to \texttt{main} restores the working version instantly.
+\item
+  A merge conflict happens when both branches changed the same lines. Git pauses and writes both versions into the file between conflict markers.
+\item
+  To resolve, edit the file into its final form, remove the markers, \texttt{git\ add} it, and commit. \texttt{git\ merge\ -\/-abort} backs out.
+\item
+  Rebase replays your commits on top of another branch, giving a straight history. Only rebase commits you haven't shared.
+\item
+  Deleted branches and reset commits can be found in \texttt{git\ reflog} and brought back with a new branch or a reset.
+\end{itemize}
+
+\Needspace{8\baselineskip}
+
+\subsection*{Key Terms}\label{10-lab-try-an-idea-without-breaking-anything:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1351\linewidth-1.7297\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.8649\linewidth-0.2703\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Rebase & Replay a branch's commits on top of another commit, creating new commits \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{10-lab-try-an-idea-without-breaking-anything:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Why is the working version safe while you experiment on a branch?
+\item
+  In a conflict, which side sits between \texttt{\textless{}\textless{}\textless{}\textless{}\textless{}\textless{}\textless{}\ HEAD} and \texttt{=======}?
+\item
+  What three things must you do to finish resolving a conflict?
+\item
+  How does history look after a rebase compared with a merge? Why do the rebased commits get new IDs?
+\item
+  You deleted a branch with \texttt{git\ branch\ -D} and regret it. Describe how to get it back.
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can resolve a merge conflict without panic, and bring back a commit you thought was lost.
+
+\end{understandbox}

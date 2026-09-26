@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Machine Learning: Framing Problems and Building Models · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><span>Part 1 — Fundamentals</span></li>
+      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part">Part 1 — Fundamentals</span><span aria-hidden="true"> · </span><span>Step 3 of 19</span></p>
+<h1 id="3-machine-learning-framing-problems-and-building-models" class="guide-title">3. Machine Learning: Framing Problems and Building Models</h1>
+<div class="guide-body">
+<p>Machine learning is what you reach for when the rule you would otherwise write by hand is too complicated, too changeable or simply unknown. Instead of specifying how to decide, you collect examples of the decision — emails that were spam and emails that were not — and a learning procedure searches for a rule that fits them. The catch, and the reason this step exists, is that fitting the examples you have is easy and worthless on its own: what matters is behaviour on the cases you have not seen yet.</p>
+<p>So the work divides in two. First, deciding <em>what</em> to build: what exactly is being predicted, from what information, and whether learning is even the right tool. Then building it: a simple comparison that involves no learning at all, a model or two whose behaviour you can explain, and enough honesty in how you test them that the number you report survives contact with reality. This step also starts the one system you keep extending for the rest of the guide.</p>
+<section class="guide-block guide-block--where-you-are" aria-label="Where you are">
+<p class="guide-label"><strong>Where you are</strong></p>
+<p>You can work with data (step 1) and read what a learning method does (step 2). What you have never had to do is turn a vague goal into something a model could actually predict — and that decision, made badly, is the most expensive mistake in applied AI, because no amount of modelling repairs a problem framed wrongly.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#framing-the-problem">Framing the problem</a>
+<ol class="unit-toc-sublist">
+<li><a href="#whether-to-use-learning-at-all">Whether to use learning at all</a></li>
+<li><a href="#the-unit-of-prediction-and-what-the-output-drives">The unit of prediction, and what the output drives</a></li>
+<li><a href="#business-objective-versus-model-objective">Business objective versus model objective</a></li>
+<li><a href="#task-formulations">Task formulations</a></li>
+<li><a href="#baselines-that-involve-no-learning">Baselines that involve no learning</a></li>
+</ol>
+</li>
+<li><a href="#models-you-should-know">Models you should know</a>
+<ol class="unit-toc-sublist">
+<li><a href="#linear-and-logistic-models">Linear and logistic models</a></li>
+<li><a href="#regularization">Regularization</a></li>
+<li><a href="#trees-forests-and-gradient-boosting">Trees, forests and gradient boosting</a></li>
+<li><a href="#dimensionality-reduction-and-clustering">Dimensionality reduction and clustering</a></li>
+</ol>
+</li>
+<li><a href="#making-a-model-generalize">Making a model generalize</a>
+<ol class="unit-toc-sublist">
+<li><a href="#bias-and-variance">Bias and variance</a></li>
+<li><a href="#learning-curves">Learning curves</a></li>
+<li><a href="#cross-validation-and-splits-that-avoid-leakage">Cross-validation and splits that avoid leakage</a></li>
+</ol>
+</li>
+<li><a href="#judging-a-model">Judging a model</a>
+<ol class="unit-toc-sublist">
+<li><a href="#metrics-and-confusion-matrices">Metrics and confusion matrices</a></li>
+<li><a href="#roc-and-precisionrecall-curves">ROC and precision–recall curves</a></li>
+<li><a href="#error-analysis">Error analysis</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-you-ll-learn" aria-label="What you&#x27;ll learn">
+<p class="guide-label"><strong>What you&#x27;ll learn</strong></p>
+<p>By the end you should be able to decide whether learning is the right tool for a goal, frame the problem and its unit of prediction, set a baseline that involves no learning, build and validate a supervised model, and diagnose what its errors are telling you — implementing all of it yourself.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>Framing decides what a model is for; modelling produces a candidate; judging tells you whether the candidate is any good — and the three are not separable. The unit of prediction you choose determines which metric is meaningful; the baseline you set determines what &quot;better&quot; means; the split you choose determines whether the number you get is honest at all. Bias and variance give you the vocabulary for <em>why</em> a model underperforms, and error analysis turns that vocabulary into a next action. This step deliberately keeps you in classical territory: these mechanics are easier to see when the model is simple, and every one of them returns when the models get large.</p>
+</section>
+<section class="unit-area" aria-labelledby="framing-the-problem">
+<h2 id="framing-the-problem">Framing the problem<a class="heading-anchor" href="#framing-the-problem" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The decisions made before any model exists, which no amount of modelling can repair afterwards.</p>
+</section>
+<section class="unit-concept" aria-labelledby="whether-to-use-learning-at-all">
+<h3 id="whether-to-use-learning-at-all">Whether to use learning at all<a class="heading-anchor" href="#whether-to-use-learning-at-all" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The cases where a rule, a lookup or a human process is the correct answer, and how to recognize them before building anything. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 1, &quot;When to Use Machine Learning&quot;.</p>
+</section>
+<section class="unit-concept" aria-labelledby="the-unit-of-prediction-and-what-the-output-drives">
+<h3 id="the-unit-of-prediction-and-what-the-output-drives">The unit of prediction, and what the output drives<a class="heading-anchor" href="#the-unit-of-prediction-and-what-the-output-drives" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What single thing the model predicts, for what entity, and which decision consumes it — the choice that silently determines your data, your metric and your evaluation. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 2.</p>
+</section>
+<section class="unit-concept" aria-labelledby="business-objective-versus-model-objective">
+<h3 id="business-objective-versus-model-objective">Business objective versus model objective<a class="heading-anchor" href="#business-objective-versus-model-objective" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Why the quantity you can optimize is rarely the quantity you care about, and what to do about the gap. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 2.</p>
+</section>
+<section class="unit-concept" aria-labelledby="task-formulations">
+<h3 id="task-formulations">Task formulations<a class="heading-anchor" href="#task-formulations" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>How a goal becomes a classification, extraction, ranking or generation problem — including the common text tasks you will meet again from step 8 onwards. <strong>Studied in:</strong> <em>Designing Machine Learning Systems</em> ch 2; <em>Hands-On ML</em> chs 1–3.</p>
+</section>
+<section class="unit-concept" aria-labelledby="baselines-that-involve-no-learning">
+<h3 id="baselines-that-involve-no-learning">Baselines that involve no learning<a class="heading-anchor" href="#baselines-that-involve-no-learning" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The non-learned comparison that tells you whether a model earns its complexity. Every later claim in this guide is measured against something like it. <strong>Studied in:</strong> <em>Hands-On ML</em> chs 1–2; <em>Designing Machine Learning Systems</em> ch 6.</p>
+</section>
+<section class="unit-area" aria-labelledby="models-you-should-know">
+<h2 id="models-you-should-know">Models you should know<a class="heading-anchor" href="#models-you-should-know" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>A working repertoire, kept deliberately classical: these are the models whose behaviour you can see.</p>
+</section>
+<section class="unit-concept" aria-labelledby="linear-and-logistic-models">
+<h3 id="linear-and-logistic-models">Linear and logistic models<a class="heading-anchor" href="#linear-and-logistic-models" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The two workhorses, and what their coefficients do and do not mean. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 4.</p>
+</section>
+<section class="unit-concept" aria-labelledby="regularization">
+<h3 id="regularization">Regularization<a class="heading-anchor" href="#regularization" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Penalizing complexity, and why a slightly worse fit often generalizes better. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 4.</p>
+</section>
+<section class="unit-concept" aria-labelledby="trees-forests-and-gradient-boosting">
+<h3 id="trees-forests-and-gradient-boosting">Trees, forests and gradient boosting<a class="heading-anchor" href="#trees-forests-and-gradient-boosting" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Why ensembles of trees remain a strong default for tabular data, and when they beat anything deeper. <strong>Studied in:</strong> <em>Hands-On ML</em> chs 6–7.</p>
+</section>
+<section class="unit-concept" aria-labelledby="dimensionality-reduction-and-clustering">
+<h3 id="dimensionality-reduction-and-clustering">Dimensionality reduction and clustering<a class="heading-anchor" href="#dimensionality-reduction-and-clustering" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Finding structure without labels, and using it to understand data rather than to impress. <strong>Studied in:</strong> <em>Hands-On ML</em> chs 8–9.</p>
+</section>
+<section class="unit-area" aria-labelledby="making-a-model-generalize">
+<h2 id="making-a-model-generalize">Making a model generalize<a class="heading-anchor" href="#making-a-model-generalize" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Everything here is about the difference between performing on the data you have and performing on the data you will meet.</p>
+</section>
+<section class="unit-concept" aria-labelledby="bias-and-variance">
+<h3 id="bias-and-variance">Bias and variance<a class="heading-anchor" href="#bias-and-variance" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>The two ways a model fails, and how to tell which one you are looking at. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 4.</p>
+</section>
+<section class="unit-concept" aria-labelledby="learning-curves">
+<h3 id="learning-curves">Learning curves<a class="heading-anchor" href="#learning-curves" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Reading performance against training-set size to decide whether more data, a different model or better features is the next move. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 4.</p>
+</section>
+<section class="unit-concept" aria-labelledby="cross-validation-and-splits-that-avoid-leakage">
+<h3 id="cross-validation-and-splits-that-avoid-leakage">Cross-validation and splits that avoid leakage<a class="heading-anchor" href="#cross-validation-and-splits-that-avoid-leakage" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>How to estimate performance honestly, and the ways a careless split lets the answer leak into the question. Step 5 treats leakage as the family of failures it is. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 2.</p>
+</section>
+<section class="unit-area" aria-labelledby="judging-a-model">
+<h2 id="judging-a-model">Judging a model<a class="heading-anchor" href="#judging-a-model" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Turning a trained model into evidence about its quality — the habits that steps 4 and 6 then make rigorous.</p>
+</section>
+<section class="unit-concept" aria-labelledby="metrics-and-confusion-matrices">
+<h3 id="metrics-and-confusion-matrices">Metrics and confusion matrices<a class="heading-anchor" href="#metrics-and-confusion-matrices" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What each metric rewards, and what a single number hides about the errors underneath it. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 3.</p>
+</section>
+<section class="unit-concept" aria-labelledby="roc-and-precisionrecall-curves">
+<h3 id="roc-and-precisionrecall-curves">ROC and precision–recall curves<a class="heading-anchor" href="#roc-and-precisionrecall-curves" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Performance across thresholds, and which curve to trust when classes are imbalanced. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 3.</p>
+</section>
+<section class="unit-concept" aria-labelledby="error-analysis">
+<h3 id="error-analysis">Error analysis<a class="heading-anchor" href="#error-analysis" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Looking at what the model got wrong, grouping the mistakes, and deciding the next action from them — a habit that returns in step 6 and again in the Modern evaluation topic. <strong>Studied in:</strong> <em>Hands-On ML</em> ch 3.</p>
+</section>
+<section class="guide-block guide-block--where-this-fits-in-ai" aria-label="Where this fits in AI">
+<p class="guide-label"><strong>Where this fits in AI</strong></p>
+<p>This is the first complete picture of an AI system, and the shape you will keep enriching:</p>
+<figure class="diagram breakout" data-diagram aria-label="Diagram: Error analysis"><figcaption class="diagram-caption" data-chrome>Diagram · text form</figcaption><pre class="diagram-source"><code>flowchart LR
+    D[&quot;Data&quot;] --&gt; M[&quot;Model&quot;] --&gt; P[&quot;Prediction&quot;] --&gt; A[&quot;Decision or action&quot;]
+    A -. &quot;produces new data&quot; .-&gt; D
+</code></pre></figure>
+<p>Everything later is an elaboration of this loop: step 6 makes the arrow from prediction to decision trustworthy, step 7 changes what a model can be, step 9 adds retrieved information to the model&#x27;s input, and step 11 replaces the single model with several components working together.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary</strong></span><span class="study-title"><em>Hands-On ML with Scikit-Learn and PyTorch</em></span><span class="study-task"><strong>read:</strong> the complete book, in order. Start here and keep reading alongside the next steps: this step&#x27;s practice uses chapters 1–8, step 7 puts chapters 9–16 to work, and the rest — faster transformers, generative models, reinforcement learning and the appendices — gives you early exposure that later steps build on.</span><span class="study-why"><strong>Why:</strong> the core text from classical machine learning to deep learning, with runnable notebooks for every chapter. <strong>Access:</strong> the book is paid; its notebooks are free, and step 2 used only its free appendix.</span></li>
+<li><span class="study-role"><strong>Primary (framing)</strong></span><span class="study-title"><a href="https://github.com/chiphuyen/dmls-book" class="external" rel="noopener noreferrer"><em>Designing Machine Learning Systems</em><span class="visually-hidden" data-chrome> (external link)</span></a> (Huyen)</span><span class="study-task"><strong>read:</strong> the complete book, in order. Chapters 1–2 — including &quot;When to Use Machine Learning&quot;, objectives and framing — are what this step&#x27;s practice needs first.</span><span class="study-why"><strong>Why:</strong> the whole life of a machine-learning system — framing, data, evaluation, deployment, monitoring, continual learning and the infrastructure around them. Reading it now means you build every system with its whole life in view; steps 5, 6 and 16 return to its chapters in depth.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--where-you-study-each-concept" aria-label="Where you study each concept">
+<p class="guide-label"><strong>Where you study each concept</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Error analysis"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">What you study</th>
+<th scope="col">Where you study it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Framing, objectives, when not to use learning</td>
+<td><em>Designing Machine Learning Systems</em> chs 1–2</td>
+</tr>
+<tr>
+<td>Models, regularization, ensembles, clustering</td>
+<td><em>Hands-On ML</em> chs 1–8</td>
+</tr>
+<tr>
+<td>Validation, leakage-safe splits, metrics, error analysis</td>
+<td><em>Hands-On ML</em> chs 2–3</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<ol class="guide-list guide-list--practise-and-build">
+<li>A framing exercise on <a href="../materials/framing-cases/index.html">six cases, one of which is not a machine-learning problem</a> — decide what each system should predict, from what, against which baseline, and at what cost per error.</li>
+<li>An end-to-end project that begins with a written framing and a baseline that involves no learning. <strong>This is the start of your evolving system.</strong></li>
+</ol>
+</section>
+<section class="guide-block guide-block--you-re-ready-to-continue-when-you-can" aria-label="You&#x27;re ready to continue when you can">
+<p class="guide-label"><strong>You&#x27;re ready to continue when you can</strong></p>
+<ul class="guide-list guide-list--you-re-ready-to-continue-when-you-can">
+<li>decide whether learning is appropriate for a stated goal, and justify the decision;</li>
+<li>frame the problem and its unit of prediction;</li>
+<li>select and justify a baseline;</li>
+<li>implement a supervised pipeline with leakage-safe validation;</li>
+<li>diagnose overfitting and class imbalance from evidence.</li>
+</ul>
+</section>
+<p class="guide-note">You can begin step 4 while you finish this step.</p>
+<section class="guide-block guide-block--what-comes-next" aria-label="What comes next">
+<p class="guide-label"><strong>What comes next</strong></p>
+<p>You now have two models and a number for each. Step 4 asks the question that number cannot answer on its own: is the difference between them real, or an artefact of the particular data you happened to test on?</p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev" href="../2-the-mathematics-of-learning/index.html" rel="prev"><span class="guide-pager-label">← Previous</span><span class="guide-pager-title">2. The Mathematics of Learning</span></a>
+  <a class="guide-pager-link guide-pager-link--next" href="../4-statistics-is-the-difference-real/index.html" rel="next"><span class="guide-pager-label">Next →</span><span class="guide-pager-title">4. Statistics: Is the Difference Real?</span></a>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+<script src="../../assets/js/diagrams.js?v=ce213ccecc" defer data-mermaid-src="../../assets/vendor/mermaid/mermaid.min.js"></script>
+</body>
+</html>

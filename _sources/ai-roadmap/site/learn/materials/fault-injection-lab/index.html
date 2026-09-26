@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Fault Injection: Find the Component That Failed · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-material">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../../research/index.html">Evidence</a></li>
+    <li><a href="../../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button toc-toggle" type="button" aria-controls="page-toc" aria-expanded="false" data-drawer-toggle="page-toc">
+        <span class="toc-glyph" aria-hidden="true"></span><span class="tool-label">On this page</span>
+      </button>
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../../research/index.html">Evidence</a></li>
+    <li><a href="../../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../evaluating-and-observing-ai-applications/index.html">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../index.html">Learn</a></li>
+<li><span aria-current="page">Fault Injection: Find the Component That Failed</span></li>      </ol>
+    </nav>
+    <article class="prose doc doc--material">
+<p class="doc-kind doc-kind--material" data-chrome><span class="doc-kind-label">Curriculum material</span><span class="doc-kind-divider" aria-hidden="true"></span><span class="doc-kind-note">Written for this roadmap — the guide sends you here</span></p><h1 id="fault-injection-find-the-component-that-failed">Fault Injection: Find the Component That Failed</h1>
+<dl class="doc-meta" data-chrome>
+  <div class="doc-meta-item"><dt>Canonical source</dt><dd><code>materials/fault-injection-lab.md</code></dd></div>
+</dl><div class="table-wrap" role="region" tabindex="0" aria-label="Table: Fault Injection: Find the Component That Failed"><table class="doc-table table--kv" style="--cols:2">
+<thead>
+<tr>
+<th scope="col"></th>
+<th scope="col"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="kv-row kv-row--type">
+<td><strong>Type</strong></td>
+<td>Lab — break the system on purpose, diagnose from evidence, then check</td>
+</tr>
+<tr class="kv-row kv-row--for">
+<td><strong>For</strong></td>
+<td><a href="../../11-compound-ai-systems-tools-retrieval-and-verification/index.html#11-compound-ai-systems-tools-retrieval-and-verification">11. Compound AI Systems: Tools, Retrieval and Verification</a></td>
+</tr>
+<tr class="kv-row kv-row--you-should-already-have">
+<td><strong>You should already have</strong></td>
+<td><a href="../agent-loop-exercise/index.html">the agent loop you built</a>, your step 9 retriever, and an evaluation you trust from step 6</td>
+</tr>
+<tr class="kv-row kv-row--needs">
+<td><strong>Needs</strong></td>
+<td>Python, standard library only. The harness runs offline</td>
+</tr>
+<tr class="kv-row kv-row--sources">
+<td><strong>Sources</strong></td>
+<td>Kapoor et al., &quot;AI Agents That Matter&quot; · Kambhampati et al., LLM-Modulo · Liu et al., &quot;Lost in the Middle&quot;</td>
+</tr>
+</tbody>
+</table></div>
+<p>A compound system gives you one symptom — a wrong answer — and five candidate causes: retrieval, context, the tool, the model&#x27;s decision, or your own orchestration code. The skill this lab builds is not knowing which it <em>usually</em> is. It is producing evidence that distinguishes them, quickly, before you start changing things.</p>
+<p>The method is the one you already use for data: create the failure yourself, under control, so you learn what each failure <em>looks like</em> from the outside. Then when one arrives uninvited, you recognize its signature.</p>
+<nav class="doc-contents" aria-labelledby="contents">
+<h2 id="contents">Contents<a class="heading-anchor" href="#contents" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<details open>
+<summary><b>Click to expand / collapse</b></summary>
+<ol>
+<li><a href="#1-the-faults">The Faults</a></li>
+<li><a href="#2-the-harness">The Harness</a></li>
+<li><a href="#3-run-it-blind">Run It Blind</a></li>
+<li><a href="#4-signatures">Signatures</a></li>
+<li><a href="#5-do-it-to-your-own-system">Do It To Your Own System</a></li>
+</ol>
+</details>
+<hr class="section-break">
+</nav>
+<section class="doc-section" aria-labelledby="1-the-faults">
+<h2 id="1-the-faults">1. The Faults<a class="heading-anchor" href="#1-the-faults" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Six faults, each a plausible thing that happens in production rather than an invention for the lab.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 1. The Faults"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">#</th>
+<th scope="col">Fault</th>
+<th scope="col">What actually happens in production</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Retrieval returns nothing</td>
+<td>An index rebuild fails; a filter excludes everything</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Retrieval returns confidently wrong passages</td>
+<td>Embedding model swapped; a near-duplicate outranks the right passage</td>
+</tr>
+<tr>
+<td>3</td>
+<td>A tool raises an error</td>
+<td>A dependency times out, a credential expires</td>
+</tr>
+<tr>
+<td>4</td>
+<td>A tool returns malformed output</td>
+<td>An upstream API changes a field name or a unit</td>
+</tr>
+<tr>
+<td>5</td>
+<td>The context is truncated</td>
+<td>The history outgrows the budget and the middle is dropped</td>
+</tr>
+<tr>
+<td>6</td>
+<td>The model&#x27;s step does not parse</td>
+<td>A model update changes the output format</td>
+</tr>
+</tbody>
+</table></div>
+<p>Faults 1, 2 and 5 produce <em>fluent, plausible, wrong</em> answers — the ones that are dangerous because nothing looks broken.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="2-the-harness">
+<h2 id="2-the-harness">2. The Harness<a class="heading-anchor" href="#2-the-harness" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<div class="code-block" data-lang="python"><div class="code-meta" data-chrome><span class="code-lang">PYTHON</span></div><pre class="code"><code><span class="sd">"""Inject one fault at a time into a retrieve-then-answer pipeline and read the trace."""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+
+<span class="n">DOCS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"refund-policy"</span><span class="p">:</span> <span class="s2">"Refunds are issued within 14 days of purchase, minus shipping."</span><span class="p">,</span>
+    <span class="s2">"returns-policy"</span><span class="p">:</span> <span class="s2">"Items may be returned unopened within 30 days for store credit."</span><span class="p">,</span>
+    <span class="s2">"shipping"</span><span class="p">:</span> <span class="s2">"Standard shipping takes 3-5 working days."</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fault</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">fault</span> <span class="o">==</span> <span class="s2">"empty"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">fault</span> <span class="o">==</span> <span class="s2">"wrong"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">DOCS</span><span class="p">[</span><span class="s2">"shipping"</span><span class="p">]]</span>                      <span class="c1"># plausible, unrelated</span>
+    <span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">text</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">DOCS</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+    <span class="k">return</span> <span class="n">hits</span> <span class="ow">or</span> <span class="p">[</span><span class="n">DOCS</span><span class="p">[</span><span class="s2">"refund-policy"</span><span class="p">]]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">call_tool</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fault</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">fault</span> <span class="o">==</span> <span class="s2">"tool_error"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="s2">"order-service did not respond"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fault</span> <span class="o">==</span> <span class="s2">"tool_malformed"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">'{"purchase_date": "01/09/2026"}'</span>        <span class="c1"># day-first, undeclared</span>
+    <span class="k">return</span> <span class="s1">'{"purchase_date": "2026-09-01"}'</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">build_context</span><span class="p">(</span><span class="n">goal</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">passages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">tool_output</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fault</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"GOAL: </span><span class="si">{</span><span class="n">goal</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="o">*</span><span class="n">passages</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"TOOL: </span><span class="si">{</span><span class="n">tool_output</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fault</span> <span class="o">==</span> <span class="s2">"truncated"</span><span class="p">:</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">context</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>         <span class="c1"># the middle and end are gone</span>
+    <span class="k">return</span> <span class="n">context</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">answer</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fault</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A stand-in model: answers from what it was given, and never says 'I don't know'."""</span>
+    <span class="k">if</span> <span class="n">fault</span> <span class="o">==</span> <span class="s2">"unparsable"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">'&lt;tool_call name="order_service"'</span>          <span class="c1"># truncated, unparsable</span>
+    <span class="n">has_refund_rule</span> <span class="o">=</span> <span class="s2">"14 days"</span> <span class="ow">in</span> <span class="n">context</span>
+    <span class="n">has_date</span> <span class="o">=</span> <span class="s2">"2026-09-01"</span> <span class="ow">in</span> <span class="n">context</span>
+    <span class="k">if</span> <span class="n">has_refund_rule</span> <span class="ow">and</span> <span class="n">has_date</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"Not refundable: 20 days have passed, past the 14-day window. Offer a return."</span>
+    <span class="k">if</span> <span class="n">has_refund_rule</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"Refunds are available within 14 days of purchase."</span>
+    <span class="k">return</span> <span class="s2">"This purchase is eligible for a refund; please process it."</span>  <span class="c1"># confident, wrong</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">fault</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">goal</span> <span class="o">=</span> <span class="s2">"Is this refund request within policy?"</span>
+    <span class="n">passages</span> <span class="o">=</span> <span class="n">retrieve</span><span class="p">(</span><span class="s2">"refund window"</span><span class="p">,</span> <span class="n">fault</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">tool_output</span> <span class="o">=</span> <span class="n">call_tool</span><span class="p">(</span><span class="s2">"order_service"</span><span class="p">,</span> <span class="n">fault</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">tool_output</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"ERROR: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">build_context</span><span class="p">(</span><span class="n">goal</span><span class="p">,</span> <span class="n">passages</span><span class="p">,</span> <span class="n">tool_output</span><span class="p">,</span> <span class="n">fault</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"fault"</span><span class="p">:</span> <span class="n">fault</span> <span class="ow">or</span> <span class="s2">"none"</span><span class="p">,</span>
+            <span class="s2">"passages"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">passages</span><span class="p">),</span>
+            <span class="s2">"context_chars"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="p">),</span>
+            <span class="s2">"tool_output"</span><span class="p">:</span> <span class="n">tool_output</span><span class="p">[:</span><span class="mi">40</span><span class="p">],</span>
+            <span class="s2">"answer"</span><span class="p">:</span> <span class="n">answer</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">fault</span><span class="p">)}</span>
+
+<span class="n">FAULTS</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">"empty"</span><span class="p">,</span> <span class="s2">"wrong"</span><span class="p">,</span> <span class="s2">"tool_error"</span><span class="p">,</span> <span class="s2">"tool_malformed"</span><span class="p">,</span> <span class="s2">"truncated"</span><span class="p">,</span> <span class="s2">"unparsable"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">fault</span> <span class="ow">in</span> <span class="n">FAULTS</span><span class="p">:</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">fault</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'fault'</span><span class="p">]</span><span class="si">:</span><span class="s2">14s</span><span class="si">}</span><span class="s2"> passages=</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'passages'</span><span class="p">]</span><span class="si">}</span><span class="s2">  ctx=</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'context_chars'</span><span class="p">]</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">  "</span>
+          <span class="sa">f</span><span class="s2">"tool=</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'tool_output'</span><span class="p">]</span><span class="si">:</span><span class="s2">34s</span><span class="si">}</span><span class="s2"> answer=</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'answer'</span><span class="p">][:</span><span class="mi">58</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="3-run-it-blind">
+<h2 id="3-run-it-blind">3. Run It Blind<a class="heading-anchor" href="#3-run-it-blind" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Do this before reading section 4, and do it with a colleague if you can.</p>
+<ol>
+<li>Have someone else (or a script) pick one fault at random and run only that line, showing you <strong>the answer alone</strong>.</li>
+<li>From the answer, write down your hypothesis and the <em>single</em> piece of evidence you would ask for next.</li>
+<li>Ask for that evidence — one field of the trace, nothing more — and revise.</li>
+<li>Record how many pieces of evidence you needed to be sure.</li>
+</ol>
+<p>The count is the point. An engineer who needs the whole trace to diagnose anything will not be able to diagnose a system whose trace is ten thousand tokens long.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="4-signatures">
+<h2 id="4-signatures">4. Signatures<a class="heading-anchor" href="#4-signatures" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>After running all seven rows, fill in this table from what you saw, then compare with your hypotheses.</p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: 4. Signatures"><table class="doc-table" style="--cols:3">
+<thead>
+<tr>
+<th scope="col">Fault</th>
+<th scope="col">What the answer looks like</th>
+<th scope="col">Which field of the trace settles it in one look</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>none</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>empty</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>wrong</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>tool_error</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>tool_malformed</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>truncated</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>unparsable</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>Then answer the four questions that matter more than the table:</p>
+<ol>
+<li><strong>Three of the faults produce the same answer, word for word.</strong> Which three, and what is the smallest piece of evidence that separates each from the others? (They are the reason a trace records retrieval results and context size, not just the final text.)</li>
+<li><strong>Which fault produces an answer that is confidently wrong with no error anywhere?</strong> What would have to be true of your evaluation for you to notice it in production?</li>
+<li><strong>The malformed tool output is a date in another format.</strong> Nothing raised. Where should that have been caught — the tool, the parser, or a check on the answer — and what does your choice cost?</li>
+<li><strong>Truncation removed the middle of the context.</strong> Relate what you saw to the &quot;lost in the middle&quot; result you read in step 11: what does that imply about long-context systems that look fine in testing?</li>
+</ol>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="5-do-it-to-your-own-system">
+<h2 id="5-do-it-to-your-own-system">5. Do It To Your Own System<a class="heading-anchor" href="#5-do-it-to-your-own-system" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Take the compound system from your step 11 practice and inject the same six faults, one at a time, with a flag rather than by editing code.</p>
+<ul>
+<li>Write the <strong>diagnosis you would make from the output alone</strong>, before looking at the trace.</li>
+<li>Note which faults your evaluation catches automatically and which pass it silently. The silent ones are your next tests, in the sense of <a href="../ml-testing-checklist/index.html">the testing checklist</a>.</li>
+<li>Add one check that turns the most dangerous silent failure into a loud one — a grounding check, a schema assertion, a retrieval-quality floor — and prove it works by re-injecting the fault.</li>
+</ul>
+<p><strong>Completion criterion.</strong> Given a bad output from your own system, you can name the component responsible with evidence rather than intuition, and you have at least one automatic check that fires for a failure that used to be silent. Step 12 then asks the harder question: whether the measurement that told you it was working deserves to be believed.</p>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+</section>
+
+    </article>
+  </main>
+
+  <aside class="toc-rail drawer drawer--right" id="page-toc" aria-label="On this page" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">On this page</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close contents</span></button>
+    </div>
+    <nav class="page-toc" aria-labelledby="toc-title">
+      <p class="rail-title" id="toc-title">On this page</p>
+      <ol class="toc-list">
+        <li class="toc-item">
+          <a href="#contents" data-toc-link>Contents</a>
+        </li>
+        <li class="toc-item">
+          <a href="#1-the-faults" data-toc-link>1. The Faults</a>
+        </li>
+        <li class="toc-item">
+          <a href="#2-the-harness" data-toc-link>2. The Harness</a>
+        </li>
+        <li class="toc-item">
+          <a href="#3-run-it-blind" data-toc-link>3. Run It Blind</a>
+        </li>
+        <li class="toc-item">
+          <a href="#4-signatures" data-toc-link>4. Signatures</a>
+        </li>
+        <li class="toc-item">
+          <a href="#5-do-it-to-your-own-system" data-toc-link>5. Do It To Your Own System</a>
+        </li>
+      </ol>
+    </nav>
+  </aside>
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>materials/fault-injection-lab.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../../assets/js/site.js?v=ce213ccecc" defer></script>
+</body>
+</html>

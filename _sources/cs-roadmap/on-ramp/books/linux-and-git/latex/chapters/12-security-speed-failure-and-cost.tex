@@ -1,0 +1,162 @@
+\bookchapter{Security, Speed, Failure, and Cost}{ch:12-security-speed-failure-and-cost}
+
+\begin{chapterintro}
+
+This chapter looks back at the terminal and Git through four questions that every tool raises sooner or later: what can go wrong, what makes it slow, how it breaks, and what it costs. Each section is short and practical: the few habits that protect your work, your time, and your money.
+
+\end{chapterintro}
+
+\emph{The problem.} The tools work for me now, but I don't know what could go badly wrong, or what it would cost me.
+
+\emph{The question.} What are the real risks of the terminal and Git, and which habits keep me safe?
+
+\section{Security: What Can Go Wrong, and What Limits the Damage}\label{12-security-speed-failure-and-cost:security-what-can-go-wrong-and-what-limits-the-damage}
+
+\emph{Secrets in your shell history.} Your shell saves the commands you type, in \texttt{\textasciitilde{}/.bash\_history} or \texttt{\textasciitilde{}/.zsh\_history}. Type \texttt{export\ API\_KEY=}\allowbreak{}\texttt{...} at the prompt and the key sits in that file for years. In bash, setting \texttt{HISTCONTROL=}\allowbreak{}\texttt{ignorespace} makes the shell skip any command that starts with a space:
+
+\codeneed{8}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{export} \VariableTok{HISTCONTROL}\OperatorTok{=}\NormalTok{ignorespace}
+ \BuiltInTok{export} \VariableTok{API\_KEY}\OperatorTok{=}\NormalTok{sk{-}live{-}4f9a2c}
+\BuiltInTok{export} \VariableTok{COLOUR}\OperatorTok{=}\NormalTok{blue}
+\BuiltInTok{history}\NormalTok{ 3}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+    1  export HISTCONTROL=ignorespace
+    2  export COLOUR=blue
+    3  history 3
+\end{Verbatim}
+\end{codeblock}
+
+The line with the key never reached the history. (In zsh, the setting is \texttt{setopt\ HIST\_}\allowbreak{}\texttt{IGNORE\_}\allowbreak{}\texttt{SPACE}.) Better still, keep secrets in a \texttt{.env} file with \texttt{chmod\ 600} and never type them at all.
+
+\codeneed{8}
+
+\emph{Secrets in Git.} This is the big one. Once a secret is committed, deleting the file doesn't delete it from history. Here a project committed \texttt{.env}, then removed it and added it to \texttt{.gitignore}:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ls} \AttributeTok{{-}a}
+\FunctionTok{git}\NormalTok{ show HEAD\textasciitilde{}1:.env}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+.  ..  .git  .gitignore  app.py
+API_KEY=sk-live-4f9a2c
+\end{Verbatim}
+\end{codeblock}
+
+The file is gone from the folder, but one command pulls it straight out of the previous commit. Anyone who clones the repository can do the same, and bots scan public repositories for keys within minutes of a push.
+
+\begin{callout}{warning}
+
+If you ever commit a secret, treat it as stolen. Revoke or rotate it at the provider first (create a new key, disable the old one), then clean up the repository. Rewriting history with a tool such as \texttt{git\ filter-repo} doesn't help if someone has already copied the key.
+
+\end{callout}
+
+The prevention is cheap: create \texttt{.gitignore} before your first commit, and always read \texttt{git\ status} and \texttt{git\ diff\ -\/-staged} before you commit.
+
+\emph{Permissions and privilege.} The habits from Chapter 3 limit the damage when something does go wrong. Keep private files at \texttt{600}, including SSH keys. Protect your private key with a passphrase. Don't work as root, and use \texttt{sudo} for single commands only. Read scripts before running them, especially anything piped from \texttt{curl} into a shell.
+
+\section{Speed: What Makes This Slow}\label{12-security-speed-failure-and-cost:speed-what-makes-this-slow}
+
+\emph{Searching too much.} Most slow commands are searching far more than you need. \texttt{grep\ -r} or \texttt{find} started at \texttt{/} or your home folder crawls through every file, including huge folders like \texttt{.venv}, \texttt{node\_modules}, and \texttt{.git}. Start as close to the target as you can, and skip the heavy folders: \texttt{grep\ -}\allowbreak{}\texttt{r\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{exclude-}\allowbreak{}\texttt{dir=}\allowbreak{}\texttt{.}\allowbreak{}\texttt{venv\ TODO\ .}.
+
+\emph{Large repositories.} Git keeps every version of every file forever. That's wonderful for code and costly for big binary files, such as videos, datasets, and build outputs. Watch what happens when a 20 MB file is committed and then deleted:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{du} \AttributeTok{{-}sh}\NormalTok{ .git}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+ 19M    .git
+\end{Verbatim}
+\end{codeblock}
+
+The file is gone from the project, but it's still in history, so every clone downloads it, for good. Before the video, \texttt{.git} was 128 KB. Three habits keep repositories fast:
+
+\begin{itemize}
+\tightlist
+\item
+  Put build outputs, virtual environments, and data files in \texttt{.gitignore}.
+\item
+  Store large assets somewhere else, or use Git LFS (Large File Storage), a Git add-on that keeps big files outside the history.
+\item
+  When you only need the latest version of someone's huge project, clone just that: \texttt{git\ clone\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{depth\ 1\ \textless{}url\textgreater{}}.
+\end{itemize}
+
+\emph{Waiting on the network.} \texttt{git\ status}, \texttt{diff}, \texttt{log}, \texttt{commit}, and \texttt{branch} are fast because they never leave your machine. Only \texttt{clone}, \texttt{fetch}, \texttt{pull}, and \texttt{push} talk to the remote. If Git feels slow, check which kind of command you're running.
+
+\Needspace{26\baselineskip}
+
+\section{Failure: How It Breaks, and How to Diagnose It}\label{12-security-speed-failure-and-cost:failure-how-it-breaks-and-how-to-diagnose-it}
+
+Most failures in this book announce themselves with a clear message. Read the message first, then run the one command that checks it:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2977\linewidth-1.4046\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.3740\linewidth-1.2519\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.3282\linewidth-1.3435\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{You see} & \thead{Likely cause} & \thead{Check with} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{You see} & \thead{Likely cause} & \thead{Check with} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{command\ not\ found} & Typo, not installed, or not on PATH & \texttt{which\ name}, \texttt{echo\ \$PATH} \\
+\texttt{Permission\ denied} & Not yours, not executable, or a closed folder & \texttt{ls\ -l} on the file and its folders \\
+\texttt{No\ space\ left\ on\ device} & Disk full, often from logs or backups & \texttt{df\ -h}, then \texttt{du\ -sh\ *} in suspect folders \\
+A background program vanished & It crashed or was killed & Its log, or \texttt{journalctl\ -u\ name} \\
+A script ``succeeded'' but did damage & Errors were ignored & Add \texttt{set\ -euo\ pipefail} \\
+\texttt{!\ {[}rejected{]}\ …\ (fetch\ first)} & Someone pushed before you & \texttt{git\ pull}, then push \\
+\texttt{CONFLICT} & Both sides changed the same lines & \texttt{git\ status}, then resolve \\
+\texttt{HEAD\ detached\ at\ …} & You checked out a commit, not a branch & \texttt{git\ switch\ main} \\
+A commit seems lost & Branch deleted or reset & \texttt{git\ reflog} \\
+\end{longtable}
+\end{booktable}
+
+Two failures can't be fixed afterwards, so prevent them. First, uncommitted work that you discard with \texttt{git\ restore} or \texttt{git\ reset\ -\/-hard} is gone, because Git never saw it; commit small and often. Second, a laptop is a single point of failure; push to a remote regularly, because a repository that exists in one place isn't backed up.
+
+\begin{callout}{tip}
+
+When you're stuck, run \texttt{git\ status}. It almost always says what state you're in and prints the exact command to get out of it.
+
+\end{callout}
+
+\section{Cost: What This Costs You}\label{12-security-speed-failure-and-cost:cost-what-this-costs-you}
+
+The tools themselves are free. Linux, bash, zsh, the command-line tools, and Git are all open source, and they run on the laptop you already have. The real costs are elsewhere:
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Time.} The first weeks in the terminal are slower than clicking. That cost is paid once, and the time it saves comes back every day after.
+\item
+  \emph{Hosting.} GitHub, GitLab, and Bitbucket all have free plans that cover public and private repositories for individuals and small teams. Paid plans add things like more automation minutes, more storage for large files, and organisation controls. Check current prices before you rely on a limit.
+\item
+  \emph{Disk and bandwidth.} Big files in history cost every person who clones the project, on every clone.
+\item
+  \emph{Mistakes.} The most expensive items in this chapter are the silent ones. A cloud key leaked in a public repository can be used to run up a large bill before you notice. A week of work that was never pushed dies with a stolen laptop. Both are prevented by habits that cost nothing: ignore secrets, commit often, push daily.
+\end{itemize}

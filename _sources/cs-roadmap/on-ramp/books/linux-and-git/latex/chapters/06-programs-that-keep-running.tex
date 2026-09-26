@@ -1,0 +1,344 @@
+\bookchapter{Programs That Keep Running}{ch:06-programs-that-keep-running}
+
+\begin{chapterintro}
+
+This chapter shows you running programs from the outside: how to list them, run them in the background, stop them politely or by force, and hand them to the system so they keep running after you leave. You'll also see where their logs go and how to run a job on a schedule.
+
+\end{chapterintro}
+
+\emph{The problem.} My program stops the moment I close the terminal.
+
+\emph{The question.} How do I keep a program running, see what's running, and stop it cleanly?
+
+\section{Processes: Programs in Motion}\label{06-programs-that-keep-running:processes-programs-in-motion}
+
+A program is a file on disk, like a recipe in a book. A \textbf{process}\index{process} is that program running, like someone cooking the recipe. The same recipe can be cooked twice at once.
+
+The kernel gives every process a number, its \textbf{PID}\index{pid@PID} (process ID), and remembers who started it, its parent. Programs you run from the shell are the shell's children. That's why closing the terminal can end your program: when the terminal goes, the shell and its children are told to hang up.
+
+The examples use a small Python program, \texttt{labs/}\allowbreak{}\texttt{ch06/}\allowbreak{}\texttt{heartbeat.py}, which prints a line such as \texttt{14:36:53\ beat\ 2} every two seconds until it's asked to stop.
+
+\section{Foreground and Background}\label{06-programs-that-keep-running:foreground-and-background}
+
+Normally a program runs in the foreground, holding the terminal until it finishes. With \texttt{\&} at the end, it runs in the background: the shell prints a job number and the PID, and gives you the prompt back:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{python3}\NormalTok{ heartbeat.py }\OperatorTok{\textgreater{}}\NormalTok{ heartbeat.log }\KeywordTok{\&}
+\BuiltInTok{jobs}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+[1] 25
+[1]+  Running                 python3 heartbeat.py > heartbeat.log &
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{11}
+
+Each background program started from this shell is a job. \texttt{jobs} lists them and \texttt{fg} brings one back to the foreground. \texttt{ps} lists your processes, and \texttt{pgrep} finds one by name (on macOS, use \texttt{pgrep\ -fl}):
+
+\codeneed{8}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ps}
+\ExtensionTok{pgrep} \AttributeTok{{-}af}\NormalTok{ heartbeat}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{5}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+  PID TTY          TIME CMD
+   21 pts/0    00:00:00 bash
+   25 pts/0    00:00:00 python3
+   27 pts/0    00:00:00 ps
+25 python3 heartbeat.py
+\end{Verbatim}
+\end{codeblock}
+
+\texttt{ps\ aux} lists every process on the machine, and \texttt{top} shows a live view (press \texttt{q} to quit).
+
+\codeneed{4}
+
+Jobs still belong to your terminal. To let a program survive the terminal closing, start it with \texttt{nohup} (``no hang-up''):
+
+\codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{nohup}\NormalTok{ python3 heartbeat.py }\OperatorTok{\textgreater{}}\NormalTok{ heartbeat.log }\DecValTok{2}\OperatorTok{\textgreater{}\&}\DecValTok{1} \KeywordTok{\&}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\texttt{2\textgreater{}\&1} sends errors into the same file, since no screen will show them. The log's first line, \texttt{nohup:\ ignoring\ input}, is harmless.
+
+\Needspace{13\baselineskip}
+
+\section{Signals: Asking a Process to Stop}\label{06-programs-that-keep-running:signals-asking-a-process-to-stop}
+
+You talk to a running process by sending it a \textbf{signal}\index{signal}, a small numbered message from the kernel. The ones you'll use:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1528\linewidth-1.6944\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.1389\linewidth-1.7222\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7083\linewidth-0.5833\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Signal} & \thead{Number} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Signal} & \thead{Number} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+SIGINT & 2 & ``Interrupt.'' Sent when you press Ctrl-C \\
+SIGTERM & 15 & ``Please finish up and stop.'' The polite default \\
+SIGKILL & 9 & ``Stop now.'' Cannot be caught or ignored \\
+\end{longtable}
+\end{booktable}
+
+Signals are sent with \texttt{kill}, a gloomy name for something usually polite. \texttt{kill\ 25} sends SIGTERM to PID 25; \texttt{kill\ \%1} sends it to job 1. A well-written program catches SIGTERM, finishes what it was doing, saves its work, and exits. That's a graceful shutdown. \texttt{heartbeat.py} does it by registering a Python function to run when SIGTERM arrives:
+
+\codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def}\NormalTok{ stop(signum, frame):}
+    \KeywordTok{global}\NormalTok{ running}
+    \BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"got signal }\SpecialCharTok{\{}\NormalTok{signum}\SpecialCharTok{\}}\SpecialStringTok{, finishing up"}\NormalTok{, flush}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\NormalTok{    running }\OperatorTok{=} \VariableTok{False}
+
+\NormalTok{signal.signal(signal.SIGTERM, stop)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{8}
+
+The main loop checks \texttt{running}, so it stops after the current beat. Send SIGTERM with \texttt{kill\ \%1}, and a couple of seconds later the shell reports \texttt{{[}1{]}+\ Done}, and the log ends with a goodbye:
+
+\codeneed{5}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{tail} \AttributeTok{{-}n}\NormalTok{ 3 heartbeat.log}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{3}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+14:36:55 beat 3
+got signal 15, finishing up
+saved my work, bye
+\end{Verbatim}
+\end{codeblock}
+
+\texttt{kill\ -9} sends SIGKILL instead. The kernel ends the process on the spot, the shell reports \texttt{Killed}, and the program gets no chance to save anything.
+
+\begin{callout}{warning}
+
+Use \texttt{kill\ -9} only when a polite \texttt{kill} hasn't worked after a few seconds. A program killed mid-write can leave a half-written, corrupted file.
+
+\end{callout}
+
+\section{Services: Programs the System Looks After}\label{06-programs-that-keep-running:services-programs-the-system-looks-after}
+
+With \texttt{nohup}, nobody restarts a crashed program, and a reboot ends it. For programs that should always run, the system takes charge.
+
+A \textbf{service}\index{service} (or daemon) is a background program with no terminal, supervised by the \textbf{init system}\index{init system}: the first process the kernel starts at boot, PID 1. It starts services, restarts them if they crash, and collects their output. On most Linux systems it's systemd; on macOS it's launchd, controlled with \texttt{launchctl}.
+
+\codeneed{12}
+
+With systemd, you describe a service in a small text file called a unit file. For a personal service, it goes in \texttt{\textasciitilde{}/}\allowbreak{}\texttt{.}\allowbreak{}\texttt{config/}\allowbreak{}\texttt{systemd/}\allowbreak{}\texttt{user/}\allowbreak{}\texttt{heartbeat.}\allowbreak{}\texttt{service}:
+
+\codeneed{9}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{[Unit]}
+\DataTypeTok{Description}\OtherTok{=}\StringTok{Heartbeat demo}
+
+\KeywordTok{[Service]}
+\DataTypeTok{ExecStart}\OtherTok{=}\StringTok{/usr/bin/python3 /home/ada/sandbox/heartbeat.py}
+\DataTypeTok{Restart}\OtherTok{=}\StringTok{on{-}failure}
+
+\KeywordTok{[Install]}
+\DataTypeTok{WantedBy}\OtherTok{=}\StringTok{default.target}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{11}
+
+\texttt{ExecStart} is the command, \texttt{Restart=}\allowbreak{}\texttt{on-failure} restarts it after a crash, and \texttt{WantedBy} starts it automatically. You control it with \texttt{systemctl}:
+
+\codeneed{8}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{systemctl} \AttributeTok{{-}{-}user}\NormalTok{ daemon{-}reload}
+\ExtensionTok{systemctl} \AttributeTok{{-}{-}user}\NormalTok{ enable }\AttributeTok{{-}{-}now}\NormalTok{ heartbeat}
+\ExtensionTok{systemctl} \AttributeTok{{-}{-}user}\NormalTok{ status heartbeat}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+● heartbeat.service - Heartbeat demo
+     Active: active (running) since Fri 2026-09-25 10:02:11 UTC
+   Main PID: 2143 (python3)
+…
+\end{Verbatim}
+\end{codeblock}
+
+\texttt{stop} sends SIGTERM, \texttt{restart} stops and starts it, and \texttt{disable} stops it starting automatically. System-wide services use \texttt{sudo} instead of \texttt{-\/-user}.
+
+\begin{callout}{note}
+
+systemd runs only on Linux, and not inside every WSL setup or container. On macOS, use \texttt{nohup} for this chapter's lab, and read this section for the idea.
+
+\end{callout}
+
+\codeneed{7}
+
+\section{Logs: Where the Output Goes}\label{06-programs-that-keep-running:logs-where-the-output-goes}
+
+A service has no screen, so its output goes into a \textbf{log}\index{log}: a record of timestamped messages. systemd keeps every service's output in its journal, and \texttt{journalctl\ -f} follows it like \texttt{tail\ -f}:
+
+\codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{journalctl} \AttributeTok{{-}{-}user} \AttributeTok{{-}u}\NormalTok{ heartbeat }\AttributeTok{{-}f}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+Many programs write their own log files, traditionally under \texttt{/var/log}; read them with the tools from Chapter 5. On macOS, use the Console app.
+
+\section{Scheduled Jobs with cron}\label{06-programs-that-keep-running:scheduled-jobs-with-cron}
+
+Some work should run only at set times, like a nightly backup. \textbf{cron}\index{cron} is the classic scheduler on Linux and macOS. Each user has a crontab, a table of jobs, edited with \texttt{crontab\ -e} and listed with \texttt{crontab\ -l}. Each line has five time fields, then the command:
+
+\codeneed{7}\begin{codeblock}
+\begin{Verbatim}[breaklines=false, fontsize=\fontsize{8.8}{8.68}\selectfont, fontfamily=diagrammono, formatcom=\diagramlines]
+  ┌──────── minute (0-59)
+  │ ┌────── hour (0-23)
+  │ │ ┌──── day of month (1-31)
+  │ │ │ ┌── month (1-12)
+  │ │ │ │ ┌ day of week (0-6, Sunday is 0)
+  │ │ │ │ │
+  0 7 * * 1-5  /home/ada/bin/morning.sh
+\end{Verbatim}
+\end{codeblock}
+
+A \texttt{*} means ``every''. This line runs \texttt{morning.sh} at 07:00, Monday to Friday.
+
+cron runs jobs with a bare environment, without your PATH or \texttt{\textasciitilde{}/.bashrc}. Use full paths, and send output to a file (\texttt{\textgreater{}\textgreater{}\ /}\allowbreak{}\texttt{home/}\allowbreak{}\texttt{ada/}\allowbreak{}\texttt{morning.}\allowbreak{}\texttt{log\ 2\textgreater{}\&}\allowbreak{}\texttt{1}), or you'll never see the errors. Chapter 9 schedules a real script.
+
+\section{Lab: A Program That Outlives the Terminal}\label{06-programs-that-keep-running:lab-a-program-that-outlives-the-terminal}
+
+Copy \texttt{labs/}\allowbreak{}\texttt{ch06/}\allowbreak{}\texttt{heartbeat.py} into \texttt{\textasciitilde{}/sandbox} and \texttt{cd} there.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Run it in the foreground: \texttt{python3\ heartbeat.py}. After a few beats, press Ctrl-C. \textbf{Expected:} beats every two seconds, then a traceback ending in \texttt{KeyboardInterrupt}. Ctrl-C sent SIGINT, which this program doesn't handle gracefully.
+\item
+  Start it in the background: \texttt{nohup\ python3\ heartbeat.}\allowbreak{}\texttt{py\ \textgreater{}\ heartbeat.}\allowbreak{}\texttt{log\ 2\textgreater{}\&}\allowbreak{}\texttt{1\ \&}. \textbf{Expected:} a job number and PID, such as \texttt{{[}1{]}\ 25}, and your prompt back.
+\item
+  Find it: \texttt{pgrep\ -af\ heartbeat} (macOS: \texttt{pgrep\ -fl\ heartbeat}). \textbf{Expected:} the same PID and the command.
+\item
+  Watch it with \texttt{tail\ -f\ heartbeat.log}, then press Ctrl-C. \textbf{Expected:} new beats appear; stopping \texttt{tail} doesn't stop the program.
+\item
+  Close the terminal window, open a new one, and run \texttt{pgrep\ -af\ heartbeat} again. \textbf{Expected:} it's still running, under the same PID.
+\item
+  Stop it gracefully: \texttt{kill\ \textless{}PID\textgreater{}}, wait a few seconds, then \texttt{tail\ -}\allowbreak{}\texttt{n\ 2\ \textasciitilde{}/}\allowbreak{}\texttt{sandbox/}\allowbreak{}\texttt{heartbeat.}\allowbreak{}\texttt{log}. \textbf{Expected:} \texttt{got\ signal\ 15,}\allowbreak{}\texttt{\ finishing\ up} and \texttt{saved\ my\ work,}\allowbreak{}\texttt{\ bye}.
+\end{enumerate}
+
+\section{Summary, Key Terms, and Review Questions}\label{06-programs-that-keep-running:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{06-programs-that-keep-running:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  A process is a running program with a PID and a parent. \texttt{ps}, \texttt{pgrep}, and \texttt{top} show them.
+\item
+  \texttt{\&} runs a command in the background; \texttt{jobs} and \texttt{fg} manage it. \texttt{nohup} lets it survive the terminal closing.
+\item
+  Signals ask processes to act. SIGTERM asks politely; SIGKILL forces. Prefer graceful shutdown.
+\item
+  Services are supervised by the init system (systemd on Linux, launchd on macOS), which starts, restarts, and logs them.
+\item
+  Logs hold what background programs say. \texttt{journalctl} reads systemd's; \texttt{tail\ -f} follows a file.
+\item
+  cron runs commands on a schedule, with a bare environment.
+\end{itemize}
+
+\Needspace{14\baselineskip}
+
+\subsection*{Key Terms}\label{06-programs-that-keep-running:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.1899\linewidth-1.6203\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.8101\linewidth-0.3797\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Process & A running instance of a program \\
+PID & The number the kernel gives each process \\
+Signal & A small numbered message sent to a process \\
+Service & A background program supervised by the system \\
+Init system & The first process (PID 1), which starts and supervises services \\
+Log & A record of timestamped messages written by a program \\
+cron & The classic scheduler for running commands at set times \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{06-programs-that-keep-running:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  What's the difference between a program and a process?
+\item
+  Why does a program started normally stop when you close its terminal? Name two ways to prevent that.
+\item
+  Why should you try \texttt{kill} before \texttt{kill\ -9}?
+\item
+  What does a service manager give you that \texttt{nohup} doesn't?
+\item
+  A cron job works when you run it by hand but fails from cron. What's the likely cause?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can start a program in the background, find its PID, read its output, and stop it gracefully.
+
+\end{understandbox}

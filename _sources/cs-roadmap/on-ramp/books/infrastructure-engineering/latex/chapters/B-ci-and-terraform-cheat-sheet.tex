@@ -1,0 +1,90 @@
+\bookchapter{CI and Terraform Cheat Sheet}{ch:B-ci-and-terraform-cheat-sheet}
+
+\Needspace{23\baselineskip}
+
+\section{GitHub Actions and act}\label{B-ci-and-terraform-cheat-sheet:github-actions-and-act}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3469\linewidth-1.3061\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6531\linewidth-0.6939\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Key or command} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Key or command} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{on:} & Events that start the workflow \\
+\texttt{jobs.\textless{}id\textgreater{}.runs-on:} & The runner a job uses \\
+\texttt{needs:} & Run this job only after the named jobs succeed \\
+\texttt{uses:} / \texttt{with:} & Run a ready-made action / give it inputs \\
+\texttt{run:} & Run shell commands (\texttt{run:\ \textbar{}} starts a block of several
+lines) \\
+\texttt{env:} & Environment variables for the workflow, a job, or a step \\
+\texttt{\$\{\{\ secrets.NAME\ \}\}} & A secret, masked as \texttt{***} in logs \\
+\texttt{\$\{\{\ github.sha\ \}\}}, \texttt{\$GITHUB\_SHA} & The commit hash being built \\
+\texttt{concurrency:\ NAME} & Never run two workflows in the same group at once \\
+\texttt{act\ -l}, \texttt{act\ push} & List the jobs; run the workflows as if you had pushed (\texttt{-v} for
+detail) \\
+\texttt{.actrc}, \texttt{.secrets} & act's default options; its secrets, one \texttt{NAME=value} per line
+(keep out of git) \\
+\end{longtable}
+\end{booktable}
+
+\Needspace{16\baselineskip}
+
+\section{Terraform Commands}\label{B-ci-and-terraform-cheat-sheet:terraform-commands}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3962\linewidth-1.2075\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6038\linewidth-0.7925\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{terraform\ init} & Download providers and prepare the folder \\
+\texttt{terraform\ validate} & Check the files for mistakes \\
+\texttt{terraform\ plan} & Show what would change: \texttt{+} create, \texttt{\textasciitilde{}}
+update, \texttt{-} destroy, \texttt{-/+} replace \\
+\texttt{terraform\ apply} & Show the plan, ask for \texttt{yes}, and make the changes \\
+\texttt{terraform\ destroy} & Delete everything the configuration manages, after asking \\
+\texttt{terraform\ state\ list}, \texttt{terraform\ output} & List what's in the state; print the outputs again \\
+\end{longtable}
+\end{booktable}
+
+\Needspace{17\baselineskip}
+
+\section{Terraform Language}\label{B-ci-and-terraform-cheat-sheet:terraform-language}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3402\linewidth-1.3196\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6598\linewidth-0.6804\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{To do this} & \thead{Write this} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{To do this} & \thead{Write this} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Choose a provider & \texttt{required\_providers} in the \texttt{terraform} block, with
+\texttt{source} and \texttt{version} \\
+Declare a resource & \texttt{resource\ "TYPE"\ "NAME"\ \{\ …\ \}} \\
+Refer to another resource & \texttt{docker\_}\allowbreak{}\texttt{image.}\allowbreak{}\texttt{app.}\allowbreak{}\texttt{image\_}\allowbreak{}\texttt{id}
+(type, name, attribute) \\
+Use a variable & \texttt{var.app\_version}, or
+\texttt{"APP\_}\allowbreak{}\texttt{VERSION=}\allowbreak{}\texttt{\$\{var.}\allowbreak{}\texttt{app\_}\allowbreak{}\texttt{version\}"} \\
+Set a variable from the shell & \texttt{export\ TF\_}\allowbreak{}\texttt{VAR\_}\allowbreak{}\texttt{db\_}\allowbreak{}\texttt{password=}\allowbreak{}\texttt{…} \\
+Hide a variable's value & \texttt{sensitive\ =\ true} in its \texttt{variable} block \\
+Print a value after apply & an \texttt{output} block with a \texttt{value} \\
+Refuse to destroy a resource & \texttt{lifecycle\ \{\ prevent\_}\allowbreak{}\texttt{destroy\ =}\allowbreak{}\texttt{\ true\ \}} \\
+\end{longtable}
+\end{booktable}

@@ -1,0 +1,84 @@
+\bookchapter{Docker Cheat Sheet}{ch:A-docker-cheat-sheet}
+
+\Needspace{26\baselineskip}
+
+\section{Images and Containers}\label{A-docker-cheat-sheet:images-and-containers}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.4828\linewidth-1.0345\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5172\linewidth-0.9655\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{docker\ build\ -}\allowbreak{}\texttt{t\ tinyapp:}\allowbreak{}\texttt{1.}\allowbreak{}\texttt{0.}\allowbreak{}\texttt{0\ .} & Build an image from the Dockerfile here, and name it \\
+\texttt{docker\ images}, \texttt{docker\ rmi\ IMAGE} & List images; delete one (or one of its names) \\
+\texttt{docker\ tag\ IMG\ localhost:}\allowbreak{}\texttt{5001/}\allowbreak{}\texttt{IMG} & Add a registry address to an image's name \\
+\texttt{docker\ push\ NAME}, \texttt{docker\ pull\ NAME} & Upload to, or download from, a registry \\
+\texttt{docker\ run\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{rm\ IMAGE\ COMMAND} & Run a one-off container, removed when it exits \\
+\texttt{docker\ run\ -}\allowbreak{}\texttt{d\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{name\ N\ -}\allowbreak{}\texttt{p\ 8080:}\allowbreak{}\texttt{8000\ IMAGE} & Run in the background, forwarding host port 8080 to 8000 \\
+\texttt{…\ -e\ KEY=value}, \texttt{-\/-env-file\ .env} & Pass configuration as environment variables \\
+\texttt{…\ -v\ VOLUME:/path}, \texttt{-v\ "\$PWD":/path} & Attach a volume, or a folder from your machine \\
+\texttt{…\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{restart\ unless-}\allowbreak{}\texttt{stopped} & Restart it whenever it exits, until you stop it \\
+\texttt{docker\ ps}, \texttt{docker\ ps\ -a} & List running containers, or all of them \\
+\texttt{docker\ logs\ N}, \texttt{docker\ exec\ N\ COMMAND} & See its output; run a command inside it \\
+\texttt{docker\ inspect\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{format\ \textquotesingle{}\{\{.}\allowbreak{}\texttt{State.}\allowbreak{}\texttt{Health.}\allowbreak{}\texttt{Status\}\}\textquotesingle{}\ N} & Show one field, here the health status \\
+\texttt{docker\ rm\ -f\ N} & Stop and remove a container \\
+\texttt{docker\ volume\ create\ V},
+\texttt{docker\ network\ create\ NET} & Create a volume or a network (\texttt{rm} deletes) \\
+\end{longtable}
+\end{booktable}
+
+\Needspace{12\baselineskip}
+
+\section{Compose}\label{A-docker-cheat-sheet:compose}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3535\linewidth-1.2929\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6465\linewidth-0.7071\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{docker\ compose\ up\ -d} & Build if needed, then start everything in \texttt{compose.yaml} \\
+\texttt{docker\ compose\ ps}, \texttt{logs\ SERVICE} & List the project's containers; show a service's output \\
+\texttt{docker\ compose\ down} & Remove containers and networks; keep volumes (\texttt{-v} deletes them) \\
+\end{longtable}
+\end{booktable}
+
+\Needspace{16\baselineskip}
+
+\section{Dockerfile Instructions}\label{A-docker-cheat-sheet:dockerfile-instructions}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3370\linewidth-1.3261\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6630\linewidth-0.6739\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Instruction} & \thead{Purpose} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Instruction} & \thead{Purpose} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{FROM\ image:tag} & The base image to start from \\
+\texttt{WORKDIR\ /app}, \texttt{COPY\ src\ dest} & Set the working folder; copy files into the image \\
+\texttt{RUN\ command} & Run a command while building \\
+\texttt{ENV\ KEY=value} & Set an environment variable in the image (never a secret) \\
+\texttt{USER\ name} & Run as this user instead of root \\
+\texttt{EXPOSE\ 8000} & Document the port the app listens on \\
+\texttt{HEALTHCHECK\ …\ CMD\ command} & How Docker checks that the app works \\
+\texttt{CMD\ {[}"program",}\allowbreak{}\texttt{\ "arg"{]}} & The command a container runs at start \\
+\end{longtable}
+\end{booktable}

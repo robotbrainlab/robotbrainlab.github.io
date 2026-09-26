@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="generator" content="AI Engineer Roadmap learner site generator">
+<title>Evaluating and Observing AI Applications · AI Engineer Roadmap</title>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
+<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+</head>
+<body class="page-doc kind-guide">
+<div id="page-top"></div>
+<a class="skip-link" href="#main" data-chrome>Skip to content</a>
+<header class="topbar" data-chrome>
+  <div class="topbar-inner">
+    <button class="nav-toggle" type="button" aria-controls="site-drawer" aria-expanded="false" data-drawer-toggle="site-drawer">
+      <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
+    </button>
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+    </a>
+<nav class="primary-nav" aria-label="Primary" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav>    <div class="topbar-tools">
+      <button class="tool-button theme-toggle" type="button" data-theme-toggle aria-label="Theme: System. Activate to change.">
+        <span class="theme-glyph" aria-hidden="true"></span><span class="tool-label theme-label">System</span>
+      </button>
+    </div>
+  </div>
+</header><div class="shell shell--no-toc">
+  <aside class="sidebar drawer drawer--left" id="site-drawer" aria-label="Site navigation" data-chrome>
+    <div class="drawer-head">
+      <span class="drawer-title">Navigation</span>
+      <button class="drawer-close" type="button" data-drawer-close><span aria-hidden="true">×</span><span class="visually-hidden">Close navigation</span></button>
+    </div>
+<nav class="primary-nav primary-nav--drawer" aria-label="Primary (menu)" data-chrome>
+  <ul>
+    <li><a href="../index.html" class="is-current" aria-current="true">Learn</a></li>
+    <li><a href="../../research/index.html">Evidence</a></li>
+    <li><a href="../../about/index.html">About</a></li>
+  </ul>
+</nav><nav class="area-nav area-nav--learn" aria-labelledby="area-nav-title" data-chrome>
+  <p class="rail-title" id="area-nav-title">Learn</p>
+  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../index.html">
+        <span class="area-link-title"><span>How this guide works</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Depth path</p><p class="rail-group">Fundamentals</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../1-python-sql-and-data-analysis/index.html">
+        <span class="area-link-title"><span class="area-link-num">1</span><span>Python, SQL and Data Analysis</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../2-the-mathematics-of-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">2</span><span>The Mathematics of Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../3-machine-learning-framing-problems-and-building-models/index.html">
+        <span class="area-link-title"><span class="area-link-num">3</span><span>Machine Learning: Framing Problems and Building Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../4-statistics-is-the-difference-real/index.html">
+        <span class="area-link-title"><span class="area-link-num">4</span><span>Statistics: Is the Difference Real?</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../5-data-you-can-defend/index.html">
+        <span class="area-link-title"><span class="area-link-num">5</span><span>Data You Can Defend</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../6-evaluation-and-testing/index.html">
+        <span class="area-link-title"><span class="area-link-num">6</span><span>Evaluation and Testing</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../7-deep-learning/index.html">
+        <span class="area-link-title"><span class="area-link-num">7</span><span>Deep Learning</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../8-how-language-models-work-build-one/index.html">
+        <span class="area-link-title"><span class="area-link-num">8</span><span>How Language Models Work: Build One</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../9-retrieval-and-search/index.html">
+        <span class="area-link-title"><span class="area-link-num">9</span><span>Retrieval and Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-advanced/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Advanced</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Advanced</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../10-how-foundation-models-are-made-and-adapted/index.html">
+        <span class="area-link-title"><span class="area-link-num">10</span><span>How Foundation Models Are Made and Adapted</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../11-compound-ai-systems-tools-retrieval-and-verification/index.html">
+        <span class="area-link-title"><span class="area-link-num">11</span><span>Compound AI Systems: Tools, Retrieval and Verification</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../12-evaluation-science/index.html">
+        <span class="area-link-title"><span class="area-link-num">12</span><span>Evaluation Science</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../13-reading-research-critically/index.html">
+        <span class="area-link-title"><span class="area-link-num">13</span><span>Reading Research Critically</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../14-advanced-retrieval-and-ranking/index.html">
+        <span class="area-link-title"><span class="area-link-num">14</span><span>Advanced Retrieval and Ranking</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../15-trustworthy-ai-and-security/index.html">
+        <span class="area-link-title"><span class="area-link-num">15</span><span>Trustworthy AI and Security</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../16-operating-ai-systems-in-production/index.html">
+        <span class="area-link-title"><span class="area-link-num">16</span><span>Operating AI Systems in Production</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-for-mastery/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready for Mastery</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Mastery</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../17-independent-judgment-design-diagnosis-and-experiment/index.html">
+        <span class="area-link-title"><span class="area-link-num">17</span><span>Independent Judgment: Design, Diagnosis and Experiment</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../18-choose-your-depth/index.html">
+        <span class="area-link-title"><span class="area-link-num">18</span><span>Choose Your Depth</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-checkpoint" href="../checkpoint-ready-to-contribute-research/index.html">
+        <span class="area-link-title"><span>Checkpoint: Ready to Contribute Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-group">Research</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../19-contributing-research/index.html">
+        <span class="area-link-title"><span class="area-link-num">19</span><span>Contributing Research</span></span>
+      </a>
+    </li>
+  </ul>
+<p class="rail-track">Modern AI Engineering</p>  <ul class="area-list">
+    <li>
+      <a class="area-link" href="../modern-ai-engineering/index.html">
+        <span class="area-link-title"><span>Overview</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../orientation-contemporary-ai-systems/index.html">
+        <span class="area-link-title"><span>Orientation: Contemporary AI Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../working-with-models/index.html">
+        <span class="area-link-title"><span>Working with Models</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../embeddings-and-semantic-search/index.html">
+        <span class="area-link-title"><span>Embeddings and Semantic Search</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../retrieval-augmented-systems/index.html">
+        <span class="area-link-title"><span>Retrieval-Augmented Systems</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link is-current" href="index.html" aria-current="page">
+        <span class="area-link-title"><span>Evaluating and Observing AI Applications</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../agents-tools-and-context/index.html">
+        <span class="area-link-title"><span>Agents, Tools and Context</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../adapting-models-in-practice/index.html">
+        <span class="area-link-title"><span>Adapting Models in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../securing-ai-systems-in-practice/index.html">
+        <span class="area-link-title"><span>Securing AI Systems in Practice</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../inference-cost-and-production/index.html">
+        <span class="area-link-title"><span>Inference, Cost and Production</span></span>
+      </a>
+    </li>
+  </ul>
+</nav>  </aside>
+
+  <main id="main" class="content" tabindex="-1">
+    <nav class="breadcrumbs" aria-label="Breadcrumb" data-chrome>
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../index.html">Learn</a></li>
+        <li><a href="../modern-ai-engineering/index.html">Modern AI Engineering</a></li>
+<li><span aria-current="page">Evaluating and Observing AI Applications</span></li>      </ol>
+    </nav>
+    <article class="prose doc doc--guide">
+<p class="guide-kicker" data-chrome><span class="guide-kicker-part guide-kicker-part--modern">Modern AI Engineering</span><span aria-hidden="true"> · </span><span>Opens: After step 9</span></p>
+<h1 id="evaluating-and-observing-ai-applications" class="guide-title">Evaluating and Observing AI Applications</h1>
+<div class="guide-body guide-body--modern">
+<p>A classifier is wrong in one way: it picked the wrong label. An application that writes text can be wrong in dozens — it invented a fact, it answered a different question, it ignored the retrieved passage, it was rude, it was correct but unusable — and no single accuracy number distinguishes them.</p>
+<p>The practice that deals with this starts by looking: read a few dozen real outputs, and sort the failures into kinds. That is <strong>error analysis</strong>, and it decides what is worth measuring. The frequent kinds then become checks that run automatically; where a check needs judgment rather than a rule, a second model can be used as a <strong>judge</strong> — but only after you have measured how often it agrees with you. Underneath all of it sits the <strong>trace</strong>: a record of what each request actually did, so that when something is wrong you can see which part did it.</p>
+<section class="guide-block guide-block--opens-when" aria-label="Opens when">
+<p class="guide-label"><strong>Opens when</strong></p>
+<p>After <a href="../6-evaluation-and-testing/index.html">6. Evaluation and Testing</a>, <a href="../7-deep-learning/index.html">7. Deep Learning</a>, <a href="../8-how-language-models-work-build-one/index.html">8. How Language Models Work: Build One</a> and <a href="../9-retrieval-and-search/index.html">9. Retrieval and Search</a>.</p>
+<p>The best time is after <a href="../9-retrieval-and-search/index.html">9. Retrieval and Search</a>, together with <a href="../retrieval-augmented-systems/index.html">Retrieval-Augmented Systems</a>, and before step 11.</p>
+</section>
+<section class="guide-block guide-block--how-to-take-it" aria-label="How to take it">
+<p class="guide-label"><strong>How to take it</strong></p>
+<p><strong>Recommended, together with the retrieval topic.</strong> Build the grounded system and the means of judging it in the same sitting; each is weak without the other. This is the practice half of a pair — <a href="../12-evaluation-science/index.html">12. Evaluation Science</a> is where the same work is examined scientifically.</p>
+</section>
+<section class="guide-block guide-block--return-to-the-numbered-path" aria-label="Return to the numbered path">
+<p class="guide-label"><strong>Return to the numbered path</strong></p>
+<p>Return to the <a href="../checkpoint-ready-for-advanced/index.html">Checkpoint: Ready for Advanced</a>, then to <a href="../10-how-foundation-models-are-made-and-adapted/index.html">10. How Foundation Models Are Made and Adapted</a>.</p>
+</section>
+<nav class="unit-toc" aria-labelledby="unit-toc-title" data-chrome>
+<p class="unit-toc-title" id="unit-toc-title">In this unit</p>
+<ol class="unit-toc-list">
+<li><a href="#error-analysis-first">Error analysis first</a>
+<ol class="unit-toc-sublist">
+<li><a href="#open-and-axial-coding-of-real-outputs">Open and axial coding of real outputs</a></li>
+<li><a href="#letting-the-failure-modes-choose-the-metrics">Letting the failure modes choose the metrics</a></li>
+</ol>
+</li>
+<li><a href="#checks-and-who-does-the-checking">Checks, and who does the checking</a>
+<ol class="unit-toc-sublist">
+<li><a href="#passfail-checks-per-failure-mode">Pass/fail checks per failure mode</a></li>
+<li><a href="#code-first-judges-where-judgment-is-needed">Code first, judges where judgment is needed</a></li>
+<li><a href="#validating-a-judge-before-trusting-it">Validating a judge before trusting it</a></li>
+<li><a href="#criteria-drift">Criteria drift</a></li>
+</ol>
+</li>
+<li><a href="#keeping-the-system-honest-as-it-changes">Keeping the system honest as it changes</a>
+<ol class="unit-toc-sublist">
+<li><a href="#regression-sets-with-repeated-trials">Regression sets with repeated trials</a></li>
+<li><a href="#tracing-every-request">Tracing every request</a></li>
+<li><a href="#deciding-what-content-to-capture">Deciding what content to capture</a></li>
+</ol>
+</li>
+</ol>
+</nav><section class="guide-block guide-block--what-to-understand-today" aria-label="What to understand today">
+<p class="guide-label"><strong>What to understand today</strong></p>
+<p>How practitioners find out whether a generative application works: error analysis first, checks derived from the failures found, judges that have been validated, and a trace of every request so failures can be attributed.</p>
+</section>
+<section class="guide-block guide-block--how-these-ideas-connect" aria-label="How these ideas connect">
+<p class="guide-label"><strong>How these ideas connect</strong></p>
+<p>The order matters as much as the parts. Error analysis produces failure modes; failure modes become checks; the checks that need judgment become model judges, and a judge is only worth having once you have measured it against your own labels. Traces sit underneath all of it: without a record of what was retrieved, sent and returned, a failure mode is an anecdote rather than something you can attribute to a stage. And because criteria drift as you see more output, the whole cycle repeats rather than completing.</p>
+</section>
+<section class="unit-area" aria-labelledby="error-analysis-first">
+<h2 id="error-analysis-first">Error analysis first<a class="heading-anchor" href="#error-analysis-first" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The practice that decides what is worth measuring, before any metric is chosen.</p>
+</section>
+<section class="unit-concept" aria-labelledby="open-and-axial-coding-of-real-outputs">
+<h3 id="open-and-axial-coding-of-real-outputs">Open and axial coding of real outputs<a class="heading-anchor" href="#open-and-axial-coding-of-real-outputs" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Reading actual outputs, writing a short note on what went wrong in each, then grouping those notes into a small set of named failure modes. <strong>Studied in:</strong> the <a href="../../evidence/current-practice/index.html">current-practice register</a>, with its evidence; cross-reference: step 12&#x27;s error analysis.</p>
+</section>
+<section class="unit-concept" aria-labelledby="letting-the-failure-modes-choose-the-metrics">
+<h3 id="letting-the-failure-modes-choose-the-metrics">Letting the failure modes choose the metrics<a class="heading-anchor" href="#letting-the-failure-modes-choose-the-metrics" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Measuring what actually goes wrong in your system rather than what is conventional to measure. <strong>Studied in:</strong> the <a href="../../evidence/current-practice/index.html">current-practice register</a>; cross-reference: step 6.</p>
+</section>
+<section class="unit-area" aria-labelledby="checks-and-who-does-the-checking">
+<h2 id="checks-and-who-does-the-checking">Checks, and who does the checking<a class="heading-anchor" href="#checks-and-who-does-the-checking" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>Three kinds of grader, in increasing cost and decreasing reliability.</p>
+</section>
+<section class="unit-concept" aria-labelledby="passfail-checks-per-failure-mode">
+<h3 id="passfail-checks-per-failure-mode">Pass/fail checks per failure mode<a class="heading-anchor" href="#passfail-checks-per-failure-mode" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>A check that says pass or fail for each known failure mode, rather than a vague one-to-five quality score. <strong>Studied in:</strong> the <a href="../../evidence/current-practice/index.html">current-practice register</a>, with its evidence.</p>
+</section>
+<section class="unit-concept" aria-labelledby="code-first-judges-where-judgment-is-needed">
+<h3 id="code-first-judges-where-judgment-is-needed">Code first, judges where judgment is needed<a class="heading-anchor" href="#code-first-judges-where-judgment-is-needed" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Checking with code whatever code can check — format, citations present, valid tool arguments — and reserving model judges for what needs judgment. <strong>Studied in:</strong> <em>AI Engineering</em> chs 3–4.</p>
+</section>
+<section class="unit-concept" aria-labelledby="validating-a-judge-before-trusting-it">
+<h3 id="validating-a-judge-before-trusting-it">Validating a judge before trusting it<a class="heading-anchor" href="#validating-a-judge-before-trusting-it" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>A model judge is itself a classifier: measure how often it agrees with human labels on both passes and failures. A judge can be consistent and still wrong, and judges are known to be biased by the order in which answers are shown. <strong>Studied in:</strong> <em>AI Engineering</em> ch 3; the <a href="../../evidence/current-practice/index.html">current-practice register</a>, with its evidence.</p>
+</section>
+<section class="unit-concept" aria-labelledby="criteria-drift">
+<h3 id="criteria-drift">Criteria drift<a class="heading-anchor" href="#criteria-drift" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>What counts as a failure changes as you see more output, so labels and checks are revisited rather than fixed once. <strong>Studied in:</strong> the <a href="../../evidence/current-practice/index.html">current-practice register</a>, with its evidence.</p>
+</section>
+<section class="unit-area" aria-labelledby="keeping-the-system-honest-as-it-changes">
+<h2 id="keeping-the-system-honest-as-it-changes">Keeping the system honest as it changes<a class="heading-anchor" href="#keeping-the-system-honest-as-it-changes" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p>The parts that turn evaluation from an exercise into a standing practice.</p>
+</section>
+<section class="unit-concept" aria-labelledby="regression-sets-with-repeated-trials">
+<h3 id="regression-sets-with-repeated-trials">Regression sets with repeated trials<a class="heading-anchor" href="#regression-sets-with-repeated-trials" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Keeping the cases that once failed, and running them on every change — with repeated trials, because output is stochastic. <strong>Studied in:</strong> the <a href="../../evidence/current-practice/index.html">current-practice register</a>; cross-reference: steps 4 and 6.</p>
+</section>
+<section class="unit-concept" aria-labelledby="tracing-every-request">
+<h3 id="tracing-every-request">Tracing every request<a class="heading-anchor" href="#tracing-every-request" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Recording the input, what was retrieved, each model and tool call, the output, tokens and time, so any failure can be traced to the step that caused it. <strong>Studied in:</strong> <em>AI Engineering</em> ch 10, monitoring and observability; the <a href="../../evidence/current-practice/index.html">current-practice register</a>.</p>
+</section>
+<section class="unit-concept" aria-labelledby="deciding-what-content-to-capture">
+<h3 id="deciding-what-content-to-capture">Deciding what content to capture<a class="heading-anchor" href="#deciding-what-content-to-capture" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>Traces contain user data, so what is recorded is a deliberate decision rather than a default. <strong>Studied in:</strong> the <a href="../../evidence/current-practice/index.html">current-practice register</a>, with its evidence.</p>
+</section>
+<section class="guide-block guide-block--study" aria-label="Study">
+<p class="guide-label"><strong>Study</strong></p>
+<ul class="guide-list guide-list--study">
+<li><span class="study-role"><strong>Primary · continuing</strong></span><span class="study-title"><em>AI Engineering</em></span><span class="study-task"><strong>revisit:</strong> (begun in <a href="../working-with-models/index.html">Working with Models</a>) chapters 3 (evaluation methodology, including using AI as a judge) and 4 (evaluating AI systems), and the monitoring and observability section of chapter 10.</span><span class="study-why"><strong>Why:</strong> evaluation of open-ended outputs and the observability of an AI application, framed as engineering decisions. Step 12 deepens this into evaluation science.</span></li>
+</ul>
+</section>
+<section class="guide-block guide-block--where-you-study-each-concept" aria-label="Where you study each concept">
+<p class="guide-label"><strong>Where you study each concept</strong></p>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Table: Deciding what content to capture"><table class="doc-table table--pair" style="--cols:2">
+<thead>
+<tr>
+<th scope="col">What you study</th>
+<th scope="col">Where you study it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Evaluating open-ended output; judges</td>
+<td><em>AI Engineering</em> chs 3–4</td>
+</tr>
+<tr>
+<td>Observability and monitoring of an application</td>
+<td><em>AI Engineering</em> ch 10, monitoring and observability</td>
+</tr>
+<tr>
+<td>Error analysis as a method; validity of measurement</td>
+<td>Cross-reference: steps 6 and 12</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="guide-block guide-block--practise-and-build" aria-label="Practise and build">
+<p class="guide-label"><strong>Practise and build</strong></p>
+<p>On your retrieval-augmented system, review a few dozen real outputs, code the failures and build a failure taxonomy. Write a pass/fail check for each of the most frequent failure modes. Build one model-based judge, label a sample yourself, and measure how well the judge agrees with you on passes and failures before you use it. Add the cases that failed to a regression set that runs on every change. Add a trace to every request, and use one trace to find the cause of a failure.</p>
+</section>
+<section class="guide-block guide-block--how-deeply-to-know-it-now" aria-label="How deeply to know it now">
+<p class="guide-label"><strong>How deeply to know it now</strong></p>
+<p>Implement. You can:</p>
+<ul class="guide-list guide-list--how-deeply-to-know-it-now">
+<li>build an evaluation harness from your own error analysis;</li>
+<li>validate a model judge against human labels and report its agreement on passes and failures;</li>
+<li>run a regression set with repeated trials on every change;</li>
+<li>use a trace to find which step caused a failure.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--what-lasts-and-what-changes" aria-label="What lasts and what changes">
+<p class="guide-label"><strong>What lasts and what changes</strong></p>
+<ul class="guide-list guide-list--what-lasts-and-what-changes">
+<li><strong>Lasting:</strong> error analysis, failure taxonomies, regression tests and repeated-trial reliability (<a href="../6-evaluation-and-testing/index.html">6. Evaluation and Testing</a>); judges validated against human labels, and construct validity — whether a measurement measures the thing it claims to (<a href="../12-evaluation-science/index.html">12. Evaluation Science</a>); tracing calls for diagnosis.</li>
+<li><strong>Current convention:</strong> open then axial coding; pass/fail checks per failure mode; model judges calibrated on labelled samples; a trace for every request.</li>
+<li><strong>Likely to change:</strong> evaluation platforms, tracing tools and their field names, and the models used as judges.</li>
+</ul>
+</section>
+<section class="guide-block guide-block--when-to-revisit" aria-label="When to revisit">
+<p class="guide-label"><strong>When to revisit</strong></p>
+<p>At step 11, where you evaluate whole trajectories; at step 12, where evaluation becomes a science; and at step 16, where traces feed production monitoring.</p>
+</section>
+
+</div>
+<nav class="guide-pager" aria-label="Previous and next on the learning journey" data-chrome>
+  <a class="guide-pager-link guide-pager-link--prev guide-pager-link--modern" href="../retrieval-augmented-systems/index.html" rel="prev"><span class="guide-pager-label">← Previous · Modern AI Engineering · recommended</span><span class="guide-pager-title">Retrieval-Augmented Systems</span></a>
+  <a class="guide-pager-link guide-pager-link--next" href="../checkpoint-ready-for-advanced/index.html" rel="next"><span class="guide-pager-label">Next → back on the numbered path</span><span class="guide-pager-title">Checkpoint: Ready for Advanced</span></a>
+</nav>
+    </article>
+  </main>
+
+</div>
+<a class="to-top" href="#page-top" data-to-top data-chrome><span aria-hidden="true">↑</span> Top</a>
+<footer class="site-footer" data-chrome>
+  <div class="footer-inner">
+    <p class="footer-sources">Generated from canonical Markdown:
+<code>LEARNING-GUIDE.md</code></p>
+    <p class="footer-note">Presentation only. Canonical sources take precedence over this page.</p>
+  </div>
+</footer><div class="scrim" data-scrim data-chrome hidden></div>
+<div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
+<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+</body>
+</html>

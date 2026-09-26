@@ -1,0 +1,374 @@
+\bookchapter{Infrastructure as Code}{ch:08-infrastructure-as-code}
+
+\begin{chapterintro}
+
+Your app is packaged and your pipeline automated. The last manual part is the infrastructure itself. This chapter describes it in files that Terraform reads and builds: providers, resources, \texttt{plan}, \texttt{apply}, and state. In the lab, Terraform creates, changes, repairs, and deletes a container.
+
+\end{chapterintro}
+
+\emph{The problem.} I clicked 40 buttons to build this, and I can't do it again.
+
+\emph{The question.} How do I write my infrastructure down so that a tool can build it the same way every time?
+
+\section{Clicks Don't Repeat}\label{08-infrastructure-as-code:clicks-dont-repeat}
+
+Clicking through a console is fine for exploring and bad for anything you need to keep. Nobody remembers the 40 clicks or can review them, and when you need a second copy for staging, you start from zero.
+
+Builders don't construct a house from memory. They work from a blueprint that anyone can read, check, copy, and correct. \textbf{Infrastructure as code}\index{infrastructure as code} (IaC) is the blueprint approach: you describe your servers, networks, databases, and permissions in text files, keep those files in git next to your app, and let a tool create exactly what they describe. You get:
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Repeatability.} Staging and production are built from the same files.
+\item
+  \emph{Review.} A change to the infrastructure is a change to a file, so a colleague can read it before it happens.
+\item
+  \emph{History.} Git shows who changed what, when, and why.
+\item
+  \emph{Disposability.} If you can rebuild it in minutes, you can also delete it without fear.
+\end{itemize}
+
+\section{Declarative: Say What, Not How}\label{08-infrastructure-as-code:declarative-say-what-not-how}
+
+You can tell a taxi driver ``take me to the station'', or you can give every turn yourself. The first is \textbf{declarative}\index{declarative}: you describe the destination and let the expert find the route. The second is imperative: you list the steps.
+
+Terraform is declarative: you write ``there should be a container like this'', and it compares that with what exists and makes only the changes needed. Run it twice and the second run does nothing, because nothing differs.
+
+\section{Terraform}\label{08-infrastructure-as-code:terraform}
+
+Terraform is the most widely used IaC tool. You write its files in HCL (HashiCorp Configuration Language), a simple language of blocks and \texttt{name\ =\ value} settings, in files ending in \texttt{.tf}.
+
+Terraform itself knows nothing about clouds. A \textbf{provider}\index{provider} is a plugin that knows how to talk to one system's API: AWS, Azure, Google Cloud, GitHub, or, for this book's labs, your local Docker. A \textbf{resource}\index{resource} is one thing a provider manages, such as a VM, a bucket, or a container.
+
+\codeneed{7}
+
+Here is a complete configuration that runs the nginx web server in a container:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{terraform \{}
+\NormalTok{  required\_providers \{}
+\NormalTok{    docker = \{}
+\NormalTok{      source  = "kreuzwerker/docker"}
+\NormalTok{      version = "\textasciitilde{}\textgreater{} 4.6"}
+\NormalTok{    \}}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\NormalTok{provider "docker" \{\}}
+
+\NormalTok{resource "docker\_image" "web" \{}
+\NormalTok{  name         = "nginx:alpine"}
+\NormalTok{  keep\_locally = true}
+\NormalTok{\}}
+
+\NormalTok{resource "docker\_container" "web" \{}
+\NormalTok{  name  = "tf{-}web"}
+\NormalTok{  image = docker\_image.web.image\_id}
+
+\NormalTok{  ports \{}
+\NormalTok{    internal = 80}
+\NormalTok{    external = 8081}
+\NormalTok{  \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+The \texttt{terraform} block says which provider to download: \texttt{kreuzwerker/}\allowbreak{}\texttt{docker}, any 4.x version from 4.6. The \texttt{provider} block configures it; empty means ``use the local Docker''. Each \texttt{resource} block has a type (\texttt{docker\_container}) and a name you choose (\texttt{web}).
+
+The line \texttt{image\ =}\allowbreak{}\texttt{\ docker\_}\allowbreak{}\texttt{image.}\allowbreak{}\texttt{web.}\allowbreak{}\texttt{image\_}\allowbreak{}\texttt{id} is a reference: the container uses an attribute of the image resource. References tell Terraform the order: the image must exist before the container. You never write the order yourself.
+
+\texttt{keep\_locally\ =}\allowbreak{}\texttt{\ true} stops Terraform deleting the image from your machine on destroy.
+
+\Needspace{13\baselineskip}
+
+\section{The Workflow: init, plan, apply, destroy}\label{08-infrastructure-as-code:the-workflow-init-plan-apply-destroy}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2471\linewidth-1.5059\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7529\linewidth-0.4941\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{terraform\ init} & Downloads the providers and prepares the folder. Run once, and after
+changing providers \\
+\texttt{terraform\ plan} & Compares the files with reality and shows what would change. Changes
+nothing \\
+\texttt{terraform\ apply} & Shows the plan again, asks for \texttt{yes}, then makes the changes \\
+\texttt{terraform\ destroy} & Deletes everything this configuration manages, after asking \\
+\end{longtable}
+\end{booktable}
+
+A \textbf{plan}\index{plan} marks each resource with a symbol: \texttt{+} create, \texttt{\textasciitilde{}} update in place, \texttt{-} destroy, and \texttt{-/+} destroy and re-create, which Terraform does when a setting can't be changed on a live resource. Read the plan every time. It is your last chance to catch ``1 to destroy'' before it happens.
+
+\section{State}\label{08-infrastructure-as-code:state}
+
+After \texttt{apply}, Terraform writes a file called \texttt{terraform.tfstate}. This \textbf{state}\index{state} is Terraform's notebook: which real object belongs to which resource block, with its ID and attributes. On the next run, Terraform reads the notebook, asks the provider what really exists, and compares both with your files.
+
+If someone changes or deletes something by hand, reality no longer matches the files. That difference is called \textbf{drift}\index{drift}, and the next \texttt{plan} shows it and offers to put things back.
+
+\begin{callout}{warning}
+
+State can contain secrets, such as database passwords, in plain text. Never commit \texttt{terraform.tfstate} to git, and never edit it by hand. Teams keep it in remote state: a shared, access-controlled location, such as a storage bucket, with a lock so two people can't apply at once.
+
+\end{callout}
+
+\section{Lab: Your First Terraform}\label{08-infrastructure-as-code:lab-your-first-terraform}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Create \texttt{\textasciitilde{}/}\allowbreak{}\texttt{infra-}\allowbreak{}\texttt{labs/}\allowbreak{}\texttt{ch08/}\allowbreak{}\texttt{main.}\allowbreak{}\texttt{tf} with the configuration above, then initialise the folder:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/infra{-}labs/ch08}
+\ExtensionTok{terraform}\NormalTok{ init}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{8}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  Initializing the backend...
+
+  Initializing provider plugins...
+  - Finding kreuzwerker/docker versions matching "~> 4.6"...
+  - Installing kreuzwerker/docker v4.6.0...
+  - Installed kreuzwerker/docker v4.6.0 (self-signed, key ID 0DCE698927DAF8EC)
+  …
+  Terraform has been successfully initialized!
+  \end{Verbatim}
+  \end{codeblock}
+
+  \texttt{init} also writes \texttt{.terraform.lock.hcl}, which pins the exact provider version. Commit it.
+\item
+  Check the file and preview the changes:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{terraform}\NormalTok{ validate}
+\ExtensionTok{terraform}\NormalTok{ plan}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{11}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  Success! The configuration is valid.
+
+  …
+    # docker_container.web will be created
+    + resource "docker_container" "web" {
+        + name                                        = "tf-web"
+  …
+    # docker_image.web will be created
+    + resource "docker_image" "web" {
+  …
+  Plan: 2 to add, 0 to change, 0 to destroy.
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Apply it. Terraform shows the plan again and asks for confirmation; type \texttt{yes}. The first time, it also downloads the nginx image:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{terraform}\NormalTok{ apply}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{9}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  …
+    Enter a value: yes
+
+  docker_image.web: Creating...
+  docker_image.web: Creation complete after 0s [id=sha256:1ed1b0e1d765…nginx:alpine]
+  docker_container.web: Creating...
+  docker_container.web: Creation complete after 1s [id=c5c48da6fc2e…]
+
+  Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Check the result and the state:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl} \AttributeTok{{-}s}\NormalTok{ localhost:8081 }\KeywordTok{|} \FunctionTok{grep}\NormalTok{ title}
+\ExtensionTok{terraform}\NormalTok{ state list}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{3}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  <title>Welcome to nginx!</title>
+  docker_container.web
+  docker_image.web
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Run \texttt{terraform\ plan} again. Nothing differs, so nothing would change:
+
+  \codeneed{2}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  No changes. Your infrastructure matches the configuration.
+  …
+  \end{Verbatim}
+  \end{codeblock}
+\item
+  Change \texttt{external\ =\ 8081} to \texttt{8082} in \texttt{main.tf}, and plan:
+
+  \codeneed{6}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+    # docker_container.web must be replaced
+  -/+ resource "docker_container" "web" {
+  …
+            ~ external = 8081 -> 8082 # forces replacement
+  …
+  Plan: 1 to add, 0 to change, 1 to destroy.
+  \end{Verbatim}
+  \end{codeblock}
+
+  A running container's ports can't be changed, so Terraform will replace it. Run \texttt{terraform\ apply} and type \texttt{yes}.
+\item
+  Cause drift by deleting the container behind Terraform's back, then plan and apply:
+
+  \codeneed{2}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ rm }\AttributeTok{{-}f}\NormalTok{ tf{-}web}
+\ExtensionTok{terraform}\NormalTok{ plan}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{3}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+    # docker_container.web will be created
+  …
+  Plan: 1 to add, 0 to change, 0 to destroy.
+  \end{Verbatim}
+  \end{codeblock}
+
+  After \texttt{terraform\ apply}, \texttt{curl\ localhost:8082} answers again.
+\item
+  Delete everything, typing \texttt{yes} when asked:
+
+  \codeneed{1}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{terraform}\NormalTok{ destroy}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codeblock}
+
+  \codeneed{7}\begin{codeblock}
+  \begin{Verbatim}[formatcom=\outputstyle]
+  Plan: 0 to add, 0 to change, 2 to destroy.
+  …
+  docker_container.web: Destruction complete after 0s
+  docker_image.web: Destroying... [id=sha256:1ed1b0e1d765…nginx:alpine]
+  docker_image.web: Destruction complete after 0s
+
+  Destroy complete! Resources: 2 destroyed.
+  \end{Verbatim}
+  \end{codeblock}
+\end{enumerate}
+
+\textbf{Expected results:} \texttt{plan} previews without changing anything; \texttt{apply} creates the image and container; a second plan finds no changes; changing the port forces a replacement; a container deleted by hand is detected and re-created; and \texttt{destroy} removes it all (the nginx image stays on disk because of \texttt{keep\_locally}).
+
+\section{Summary, Key Terms, and Review Questions}\label{08-infrastructure-as-code:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{08-infrastructure-as-code:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  Infrastructure as code describes infrastructure in files kept in git, so it can be rebuilt, reviewed, and versioned.
+\item
+  Terraform is declarative: you describe the result, and it works out the changes.
+\item
+  Providers talk to systems; resources are the things they manage; references set the order.
+\item
+  \texttt{init}, \texttt{plan}, \texttt{apply}, and \texttt{destroy} are the whole workflow. Always read the plan.
+\item
+  State records what Terraform built. Drift is reality differing from the files. State can hold secrets, so keep it out of git.
+\end{itemize}
+
+\Needspace{17\baselineskip}
+
+\subsection*{Key Terms}\label{08-infrastructure-as-code:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3404\linewidth-1.3191\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6596\linewidth-0.6809\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Infrastructure as code (IaC) & Describing infrastructure in files that a tool builds from \\
+Declarative & Describing the result you want, not the steps to get there \\
+Provider & A Terraform plugin that manages one system through its API \\
+Resource & One thing a provider manages \\
+Plan & Terraform's preview of the changes it would make \\
+State & Terraform's record of what it built \\
+Drift & Differences between reality and the configuration \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{08-infrastructure-as-code:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Name three problems with building infrastructure by clicking in a console.
+\item
+  What does ``declarative'' mean, and why does running \texttt{terraform\ apply} twice change nothing the second time?
+\item
+  How does Terraform know to create the image before the container?
+\item
+  What do \texttt{+}, \texttt{\textasciitilde{}}, and \texttt{-/+} mean in a plan?
+\item
+  Why must \texttt{terraform.tfstate} stay out of git?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can read a Terraform plan and predict exactly what will be created, replaced, or destroyed before you type \texttt{yes}.
+
+\end{understandbox}

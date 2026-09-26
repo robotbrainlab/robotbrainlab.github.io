@@ -1,0 +1,123 @@
+\bookchapter{Git Cheat Sheet}{ch:B-git-cheat-sheet}
+
+\begin{chapterintro}
+
+The Git commands from this book, in the order you'll usually need them.
+
+\end{chapterintro}
+
+\Needspace{11\baselineskip}
+
+\section{Set Up Once}\label{B-git-cheat-sheet:set-up-once}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.4898\linewidth-1.0204\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5102\linewidth-0.9796\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{git\ config\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{global\ user.}\allowbreak{}\texttt{name\ "Ada\ Lovelace"} & Name recorded in your commits (and \texttt{user.email}) \\
+\texttt{git\ config\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{global\ init.}\allowbreak{}\texttt{defaultBranch\ main} & New repositories start on \texttt{main} \\
+\texttt{git\ config\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{global\ pull.}\allowbreak{}\texttt{rebase\ false} & Pulls combine diverged work by merging \\
+\end{longtable}
+\end{booktable}
+
+\Needspace{20\baselineskip}
+
+\section{Every Day}\label{B-git-cheat-sheet:every-day}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.4020\linewidth-1.1961\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5980\linewidth-0.8039\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{git\ init},
+\texttt{git\ clone\ \textless{}url-or-path\textgreater{}} & Start a repository; copy an existing one \\
+\texttt{git\ status} & What changed, and what's staged \\
+\texttt{git\ diff}, \texttt{git\ diff\ -\/-staged} & Unstaged changes; what the next commit will hold \\
+\texttt{git\ add\ file}, \texttt{git\ commit\ -m\ "Message"} & Stage a change; record the snapshot (\texttt{-am} does both) \\
+\texttt{git\ log\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{oneline\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{graph\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{all} & History of every branch, drawn as a graph \\
+\texttt{git\ switch\ -c\ name}, \texttt{git\ switch\ name} & Create and switch to a branch; switch to one \\
+\texttt{git\ merge\ name}, \texttt{git\ merge\ -\/-abort} & Merge \texttt{name} into this branch; back out of a conflict \\
+\texttt{git\ rebase\ main} & Replay this branch on top of \texttt{main} (unshared commits only) \\
+\texttt{git\ branch\ -d\ name} & Delete a merged branch (\texttt{-D} forces it) \\
+\end{longtable}
+\end{booktable}
+
+\Needspace{13\baselineskip}
+
+\section{Sharing}\label{B-git-cheat-sheet:sharing}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.4333\linewidth-1.1333\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5667\linewidth-0.8667\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{git\ init\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{bare\ name.}\allowbreak{}\texttt{git} & Make a repository to use as a shared remote \\
+\texttt{git\ remote\ add\ origin\ \textless{}url-}\allowbreak{}\texttt{or-}\allowbreak{}\texttt{path\textgreater{}} & Name a remote (\texttt{git\ remote\ -v} lists them) \\
+\texttt{git\ push\ -u\ origin\ main} & First push of a branch, remembering the pairing \\
+\texttt{git\ push}, \texttt{git\ pull}, \texttt{git\ fetch} & Send; fetch and merge; fetch only \\
+\texttt{git\ diff\ main.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{.}\allowbreak{}\texttt{origin/}\allowbreak{}\texttt{branch} & What a branch changed since it split from \texttt{main} \\
+\texttt{git\ push\ origin\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{delete\ name} & Delete a branch on the remote \\
+\end{longtable}
+\end{booktable}
+
+\Needspace{16\baselineskip}
+
+\section{Undo}\label{B-git-cheat-sheet:undo}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.4038\linewidth-1.1923\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.5962\linewidth-0.8077\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Situation} & \thead{Command} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Situation} & \thead{Command} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Discard unstaged edits to a file & \texttt{git\ restore\ file} \\
+Unstage a file, keeping the edits & \texttt{git\ restore\ -}\allowbreak{}\texttt{-}\allowbreak{}\texttt{staged\ file} \\
+Fix the last commit (message or files) & \texttt{git\ commit\ -\/-amend} \\
+Undo a pushed commit safely & \texttt{git\ revert\ \textless{}id\textgreater{}} \\
+Undo the last local commit & \texttt{git\ reset\ -\/-soft\ HEAD\textasciitilde{}1} (keep changes) or
+\texttt{-\/-hard} (discard) \\
+Find a ``lost'' commit and bring it back & \texttt{git\ reflog}, then
+\texttt{git\ branch\ name\ \textless{}id\textgreater{}} \\
+\end{longtable}
+\end{booktable}
+
+\section{Resolving a Conflict}\label{B-git-cheat-sheet:resolving-a-conflict}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \texttt{git\ status} lists files marked \texttt{both\ modified}.
+\item
+  Edit each file to its final form and delete the \texttt{\textless{}\textless{}\textless{}\textless{}\textless{}\textless{}\textless{}}, \texttt{=======}, and \texttt{\textgreater{}\textgreater{}\textgreater{}\textgreater{}\textgreater{}\textgreater{}\textgreater{}} lines.
+\item
+  Run the code to check it works, then \texttt{git\ add} each file and \texttt{git\ commit}.
+\end{enumerate}

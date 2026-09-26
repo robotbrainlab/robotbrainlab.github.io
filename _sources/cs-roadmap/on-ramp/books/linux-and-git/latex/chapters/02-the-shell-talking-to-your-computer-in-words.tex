@@ -1,0 +1,419 @@
+\bookchapter{The Shell: Talking to Your Computer in Words}{ch:02-the-shell-talking-to-your-computer-in-words}
+
+\begin{chapterintro}
+
+This chapter turns the shell from a mystery into a tool. You'll learn to read any command, move around, see how the shell finds programs, and join small commands into bigger ones. By the end, you'll predict what a command does before you press Enter.
+
+\end{chapterintro}
+
+\emph{The problem.} I type a command and something happens, but I couldn't tell you what.
+
+\emph{The question.} What exactly happens between pressing Enter and seeing the result?
+
+\section{The Shell's Loop}\label{02-the-shell-talking-to-your-computer-in-words:the-shells-loop}
+
+The shell does the same four things, forever:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  It shows a prompt, the text before your cursor (often your name, the folder you're in, and a \texttt{\$} or \texttt{\%}).
+\item
+  It reads the line you type when you press Enter.
+\item
+  It finds the program you named and runs it, passing along the rest of the line.
+\item
+  It shows the program's output, then goes back to step 1.
+\end{enumerate}
+
+The two shells you'll meet are bash, the default on most Linux systems, and zsh, the default on macOS. For everything in this book they behave the same way.
+
+\section{The Parts of a Command}\label{02-the-shell-talking-to-your-computer-in-words:the-parts-of-a-command}
+
+Every command line has the same shape: a command, then options, then arguments.
+
+\codeneed{5}\begin{codeblock}
+\begin{Verbatim}[breaklines=false, fontsize=\fontsize{8.8}{8.68}\selectfont, fontfamily=diagrammono, formatcom=\diagramlines]
+  ls   -l   -a   /home/ada/sandbox
+  │    └──┬──┘   └──────┬────────┘
+  │       │             └─ argument: what to act on
+  │       └─ options: how to do it
+  └─ command: which program to run
+\end{Verbatim}
+\end{codeblock}
+
+\begin{itemize}
+\tightlist
+\item
+  The command is the program to run. Here it's \texttt{ls}, which lists files.
+\item
+  An \textbf{option}\index{option} (also called a flag) changes how the command behaves. Short options are one letter after a dash (\texttt{-l}), and can be combined (\texttt{-la} means \texttt{-l\ -a}). Long options are words after two dashes (\texttt{-\/-all}).
+\item
+  An \textbf{argument}\index{argument} is the thing the command acts on, usually a file or folder. Most commands have a sensible default when you leave it out.
+\end{itemize}
+
+Spaces separate the parts. That's why file names with spaces cause trouble: \texttt{my\ notes.txt} looks like two arguments. Wrap such names in quotes: \texttt{"my\ notes.txt"}.
+
+\section{Where You Are: Paths and the Working Directory}\label{02-the-shell-talking-to-your-computer-in-words:where-you-are-paths-and-the-working-directory}
+
+The shell always has a current folder, called the \textbf{working directory}\index{working directory}. Commands act there unless you say otherwise. When you open a terminal, you start in your \textbf{home directory}\index{home directory}, your personal folder: \texttt{/home/ada} on Linux, \texttt{/Users/ada} on macOS. The shell lets you write it as \texttt{\textasciitilde{}}.
+
+A \textbf{path}\index{path} is the address of a file or folder. An absolute path starts at the very top of the file system, \texttt{/}, and works from anywhere: \texttt{/}\allowbreak{}\texttt{home/}\allowbreak{}\texttt{ada/}\allowbreak{}\texttt{sandbox/}\allowbreak{}\texttt{todo.}\allowbreak{}\texttt{txt}. A relative path starts from where you are now: if you're in \texttt{/home/ada}, then \texttt{sandbox/todo.txt} means the same file. Two special names help: \texttt{.} means ``this folder'' and \texttt{..} means ``the folder above''.
+
+Three commands do most of the moving around. \texttt{pwd} prints the working directory. \texttt{ls} lists what's in it. \texttt{cd} changes it.
+
+\codeneed{8}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{pwd}
+\FunctionTok{mkdir} \AttributeTok{{-}p}\NormalTok{ sandbox/notes}
+\BuiltInTok{cd}\NormalTok{ sandbox}
+\FunctionTok{touch}\NormalTok{ todo.txt ideas.txt}
+\FunctionTok{ls}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+/home/ada
+ideas.txt  notes  todo.txt
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{9}
+
+\texttt{mkdir\ -p} made the folder \texttt{sandbox} and, inside it, \texttt{notes} (the \texttt{-p} means ``make parent folders too, and don't complain if they exist''). \texttt{touch} created two empty files. Now the long listing:
+
+\codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ls} \AttributeTok{{-}l}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{4}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+total 4
+-rw-r--r-- 1 ada ada    0 Sep 26 14:27 ideas.txt
+drwxr-xr-x 2 ada ada 4096 Sep 26 14:27 notes
+-rw-r--r-- 1 ada ada    0 Sep 26 14:27 todo.txt
+\end{Verbatim}
+\end{codeblock}
+
+Each line shows permissions, owner, size in bytes, date, and name. A \texttt{d} at the start marks a directory. Chapter 3 reads the rest.
+
+To move around, \texttt{cd\ notes} goes into a folder, \texttt{cd\ ..} climbs one level, and \texttt{cd} on its own always takes you home.
+
+\Needspace{16\baselineskip}
+
+\section{Making, Copying, and Removing}\label{02-the-shell-talking-to-your-computer-in-words:making-copying-and-removing}
+
+A few more commands handle everyday file work:
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.2623\linewidth-1.4754\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.7377\linewidth-0.5246\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Command} & \thead{What it does} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+\texttt{mkdir\ -p\ a/b} & Make folders, including parents \\
+\texttt{touch\ f} & Create an empty file (or update its time) \\
+\texttt{cp\ src\ dst} & Copy a file; \texttt{cp\ -r} copies a folder \\
+\texttt{mv\ old\ new} & Move or rename \\
+\texttt{rm\ f} & Remove a file; \texttt{rm\ -r} removes a folder \\
+\texttt{cat\ f} & Print a whole file \\
+\end{longtable}
+\end{booktable}
+
+\begin{callout}{warning}
+
+\texttt{rm} does not use the bin or the Trash. The file is gone the moment you press Enter. Be especially careful with \texttt{rm\ -r}, and read the whole line before you press Enter.
+
+\end{callout}
+
+\section{How the Shell Finds a Command}\label{02-the-shell-talking-to-your-computer-in-words:how-the-shell-finds-a-command}
+
+When you type \texttt{ls}, how does the shell know which program you mean? It looks in a list of folders stored in a setting called \textbf{PATH}\index{path@PATH}. It checks them from left to right and runs the first program with that name.
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{echo} \VariableTok{$PATH}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{7}
+
+The folders are separated by colons. \texttt{which} tells you where a command was found:
+
+\codeneed{4}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{which}\NormalTok{ ls python3}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+/usr/bin/ls
+/usr/local/bin/python3
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{6}
+
+A few commands, like \texttt{cd}, aren't programs at all. They're a builtin, part of the shell itself:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{type}\NormalTok{ cd}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+cd is a shell builtin
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{4}
+
+This explains the most common error in the terminal:
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+bash: nosuchcmd: command not found
+\end{Verbatim}
+\end{codeblock}
+
+No folder on your PATH holds a program with that name. It's misspelled, not installed, or installed in a folder that isn't on your PATH.
+
+\section{Streams, Redirection, and Pipes}\label{02-the-shell-talking-to-your-computer-in-words:streams-redirection-and-pipes}
+
+Every program starts with three streams, like three hoses attached to it. \textbf{Standard input}\index{standard input} (stdin) is where it reads from, usually your keyboard. \textbf{Standard output}\index{standard output} (stdout) is where it writes results, usually your screen. \textbf{Standard error}\index{standard error} (stderr) is a second output just for error messages, also your screen.
+
+\textbf{Redirection}\index{redirection} points those hoses somewhere else. \texttt{\textgreater{}} sends stdout into a file, replacing what was there. \texttt{\textgreater{}\textgreater{}} adds to the end instead. \texttt{2\textgreater{}} sends stderr into a file.
+
+\codeneed{7}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ \textasciitilde{}/sandbox}
+\BuiltInTok{echo} \StringTok{"buy milk"} \OperatorTok{\textgreater{}}\NormalTok{ todo.txt}
+\BuiltInTok{echo} \StringTok{"call Sam"} \OperatorTok{\textgreater{}\textgreater{}}\NormalTok{ todo.txt}
+\FunctionTok{cat}\NormalTok{ todo.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+buy milk
+call Sam
+\end{Verbatim}
+\end{codeblock}
+
+\codeneed{9}
+
+Errors travel on their own hose, so you can separate them:
+
+\codeneed{6}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ls}\NormalTok{ /nope}
+\FunctionTok{ls}\NormalTok{ /nope }\DecValTok{2}\OperatorTok{\textgreater{}}\NormalTok{ errors.txt}
+\FunctionTok{cat}\NormalTok{ errors.txt}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{2}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+ls: cannot access '/nope': No such file or directory
+ls: cannot access '/nope': No such file or directory
+\end{Verbatim}
+\end{codeblock}
+
+The first \texttt{ls} printed its complaint on the screen. The second printed nothing, because its error went into \texttt{errors.txt}. On macOS the message reads \texttt{ls:}\allowbreak{}\texttt{\ /}\allowbreak{}\texttt{nope:}\allowbreak{}\texttt{\ No\ such\ file\ or\ directory}; the idea is the same.
+
+\codeneed{6}
+
+A \textbf{pipe}\index{pipe}, written \texttt{\textbar{}}, connects one program's stdout to the next program's stdin. This is how small tools join forces. How many entries are in \texttt{/etc}? \texttt{ls} lists them, \texttt{wc\ -l} counts lines:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ls}\NormalTok{ /etc }\KeywordTok{|} \FunctionTok{wc} \AttributeTok{{-}l}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+75
+\end{Verbatim}
+\end{codeblock}
+
+Read a pipeline left to right, like a sentence: ``list \texttt{/etc}, then count the lines''. Chapter 5 builds longer ones.
+
+\section{Getting Help}\label{02-the-shell-talking-to-your-computer-in-words:getting-help}
+
+You never need to memorise options. Every standard command has a manual page, or \textbf{man page}\index{man page}. Run \texttt{man\ ls} to read it; use the arrow keys or space to scroll, \texttt{/word} to search, and \texttt{q} to quit. Most GNU tools on Linux also print a short summary with \texttt{-\/-help}:
+
+\codeneed{3}\begin{codeblock}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ls} \AttributeTok{{-}{-}help} \KeywordTok{|} \FunctionTok{head} \AttributeTok{{-}1}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codeblock}
+
+\codeneed{1}\begin{codeblock}
+\begin{Verbatim}[formatcom=\outputstyle]
+Usage: ls [OPTION]... [FILE]...
+\end{Verbatim}
+\end{codeblock}
+
+macOS's \texttt{ls} doesn't understand \texttt{-\/-help}; use \texttt{man\ ls} there.
+
+\begin{callout}{tip}
+
+Press Tab while typing a name, and the shell completes it for you; press it twice to see the choices. It saves typing and, more importantly, typos.
+
+\end{callout}
+
+A few more keys make life easier. The Up arrow brings back earlier commands. Ctrl-R searches your history as you type. Ctrl-C cancels whatever is running. Ctrl-L clears the screen.
+
+\section{Lab: A Sandbox Tour}\label{02-the-shell-talking-to-your-computer-in-words:lab-a-sandbox-tour}
+
+Work in a new terminal window. Each step says what you should see.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Make a fresh folder for this lab: \texttt{mkdir\ -}\allowbreak{}\texttt{p\ \textasciitilde{}/}\allowbreak{}\texttt{sandbox/}\allowbreak{}\texttt{ch2/}\allowbreak{}\texttt{notes}, then \texttt{cd\ \textasciitilde{}/sandbox/ch2}. \textbf{Expected:} \texttt{pwd} prints your home folder followed by \texttt{/sandbox/ch2}.
+\item
+  Create a file with two lines: \texttt{echo\ "first"\ \textgreater{}\ log.txt}, then \texttt{echo\ "second"\ \textgreater{}\textgreater{}\ log.}\allowbreak{}\texttt{txt}, then \texttt{cat\ log.txt}. \textbf{Expected:} \texttt{first} and \texttt{second} on two lines.
+\item
+  Replace instead of adding: \texttt{echo\ "only"\ \textgreater{}\ log.txt} and \texttt{cat\ log.txt}. \textbf{Expected:} just \texttt{only}. That's the difference between \texttt{\textgreater{}} and \texttt{\textgreater{}\textgreater{}}.
+\item
+  Copy and move: \texttt{cp\ log.}\allowbreak{}\texttt{txt\ notes/}\allowbreak{}\texttt{copy.}\allowbreak{}\texttt{txt}, then \texttt{mv\ notes/}\allowbreak{}\texttt{copy.}\allowbreak{}\texttt{txt\ notes/}\allowbreak{}\texttt{moved.}\allowbreak{}\texttt{txt}, then \texttt{ls\ notes}. \textbf{Expected:} \texttt{moved.txt}.
+\item
+  Separate an error: \texttt{ls\ /}\allowbreak{}\texttt{nope\ 2\textgreater{}\ err.txt}, then \texttt{cat\ err.txt}. \textbf{Expected:} nothing on screen from the first command; the error message from the second.
+\item
+  Count with a pipe: \texttt{ls\ \textasciitilde{}/}\allowbreak{}\texttt{sandbox/}\allowbreak{}\texttt{ch2\ \textbar{}\ wc\ -}\allowbreak{}\texttt{l}. \textbf{Expected:} \texttt{3} (\texttt{err.txt}, \texttt{log.txt}, \texttt{notes}).
+\item
+  Find where Python lives: \texttt{which\ python3}. \textbf{Expected:} a path such as \texttt{/usr/bin/python3}.
+\item
+  Look up an option: run \texttt{man\ wc} and find what \texttt{-w} does. \textbf{Expected:} it counts words. Press \texttt{q} to leave.
+\end{enumerate}
+
+\section{Summary, Key Terms, and Review Questions}\label{02-the-shell-talking-to-your-computer-in-words:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\label{02-the-shell-talking-to-your-computer-in-words:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  The shell loops: prompt, read, run, show. bash and zsh work the same way for everyday use.
+\item
+  A command line is a command, then options, then arguments, separated by spaces.
+\item
+  The working directory is where commands act. Absolute paths start at \texttt{/}; relative paths start where you are.
+\item
+  The shell finds programs by searching the folders on your PATH, left to right.
+\item
+  Every program has stdin, stdout, and stderr. Redirection points them at files; pipes connect programs.
+\item
+  \texttt{man} and \texttt{-\/-help} explain any command.
+\end{itemize}
+
+\Needspace{17\baselineskip}
+
+\subsection*{Key Terms}\label{02-the-shell-talking-to-your-computer-in-words:key-terms}
+
+\begin{booktable}
+\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr 0.3667\linewidth-1.2667\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.6333\linewidth-0.7333\tabcolsep\relax}}
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endfirsthead
+\tabletop
+\rowcolor{tablehead}\thead{Term} & \thead{Meaning} \\
+\tablemid
+\endhead
+\tablebottom
+\endlastfoot
+Option & A setting that changes how a command behaves, like \texttt{-l} \\
+Argument & What a command acts on, usually a file or folder \\
+Working directory & The folder the shell is currently in \\
+Home directory & Your personal folder, written \texttt{\textasciitilde{}} \\
+Path & The address of a file or folder \\
+PATH & The list of folders the shell searches for commands \\
+Standard input, output, error & The three streams every program starts with \\
+Redirection & Sending a stream to or from a file (\texttt{\textgreater{}},
+\texttt{\textgreater{}\textgreater{}}, \texttt{2\textgreater{}}) \\
+Pipe & The ` \\
+Man page & The built-in manual for a command \\
+\end{longtable}
+\end{booktable}
+
+\subsection*{Review Questions}\label{02-the-shell-talking-to-your-computer-in-words:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  In \texttt{cp\ -}\allowbreak{}\texttt{r\ photos\ /}\allowbreak{}\texttt{home/}\allowbreak{}\texttt{ada/}\allowbreak{}\texttt{backup}, which part is the command, which the option, and which the arguments?
+\item
+  You're in \texttt{/home/ada/sandbox}. Write the absolute and relative paths to \texttt{notes/ideas.txt}.
+\item
+  What's the difference between \texttt{\textgreater{}} and \texttt{\textgreater{}\textgreater{}}? Which one can destroy data?
+\item
+  What does ``command not found'' tell you, and what are three possible causes?
+\item
+  What does \texttt{ls\ /etc\ \textbar{}\ wc\ -l} do, step by step?
+\end{enumerate}
+
+\begin{understandbox}
+
+\textbf{You understand this when} you can read a command like \texttt{ls\ -}\allowbreak{}\texttt{l\ \textasciitilde{}/}\allowbreak{}\texttt{sandbox\ 2\textgreater{}\ err.}\allowbreak{}\texttt{txt\ \textbar{}\ wc\ -}\allowbreak{}\texttt{l} aloud and say what each part does.
+
+\end{understandbox}
