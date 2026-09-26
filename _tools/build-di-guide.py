@@ -8,7 +8,7 @@ Usage (from the repository root):
 1. Runs the roadmap's own generator (with its validation) into a temp directory.
    The roadmap source in _sources/ai-roadmap/ is only read, never modified.
 2. Adds a "Towards Intelligence" link to each page's top bar, pointing back to
-   the site home page, and justifies the running text on the guide's home page.
+   the site home page, adds the site icon, and justifies the running text on the guide's home page.
    These are the only changes made to the generated pages.
 3. Replaces data-intelligence/guide/ with the result.
 """
@@ -55,7 +55,8 @@ def add_home_link(out: Path) -> int:
         html = page.read_text(encoding="utf-8")
         if html.count(ANCHOR) != 1 or html.count("</head>") != 1:
             sys.exit(f"Unexpected page structure, not patching: {page.relative_to(out)}")
-        html = html.replace(ANCHOR, home_link("../" * depth)).replace("</head>", STYLE)
+        icon = f'<link rel="icon" type="image/svg+xml" href="{"../" * depth}favicon/favicon.svg"/>\n'
+        html = html.replace(ANCHOR, home_link("../" * depth)).replace("</head>", icon + STYLE)
         if page.relative_to(out).as_posix() == HOME_PAGE:
             html = html.replace("</head>", HOME_STYLE)
         page.write_text(html, encoding="utf-8")

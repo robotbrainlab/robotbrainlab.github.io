@@ -35,7 +35,7 @@ not on the website.
 | `data-intelligence/index.html` | Redirects to `guide/` |
 | `data-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site (72 pages). Never edit by hand |
 | `theme/site.css`, `theme/site.js` | Shared styling + behaviour for restyled pages |
-| `favicon/` | Site icon |
+| `favicon/` | Site icon: "Apex", a neural network converging into a radiant star, the culmination of AI (gradient tile). Also added to the D&I guide pages by the build script |
 | `_sources/ai-roadmap/` | Source of the D&I guide (a separate research repo; **this is its only copy**) |
 | `_sources/ai-tools/` | Claude Code guides, skills, and `html-reference/reference.html` (the design reference) |
 | `_sources/cs-roadmap/` | CS&E on-ramp books (Markdown + LaTeX) and `end-to-end/` (empty for now) |
