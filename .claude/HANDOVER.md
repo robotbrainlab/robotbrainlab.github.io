@@ -66,6 +66,9 @@ blue accent and gradient emphasis. The rule is **not a single letter of content 
   must stay left-aligned: never use `text-align-last: center` (the reference does, and the user
   flagged it). Keep justified columns wide enough (about 800px for 21px text) to avoid gappy lines.
 
+To restyle the rest of the site unattended, follow `.claude/RESTYLE-RUNBOOK.md` (a `restyle` branch, one commit
+per page, nothing pushed).
+
 ### Process for each page
 
 1. Read the page. Map its structure onto the `theme/site.css` components (`.band`/`.band.alt`,
@@ -89,7 +92,7 @@ blue accent and gradient emphasis. The rule is **not a single letter of content 
 | `cse/index.html` | To do. The large nested knowledge tree maps to cards |
 | `cse/on-ramp.html` | To do. One table with row spans; restyle it like the reference's `table.grid` inside a card |
 | `data-intelligence/resources.html` | To do. 7 tables, same treatment |
-| 5 Coming Soon pages | To do. They share one template |
+| 4 Coming Soon pages (`cse/resources`, `mathematics/index`, `mathematics/resources`, `data-intelligence/llm-engineering`) | To do. They share one template |
 | `data-intelligence/guide/` (72 pages) | To do last. It has its own ~2,300-line CSS. **Don't touch `_sources/ai-roadmap/`**; add an override stylesheet from `_tools/build-di-guide.py`, the same way that script already adds the home link and the justify rule |
 
 ---

@@ -12,6 +12,9 @@ Then follow the matching section of the handover: "Restyle work" or "Website wor
 If the user's first message already makes the answer obvious, confirm it in one line instead
 of asking.
 
+**Exception: unattended restyle run.** If the first message asks you to follow
+`.claude/RESTYLE-RUNBOOK.md`, don't ask anything. Go straight to the runbook; the user is away.
+
 ## Handover
 
 @HANDOVER.md

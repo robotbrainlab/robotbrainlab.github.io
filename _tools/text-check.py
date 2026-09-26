@@ -3,8 +3,9 @@
 
 Usage (from the repository root):
 
-    python3 _tools/text-check.py index.html            # working copy vs HEAD
+    python3 _tools/text-check.py index.html                    # working copy vs HEAD
     python3 _tools/text-check.py index.html --rev 683e3ce
+    python3 _tools/text-check.py $(git ls-files 'data-intelligence/guide/*.html')   # many pages
 
 Compared, in document order:
   - every text node in <head> <title> and <body> (scripts and styles excluded),
@@ -74,19 +75,24 @@ def extract(html: str) -> list[str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("page")
+    ap.add_argument("pages", nargs="+")
     ap.add_argument("--rev", default="HEAD")
     args = ap.parse_args()
-    old = subprocess.run(["git", "show", f"{args.rev}:{args.page}"], capture_output=True, text=True, check=True).stdout
-    new = Path(args.page).read_text(encoding="utf-8")
-    a, b = extract(old), extract(new)
-    if a == b:
-        print(f"OK  {args.page}: {len(a)} text/link items identical to {args.rev}")
-        return 0
-    print(f"CHANGED  {args.page} vs {args.rev}:")
-    for line in list(difflib.unified_diff(a, b, "before", "after", lineterm="", n=1))[:60]:
-        print("  " + line)
-    return 1
+    failed = 0
+    for page in args.pages:
+        old = subprocess.run(["git", "show", f"{args.rev}:{page}"], capture_output=True, text=True, check=True).stdout
+        new = Path(page).read_text(encoding="utf-8")
+        a, b = extract(old), extract(new)
+        if a == b:
+            print(f"OK  {page}: {len(a)} text/link items identical to {args.rev}")
+            continue
+        failed += 1
+        print(f"CHANGED  {page} vs {args.rev}:")
+        for line in list(difflib.unified_diff(a, b, "before", "after", lineterm="", n=1))[:60]:
+            print("  " + line)
+    if len(args.pages) > 1:
+        print(f"{len(args.pages) - failed}/{len(args.pages)} pages unchanged")
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
