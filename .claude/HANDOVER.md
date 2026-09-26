@@ -26,7 +26,7 @@ not on the website.
 
 | Path | What it is |
 | --- | --- |
-| `index.html` | Home page. **Restyled** (pilot); uses `theme/` |
+| `index.html` | Home page. **Restyled** (live); uses `theme/` |
 | `cse/index.html` | CS&E guide (knowledge tree), old dark style |
 | `cse/on-ramp.html` | CS&E on-ramp, a table of "from Zero" books, old dark style |
 | `cse/books/` | Published book PDFs + lab zips (copies of those in `_sources/cs-roadmap/on-ramp/books/`) |
