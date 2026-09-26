@@ -33,13 +33,14 @@ git switch -c restyle                        # or `git switch restyle` to resume
 
 | # | Commit | Pages | Notes |
 | --- | --- | --- | --- |
-| 1 | Coming Soon pages | `cse/resources.html`, `mathematics/index.html`, `mathematics/resources.html`, `data-intelligence/llm-engineering.html` | Identical template. Make it a centred hero (eyebrow, big title, text, button) in one commit |
+| 1 | Coming Soon pages | `mathematics/index.html` (linked from Home), `cse/resources.html` (linked from the CS&E guide) | Same template. Make it a centred hero (eyebrow, big title, text, button) in one commit |
 | 2 | CS&E on-ramp | `cse/on-ramp.html` | One big table with row spans. Restyle it like the reference's `table.grid` inside a `.card`; scroll sideways on phones. Keep `target="_blank"` on book links |
-| 3 | D&I resources | `data-intelligence/resources.html` | 7 tables, same table treatment |
-| 4 | CS&E guide | `cse/index.html` | ~1,100 lines of nested knowledge tree. Map the levels to bands, cards and lists. The largest hand-written page, so take care |
-| 5 | D&I guide | `data-intelligence/guide/` (72 generated pages) | Add an **override stylesheet** (`theme/guide-override.css`) that `_tools/build-di-guide.py` links into every page. Map the guide's own CSS tokens (`data-intelligence/guide/assets/css/tokens.css`) to the theme's colours and fonts. Keep the guide's own light/dark toggle working. Rebuild, then text-check all 72 pages |
-| 6 | Consistency pass | all restyled pages | Same nav and footer everywhere, same `?v=N` on every theme link, no leftover Google Fonts or old inline `<style>` blocks |
+| 3 | CS&E guide | `cse/index.html` | ~1,100 lines of nested knowledge tree. Map the levels to bands, cards and lists. The largest hand-written page, so take care |
+| 4 | D&I guide | `data-intelligence/guide/` (72 generated pages) | Add an **override stylesheet** (`theme/guide-override.css`) that `_tools/build-di-guide.py` links into every page. Map the guide's own CSS tokens (`data-intelligence/guide/assets/css/tokens.css`) to the theme's colours and fonts. Keep the guide's own light/dark toggle working. Rebuild, then text-check all 72 pages |
+| 5 | Consistency pass | all restyled pages | Same nav and footer everywhere, same `?v=N` on every theme link, no leftover Google Fonts or old inline `<style>` blocks |
 
+**Out of scope. Don't touch these:** no page on the site links to them.
+`data-intelligence/llm-engineering.html`, `mathematics/resources.html`, `data-intelligence/resources.html`.
 `data-intelligence/index.html` is only a redirect. Leave it alone.
 
 ## The loop for each page

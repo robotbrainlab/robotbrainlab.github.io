@@ -30,8 +30,8 @@ not on the website.
 | `cse/index.html` | CS&E guide (knowledge tree), old dark style |
 | `cse/on-ramp.html` | CS&E on-ramp, a table of "from Zero" books, old dark style |
 | `cse/books/` | Published book PDFs + lab zips (copies of those in `_sources/cs-roadmap/on-ramp/books/`) |
-| `cse/resources.html`, `mathematics/*.html`, `data-intelligence/llm-engineering.html` | "Coming Soon" placeholders, old style |
-| `data-intelligence/resources.html` | D&I resources (7 tables), old style |
+| `mathematics/index.html`, `cse/resources.html` | "Coming Soon" placeholders, old style (linked from Home and the CS&E guide) |
+| `mathematics/resources.html`, `data-intelligence/llm-engineering.html`, `data-intelligence/resources.html` | **Orphans.** No page links to them (reachable by URL only). Not part of the restyle |
 | `data-intelligence/index.html` | Redirects to `guide/` |
 | `data-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site (72 pages). Never edit by hand |
 | `theme/site.css`, `theme/site.js` | Shared styling + behaviour for restyled pages |
@@ -91,8 +91,7 @@ per page, nothing pushed).
 | `index.html` | **Done, live** (2026-09-26): text-check OK, checked light/dark/mobile |
 | `cse/index.html` | To do. The large nested knowledge tree maps to cards |
 | `cse/on-ramp.html` | To do. One table with row spans; restyle it like the reference's `table.grid` inside a card |
-| `data-intelligence/resources.html` | To do. 7 tables, same treatment |
-| 4 Coming Soon pages (`cse/resources`, `mathematics/index`, `mathematics/resources`, `data-intelligence/llm-engineering`) | To do. They share one template |
+| 2 Coming Soon pages (`mathematics/index`, `cse/resources`) | To do. They share one template |
 | `data-intelligence/guide/` (72 pages) | To do last. It has its own ~2,300-line CSS. **Don't touch `_sources/ai-roadmap/`**; add an override stylesheet from `_tools/build-di-guide.py`, the same way that script already adds the home link and the justify rule |
 
 ---
