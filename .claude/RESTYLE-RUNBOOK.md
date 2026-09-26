@@ -60,7 +60,7 @@ git switch -c restyle                        # or `git switch restyle` to resume
      whenever `theme/` changes.
    - Keep text nodes whole. Restyle through classes and wrappers only.
 3. **Text check:** `python3 _tools/text-check.py <page(s)> --rev main` must say OK. It also fails if an
-   element `id` disappears, since jump links target them. If it doesn't,
+   element `id` disappears, since jump links target them. If it fails,
    fix the markup, not the text. After 3 failed attempts, restore the page and log it.
 4. **Visual check** in the preview (`http://localhost:8080/<page>`):
    - Desktop light, desktop dark (use the switch), mobile 375px light and dark.
