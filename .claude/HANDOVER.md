@@ -62,7 +62,9 @@ blue accent and gradient emphasis. The rule is **not a single letter of content 
 - Don't add visible text through CSS `content:`. Decorative empty `content: ""` is fine; `attr(data-label)`
   reuses existing text.
 - Don't split or merge text nodes. For example, don't wrap one word of a sentence in a new `<span>`.
-- Justified text stays. The user wants running text justified (`p, li, td, .prose`).
+- Justified text stays. The user wants running text justified (`p, li, td, .prose`). The last line
+  must stay left-aligned: never use `text-align-last: center` (the reference does, and the user
+  flagged it). Keep justified columns wide enough (about 800px for 21px text) to avoid gappy lines.
 
 ### Process for each page
 
