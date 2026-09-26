@@ -45,8 +45,11 @@ git switch -c restyle                        # or `git switch restyle` to resume
 
 ## The loop for each page
 
-1. **Read the whole page** before changing it. List its structure: nav, hero, sections, tables, lists
-   and scripts.
+1. **Read the whole page** before changing it. List its structure (nav, hero, sections, tables, lists)
+   and write down **every behaviour** its `<script>` provides, for example the mobile menu, scroll reveal,
+   highlighting of the table of contents (`cse/index.html`), and the back-to-top button (`cse/index.html`).
+   Each one must still work afterwards. Move it into `theme/site.js` if it's generic, otherwise keep a
+   small page script.
 2. **Restyle it**, following the Rules in HANDOVER.md → Restyle work:
    - `<head>`: keep every meta tag, the title and the favicon link. Add the pre-paint theme script
      (copy it from `index.html`). Link `../theme/site.css?v=N`. Remove the page's own `<style>` block
@@ -56,7 +59,8 @@ git switch -c restyle                        # or `git switch restyle` to resume
    - Put reusable components in `theme/site.css`, not inline. Bump `?v=N` on **every** restyled page
      whenever `theme/` changes.
    - Keep text nodes whole. Restyle through classes and wrappers only.
-3. **Text check:** `python3 _tools/text-check.py <page(s)> --rev main` must say OK. If it doesn't,
+3. **Text check:** `python3 _tools/text-check.py <page(s)> --rev main` must say OK. It also fails if an
+   element `id` disappears, since jump links target them. If it doesn't,
    fix the markup, not the text. After 3 failed attempts, restore the page and log it.
 4. **Visual check** in the preview (`http://localhost:8080/<page>`):
    - Desktop light, desktop dark (use the switch), mobile 375px light and dark.
@@ -64,7 +68,10 @@ git switch -c restyle                        # or `git switch restyle` to resume
      Tables may scroll inside their own card.
    - The mobile menu opens and closes. The console shows no errors.
    - Justified text: the last line starts at the left, and lines aren't gappy (see HANDOVER).
-   - Every internal link on the page still resolves: fetch each `href` and expect 200.
+   - Every internal link on the page still resolves: fetch each `href` and expect 200. For `#id` and
+     `page.html#id` links, check that the target element exists on the target page.
+   - Test every behaviour from step 1 by hand: click the table-of-contents links and watch the active
+     highlight follow the scroll; scroll down and use back-to-top; open and close the menu.
    - Reset the viewport to desktop afterwards.
 5. **Regression check:** `python3 _tools/text-check.py $(git ls-files '*.html' | grep -v '^_') --rev main`.
    Every page that isn't in this commit must still pass too, which catches accidental edits.

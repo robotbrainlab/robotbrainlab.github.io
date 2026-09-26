@@ -11,6 +11,8 @@ Compared, in document order:
   - every text node in <head> <title> and <body> (scripts and styles excluded),
     with runs of ordinary whitespace collapsed; non-breaking spaces are kept exact
   - every href, plus the meta description/og tags and data-label tooltips
+Also checked: every element id in the old page still exists (jump links like #cse target them);
+new ids may be added.
 Exits 1 and prints the first differences if anything changed.
 """
 
@@ -34,9 +36,12 @@ class Extract(HTMLParser):
         self.in_title = False
         self.in_body = False
         self.items: list[str] = []
+        self.ids: set[str] = set()
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
+        if a.get("id"):
+            self.ids.add(a["id"])
         if tag in SKIP:
             self.skip += 1
         elif tag == "title":
@@ -68,9 +73,13 @@ class Extract(HTMLParser):
 
 
 def extract(html: str) -> list[str]:
+    return parse(html).items
+
+
+def parse(html: str) -> Extract:
     p = Extract()
     p.feed(html)
-    return p.items
+    return p
 
 
 def main() -> int:
@@ -82,14 +91,18 @@ def main() -> int:
     for page in args.pages:
         old = subprocess.run(["git", "show", f"{args.rev}:{page}"], capture_output=True, text=True, check=True).stdout
         new = Path(page).read_text(encoding="utf-8")
-        a, b = extract(old), extract(new)
-        if a == b:
-            print(f"OK  {page}: {len(a)} text/link items identical to {args.rev}")
+        po, pn = parse(old), parse(new)
+        a, b = po.items, pn.items
+        missing = sorted(po.ids - pn.ids)
+        if a == b and not missing:
+            print(f"OK  {page}: {len(a)} text/link items identical to {args.rev}; all {len(po.ids)} ids kept")
             continue
         failed += 1
         print(f"CHANGED  {page} vs {args.rev}:")
         for line in list(difflib.unified_diff(a, b, "before", "after", lineterm="", n=1))[:60]:
             print("  " + line)
+        if missing:
+            print(f"  ids removed (jump links to them would break): {', '.join(missing)}")
     if len(args.pages) > 1:
         print(f"{len(args.pages) - failed}/{len(args.pages)} pages unchanged")
     return 1 if failed else 0
