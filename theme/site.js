@@ -75,6 +75,35 @@
     update();
   }
 
+  /* ---------- Sidebar contents: highlight the section being read ---------- */
+  var tocLinks = document.querySelectorAll('.toc a');
+  if (tocLinks.length && 'IntersectionObserver' in window) {
+    var targets = [];
+    tocLinks.forEach(function (link) {
+      var href = link.getAttribute('href');
+      if (href && href.charAt(0) === '#') {
+        var el = document.getElementById(href.slice(1));
+        if (el) targets.push({ el: el, link: link });
+      }
+    });
+    var tocObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        tocLinks.forEach(function (l) { l.classList.remove('active'); });
+        targets.forEach(function (t) { if (t.el === entry.target) t.link.classList.add('active'); });
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    targets.forEach(function (t) { tocObserver.observe(t.el); });
+  }
+
+  /* ---------- Back-to-top button ---------- */
+  var backBtn = document.getElementById('backToTop');
+  if (backBtn) {
+    window.addEventListener('scroll', function () {
+      backBtn.classList.toggle('visible', window.scrollY > 600);
+    }, { passive: true });
+  }
+
   /* ---------- Hash jump once layout settles (e.g. ../index.html#data-intelligence) ---------- */
   if (location.hash) {
     history.scrollRestoration = 'manual';

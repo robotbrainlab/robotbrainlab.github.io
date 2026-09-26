@@ -8,374 +8,45 @@
   <meta property="og:title" content="CS & Engineering On-Ramp — Towards Intelligence"/>
   <meta property="og:description" content="A series of books for Computer Science & Engineering — the fastest path to becoming employable, mapped against every CS&E topic in the grid."/>
   <meta property="og:type" content="article"/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <style>
-    :root {
-      --bg:         #0e0e0f;
-      --surface:    #151516;
-      --surface2:   #1c1c1e;
-      --rule:       #2a2a2e;
-      --rule-lt:    #333338;
-      --ink:        #e8e8e8;
-      --ink-mid:    #d4d4d4;
-      --ink-dim:    #a8a8a8;
-      --white:      #f8f8f8;
-      --accent:     #c8a96e;
-      --accent-dim: #3a2e1a;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
-    body {
-      font-family: 'Source Serif 4', Georgia, serif;
-      background: var(--bg); color: var(--ink);
-      line-height: 1.7;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: clip;
-    }
-    body > nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(14, 14, 15, 0.94);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--rule);
-    }
-    .nav-inner {
-      max-width: 1100px; margin: 0 auto;
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 1rem 2rem;
-    }
-    .nav-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em;
-      color: var(--white); text-decoration: none;
-    }
-    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
-    .nav-links a {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.92rem; font-weight: 500; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--ink-mid);
-      text-decoration: none; transition: color 0.2s;
-    }
-    .nav-links a:hover { color: var(--accent); }
-    .nav-links a.active { color: var(--accent); }
-    .nav-hamburger {
-      display: none;
-      flex-direction: column; justify-content: center; align-items: center;
-      gap: 5px; width: 44px; height: 44px;
-      cursor: pointer; background: none; border: none; padding: 0;
-    }
-    .nav-hamburger span {
-      display: block; width: 24px; height: 2px;
-      background: var(--ink); border-radius: 1px;
-      transition: transform 0.3s, opacity 0.3s;
-    }
-    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
-    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-    .mobile-menu {
-      display: none;
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      z-index: 99;
-      background: rgba(14, 14, 15, 0.97);
-      backdrop-filter: blur(12px);
-      flex-direction: column; justify-content: center; align-items: center;
-      gap: 2rem;
-    }
-    .mobile-menu.open { display: flex; }
-    .mobile-menu a {
-      font-family: 'Karla', sans-serif;
-      font-size: 1.1rem; font-weight: 500; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--ink-mid);
-      text-decoration: none; transition: color 0.2s;
-    }
-    .mobile-menu a:hover { color: var(--accent); }
-
-    .page-wrap {
-      max-width: 1100px; margin: 0 auto;
-      padding: 0 2rem 6rem;
-    }
-    .breadcrumb {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.84rem; letter-spacing: 0.04em;
-      color: var(--ink-dim);
-      padding-top: 6rem;
-    }
-    .breadcrumb a { color: var(--ink-dim); text-decoration: none; transition: color 0.2s; }
-    .breadcrumb a:hover { color: var(--accent); }
-    .breadcrumb .sep { margin: 0 0.5rem; color: var(--rule-lt); }
-    .breadcrumb .current { color: var(--ink-mid); }
-
-    .hero {
-      padding: 3rem 0 3rem;
-      border-bottom: 1px solid var(--rule);
-      margin-bottom: 3rem;
-    }
-    .hero-kicker {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--accent);
-      display: flex; align-items: center; gap: 0.8rem;
-      margin-bottom: 1.4rem;
-    }
-    .hero-kicker::before {
-      content: ''; display: block;
-      width: 32px; height: 1px; background: var(--accent);
-    }
-    .hero-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.2rem, 4.5vw, 3.6rem);
-      font-weight: 600; line-height: 1.1;
-      letter-spacing: -0.01em;
-      color: var(--white);
-      margin-bottom: 1rem;
-    }
-    .hero-title em { font-style: italic; font-weight: 400; color: var(--accent); }
-    .hero-subtitle {
-      font-size: 1.02rem; line-height: 1.75;
-      color: var(--ink); max-width: 760px; font-weight: 400;
-    }
-    .hero-meta {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.82rem; letter-spacing: 0.06em;
-      color: var(--ink-dim);
-      margin-top: 1.4rem;
-      text-transform: uppercase;
-    }
-    .article-link {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--accent);
-      text-decoration: none;
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      margin-top: 1.2rem;
-      border-bottom: 1px solid var(--accent-dim);
-      padding-bottom: 0.2rem;
-      transition: border-color 0.2s;
-    }
-    .article-link:hover { border-color: var(--accent); }
-
-    /* On-ramp table styles */
-    .onramp-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 0.6rem;
-      margin-bottom: 3rem;
-      border: 1px solid var(--rule);
-    }
-    .onramp-table thead th {
-      text-align: left;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.74rem; font-weight: 600;
-      letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--ink-dim);
-      border: 1px solid var(--rule); background: var(--surface);
-      padding: 0.9rem 1rem; vertical-align: middle;
-    }
-    .onramp-table tbody td {
-      padding: 1rem 1rem;
-      border: 1px solid var(--rule);
-      vertical-align: top;
-      font-family: 'Source Serif 4', serif;
-      font-size: 0.96rem;
-      line-height: 1.55;
-      color: var(--ink);
-    }
-    .onramp-table td.col-category,
-    .onramp-table td.col-topic {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 500;
-      color: var(--white);
-      background: rgba(21, 21, 22, 0.4);
-    }
-    .onramp-table td.col-category { font-size: 1.1rem; vertical-align: middle; }
-    .onramp-table td.col-topic { font-size: 1.05rem; }
-    .onramp-table .cell-item {
-      display: block;
-      margin-bottom: 0.6rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px dashed var(--rule);
-    }
-    .onramp-table .cell-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-    .onramp-table .cell-item a {
-      color: var(--ink); text-decoration: none;
-      border-bottom: 1px solid var(--rule-lt);
-      transition: color 0.2s, border-color 0.2s;
-      font-weight: 500;
-    }
-    .onramp-table .cell-item a:hover {
-      color: var(--accent); border-bottom-color: var(--accent);
-    }
-    .onramp-table .cell-desc {
-      display: block;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.8rem; color: var(--ink-dim);
-      margin-top: 0.2rem; line-height: 1.45;
-    }
-    .onramp-table .cell-empty { color: var(--ink-dim); opacity: 0.35; text-align: center; }
-    .onramp-table tr.track-divider td {
-      background: var(--surface);
-      border-left: none; border-right: none;
-      padding: 0.9rem 1rem;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.78rem; font-weight: 600;
-      letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--accent);
-    }
-    .onramp-table tr.track-divider td::before {
-      content: ''; display: inline-block;
-      width: 28px; height: 1px; background: var(--accent);
-      vertical-align: middle; margin-right: 0.8rem;
-    }
-    .onramp-table .cell-merged-note {
-      display: block;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.66rem; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--accent);
-      margin-bottom: 0.7rem; padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--accent-dim);
-    }
-    .onramp-table .cell-explainer {
-      display: block;
-      margin-top: 0.4rem;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.8rem; color: var(--ink-mid);
-      line-height: 1.6; font-style: normal;
-    }
-    .onramp-table .cell-explainer strong { color: var(--accent); font-weight: 600; }
-    .onramp-table .topic-sub {
-      display: block;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.86rem; font-weight: 500;
-      letter-spacing: 0.02em;
-      color: var(--ink-mid);
-      margin-top: 0.4rem;
-      padding-left: 0.6rem;
-      white-space: normal;
-    }
-    .onramp-table .topic-sub:first-of-type { margin-top: 0.6rem; }
-    .onramp-table .course-target {
-      display: inline-block;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.62rem; font-weight: 600;
-      letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--ink-dim);
-      background: var(--surface2);
-      padding: 0.15rem 0.5rem;
-      border-radius: 2px;
-      margin-bottom: 0.4rem;
-      vertical-align: middle;
-    }
-    .onramp-table thead th.col-h-cat    { width: 18%; }
-    .onramp-table thead th.col-h-topic  { width: 38%; }
-    .onramp-table thead th.col-h-course { width: 44%; }
-
-    /* Book entries */
-    .onramp-table .book-title {
-      display: block;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.14rem; font-weight: 600;
-      color: var(--white); line-height: 1.3;
-    }
-    .onramp-table .book-title a { color: var(--white); font-weight: 600; }
-    .onramp-table .book-problem {
-      display: block;
-      font-style: italic;
-      color: var(--ink-dim);
-      font-size: 0.92rem;
-      margin-top: 0.2rem;
-    }
-    .onramp-table .book-question {
-      display: block;
-      color: var(--ink-dim);
-      font-size: 0.96rem;
-      margin-top: 0.2rem;
-    }
-    .onramp-table .book-labs {
-      display: block;
-      margin-top: 0.4rem;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.78rem;
-    }
-    .onramp-table .cell-item .book-labs a {
-      color: var(--accent); font-weight: 400;
-      border-bottom: 1px solid var(--rule);
-    }
-    .onramp-table .book-status {
-      display: inline-block;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.6rem; font-weight: 600;
-      letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--ink-dim);
-      border: 1px solid var(--rule-lt);
-      padding: 0.1rem 0.45rem;
-      border-radius: 2px;
-      margin-left: 0.4rem;
-      vertical-align: middle;
-    }
-    .onramp-table .book-status.available { color: var(--accent); border-color: var(--accent); }
-    .onramp-table .book-deeper {
-      display: block;
-      margin-top: 0.45rem;
-      font-family: 'Karla', sans-serif;
-      font-size: 0.74rem; color: var(--ink-dim);
-    }
-    .onramp-table .cell-item .book-deeper a {
-      color: var(--ink-dim); font-weight: 400;
-      border-bottom: 1px solid var(--rule);
-    }
-
-    footer {
-      border-top: 1px solid var(--rule);
-      padding: 1.6rem 2rem;
-      background: var(--surface);
-    }
-    .footer-inner {
-      max-width: 1100px; margin: 0 auto;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .footer-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.96rem; color: var(--ink-dim);
-    }
-    .footer-copy {
-      font-family: 'Karla', sans-serif;
-      font-size: 0.88rem; color: var(--ink-dim); letter-spacing: 0.05em;
-    }
-
-    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.65s ease, transform 0.65s ease; }
-    .reveal.visible { opacity: 1; transform: none; }
-
-    @media (max-width: 600px) {
-      .nav-links { display: none; }
-      .nav-hamburger { display: flex; }
-      .nav-inner { padding-left: 1.2rem; padding-right: 1.2rem; }
-      .page-wrap { padding-left: 1.2rem; padding-right: 1.2rem; }
-    }
-    /* Justify prose: hero/section intros, body classes, tables, and grid cells (site-wide consistency) */
-    .hero-subtitle, .part-subtitle, .major-section-desc, .sub-discipline-desc,
-    .cell-desc, .cell-explainer, .cell-merged-note,
-    .tree-desc, .ops-note, .note-desc,
-    .sub-label-desc, .track-desc,
-    .mirror-table tbody td:not(:first-child),
-    .content-table tbody td:not(:first-child),
-    .resource-table tbody td:not(:first-child) {
-      text-align: justify;
-      hyphens: auto;
-    }
-  </style>
+  <script>
+    /* Apply the saved (or system) theme before first paint to avoid a flash. */
+    (function () {
+      var t;
+      try { t = localStorage.getItem('ti-theme'); } catch (e) {}
+      if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.classList.add('js');
+    })();
+  </script>
+  <link rel="stylesheet" href="../theme/site.css?v=4"/>
 </head>
 <body>
 
-<nav>
-  <div class="nav-inner">
-    <a href="../index.html" class="nav-logo">Towards Intelligence</a>
-    <ul class="nav-links">
-      <li><a href="../index.html#mathematics">Mathematics</a></li>
-      <li><a href="../cse/index.html" class="active">CS &amp; Engineering</a></li>
-      <li><a href="../index.html#data-intelligence">Data &amp; Intelligence</a></li>
-    </ul>
-    <button class="nav-hamburger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+<nav class="nav" aria-label="Sections">
+  <div class="wrap">
+    <a href="../index.html" class="brand">Towards Intelligence</a>
+    <div class="right">
+      <ul class="links">
+        <li><a href="../index.html#mathematics">Mathematics</a></li>
+        <li><a href="../cse/index.html" class="active">CS &amp; Engineering</a></li>
+        <li><a href="../index.html#data-intelligence">Data &amp; Intelligence</a></li>
+      </ul>
+      <button class="switch" id="themeToggle" type="button" role="switch"
+              aria-checked="false" aria-label="Dark mode" title="Toggle dark mode">
+        <span class="knob">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2" fill="currentColor"/>
+            <path d="M12 2v2.5M12 19.5V22M4.2 4.2 6 6M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8 6 18M18 6l1.8-1.8"/>
+          </svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1Z"/>
+          </svg>
+        </span>
+      </button>
+      <button class="nav-hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
 </nav>
 <div class="mobile-menu">
@@ -393,7 +64,7 @@
     <span class="current">On-Ramp</span>
   </nav>
 
-  <div class="hero reveal">
+  <div class="page-hero reveal">
     <div class="hero-kicker">Getting Started</div>
     <h1 class="hero-title">CS &amp; Engineering <em>On-Ramp</em></h1>
     <p class="hero-subtitle">
@@ -401,7 +72,8 @@
     </p>
   </div>
 
-  <table class="onramp-table reveal">
+  <div class="table-card reveal">
+  <table class="onramp-table">
     <thead>
       <tr>
         <th class="col-h-cat">Category</th>
@@ -424,7 +96,7 @@
         <td class="col-topic">Data Structures &amp; Algorithms</td>
         <td>
           <span class="cell-item">
-            <span class="course-target" style="color: var(--accent);">Data Structures and Algorithms</span><br>
+            <span class="course-target">Data Structures and Algorithms</span><br>
             <span class="book-title">Data Structures and Algorithms from Zero <span class="book-status">Coming soon</span></span>
             <span class="book-problem">My code gives the right answer, but it gets painfully slow as the data grows.</span>
             <span class="book-question">Why is one way of organizing data a thousand times faster than another, and how do I choose?</span>
@@ -440,7 +112,7 @@
         <td class="col-topic">Databases</td>
         <td>
           <span class="cell-item">
-            <span class="course-target" style="color: var(--accent);">Databases</span><br>
+            <span class="course-target">Databases</span><br>
             <span class="book-title">Databases from Zero <span class="book-status">Coming soon</span></span>
             <span class="book-problem">My app forgets everything when it stops. A list in memory can&rsquo;t be shared between users, searched well, or trusted after a crash.</span>
             <span class="book-question">Where should my app keep information so that it survives restarts, many users can share it, and I can find exactly what I need?</span>
@@ -451,7 +123,7 @@
         <td class="col-topic">Distributed Systems</td>
         <td>
           <span class="cell-item">
-            <span class="course-target" style="color: var(--accent);">Distributed Systems</span><br>
+            <span class="course-target">Distributed Systems</span><br>
             <span class="book-title">Distributed Systems from Zero <span class="book-status">Coming soon</span></span>
             <span class="book-problem">One machine can&rsquo;t handle the load, and any machine can die at any time.</span>
             <span class="book-question">What changes when my app runs on many machines at once?</span>
@@ -462,7 +134,7 @@
         <td class="col-topic">Operating Systems</td>
         <td>
           <span class="cell-item">
-            <span class="course-target" style="color: var(--accent);">Operating Systems</span><br>
+            <span class="course-target">Operating Systems</span><br>
             <span class="book-title">Operating Systems from Zero <span class="book-status">Coming soon</span></span>
             <span class="book-problem">I start my program and it &ldquo;just runs&rdquo;, but when it crashes, hangs, or runs out of memory, I don&rsquo;t know where to look.</span>
             <span class="book-question">What is the computer actually doing when my code runs?</span>
@@ -473,7 +145,7 @@
         <td class="col-topic">Computer Networks</td>
         <td>
           <span class="cell-item">
-            <span class="course-target" style="color: var(--accent);">Networking</span><br>
+            <span class="course-target">Networking</span><br>
             <span class="book-title">Networking from Zero <span class="book-status">Coming soon</span></span>
             <span class="book-problem">It works on <code>localhost</code>, but nobody else can reach it.</span>
             <span class="book-question">How does a request from someone&rsquo;s browser find my program and get an answer back?</span>
@@ -494,33 +166,33 @@
         <td class="col-topic">Software Engineering</td>
         <td>
           <span class="cell-item">
-            <span class="course-target" style="color: var(--accent);">Programming</span><br>
+            <span class="course-target">Programming</span><br>
             <span class="book-title">Programming from Zero <span class="book-status">Coming soon</span></span>
             <span class="book-problem">I have a task or an idea I want a computer to carry out, but I can&rsquo;t tell it what to do yet.</span>
             <span class="book-question">How do I tell a computer exactly what to do, and how does a programming language turn my instructions into action?</span>
           </span>
           <span class="cell-item">
-            <span class="course-target" style="color: var(--accent);">Linux and Git</span><br>
+            <span class="course-target">Linux and Git</span><br>
             <span class="book-title"><a href="books/linux-and-git/Linux%20and%20Git%20from%20Zero.pdf" target="_blank" rel="noopener">Linux and Git from Zero</a></span>
             <span class="book-problem">Every tutorial says &ldquo;open the terminal&rdquo;, and I don&rsquo;t know what I&rsquo;m typing. When my code breaks, I can&rsquo;t get the old version back.</span>
             <span class="book-question">How do I use the tools every developer uses every day, and never lose my work?</span>
             <span class="book-labs"><a href="books/linux-and-git/Linux%20and%20Git%20from%20Zero%20Lab%20Files.zip" download>Lab files</a></span>
           </span>
           <span class="cell-item">
-            <span class="course-target" style="color: var(--accent);">Web Applications</span><br>
+            <span class="course-target">Web Applications</span><br>
             <span class="book-title"><a href="books/web-applications/Web%20Applications%20from%20Zero.pdf" target="_blank" rel="noopener">Web Applications from Zero</a></span>
             <span class="book-problem">I use apps every day, but I have no idea what happens after I tap a button.</span>
             <span class="book-question">What happens between tapping a button and seeing the result?</span>
           </span>
           <span class="cell-item">
-            <span class="course-target" style="color: var(--accent);">APIs</span><br>
+            <span class="course-target">APIs</span><br>
             <span class="book-title"><a href="books/apis-to-fastapi/APIs%20to%20FastAPI.pdf" target="_blank" rel="noopener">APIs to FastAPI</a></span>
             <span class="book-problem">My program is useful, but other programs and people can&rsquo;t use it.</span>
             <span class="book-question">How does one program offer its abilities to another over the internet?</span>
             
           </span>
           <span class="cell-item">
-            <span class="course-target" style="color: var(--accent);">Complete Software Engineering</span><br>
+            <span class="course-target">Complete Software Engineering</span><br>
             <span class="book-title"><a href="books/complete-software-engineering-guide/The%20Complete%20Software%20Engineering%20Guide.pdf" target="_blank" rel="noopener">The Complete Software Engineering Guide</a></span>
             <span class="book-problem">I understand the pieces, but I&rsquo;ve never taken a real application from an idea all the way to production.</span>
             <span class="book-question">How does software actually get built, from deciding what to build to a running production system?</span>
@@ -536,7 +208,7 @@
         </td>
         <td>
           <span class="cell-item">
-            <span class="course-target" style="color: var(--accent);">DevOps and Cloud</span><br>
+            <span class="course-target">DevOps and Cloud</span><br>
             <span class="book-title"><a href="books/infrastructure-engineering/Infrastructure%20Engineering%20from%20Zero.pdf" target="_blank" rel="noopener">Infrastructure Engineering from Zero</a></span>
             <span class="book-problem">It works on my machine but breaks on the server, and I don&rsquo;t even own a server.</span>
             <span class="book-question">How does my code get from my laptop to machines that serve everyone, the same way every time?</span>
@@ -554,37 +226,18 @@
       <tr><td class="col-topic">Observability Engineering</td><td class="cell-empty"><em>Not necessary at this level</em></td></tr>
     </tbody>
   </table>
+  </div>
 
 </div>
 
 <footer>
-  <div class="footer-inner">
+  <div class="wrap">
     <span class="footer-name">CS &amp; Engineering On-Ramp</span>
     <span class="footer-copy">Last updated &mdash; April 2026 &nbsp;&middot;&nbsp; &copy; 2026</span>
   </div>
 </footer>
 
-<script>
-  const hamburger = document.querySelector('.nav-hamburger');
-  const mobileMenu = document.querySelector('.mobile-menu');
-  hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('open');
-    mobileMenu.classList.toggle('open');
-    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
-  });
-  document.querySelectorAll('.mobile-link').forEach(link => {
-    link.addEventListener('click', () => {
-      hamburger.classList.remove('open');
-      mobileMenu.classList.remove('open');
-      document.body.style.overflow = '';
-    });
-  });
-  // Scroll reveal
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
-  }, { threshold: 0.05 });
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-</script>
+<script src="../theme/site.js?v=4"></script>
 
 </body>
 </html>

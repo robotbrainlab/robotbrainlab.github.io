@@ -27,20 +27,22 @@ not on the website.
 | Path | What it is |
 | --- | --- |
 | `index.html` | Home page. **Restyled** (live); uses `theme/` |
-| `cse/index.html` | CS&E guide (knowledge tree), old dark style |
-| `cse/on-ramp.html` | CS&E on-ramp, a table of "from Zero" books, old dark style |
+| `cse/index.html` | CS&E guide (knowledge tree): **restyled**; sidebar contents + back-to-top live in `theme/site.js` |
+| `cse/on-ramp.html` | CS&E on-ramp, a table of "from Zero" books: **restyled** |
 | `cse/books/` | Published book PDFs + lab zips (copies of those in `_sources/cs-roadmap/on-ramp/books/`) |
-| `mathematics/index.html`, `cse/resources.html` | "Coming Soon" placeholders, old style (linked from Home and the CS&E guide) |
+| `mathematics/index.html`, `cse/resources.html` | "Coming Soon" placeholders: **restyled** (linked from Home and the CS&E guide) |
 | `mathematics/resources.html`, `data-intelligence/llm-engineering.html`, `data-intelligence/resources.html` | **Orphans.** No page links to them (reachable by URL only). Not part of the restyle |
 | `data-intelligence/index.html` | Redirects to `guide/` |
-| `data-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site (72 pages). Never edit by hand |
-| `theme/site.css`, `theme/site.js` | Shared styling + behaviour for restyled pages |
+| `data-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site (72 pages). Never edit by hand. Restyled by `theme/guide-override.css`, which the build script links in |
+| `theme/site.css`, `theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=4`) |
+| `theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `_tools/build-di-guide.py` |
 | `favicon/` | Site icon: "Apex", a neural network converging into a radiant star, the culmination of AI (gradient tile). Also added to the D&I guide pages by the build script |
 | `_sources/ai-roadmap/` | Source of the D&I guide (a separate research repo; **this is its only copy**) |
 | `_sources/ai-tools/` | Claude Code guides, skills, and `html-reference/reference.html` (the design reference) |
 | `_sources/cs-roadmap/` | CS&E on-ramp books (Markdown + LaTeX) and `end-to-end/` (empty for now) |
 | `_tools/build-di-guide.py` | Builds the D&I guide from `_sources/ai-roadmap/` |
-| `_tools/text-check.py` | Proves a page's text and links did not change |
+| `_tools/text-check.py` | Proves a page's text, links and element ids did not change |
+| `_tools/link-check.py` | Checks every internal link and `#anchor` on the site resolves |
 | `_backup/data-intelligence/index.html` | The old D&I guide page with the pipeline diagram |
 
 Removed on purpose, so don't recreate them: the Mathematics and D&I on-ramps, and the old `redesign/`
@@ -88,12 +90,8 @@ per page, nothing pushed).
 
 | Page | Status |
 | --- | --- |
-| `index.html` | **Done, live** (2026-09-26): text-check OK, checked light/dark/mobile |
-| `cse/index.html` | To do. The large nested knowledge tree maps to cards |
-| `cse/on-ramp.html` | To do. One table with row spans; restyle it like the reference's `table.grid` inside a card |
-| 2 Coming Soon pages (`mathematics/index`, `cse/resources`) | To do. They share one template |
-| `data-intelligence/guide/` (72 pages) | To do last. It has its own ~2,300-line CSS. **Don't touch `_sources/ai-roadmap/`**; add an override stylesheet from `_tools/build-di-guide.py`, the same way that script already adds the home link and the justify rule |
-
+| All reachable pages | **Done** (2026-09-26) in one commit: Home, the 2 Coming Soon pages, CS&E on-ramp, CS&E guide, and the D&I guide (72 pages via `theme/guide-override.css`). Checks: 81/81 pages text/link/id-identical to the previous `main`, 0 broken internal links, `_sources/` untouched |
+| Orphans (`mathematics/resources`, `data-intelligence/resources`, `data-intelligence/llm-engineering`) | Deliberately left in the old style. Nothing links to them |
 ---
 
 ## Website work
@@ -135,6 +133,7 @@ the number of files on disk matches the `git ls-files` count. Scan for secrets b
   `theme/site.css?v=N` / `theme/site.js?v=N`. **Bump `N` on every page whenever `theme/` changes**, or
   visitors keep the old styling.
 - Git doesn't store empty folders. Use `.gitkeep` (as in `_sources/cs-roadmap/end-to-end/`).
-- Pages that aren't restyled yet still load Google Fonts and have their own inline `<style>`. Restyled
-  pages don't.
+- Only the 3 orphan pages still load Google Fonts and have their own inline `<style>`.
+- Headless screenshots: use Chrome with `--force-prefers-reduced-motion`, or the fade-ins may not have
+  finished (blank captures). A hidden Browser pane also pauses scroll observers and painting.
 - The Browser pane preview is the user's view too. Reset any viewport emulation when you're done.

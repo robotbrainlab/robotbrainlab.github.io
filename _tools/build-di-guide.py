@@ -8,8 +8,9 @@ Usage (from the repository root):
 1. Runs the roadmap's own generator (with its validation) into a temp directory.
    The roadmap source in _sources/ai-roadmap/ is only read, never modified.
 2. Adds a "Towards Intelligence" link to each page's top bar, pointing back to
-   the site home page, adds the site icon, and justifies the running text on the guide's home page.
-   These are the only changes made to the generated pages.
+   the site home page, adds the site icon and the site theme override (theme/guide-override.css),
+   and justifies the running text on the guide's home page.
+   These are the only changes made to the generated pages; the roadmap's own files are untouched.
 3. Replaces data-intelligence/guide/ with the result.
 """
 
@@ -24,6 +25,8 @@ REPO = Path(__file__).resolve().parent.parent
 SOURCE = REPO / "_sources" / "ai-roadmap"
 GUIDE = REPO / "data-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
+# Site theme override for the guide (theme/guide-override.css). Bump when that file changes.
+OVERRIDE_VERSION = 1
 
 ANCHOR = '<div class="topbar-tools">'
 STYLE = """<style>
@@ -55,8 +58,10 @@ def add_home_link(out: Path) -> int:
         html = page.read_text(encoding="utf-8")
         if html.count(ANCHOR) != 1 or html.count("</head>") != 1:
             sys.exit(f"Unexpected page structure, not patching: {page.relative_to(out)}")
-        icon = f'<link rel="icon" type="image/svg+xml" href="{"../" * depth}favicon/favicon.svg"/>\n'
-        html = html.replace(ANCHOR, home_link("../" * depth)).replace("</head>", icon + STYLE)
+        up = "../" * depth
+        icon = f'<link rel="icon" type="image/svg+xml" href="{up}favicon/favicon.svg"/>\n'
+        theme = f'<link rel="stylesheet" href="{up}theme/guide-override.css?v={OVERRIDE_VERSION}"/>\n'
+        html = html.replace(ANCHOR, home_link(up)).replace("</head>", icon + theme + STYLE)
         if page.relative_to(out).as_posix() == HOME_PAGE:
             html = html.replace("</head>", HOME_STYLE)
         page.write_text(html, encoding="utf-8")

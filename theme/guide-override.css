@@ -1,0 +1,296 @@
+/* Towards Intelligence — D&I guide override.
+   Linked into every generated guide page by _tools/build-di-guide.py, after the guide's own CSS.
+   Restyles the AI Engineer Roadmap to the site theme (theme/site.css) WITHOUT touching its source
+   (_sources/ai-roadmap/) or its markup: it remaps the guide's design tokens and restyles components.
+   The guide keeps its three colour families, so meaning survives the new palette:
+     curriculum (--accent) → blue · evidence (--evidence) → purple · Modern AI track (--track) → green
+   The guide's own System / Light / Dark switch keeps working (html[data-theme] or system). */
+
+/* ============================== TOKENS ============================== */
+:root {
+  --font-serif: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --topbar-h: 3.25rem;
+  --radius: 14px;
+  --grad: linear-gradient(90deg, #0090f7 0%, #ba62fc 50%, #f2416b 100%);
+
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --panel: #f5f5f7;
+  --panel-strong: #e8e8ed;
+  --text: #1d1d1f;
+  --text-soft: #424245;
+  --muted: #6e6e73;
+  --faint: #86868b;
+  --head: #1d1d1f;
+  --rule: #e8e8ed;
+  --rule-mid: #d2d2d7;
+  --rule-strong: #86868b;
+
+  --accent: #0071e3;
+  --accent-soft: rgba(0, 113, 227, 0.08);
+  --accent-line: rgba(0, 113, 227, 0.35);
+  --evidence: #8944ab;
+  --evidence-soft: rgba(137, 68, 171, 0.07);
+  --evidence-line: rgba(137, 68, 171, 0.35);
+  --track: #248a3d;
+  --track-soft: rgba(36, 138, 61, 0.07);
+  --track-line: rgba(36, 138, 61, 0.38);
+  --warning: #c93400;
+  --warning-bg: #fff4ee;
+  --warning-line: rgba(201, 52, 0, 0.28);
+  --focus: #0071e3;
+  --mark: rgba(0, 113, 227, 0.16);
+  --scrim: rgba(0, 0, 0, 0.3);
+  --shadow: rgba(0, 0, 0, 0.08);
+  --code-bg: #f5f5f7;
+  --code-text: #1d1d1f;
+
+  --ti-nav-bg: rgba(255, 255, 255, 0.72);
+  --ti-nav-rule: rgba(0, 0, 0, 0.12);
+  --ti-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --ti-card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.10);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --panel: #161618;
+    --panel-strong: #2c2c2e;
+    --text: #f5f5f7;
+    --text-soft: #d2d2d7;
+    --muted: #a1a1a6;
+    --faint: #86868b;
+    --head: #f5f5f7;
+    --rule: #2c2c2e;
+    --rule-mid: #424245;
+    --rule-strong: #6e6e73;
+    --accent: #0a84ff;
+    --accent-soft: rgba(10, 132, 255, 0.12);
+    --accent-line: rgba(10, 132, 255, 0.42);
+    --evidence: #bf5af2;
+    --evidence-soft: rgba(191, 90, 242, 0.10);
+    --evidence-line: rgba(191, 90, 242, 0.42);
+    --track: #30d158;
+    --track-soft: rgba(48, 209, 88, 0.08);
+    --track-line: rgba(48, 209, 88, 0.40);
+    --warning: #ff9f0a;
+    --warning-bg: rgba(255, 159, 10, 0.08);
+    --warning-line: rgba(255, 159, 10, 0.30);
+    --focus: #0a84ff;
+    --mark: rgba(10, 132, 255, 0.22);
+    --scrim: rgba(0, 0, 0, 0.55);
+    --shadow: rgba(0, 0, 0, 0.5);
+    --code-bg: #161618;
+    --code-text: #f5f5f7;
+    --ti-nav-bg: rgba(22, 22, 23, 0.72);
+    --ti-nav-rule: rgba(255, 255, 255, 0.10);
+    --ti-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    --ti-card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.7);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --panel: #161618;
+  --panel-strong: #2c2c2e;
+  --text: #f5f5f7;
+  --text-soft: #d2d2d7;
+  --muted: #a1a1a6;
+  --faint: #86868b;
+  --head: #f5f5f7;
+  --rule: #2c2c2e;
+  --rule-mid: #424245;
+  --rule-strong: #6e6e73;
+  --accent: #0a84ff;
+  --accent-soft: rgba(10, 132, 255, 0.12);
+  --accent-line: rgba(10, 132, 255, 0.42);
+  --evidence: #bf5af2;
+  --evidence-soft: rgba(191, 90, 242, 0.10);
+  --evidence-line: rgba(191, 90, 242, 0.42);
+  --track: #30d158;
+  --track-soft: rgba(48, 209, 88, 0.08);
+  --track-line: rgba(48, 209, 88, 0.40);
+  --warning: #ff9f0a;
+  --warning-bg: rgba(255, 159, 10, 0.08);
+  --warning-line: rgba(255, 159, 10, 0.30);
+  --focus: #0a84ff;
+  --mark: rgba(10, 132, 255, 0.22);
+  --scrim: rgba(0, 0, 0, 0.55);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --code-bg: #161618;
+  --code-text: #f5f5f7;
+  --ti-nav-bg: rgba(22, 22, 23, 0.72);
+  --ti-nav-rule: rgba(255, 255, 255, 0.10);
+  --ti-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  --ti-card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.7);
+}
+
+/* ============================== BASE ============================== */
+body {
+  font-size: 1.0625rem;
+  line-height: 1.52;
+  letter-spacing: -0.012em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+::selection { background: rgba(0, 113, 227, 0.22); }
+
+/* ============================== TOP BAR ============================== */
+.topbar,
+.kind-evidence .topbar {
+  background: var(--ti-nav-bg);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--ti-nav-rule);
+}
+.brand {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: .005em;
+  text-transform: none;
+}
+.brand-mark {
+  width: 1rem;
+  height: 1rem;
+  border: 0;
+  border-radius: 5px;
+  transform: none;
+  background: var(--grad);
+}
+.primary-nav a,
+.primary-nav .is-unavailable { font-size: .8125rem; letter-spacing: -0.01em; }
+.primary-nav a.is-current { color: var(--accent); }
+.primary-nav a.is-current::after { display: none; }
+.tool-button {
+  border-color: transparent;
+  background: var(--panel);
+  color: var(--text-soft);
+  transition: color .2s, background-color .2s;
+}
+.tool-button:hover { color: var(--head); background: var(--panel-strong); border-color: transparent; }
+.to-top {
+  background: var(--ti-nav-bg);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-color: var(--ti-nav-rule);
+  box-shadow: var(--ti-card-shadow);
+}
+
+/* ============================== RAILS ============================== */
+.sidebar { border-right-color: var(--rule); }
+.area-link { border-left: 0; border-radius: 10px; margin-left: -.8rem; }
+.area-link.is-current { background: var(--page-accent-soft); color: var(--page-accent); font-weight: 600; }
+.toc-list a.is-active,
+.toc-sublist a.is-active { color: var(--accent); }
+
+/* ============================== BUTTONS ============================== */
+.button {
+  border-radius: 980px;
+  padding: .72rem 1.35rem;
+  font-weight: 500;
+  font-size: .95rem;
+  border-color: var(--accent);
+  color: var(--accent);
+  background: transparent;
+  transition: filter .2s, transform .2s, background-color .2s, color .2s;
+}
+.button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.button:active { transform: scale(.98); }
+.button--primary,
+.prose .button--primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.button--primary:hover { background: var(--accent); border-color: var(--accent); color: #fff; filter: brightness(1.1); }
+.button--modern { border-color: var(--track); color: var(--track); }
+.button--modern:hover { background: var(--track); border-color: var(--track); color: #fff; }
+
+/* ============================== HOME ============================== */
+.eyebrow { font-size: .9375rem; letter-spacing: -0.01em; text-transform: none; font-weight: 600; }
+.eyebrow::before { background: var(--grad); height: 3px; border-radius: 3px; }
+.home-title {
+  font-size: clamp(2.75rem, 1.6rem + 4.2vw, 4.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  width: fit-content;
+}
+.home-lead { font-size: clamp(1.2rem, 1.1rem + .4vw, 1.3125rem); line-height: 1.4; letter-spacing: .005em; }
+.home-section-head { border-bottom-color: var(--rule); }
+.home-section-title { font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem); letter-spacing: -0.005em; }
+.kicker { font-size: .8125rem; letter-spacing: .02em; text-transform: none; font-weight: 600; color: var(--accent); }
+.track-title { font-size: 1.5rem; letter-spacing: -0.005em; }
+
+/* Cards: rounded tiles on a grey panel; the coloured top rule becomes an inset bar */
+.path-part-card,
+.track--modern {
+  border: 0;
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: inset 0 3px 0 var(--accent);
+  padding: 1.6rem 1.7rem 1.4rem;
+  transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s;
+}
+.track--modern { box-shadow: inset 0 3px 0 var(--track); }
+.path-part-title { font-size: 1.4rem; letter-spacing: -0.005em; }
+/* One card per row: side-by-side cards were too narrow for justified text (gappy lines) */
+.path-parts,
+.track--depth .path-parts { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+.path-part-steps li { border-top-color: var(--rule-mid); }
+.path-num { border-color: var(--accent); }
+.how-list { border-color: var(--rule); }
+.behind-list a { border-radius: 18px; }
+
+/* ============================== DOCUMENT ============================== */
+.prose h1 { font-size: clamp(2.25rem, 1.5rem + 2.4vw, 3rem); letter-spacing: -0.015em; line-height: 1.08; }
+.prose h2 { font-size: clamp(1.6rem, 1.3rem + 1vw, 2rem); letter-spacing: -0.005em; border-bottom-color: var(--rule); }
+.prose h3 { font-size: 1.375rem; letter-spacing: .005em; }
+.prose h4 { letter-spacing: .02em; text-transform: none; font-size: .875rem; color: var(--muted); }
+.prose a { color: var(--link, var(--accent)); text-decoration-color: var(--accent-line); }
+:root { --link: #0066cc; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --link: #2997ff; } }
+:root[data-theme="dark"] { --link: #2997ff; }
+
+.doc-contents {
+  border: 0;
+  border-radius: 18px;
+  background: var(--panel);
+  padding: 1.3rem 1.6rem 1.4rem;
+}
+.prose blockquote { border-left-width: 3px; border-radius: 0; }
+.prose .quote-principle { border-left-color: var(--accent); }
+.prose .callout-warning { border-radius: 14px; border-left-width: 1px; box-shadow: inset 4px 0 0 var(--warning); }
+
+/* Tables sit on a rounded panel; scrolling and shadows still come from the guide's .table-wrap */
+.table-wrap {
+  border-radius: 18px;
+  padding: .4rem 1.4rem;
+  /* The guide's scroll-edge shadows, re-based on the panel colour instead of the page background */
+  background:
+    linear-gradient(to right, var(--panel) 30%, transparent) left center / 2.5rem 100% no-repeat local,
+    linear-gradient(to left, var(--panel) 30%, transparent) right center / 2.5rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, var(--shadow), transparent) left center / .7rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, var(--shadow), transparent) right center / .7rem 100% no-repeat scroll,
+    var(--panel);
+}
+.table-wrap .doc-table th { border-bottom-color: var(--rule-mid); }
+.table-wrap .doc-table td { border-bottom-color: var(--rule-mid); }
+
+.diagram { border-radius: 18px; border-color: var(--rule); background: var(--panel); }
+.code-block { border-radius: 14px; border-color: var(--rule); }
+.role { border-radius: 980px; padding: .05em .6em; }
+.xref { border-radius: 980px; padding: .02em .5em; }
+
+/* ============================== FOOTER ============================== */
+.site-footer { background: var(--panel); border-top-color: var(--rule); }
+
+/* ============================== MOBILE ============================== */
+@media (max-width: 640px) {
+  .home-title { font-size: clamp(2.4rem, 11vw, 3rem); }
+  .home-lead { font-size: 1.0625rem; line-height: 1.47; }
+  .path-part-card, .track--modern { padding: 1.3rem 1.25rem 1.15rem; }
+  .table-wrap { padding: .3rem .9rem; border-radius: 14px; }
+}
