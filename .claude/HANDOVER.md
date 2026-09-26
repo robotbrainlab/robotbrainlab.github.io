@@ -72,7 +72,7 @@ blue accent and gradient emphasis. The rule is **not a single letter of content 
    `.sec-head`, `.card`, `.grid-2`, `.ctas`/`.btn`, `.prose`, …). Add new components to
    `theme/site.css`, not inline.
 2. Rewrite the page: keep the `<head>` meta, add the pre-paint theme `<script>` (copy it from
-   `index.html`), link `theme/site.css` (use `../theme/site.css` from subfolders), and load
+   `index.html`), link `theme/site.css?v=N` with the current version (use `../theme/site.css?v=N` from subfolders), and load
    `theme/site.js` at the end. Nav = brand + links + theme switch + hamburger.
 3. Run `python3 _tools/text-check.py <page>`. It must print `OK`. It compares against `HEAD`, so run it
    before committing (or pass `--rev <commit>`).
@@ -129,6 +129,9 @@ the number of files on disk matches the `git ls-files` count. Scan for secrets b
 
 - Keep `.gitignore` rules anchored to the root (`/assets/`, `/docs/`, `/CLAUDE.md`). An unanchored
   `assets/` once silently dropped the D&I guide's CSS from git.
+- GitHub Pages lets browsers cache files for 10 minutes (phones often longer). Pages link the theme as
+  `theme/site.css?v=N` / `theme/site.js?v=N`. **Bump `N` on every page whenever `theme/` changes**, or
+  visitors keep the old styling.
 - Git doesn't store empty folders. Use `.gitkeep` (as in `_sources/cs-roadmap/end-to-end/`).
 - Pages that aren't restyled yet still load Google Fonts and have their own inline `<style>`. Restyled
   pages don't.
