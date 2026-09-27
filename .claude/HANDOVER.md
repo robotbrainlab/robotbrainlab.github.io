@@ -22,6 +22,55 @@ not on the website.
 - The user usually wants changes committed and pushed. Confirm first for anything that changes how the
   live site looks.
 
+## Rolling back the redesign
+
+Every step of the redesign is its own commit, so any part can be undone with `git revert`. A revert
+adds a new commit that undoes an old one, so history is never lost and a rollback can itself be undone.
+Every recipe below was tested on a copy of the repo (2026-09-27): each applies cleanly and leaves 0
+broken links.
+
+| Commit | Date | What it did |
+| --- | --- | --- |
+| `d6d73ce` | 2026-09-27 | Phone fixes: D&I guide top bar, justified text on phones, very small screens |
+| `c08458d` | 2026-09-27 | CS&E On-Ramp merged into the CS&E guide; `cse/on-ramp.html` removed |
+| `422f0a0` | 2026-09-26 | **The redesign** of every page except Home (D&I guide, CS&E guide, on-ramp, Coming Soon pages) |
+| `8ba365b`, `b05c60d`, `7901163` | 2026-09-26 | Home page redesign (pilot) and its two justification/cache fixes |
+| `98f7de6` | 2026-09-26 | New site icon (Apex) |
+| `0d44bc0` | 2026-09-26 | **Last commit before any redesign.** The old dark, gold, serif site |
+
+Pick the smallest undo that does what you want. Always revert **newest first**: list the hashes in
+that order, as below.
+
+```bash
+# 1. Undo only the phone fixes
+git revert --no-edit d6d73ce
+
+# 2. Undo only the On-Ramp merge (brings back cse/on-ramp.html and Home's "The On-Ramp" button)
+git revert --no-edit c08458d
+
+# 3. Undo the whole redesign of the sub-pages; Home keeps its new look
+git revert --no-edit d6d73ce c08458d 422f0a0
+
+# 4. Full reset of the website to before any redesign (old look everywhere, old icon).
+#    Keeps _sources/, the docs and later tool improvements.
+git rm -r -q theme
+git checkout 0d44bc0 -- index.html favicon cse mathematics data-intelligence _tools/build-di-guide.py
+git commit -m "Roll back the website to before the redesign"
+```
+
+Then **look before publishing**: preview locally (Browser pane server `site`, port 8080), run
+`python3 _tools/link-check.py` if it still exists (recipes 3 and 4 remove it along with the redesign), and
+only then run `git push origin main`. Nothing goes live until that push.
+
+Notes:
+- To undo a rollback, revert the rollback commit: `git revert <hash of the rollback>`.
+- After a rollback that touches the D&I guide (recipes 3 and 4), don't run `_tools/build-di-guide.py`
+  until you've decided what you want. It rebuilds the guide from whatever that script and
+  `theme/guide-override.css` currently say.
+- After publishing, reload each page once on the phone (pull down) so Safari drops cached styles.
+- If Git reports a conflict during a revert, stop with `git revert --abort` (nothing changes) and ask
+  Claude to resolve it.
+
 ## Map
 
 | Path | What it is |

@@ -15,6 +15,9 @@ of asking.
 **Exception: unattended restyle run.** If the first message asks you to follow
 `.claude/RESTYLE-RUNBOOK.md`, don't ask anything. Go straight to the runbook; the user is away.
 
+If the user wants to undo the redesign or part of it, follow "Rolling back the redesign" in the
+handover. Those recipes were tested; confirm with the user before pushing a rollback.
+
 ## Handover
 
 @HANDOVER.md
