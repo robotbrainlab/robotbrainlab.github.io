@@ -284,10 +284,61 @@ body {
 .role { border-radius: 980px; padding: .05em .6em; }
 .xref { border-radius: 980px; padding: .02em .5em; }
 
+/* Sentence-length entries the guide sets ragged as "interface text": justify them like the prose.
+   (A paragraph's last line is never stretched, so short title lines stay as they are.) */
+.prose .guide-list--study > li,
+.prose .guide-list--study .study-task,
+.prose .guide-list--study .study-why,
+.prose .path-lead {
+  text-align: justify;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
 /* ============================== FOOTER ============================== */
 .site-footer { background: var(--panel); border-top-color: var(--rule); }
 
 /* ============================== MOBILE ============================== */
+@media (max-width: 47.99em) {
+  /* Top bar. The guide's menu button has a -0.9rem right margin sized for its original tiny brand;
+     with the gradient brand mark that made the two overlap. Give every item its own space. */
+  .topbar .topbar-inner,
+  .page-doc .topbar-inner { gap: .6rem; padding: 0 .9rem; }
+  .nav-toggle { flex: none; margin: 0 0 0 -.4rem; }
+  .brand { flex: 0 1 auto; min-width: 0; gap: .5rem; font-size: 1rem; letter-spacing: 0; }
+  .brand-mark { flex: none; width: .85rem; height: .85rem; border-radius: 4px; }
+  .brand-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar-tools { flex: none; gap: .35rem; }
+  .topbar-tools .tool-button { flex: none; justify-content: center; min-width: 2rem; height: 2rem; min-height: 2rem; padding: 0 .55rem; }
+
+  /* Justified prose on phones too (the guide sets it ragged below 48em). Interface text inside
+     the prose (labels, pager, contents, tables) keeps its own left alignment: those rules are
+     more specific. */
+  .prose p,
+  .prose li,
+  .prose dd,
+  .prose blockquote {
+    text-align: justify;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+
+  .home-actions { gap: .6rem; }
+  .home-actions .button { width: 100%; }
+}
+
+@media (max-width: 360px) {
+  /* Very small phones: the brand name keeps its full width; the gradient mark steps aside */
+  .topbar .topbar-inner,
+  .page-doc .topbar-inner { gap: .45rem; }
+  .brand-mark { display: none; }
+  .brand { font-size: .875rem; }
+  .topbar .topbar-inner, .page-doc .topbar-inner { padding: 0 .75rem; }
+  .nav-toggle { width: 2rem; }
+  .topbar-tools { gap: .3rem; }
+  .topbar-tools .tool-button { min-width: 1.875rem; height: 1.875rem; min-height: 1.875rem; padding: 0 .45rem; }
+}
+
 @media (max-width: 640px) {
   .home-title { font-size: clamp(2.4rem, 11vw, 3rem); }
   .home-lead { font-size: 1.0625rem; line-height: 1.47; }

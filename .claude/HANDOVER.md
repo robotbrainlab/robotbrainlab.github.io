@@ -132,6 +132,13 @@ the number of files on disk matches the `git ls-files` count. Scan for secrets b
 - GitHub Pages lets browsers cache files for 10 minutes (phones often longer). Pages link the theme as
   `theme/site.css?v=N` / `theme/site.js?v=N`. **Bump `N` on every page whenever `theme/` changes**, or
   visitors keep the old styling.
+- **Phones (fixed 2026-09-27).** The D&I guide's own CSS sets prose ragged below 48em and its menu button
+  has a -0.9rem margin sized for its old tiny brand. `theme/guide-override.css` re-justifies prose (and the
+  study-resource entries and step leads) and re-spaces the phone top bar. Audit every page at
+  320/360/375/390/414/430px for: top-bar overlaps, cut-off brand, real sideways scroll (`scrollTo` then
+  `scrollX`, not `scrollWidth`: the guide's hidden drawers overflow but `overflow-x: clip` stops scrolling),
+  overlapping or off-screen buttons, and long paragraphs that aren't justified. Load each page in a
+  same-origin iframe of that width; this works even while the Browser pane is hidden.
 - Git doesn't store empty folders. Use `.gitkeep` (as in `_sources/cs-roadmap/end-to-end/`).
 - Only the 3 orphan pages still load Google Fonts and have their own inline `<style>`.
 - Headless screenshots: use Chrome with `--force-prefers-reduced-motion`, or the fade-ins may not have

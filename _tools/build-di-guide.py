@@ -26,7 +26,7 @@ SOURCE = REPO / "_sources" / "ai-roadmap"
 GUIDE = REPO / "data-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
 # Site theme override for the guide (theme/guide-override.css). Bump when that file changes.
-OVERRIDE_VERSION = 1
+OVERRIDE_VERSION = 6
 
 ANCHOR = '<div class="topbar-tools">'
 STYLE = """<style>
