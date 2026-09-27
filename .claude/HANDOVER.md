@@ -27,8 +27,7 @@ not on the website.
 | Path | What it is |
 | --- | --- |
 | `index.html` | Home page. **Restyled** (live); uses `theme/` |
-| `cse/index.html` | CS&E guide (knowledge tree): **restyled**; sidebar contents + back-to-top live in `theme/site.js` |
-| `cse/on-ramp.html` | CS&E on-ramp, a table of "from Zero" books: **restyled** |
+| `cse/index.html` | CS&E guide: **restyled**. Starts with the **On-Ramp** section (`#on-ramp`, the "from Zero" book table), then the knowledge tree. Sidebar contents + back-to-top live in `theme/site.js` |
 | `cse/books/` | Published book PDFs + lab zips (copies of those in `_sources/cs-roadmap/on-ramp/books/`) |
 | `mathematics/index.html`, `cse/resources.html` | "Coming Soon" placeholders: **restyled** (linked from Home and the CS&E guide) |
 | `mathematics/resources.html`, `data-intelligence/llm-engineering.html`, `data-intelligence/resources.html` | **Orphans.** No page links to them (reachable by URL only). Not part of the restyle |
@@ -45,7 +44,8 @@ not on the website.
 | `_tools/link-check.py` | Checks every internal link and `#anchor` on the site resolves |
 | `_backup/data-intelligence/index.html` | The old D&I guide page with the pipeline diagram |
 
-Removed on purpose, so don't recreate them: the Mathematics and D&I on-ramps, and the old `redesign/`
+Removed on purpose, so don't recreate them: the Mathematics and D&I on-ramps, the separate `cse/on-ramp.html` page
+(merged into the CS&E guide on 2026-09-27, so each discipline has one guide; the site is for the owner only, so no redirect is kept), and the old `redesign/`
 effort (a different, "technical" style the user rejected).
 
 ---
@@ -90,7 +90,7 @@ per page, nothing pushed).
 
 | Page | Status |
 | --- | --- |
-| All reachable pages | **Done** (2026-09-26) in one commit: Home, the 2 Coming Soon pages, CS&E on-ramp, CS&E guide, and the D&I guide (72 pages via `theme/guide-override.css`). Checks: 81/81 pages text/link/id-identical to the previous `main`, 0 broken internal links, `_sources/` untouched |
+| All reachable pages | **Done** (2026-09-26) in one commit: Home, the 2 Coming Soon pages, CS&E on-ramp (since merged into the CS&E guide), CS&E guide, and the D&I guide (72 pages via `theme/guide-override.css`). Checks: 81/81 pages text/link/id-identical to the previous `main`, 0 broken internal links, `_sources/` untouched |
 | Orphans (`mathematics/resources`, `data-intelligence/resources`, `data-intelligence/llm-engineering`) | Deliberately left in the old style. Nothing links to them |
 ---
 
