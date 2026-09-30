@@ -1,0 +1,34 @@
+% ================================================================
+%  cover.tex — the front cover of "The Complete Software Engineering Guide"
+%  in the series design (the template's front/cover.tex), at this book's page size.
+%  The book can't be rebuilt here (its Markdown library isn't in the repository), so the
+%  cover is built on its own and put in place of page 1 of the PDF; LaTeX-Book/front/cover.tex
+%  places the same cover.pdf, so a rebuild keeps it.
+%  Build and swap in:  make   (see Makefile)
+% ================================================================
+\documentclass{article}
+\usepackage[paperwidth=7.5in, paperheight=9.25in, margin=0pt]{geometry}   % the book's page (540 x 666 pt)
+\usepackage{fontspec}
+\setsansfont{SourceSans3}[
+  Extension=.otf,
+  UprightFont=*-Regular,  BoldFont=*-Semibold,
+  ItalicFont=*-RegularIt, BoldItalicFont=*-SemiboldIt]
+\newfontfamily\coverfont{EBGaramond}[
+  Extension=.otf, UprightFont=*-Regular, ItalicFont=*-Italic]
+\usepackage{xcolor}
+\definecolor{brand}{HTML}{135C6A}
+\definecolor{ink}{HTML}{1A1A1A}
+\usepackage{graphicx}
+\usepackage{tikz}
+
+% The words already on the book's cover
+\newcommand{\BookTitle}{The Complete Software Engineering Guide}
+\newcommand{\BookTitleLines}{The Complete Software\\Engineering Guide}
+\newcommand{\BookSubtitle}{}
+\newcommand{\BookTagline}{From deciding what to build to a running, observable production system}
+\newcommand{\BookEdition}{First Edition}
+\newcommand{\BookCoverImage}{}   % empty = the series' concentric rings
+
+\begin{document}
+\input{../../book-template/front/cover}
+\end{document}

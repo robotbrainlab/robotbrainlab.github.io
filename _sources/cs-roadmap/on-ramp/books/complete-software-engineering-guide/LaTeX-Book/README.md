@@ -21,7 +21,7 @@ The build uses **MacTeX** (latexmk + XeLaTeX) and takes about a minute.
 |---|---|
 | `book.tex` | Master file: order of parts, sub-part openers and chapters |
 | `preamble.tex` | The whole design: page size, fonts, colours, boxes, headings, contents |
-| `front/` | Cover, title, copyright, dedication, preface, back cover |
+| `front/` | Cover (places `../cover/cover.pdf`, the series cover built in `../cover/`), title, copyright, dedication, preface, back cover |
 | `content/` | Markdown for the two book-only chapters: the opening map (*How Software Gets Built*) and the closing chapter (*The Same Process in a Real Team*) |
 | `tools/convert.sh` | List of source files and the Markdown → LaTeX conversion |
 | `tools/filter.lua` | Conversion rules (headings, listings, diagrams, tables, cross-references) |

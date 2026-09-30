@@ -1,0 +1,31 @@
+% ================================================================
+%  cover.tex — the front cover of "APIs to FastAPI" in the series design.
+%  The book has no source in this repository, so its cover is built on its own
+%  from the template's front/cover.tex and put in place of page 1 of the PDF.
+%  Build and swap in:  make   (see Makefile)
+% ================================================================
+\documentclass{article}
+\usepackage[paperwidth=504bp, paperheight=661.5bp, margin=0pt]{geometry}   % the book's page
+\usepackage{fontspec}
+\setsansfont{SourceSans3}[
+  Extension=.otf,
+  UprightFont=*-Regular,  BoldFont=*-Semibold,
+  ItalicFont=*-RegularIt, BoldItalicFont=*-SemiboldIt]
+\newfontfamily\coverfont{EBGaramond}[
+  Extension=.otf, UprightFont=*-Regular, ItalicFont=*-Italic]
+\usepackage{xcolor}
+\definecolor{brand}{HTML}{135C6A}
+\definecolor{ink}{HTML}{1A1A1A}
+\usepackage{graphicx}
+\usepackage{tikz}
+
+% The words already on the book's cover
+\newcommand{\BookTitle}{APIs to FastAPI}
+\newcommand{\BookSubtitle}{A Practical Guide}
+\newcommand{\BookTagline}{From your first API call to shipping real services}
+\newcommand{\BookEdition}{First Edition}
+\newcommand{\BookCoverImage}{}   % empty = the series' concentric rings
+
+\begin{document}
+\input{../../book-template/front/cover}
+\end{document}

@@ -1,43 +1,9 @@
 % ---------------------------------------------------------------- Front cover
+% The series cover (teal bands, concentric rings), built in ../cover/ from the
+% template's front/cover.tex. Rebuild it there (make) after changing its words.
 \thispagestyle{empty}
 \begin{tikzpicture}[remember picture, overlay]
-  % background
-  \fill[brand] (current page.south west) rectangle (current page.north east);
-  % dot-grid texture
-  \foreach \x in {0,0.25,...,7.5}{
-    \foreach \y in {0,0.25,...,9.25}{
-      \fill[white, opacity=0.05] ([xshift=\x in, yshift=\y in]current page.south west) circle (0.6pt);
-    }}
-  % accent spine band
-  \fill[accent] ([yshift=-0.55in]current page.north west) rectangle ([xshift=0.22in]current page.south west);
-
-  % title
-  \node[anchor=north west, text=white, text width=6in, align=left,
-        font=\sffamily\bfseries\fontsize{40}{44}\selectfont]
-    at ([xshift=0.72in, yshift=-1.45in]current page.north west)
-    {The Complete\\Software\\Engineering Guide};
-  \fill[accent] ([xshift=0.75in, yshift=-4.05in]current page.north west) rectangle +(1.3in, 0.06in);
-  \node[anchor=north west, text=white!85, text width=5.2in, align=left,
-        font=\large\itshape]
-    at ([xshift=0.72in, yshift=-4.3in]current page.north west)
-    {From deciding what to build to a running, observable production system};
-
-  % lifecycle diagram
-  \begin{scope}[shift={([xshift=0.35in, yshift=2.35in]current page.south west)}]
-    \foreach \n/\lab/\sub in {1/Discover/what to build, 2/Plan/frame \& document,
-                             3/Code/write it well, 4/Production/run it for real}{
-      \node[circle, draw=white, line width=1pt, minimum size=34pt, text=white,
-            font=\sffamily\bfseries\large, fill=brand] (c\n) at (\n*1.55in, 0) {\n};
-      \node[below=6pt of c\n, text=white, font=\sffamily\small\bfseries] (l\n) {\lab};
-      \node[below=0pt of l\n, text=white!60, font=\sffamily\scriptsize] {\sub};
-    }
-    \foreach \a/\b in {1/2, 2/3, 3/4}{
-      \draw[-{Latex[length=6pt]}, accent, line width=1.2pt] (c\a) -- (c\b);}
-  \end{scope}
-
-  % footer
-  \node[anchor=south west, text=white!60, font=\sffamily\scriptsize\addfontfeature{LetterSpace=15}]
-    at ([xshift=0.75in, yshift=0.55in]current page.south west) {FIRST EDITION \textperiodcentered{} 2026};
+  \node[inner sep=0pt] at (current page.center) {\includegraphics{../cover/cover.pdf}};
 \end{tikzpicture}
 \null
 \clearpage

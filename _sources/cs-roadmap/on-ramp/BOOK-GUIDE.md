@@ -369,7 +369,8 @@ If a chapter isn't good enough, rewrite it rather than patching it. Then build t
 ### APIs to FastAPI and The Complete Software Engineering Guide
 
 - Both were written before this series. Only their PDFs matter here: *APIs to FastAPI* has no source in this repository, and the big book's `LaTeX-Book/` needs a separate Markdown library that isn't in this repository, so it can't be rebuilt from here.
-- *APIs to FastAPI* is the design the series template copies. The big book has its own design (navy cover, other fonts, a larger page). The user decided to leave both as they are: don't restyle them.
+- *APIs to FastAPI* is the design the series template copies. The big book has its own design inside (other fonts, a larger page). The user decided to leave both as they are inside: don't restyle them.
+- **Covers (2026-09-30):** both now have the series front cover (teal bands, concentric rings), so all books look like one series. The octopus on *APIs to FastAPI* and the big book's navy cover were replaced; the words are the ones already on each cover (the big book dropped "· 2026" and its four-step strip, and has no subtitle line). Each cover is built in `books/<slug>/cover/` from the template's `front/cover.tex`; `make` there swaps it in as page 1 of the PDF with `book-template/tools/swap-cover.py` (every other page stays byte for byte) and copies the PDF to `cse/books/`. The big book's `LaTeX-Book/front/cover.tex` places the same `cover.pdf`, so a rebuild keeps it.
 
 ### Lab files (downloads)
 
