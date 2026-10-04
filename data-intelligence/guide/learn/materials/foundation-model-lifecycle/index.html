@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <meta name="generator" content="AI Engineer Roadmap learner site generator">
-<title>Reading the Foundation-Model Lifecycle: What Is Settled, What Is Current, What Is Contested · AI Engineer Roadmap</title>
+<title>Reading the Foundation-Model Lifecycle: What Is Settled, What Is Current, What Is Contested · Data &amp; Intelligence</title>
 <script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
 <link rel="stylesheet" href="../../../assets/css/tokens.css?v=ce213ccecc">
 <link rel="stylesheet" href="../../../assets/css/site.css?v=ce213ccecc">
 <link rel="stylesheet" href="../../../assets/css/print.css?v=ce213ccecc" media="print">
 <link rel="icon" type="image/svg+xml" href="../../../../../favicon/favicon.svg"/>
-<link rel="stylesheet" href="../../../../../theme/guide-override.css?v=6"/>
+<link rel="stylesheet" href="../../../../../theme/guide-override.css?v=8"/>
 <style>
   .ti-home { text-decoration: none; }
   @media (max-width: 700px) { .ti-home .tool-label { display: none; } }
@@ -26,7 +26,7 @@
       <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
     </button>
     <a class="brand" href="../../../index.html">
-      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Data &amp; Intelligence</span>
     </a>
 <nav class="primary-nav" aria-label="Primary" data-chrome>
   <ul>
@@ -386,7 +386,7 @@
 <h2 id="4-what-an-adaptation-changes-that-you-did-not-ask-for">4. What an Adaptation Changes That You Did Not Ask For<a class="heading-anchor" href="#4-what-an-adaptation-changes-that-you-did-not-ask-for" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
 <p>Fine-tuning has a property that makes it unlike other engineering changes: <strong>its effects are not confined to the behaviour you tuned.</strong> Training on a narrow task can move behaviour far outside that task, including in directions nobody intended. Narrow fine-tuning producing broad behavioural change — the literature calls the alarming end of this <em>emergent misalignment</em> — is an <strong>active research</strong> area whose mechanism is not settled, and the evidence is strong enough that the practical rule does not depend on the mechanism:</p>
 <blockquote class="quote quote-principle">
-<p><strong>Never evaluate an adapted model only on the task you adapted it for.</strong></p>
+<p class="ti-subhead"><strong>Never evaluate an adapted model only on the task you adapted it for.</strong></p>
 </blockquote>
 <p>Your step 10 practice applies this directly, and step 15 returns to it as a security property. Keep a held-out slice of general behaviour — instruction following, refusals, tone, a few capabilities you did not touch — and measure it before and after every adaptation. If the target metric improves and something else falls, you have found the trade you were about to ship without knowing.</p>
 <p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>

@@ -1,6 +1,6 @@
 # Handover — Towards Intelligence (robotbrainlab.github.io)
 
-Last updated: 2026-09-26.
+Last updated: 2026-10-04.
 
 ## What this repo is
 
@@ -152,7 +152,11 @@ per page, nothing pushed).
   research repo. **Never change its content, templates or generator for site purposes.**
 - Rebuild: `python3 _tools/build-di-guide.py` from the repo root. It runs the roadmap's generator
   (1461 validation checks) into a temp directory, adds the "← Towards Intelligence" top-bar link to
-  every page and the justify rule to the guide home, then replaces `data-intelligence/guide/`.
+  every page and the justify rule to the guide home, renames the guide to **Data & Intelligence** in
+  its chrome (top bar, tab title, home heading) and its primary action to "Explore the roadmap",
+  then replaces `data-intelligence/guide/`. The rename touches chrome only — the roadmap's own
+  running text keeps its name, and `_sources/ai-roadmap/` is never written to. Each replacement is
+  checked, so the build stops rather than publishing a page it did not recognise.
 - Don't run the roadmap's `build_site.py --out` straight into the guide, because the link would be
   lost. Never point `--out` at `data-intelligence/`, because it wipes that directory.
 - If `.venv` is missing: `cd _sources/ai-roadmap && python3.14 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt`.

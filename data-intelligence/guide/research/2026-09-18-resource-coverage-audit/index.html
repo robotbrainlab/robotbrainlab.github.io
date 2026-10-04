@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <meta name="generator" content="AI Engineer Roadmap learner site generator">
-<title>Resource Coverage Audit — What the Baseline Roadmap&#39;s Resources Actually Teach · AI Engineer Roadmap</title>
+<title>Resource Coverage Audit — What the Baseline Roadmap&#39;s Resources Actually Teach · Data &amp; Intelligence</title>
 <script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
 <link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
 <link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
 <link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
 <link rel="icon" type="image/svg+xml" href="../../../../favicon/favicon.svg"/>
-<link rel="stylesheet" href="../../../../theme/guide-override.css?v=6"/>
+<link rel="stylesheet" href="../../../../theme/guide-override.css?v=8"/>
 <style>
   .ti-home { text-decoration: none; }
   @media (max-width: 700px) { .ti-home .tool-label { display: none; } }
@@ -26,7 +26,7 @@
       <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
     </button>
     <a class="brand" href="../../index.html">
-      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Data &amp; Intelligence</span>
     </a>
 <nav class="primary-nav" aria-label="Primary" data-chrome>
   <ul>
@@ -167,7 +167,7 @@
 <p><strong>4. Reinforcement learning is covered — this corrects an assumption in the prior comparison report.</strong> The current ML/DL book contains a full RL chapter (MDPs, Q-learning, DQN, actor-critic, PPO). What is absent is bandits, off-policy evaluation and multi-agent/game-theoretic material.</p>
 <p><strong>5. Information retrieval <em>is</em> taught as a discipline, not only implicitly through RAG.</strong> The NLP textbook has a retrieval chapter with BM25, dense retrieval and IR evaluation; the applied NLP book teaches search, ANN indexing and vector quantization. What is missing is ranking metrics (nDCG, MRR), learned sparse and late-interaction retrieval, and recommender systems entirely.</p>
 <p><strong>6. The largest contemporary-practice gap is the compound-AI-systems layer (C13).</strong> No audited resource teaches agents, tool-use protocols, context engineering, structured outputs/constrained decoding, memory, multi-agent orchestration or evaluation of agentic systems. Every LLM-era resource in the baseline predates the 2025–2026 agent and reasoning wave.</p>
-<p><strong>7. Two important regressions were discovered inside resources the roadmap already lists.</strong></p>
+<p class="ti-subhead"><strong>7. Two important regressions were discovered inside resources the roadmap already lists.</strong></p>
 <ul>
 <li>The ML/DL book is a <strong>new first edition of a PyTorch line published October 2025</strong>, not a fourth edition of the TensorFlow line. Its changelog confirms the previous edition&#x27;s <strong>deployment-at-scale chapter was only partially merged</strong> into a new chapter, and <strong>SVMs were demoted to an online-only appendix</strong>. A roadmap citing this book for deployment coverage no longer holds.</li>
 <li>The audio course&#x27;s content is <strong>2023-vintage</strong> with no evidence of substantive updates, which is the largest currency risk in the baseline.</li>
@@ -184,7 +184,7 @@
 <section class="doc-section" aria-labelledby="b-methodology">
 <h2 id="b-methodology">B. Methodology<a class="heading-anchor" href="#b-methodology" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
 <p><strong>Fresh evidence.</strong> Four parallel research threads investigated the resources independently on 2026-09-18, using official book pages, publisher tables of contents, author-maintained sites, official repositories and official documentation. Marketing descriptions were not accepted as evidence of detailed coverage. Where contents could not be verified, the finding is marked <strong>Uncertain</strong> rather than assumed.</p>
-<p><strong>Evidence tiers used throughout:</strong></p>
+<p class="ti-subhead"><strong>Evidence tiers used throughout:</strong></p>
 <div class="table-wrap" role="region" tabindex="0" aria-label="Table: B. Methodology"><table class="doc-table table--pair" style="--cols:2">
 <thead>
 <tr>
@@ -373,7 +373,7 @@
 <p><strong>Identity.</strong> Official Python documentation tutorial, Python Software Foundation; version 3.14.7 at audit; 16 top-level sections. <strong>Baseline location:</strong> Fundamentals §2.1.</p>
 <p><strong>Intended scope (observed).</strong> The tutorial states it &quot;does not attempt to be comprehensive and cover every single feature&quot; and aims to give &quot;a good idea of the language&#x27;s flavor and style&quot;, routing readers onward to the Library and Language References.</p>
 <p><strong>Actual structure.</strong> Interpreter use; informal introduction; control flow and functions (including <code>match</code>, argument forms, annotations, PEP-8); data structures and comprehensions; modules and packages; input/output and JSON; errors and exceptions (including exception groups); classes, iterators and generators; two standard-library tours (including <code>re</code>, <code>datetime</code>, <code>timeit</code>/<code>profile</code>, <code>doctest</code>/<code>unittest</code>, logging, decimal); virtual environments and pip; floating-point limitations.</p>
-<p><strong>Foundation coverage.</strong></p>
+<p class="ti-subhead"><strong>Foundation coverage.</strong></p>
 <div class="table-wrap" role="region" tabindex="0" aria-label="Table: D1. The Python Tutorial"><table class="doc-table" style="--cols:4">
 <thead>
 <tr>
@@ -418,7 +418,7 @@
 <p><strong>Identity.</strong> <em>Practical SQL: A Beginner&#x27;s Guide to Storytelling with Data</em>, 2nd edition, No Starch Press, January 2022; PostgreSQL and pgAdmin; 20 chapters plus appendix; per-chapter &quot;Try It Yourself&quot; exercises with answers in the official repository. <strong>Baseline location:</strong> Fundamentals §3.1.</p>
 <p><strong>Intended scope (observed).</strong> Publisher and author present it as suitable for beginners including non-programmers, teaching SQL for data analysis and storytelling.</p>
 <p><strong>Actual structure.</strong> Setup; database and table creation; SELECT fundamentals; data types; import/export with real government datasets; basic math and descriptive statistics; joins; <strong>table design (constraints, keys, indexes)</strong>; grouping and summarising; <strong>inspecting and modifying data, including transactions</strong>; statistical functions (correlation, regression, rank, rolling averages); dates and times; advanced queries (subqueries, CTEs, cross-tab, CASE); text mining and full-text search; PostGIS spatial data; JSON; views, functions and triggers; psql and command-line utilities; maintenance (VACUUM, backup/restore); communicating findings.</p>
-<p><strong>Foundation coverage.</strong></p>
+<p class="ti-subhead"><strong>Foundation coverage.</strong></p>
 <div class="table-wrap" role="region" tabindex="0" aria-label="Table: D2. Practical SQL"><table class="doc-table" style="--cols:4">
 <thead>
 <tr>
@@ -455,7 +455,7 @@
 </tr>
 </tbody>
 </table></div>
-<p><strong>Landscape coverage.</strong></p>
+<p class="ti-subhead"><strong>Landscape coverage.</strong></p>
 <p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: D2. Practical SQL"><table class="doc-table table--wide" style="--cols:5">
 <thead>
 <tr>
@@ -497,7 +497,7 @@
 <p><strong>Identity.</strong> pgexercises.com by Alisdair Owens; free browser-based SQL practice against a live PostgreSQL instance; 7 categories, 71 exercises; each with question, expected results, hint, and a commented reference solution with discussion. <strong>Baseline location:</strong> Fundamentals §3.2.</p>
 <p><strong>Intended scope (observed).</strong> The site states it is &quot;designed for use as a partner to a good book or Postgres&#x27; excellent documentation&quot; — it does not claim to teach SQL from scratch, and refers readers to other books when they struggle.</p>
 <p><strong>Actual structure.</strong> Basic (12), joins and subqueries (8), modifying data (9), aggregates (22, including window functions, running totals, rolling averages), date (10), string (7), recursive CTEs (3), over a three-table country-club schema.</p>
-<p><strong>Foundation coverage.</strong></p>
+<p class="ti-subhead"><strong>Foundation coverage.</strong></p>
 <div class="table-wrap" role="region" tabindex="0" aria-label="Table: D3. PostgreSQL Exercises"><table class="doc-table" style="--cols:4">
 <thead>
 <tr>
@@ -530,7 +530,7 @@
 <p><strong>Identity.</strong> <em>Python for Data Analysis: Data Wrangling with pandas, NumPy, and Jupyter</em>, 3rd edition, O&#x27;Reilly, 2022; free open-access web edition; 13 chapters plus two appendices. <strong>Baseline location:</strong> Fundamentals §4.1.</p>
 <p><strong>Intended scope (observed).</strong> The author is explicit: the focus is &quot;specifically on Python programming, libraries, and tools <strong>as opposed to data analysis methodology</strong>&quot;, and he endorses the framing of the work as data manipulation, wrangling or munging.</p>
 <p><strong>Actual structure.</strong> Python basics and IPython/Jupyter; built-in data structures; <strong>NumPy arrays and vectorized computation</strong>; pandas fundamentals; data loading and file formats; <strong>data cleaning and preparation</strong> (missing data, duplicates, binning, outliers, categorical types, string/regex); joining, combining and reshaping; <strong>plotting and visualization</strong> (matplotlib, pandas, seaborn); aggregation and group operations; <strong>time series</strong>; a short introduction to modelling libraries (Patsy, statsmodels, scikit-learn); five worked analyses. Appendix A covers ndarray internals, broadcasting, memory order, structured arrays and Numba; Appendix B covers IPython profiling and debugging.</p>
-<p><strong>Foundation coverage.</strong></p>
+<p class="ti-subhead"><strong>Foundation coverage.</strong></p>
 <div class="table-wrap" role="region" tabindex="0" aria-label="Table: D4. Python for Data Analysis"><table class="doc-table" style="--cols:4">
 <thead>
 <tr>
@@ -573,7 +573,7 @@
 </tr>
 </tbody>
 </table></div>
-<p><strong>Landscape coverage.</strong></p>
+<p class="ti-subhead"><strong>Landscape coverage.</strong></p>
 <p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: D4. Python for Data Analysis"><table class="doc-table table--wide" style="--cols:5">
 <thead>
 <tr>
@@ -622,7 +622,7 @@
 <p><strong>Identity (corrected).</strong> Aurélien Géron, O&#x27;Reilly, <strong>released October 2025</strong>, 878 pages, repository <code>ageron/handson-mlp</code>. The author&#x27;s own changelog states this is <strong>the first edition of the PyTorch version</strong>, nicknamed <em>homlp</em> — <strong>not</strong> a fourth edition of the Keras/TensorFlow line, which continues as a separate product. <strong>Baseline location:</strong> Fundamentals §5.1.</p>
 <p><strong>Intended scope (observed).</strong> Concepts, tools and techniques to build intelligent systems, from classical ML through modern deep learning, with executable notebooks for every chapter.</p>
 <p><strong>Actual structure.</strong> Ch. 1–8 classical ML: the ML landscape; an end-to-end project; classification; training models (linear, polynomial, logistic, gradient descent, regularisation); decision trees; ensembles; dimensionality reduction; unsupervised learning. Ch. 9–19 deep learning: neural network introduction; <strong>building networks with PyTorch</strong>; training deep networks; CNNs; sequences with RNNs/CNNs; NLP with RNNs and attention; <strong>transformers for NLP</strong>; <strong>vision and multimodal transformers</strong>; <strong>speeding up transformers</strong> (online-only chapter); <strong>autoencoders, GANs and diffusion</strong>; <strong>reinforcement learning</strong>. Appendices: autodiff; mixed precision and quantization; SVMs (online-only); relative positional encoding; state-space models; other architectures.</p>
-<p><strong>Landscape coverage.</strong></p>
+<p class="ti-subhead"><strong>Landscape coverage.</strong></p>
 <p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: D5. Hands-On Machine Learning with Scikit-Learn and PyTorch"><table class="doc-table table--wide" style="--cols:5">
 <thead>
 <tr>
@@ -812,7 +812,7 @@
 <p><strong>Identity.</strong> Jurafsky &amp; Martin, 3rd edition <strong>free online draft dated 19 August 2026</strong>; 26 chapters in three volumes plus 11 web appendices; no published final edition (&quot;When will the book be finished?&quot; — &quot;Don&#x27;t ask.&quot;). <strong>Baseline location:</strong> Fundamentals §6.1.</p>
 <p><strong>Intended scope (observed).</strong> A comprehensive introduction to NLP, computational linguistics and speech recognition, now subtitled &quot;with Language Models&quot;.</p>
 <p><strong>Actual structure.</strong> Volume I (language models): introduction; words and tokens; n-gram models; logistic regression; embeddings; neural networks; <strong>transformers and pretraining</strong>; <strong>post-training</strong>. Volume II (advanced topics): masked language models; <strong>interpretability</strong> (new, and described by the authors as about half-written); <strong>retrieval-based models / IR and RAG</strong>; <strong>agents — an unwritten placeholder page</strong>; machine translation; RNNs and LSTMs; <strong>phonetics</strong>; <strong>automatic speech recognition</strong>; <strong>text-to-speech</strong>. Volume III (linguistic structure): sequence labelling; constituency and dependency parsing; information extraction; semantic role labelling; sentiment lexicons; coreference; discourse; conversation. Appendices include HMMs, Naive Bayes, logical representations, WordNet.</p>
-<p><strong>Landscape coverage.</strong></p>
+<p class="ti-subhead"><strong>Landscape coverage.</strong></p>
 <p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: D6. Speech and Language Processing"><table class="doc-table table--wide" style="--cols:5">
 <thead>
 <tr>
@@ -953,7 +953,7 @@
 <p><strong>Intended scope (observed).</strong> Manning describes the audience as intermediate Python programmers familiar with deep-learning basics; remedial appendices lower the true floor.</p>
 <p><strong>Actual structure.</strong> Part 1 (classical): NLP overview and rule-based chatbot; <strong>tokenization</strong> (including WordPiece, n-grams, normalisation, logographic languages, sentiment with VADER and Naive Bayes); TF-IDF and relevance ranking; semantic analysis (LSA, PCA, SVD, LDA). Part 2 (neural): perceptron from scratch then PyTorch; <strong>word embeddings</strong> (Word2Vec training, GloVe, fastText, static versus contextual); CNNs for text; <strong>RNNs and LSTMs built from scratch</strong>. Part 3 (modern): <strong>transformers</strong> (positional encoding, assembling the pieces, translation, BERT fine-tuning); <strong>LLMs in the real world</strong> (scaling, smaller models, <strong>semantic routing and guard rails</strong>, <strong>red teaming</strong>, <strong>hallucination</strong>, and a substantial section on <strong>search: full-text, semantic, approximate nearest neighbour, index choice, vector quantization</strong>); <strong>information extraction and knowledge graphs</strong> (NER, coreference, dependency and constituency parsing, relation extraction, KG construction and QA); dialog engines (intent recognition, template/graph/generative responses, Rasa, LangChain). Appendices cover Python/regex, linear algebra, ML basics and <strong>containerised deployment</strong>.</p>
 <p><strong>Balance (Observed).</strong> Eight of twelve chapters are classical or pre-transformer neural NLP; four are transformer-era, and only two are transformer/LLM proper.</p>
-<p><strong>Landscape coverage.</strong></p>
+<p class="ti-subhead"><strong>Landscape coverage.</strong></p>
 <p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: D7. Natural Language Processing in Action"><table class="doc-table table--wide" style="--cols:5">
 <thead>
 <tr>
@@ -1058,7 +1058,7 @@
 <p><strong>Identity.</strong> Free self-paced course by Hugging Face; units dated <strong>2023</strong>; no version number and <strong>no evidence of substantive content updates since 2023</strong>, although the repository remains active for translations. <strong>Baseline location:</strong> Fundamentals §6.3.</p>
 <p><strong>Intended scope (observed).</strong> Transformer-based audio applications for readers with a deep-learning background and general transformer familiarity; no audio expertise required.</p>
 <p><strong>Actual structure.</strong> Unit 1 audio data (sampling rate, amplitude, waveforms, <strong>DFT/FFT, spectrograms, log-Mel</strong>, preprocessing, dataset streaming); Unit 2 applications via pipelines; Unit 3 <strong>architectures for audio (CTC, seq2seq, classification)</strong>; Unit 4 <strong>fine-tuning a music classifier</strong>; Unit 5 <strong>ASR (pre-trained models, dataset choice, evaluation, fine-tuning)</strong>; Unit 6 <strong>TTS (datasets, fine-tuning SpeechT5, evaluation)</strong>; Unit 7 speech-to-speech translation, voice assistant, meeting transcription; Unit 8 certificate.</p>
-<p><strong>Landscape coverage.</strong></p>
+<p class="ti-subhead"><strong>Landscape coverage.</strong></p>
 <p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: D8. Hugging Face Audio Course"><table class="doc-table table--wide" style="--cols:5">
 <thead>
 <tr>
@@ -1129,7 +1129,7 @@
 <p><strong>Intended scope (observed).</strong> Implement a GPT-style model end to end: data pipeline, attention, architecture, pretraining, and fine-tuning.</p>
 <p><strong>Actual structure (book).</strong> Understanding LLMs (concept only); <strong>working with text data</strong> (tokenization, byte-pair encoding, sliding-window sampling, token and positional embeddings); <strong>coding attention mechanisms</strong> (self-attention without weights → with trainable weights → causal masking → multi-head); <strong>implementing a GPT model</strong> (layer norm, GELU feed-forward, residual connections, transformer block, text generation); <strong>pretraining</strong> (cross-entropy loss, training loop, temperature and top-k decoding, checkpointing, <strong>loading real GPT-2 weights into the hand-built model</strong>); <strong>fine-tuning for classification</strong>; <strong>instruction fine-tuning</strong> including evaluation. Appendices cover PyTorch and <strong>LoRA</strong>.</p>
 <p><strong>Repository extensions (Observed, 2026 state).</strong> Modern architectures implemented from scratch (Llama 3.2, Qwen3 dense and MoE, Gemma 3/4, OLMo 3); <strong>KV cache</strong>, FLOPs analysis, memory-efficient loading; attention variants (grouped-query, multi-head latent, sliding window, gated DeltaNet, sparse); <strong>DPO with preference-dataset creation</strong>; <strong>LLM-as-judge evaluation via API/Ollama</strong>; synthetic instruction-data generation and near-duplicate detection.</p>
-<p><strong>Landscape coverage.</strong></p>
+<p class="ti-subhead"><strong>Landscape coverage.</strong></p>
 <p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: D9. Build a Large Language Model (From Scratch)"><table class="doc-table table--wide" style="--cols:5">
 <thead>
 <tr>
@@ -1213,7 +1213,7 @@
 <p><strong>Identity.</strong> Alammar &amp; Grootendorst, O&#x27;Reilly, <strong>2024</strong>; repository <code>HandsOnLLM/Hands-On-Large-Language-Models</code> with one notebook per chapter, built for a free Colab T4 GPU. <strong>Baseline location:</strong> Fundamentals §7.2.</p>
 <p><strong>Intended scope (observed).</strong> Practical use of language models for understanding and generation, for Python developers with ML familiarity.</p>
 <p><strong>Actual structure.</strong> Part I understanding: introduction; <strong>tokens and embeddings</strong>; looking inside transformer LLMs. Part II using pretrained models: text classification; <strong>text clustering and topic modelling</strong>; <strong>prompt engineering</strong>; advanced generation techniques and tools; <strong>semantic search and RAG</strong>; <strong>multimodal LLMs</strong>. Part III training: <strong>creating text embedding models</strong>; fine-tuning representation models; <strong>fine-tuning generation models</strong>.</p>
-<p><strong>Landscape coverage.</strong></p>
+<p class="ti-subhead"><strong>Landscape coverage.</strong></p>
 <p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: D10. Hands-On Large Language Models"><table class="doc-table table--wide" style="--cols:5">
 <thead>
 <tr>
@@ -1297,7 +1297,7 @@
 <p><strong>Identity.</strong> Chip Huyen, O&#x27;Reilly, <strong>2022</strong>; companion repository holds chapter summaries and tool lists rather than project code. <strong>Baseline location:</strong> Existing Engineering Section — MLOps (pending reclassification).</p>
 <p><strong>Intended scope (observed).</strong> An iterative process for production-ready ML applications, for ML engineers, data scientists, data engineers, platform engineers and engineering managers.</p>
 <p><strong>Actual structure.</strong> Overview of ML systems; ML systems design (business objectives, reliability, scalability, maintainability, adaptability); <strong>data engineering fundamentals</strong> (storage, OLTP/OLAP, batch versus stream); <strong>training data</strong> (sampling, labelling, weak supervision, semi-supervision, class imbalance, active learning, augmentation); <strong>feature engineering</strong> (temporal splits, <strong>data leakage</strong>, lineage, stale features); model development and offline evaluation (selection, ensembles, experiment tracking, <strong>distributed training</strong>, baselines); <strong>deployment and prediction service</strong> (online versus batch, cloud versus edge, latency/cost); <strong>data distribution shifts and monitoring</strong>; <strong>continual learning and testing in production</strong>; <strong>infrastructure and tooling for MLOps</strong> (storage/compute, orchestrators, model stores, feature stores, build-versus-buy); <strong>the human side of ML</strong> (UX under probabilistic outputs, team structures, responsible AI).</p>
-<p><strong>Landscape coverage.</strong></p>
+<p class="ti-subhead"><strong>Landscape coverage.</strong></p>
 <p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: D11. Designing Machine Learning Systems"><table class="doc-table table--wide" style="--cols:5">
 <thead>
 <tr>
@@ -1395,7 +1395,7 @@
 <p><strong>Identity.</strong> Iusztin &amp; Labonne, Packt, <strong>October 2024</strong>, 522 pages; repository <code>PacktPublishing/LLM-Engineers-Handbook</code> implementing one end-to-end project. <strong>Baseline location:</strong> Existing Engineering Section — LLMOps (pending reclassification).</p>
 <p><strong>Intended scope (observed).</strong> Engineering LLM applications &quot;from concept to production&quot; for AI/NLP/LLM engineers with basic LLM, Python and AWS knowledge.</p>
 <p><strong>Actual structure.</strong> The &quot;LLM Twin&quot; project: architecture (FTI — feature/training/inference); tooling and installation; <strong>data engineering</strong> (crawling and ETL); <strong>RAG feature pipeline</strong>; <strong>supervised fine-tuning</strong>; <strong>fine-tuning with preference alignment</strong>; <strong>evaluating LLMs</strong>; <strong>inference optimisation</strong> (speculative decoding, model parallelism, weight quantization, engine comparison); <strong>RAG inference pipeline</strong>; <strong>deployment</strong>; <strong>MLOps and LLMOps</strong>; appendix on MLOps principles. The project crawls the author&#x27;s writing, builds instruct and preference datasets, trains Llama 3.1 with SFT then DPO, evaluates, and serves a RAG-backed microservice.</p>
-<p><strong>Landscape coverage.</strong></p>
+<p class="ti-subhead"><strong>Landscape coverage.</strong></p>
 <p class="table-hint" data-chrome>Wide table — scroll horizontally</p><div class="table-wrap breakout" role="region" tabindex="0" aria-label="Table: D12. LLM Engineer&#x27;s Handbook"><table class="doc-table table--wide" style="--cols:5">
 <thead>
 <tr>
@@ -3018,7 +3018,7 @@
 </tr>
 </tbody>
 </table></div>
-<p><strong>What the matrix makes visible.</strong></p>
+<p class="ti-subhead"><strong>What the matrix makes visible.</strong></p>
 <div class="table-wrap" role="region" tabindex="0" aria-label="Table: E. Cross-Resource Coverage Matrix"><table class="doc-table table--pair" style="--cols:2">
 <thead>
 <tr>
@@ -3588,7 +3588,7 @@ Descriptively, and without implying placement: the landscape itself labels <stro
 </section>
 <section class="doc-section" aria-labelledby="l-uncertainties">
 <h2 id="l-uncertainties">L. Uncertainties<a class="heading-anchor" href="#l-uncertainties" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
-<p><strong>Verification limits.</strong></p>
+<p class="ti-subhead"><strong>Verification limits.</strong></p>
 <ol>
 <li><strong>Publisher blocking.</strong> O&#x27;Reilly and Packt product pages returned HTTP 403 to automated access. Sub-chapter detail for R5, R10 and R12 could not be read directly; chapter-level structure for R5 came from the author&#x27;s own repository and changelog, which is primary.</li>
 <li><strong>R5 trustworthy-AI content</strong> is classified Not Covered based on the absence of relevant sections in all 19 notebook headings. Whether the printed narrative contains brief fairness or ethics passages is <strong>Uncertain</strong>.</li>
@@ -3601,7 +3601,7 @@ Descriptively, and without implying placement: the landscape itself labels <stro
 <li><strong>R2 query plans.</strong> Whether <code>EXPLAIN</code> appears in body text is <strong>Uncertain</strong>; it is absent from the publisher&#x27;s detailed contents.</li>
 <li><strong>R3 server version</strong> is not published.</li>
 </ol>
-<p><strong>Structural uncertainties.</strong></p>
+<p class="ti-subhead"><strong>Structural uncertainties.</strong></p>
 <ol start="11">
 <li><strong>Chapter-level intent.</strong> ROADMAP cites whole resources, not chapters. R6 in particular is 26 chapters spanning three volumes; coverage attributed to it assumes the whole book is in scope. If only parts are intended, several &quot;Core&quot; classifications weaken — most importantly IR (ch. 11) and trustworthy AI (§1.10, ch. 10).</li>
 <li><strong>Repository versus book.</strong> R9&#x27;s repository now substantially exceeds the published book (modern architectures, DPO, KV cache, LLM-as-judge). Coverage attributed to &quot;repository bonus&quot; is real but outside the published text, and the roadmap cites the book.</li>

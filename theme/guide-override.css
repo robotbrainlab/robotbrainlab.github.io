@@ -244,6 +244,21 @@ body {
 .how-list { border-color: var(--rule); }
 .behind-list a { border-radius: 18px; }
 
+/* Modern AI Engineering topic lists (Home and the Learn overview).
+   The guide sets each row as the title with "when it opens" pushed to the right, and lets that
+   note wrap to its own line when the row is too narrow. Whether a row is one line or two then
+   depends on the length of its title, so the list reads ragged — in the narrow card on a desktop
+   and on a phone alike. Set every row the same way: the title, then when it opens underneath it.
+   These rows are list items, so the home page's justify rule reaches them as well and stretches
+   the longer titles; like the guide's own interface text they are set ragged right. */
+.topic-list a {
+  display: block;
+  text-align: left;
+  -webkit-hyphens: manual;
+  hyphens: manual;
+}
+.topic-list .topic-opens { display: block; margin-top: .15rem; }
+
 /* ============================== DOCUMENT ============================== */
 .prose h1 { font-size: clamp(2.25rem, 1.5rem + 2.4vw, 3rem); letter-spacing: -0.015em; line-height: 1.08; }
 .prose h2 { font-size: clamp(1.6rem, 1.3rem + 1vw, 2rem); letter-spacing: -0.005em; border-bottom-color: var(--rule); }
@@ -293,6 +308,16 @@ body {
   text-align: justify;
   -webkit-hyphens: auto;
   hyphens: auto;
+}
+
+/* A Markdown sub-heading written as bold text arrives as a paragraph of nothing but that bold
+   run (the build script marks them). They are headings, not running text: a six-word line set
+   justified only stretches into gaps, which is what phone-width columns did to them. */
+p.ti-subhead,
+.prose p.ti-subhead {
+  text-align: left;
+  -webkit-hyphens: manual;
+  hyphens: manual;
 }
 
 /* ============================== FOOTER ============================== */

@@ -10,11 +10,15 @@ Usage (from the repository root):
 2. Adds a "Towards Intelligence" link to each page's top bar, pointing back to
    the site home page, adds the site icon and the site theme override (theme/guide-override.css),
    and justifies the running text on the guide's home page.
+3. Names the guide after the site's discipline ("Data & Intelligence") in its chrome, names the
+   home page's two actions for where they go, and marks the bold-text sub-headings so they can
+   be set ragged right.
    These are the only changes made to the generated pages; the roadmap's own files are untouched.
-3. Replaces data-intelligence/guide/ with the result.
+4. Replaces data-intelligence/guide/ with the result.
 """
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -26,7 +30,7 @@ SOURCE = REPO / "_sources" / "ai-roadmap"
 GUIDE = REPO / "data-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
 # Site theme override for the guide (theme/guide-override.css). Bump when that file changes.
-OVERRIDE_VERSION = 6
+OVERRIDE_VERSION = 8
 
 ANCHOR = '<div class="topbar-tools">'
 STYLE = """<style>
@@ -37,9 +41,55 @@ STYLE = """<style>
 # The guide's home page only: justify all running text.
 HOME_PAGE = "index.html"
 HOME_STYLE = """<style>
-  main.home p:not(.home-actions), main.home li, .site-footer p { text-align: justify; hyphens: auto; }
+  main.home p:not(.home-actions):not(.ti-subhead), main.home li, .site-footer p { text-align: justify; hyphens: auto; }
 </style>
 </head>"""
+
+
+# On this site the guide is the Data & Intelligence discipline, so its chrome carries that
+# name rather than the roadmap's own: the top bar, the browser tab title and the home page's
+# heading. Running text that names the roadmap is content and is left exactly as written.
+ROADMAP_NAME = "AI Engineer Roadmap"
+GUIDE_NAME = "Data &amp; Intelligence"
+BRAND = f'<span class="brand-name">{ROADMAP_NAME}</span>'
+HOME_HEADING = f'<h1 class="home-title">{ROADMAP_NAME}</h1>'
+# A sub-page's tab title reads "<page> \u00b7 <guide>"; the home page's is the guide's name alone.
+TAB_TITLE = re.compile(rf"(<title>(?:.*? \u00b7 )?){re.escape(ROADMAP_NAME)}</title>")
+# The generator names the home page's primary action after the first step of the numbered path
+# ("Start Fundamentals: ..."). Here it is named for where it goes, like the action beside it.
+PRIMARY_ACTION = re.compile(r'(<a class="button button--primary" href="[^"]*">)[^<]*(<span aria-hidden)')
+PRIMARY_LABEL = "Explore the roadmap "
+
+
+# A Markdown sub-heading written as bold text comes through as a paragraph holding nothing but
+# that bold run. It is a heading, not running text, so it is marked here and set ragged right in
+# theme/guide-override.css: justifying a six-word line only stretches it into gaps. CSS alone
+# cannot tell such a paragraph from one that merely opens with a bold lead-in, hence the marker.
+SUBHEAD = re.compile(r"<p><strong>((?:(?!</strong>).)*?)</strong></p>", re.S)
+
+
+def mark_subheads(html: str) -> str:
+    return SUBHEAD.sub(r'<p class="ti-subhead"><strong>\g<1></strong></p>', html)
+
+
+def rename(html: str, page: str, is_home: bool) -> str:
+    """Give the guide the site's name for the discipline, in the chrome only."""
+    def once(text: str, pattern: re.Pattern, replacement: str, what: str) -> str:
+        patched, count = pattern.subn(replacement, text)
+        if count != 1:
+            sys.exit(f"Expected one {what}, found {count}, not patching: {page}")
+        return patched
+
+    if html.count(BRAND) != 1:
+        sys.exit(f"Expected one top-bar brand, found {html.count(BRAND)}, not patching: {page}")
+    html = html.replace(BRAND, f'<span class="brand-name">{GUIDE_NAME}</span>')
+    html = once(html, TAB_TITLE, rf"\g<1>{GUIDE_NAME}</title>", "tab title")
+    if is_home:
+        if html.count(HOME_HEADING) != 1:
+            sys.exit(f"Expected one home heading, not patching: {page}")
+        html = html.replace(HOME_HEADING, f'<h1 class="home-title">{GUIDE_NAME}</h1>')
+        html = once(html, PRIMARY_ACTION, rf"\g<1>{PRIMARY_LABEL}\g<2>", "primary action")
+    return html
 
 
 def home_link(rel_to_root: str) -> str:
@@ -61,9 +111,11 @@ def add_home_link(out: Path) -> int:
         up = "../" * depth
         icon = f'<link rel="icon" type="image/svg+xml" href="{up}favicon/favicon.svg"/>\n'
         theme = f'<link rel="stylesheet" href="{up}theme/guide-override.css?v={OVERRIDE_VERSION}"/>\n'
+        rel = page.relative_to(out).as_posix()
         html = html.replace(ANCHOR, home_link(up)).replace("</head>", icon + theme + STYLE)
-        if page.relative_to(out).as_posix() == HOME_PAGE:
+        if rel == HOME_PAGE:
             html = html.replace("</head>", HOME_STYLE)
+        html = mark_subheads(rename(html, rel, rel == HOME_PAGE))
         page.write_text(html, encoding="utf-8")
         patched += 1
     return patched

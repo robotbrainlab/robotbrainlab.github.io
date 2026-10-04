@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <meta name="generator" content="AI Engineer Roadmap learner site generator">
-<title>Maintenance Procedure · AI Engineer Roadmap</title>
+<title>Maintenance Procedure · Data &amp; Intelligence</title>
 <script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
 <link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
 <link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
 <link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
 <link rel="icon" type="image/svg+xml" href="../../../../favicon/favicon.svg"/>
-<link rel="stylesheet" href="../../../../theme/guide-override.css?v=6"/>
+<link rel="stylesheet" href="../../../../theme/guide-override.css?v=8"/>
 <style>
   .ti-home { text-decoration: none; }
   @media (max-width: 700px) { .ti-home .tool-label { display: none; } }
@@ -26,7 +26,7 @@
       <span class="burger" aria-hidden="true"><span></span></span><span class="visually-hidden">Open navigation</span>
     </button>
     <a class="brand" href="../../index.html">
-      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">AI Engineer Roadmap</span>
+      <span class="brand-mark" aria-hidden="true"></span><span class="brand-name">Data &amp; Intelligence</span>
     </a>
 <nav class="primary-nav" aria-label="Primary" data-chrome>
   <ul>
@@ -219,13 +219,13 @@
 <section class="doc-section" aria-labelledby="1-normal-maintenance-command">
 <h2 id="1-normal-maintenance-command">1. Normal Maintenance Command<a class="heading-anchor" href="#1-normal-maintenance-command" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
 <blockquote class="quote quote-principle">
-<p><strong>Read AGENTS.md and MAINTENANCE.md. Perform the maintenance action that is currently due.</strong></p>
+<p class="ti-subhead"><strong>Read AGENTS.md and MAINTENANCE.md. Perform the maintenance action that is currently due.</strong></p>
 </blockquote>
 <p>On this command, the agent determines the due action from the <a href="#3-maintenance-state">state file</a> and today&#x27;s date, performs it, updates the state file, and reports. It does not ask the human to work out dates.</p>
 <p>Explicit commands are also supported and may be given at any time:</p>
 <blockquote class="quote">
-<p><strong>Perform the 4-week Modern AI Scan.</strong></p>
-<p><strong>Perform the 12-week Curriculum Review.</strong></p>
+<p class="ti-subhead"><strong>Perform the 4-week Modern AI Scan.</strong></p>
+<p class="ti-subhead"><strong>Perform the 12-week Curriculum Review.</strong></p>
 </blockquote>
 <p>An explicit command runs the named action even if it is not yet due. The state file is updated from the date the action was completed.</p>
 <p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
@@ -411,7 +411,7 @@
 <p><strong>What a scan may change.</strong> A scan normally does <strong>not</strong> modify the permanent curriculum. It may update the <em>current-practice</em> column of <a href="../curriculum/index.html#7-modern-ai-engineering" class="xref-link xref-link--curriculum">ROADMAP.md §7 Modern AI Engineering<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a> when the evidence is recorded in the scan report and the change does not touch the Depth Track, any block&#x27;s required capability, depth or prerequisites, the durable-concept column, or mandatory resources. Any such edit must be listed in the report and in the completion message, and the site must be regenerated per <a href="../governance/index.html#generated-html">AGENTS.md — Generated HTML</a>. Everything else waits for the 12-week review.</p>
 <h3 id="scan-report">Scan Report<a class="heading-anchor" href="#scan-report" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
 <p><strong>Location:</strong> <code>reviews/YYYY-MM-DD-modern-ai-scan.md</code>, dated on completion, following the Markdown conventions in <a href="../governance/index.html#markdown-source-files">AGENTS.md</a>.</p>
-<p><strong>Contents:</strong></p>
+<p class="ti-subhead"><strong>Contents:</strong></p>
 <ol>
 <li><strong>Header</strong> — date; period covered; current baseline.</li>
 <li><strong>Method</strong> — search directions used; sources consulted; what was deliberately excluded.</li>
@@ -443,8 +443,8 @@
 <h3 id="purpose">Purpose<a class="heading-anchor" href="#purpose" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
 <p>Decide whether accumulated evidence requires changing the current baseline. <strong>Cadence:</strong> every 12 weeks (84 days).</p>
 <blockquote class="quote">
-<p><strong>Do not ask: what changed in our roadmap topics?</strong></p>
-<p><strong>Ask: what does the learner need now, independent of what we currently teach?</strong></p>
+<p class="ti-subhead"><strong>Do not ask: what changed in our roadmap topics?</strong></p>
+<p class="ti-subhead"><strong>Ask: what does the learner need now, independent of what we currently teach?</strong></p>
 </blockquote>
 <p>The review applies the <a href="../governance/index.html#independent-discovery-and-falsification-rule">Independent Discovery and Falsification Rule</a>: the independent examination comes <strong>before</strong> the comparison with <a href="../curriculum/index.html" class="xref-link xref-link--curriculum">ROADMAP.md<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a>.</p>
 <h3 id="inputs">Inputs<a class="heading-anchor" href="#inputs" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
@@ -468,7 +468,7 @@
 <li><strong>Proposals.</strong> Classify each proposed change and apply the <a href="../governance/index.html#curriculum-change-rule">Curriculum Change Rule</a>.</li>
 <li><strong>Write the report, update the state file, and present proposals for human approval.</strong> Make no significant change to <a href="../curriculum/index.html" class="xref-link xref-link--curriculum">ROADMAP.md<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a> before approval.</li>
 </ol>
-<p><strong>Change classification.</strong></p>
+<p class="ti-subhead"><strong>Change classification.</strong></p>
 <div class="table-wrap" role="region" tabindex="0" aria-label="Table: Review Procedure"><table class="doc-table table--pair" style="--cols:2">
 <thead>
 <tr>
@@ -498,7 +498,7 @@
 <p>For each Critical or Important proposal, state: current state; finding; evidence; capability consequence; proposed change; learning-cost consequence; confidence.</p>
 <h3 id="review-report">Review Report<a class="heading-anchor" href="#review-report" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
 <p><strong>Location:</strong> <code>reviews/YYYY-MM-DD-curriculum-review.md</code>, dated on completion, following the Markdown conventions in <a href="../governance/index.html#markdown-source-files">AGENTS.md</a>.</p>
-<p><strong>Sections:</strong></p>
+<p class="ti-subhead"><strong>Sections:</strong></p>
 <ol>
 <li>Executive Summary</li>
 <li>Independent Current-State Reconstruction</li>
