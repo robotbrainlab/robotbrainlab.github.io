@@ -213,6 +213,10 @@ strong { font-weight: 600; color: var(--head); }
 .btn.secondary { background: transparent; color: var(--blue); }
 .btn.secondary:hover { background: var(--blue); color: #fff; filter: none; }
 
+/* A button label is not running text: justified, "Browse the full CS & Engineering Resources
+   page" spreads over three gappy lines on a phone. (Buttons inherit it from the p around them.) */
+.btn, .resources-outro-link { text-align: left; -webkit-hyphens: manual; hyphens: manual; }
+
 /* ===================== SECTIONS ===================== */
 .band { padding: 96px 0; background: var(--bg); transition: background-color .4s ease; }
 .band.alt { background: var(--bg-alt); }

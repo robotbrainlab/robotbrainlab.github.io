@@ -30,7 +30,7 @@ SOURCE = REPO / "_sources" / "ai-roadmap"
 GUIDE = REPO / "data-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
 # Site theme override for the guide (theme/guide-override.css). Bump when that file changes.
-OVERRIDE_VERSION = 8
+OVERRIDE_VERSION = 9
 
 ANCHOR = '<div class="topbar-tools">'
 STYLE = """<style>
@@ -38,10 +38,12 @@ STYLE = """<style>
   @media (max-width: 700px) { .ti-home .tool-label { display: none; } }
 </style>
 </head>"""
-# The guide's home page only: justify all running text.
+# The guide's home page only: justify its running text. Its lists hold step names and
+# titles rather than prose, and its lead is set larger than the body, so both stay ragged.
 HOME_PAGE = "index.html"
 HOME_STYLE = """<style>
-  main.home p:not(.home-actions):not(.ti-subhead), main.home li, .site-footer p { text-align: justify; hyphens: auto; }
+  main.home p:not(.home-actions):not(.ti-subhead):not(.home-lead),
+  .site-footer p { text-align: justify; hyphens: auto; }
 </style>
 </head>"""
 

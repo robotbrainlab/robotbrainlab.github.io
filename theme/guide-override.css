@@ -370,3 +370,33 @@ p.ti-subhead,
   .path-part-card, .track--modern { padding: 1.3rem 1.25rem 1.15rem; }
   .table-wrap { padding: .3rem .9rem; border-radius: 14px; }
 }
+
+/* ============================== ALIGNMENT ============================== */
+/* Justification is for running text. A heading, the name of a step, a button label or a pull
+   quote holds three or four words on a phone line, and justifying those is all gaps. The guide
+   sets its own interface text ragged; these are the places the broader rules above (and the
+   home page's own justify rule) would otherwise reach. */
+h1, h2, h3, h4, h5, h6,
+.button,
+.prose .path-step, .path-step-link, .path-title,
+.prose .landing-item, .landing-item-title,
+.prose .overview-actions,
+.study-title {
+  text-align: left;
+  -webkit-hyphens: manual;
+  hyphens: manual;
+}
+
+@media (max-width: 47.99em) {
+  /* The leads are set two to four points larger than the body, so a phone column holds four or
+     five of their words per line — too few to justify evenly. They read ragged right here. */
+  .home-lead,
+  .prose .guide-preamble p,
+  .prose .landing-lead,
+  .prose .guide-body > p:first-child,
+  .prose .quote-principle {
+    text-align: left;
+    -webkit-hyphens: manual;
+    hyphens: manual;
+  }
+}

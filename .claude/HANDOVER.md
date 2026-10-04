@@ -187,7 +187,10 @@ the number of files on disk matches the `git ls-files` count. Scan for secrets b
   visitors keep the old styling.
 - **Phones (fixed 2026-09-27).** The D&I guide's own CSS sets prose ragged below 48em and its menu button
   has a -0.9rem margin sized for its old tiny brand. `theme/guide-override.css` re-justifies prose (and the
-  study-resource entries and step leads) and re-spaces the phone top bar. Audit every page at
+  study-resource entries and step leads) and re-spaces the phone top bar. Only running text is
+  justified: `theme/guide-override.css` keeps headings, step and item names, button labels, pull
+  quotes and (on phones) the large lead paragraphs ragged right, because they hold three or four
+  words per phone line. `theme/site.css` does the same for the site's own buttons. Audit every page at
   320/360/375/390/414/430px for: top-bar overlaps, cut-off brand, real sideways scroll (`scrollTo` then
   `scrollX`, not `scrollWidth`: the guide's hidden drawers overflow but `overflow-x: clip` stops scrolling),
   overlapping or off-screen buttons, and long paragraphs that aren't justified. Load each page in a
