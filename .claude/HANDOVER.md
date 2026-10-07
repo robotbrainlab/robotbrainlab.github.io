@@ -1,6 +1,6 @@
 # Handover — Towards Intelligence (robotbrainlab.github.io)
 
-Last updated: 2026-10-04.
+Last updated: 2026-10-07.
 
 ## What this repo is
 
@@ -81,9 +81,10 @@ Notes:
 | `mathematics/index.html`, `cse/resources.html` | "Coming Soon" placeholders: **restyled** (linked from Home and the CS&E guide) |
 | `mathematics/resources.html`, `data-intelligence/llm-engineering.html`, `data-intelligence/resources.html` | **Orphans.** No page links to them (reachable by URL only). Not part of the restyle |
 | `data-intelligence/index.html` | Redirects to `guide/` |
+| `data-intelligence/books/python-roadmap.html` | Hand-written, self-contained page (its own CSS, JS and theme switch; no `theme/` link). The Python resource for **both** the D&I guide and the CS&E on-ramp. Not generated — edit it directly |
 | `data-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site (72 pages). Never edit by hand. Restyled by `theme/guide-override.css`, which the build script links in |
-| `theme/site.css`, `theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=4`) |
-| `theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `_tools/build-di-guide.py` |
+| `theme/site.css`, `theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=6`) |
+| `theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `_tools/build-di-guide.py` (currently `10`) |
 | `favicon/` | Site icon: "Apex", a neural network converging into a radiant star, the culmination of AI (gradient tile). Also added to the D&I guide pages by the build script |
 | `_sources/ai-roadmap/` | Source of the D&I guide (a separate research repo; **this is its only copy**) |
 | `_sources/ai-tools/` | Claude Code guides, skills, and `html-reference/reference.html` (the design reference) |
@@ -157,6 +158,22 @@ per page, nothing pushed).
   then replaces `data-intelligence/guide/`. The rename touches chrome only — the roadmap's own
   running text keeps its name, and `_sources/ai-roadmap/` is never written to. Each replacement is
   checked, so the build stops rather than publishing a page it did not recognise.
+- **The Python resource points at this site's own page** (2026-10-07, commit `2042d27`).
+  `data-intelligence/books/python-roadmap.html` is a staged path through the language that
+  sequences *The Python Tutorial* together with uv, ruff, mypy and pytest. The build script does two
+  different things with it, both in `PYTHON_SWAPS` and `NOTE_PAGES`, each checked to match exactly
+  once:
+  - **Renames the resource and repoints the link** on the 4 pages that tell a reader what to read
+    now — step 1, step 6, the curriculum map and the ML testing checklist. Step 6 asked for modules,
+    a test runner and isolated environments by tutorial chapter (ch 6, §10.11, ch 12); the roadmap
+    assigns those same chapters inside Fundamentals, so they are named by stage instead.
+  - **Adds a dated note** to the 7 pages that record earlier research, design or review work. Their
+    own text is left exactly as written: renaming the resource there would claim that work examined
+    something that did not exist yet. The note sits after the document's `doc-meta` block and uses
+    the `.ti-update` style in `theme/guide-override.css`.
+  If the roadmap source ever changes that resource's wording, these swaps stop matching and **the
+  build exits** rather than publishing a page it did not recognise. Fix the strings, don't delete the
+  check.
 - Don't run the roadmap's `build_site.py --out` straight into the guide, because the link would be
   lost. Never point `--out` at `data-intelligence/`, because it wipes that directory.
 - If `.venv` is missing: `cd _sources/ai-roadmap && python3.14 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt`.
@@ -168,6 +185,10 @@ per page, nothing pushed).
 - Book links open in a new tab (`target="_blank" rel="noopener"`). Books without a PDF yet carry a
   `<span class="book-status">Coming soon</span>` badge. Topics that are skipped at this level say
   *Not necessary at this level*.
+- The on-ramp's **Programming** entry (Engineering Track → Building → Software Engineering) links to
+  `data-intelligence/books/python-roadmap.html`, not to a "from Zero" PDF. It is the one on-ramp
+  entry served by a page rather than a book, so it crosses into `data-intelligence/`. Changed
+  2026-10-07; it used to be a "Programming from Zero — Coming soon" placeholder.
 
 ### `_sources/` is the only copy
 
