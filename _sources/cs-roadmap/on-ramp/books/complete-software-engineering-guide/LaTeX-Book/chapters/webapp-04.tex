@@ -1,0 +1,231 @@
+\unnumberedchapter{Following One Tap from Start to Finish}\label{ch:webapp-04}
+
+\chapterrule
+
+This chapter puts the two sides together. You will follow one tap on a Save button to the server and back, then meet the common combinations of tools real apps are built from.
+
+\emph{The problem.} I know the two sides now, but not how one tap travels between them.
+
+\emph{The question.} What happens, in order, between tapping Save and seeing ``Saved!''?
+
+\unnumberedsection{true}{The Button, Now for Real}\label{webapp-04:the-button-now-for-real}
+
+In Chapter 2, the Save button only changed the page. Here is the same button's JavaScript, now talking to the back end from Chapter 3:
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{button}\OperatorTok{.}\AttributeTok{onclick} \OperatorTok{=} \KeywordTok{async} \KeywordTok{function}\NormalTok{ () \{}
+  \KeywordTok{const}\NormalTok{ response }\OperatorTok{=} \ControlFlowTok{await} \FunctionTok{fetch}\NormalTok{(}\StringTok{"/notes"}\OperatorTok{,}\NormalTok{ \{}
+    \DataTypeTok{method}\OperatorTok{:} \StringTok{"POST"}\OperatorTok{,}
+    \DataTypeTok{headers}\OperatorTok{:}\NormalTok{ \{}\StringTok{"Content{-}Type"}\OperatorTok{:} \StringTok{"application/json"}\NormalTok{\}}\OperatorTok{,}
+    \DataTypeTok{body}\OperatorTok{:} \BuiltInTok{JSON}\OperatorTok{.}\FunctionTok{stringify}\NormalTok{(\{}\DataTypeTok{text}\OperatorTok{:} \StringTok{"Buy milk"}\NormalTok{\})}\OperatorTok{,}
+\NormalTok{  \})}\OperatorTok{;}
+  \KeywordTok{const}\NormalTok{ data }\OperatorTok{=} \ControlFlowTok{await}\NormalTok{ response}\OperatorTok{.}\FunctionTok{json}\NormalTok{()}\OperatorTok{;}
+  \BuiltInTok{document}\OperatorTok{.}\FunctionTok{getElementById}\NormalTok{(}\StringTok{"status"}\NormalTok{)}\OperatorTok{.}\AttributeTok{textContent} \OperatorTok{=}
+    \StringTok{"Saved! Notes so far: "} \OperatorTok{+}\NormalTok{ data}\OperatorTok{.}\AttributeTok{count}\OperatorTok{;}
+\NormalTok{\}}\OperatorTok{;}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}\texttt{fetch} sends a request; \texttt{await} means ``wait here for the response.'' The last lines put the result on the page: \emph{Saved! Notes so far: 1}. Everything in this chapter happens inside that one \texttt{await}.
+
+\unnumberedsection{true}{The Whole Trip}\label{webapp-04:the-whole-trip}
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ FRONT END              BACK END              DATABASE}
+\NormalTok{ (your browser)         (a server)            (the memory)}
+\NormalTok{ ──────────────         ──────────            ────────────}
+\NormalTok{ 1 You tap Save}
+\NormalTok{ 2 JavaScript builds}
+\NormalTok{   the request}
+\NormalTok{ 3 Look up the address}
+\NormalTok{ 4 POST /notes ───────► 5 Route to handler,}
+\NormalTok{   + JSON + cookie        check cookie + rules}
+\NormalTok{                        6 Store the note ◄──► saved}
+\NormalTok{ 8 Draw "Saved!" ◄───── 7 200 OK + JSON}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \emph{The tap.} The browser notices the click and runs the button's JavaScript.
+\item
+  \emph{The request.} JavaScript builds a request: an action (\texttt{POST}, meaning ``create''), an address, and a JSON body. The browser attaches the site's cookie by itself.
+\item
+  \emph{The address.} Every request goes to a \textbf{URL}, such as \texttt{https:}\allowbreak{}\texttt{/}\allowbreak{}\texttt{/}\allowbreak{}\texttt{notes.}\allowbreak{}\texttt{example.}\allowbreak{}\texttt{com/}\allowbreak{}\texttt{notes}. The middle part, \texttt{notes.example.com}, is a \textbf{domain name}: a human-friendly name for the server. Computers really find each other by numbers called \textbf{IP addresses}, so the browser asks \textbf{DNS}, the internet's phone book, to turn the name into a number. The \texttt{https} at the front means \textbf{HTTPS}: the request travels sealed, so nobody on the way can read it.
+\item
+  \emph{The journey.} The sealed request hops across the internet to the server.
+\item
+  \emph{The back end.} The framework matches \texttt{POST\ /notes} to its route and runs the handler, which looks up the cookie to learn who you are and applies the rules.
+\item
+  \emph{The database.} The handler asks the database to store the note and waits for ``OK''.
+\item
+  \emph{The response.} The back end sends back a \textbf{status code}, a number that says how it went, plus JSON. Here is that response exactly as it arrives, shown by \texttt{curl\ -i} (the \texttt{-i} means ``include the headers''):
+
+  \begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{curl} \AttributeTok{{-}i} \AttributeTok{{-}X}\NormalTok{ POST http://localhost:8000/notes }\DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}H} \StringTok{"Content{-}Type: application/json"} \DataTypeTok{\textbackslash{}}
+  \AttributeTok{{-}d} \StringTok{\textquotesingle{}\{"text": "Buy milk"\}\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codebox}
+
+  \begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{HTTP/1.1 200 OK}
+\NormalTok{date: Sat, 26 Sep 2026 14:31:05 GMT}
+\NormalTok{server: uvicorn}
+\NormalTok{content{-}length: 24}
+\NormalTok{content{-}type: application/json}
+
+\NormalTok{\{"saved":true,"count":1\}}
+\end{Highlighting}
+\end{Shaded}
+
+  \end{codebox}
+
+  The first line is the status. Then come headers, notes about the message. After the blank line comes the body: the handler's JSON.
+\item
+  \emph{The drawing.} JavaScript reads the JSON and changes one paragraph. The browser redraws only that part; the page doesn't reload.
+\end{enumerate}
+
+\noindent{}The whole trip usually takes a tenth to a third of a second. You feel it as ``instant''.
+
+\begin{notebox}
+
+\textbf{Tip:} Status codes come in families. Numbers starting with 2 mean success, with 4 mean ``your request was wrong'' (404 is ``not found''), and with 5 mean ``the server broke''. The first digit tells you which side to blame.
+
+\end{notebox}
+
+\unnumberedsection{true}{Common Stacks}\label{webapp-04:common-stacks}
+
+Every app picks a front end, a back end, and a database. That combination is its \textbf{stack}. The pieces mix freely, because they only talk through requests and responses:
+
+\Needspace{11\baselineskip}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2897}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2665}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2781}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1657}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Stack
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Front end
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Back end
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Database
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Python & React or plain HTML & FastAPI or Django & PostgreSQL \\
+JavaScript everywhere & React & Node.js with Express & MongoDB \\
+Classic ``LAMP'' & HTML made by PHP & PHP on Linux & MySQL \\
+Ruby on Rails & Rails pages & Ruby on Rails & PostgreSQL \\
+Mobile & Swift or Kotlin app & Any of the above & Any \\
+\end{longtable}
+}
+
+A developer who works on both sides is called a \textbf{full-stack developer}. The tools change every few years; the trip you just followed does not.
+
+\unnumberedsection{true}{Try It}\label{webapp-04:try-it}
+
+Catch a real request in the act.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Open a site with a search box that suggests results as you type, such as an online shop.
+\item
+  Open the developer tools, click \emph{Network}, and choose the \emph{Fetch/XHR} filter. This hides images and files and shows only requests made by JavaScript. Clear the list with the clear button.
+\item
+  Type one letter into the search box. Click the new request that appears.
+\end{enumerate}
+
+\noindent{}\emph{Expected result:} A request appears as you type, with status \texttt{200}. \emph{Headers} shows its URL and method, \emph{Response} (or \emph{Preview}) shows JSON holding the suggestions, and \emph{Timing} shows how long the server took. Match each piece to the eight steps above.
+
+\unnumberedsection{true}{Summary, Key Terms, and Review Questions}\label{webapp-04:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\phantomsection\label{webapp-04:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  A tap runs JavaScript, which builds a request and sends it to a URL.
+\item
+  DNS turns the domain name into an IP address; HTTPS seals the request for the journey.
+\item
+  The back end routes the request, checks who you are and the rules, and uses the database.
+\item
+  The response carries a status code and JSON; JavaScript redraws part of the page.
+\item
+  A stack is one app's choice of front end, back end, and database.
+\end{itemize}
+
+\Needspace{19\baselineskip}
+
+\subsection*{Key Terms}\phantomsection\label{webapp-04:key-terms}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Term & Meaning \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+URL & The full address a request is sent to \\
+Domain name & A human-friendly name for a server \\
+IP address & The number computers use to find each other \\
+DNS & The internet's phone book, from names to numbers \\
+HTTPS & The sealed, encrypted way requests travel \\
+Status code & A number saying how a request went \\
+Stack & An app's front end, back end, and database \\
+Full-stack developer & Someone who works on both sides \\
+\end{longtable}
+}
+
+\subsection*{Review Questions}\phantomsection\label{webapp-04:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  List the eight steps between tapping Save and seeing ``Saved!''.
+\item
+  What does DNS do, and why is it needed?
+\item
+  What are the three parts of the response shown by \texttt{curl\ -i}?
+\item
+  What would a status code of 500 tell you, and what would 404 tell you?
+\item
+  Why can a React front end work with a Django back end?
+\end{enumerate}
+
+\begin{notebox}
+
+\textbf{You understand this when} you can draw the whole trip from memory for any button in any app, and point to the step where each piece of this book fits.
+
+\end{notebox}

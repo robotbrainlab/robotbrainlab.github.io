@@ -15,6 +15,15 @@ BOOK_MD="4-Building-Real-Applications/from-writing-code-to-production-system/mar
 
 SOURCES=(
   "how-software-gets-built|false|chapter|LaTeX-Book/content/how-software-gets-built.md"
+  # The pre-book, "How Web Applications Work". Its Markdown stays with the Web Applications
+  # book in ../web-applications/; this guide is the only place it is published. Unnumbered on
+  # purpose, so Part IV keeps chapters 1-44 and every "see Chapter N" in the prose stays true.
+  "webapp-01|false|chapter|../web-applications/markdown/01-two-sides-of-every-app.md"
+  "webapp-02|false|chapter|../web-applications/markdown/02-the-front-end.md"
+  "webapp-03|false|chapter|../web-applications/markdown/03-the-back-end.md"
+  "webapp-04|false|chapter|../web-applications/markdown/04-following-one-tap.md"
+  "webapp-05|false|chapter|../web-applications/markdown/05-security-speed-failure-cost.md"
+  "webapp-06|false|chapter|../web-applications/markdown/06-where-to-go-from-here.md"
   "product-discovery|false|chapter|1-Product-Discovery/product-discovery.md"
   "project-planning-guide|false|chapter|2-Project-Planning/project-planning-guide.md"
   "writing-good-code|false|split|3-Writing-the-Code/writing-good-code.md"

@@ -5,7 +5,7 @@ One folder per book, with its `TOC.md`, and once writing starts its Markdown cha
 | Book | Folder | Status |
 |---|---|---|
 | Linux and Git from Zero | `linux-and-git/` | Done |
-| Web Applications from Zero | `web-applications/` | Done |
+| Web Applications from Zero | `web-applications/` | Done &mdash; **not published on its own.** Its Markdown is the pre-book "How Web Applications Work" inside the Complete Software Engineering Guide |
 | Infrastructure Engineering from Zero | `infrastructure-engineering/` | Done |
 | Data Structures and Algorithms from Zero | `data-structures-and-algorithms/` | TOC ready |
 | Operating Systems from Zero | `operating-systems/` | TOC ready |

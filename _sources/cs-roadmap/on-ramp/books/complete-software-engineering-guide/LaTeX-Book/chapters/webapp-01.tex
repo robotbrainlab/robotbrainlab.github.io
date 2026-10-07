@@ -1,0 +1,190 @@
+\unnumberedchapter{Two Sides of Every App}\label{ch:webapp-01}
+
+\chapterrule
+
+This chapter gives you the one picture the rest of the book hangs on. Every app you use has two sides: one in your hand, and one far away. The two sides talk by passing messages. By the end of the chapter you will know what each side is called and how their conversation works.
+
+\emph{The problem.} I tap a button, and something happens far away.
+
+\emph{The question.} What is on the other end of my tap, and how do the two ends talk?
+
+\unnumberedsection{true}{One App, Two Places}\label{webapp-01:one-app-two-places}
+
+You open a food delivery app, pick a pizza, and tap \emph{Order}. A few seconds later the screen says ``Order placed.'' In between, the restaurant received your order, a driver was found, and your card was charged. None of that happened on your phone. Your phone doesn't know which drivers are free, and it can't charge a card by itself.
+
+So the app you ``use'' is really two programs. One runs on your phone. The other runs on the delivery company's computers, often hundreds of kilometres away. Together they make one \textbf{web application}: a program split between your device and a computer on the internet, with the two halves talking over the network. Email, maps, banking, social media, and online shopping all work this way.
+
+\unnumberedsection{true}{The Restaurant Picture}\label{webapp-01:the-restaurant-picture}
+
+A restaurant has two areas. The \emph{front of house} is the dining room: tables, menus, waiters. Everything there is designed for you. The \emph{back of house} is the kitchen. You never go there, but that is where the food, the recipes, and the cooks are.
+
+Apps are built the same way, and developers even use the same words:
+
+\begin{itemize}
+\tightlist
+\item
+  The \textbf{front end} is the part you see and touch: screens, buttons, text boxes. It runs on your device.
+\item
+  The \textbf{back end} is the part you never see: the program that keeps the data, applies the rules, and does the real work. It runs on the company's computers.
+\end{itemize}
+
+\noindent{}A waiter carries orders to the kitchen and plates back to the table. In an app, messages sent over the internet do the carrying.
+
+\begin{notebox}
+
+\textbf{Note:} You will also see ``frontend'', ``client side'', ``backend'', and ``server side''. They mean the same two things.
+
+\end{notebox}
+
+\unnumberedsection{true}{Client and Server}\label{webapp-01:client-and-server}
+
+Two more words describe the \emph{roles} in the conversation:
+
+\begin{itemize}
+\tightlist
+\item
+  The \textbf{client} is the program that asks. Your phone app is a client. So is a web browser.
+\item
+  The \textbf{server} is the program that answers. It waits for questions, day and night, from many clients at once. People also say ``server'' for the computer it runs on.
+\end{itemize}
+
+\noindent{}One kitchen feeds every table, and one back end serves millions of phones. That is why shared data lives on the server: it is the one place every client can reach. Your friend sees your new photo because the photo is stored on the server, not on your phone.
+
+\unnumberedsection{true}{The Request and Response Loop}\label{webapp-01:the-request-and-response-loop}
+
+Client and server talk in a strict pattern. The client sends a \textbf{request}: a message saying what it wants. The server sends back a \textbf{response}: a message with the answer. One request plus its response is a \textbf{round trip}.
+
+\begin{codebox}[short]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{  ┌──────────────┐     request      ┌──────────────┐}
+\NormalTok{  │    Client    │ ───────────────► │    Server    │}
+\NormalTok{  │ (front end)  │                  │  (back end)  │}
+\NormalTok{  │ your device  │ ◄─────────────── │  far away    │}
+\NormalTok{  └──────────────┘     response     └──────────────┘}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\noindent{}Three rules hold for almost every round trip:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \emph{The client speaks first.} The server answers questions; it doesn't start conversations.
+\item
+  \emph{Every request gets one response}, even if the answer is ``no'' or ``something broke''.
+\item
+  \emph{Each round trip stands alone.} The server treats every request as a fresh message. (Chapter 3 shows how it still remembers who you are.)
+\end{enumerate}
+
+\noindent{}Here is the pizza order as a round trip:
+
+\begin{itemize}
+\tightlist
+\item
+  Request: ``Place an order: one margherita, to 12 Park Road, paid with the saved card.''
+\item
+  Response: ``Done. Order number 5531. The driver arrives in 25 minutes.''
+\end{itemize}
+
+\noindent{}Then the app shows the result on your screen. That is the whole shape of a web application: \emph{tap, request, work, response, show.} The rest of this book fills in each step.
+
+\unnumberedsection{true}{Why Split an App at All?}\label{webapp-01:why-split-an-app-at-all}
+
+Why not put everything on the phone? Four reasons:
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Sharing.} Data that many people need must live in one place everyone can reach.
+\item
+  \emph{Trust.} You control what runs on your own phone. A rule like ``charge the card only after the restaurant accepts'' must run where customers can't tamper with it.
+\item
+  \emph{Power.} A server can search millions of restaurants in a blink. A phone has a small battery.
+\item
+  \emph{Updates.} Fix a bug on the server once, and every user gets the fix at the same moment.
+\end{itemize}
+
+\noindent{}The price of the split: the two sides must be able to reach each other. No network, no app. You have seen this price as ``No internet connection.''
+
+\unnumberedsection{true}{Try It}\label{webapp-01:try-it}
+
+You can watch round trips happen. Your browser has \textbf{developer tools}: a built-in panel that shows what a web page is doing behind the scenes.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Open any news website in Chrome, Edge, or Firefox on a computer.
+\item
+  Open the developer tools: press F12 (Windows, Linux) or Cmd+Option+I (Mac), or right-click the page and choose \emph{Inspect}.
+\item
+  Click the \emph{Network} tab, then reload the page.
+\end{enumerate}
+
+\noindent{}\emph{Expected result:} The panel fills with a long list, often over a hundred lines. Each line is one round trip. The \emph{Status} column shows numbers such as \texttt{200}, which means ``OK'', and the bar at the bottom counts the requests. One page, loaded by one click, needed all of them.
+
+\unnumberedsection{true}{Summary, Key Terms, and Review Questions}\label{webapp-01:summary-key-terms-and-review-questions}
+
+\subsection*{Summary}\phantomsection\label{webapp-01:summary}
+
+\begin{itemize}
+\tightlist
+\item
+  A web application is split in two: a front end on your device and a back end on the company's computers.
+\item
+  The client asks and the server answers. One server answers many clients.
+\item
+  Client and server talk in round trips: one request, one response.
+\item
+  Apps are split for sharing, trust, power, and easy updates. The cost is that both sides need the network.
+\end{itemize}
+
+\Needspace{23\baselineskip}
+
+\subsection*{Key Terms}\phantomsection\label{webapp-01:key-terms}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Term & Meaning \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Web application & A program split between your device and a server \\
+Front end & The part you see and touch \\
+Back end & The hidden part that keeps data and does the work \\
+Client & The program that asks \\
+Server & The program that answers \\
+Request & The message the client sends \\
+Response & The message the server sends back \\
+Round trip & One request plus its response \\
+Developer tools & The browser panel that shows what a page is doing \\
+\end{longtable}
+}
+
+\subsection*{Review Questions}\phantomsection\label{webapp-01:review-questions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Using the restaurant picture, explain the front end and the back end.
+\item
+  Why does your friend's phone show a photo you uploaded from your phone?
+\item
+  Walk through ``tap, request, work, response, show'' for sending a chat message.
+\item
+  Give two reasons a rule like ``charge the card'' runs on the server, not the phone.
+\end{enumerate}
+
+\begin{notebox}
+
+\textbf{You understand this when} you can pick any app on your phone and say which of its jobs happen on your device and which happen far away.
+
+\end{notebox}

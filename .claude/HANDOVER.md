@@ -192,6 +192,28 @@ per page, nothing pushed).
 - **Building's order is deliberate** (2026-10-08): Linux and Git → Programming → Web Applications →
   Complete Software Engineering. Tools first, then programming, then how web apps work, then all of it
   together.
+- **The on-ramp's Building path is three books** (2026-10-08): Linux and Git → Programming → Complete
+  Software Engineering. Nothing else belongs in that column.
+- **Web Applications from Zero is no longer published on its own.** Its six chapters are now the pre-book
+  *How Web Applications Work* inside the Complete Software Engineering Guide, sitting after the map
+  chapter and before Part I (2026-10-08). `cse/books/web-applications/` was deleted;
+  `_sources/.../web-applications/markdown/` stays, because it is the pre-book's source.
+  - The chapters are **unnumbered** (`numbered=false` in `convert.sh`). This is load-bearing: Part IV keeps
+    chapters 1–44, so every "see Chapter 17" in the guide's prose stays true. Do not make them numbered.
+  - The part page uses `\prebookpart` in `LaTeX-Book/preamble.tex` — a copy of `\lifecyclepart` that does
+    **not** advance the part counter, so Product Discovery is still Part I and the preface's "four parts"
+    stays true. `\phasestrip{0}` highlights none of the four phases, which is correct before the loop starts.
+- **⚠ The Complete Software Engineering Guide cannot be rebuilt from Markdown in this repo.** Its
+  `tools/convert.sh` reads a Markdown library (`1-Product-Discovery/`, `2-Project-Planning/`,
+  `3-Writing-the-Code/`, `4-Building-Real-Applications/…`) that is **not in `_sources/` and not anywhere on
+  this machine** — searched 2026-10-08. Only the generated `LaTeX-Book/chapters/*.tex` survive, and they are
+  committed. So `make` fails at the convert step, but `make pdf` works:
+  ```
+  cd _sources/cs-roadmap/on-ramp/books/complete-software-engineering-guide/LaTeX-Book
+  latexmk -xelatex -interaction=nonstopmode -halt-on-error book.tex
+  ```
+  Treat `chapters/*.tex` as source until that Markdown is found or rewritten. **Never run `make clean`** —
+  it deletes `chapters/`, and nothing can regenerate it.
 - **APIs to FastAPI is no longer an on-ramp row.** It moved into the Python Roadmap, Phase 1.5, where it
   replaced the MDN HTTP reading item (2026-10-08). The PDF stays at `cse/books/apis-to-fastapi/`; only the
   table entry went. Don't re-add the row — the on-ramp reaches the book through Programming → Python
