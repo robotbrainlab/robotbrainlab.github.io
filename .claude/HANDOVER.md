@@ -1,6 +1,6 @@
 # Handover — Towards Intelligence (robotbrainlab.github.io)
 
-Last updated: 2026-10-07.
+Last updated: 2026-10-08.
 
 ## What this repo is
 
@@ -189,6 +189,20 @@ per page, nothing pushed).
   `data-intelligence/books/python-roadmap.html`, not to a "from Zero" PDF. It is the one on-ramp
   entry served by a page rather than a book, so it crosses into `data-intelligence/`. Changed
   2026-10-07; it used to be a "Programming from Zero — Coming soon" placeholder.
+- **Building's order is deliberate** (2026-10-08): Linux and Git → Programming → Web Applications →
+  Complete Software Engineering. Tools first, then programming, then how web apps work, then all of it
+  together.
+- **APIs to FastAPI is no longer an on-ramp row.** It moved into the Python Roadmap, Phase 1.5, where it
+  replaced the MDN HTTP reading item (2026-10-08). The PDF stays at `cse/books/apis-to-fastapi/`; only the
+  table entry went. Don't re-add the row — the on-ramp reaches the book through Programming → Python
+  Roadmap → 1.5.
+- **Learning method, agreed 2026-10-08.** The roadmap is kept clean and supporting concepts are learned as
+  they come up. A new "from Zero" guide is written only when (a) no good from-zero resource exists at this
+  level, and (b) the wall has been hit twice. That is how `APIs to FastAPI` came to exist. Don't try to
+  close every prerequisite in advance — the regress has no bottom.
+- **The one known gap in Python Fundamentals is SQL.** Phase 1.5 opens with five database items, and
+  *Use the Index, Luke!* ch. 1–5 assumes you can already write a join. The failure is silent — a missing
+  index doesn't error, it gets slow later — so `databases/TOC.md` is the next book worth writing.
 
 ### `_sources/` is the only copy
 
