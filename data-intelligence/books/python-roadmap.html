@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A sequenced roadmap for the Python language itself: Fundamentals, Advanced and Mastery. Exact chapters to read, projects to build, and explicit exit criteria.">
+<meta name="color-scheme" content="light dark">
+<title>Python Roadmap &mdash; Fundamentals, Advanced &amp; Mastery</title>
+<script>
+  /* Apply the saved (or system) theme before first paint to avoid a flash. */
+  (function () {
+    var t;
+    try { t = localStorage.getItem('pyroadmap-theme'); } catch (e) {}
+    if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.classList.add('js');
+  })();
+</script>
+<style>
+  /* ===================== TOKENS ===================== */
+  :root {
+    --bg:          #ffffff;
+    --bg-alt:      #f5f5f7;
+    --card:        #ffffff;
+    --card-alt:    #f5f5f7;
+    --text:        #1d1d1f;
+    --text-soft:   #424245;
+    --muted:       #6e6e73;
+    --faint:       #86868b;
+    --head:        #1d1d1f;
+    --blue:        #0071e3;
+    --link:        #0066cc;
+    --green:       #248a3d;
+    --orange:      #c93400;
+    --rule:        #d2d2d7;
+    --rule-soft:   #e8e8ed;
+    --nav-bg:      rgba(255, 255, 255, 0.72);
+    --nav-rule:    rgba(0, 0, 0, 0.12);
+    --shadow:      0 4px 24px rgba(0, 0, 0, 0.06);
+    --shadow-hover:0 12px 40px rgba(0, 0, 0, 0.10);
+    --grad:        linear-gradient(90deg, #0090f7 0%, #ba62fc 50%, #f2416b 100%);
+    --switch-off:  #e9e9eb;
+    --switch-on:   #0071e3;
+    color-scheme: light;
+  }
+
+  html[data-theme="dark"] {
+    --bg:          #000000;
+    --bg-alt:      #101012;
+    --card:        #1c1c1e;
+    --card-alt:    #161618;
+    --text:        #f5f5f7;
+    --text-soft:   #d2d2d7;
+    --muted:       #a1a1a6;
+    --faint:       #86868b;
+    --head:        #f5f5f7;
+    --blue:        #0a84ff;
+    --link:        #2997ff;
+    --green:       #30d158;
+    --orange:      #ff9f0a;
+    --rule:        #424245;
+    --rule-soft:   #2c2c2e;
+    --nav-bg:      rgba(22, 22, 23, 0.72);
+    --nav-rule:    rgba(255, 255, 255, 0.10);
+    --shadow:      0 4px 24px rgba(0, 0, 0, 0.5);
+    --shadow-hover:0 12px 40px rgba(0, 0, 0, 0.7);
+    --switch-off:  #39393d;
+    --switch-on:   #0a84ff;
+    color-scheme: dark;
+  }
+
+  /* No-JS fallback: follow the system theme */
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) {
+      --bg: #000; --bg-alt: #101012; --card: #1c1c1e; --card-alt: #161618;
+      --text: #f5f5f7; --text-soft: #d2d2d7; --muted: #a1a1a6; --head: #f5f5f7;
+      --link: #2997ff; --rule: #424245; --rule-soft: #2c2c2e; --nav-bg: rgba(22,22,23,.72);
+    }
+  }
+
+  /* ===================== BASE ===================== */
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+                 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.47059;
+    letter-spacing: -0.022em;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color .4s ease, color .4s ease;
+  }
+  h1, h2, h3, h4 {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue",
+                 Helvetica, Arial, sans-serif;
+    color: var(--head);
+  }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p { margin: 0 0 1em 0; }
+  p, li, td { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+  em { font-style: italic; }
+  strong { font-weight: 600; color: var(--head); }
+  ::selection { background: rgba(0, 113, 227, 0.22); }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 22px; }
+  .wrap-narrow { max-width: 692px; margin: 0 auto; padding: 0 22px; }
+
+  /* ===================== NAV ===================== */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--nav-bg);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--nav-rule);
+    transition: background-color .4s ease;
+  }
+  .nav .wrap {
+    height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  }
+  .nav .brand {
+    font-size: 21px; font-weight: 600; letter-spacing: .011em; color: var(--head);
+    white-space: nowrap;
+  }
+  .nav .brand:hover { text-decoration: none; }
+  .nav .right { display: flex; align-items: center; gap: 26px; }
+  .nav .links { display: flex; gap: 22px; margin: 0; padding: 0; list-style: none; }
+  .nav .links a {
+    font-size: 12px; letter-spacing: -0.01em; color: var(--text); opacity: .8;
+    transition: opacity .2s, color .2s;
+  }
+  .nav .links a:hover { opacity: 1; text-decoration: none; }
+  .nav .links a.active { color: var(--blue); opacity: 1; }
+
+  /* ---------- iOS-style theme switch ---------- */
+  .switch {
+    position: relative; flex: none;
+    width: 51px; height: 31px; padding: 0; border: 0; border-radius: 999px;
+    background: var(--switch-off); cursor: pointer;
+    transition: background-color .3s ease;
+  }
+  .switch:focus-visible { outline: 3px solid rgba(0, 113, 227, .5); outline-offset: 2px; }
+  .switch[aria-checked="true"] { background: var(--switch-on); }
+  .switch .knob {
+    position: absolute; top: 2px; left: 2px;
+    width: 27px; height: 27px; border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 3px 1px rgba(0,0,0,.06);
+    display: grid; place-items: center;
+    transition: transform .3s cubic-bezier(.3, 1.4, .5, 1);
+  }
+  .switch[aria-checked="true"] .knob { transform: translateX(20px); }
+  .switch svg { width: 15px; height: 15px; position: absolute; transition: opacity .25s, transform .35s; }
+  .switch .sun  { color: #ff9f0a; }
+  .switch .moon { color: #3a3a3c; opacity: 0; transform: rotate(-60deg); }
+  .switch[aria-checked="true"] .sun  { opacity: 0; transform: rotate(60deg); }
+  .switch[aria-checked="true"] .moon { opacity: 1; transform: none; }
+
+  /* ===================== HERO ===================== */
+  .hero { text-align: center; padding: 96px 0 88px; background: var(--bg); }
+  .hero .eyebrow {
+    font-size: 17px; font-weight: 600; color: var(--muted); letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+  .hero h1 {
+    font-size: clamp(44px, 7.5vw, 80px); line-height: 1.05; font-weight: 700;
+    letter-spacing: -0.015em; margin: 0 auto 6px; max-width: 900px;
+  }
+  .hero .sub {
+    font-size: clamp(28px, 4.4vw, 48px); line-height: 1.1; font-weight: 600;
+    letter-spacing: -0.003em; margin: 0 0 34px;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .hero .purpose {
+    max-width: 720px; margin: 0 auto 36px; font-size: 21px; line-height: 1.381;
+    letter-spacing: .011em; color: var(--muted);
+    text-align: justify; text-align-last: left;
+  }
+  .hero .purpose strong { color: var(--head); }
+  .hero .ctas { display: flex; justify-content: center; align-items: center; gap: 28px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-block; background: var(--blue); color: #fff;
+    font-size: 17px; padding: 11px 22px; border-radius: 980px;
+    transition: filter .2s, transform .2s;
+  }
+  .btn:hover { text-decoration: none; filter: brightness(1.1); }
+  .btn:active { transform: scale(.98); }
+  .more { font-size: 17px; color: var(--link); }
+  .more::after { content: " \203A"; font-size: 1.15em; }
+
+  /* ===================== SECTIONS ===================== */
+  .band { padding: 96px 0; background: var(--bg); transition: background-color .4s ease; }
+  .band.alt { background: var(--bg-alt); }
+  section[id], .phase[id] { scroll-margin-top: 64px; }
+
+  .sec-head { margin-bottom: 44px; }
+  .sec-head .num {
+    display: block; font-size: 17px; font-weight: 600; color: var(--blue);
+    letter-spacing: -0.01em; margin-bottom: 6px;
+  }
+  .sec-head h2 {
+    font-size: clamp(32px, 5vw, 48px); line-height: 1.08; font-weight: 700;
+    letter-spacing: -0.003em; margin: 0;
+  }
+  .lede { font-size: 21px; line-height: 1.381; letter-spacing: .011em; color: var(--text-soft); }
+
+  h3 {
+    font-size: 24px; line-height: 1.17; font-weight: 600; letter-spacing: .009em;
+    margin: 56px 0 18px;
+  }
+  h3 .n { color: var(--faint); font-weight: 500; margin-right: 8px; }
+  .sec-head + h3, .sec-head + * h3:first-child { margin-top: 0; }
+  h4 {
+    font-size: 14px; font-weight: 600; letter-spacing: -0.01em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 14px;
+  }
+
+  ul, ol { margin: 0 0 1em; padding-left: 22px; }
+  li { margin-bottom: 8px; }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: var(--card); border-radius: 18px; padding: 30px 32px;
+    box-shadow: var(--shadow);
+    transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s, background-color .4s;
+  }
+  .band:not(.alt) .card { background: var(--card-alt); box-shadow: none; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  /* ---------- Contents tiles ---------- */
+  .toc { list-style: none; padding: 0; margin: 0; }
+  .toc li { margin: 0; }
+  .toc a {
+    display: flex; flex-direction: column; justify-content: space-between; height: 100%;
+    min-height: 150px; color: var(--head);
+  }
+  .toc a:hover { text-decoration: none; transform: translateY(-4px) scale(1.01); box-shadow: var(--shadow-hover); }
+  .toc .n { font-size: 14px; font-weight: 600; color: var(--blue); }
+  .toc .t { font-size: 21px; font-weight: 600; line-height: 1.2; letter-spacing: .011em; margin: 8px 0 18px; }
+  .toc .go {
+    align-self: flex-end; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bg-alt); color: var(--muted);
+    display: grid; place-items: center; font-size: 20px; line-height: 1;
+    transition: background .2s, color .2s;
+  }
+  .band:not(.alt) .toc .go { background: var(--bg); }
+  .toc a:hover .go { background: var(--blue); color: #fff; }
+
+  /* ---------- Steps (inset grouped list) ---------- */
+  ol.steps {
+    counter-reset: step; list-style: none; padding: 6px 0; margin: 0 0 8px;
+    background: var(--card); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .band:not(.alt) ol.steps { background: var(--card-alt); box-shadow: none; }
+  ol.steps li {
+    counter-increment: step; position: relative; margin: 0;
+    padding: 16px 28px 16px 76px;
+  }
+  ol.steps li + li::after {
+    content: ""; position: absolute; top: 0; left: 76px; right: 0;
+    height: 1px; background: var(--rule-soft);
+  }
+  ol.steps li::before {
+    content: counter(step);
+    position: absolute; left: 28px; top: 15px;
+    width: 30px; height: 30px; line-height: 30px; border-radius: 50%;
+    text-align: center; font-size: 14px; font-weight: 600;
+    background: var(--blue); color: #fff;
+  }
+  .intro { margin: -4px 0 18px; color: var(--text-soft); }
+
+  /* ---------- Callout ---------- */
+  .callout {
+    margin-top: 40px; padding: 44px 48px; border-radius: 28px;
+    background: var(--card); box-shadow: var(--shadow); position: relative; overflow: hidden;
+  }
+  .callout::before {
+    content: ""; position: absolute; inset: 0 auto 0 0; width: 6px; background: var(--grad);
+  }
+  .callout .label { font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 12px; }
+  .callout p {
+    margin: 0; font-size: clamp(21px, 2.6vw, 28px); line-height: 1.3; font-weight: 600;
+    letter-spacing: .007em; color: var(--head);
+  }
+
+  /* ---------- Compare cards ---------- */
+  .compare .card h4 { display: flex; align-items: center; gap: 10px; font-size: 15px; text-transform: none; color: var(--head); }
+  .compare .icon {
+    width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+    color: #fff; font-size: 15px; font-weight: 700; flex: none;
+  }
+  .compare .easy .icon { background: var(--green); }
+  .compare .hard .icon { background: var(--orange); }
+  .compare ul { list-style: none; padding: 0; margin: 0; }
+  .compare li { position: relative; padding-left: 20px; color: var(--text-soft); }
+  .compare li::before {
+    content: ""; position: absolute; left: 2px; top: .62em;
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .compare .easy li::before { background: var(--green); }
+  .compare .hard li::before { background: var(--orange); }
+
+  /* ---------- Goals ---------- */
+  .goal { display: flex; flex-direction: column; }
+  .goal .big {
+    font-size: 56px; line-height: 1; font-weight: 700; letter-spacing: -0.02em;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 18px; align-self: flex-start;
+  }
+  .goal .kicker { font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  .goal .title { font-size: 24px; line-height: 1.17; font-weight: 600; color: var(--head); margin-bottom: 12px; letter-spacing: .009em; }
+  .goal .crit { color: var(--text-soft); margin: 0; }
+  .goal:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+
+  /* ---------- Constraints / assumptions ---------- */
+  .ca ul { list-style: none; padding: 0; margin: 0; }
+  .ca li { position: relative; padding: 12px 0 12px 32px; margin: 0; border-top: 1px solid var(--rule-soft); color: var(--text-soft); }
+  .ca li:first-child { border-top: 0; padding-top: 4px; }
+  .ca li::before {
+    position: absolute; left: 0; top: 12px; width: 20px; height: 20px; border-radius: 50%;
+    font-size: 12px; font-weight: 700; line-height: 20px; text-align: center; color: #fff;
+  }
+  .ca li:first-child::before { top: 4px; }
+  .ca .cons li::before { content: "!"; background: var(--orange); }
+  .ca .assm li::before { content: "\2713"; background: var(--blue); }
+
+  /* ---------- Table ---------- */
+  .table-card { padding: 8px 0; overflow-x: auto; }
+  table.grid { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.47; min-width: 620px; }
+  table.grid th {
+    font-size: 12px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase;
+    color: var(--muted); text-align: left; padding: 18px 20px 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  table.grid td { vertical-align: top; padding: 18px 20px; border-bottom: 1px solid var(--rule-soft); color: var(--text-soft);
+                  text-align: left; hyphens: none; -webkit-hyphens: none; }
+  table.grid tr:last-child td { border-bottom: 0; }
+  table.grid th:first-child, table.grid td:first-child { padding-left: 32px; }
+  table.grid th:last-child, table.grid td:last-child { padding-right: 32px; }
+  table.grid td.role { font-weight: 600; color: var(--head); text-align: left; hyphens: none; }
+
+  /* ---------- Back link ---------- */
+  .back { margin: 40px 0 0; text-align: right; font-size: 14px; }
+  .back a::after { content: " \2191"; }
+
+  /* ===================== FOOTER ===================== */
+  footer {
+    background: var(--bg-alt); color: var(--faint); font-size: 12px; line-height: 1.33;
+    letter-spacing: -0.01em; padding: 18px 0 22px;
+  }
+  footer .wrap { border-top: 1px solid var(--rule); padding-top: 16px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  /* ===================== REVEAL ===================== */
+  html.js .reveal { opacity: 0; transform: translateY(28px); }
+  html.js .reveal.in {
+    opacity: 1; transform: none;
+    transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1);
+  }
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 1068px) {
+    .nav .links { display: none; }
+  }
+  @media (max-width: 834px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .band { padding: 72px 0; }
+  }
+  @media (max-width: 640px) {
+    .wrap, .wrap-narrow { padding: 0 16px; }
+    .nav .brand { font-size: 19px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .hero { padding: 64px 0 60px; }
+    .hero .purpose { font-size: 19px; }
+    .card { padding: 24px; }
+    .callout { padding: 32px 26px; }
+    ol.steps li { padding: 14px 20px 14px 64px; }
+    ol.steps li::before { left: 20px; top: 13px; }
+    ol.steps li + li::after { left: 64px; }
+    .toc a { min-height: 0; }
+    table.grid th:first-child, table.grid td:first-child { padding-left: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition: none !important; }
+    html.js .reveal { opacity: 1; transform: none; }
+  }
+
+  /* ===================== PRINT ===================== */
+  @media print {
+    @page { size: A4; margin: 20mm 18mm; }
+    .nav, .back, .hero .ctas, footer { display: none; }
+    html.js .reveal { opacity: 1; transform: none; }
+    body { background: #fff; color: #1d1d1f; font-size: 11pt; }
+    .band, .band.alt, .hero { background: #fff !important; padding: 18pt 0; }
+    .card, ol.steps, .callout { box-shadow: none !important; border: 1px solid #d2d2d7; background: #fff !important; }
+    .hero { page-break-after: always; padding-top: 60mm; }
+    .sec-head h2 { font-size: 22pt; }
+    .card, .callout, table.grid { page-break-inside: avoid; }
+  }
+
+  /* ===================== ROADMAP ADDITIONS ===================== */
+  .meta { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; margin: -6px 0 22px; }
+  .pill {
+    font-size: 12px; font-weight: 600; letter-spacing: .01em;
+    padding: 5px 12px; border-radius: 999px;
+    background: var(--bg-alt); color: var(--muted);
+  }
+  .band:not(.alt) .pill { background: var(--card-alt); }
+  .pill.accent { background: rgba(0,113,227,.12); color: var(--blue); }
+  .pill.warn   { background: rgba(201,52,0,.12);  color: var(--orange); }
+  .pill.good   { background: rgba(36,138,61,.12); color: var(--green); }
+  html[data-theme="dark"] .pill.accent { background: rgba(10,132,255,.18); }
+  html[data-theme="dark"] .pill.warn   { background: rgba(255,159,10,.16); }
+  html[data-theme="dark"] .pill.good   { background: rgba(48,209,88,.16); }
+
+  .topics { color: var(--text-soft); margin: 0 0 8px; }
+  .topics strong { color: var(--head); }
+
+  h4.lbl {
+    font-size: 12px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase;
+    color: var(--muted); margin: 38px 0 14px;
+  }
+  code {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: .88em; background: var(--bg-alt); padding: 1px 5px; border-radius: 5px;
+    hyphens: none;
+  }
+  .band:not(.alt) code, ol.steps code, .card code { background: var(--bg); }
+  html[data-theme="dark"] .band:not(.alt) code,
+  html[data-theme="dark"] ol.steps code,
+  html[data-theme="dark"] .card code { background: #2c2c2e; }
+
+  ol.steps li .src { font-weight: 600; color: var(--head); }
+  ol.steps li .src::after { content: " \2014 "; font-weight: 400; color: var(--faint); }
+  ol.steps li { text-align: left; hyphens: none; }
+
+  table.grid td.num { width: 46px; font-weight: 600; color: var(--blue); text-align: center; hyphens: none; }
+  table.grid td.k   { font-weight: 600; color: var(--head); hyphens: none; text-align: left; }
+  table.grid.tight  { min-width: 480px; }
+  table.grid .fin   { color: var(--green); font-size: 17px; }
+
+  .opt { display: flex; gap: 18px; align-items: flex-start; }
+  .opt .tag {
+    flex: none; width: 38px; height: 38px; border-radius: 12px;
+    background: var(--blue); color: #fff; display: grid; place-items: center;
+    font-size: 17px; font-weight: 700;
+  }
+  .grid-2 > .opt:nth-child(2) .tag { background: #ba62fc; }
+  .opt p { margin: 0; color: var(--text-soft); }
+  .opt .nm { font-size: 19px; font-weight: 600; color: var(--head); margin-bottom: 6px; letter-spacing: .009em; }
+
+  .must {
+    margin-top: 20px; padding: 18px 22px; border-radius: 14px;
+    background: var(--bg-alt); color: var(--text-soft); font-size: 15px;
+  }
+  .band:not(.alt) .must { background: var(--card-alt); }
+  .must strong { color: var(--head); }
+
+  .cap { margin-top: 52px; }
+  .cap .why { color: var(--muted); font-style: italic; margin: -10px 0 20px; }
+
+  pre.prompt {
+    margin: 0; padding: 20px 22px; border-radius: 14px;
+    background: var(--bg); color: var(--text-soft);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px; line-height: 1.62;
+    white-space: pre-wrap; overflow-x: auto;
+    hyphens: none; text-align: left;
+  }
+  html[data-theme="dark"] pre.prompt { background: #2c2c2e; }
+  pre.prompt b { color: var(--head); font-weight: 600; }
+
+  .note { border-left: 3px solid var(--blue); padding: 2px 0 2px 20px; color: var(--text-soft); margin: 0 0 24px; }
+  .note.flag { border-left-color: var(--orange); }
+  .note strong { color: var(--head); }
+
+  .phase { margin-top: 72px; }
+  .phase:first-of-type { margin-top: 0; }
+
+  /* ---------- Plain step lists (no number bubbles) ---------- */
+  ol.steps.plain { counter-reset: none; }
+  ol.steps.plain li { padding-left: 28px; }
+  ol.steps.plain li::before { content: none; }
+  ol.steps.plain li + li::after { left: 28px; }
+
+  /* ---------- Mobile navigation ---------- */
+  .navtoggle { display: none; }
+  @media (max-width: 1068px) {
+    .navtoggle {
+      display: grid; place-items: center; flex: none;
+      width: 34px; height: 31px; padding: 0; border: 0; border-radius: 8px;
+      background: transparent; color: var(--text); cursor: pointer;
+    }
+    .navtoggle:focus-visible { outline: 3px solid rgba(0,113,227,.5); outline-offset: 2px; }
+    .navtoggle svg { width: 19px; height: 19px; }
+    .nav .links {
+      display: none; position: absolute; top: 52px; left: 0; right: 0;
+      flex-direction: column; gap: 0;
+      background: var(--nav-bg);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--nav-rule);
+      padding: 6px 22px 14px;
+    }
+    .nav .links.open { display: flex; }
+    .nav .links a { display: block; padding: 11px 0; font-size: 15px; opacity: 1; }
+    .nav .links li + li { border-top: 1px solid var(--rule-soft); }
+  }
+
+  @media print {
+    .navtoggle { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<nav class="nav" aria-label="Sections">
+  <div class="wrap">
+    <a class="brand" href="#top">Python Roadmap</a>
+    <div class="right">
+      <button class="navtoggle" id="navToggle" type="button"
+              aria-expanded="false" aria-controls="navLinks" aria-label="Sections menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M3 6h18M3 12h18M3 18h18"/>
+        </svg>
+      </button>
+      <ul class="links" id="navLinks">
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#fundamentals">Fundamentals</a></li>
+        <li><a href="#advanced">Advanced</a></li>
+        <li><a href="#mastery">Mastery</a></li>
+        <li><a href="#practice">Practice</a></li>
+        <li><a href="#resources">Resources</a></li>
+      </ul>
+      <button class="switch" id="themeToggle" type="button" role="switch"
+              aria-checked="false" aria-label="Dark mode" title="Toggle dark mode">
+        <span class="knob">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2" fill="currentColor"/>
+            <path d="M12 2v2.5M12 19.5V22M4.2 4.2 6 6M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8 6 18M18 6l1.8-1.8"/>
+          </svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1Z"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow reveal">Learning Path</div>
+    <h1 class="reveal">Python Roadmap</h1>
+    <div class="sub reveal">Fundamentals &middot; Advanced &middot; Mastery</div>
+    <p class="purpose reveal">
+      <strong>The Python language, and nothing else.</strong> Every phase names the exact chapters to
+      read and the projects to build &mdash; no resource hunting, no guessing what to skip. Two books,
+      one website and a handful of quickstarts carry the fundamentals.
+      <strong>Stage 1 is the part that matters</strong>; Advanced and Mastery are there if you ever
+      want them.
+    </p>
+    <div class="ctas reveal">
+      <a class="btn" href="#overview">Start with the rules</a>
+      <a class="more" href="#contents">View contents</a>
+    </div>
+  </div>
+</header>
+
+<!-- ================= CONTENTS ================= -->
+<section class="band alt" id="contents">
+  <div class="wrap">
+    <div class="sec-head reveal"><h2>Contents</h2></div>
+    <ul class="toc grid-3">
+      <li class="reveal"><a class="card" href="#overview"><div><span class="n">Start here</span><div class="t">Overview &amp; Rules</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#fundamentals"><div><span class="n">Stage 1 &middot; Essential</span><div class="t">Fundamentals</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#advanced"><div><span class="n">Stage 2 &middot; Optional</span><div class="t">Advanced</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#mastery"><div><span class="n">Stage 3 &middot; Reference</span><div class="t">Mastery</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#practice"><div><span class="n">Practice</span><div class="t">How to Practise</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#resources"><div><span class="n">Reference</span><div class="t">What You Actually Read</div></div><span class="go">&rsaquo;</span></a></li>
+      <li class="reveal"><a class="card" href="#outside"><div><span class="n">Appendix</span><div class="t">What&rsquo;s Not Here</div></div><span class="go">&rsaquo;</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= OVERVIEW ================= -->
+<section class="band" id="overview">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="num">Overview</span>
+      <h2>Three stages, in order</h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="card goal reveal">
+        <div class="big">01</div>
+        <div class="kicker">Essential</div>
+        <div class="title">Fundamentals</div>
+        <p class="crit">Complete command of the language, applied to real systems. Six phases,
+        49 projects, three capstones. <strong>This is the part that is not optional.</strong> Everything
+        below it is a bonus; this is the floor.</p>
+      </div>
+      <div class="card goal reveal">
+        <div class="big">02</div>
+        <div class="kicker">Optional</div>
+        <div class="title">Advanced</div>
+        <p class="crit">The language <em>finished</em> &mdash; descriptors, metaprogramming, variance,
+        performance, architecture. Four phases. <strong>Genuinely optional</strong>, and best read
+        alongside real work rather than before it. Many strong Python engineers never do it.</p>
+      </div>
+      <div class="card goal reveal">
+        <div class="big">03</div>
+        <div class="kicker">Reference</div>
+        <div class="title">Mastery</div>
+        <p class="crit">CPython as an implementation. <strong>A reference, not a curriculum</strong>
+        &mdash; read when a problem sends you there.</p>
+      </div>
+    </div>
+
+    <div class="callout reveal">
+      <div class="label">Scope</div>
+      <p>The Python language and the craft around it. One phase steps outside deliberately &mdash;
+      building an API is the best vehicle there is for exercising the language under real conditions.</p>
+    </div>
+
+    <div class="wrap-narrow" style="padding:0">
+      <h3 class="reveal">Operating rules</h3>
+      <ol class="steps reveal">
+        <li><span class="src">Read specification and instruction in pairs</span>The official docs are terse
+        and normative; the HOWTOs and books say the same thing in tutorial voice. When a passage
+        doesn&rsquo;t land, switch registers rather than rereading.</li>
+        <li><span class="src">Respect the two real dependencies, and overlap the rest</span>Only two
+        orderings actually matter: <strong>1.1 before 1.3</strong>, because 1.3 is a second pass over the
+        same ground, and <strong>1.3 before 1.4</strong>, because <code>asyncio</code> needs generators
+        and context managers. Everything else is soft. <strong>1.4 and 1.5 are meant to run
+        together</strong> &mdash; build the API while you learn concurrency, and put the concurrency into
+        the API. A phase is finished when its phase project is finished, not when you have read every
+        line of it.</li>
+        <li><span class="src">Nothing here can tell you how you are doing</span>Every description of
+        competence on this page is one you grade yourself, and self-assessment is where people overrate
+        themselves. The only reliable correction is another person reading your code.
+        <a href="#review">Getting reviewed</a> lists places that will.</li>
+        <li><span class="src">Not everything on these lists is the same kind of document</span>The
+        Tutorial, the Language Reference and the HOWTOs are prose, written to be read. Most Library
+        Reference pages are not &mdash; they are lookup tables, and items below marked
+        <strong>&ldquo;Reference, not a chapter&rdquo;</strong> are flagged so you know which you are
+        holding before you try to read it front to back.</li>
+        <li><span class="src">These lists are longer than anyone can hold at once</span>Phase 1.1 has
+        twenty-three items before its first project, and the start of a list goes cold while you work
+        through the end of it. The projects are proof that a phase landed, not the practice that gets you
+        there. Where that practice comes from is up to you &mdash;
+        <a href="#practice">How to Practise</a> is a set of prompts for generating it.</li>
+        <li><span class="src">Build, don&rsquo;t collect</span>A project you finished teaches more than four
+        you bookmarked.</li>
+        <li><span class="src">One thing at a time</span><em>Domain tourism</em> &mdash; a little scraping, a
+        little data science, a little web &mdash; reads as a beginner&rsquo;s portfolio no matter how many
+        fields it touches. <strong>This is an argument against sampling four domains at once, not against
+        having one.</strong> Pick a domain deliberately after Stage 1 and go deep into it &mdash; that is
+        the whole purpose of getting the language solid first. See
+        <a href="#outside">What&rsquo;s Not Here</a>.</li>
+        <li><span class="src">Write things down</span>Keep a log of every bug that cost you more than an
+        hour. The second time you hit it you&rsquo;ll have the answer. Worth more than any book on these lists.</li>
+        <li><span class="src">Use whatever is current stable</span>At the time of writing that is Python
+        <strong>3.14</strong>, with 3.15 due October 2026 &mdash; you will cross at least one release
+        during this roadmap, which is fine. Always read the <code>/3/</code> documentation URLs; pinned
+        versions silently serve stale material. Read <a href="https://docs.python.org/3/whatsnew/">What&rsquo;s
+        New</a> when you upgrade.</li>
+      </ol>
+
+      <h4 class="lbl">Priority tags</h4>
+      <p class="intro reveal">The standard to hold yourself to for any given topic. Everything in
+      Fundamentals and Advanced is CORE or PRO &mdash; that is why those stages are ordered and gated.
+      The tags do their real work in <a href="#mastery">Mastery</a>, where most material is DEMAND or
+      SPEC and reading it early is wasted effort.</p>
+      <div class="card table-card reveal">
+        <table class="grid tight">
+          <thead><tr><th scope="col" style="width:24%">Tag</th><th scope="col">Standard</th></tr></thead>
+          <tbody>
+          <tr><td class="k">CORE</td><td>Know cold, without lookup. Non-negotiable</td></tr>
+          <tr><td class="k">PRO</td><td>Know well; look up specifics. Expected of a senior</td></tr>
+          <tr><td class="k">DEMAND</td><td>Know it exists. Learn it when a real problem arrives</td></tr>
+          <tr><td class="k">SPEC</td><td>Specialization. Most engineers never need it</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="reveal" id="review">Getting reviewed</h3>
+      <p class="reveal">The gap between &ldquo;I could write a metadata-preserving decorator&rdquo; and
+      writing one is invisible from the inside, which is the limit of everything on this page &mdash; a
+      document cannot tell you how you are doing. Another person reading your code can. How often is your
+      call; these are the places that will.</p>
+      <div class="card table-card reveal">
+        <table class="grid">
+          <thead><tr><th scope="col" style="width:27%">Where</th><th scope="col" style="width:14%">Cost</th><th scope="col">What it is good for</th></tr></thead>
+          <tbody>
+          <tr><td class="k"><a href="https://exercism.org/tracks/python">Exercism mentoring</a></td><td>Free</td><td><strong>Start here.</strong> You are already on the track daily from Phase 1.1 &mdash; request mentoring on a solution instead of just marking it done. Mentors comment on idiom, which is exactly what a solo learner cannot see</td></tr>
+          <tr><td class="k"><a href="https://codereview.stackexchange.com/">Code Review Stack Exchange</a></td><td>Free</td><td>Whole working programs. Best for the phase projects. Post the Journal CLI; expect to be told things you did not want to hear</td></tr>
+          <tr><td class="k"><a href="https://discuss.python.org/">discuss.python.org</a></td><td>Free</td><td>Design questions rather than line-by-line review &mdash; &ldquo;is this the right shape?&rdquo; Useful from 1.3 onward, once the questions turn architectural</td></tr>
+          <tr><td class="k">A pull request to a real project</td><td>Free</td><td><strong>The best one.</strong> A maintainer reviewing your patch against their standards is worth ten self-assessments. Start with a documentation fix &mdash; the process matters more than the diff</td></tr>
+          <tr><td class="k">A colleague, or a paid mentor</td><td>Varies</td><td>If you have access to a working Python engineer this beats everything above on latency alone. Ask for thirty minutes against one file</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note reveal" style="margin-top:22px">One thing worth knowing before you post:
+      &ldquo;any feedback?&rdquo; reliably gets none. A specific question &mdash; &ldquo;I chose
+      composition over inheritance here, and a <code>Protocol</code> over an ABC; what would you have
+      done?&rdquo; &mdash; gets an answer worth having.</p>
+
+      <h3 class="reveal" id="minimum">How far to go</h3>
+      <p class="reveal"><strong>The fundamentals are not optional; everything after them is.</strong>
+      The order below is a priority order &mdash; if you stop, stop at a boundary rather than in the
+      middle of a phase, and know what you are trading away.</p>
+      <div class="card table-card reveal">
+        <table class="grid">
+          <thead><tr><th scope="col" style="width:24%">If you get through</th><th scope="col" style="width:13%">Status</th><th scope="col">Where that leaves you</th></tr></thead>
+          <tbody>
+          <tr><td class="k">1.1 only</td><td>Started</td><td>You can write Python. You cannot yet write Python that anyone else should depend on</td></tr>
+          <tr><td class="k"><strong>1.1 &rarr; 1.2</strong></td><td><strong>Floor</strong></td><td><strong>The first point worth stopping at.</strong> Typed, tested, packaged, CI&rsquo;d work &mdash; the difference between a hobbyist and someone employable</td></tr>
+          <tr><td class="k"><strong>1.1 &rarr; 1.3</strong></td><td><strong>The goal</strong></td><td><strong>The point of this whole document.</strong> 1.3 is the plateau-breaker &mdash; it is why most self-taught developers stall, and why you will not. If you read one phase on this page, make it 1.3</td></tr>
+          <tr><td class="k">&hellip; plus one capstone</td><td>Provable</td><td>Something real to point at, and a defensible place to stop and go get a job</td></tr>
+          <tr><td class="k">All of Stage 1</td><td>Complete</td><td>Complete command of the language, applied. What this document was written for &mdash; but 1.3 is where the value concentrates</td></tr>
+          <tr><td class="k">Stage 2</td><td>Bonus</td><td><strong>Genuinely optional.</strong> Excellent, and most working Python engineers never do it. Read it when the language itself starts to feel like the constraint &mdash; not before</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="back"><a href="#contents">Back to Contents</a></p>
+    </div>
+  </div>
+</section>
+<!-- ================= FUNDAMENTALS ================= -->
+<section class="band alt" id="fundamentals">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="num">Stage 1</span>
+      <h2>Fundamentals</h2>
+    </div>
+
+    <p class="lede reveal">Complete command of the Python language, applied to real systems &mdash;
+    idiomatic, well-tested, properly packaged Python, a real understanding of <em>why</em> the language
+    behaves as it does, and something built that people actually use.</p>
+
+    <div class="card table-card reveal" style="margin-top:28px">
+      <table class="grid tight">
+        <thead><tr><th scope="col" style="width:14%">Phase</th><th scope="col">Name</th></tr></thead>
+        <tbody>
+        <tr><td class="num">1.1</td><td class="k"><a href="#f11">The Language</a></td></tr>
+        <tr><td class="num">1.2</td><td class="k"><a href="#f12">Writing It Properly</a></td></tr>
+        <tr><td class="num">1.3</td><td class="k"><a href="#f13">How Python Really Works</a></td></tr>
+        <tr><td class="num">1.4</td><td class="k"><a href="#f14">Concurrency</a></td></tr>
+        <tr><td class="num">1.5</td><td class="k"><a href="#f15">Applying Python</a></td></tr>
+        <tr><td class="num">1.6</td><td class="k"><a href="#f16">Capstones</a></td></tr>
+        </tbody>
+        </table>
+    </div>
+
+    <p class="reveal" style="margin-top:22px"><strong>Two hard orderings: 1.1 before 1.3, and 1.3 before 1.4.</strong> Everything else is
+    soft, and <strong>1.4 and 1.5 are designed to overlap</strong> &mdash; build the API while you learn
+    concurrency, then put the concurrency into the API. Each phase has a reading list &mdash; complete,
+    in order, nothing missing &mdash; and a project list. <strong>Read the project list as a
+    specification, not an assignment.</strong> It says what a phase needs exercised; it does not say you
+    have to build those particular things. Hand this page to an LLM and ask for projects at the
+    difficulty you want, or build your own idea if it covers the same ground &mdash; see
+    <a href="#practice">How to Practise</a>. Project prompts are short on purpose: scope them
+    yourself. Aim for 20% reading, 20% drills, 60% building &mdash; about <strong>1:3, reading to
+    building</strong>. A phase is finished when its phase project is finished and you could explain it
+    to someone else.</p>
+
+    <!-- ---------- 1.1 ---------- -->
+    <div class="phase" id="f11">
+      <h3 class="reveal"><span class="n">1.1</span>The Language</h3>
+      <div class="meta reveal">
+        <span class="pill">One resource, start to finish</span>
+      </div>
+      <p class="topics reveal"><strong>Topics:</strong> Environment &middot; values, types, operators
+      &middot; control flow &middot; data structures &middot; functions &middot; errors and exceptions
+      &middot; strings and text &middot; files and I/O &middot; modules and packages &middot; classes
+      &middot; standard library tour</p>
+
+      <h4 class="lbl">Read, in this order</h4>
+      <ol class="steps reveal">
+        <li><span class="src"><a href="https://docs.python.org/3/using/">Python Setup and Usage</a></span>All of it. Before you write any code</li>
+        <li><span class="src"><a href="https://docs.astral.sh/uv/">uv docs</a></span><em>Quickstart.</em> Set up a project and an environment, then stop reading</li>
+        <li><span class="src"><a href="https://docs.python.org/3/tutorial/">The Tutorial</a></span><strong>Ch. 1&ndash;2</strong> &mdash; appetite, using the interpreter</li>
+        <li><span class="src">The Tutorial</span><strong>Ch. 3</strong> &mdash; numbers, strings, lists</li>
+        <li><span class="src">Library Ref: <a href="https://docs.python.org/3/library/decimal.html"><code>decimal</code></a></span><strong>Reference, not a chapter.</strong> Pause here &mdash; you need it for project 2, and binary floats will bite you before you understand why</li>
+        <li><span class="src">The Tutorial</span><strong>Ch. 4</strong> &mdash; control flow, functions, <code>match</code></li>
+        <li><span class="src">The Tutorial</span><strong>Ch. 5</strong> &mdash; data structures, comprehensions</li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/sorting.html">Sorting HOWTO</a></span>All of it. Pause the Tutorial here &mdash; ch. 5 just covered sorting</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/collections.html">Library Ref: <code>collections</code></a></span><strong>Reference, not a chapter.</strong> Same pause. <code>Counter</code>, <code>defaultdict</code> and <code>deque</code> are the three you will reach for</li>
+        <li><span class="src">The Tutorial</span><strong>Ch. 6</strong> &mdash; modules and packages</li>
+        <li><span class="src">The Tutorial</span><strong>Ch. 7</strong> &mdash; input, output, file handling</li>
+        <li><span class="src">Library Ref: <a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib</code></a> &middot; <a href="https://docs.python.org/3/library/json.html"><code>json</code></a> &middot; <a href="https://docs.python.org/3/library/csv.html"><code>csv</code></a> &middot; <a href="https://docs.python.org/3/library/shutil.html"><code>shutil</code></a> &middot; <a href="https://docs.python.org/3/library/zipfile.html"><code>zipfile</code></a></span><strong>Reference, not a chapter.</strong> Pause here &mdash; ch. 7 just covered files. The last two are project 12</li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/unicode.html">Unicode HOWTO</a></span>All of it. Same pause, while encodings are fresh</li>
+        <li><span class="src">The Tutorial</span><strong>Ch. 8</strong> &mdash; errors and exceptions</li>
+        <li><span class="src"><a href="https://docs.python.org/3/builtins/exceptions.html">Library Ref: Built-in Exceptions</a></span>The hierarchy. Learn its shape, don&rsquo;t memorize it</li>
+        <li><span class="src">The Tutorial</span><strong>Ch. 9</strong> &mdash; classes, iterators, generators</li>
+        <li><span class="src">The Tutorial</span><strong>Ch. 10&ndash;11</strong> &mdash; the standard library tour. A &ldquo;these exist&rdquo; list, not coverage</li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/regex.html">Regex HOWTO</a></span>All of it. Ch. 10 introduced <code>re</code>; this is the real treatment</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/datetime.html">Library Ref: <code>datetime</code></a></span><strong>Reference, not a chapter.</strong> Ch. 10 introduced dates. Aware vs naive is the distinction that causes the bugs</li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/argparse.html">Argparse HOWTO</a></span>All of it. Ch. 10 introduced <code>sys.argv</code>; this is how you actually build a CLI</li>
+        <li><span class="src">Library Ref: <a href="https://docs.python.org/3/library/subprocess.html"><code>subprocess</code></a></span><strong>Reference, not a chapter.</strong> Every Python engineer shells out eventually. Read the <strong>Security Considerations</strong> section twice and never reach for <code>shell=True</code></li>
+        <li><span class="src">The Tutorial</span><strong>Ch. 12&ndash;16</strong> &mdash; virtual environments, what now, interactive editing, floating point, appendix</li>
+        <li><span class="src"><a href="https://docs.python.org/3/faq/">The FAQs</a></span>Design &amp; History, then Programming. Both in full, the day you finish the Tutorial</li>
+      </ol>
+      <p class="note reveal"><strong>Running alongside, from day one:</strong>
+      <a href="https://exercism.org/tracks/python">Exercism Python track</a>, a little and often. Request
+      mentoring on your solutions rather than just marking them done &mdash; that is your first review
+      loop, free, from the start.</p>
+      <p class="note reveal">Worth knowing early: the people who stall in this phase are usually the
+      ones with nothing to show yet, and the first project list runs a long way before the Journal CLI.
+      A public repo with any one of these in it &mdash; a README, nothing else, bad code &mdash; costs an
+      afternoon and changes that. PyPI can wait for Phase 1.2.</p>
+
+      <h4 class="lbl">Projects</h4>
+      <div class="card table-card reveal">
+        <table class="grid">
+          <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
+          <tbody>
+          <tr><td class="num">1</td><td class="k">Unit converter</td><td>f-string format specs, input validation</td></tr>
+          <tr><td class="num">2</td><td class="k">Bill splitter</td><td><code>Decimal</code>; cents must reconcile exactly</td></tr>
+          <tr><td class="num">3</td><td class="k">Number-guessing game</td><td>Loops, <code>match</code>, validated input</td></tr>
+          <tr><td class="num">4</td><td class="k">Word-frequency counter</td><td>Plain <code>dict</code> first, then <code>Counter</code> &mdash; compare</td></tr>
+          <tr><td class="num">5</td><td class="k">Contact book</td><td>Data-structure choice; justify every one</td></tr>
+          <tr><td class="num">6</td><td class="k">Text-utility module</td><td>~8 pure, documented functions. <strong>Make this the week-three public repo</strong> if you have not pushed one yet</td></tr>
+          <tr><td class="num">7</td><td class="k">Log parser</td><td><code>re</code> with named groups; malformed lines counted, not crashed on</td></tr>
+          <tr><td class="num">8</td><td class="k">File organizer</td><td><code>pathlib</code>; dry-run by default</td></tr>
+          <tr><td class="num">9</td><td class="k">CSV &rarr; JSON converter</td><td>Streaming, error handling, quarantined bad rows</td></tr>
+          <tr><td class="num">10</td><td class="k">Deck of cards</td><td><code>__repr__</code>, <code>__len__</code>, <code>__getitem__</code></td></tr>
+          <tr><td class="num">11</td><td class="k">Bank account</td><td><code>@property</code>, enforced invariants</td></tr>
+          <tr><td class="num">12</td><td class="k">Backup tool</td><td><code>shutil</code>, <code>zipfile</code>, <code>datetime</code></td></tr>
+          <tr><td class="num fin">&#9873;</td><td class="k">Journal CLI</td><td><strong>Phase project.</strong> Everything above. Markdown files, search, tags, backup. Runnable as <code>python -m</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ---------- 1.2 ---------- -->
+    <div class="phase" id="f12">
+      <h3 class="reveal"><span class="n">1.2</span>Writing It Properly</h3>
+      <div class="meta reveal">
+        <span class="pill">The tooling every professional project has</span>
+      </div>
+      <p class="note reveal">Placed here, not later, so every project in 1.3&ndash;1.5 is built properly
+      from the first commit.</p>
+      <p class="topics reveal"><strong>Topics:</strong> Style and documentation &middot; testing
+      &middot; type hints &middot; packaging &middot; logging and configuration &middot; git and CI</p>
+
+      <h4 class="lbl">Read, in this order</h4>
+      <ol class="steps reveal">
+        <li><span class="src">PEPs <a href="https://peps.python.org/pep-0008/">8</a> &middot; <a href="https://peps.python.org/pep-0020/">20</a> &middot; <a href="https://peps.python.org/pep-0257/">257</a></span>All three. Short</li>
+        <li><span class="src"><a href="https://docs.astral.sh/ruff/">ruff docs</a></span><em>Quickstart.</em> Configure it, then fix every finding in your repos</li>
+        <li><span class="src">Okken &mdash; <em>Python Testing with pytest</em></span><strong>Ch. 1&ndash;6</strong> &mdash; test functions, fixtures, builtin fixtures, parametrization, markers</li>
+        <li><span class="src">Okken</span><strong>Ch. 7&ndash;13</strong> &mdash; strategy, config, coverage, mocking, CI, applications, debugging</li>
+        <li><span class="src">Okken</span><strong>Ch. 16</strong> &mdash; Advanced Parametrization. Custom ids, dynamic and indirect values. <strong>Project 3 is this chapter.</strong> Skim ch. 14 (third-party plugins), <strong>skip only ch. 15</strong> (writing them)</li>
+        <li><span class="src"><a href="https://hypothesis.readthedocs.io/">Hypothesis docs</a></span><em>Quickstart.</em> Quick start and &ldquo;What you can generate&rdquo;</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/typing.html">Library Ref: <code>typing</code></a></span><strong>Reference, not a chapter.</strong> The vocabulary; <code>mypy</code> below is where it becomes useful</li>
+        <li><span class="src"><a href="https://typing.python.org/">typing.python.org</a></span>The <strong>user guide</strong> only. Leave the specification until you&rsquo;re past this stage</li>
+        <li><span class="src"><a href="https://mypy.readthedocs.io/">mypy docs</a></span><em>Quickstart.</em> &ldquo;Getting started&rdquo; and the cheat sheet</li>
+        <li><span class="src"><a href="https://packaging.python.org/">packaging.python.org</a></span>The <strong>full user guide</strong>, not just the tutorial section</li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/logging.html">Logging HOWTO</a> &rarr; <a href="https://docs.python.org/3/howto/logging-cookbook.html">Logging Cookbook</a></span>Both, in that order</li>
+        <li><span class="src">Library Ref: <a href="https://docs.python.org/3/library/tomllib.html"><code>tomllib</code></a> &middot; <code>os.environ</code> in <a href="https://docs.python.org/3/library/os.html#os.environ"><code>os</code></a></span>Configuration, which the topics above promise and two capstones later require. Layer it: defaults &rarr; file &rarr; environment</li>
+        <li><span class="src"><a href="https://git-scm.com/book">Pro Git</a></span><strong>Ch. 2</strong> (Basics) &middot; <strong>ch. 3</strong> (Branching &mdash; the one that matters) &middot; <strong>ch. 6</strong> (GitHub) &middot; <strong>&sect;7.6</strong> (Rewriting History)</li>
+        <li><span class="src"><a href="https://docs.github.com/en/actions/get-started/quickstart">GitHub Actions</a></span><em>Quickstart.</em> The quickstart and <code>actions/cache</code></li>
+      </ol>
+      <p class="note reveal"><strong>Starts here, never stops:</strong> <em>Effective Python</em> &mdash;
+      <strong>optional</strong>. If you want it, a few items at a time from the chapter matching your
+      phase. Never front to back.</p>
+
+      <h4 class="lbl">Projects</h4>
+      <div class="card table-card reveal">
+        <table class="grid">
+          <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
+          <tbody>
+          <tr><td class="num">1</td><td class="k">Ruff everything</td><td>Add it to every repo you own; fix every finding</td></tr>
+          <tr><td class="num">2</td><td class="k">Retrofit tests</td><td>The Phase 1.1 journal, until you trust a refactor</td></tr>
+          <tr><td class="num">3</td><td class="k">Parametrize properly</td><td>20 cases, no duplicated test bodies</td></tr>
+          <tr><td class="num">4</td><td class="k">Property-test the text utilities</td><td>Hypothesis finds a bug you&rsquo;d never have tested for</td></tr>
+          <tr><td class="num">5</td><td class="k"><code>mypy --strict</code> pass</td><td>One project, zero <code>Any</code>; note the bugs it finds</td></tr>
+          <tr><td class="num">6</td><td class="k">Convert to <code>src</code> layout</td><td><code>pyproject.toml</code>, pre-commit, all tooling green</td></tr>
+          <tr><td class="num">7</td><td class="k">Publish to PyPI</td><td>TestPyPI first, then for real. Trivial counts</td></tr>
+          <tr><td class="num">8</td><td class="k">Replace every <code>print()</code></td><td><code>dictConfig</code>, levels per environment</td></tr>
+          <tr><td class="num">9</td><td class="k">History surgery</td><td>Interactive rebase on a messy branch</td></tr>
+          <tr><td class="num">10</td><td class="k">CI matrix</td><td>Lint, types, tests across three Python versions</td></tr>
+          <tr><td class="num fin">&#9873;</td><td class="k">Journal, professional grade</td><td><strong>Phase project.</strong> No new features. Typed, tested, CI&rsquo;d, published, README + CHANGELOG</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- ---------- 1.3 ---------- -->
+    <div class="phase" id="f13">
+      <h3 class="reveal"><span class="n">1.3</span>How Python Really Works</h3>
+      <div class="meta reveal">
+        <span class="pill warn">The hinge of everything here</span>
+      </div>
+      <p class="note flag reveal">A second pass over 1.1&rsquo;s ground, at depth. Most self-taught
+      developers never arrive here &mdash; which is exactly why they plateau. <strong>Don&rsquo;t rush
+      it.</strong> The order below matters more than anywhere else: book for orientation, then the
+      specification, then the stdlib that implements it.</p>
+      <p class="topics reveal"><strong>Topics:</strong> Names, scope and objects &middot; special methods
+      as protocols &middot; functions as objects and decorators &middot; iterators and generators
+      &middot; context managers &middot; modern class design</p>
+
+      <h4 class="lbl">Read, in this order</h4>
+      <ol class="steps reveal">
+        <li><span class="src"><em>Fluent Python</em></span><strong>Ch. 1</strong> &mdash; The Python Data Model. Read this <strong>before</strong> the spec, as orientation</li>
+        <li><span class="src"><em>Fluent Python</em></span><strong>Ch. 6</strong> &mdash; Object References, Mutability and Recycling. Aliasing, copies, mutable defaults. <strong>This is the chapter behind project 1 and the stage exit criterion</strong> &mdash; do not skip it</li>
+        <li><span class="src"><a href="https://docs.python.org/3/reference/executionmodel.html">Language Reference</a></span><strong>Ch. 4</strong> &mdash; Execution Model. Names, binding, scope</li>
+        <li><span class="src"><a href="https://docs.python.org/3/reference/datamodel.html">Language Reference</a></span><strong>Ch. 3, &sect;3.1 and &sect;3.3 only</strong> &mdash; the Data Model. Dense normative prose; expect to reread</li>
+        <li><span class="src"><em>Fluent Python</em></span><strong>Ch. 11, 12, 16</strong> &mdash; a Pythonic object, the sequence protocol, operator overloading</li>
+        <li><span class="src"><em>Fluent Python</em></span><strong>Ch. 7, 9</strong> &mdash; first-class functions, decorators and closures</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/functools.html">Library Ref: <code>functools</code></a></span><strong>Reference, not a chapter.</strong> The ones that matter: <code>wraps</code>, <code>partial</code>, <code>lru_cache</code>, <code>singledispatch</code></li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/functional.html">Functional Programming HOWTO</a></span>All of it</li>
+        <li><span class="src"><em>Fluent Python</em></span><strong>Ch. 17</strong> &mdash; iterators and generators. Stop at the classic-coroutines section</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/itertools.html">Library Ref: <code>itertools</code></a></span><strong>Reference, not a chapter.</strong> The recipes at the bottom are the real payload, more than the functions above them</li>
+        <li><span class="src"><a href="https://peps.python.org/pep-0343/">PEP 343</a></span>The <code>with</code> statement</li>
+        <li><span class="src"><em>Fluent Python</em></span><strong>Ch. 18</strong> &mdash; <code>with</code>, <code>match</code>, and <code>else</code> blocks</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/contextlib.html">Library Ref: <code>contextlib</code></a></span><strong>Reference, not a chapter.</strong> <code>@contextmanager</code>, <code>ExitStack</code>, <code>suppress</code> &mdash; the rest is rarely needed</li>
+        <li><span class="src"><em>Fluent Python</em></span><strong>Ch. 5, 13, 14</strong> &mdash; data class builders, protocols and ABCs, inheritance</li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/mro.html">The Python 2.3 Method Resolution Order</a></span>All of it, despite the title. The stage exit criterion asks you to explain <code>super()</code> in terms of the MRO; this is where the MRO is actually explained</li>
+        <li><span class="src">Library Ref: <a href="https://docs.python.org/3/library/dataclasses.html"><code>dataclasses</code></a> &middot; <a href="https://docs.python.org/3/library/enum.html"><code>enum</code></a> &middot; <a href="https://docs.python.org/3/library/abc.html"><code>abc</code></a> &middot; <a href="https://docs.python.org/3/library/collections.abc.html"><code>collections.abc</code></a></span><strong>Reference, not a chapter.</strong> Four small pages that together replace most hand-written class boilerplate</li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/enum.html">Enum HOWTO</a></span>All of it</li>
+      </ol>
+      <p class="note reveal"><strong>Skip in <em>Fluent Python</em>:</strong> ch. 2&ndash;4 (Phase 1.1
+      covered them) &middot; ch. 10 (design patterns) &middot; ch. 8 and 15 (type hints &mdash; Phase 1.2
+      covers what you need) &middot; ch. 19&ndash;21 (concurrency &mdash; Phase 1.4 uses the official docs
+      instead) &middot; ch. 22&ndash;24 (metaprogramming &mdash; that&rsquo;s Advanced).<br>
+      <em>Stuck?</em> &mdash; Ned Batchelder, <em>&ldquo;Facts and Myths about Python Names and
+      Values&rdquo;</em> &middot; Raymond Hettinger, <em>&ldquo;Transforming Code into Beautiful,
+      Idiomatic Python&rdquo;</em> and <em>&ldquo;Super Considered Super!&rdquo;</em></p>
+
+      <h4 class="lbl">Projects</h4>
+      <div class="card table-card reveal">
+        <table class="grid">
+          <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
+          <tbody>
+          <tr><td class="num">1</td><td class="k">Name-binding prediction drill</td><td>15 snippets on aliasing, mutation, defaults, closures. <strong>Predict every output in writing first.</strong> Highest-value exercise in the phase</td></tr>
+          <tr><td class="num">2</td><td class="k">Deep copy by hand</td><td>Nested structures without <code>copy</code>; then survive a reference cycle</td></tr>
+          <tr><td class="num">3</td><td class="k"><code>Vector</code></td><td>Arithmetic + sequence protocols; <code>repr()</code> round-trips through <code>eval()</code></td></tr>
+          <tr><td class="num">4</td><td class="k"><code>Money</code></td><td>Hashable, orderable, immutable; refuses cross-currency arithmetic</td></tr>
+          <tr><td class="num">5</td><td class="k">Custom mapping</td><td>Passes <code>isinstance(x, collections.abc.Mapping)</code></td></tr>
+          <tr><td class="num">6</td><td class="k"><code>@retry(times=3, backoff=2)</code></td><td>Works bare <em>and</em> parameterized, from one implementation</td></tr>
+          <tr><td class="num">7</td><td class="k">Memoizing decorator</td><td>Write it <em>before</em> reading <code>lru_cache</code>, then compare</td></tr>
+          <tr><td class="num">8</td><td class="k">Generator pipeline</td><td>Rewrite the 1.1 CSV converter; measure with <code>tracemalloc</code></td></tr>
+          <tr><td class="num">9</td><td class="k">Atomic file writer</td><td>Context manager; original intact on failure</td></tr>
+          <tr><td class="num">10</td><td class="k">Refactor to composition</td><td>1.1&rsquo;s class hierarchy &rarr; composition + <code>Protocol</code></td></tr>
+          <tr><td class="num fin">&#9873;</td><td class="k">Journal on the data model</td><td><strong>Phase project.</strong> Dataclasses, generator pipelines, context managers. Compare both versions in the README</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ---------- 1.4 ---------- -->
+    <div class="phase" id="f14">
+      <h3 class="reveal"><span class="n">1.4</span>Concurrency</h3>
+      <div class="meta reveal">
+        <span class="pill">Pure stdlib &mdash; the last piece of the language</span>
+      </div>
+      <p class="note reveal"><code>async</code>/<code>await</code> is language syntax and
+      <code>asyncio</code> is stdlib &mdash; this is Python, not infrastructure. Last because it needs
+      generators and context managers from 1.3.</p>
+      <p class="topics reveal"><strong>Topics:</strong> I/O-bound vs CPU-bound &middot; the GIL
+      &middot; threads and queues &middot; processes &middot; <code>concurrent.futures</code>
+      &middot; <code>asyncio</code> &middot; choosing a model</p>
+
+      <h4 class="lbl">Read, in this order</h4>
+      <ol class="steps reveal">
+        <li><span class="src"><a href="https://docs.python.org/3/howto/a-conceptual-overview-of-asyncio.html">A Conceptual Overview of asyncio</a></span>All of it. The on-ramp &mdash; read this before any API page</li>
+        <li><span class="src">Library Ref: <a href="https://docs.python.org/3/library/threading.html"><code>threading</code></a> &middot; <a href="https://docs.python.org/3/library/queue.html"><code>queue</code></a></span><strong>Reference, not a chapter.</strong> A queue is how threads talk to each other without sharing state badly</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/concurrent.futures.html">Library Ref: <code>concurrent.futures</code></a></span><strong>Reference, not a chapter.</strong> Two executors behind one interface &mdash; the difference between them is the whole lesson</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/multiprocessing.html">Library Ref: <code>multiprocessing</code></a></span><strong>Reference, not a chapter.</strong> It is a large surface and you need a small part of it: process creation, pools, and how data crosses the boundary</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/asyncio.html">Library Ref: <code>asyncio</code></a></span><strong>&ldquo;Developing with asyncio&rdquo; first</strong>, then the API pages</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/asyncio-task.html">Library Ref: <code>asyncio</code> &mdash; Tasks and Coroutines</a></span>Closely. <code>TaskGroup</code>, <code>CancelledError</code>, <code>timeout()</code> and <code>shield()</code> &mdash; cancellation is the part everyone gets wrong, and project 4 is about exactly this</li>
+      </ol>
+      <p class="note reveal"><em>Stuck?</em> &mdash; David Beazley, <em>&ldquo;Understanding the GIL&rdquo;</em></p>
+
+      <h4 class="lbl">Projects</h4>
+      <div class="card table-card reveal">
+        <table class="grid">
+          <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
+          <tbody>
+          <tr><td class="num">1</td><td class="k">Threaded downloader</td><td>Worker pool over a <code>queue</code>, clean shutdown</td></tr>
+          <tr><td class="num">2</td><td class="k">Parallel file processor</td><td><code>ProcessPoolExecutor</code>; measure speedup, explain any gap</td></tr>
+          <tr><td class="num">3</td><td class="k">Async fetcher</td><td>Semaphore-bounded concurrency, per-request timeouts, retries</td></tr>
+          <tr><td class="num">4</td><td class="k">Cancellation drill</td><td><code>TaskGroup</code> with a task cancelled cleanly mid-flight</td></tr>
+          <tr><td class="num">5</td><td class="k">Sync vs threads vs async writeup</td><td>Same job three ways, measured. <strong>The writeup is the deliverable</strong></td></tr>
+          <tr><td class="num fin">&#9873;</td><td class="k">Concurrent data-processing tool</td><td><strong>Phase project.</strong> Generator pipelines &rarr; worker pool, bounded memory, graceful Ctrl-C, benchmarked</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ---------- 1.5 ---------- -->
+    <div class="phase" id="f15">
+      <h3 class="reveal"><span class="n">1.5</span>Applying Python</h3>
+      <div class="meta reveal">
+        <span class="pill warn">The only phase that isn&rsquo;t Python</span>
+      </div>
+      <p class="note flag reveal"><strong>This phase is a vehicle, not a subject.</strong> Study these
+      shallowly and build with them deeply &mdash; the point is exercising Phases 1.1&ndash;1.4 under real
+      conditions, not collecting framework knowledge. An API forces type hints end-to-end,
+      <code>asyncio</code> under genuine concurrency, decorators and closures via <code>Depends()</code>,
+      and context managers via lifespan events. Toy projects don&rsquo;t.</p>
+      <p class="topics reveal"><strong>Topics:</strong> Persistence and SQL basics &middot; HTTP clients
+      &middot; building an API. <em>Order: persistence first, then HTTP, then the framework that sits on
+      top of both.</em></p>
+
+      <h4 class="lbl">Read, in this order</h4>
+      <ol class="steps reveal">
+        <li><span class="src"><a href="https://docs.python.org/3/library/sqlite3.html">Library Ref: <code>sqlite3</code></a></span><strong>Reference, not a chapter.</strong> Start here &mdash; zero setup, real SQL</li>
+        <li><span class="src"><a href="https://use-the-index-luke.com/">Use the Index, Luke!</a></span><strong>Ch. 1&ndash;5</strong> &mdash; through <em>The Join Operation</em>. Ch. 5 is the one that explains most slow ORM queries; stopping at 4 stops just short of it</li>
+        <li><span class="src"><a href="https://docs.sqlalchemy.org/en/20/tutorial/">SQLAlchemy 2.0 tutorial</a></span>End to end, slowly</li>
+        <li><span class="src"><a href="https://alembic.sqlalchemy.org/en/latest/tutorial.html">Alembic tutorial</a></span><em>Quickstart.</em> All of it; it&rsquo;s short, and migrations matter more than people expect</li>
+        <li><span class="src"><a href="https://www.psycopg.org/psycopg3/docs/">psycopg 3</a></span><em>Quickstart.</em> Move one project from SQLite to Postgres. You need this for Capstone 3 &mdash; a hosted service cannot keep SQLite on an ephemeral filesystem</li>
+        <li><span class="src"><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">MDN HTTP</a></span>Overview, Methods, Status codes, Headers</li>
+        <li><span class="src"><a href="https://pydantic.dev/docs/">Pydantic v2</a></span>Models and Validators &mdash; note how it builds on Phase 1.3&rsquo;s dataclasses</li>
+        <li><span class="src"><a href="https://www.python-httpx.org/">httpx docs</a></span>The docs</li>
+        <li><span class="src"><a href="https://tenacity.readthedocs.io/">tenacity</a></span><em>Quickstart.</em> The retry-patterns page</li>
+        <li><span class="src"><a href="https://fastapi.tiangolo.com/">FastAPI</a></span><strong>The Tutorial.</strong> Notice how heavily it leans on type hints</li>
+        <li><span class="src">FastAPI</span><strong>The Advanced User Guide</strong> &mdash; dependency injection, middleware, lifespan events</li>
+        <li><span class="src">Library Ref: <a href="https://docs.python.org/3/library/secrets.html"><code>secrets</code></a> &middot; <a href="https://docs.python.org/3/library/hashlib.html"><code>hashlib</code></a></span>Short. <code>secrets</code> for tokens, and <code>hashlib</code>&rsquo;s <code>scrypt</code> for passwords &mdash; or <code>argon2-cffi</code>. Never a bare SHA for a password</li>
+        <li><span class="src"><a href="https://fastapi.tiangolo.com/tutorial/security/">FastAPI &mdash; Security</a></span>The tutorial&rsquo;s security section, then OAuth2 with JWT. Project 5 needs it</li>
+        <li><span class="src"><a href="https://owasp.org/API-Security/editions/2023/en/0x11-t10/">OWASP API Security Top 10</a></span>All ten items, once</li>
+      </ol>
+
+      <h4 class="lbl">Projects</h4>
+      <div class="card table-card reveal">
+        <table class="grid">
+          <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
+          <tbody>
+          <tr><td class="num">1</td><td class="k">Task manager on SQLite</td><td>Schema design, foreign keys, parameterized queries</td></tr>
+          <tr><td class="num">2</td><td class="k">Add migrations</td><td>Alembic; three migrations including a data migration</td></tr>
+          <tr><td class="num">3</td><td class="k">API client</td><td>Pydantic-validated responses, timeouts, retries, transparent pagination</td></tr>
+          <tr><td class="num">4</td><td class="k">URL shortener</td><td>FastAPI: dependency injection, background tasks</td></tr>
+          <tr><td class="num">5</td><td class="k">CRUD API with auth</td><td>Password hashing, JWT, role checks, cursor pagination</td></tr>
+          <tr><td class="num">6</td><td class="k">Async endpoints</td><td><code>asyncio</code> from 1.4 under real request load</td></tr>
+          <tr><td class="num">7</td><td class="k">OWASP audit</td><td>All ten items against your own API; fix what you find</td></tr>
+          <tr><td class="num fin">&#9873;</td><td class="k">A service you&rsquo;d actually use</td><td><strong>Phase project.</strong> FastAPI + database + background work. Fully typed, fully tested, properly packaged &mdash; every habit from 1.2 still true of it</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- ---------- 1.6 ---------- -->
+    <div class="phase" id="f16">
+      <h3 class="reveal"><span class="n">1.6</span>Capstones</h3>
+      <div class="meta reveal">
+        <span class="pill good">Three projects</span>
+      </div>
+      <p class="note reveal">The phase projects were practice. <strong>These are the proof</strong> &mdash;
+      the three things you point at when someone asks what you&rsquo;ve built. Two concrete options per
+      capstone, so you never have to go looking for an idea. Pick whichever appeals; they&rsquo;re
+      equivalent in difficulty.</p>
+
+      <div class="cap">
+        <h4 class="lbl">Capstone 1 &mdash; A published library</h4>
+        <p class="why reveal">Proves you can design an API other people use, not just code you use yourself.</p>
+        <div class="grid-2">
+          <div class="card opt reveal">
+            <span class="tag">A</span>
+            <div>
+              <div class="nm"><code>nestdiff</code></div>
+              <p>Diff two nested structures (JSON, YAML, TOML configs, API responses) and report exactly
+              which paths were added, removed or changed. Genuinely useful for config drift and API
+              contract checks. Exercises recursion, <code>Protocol</code>, generators for streaming
+              results, and a public API you&rsquo;ll have to live with.</p>
+            </div>
+          </div>
+          <div class="card opt reveal">
+            <span class="tag">B</span>
+            <div>
+              <div class="nm"><code>tabular</code></div>
+              <p>Render a list of dicts or dataclasses as an aligned terminal table: column selection,
+              alignment, truncation, a totals row, Markdown and CSV export. Exercises
+              <code>__format__</code>, protocols, generics, and the discipline of a small surface area.</p>
+            </div>
+          </div>
+        </div>
+        <p class="must reveal"><strong>Either way it must have:</strong> full type hints,
+        <code>mypy --strict</code> clean &middot; <code>pytest</code> plus at least one
+        <code>hypothesis</code> property test &middot; CI across three Python versions &middot; a README
+        with worked examples &middot; a CHANGELOG &middot; <strong>published to PyPI</strong>. Then
+        maintain it &mdash; answer one issue from a stranger.</p>
+      </div>
+
+      <div class="cap">
+        <h4 class="lbl">Capstone 2 &mdash; A substantial CLI application</h4>
+        <p class="why reveal">Proves you can structure a real program, not a script that grew.</p>
+        <div class="grid-2">
+          <div class="card opt reveal">
+            <span class="tag">A</span>
+            <div>
+              <div class="nm">Ledger</div>
+              <p>A personal finance tracker. Import bank CSV exports (several formats), categorize
+              transactions with user-defined rules, store in SQLite, report by month and category, export
+              results. Exercises file parsing, data modelling, SQL, <code>argparse</code> subcommands, and
+              config files.</p>
+            </div>
+          </div>
+          <div class="card opt reveal">
+            <span class="tag">B</span>
+            <div>
+              <div class="nm">A static site generator</div>
+              <p>Markdown with front matter &rarr; HTML through templates, <strong>incremental
+              rebuild</strong> (only what changed), a local dev server, and a link checker. Exercises
+              <code>pathlib</code>, generator pipelines, hashing for change detection, and concurrency for
+              the rebuild.</p>
+            </div>
+          </div>
+        </div>
+        <p class="must reveal"><strong>Either way it must have:</strong> subcommands &middot; a config file
+        <em>and</em> env-var overrides &middot; structured logging &middot; a <code>--dry-run</code> for
+        anything destructive &middot; proper package layout, installable and runnable as a command
+        &middot; a test suite you&rsquo;d trust before a refactor.</p>
+      </div>
+
+      <div class="cap">
+        <h4 class="lbl">Capstone 3 &mdash; A backend service</h4>
+        <p class="why reveal">Proves you can build something with users, state, and work happening in the
+        background. This is the one a hiring manager will look at.</p>
+        <div class="grid-2">
+          <div class="card opt reveal">
+            <span class="tag">A</span>
+            <div>
+              <div class="nm">Read-later service</div>
+              <p>Save a URL through the API; a background worker fetches the title, description and
+              reading time; tag, full-text search, mark as read. Per-user accounts. Exercises FastAPI,
+              background tasks, <code>httpx</code>, full-text search, auth, and async.</p>
+            </div>
+          </div>
+          <div class="card opt reveal">
+            <span class="tag">B</span>
+            <div>
+              <div class="nm">RSS aggregator</div>
+              <p>Subscribe to feeds, poll them on a schedule, deduplicate entries, track unread counts per
+              user, OPML import and export. Exercises scheduled async work, deduplication logic,
+              pagination, and auth.</p>
+            </div>
+          </div>
+        </div>
+        <p class="must reveal"><strong>Either way it must have:</strong> authentication and per-user data
+        isolation &middot; a database with migrations &middot; <strong>background work that survives a
+        restart</strong> &mdash; which means a job row in the database, claimed and retried, not
+        FastAPI&rsquo;s <code>BackgroundTasks</code>, which dies with the process &middot; cursor
+        pagination and a consistent error format &middot; OpenAPI docs &middot; integration tests
+        against a real test database.</p>
+        <p class="note flag reveal"><strong>Deployment is deliberately not a requirement here.</strong>
+        Docker and hosting are outside this roadmap &mdash; see <a href="#outside">What&rsquo;s Not
+        Here</a>. If you want a public URL, the shortest honest path is a managed Postgres plus one
+        container on any PaaS, and that is a weekend of its own, not part of the capstone.</p>
+      </div>
+    </div>
+
+    <!-- ---------- Exit criteria ---------- -->
+    <div class="phase" id="f-exit">
+      <h3 class="reveal">Exit criteria</h3>
+      <p class="reveal">Not a test to pass &mdash; a description of what the far side of this stage looks
+      like. Anything here you cannot do is a gap that will show later.</p>
+      <div class="grid-3 ca" style="margin-top:24px">
+        <div class="card reveal">
+          <h4>The language</h4>
+          <ul class="assm">
+            <li>Predict output involving aliasing, mutation, closures and default arguments &mdash; without running it</li>
+            <li>Explain the <code>__hash__</code>/<code>__eq__</code> contract and what breaks when it&rsquo;s violated</li>
+            <li>Write a decorator that preserves metadata and works bare or parameterized</li>
+            <li>Explain what <code>super()</code> does in terms of the MRO</li>
+            <li>Reach for a generator instead of a list, by instinct</li>
+            <li>Read any traceback and go straight to the cause</li>
+            <li>Choose correctly between threads, processes and <code>asyncio</code> &mdash; and justify it in one sentence</li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <h4>Craft</h4>
+          <ul class="assm">
+            <li>Every project: typed, linted, tested, CI&rsquo;d &mdash; without being told</li>
+            <li>Refactor confidently because the test suite has your back</li>
+            <li>Published a package to PyPI</li>
+            <li>A stranger can clone any repo of yours and run it in two minutes</li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <h4>Applied</h4>
+          <ul class="assm">
+            <li>Build a tested, typed API from empty directory to running service in an afternoon</li>
+            <li>Design a schema, write the migration, and know why your query is slow</li>
+            <li>Every outbound call you write has a timeout and a retry policy, unprompted</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout reveal">
+        <div class="label">The real test</div>
+        <p>Hand yourself an unfamiliar intermediate Python file &mdash; a module from <code>Lib/</code>,
+        say &mdash; and you can read it start to finish and explain what every line does and why it was
+        written that way.</p>
+      </div>
+    </div>
+
+    <p class="back"><a href="#contents">Back to Contents</a></p>
+  </div>
+</section>
+<!-- ================= ADVANCED ================= -->
+<section class="band" id="advanced">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="num">Stage 2</span>
+      <h2>Advanced</h2>
+    </div>
+
+    <p class="lede reveal">Finish the Python language. Not &ldquo;know more Python&rdquo; &mdash;
+    <em>finish</em> it. By the end you can read the standard library&rsquo;s own source and explain why it
+    was written that way, and the language stops having corners you avoid.</p>
+
+    <div class="card table-card reveal" style="margin-top:28px">
+      <table class="grid tight">
+        <thead><tr><th scope="col" style="width:14%">Phase</th><th scope="col">Name</th></tr></thead>
+        <tbody>
+        <tr><td class="num">2.1</td><td class="k"><a href="#a21">The Language, Completely</a></td></tr>
+        <tr><td class="num">2.2</td><td class="k"><a href="#a22">Concurrency and Performance</a></td></tr>
+        <tr><td class="num">2.3</td><td class="k"><a href="#a23">Architecture</a></td></tr>
+        <tr><td class="num">2.4</td><td class="k"><a href="#a24">Capstones</a></td></tr>
+        </tbody>
+        </table>
+    </div>
+
+    <p class="reveal" style="margin-top:22px"><strong>Order: 2.1 first, then as you like.</strong> Phase 2.3 can be pulled forward to any point
+    after 2.1. The ratio shifts here: closer to <strong>40% reading, 60% building</strong>, because the
+    material is denser and the projects are smaller.</p>
+
+    <div class="wrap-narrow" style="padding:0; margin-left:0">
+      <h4 class="lbl">Before you start &mdash; and whether to start</h4>
+      <p class="reveal"><strong>This stage is optional, and you should feel no pressure to reach it.</strong>
+      Plenty of excellent, senior, well-paid Python engineers never read any of it. If the fundamentals
+      are solid and you are building things you are proud of, you have already got what this document is
+      for.</p>
+      <p class="reveal"><strong>Do domain work first.</strong> Stage 1 is enough to be hired on, and
+      everything in Stage 2 lands harder once you have production experience under it &mdash; you will
+      have met the problems descriptors and profiling and hexagonal layers actually solve, instead of
+      taking it on faith that they are problems. The strongest version of this path is Stage 1, then a
+      year of real backend, data or platform work, <em>then</em> Stage 2 in the evenings. Going straight
+      from 1.6 to 2.1 is the weaker option, and the one that risks two years of study with nothing
+      shipped for anyone.</p>
+      <p class="reveal">Whenever you do start, it reads badly without the groundwork. You should already
+      be able to:</p>
+      <div class="card ca reveal">
+        <ul class="assm">
+          <li>Predict output involving aliasing, mutation, closures and default arguments &mdash; without running it</li>
+          <li>Explain the <code>__hash__</code>/<code>__eq__</code> contract and what breaks when it&rsquo;s violated</li>
+          <li>Write a decorator that preserves metadata and works bare or parameterized</li>
+          <li>Explain what <code>super()</code> does in terms of the MRO</li>
+          <li>Choose correctly between threads, processes and <code>asyncio</code> &mdash; and justify it in one sentence</li>
+          <li>Ship code that is typed, linted, tested and CI&rsquo;d without being told to</li>
+          <li>Have published at least one package to PyPI</li>
+        </ul>
+      </div>
+      <p class="reveal">If any of those is shaky, go back and fix it first. Everything here compounds on them.</p>
+    </div>
+
+    <!-- ---------- 2.1 ---------- -->
+    <div class="phase" id="a21">
+      <h3 class="reveal"><span class="n">2.1</span>The Language, Completely</h3>
+      <div class="meta reveal">
+        <span class="pill">The specification, read as explanation</span>
+      </div>
+      <p class="note reveal">You&rsquo;ve read the data model once before as a learner. You read it here as
+      a reference &mdash; and this time it should start reading like prose rather than obstruction.</p>
+      <p class="topics reveal"><strong>Topics:</strong> The specification in full &middot; descriptors
+      &middot; metaprogramming &middot; advanced typing and variance &middot; exception groups &middot; the
+      stdlib corners that libraries depend on</p>
+
+      <h4 class="lbl">Read, in this order</h4>
+      <ol class="steps reveal">
+        <li><span class="src"><a href="https://docs.python.org/3/reference/datamodel.html">Language Reference</a></span><strong>Ch. 3 &mdash; Data Model</strong>, entire this time, not just &sect;3.1 and &sect;3.3. Including the type hierarchy, <code>__del__</code>, the copy and pickle protocols, <code>__match_args__</code></li>
+        <li><span class="src"><a href="https://docs.python.org/3/reference/executionmodel.html">Language Reference</a></span><strong>Ch. 4 &mdash; Execution Model</strong>, again. It reads completely differently now</li>
+        <li><span class="src"><a href="https://docs.python.org/3/reference/compound_stmts.html">Language Reference</a></span><strong>Ch. 8 &mdash; Compound Statements.</strong> Where <code>with</code>, <code>try</code> and decorator semantics are actually specified</li>
+        <li><span class="src"><a href="https://docs.python.org/3/reference/expressions.html">Language Reference</a></span><strong>Ch. 6, &sect;6.2.9 only</strong> &mdash; yield expressions (inside <em>Atoms</em>). The bridge from generators to coroutines</li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/descriptor.html">Descriptor Guide HOWTO</a></span>All of it. <strong>The single highest-value document in this phase</strong> &mdash; it builds <code>property</code>, <code>classmethod</code> and <code>staticmethod</code> from scratch</li>
+        <li><span class="src">Language Reference &sect;3.3.2</span>Descriptors, in spec form. Read it <em>after</em> the HOWTO, not before</li>
+        <li><span class="src"><em>Fluent Python</em></span><strong>Ch. 22</strong> (Dynamic Attributes and Properties) &middot; <strong>ch. 23</strong> (Attribute Descriptors)</li>
+        <li><span class="src">Language Reference &sect;3.3.3</span>Metaclasses and the class-creation protocol</li>
+        <li><span class="src"><em>Fluent Python</em></span><strong>Ch. 24</strong> (Class Metaprogramming)</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/inspect.html">Library Ref: <code>inspect</code></a></span><strong>Reference, not a chapter.</strong> Objects, frames, signatures, source</li>
+        <li><span class="src"><a href="https://typing.python.org/">typing.python.org</a></span><strong>The specification this time</strong>, not the user guide</li>
+        <li><span class="src">PEPs <a href="https://peps.python.org/pep-0484/">484</a> &rarr; <a href="https://peps.python.org/pep-0544/">544</a> &rarr; <a href="https://peps.python.org/pep-0695/">695</a> &rarr; <a href="https://peps.python.org/pep-0649/">649</a> + <a href="https://peps.python.org/pep-0749/">749</a></span>In that order. Type hints &rarr; protocols &rarr; type parameters &rarr; deferred annotations. 649 is amended by 749, and 749 is what 3.14 actually ships &mdash; read them together</li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/annotations.html">Annotations Best Practices HOWTO</a></span>All of it</li>
+        <li><span class="src"><a href="https://peps.python.org/pep-0654/">PEP 654</a></span>Exception groups and <code>except*</code></li>
+        <li><span class="src">Library Ref: <a href="https://docs.python.org/3/library/warnings.html"><code>warnings</code></a> &middot; <a href="https://docs.python.org/3/library/weakref.html"><code>weakref</code></a> &middot; <a href="https://docs.python.org/3/library/contextvars.html"><code>contextvars</code></a></span><strong>Reference, not a chapter.</strong> Deprecation, non-leaking caches, and state that survives an <code>await</code></li>
+      </ol>
+      <p class="note reveal"><strong>In this phase, read only chapters 22, 23 and 24 of <em>Fluent Python</em></strong>
+      &mdash; everything else in it belongs to the fundamentals.</p>
+
+      <h4 class="lbl">Projects</h4>
+      <div class="card table-card reveal">
+        <table class="grid">
+          <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
+          <tbody>
+          <tr><td class="num">1</td><td class="k">Validated-attribute system</td><td>Descriptors: <code>Positive</code>, <code>MaxLength</code>, with errors a user can act on</td></tr>
+          <tr><td class="num">2</td><td class="k">Mini-ORM</td><td><code>Column()</code> descriptors that generate SQL from a class definition</td></tr>
+          <tr><td class="num">3</td><td class="k">Reimplement <code>property</code> and <code>cached_property</code></td><td>From first principles, then diff against the real source</td></tr>
+          <tr><td class="num">4</td><td class="k">Plugin registry with <code>__init_subclass__</code></td><td>The modern alternative to most metaclasses</td></tr>
+          <tr><td class="num">5</td><td class="k">The same registry with a metaclass</td><td>Then <strong>write down why version 4 is better.</strong> That writeup is the point</td></tr>
+          <tr><td class="num">6</td><td class="k">Declarative schema DSL</td><td>Class definition generates validation</td></tr>
+          <tr><td class="num">7</td><td class="k">Variance-correct generic container</td><td>Covariance, contravariance, and getting a type checker to agree</td></tr>
+          <tr><td class="num">8</td><td class="k">Signature-preserving decorator</td><td><code>ParamSpec</code> and <code>Concatenate</code></td></tr>
+          <tr><td class="num">9</td><td class="k">Stubs for an untyped library</td><td>One you actually use. Submit them to typeshed if they&rsquo;re good</td></tr>
+          <tr><td class="num">10</td><td class="k">Library-grade exception hierarchy</td><td>With a documented deprecation path using <code>warnings</code></td></tr>
+          <tr><td class="num">11</td><td class="k">Non-leaking cache</td><td><code>weakref</code>; prove it releases under memory pressure</td></tr>
+          <tr><td class="num">12</td><td class="k">Async correlation IDs</td><td><code>contextvars</code> surviving across task boundaries</td></tr>
+          <tr><td class="num fin">&#9873;</td><td class="k">Read <code>functools</code>, <code>contextlib</code> and <code>dataclasses</code> in full</td><td><strong>Phase project.</strong> Then write up <em>why</em> each design choice was made. <strong>This is the exit test of the entire stage</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ---------- 2.2 ---------- -->
+    <div class="phase" id="a22">
+      <h3 class="reveal"><span class="n">2.2</span>Concurrency and Performance</h3>
+      <div class="meta reveal">
+        <span class="pill">Where confident guesses go to die</span>
+      </div>
+      <p class="topics reveal"><strong>Topics:</strong> Threading primitives in full &middot;
+      multiprocessing internals &middot; asyncio internals and cancellation &middot; free-threaded Python
+      &middot; profiling &middot; memory &middot; optimization that survives measurement</p>
+
+      <h4 class="lbl">Read, in this order</h4>
+      <ol class="steps reveal">
+        <li><span class="src"><em>Python Concurrency with asyncio</em> (Fowler)</span><strong>Ch. 1&ndash;7</strong> &mdash; asyncio basics, concurrent requests, CPU-bound work, threads</li>
+        <li><span class="src">Fowler</span><strong>Ch. 11&ndash;12</strong> &mdash; synchronization and asynchronous queues</li>
+        <li><span class="src">Fowler</span><strong>Ch. 14</strong> &mdash; Advanced asyncio. Cancellation, custom event loops, context. This phase&rsquo;s topic line promises asyncio internals; this is where they are. <strong>Skip ch. 8&ndash;10 and 13</strong></li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/free-threading-python.html">Free-threading HOWTO</a></span>All of it</li>
+        <li><span class="src">PEPs <a href="https://peps.python.org/pep-0703/">703</a> &middot; <a href="https://peps.python.org/pep-0779/">779</a></span>Optional GIL, and officially supported free threading</li>
+        <li><span class="src"><em>High Performance Python</em>, 2nd ed. (Gorelick &amp; Ozsvald)</span><strong>Ch. 1&ndash;2</strong> &mdash; understanding performance, and profiling to find bottlenecks. The heart of the book</li>
+        <li><span class="src">Library Ref: <a href="https://docs.python.org/3/library/timeit.html"><code>timeit</code></a> &middot; <a href="https://docs.python.org/3/library/profile.html"><code>cProfile</code></a></span><strong>Reference, not a chapter.</strong> <code>timeit</code> for micro-measurements, <code>cProfile</code> for whole programs</li>
+        <li><span class="src"><a href="https://github.com/benfred/py-spy">py-spy</a></span><em>Quickstart.</em> Sampling profiler and flame graphs &mdash; how you profile something already running</li>
+        <li><span class="src"><em>High Performance Python</em></span><strong>Ch. 11</strong> (Using Less RAM) &middot; <strong>ch. 12</strong> (Lessons from the Field). <strong>Skim ch. 3&ndash;5</strong> (lists and tuples, dicts and sets, iterators) &mdash; that is data-structure cost, not numeric work. <strong>Skip ch. 6 and 8&ndash;10</strong> unless numeric or distributed work is your job</li>
+        <li><span class="src"><a href="https://docs.python.org/3/library/tracemalloc.html">Library Ref: <code>tracemalloc</code></a></span><strong>Reference, not a chapter.</strong> Where Python allocations actually came from, by line</li>
+      </ol>
+
+      <h4 class="lbl">Projects</h4>
+      <div class="card table-card reveal">
+        <table class="grid">
+          <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
+          <tbody>
+          <tr><td class="num">1</td><td class="k">Mixed producer-consumer pipeline</td><td>Threads for I/O, processes for CPU, in one system</td></tr>
+          <tr><td class="num">2</td><td class="k">Graceful shutdown</td><td>Drains in-flight work on SIGTERM; prove nothing is lost</td></tr>
+          <tr><td class="num">3</td><td class="k">GIL vs free-threaded benchmark</td><td>Same workload, both builds, written up honestly including where it <em>didn&rsquo;t</em> help</td></tr>
+          <tr><td class="num">4</td><td class="k">Profile a slow service</td><td><code>py-spy</code>, fix the top three hotspots, flame graphs before and after</td></tr>
+          <tr><td class="num">5</td><td class="k">Halve peak memory</td><td>A data-heavy script; <code>tracemalloc</code> proves it</td></tr>
+          <tr><td class="num">6</td><td class="k"><code>__slots__</code> at scale</td><td>Measure memory and access speed across millions of instances</td></tr>
+          <tr><td class="num fin">&#9873;</td><td class="k">Make something provably fast</td><td><strong>Phase project.</strong> Take genuinely slow code, profile it, fix it. The writeup &mdash; numbers, flame graphs, and what you tried that failed &mdash; is half the deliverable</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ---------- 2.3 ---------- -->
+    <div class="phase" id="a23">
+      <h3 class="reveal"><span class="n">2.3</span>Architecture</h3>
+      <div class="meta reveal">
+        <span class="pill warn">The one phase that isn&rsquo;t about the language</span>
+      </div>
+      <p class="note reveal">Can be pulled forward to any point after Phase 2.1. It applies to every senior
+      engineer regardless of what they build.</p>
+      <p class="topics reveal"><strong>Topics:</strong> Cohesion and coupling &middot; dependency injection
+      in a dynamic language &middot; hexagonal architecture &middot; public API design &middot; deprecation
+      and backward compatibility &middot; supply-chain security &middot; code review</p>
+
+      <h4 class="lbl">Read, in this order</h4>
+      <ol class="steps reveal">
+        <li><span class="src"><a href="https://www.cosmicpython.com/">Architecture Patterns with Python</a> (free online)</span><strong>Part 1 entire &mdash; ch. 1&ndash;7.</strong> Domain modeling, repository pattern, coupling, service layer, TDD, unit of work, aggregates</li>
+        <li><span class="src">Architecture Patterns with Python</span><strong>Ch. 13</strong> &mdash; Dependency Injection and Bootstrapping. (It sits in Part 2, but read it now.) <strong>Skip ch. 8&ndash;12</strong> on a first pass; come back when you hit the problem they solve</li>
+        <li><span class="src"><a href="https://github.com/python/cpython/tree/main/Lib">CPython <code>Lib/</code></a></span>Not a read-through. Pick three stdlib modules you use and study how their public API is shaped &mdash; what&rsquo;s exposed, what&rsquo;s <code>_private</code>, what&rsquo;s documented</li>
+        <li><span class="src"><a href="https://import-linter.readthedocs.io/">import-linter docs</a></span><em>Quickstart.</em> How to make architectural boundaries fail CI instead of eroding</li>
+      </ol>
+
+      <h4 class="lbl">Projects</h4>
+      <div class="card table-card reveal">
+        <table class="grid">
+          <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
+          <tbody>
+          <tr><td class="num">1</td><td class="k">Restructure with hexagonal layers</td><td>Domain, application, adapters &mdash; swap storage for in-memory in tests</td></tr>
+          <tr><td class="num">2</td><td class="k">Enforce module boundaries</td><td><code>import-linter</code> in CI; make a violation fail the build</td></tr>
+          <tr><td class="num">3</td><td class="k">Design a public API</td><td>Decide what&rsquo;s exposed, document it, then live with the decision</td></tr>
+          <tr><td class="num fin">&#9873;</td><td class="k">Ship a deprecation across two releases</td><td><strong>Phase project.</strong> Change a public API without breaking anyone. Warnings, a migration path, a changelog people can act on</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- ---------- 2.4 ---------- -->
+    <div class="phase" id="a24">
+      <h3 class="reveal"><span class="n">2.4</span>Capstones</h3>
+      <div class="meta reveal">
+        <span class="pill good">Pick two of four</span>
+      </div>
+      <p class="note reveal"><strong>Pick two of the four.</strong> Two concrete options under each, so you
+      never have to go looking for an idea. The bar is higher than the fundamentals: these are projects
+      whose <em>source</em> is worth reading, not just whose output works.</p>
+
+      <div class="cap">
+        <h4 class="lbl">Capstone 1 &mdash; A library people depend on</h4>
+        <p class="why reveal">Proves you can design something others build on, and support it afterwards.</p>
+        <div class="grid-2">
+          <div class="card opt reveal">
+            <span class="tag">A</span>
+            <div>
+              <div class="nm">A resilience toolkit</div>
+              <p>Retries with backoff and jitter, circuit breaker, and timeout, all composable, usable as
+              both decorator and context manager, with sync <em>and</em> async variants from one
+              implementation. Exercises decorators, context managers, <code>contextvars</code>, and async
+              design.</p>
+            </div>
+          </div>
+          <div class="card opt reveal">
+            <span class="tag">B</span>
+            <div>
+              <div class="nm">A typed configuration library</div>
+              <p>Layered sources (defaults &rarr; file &rarr; env &rarr; CLI), validation at startup, typed
+              access, and errors that name the exact key <em>and</em> which source set it wrong. Exercises
+              descriptors, generics, and <code>Protocol</code>.</p>
+            </div>
+          </div>
+        </div>
+        <p class="must reveal"><strong>Either way:</strong> semantic versioning with a real deprecation
+        policy &middot; tested against three Python versions &middot; 100% typed,
+        <code>mypy --strict</code> &middot; documented with runnable examples &middot; published, and at
+        least one external issue or PR handled.</p>
+      </div>
+
+      <div class="cap">
+        <h4 class="lbl">Capstone 2 &mdash; A framework-grade abstraction</h4>
+        <p class="why reveal">Proves you can build the kind of machinery that makes other people&rsquo;s
+        code shorter.</p>
+        <div class="grid-2">
+          <div class="card opt reveal">
+            <span class="tag">A</span>
+            <div>
+              <div class="nm">A plugin framework</div>
+              <p>Entry-point discovery, lifecycle hooks, dependency ordering between plugins, and hook
+              signatures type-checked at registration rather than at call time. Exercises
+              <code>__init_subclass__</code>, <code>inspect</code>, the import system, and
+              <code>ParamSpec</code>.</p>
+            </div>
+          </div>
+          <div class="card opt reveal">
+            <span class="tag">B</span>
+            <div>
+              <div class="nm">A declarative validation library</div>
+              <p>Schemas defined as classes, fields as descriptors, nested models, coercion rules, and
+              errors that report the exact path to the bad value. Exercises descriptors,
+              <code>__set_name__</code>, generics, and error design.</p>
+            </div>
+          </div>
+        </div>
+        <p class="must reveal"><strong>Either way:</strong> the declarative surface must be genuinely small
+        &mdash; if using it is as verbose as not using it, the abstraction failed &middot; a written design
+        document explaining why you chose descriptors over metaclasses, or vice versa &middot;
+        property-based tests &middot; benchmarks showing the abstraction&rsquo;s overhead.</p>
+      </div>
+
+      <div class="cap">
+        <h4 class="lbl">Capstone 3 &mdash; A developer tool</h4>
+        <p class="why reveal">Proves you can work on code as data &mdash; the skill behind every linter,
+        formatter and framework.</p>
+        <div class="grid-2">
+          <div class="card opt reveal">
+            <span class="tag">A</span>
+            <div>
+              <div class="nm">A custom linter</div>
+              <p>AST-based rules enforcing your own conventions, a plugin interface for new rules, autofix
+              for the mechanical ones, and <code>pre-commit</code> integration. Exercises <code>ast</code>,
+              visitor patterns, and plugin architecture.</p>
+            </div>
+          </div>
+          <div class="card opt reveal">
+            <span class="tag">B</span>
+            <div>
+              <div class="nm">A test-data factory</div>
+              <p>Reads your dataclasses and models through <code>inspect</code> and
+              <code>get_type_hints</code>, generates valid instances for tests, handles nesting and
+              constraints, ships as a <code>pytest</code> plugin. Exercises runtime type introspection and
+              plugin APIs.</p>
+            </div>
+          </div>
+        </div>
+        <p class="must reveal"><strong>Either way:</strong> runs over a real codebase &mdash; ideally one of
+        your own fundamentals projects &mdash; and finds something true &middot; zero false positives on
+        that codebase, or a documented reason why &middot; installable and usable by someone who
+        didn&rsquo;t write it.</p>
+      </div>
+
+      <div class="cap">
+        <h4 class="lbl">Capstone 4 &mdash; A performance rewrite</h4>
+        <p class="why reveal">Proves you optimize from measurement rather than instinct.</p>
+        <div class="grid-2">
+          <div class="card opt reveal">
+            <span class="tag">A</span>
+            <div>
+              <div class="nm">Speed up a real open-source library</div>
+              <p>Pick one you actually use, profile it honestly, find a genuine hotspot, and submit the PR
+              with benchmarks. The hardest option, and the most valuable if it lands.</p>
+            </div>
+          </div>
+          <div class="card opt reveal">
+            <span class="tag">B</span>
+            <div>
+              <div class="nm">Optimize your own service under load</div>
+              <p>Take a fundamentals capstone, put it under realistic traffic, profile with
+              <code>py-spy</code>, fix the top three hotspots, and halve peak memory.</p>
+            </div>
+          </div>
+        </div>
+        <p class="must reveal"><strong>Either way:</strong> a reproducible benchmark harness committed
+        alongside the code &middot; flame graphs before and after &middot; <strong>an honest account of
+        what you tried that didn&rsquo;t work</strong> &mdash; that section is the one that proves you
+        measured rather than guessed &middot; no change merged without a number attached.</p>
+      </div>
+    </div>
+
+    <!-- ---------- Exit criteria ---------- -->
+    <div class="phase" id="a-exit">
+      <h3 class="reveal">Exit criteria</h3>
+      <div class="card ca reveal" style="margin-top:20px">
+        <ul class="assm">
+          <li><strong>Read the source of <code>functools</code>, <code>contextlib</code> and
+          <code>dataclasses</code> and explain why each design choice was made</strong> &mdash; the real
+          test. If you can do this, <em>you have finished the Python language</em></li>
+          <li>Derive the attribute lookup order from the data vs non-data descriptor distinction, from memory</li>
+          <li>Explain why <code>list[Dog]</code> is not a <code>list[Animal]</code>, and design around it</li>
+          <li>Read a framework&rsquo;s metaclass-driven source and follow it without getting lost &mdash; and choose not to write one yourself</li>
+          <li>Debug a deadlock and a race condition in unfamiliar code</li>
+          <li>Profile a real system and prove every speedup with numbers</li>
+          <li>Structure a package so &ldquo;where does this code go?&rdquo; has an obvious answer</li>
+          <li>Design a public API and ship a deprecation without breaking anyone</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="back"><a href="#contents">Back to Contents</a></p>
+  </div>
+</section>
+<!-- ================= MASTERY ================= -->
+<section class="band alt" id="mastery">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="num">Stage 3</span>
+      <h2>Mastery</h2>
+    </div>
+
+    <p class="lede reveal"><strong>A reference, not a curriculum.</strong> No phases, no capstones, nothing
+    to finish &mdash; because the material doesn&rsquo;t work that way. You read the import system
+    <strong>when imports break</strong>. You read <code>gc</code> and <code>tracemalloc</code>
+    <strong>when something leaks</strong>. You read <code>dis</code> <strong>when a benchmark makes no
+    sense</strong>. Read any of it speculatively and none of it retains.</p>
+
+    <div class="grid-2 compare" style="margin-top:32px">
+      <div class="card easy reveal">
+        <h4><span class="icon">&#10003;</span>Who actually needs this</h4>
+        <ul>
+          <li>Maintainers of widely-used libraries</li>
+          <li>Authors of native extensions</li>
+          <li>Engineers doing performance work at the interpreter boundary</li>
+          <li>CPython contributors</li>
+        </ul>
+      </div>
+      <div class="card hard reveal">
+        <h4><span class="icon">!</span>Who doesn&rsquo;t</h4>
+        <ul>
+          <li>Almost everyone else</li>
+          <li>Plenty of excellent, senior, well-paid Python engineers never open any of it</li>
+          <li>Nothing is wrong with that</li>
+          <li>Treat this as something you grep when a problem arrives, not a gap in your education</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Trigger index -->
+    <div class="phase" id="m-triggers">
+      <h3 class="reveal">Part 1 &mdash; The trigger index</h3>
+      <p class="reveal">The reactive majority of this material. Find your symptom, read the two or three
+      things next to it, fix the problem, move on.</p>
+      <div class="card table-card reveal" style="margin-top:22px">
+        <table class="grid">
+          <thead><tr><th scope="col" style="width:27%">When this happens</th><th scope="col" style="width:36%">Read</th><th scope="col">Then</th></tr></thead>
+          <tbody>
+          <tr>
+            <td class="k">Imports fail in a way that makes no sense &mdash; circular imports, a module shadowed, something resolving to the wrong file</td>
+            <td><a href="https://docs.python.org/3/reference/import.html">Language Reference ch. 5</a> &mdash; finders, loaders, <code>sys.meta_path</code> &middot; <a href="https://docs.python.org/3/library/importlib.html"><code>importlib</code></a></td>
+            <td>Trace the failure through the finder/loader machinery and write down the resolution. You&rsquo;ll hit it again</td>
+          </tr>
+          <tr>
+            <td class="k">A long-running process keeps growing</td>
+            <td><a href="https://docs.python.org/3/library/gc.html"><code>gc</code></a> &mdash; cycles and generational collection &middot; <a href="https://docs.python.org/3/library/tracemalloc.html"><code>tracemalloc</code></a> &middot; <a href="https://bloomberg.github.io/memray/"><code>memray</code></a> for the hard cases &middot; <a href="https://docs.python.org/3/library/weakref.html"><code>weakref</code></a></td>
+            <td>Find the cycle or the cache that never evicts. <code>sys.getsizeof</code> will lie to you; don&rsquo;t trust it alone</td>
+          </tr>
+          <tr>
+            <td class="k">Two equivalent functions benchmark differently</td>
+            <td><a href="https://docs.python.org/3/library/dis.html"><code>dis</code></a> &middot; <a href="https://peps.python.org/pep-0659/">PEP 659</a> &mdash; the specializing adaptive interpreter</td>
+            <td>Read the bytecode of both and explain the difference from it. If you can&rsquo;t, the difference is probably elsewhere</td>
+          </tr>
+          <tr>
+            <td class="k">You need to analyze or rewrite source programmatically &mdash; a linter, codemod, or custom check</td>
+            <td><a href="https://docs.python.org/3/library/ast.html"><code>ast</code></a> &middot; <a href="https://docs.python.org/3/library/inspect.html"><code>inspect</code></a></td>
+            <td>Work on the AST, never on text. Every regex-based refactor tool eventually corrupts something</td>
+          </tr>
+          <tr>
+            <td class="k">You need to know what the interpreter is doing live &mdash; a debugger, profiler, or coverage tool</td>
+            <td><a href="https://docs.python.org/3/library/sys.monitoring.html"><code>sys.monitoring</code></a> (PEP 669) &middot; <code>sys.settrace</code> / <code>setprofile</code> &middot; <a href="https://peps.python.org/pep-0768/">PEP 768</a></td>
+            <td>This is how every Python debugger works. Useful the day you need to build one</td>
+          </tr>
+          <tr>
+            <td class="k">Pure Python is genuinely too slow &mdash; and you have the profile to prove it</td>
+            <td><a href="https://docs.python.org/3/extending/">Extending and Embedding</a> &middot; <a href="https://pyo3.rs/">PyO3 user guide</a> for Rust &middot; <a href="https://docs.python.org/3/library/ctypes.html"><code>ctypes</code></a> / <code>cffi</code> for existing libraries</td>
+            <td>See Track A below. Don&rsquo;t start here without a profile &mdash; <em>&ldquo;it felt slow&rdquo;</em> is not a reason to leave Python</td>
+          </tr>
+          <tr>
+            <td class="k">Objects use more memory than they should</td>
+            <td><a href="https://docs.python.org/3/reference/datamodel.html#slots"><code>__slots__</code></a> &middot; interning behaviour &middot; <a href="https://docs.python.org/3/library/sys.html#sys.getsizeof"><code>sys.getsizeof</code></a> and its limits</td>
+            <td>Measure three representations of the same data before choosing one</td>
+          </tr>
+          <tr>
+            <td class="k">A C extension misbehaves under free threading</td>
+            <td><a href="https://docs.python.org/3/howto/free-threading-python.html">Free-threading HOWTO</a> &middot; <a href="https://docs.python.org/3/howto/free-threading-extensions.html">C API support for free threading</a></td>
+            <td>Increasingly common as 3.13+ free-threaded builds spread</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note reveal" style="margin-top:22px"><strong>Paired reading for any of the above:</strong>
+      <em>CPython Internals</em> (Anthony Shaw) &mdash; the instructional counterpart to these reference
+      pages. Read only the chapter matching your problem.</p>
+    </div>
+
+    <!-- Deliberate tracks -->
+    <div class="phase" id="m-tracks">
+      <h3 class="reveal">Part 2 &mdash; The two deliberate tracks</h3>
+      <p class="reveal">Unlike everything above, these two <em>are</em> chosen projects with a real
+      sequence. You don&rsquo;t stumble into them &mdash; you decide to do them.</p>
+
+      <h4 class="lbl">Track A &mdash; Write a native extension</h4>
+      <p class="why reveal">For when profiling has proven a hotspot and Python genuinely can&rsquo;t close
+      the gap.</p>
+      <ol class="steps reveal">
+        <li><span class="src"><a href="https://docs.python.org/3/extending/">Extending and Embedding</a></span>The guide, first. It explains the shape before the detail</li>
+        <li><span class="src"><a href="https://docs.python.org/3/c-api/">Python/C API Reference</a></span>The specification, second. Pay attention to <strong>reference counting rules, borrowed vs owned</strong> &mdash; this is where all the bugs live</li>
+        <li><span class="src">PEP 489 &middot; PEP 384 &middot; PEP 3118</span>Multi-phase init, the stable ABI, and the buffer protocol</li>
+        <li><span class="src"><a href="https://pyo3.rs/">PyO3 user guide</a></span>Rust, and the path most people should actually take today. Memory safety removes the entire class of bugs step 2 warned about</li>
+        <li><span class="src"><a href="https://docs.python.org/3/howto/free-threading-extensions.html">C API support for free threading</a></span>All of it</li>
+      </ol>
+      <p class="note reveal"><strong>Done when:</strong> you&rsquo;ve shipped an extension that measurably
+      beats pure Python on a profiled hotspot &mdash; with the benchmark committed alongside it.</p>
+
+      <h4 class="lbl">Track B &mdash; Contribute to CPython</h4>
+      <p class="why reveal">For when you want to work on the language itself.</p>
+      <ol class="steps reveal">
+        <li><span class="src"><a href="https://devguide.python.org/">devguide.python.org</a></span>The contribution process, start to finish</li>
+        <li><span class="src">Build CPython from source</span>And run the test suite. Do this before reading any internals; it makes the rest concrete</li>
+        <li><span class="src">Fix a documentation issue</span>And get it merged. A real PR through the real process, with low stakes</li>
+        <li><span class="src"><a href="https://github.com/python/cpython">CPython source</a></span><code>Objects/</code> and <code>Python/</code> for internals, <code>Lib/</code> as the best Python style reference that exists</li>
+        <li><span class="src">Trace one builtin</span>From Python call to C implementation, and write up the path</li>
+        <li><span class="src">Follow the stream</span><a href="https://discuss.python.org/">discuss.python.org</a> core-development and the <a href="https://peps.python.org/">PEP index</a></li>
+      </ol>
+      <p class="note reveal"><strong>Done when:</strong> you have a merged contribution, and you can read a
+      CPython PR discussion and follow the argument.</p>
+    </div>
+
+    <!-- Worth knowing -->
+    <div class="phase" id="m-exists">
+      <h3 class="reveal">Part 3 &mdash; Worth knowing exists</h3>
+      <p class="reveal">Not worth studying until a specific need appears. One line each is enough.</p>
+      <div class="card table-card reveal" style="margin-top:22px">
+        <table class="grid tight">
+          <thead><tr><th scope="col" style="width:27%">Thing</th><th scope="col" style="width:11%">Tag</th><th scope="col">Why it might matter</th></tr></thead>
+          <tbody>
+          <tr><td class="k">PyPy &middot; GraalPy</td><td>DEMAND</td><td>Alternative implementations. PyPy&rsquo;s JIT can be a large free win for long-running pure-Python workloads</td></tr>
+          <tr><td class="k">MicroPython &middot; CircuitPython</td><td>SPEC</td><td>Python on microcontrollers. A different language in practice &mdash; constrained, with a reduced stdlib</td></tr>
+          <tr><td class="k">Pyodide / WebAssembly</td><td>SPEC</td><td><a href="https://peps.python.org/pep-0776/">PEP 776</a>. Python in the browser, increasingly real</td></tr>
+          <tr><td class="k">iOS and Android</td><td>SPEC</td><td><a href="https://peps.python.org/pep-0730/">PEP 730</a> / <a href="https://peps.python.org/pep-0738/">738</a>. Officially supported platforms as of 3.13</td></tr>
+          <tr><td class="k">Template strings</td><td>DEMAND</td><td><a href="https://peps.python.org/pep-0750/">PEP 750</a>. Safe interpolation, new in 3.14</td></tr>
+          <tr><td class="k">Multiple interpreters</td><td>DEMAND</td><td><a href="https://peps.python.org/pep-0734/">PEP 734</a>. True parallelism without processes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- What mastery looks like -->
+    <div class="phase" id="m-mastery">
+      <h3 class="reveal">What mastery actually looks like</h3>
+      <p class="reveal">Not a checklist to complete &mdash; a description of someone who got here.
+      You&rsquo;ll recognize when it&rsquo;s true.</p>
+      <div class="card ca reveal" style="margin-top:20px">
+        <ul class="assm">
+          <li>Diagnose a memory leak in a long-running production process</li>
+          <li>Read <code>dis</code> output and explain a performance difference from it</li>
+          <li>Trace an import failure through the finder/loader machinery</li>
+          <li>Ship a native extension that measurably beats pure Python</li>
+          <li>Merge a contribution into CPython or a major library</li>
+          <li>Maintain a library others depend on, with a real deprecation policy</li>
+          <li>Teach this material to someone else and have it land</li>
+        </ul>
+      </div>
+      <div class="callout reveal">
+        <div class="label">The one that counts</div>
+        <p>The last item is the real test. Everything above can be faked with enough reading; that one
+        can&rsquo;t.</p>
+      </div>
+    </div>
+
+    <p class="back"><a href="#contents">Back to Contents</a></p>
+  </div>
+</section>
+<!-- ================= PRACTICE ================= -->
+<section class="band" id="practice">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="num">Practice</span>
+      <h2>How to Practise</h2>
+    </div>
+
+    <p class="lede reveal">This page names what to read and what to build. It does not contain the
+    practice in between &mdash; and it should not. There is far more of it than any document could hold,
+    and the right amount differs for every reader. <strong>Generate it instead.</strong></p>
+
+    <p class="reveal" style="margin-top:22px"><a href="https://exercism.org/tracks/python">Exercism</a> is
+    the ready-made option and it has human mentoring attached, which nothing below replaces. For practice
+    aimed at exactly what you just read, an LLM will produce it on demand. The prompts below are the ones
+    worth keeping. Each is written to be pasted together with this page, or with just the phase you are
+    in &mdash; give it the whole document where you can, because then it can see what earlier phases
+    built and what later ones depend on, which is the part you would otherwise have to explain.</p>
+
+    <div class="wrap-narrow" style="padding:0; margin-left:0">
+
+      <h4 class="lbl">Start the session once, then reuse it</h4>
+      <p class="intro reveal">Set the standing rules at the top of a conversation and every prompt below
+      inherits them. This is what stops a model handing you answers you have not earned.</p>
+      <div class="card reveal">
+        <pre class="prompt">I am working through a Python roadmap. Here it is:
+
+<b>&lt;paste this page, or the phase you are in&gt;</b>
+
+I am on <b>Phase &lt;X&gt;</b>. I have covered everything up to
+<b>&lt;the last reading item you finished&gt;</b>, and nothing after it.
+
+Rules for this whole conversation:
+- Never give me a solution to something I have not attempted first.
+- Never use a feature or module from a later phase in an example.
+- When you correct me, point at the official documentation rather
+  than asserting it yourself.
+- If I ask for an answer too early, ask me what I have already tried
+  instead of answering.
+
+Acknowledge these and wait. Do not start teaching yet.</pre>
+      </div>
+      <p class="note reveal">Telling it what you have <em>not</em> covered matters as much as what you
+      have. Without that line you will get <code>itertools</code> in week two, and a model cannot tell
+      that this is a problem.</p>
+
+      <h4 class="lbl">Which prompt, when</h4>
+      <div class="card table-card reveal">
+        <table class="grid tight">
+          <thead><tr><th scope="col" style="width:58%">Where you are</th><th scope="col">Use</th></tr></thead>
+          <tbody>
+          <tr><td>You have finished a reading item</td><td class="k">1</td></tr>
+          <tr><td>The topic is one where intuition is often wrong &mdash; names, mutability, scope, concurrency</td><td class="k">2</td></tr>
+          <tr><td>You think you have understood something and want to find out</td><td class="k">3</td></tr>
+          <tr><td>A listed project does not suit you, or is the wrong size</td><td class="k">4</td></tr>
+          <tr><td>You are about to start building</td><td class="k">5</td></tr>
+          <tr><td>You are stuck on a bug</td><td class="k">6</td></tr>
+          <tr><td>You have finished something and want it read</td><td class="k">7</td></tr>
+          <tr><td>You are starting a phase and the last one has gone cold</td><td class="k">8</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 class="lbl">1 &mdash; Drill a topic you just read</h4>
+      <p class="intro reveal">After any reading item, before you move to the next one.</p>
+      <div class="card reveal">
+        <pre class="prompt">I am working through a Python roadmap one topic at a time.
+
+I have just read: <b>&lt;the exact chapters or doc pages&gt;</b>
+I have not yet covered: <b>&lt;the next few items on the list&gt;</b>
+
+Give me 8 practice problems on exactly that material, easiest first.
+
+- Use only language features and standard-library modules from what
+  I have already covered. If a problem needs something later, drop it.
+- Give me the problems only. <b>No solutions, and no code in your reply.</b>
+- For each one, name the section of the official docs it maps to,
+  so I can check myself.
+- Make at least two of them cases where the obvious approach is
+  subtly wrong.
+- When I send you my attempt, tell me what is incorrect and what is
+  unidiomatic &mdash; but do not rewrite it for me.</pre>
+      </div>
+
+      <h4 class="lbl">2 &mdash; Predict, then check</h4>
+      <p class="intro reveal">The highest-value technique on this page. Phase 1.3 uses it explicitly; it
+      works for any topic where your intuition might be wrong.</p>
+      <div class="card reveal">
+        <pre class="prompt">Give me 12 short Python snippets covering <b>&lt;topic&gt;</b>.
+
+- Each should print something, or raise.
+- Choose cases where a reasonable person predicts the wrong answer.
+- Number them. <b>Give me no output and no explanation yet.</b>
+
+I will write my prediction for every one before running them. Then I
+will send you my predictions, and you tell me which are wrong and why,
+pointing at the docs rather than just asserting it.</pre>
+      </div>
+      <p class="note reveal">Write the predictions down before you run anything. The value is entirely in
+      committing to an answer while you can still be wrong about it &mdash; reading the output first
+      teaches almost nothing.</p>
+
+      <h4 class="lbl">3 &mdash; Explain it back and find the holes</h4>
+      <p class="intro reveal">Recalling something badly and then correcting it holds far better than
+      rereading it. Write the explanation before you look anything up.</p>
+      <div class="card reveal">
+        <pre class="prompt">I have just finished <b>&lt;topic&gt;</b>. Here is my explanation of it,
+written from memory without looking anything up:
+
+<b>&lt;your explanation&gt;</b>
+
+Find what is wrong, what is missing, and what I have stated more
+confidently than I should have.
+
+- Quote the documentation for each correction.
+- <b>Do not fill the gaps for me</b> &mdash; name the section I should go
+  and read instead.
+- Rank what I got wrong by how much it will cost me later.</pre>
+      </div>
+
+      <h4 class="lbl">4 &mdash; Projects at your own difficulty</h4>
+      <p class="intro reveal">The project lists are set at one difficulty, which will be wrong for
+      somebody. Read them as a specification of what a phase needs exercised, then get your own.</p>
+      <div class="card reveal">
+        <pre class="prompt">&lt;paste this page, or just the phase you are in&gt;
+
+I am on <b>Phase 1.3</b>. Propose 6 projects for it instead of the
+listed ones.
+
+- They must exercise the same things the listed projects exercise,
+  and nothing that needs a later phase.
+- Difficulty: <b>&lt;harder / about the same / smaller, and more of them&gt;</b>
+- Where a listed project continues earlier work, keep that &mdash; and
+  tell me which earlier project it builds on.
+- If I describe something I actually want to build, tell me honestly
+  which of the phase's topics it does <b>not</b> cover.
+- List them and stop. Do not pick for me.</pre>
+      </div>
+
+      <h4 class="lbl">5 &mdash; Scope something before you start it</h4>
+      <p class="intro reveal">Project prompts here are one line on purpose. This is how you turn one into
+      a week of work without it quietly becoming three.</p>
+      <div class="card reveal">
+        <pre class="prompt">I am about to build: <b>&lt;the project, in one or two sentences&gt;</b>
+I have covered: <b>&lt;phases or topics&gt;</b>
+
+Help me scope it, not build it.
+
+- What is the smallest version that still exercises the point?
+- What should I deliberately leave out of the first version?
+- Which parts will take far longer than I expect, and why?
+- What decisions should I make now because they are expensive to
+  change later?
+
+No code, and no implementation plan. Questions and trade-offs only.</pre>
+      </div>
+
+      <h4 class="lbl">6 &mdash; Get unstuck without getting the answer</h4>
+      <p class="intro reveal">The failure mode of having a model to hand is that debugging stops teaching
+      you anything. This keeps the loop intact.</p>
+      <div class="card reveal">
+        <pre class="prompt">Here is code that is not doing what I expect, and what I expected:
+
+<b>&lt;code, and the behaviour&gt;</b>
+
+<b>Do not tell me the cause and do not fix it.</b>
+
+Ask me the questions you would ask to narrow it down, one at a time.
+If I am looking in the wrong place entirely, say so without saying
+where the right place is. Point me at the documentation that covers
+the behaviour I have misunderstood.</pre>
+      </div>
+
+      <h4 class="lbl">7 &mdash; Have your code read back to you</h4>
+      <p class="intro reveal">Useful between human reviews, and no substitute for one &mdash; see
+      <a href="#review">Getting reviewed</a>.</p>
+      <div class="card reveal">
+        <pre class="prompt">Review this as a senior Python engineer would in a pull request.
+
+<b>&lt;code&gt;</b>
+
+- Be specific and be blunt. Name what you would block the PR on.
+- Separate <b>correctness bugs</b> from <b>style</b> from <b>design</b>.
+- Where you say something is unidiomatic, show the idiom by name
+  and link the docs &mdash; do not rewrite my code.
+- If parts of it are genuinely fine, say so briefly rather than
+  inventing criticism.</pre>
+      </div>
+
+      <h4 class="lbl">8 &mdash; Come back to a phase that has gone cold</h4>
+      <p class="intro reveal">The start of a reading list fades while you work through the end of it. Run
+      this at the top of each new phase; it takes twenty minutes and finds what actually slipped.</p>
+      <div class="card reveal">
+        <pre class="prompt">I am starting <b>Phase &lt;X&gt;</b>. I last worked on <b>Phase &lt;Y&gt;</b>
+a while ago.
+
+Ask me 10 questions on <b>&lt;Y&gt;</b>'s material, <b>one at a time</b>, waiting
+for my answer before the next.
+
+- Mix straight recall with "what happens if" cases.
+- Do not tell me the answer until I have given mine.
+- At the end, tell me which parts of <b>&lt;Y&gt;</b> I should reread before
+  continuing, in priority order &mdash; and which I clearly still have.</pre>
+      </div>
+
+      <h4 class="lbl">Where this goes wrong</h4>
+      <div class="card ca reveal">
+        <ul class="cons">
+          <li><strong>The answer is always one question away.</strong> Prompt 2 only works because you
+          commit to a prediction before you check it. A model will hand you the output the moment you
+          ask, and the exercise is worth nothing after that</li>
+          <li><strong>Generated material is wrong often enough to matter.</strong> The docs are the
+          authority; a model is not. Anything surprising is worth checking against the page it came
+          from &mdash; which is the habit the rest of this roadmap is built on anyway</li>
+          <li><strong>A model will agree with you.</strong> Agreement is not feedback, and it is not a
+          substitute for <a href="#review">a person reading your code</a></li>
+          <li><strong>Generated practice is not a syllabus.</strong> It is good at drilling a topic you
+          name and poor at telling you which topic matters next. That ordering is what this page is
+          for &mdash; do not hand it over</li>
+        </ul>
+      </div>
+
+      <p class="back"><a href="#contents">Back to Contents</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RESOURCES ================= -->
+<section class="band alt" id="resources">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="num">Reference</span>
+      <h2>What You Actually Read</h2>
+    </div>
+
+    <p class="lede reveal">The reading lists look long because they mix things that cost completely
+    different amounts of effort. Sorted by what each actually takes:</p>
+
+    <div class="card table-card reveal" style="margin-top:28px">
+      <table class="grid">
+        <thead><tr><th scope="col" style="width:30%">Source</th><th scope="col" style="width:16%">Used in</th><th scope="col">How much</th></tr></thead>
+        <tbody>
+        <tr>
+          <td class="k"><a href="https://docs.python.org/3/">docs.python.org</a> &mdash; free</td>
+          <td>Every phase</td>
+          <td><strong>Fundamentals:</strong> the Tutorial entire &middot; 2 Language Reference chapters &middot; 10 HOWTOs &middot; ~28 Library Reference modules &middot; 4 PEPs &middot; 2 FAQs.<br>
+          <strong>Advanced:</strong> Language Reference ch. 3, 4, 6&nbsp;&sect;6.2.9, 8 &middot; 3 HOWTOs &middot; 7 Library Reference modules &middot; 8 PEPs &middot; the typing specification</td>
+        </tr>
+        <tr>
+          <td class="k"><em>Fluent Python</em>, 2nd ed. &mdash; Ramalho</td>
+          <td>Fund. 1.3 &middot; Adv. 2.1</td>
+          <td><strong>12 chapters of 24</strong> in the fundamentals (1, 5&ndash;7, 9, 11&ndash;14, 16&ndash;18), then just <strong>3 more</strong> in Advanced (22, 23, 24). One book, spanning both stages</td>
+        </tr>
+        <tr>
+          <td class="k"><em>Python Testing with pytest</em>, 2nd ed. &mdash; Okken</td>
+          <td>Fund. 1.2</td>
+          <td>Ch. 1&ndash;13 and 16 of 16. Skim 14, skip 15 (writing plugins)</td>
+        </tr>
+        <tr>
+          <td class="k"><em>Python Concurrency with asyncio</em> &mdash; Fowler</td>
+          <td>Adv. 2.2</td>
+          <td>Ch. 1&ndash;7, 11&ndash;12 and 14 of 14</td>
+        </tr>
+        <tr>
+          <td class="k"><em>High Performance Python</em>, 2nd ed. &mdash; Gorelick &amp; Ozsvald</td>
+          <td>Adv. 2.2</td>
+          <td>Ch. 1&ndash;2, 11&ndash;12 of 12</td>
+        </tr>
+        <tr>
+          <td class="k"><a href="https://www.cosmicpython.com/">Architecture Patterns with Python</a> &mdash; free</td>
+          <td>Adv. 2.3</td>
+          <td>Part 1 (ch. 1&ndash;7) and ch. 13</td>
+        </tr>
+        <tr>
+          <td class="k"><a href="https://git-scm.com/book">Pro Git</a> &middot; <a href="https://use-the-index-luke.com/">Use the Index, Luke!</a> &mdash; both free</td>
+          <td>Fund. 1.2 &middot; 1.5</td>
+          <td>A few chapters each. Neither is Python, both are short</td>
+        </tr>
+        <tr>
+          <td class="k"><em>CPython Internals</em> &mdash; Shaw</td>
+          <td>Mastery</td>
+          <td>Only the chapter matching the problem in front of you</td>
+        </tr>
+        <tr>
+          <td class="k">Framework docs &mdash; FastAPI &middot; SQLAlchemy &middot; Pydantic &middot; httpx</td>
+          <td>Fund. 1.5</td>
+          <td>Days each. No book substitute exists &mdash; they move too fast to be printed</td>
+        </tr>
+        <tr>
+          <td class="k">Quickstarts &mdash; uv &middot; ruff &middot; mypy &middot; Hypothesis &middot; Alembic &middot; psycopg &middot; tenacity &middot; Actions &middot; py-spy &middot; import-linter</td>
+          <td>As you install them</td>
+          <td>~20 minutes each. Setup reading, not study</td>
+        </tr>
+        <tr>
+          <td class="k"><a href="https://exercism.org/tracks/python">Exercism Python track</a> &mdash; free</td>
+          <td>Fund. 1.1, daily</td>
+          <td>Runs alongside the Tutorial. Drills, not reading</td>
+        </tr>
+        <tr>
+          <td class="k"><em>Effective Python</em>, 3rd ed. &mdash; Slatkin</td>
+          <td>Optional, throughout</td>
+          <td>A few items at a time, from whichever chapter matches your phase. Never front to back. Nothing here depends on it</td>
+        </tr>
+        </tbody>
+        </table>
+    </div>
+
+    <div class="callout reveal">
+      <div class="label">The short version</div>
+      <p>Two books and one website carry the fundamentals. Three more books carry Advanced &mdash; and one
+      of those you already own.</p>
+    </div>
+
+    <div class="wrap-narrow" style="padding:0; margin-left:0">
+      <h3 class="reveal">Why isn&rsquo;t it one book?</h3>
+      <p class="reveal">No such book exists, and the reason is structural rather than a gap in the market.</p>
+      <ol class="steps plain reveal">
+        <li><span class="src">The language is documented better than any book covers it</span>The Tutorial and
+        Language Reference are free, authoritative, and track the current version. A book is a snapshot
+        that starts aging the day it ships.</li>
+        <li><span class="src">Tooling turns over every few years</span><code>uv</code> and <code>ruff</code>
+        are recent and have already displaced older tools. Any book naming a toolchain is wrong within two
+        editions.</li>
+        <li><span class="src">Frameworks move faster still</span>FastAPI&rsquo;s own docs are better than any
+        book about FastAPI, and they&rsquo;re current.</li>
+        <li><span class="src">The closest thing that exists</span><em>Fluent Python</em> &mdash; it covers
+        roughly Phases 1.1, 1.3 and 1.4. It does <em>not</em> cover testing, packaging or tooling, and it
+        predates 3.12&ndash;3.14.</li>
+      </ol>
+
+      <h3 class="reveal">Staying current</h3>
+      <div class="card table-card reveal">
+        <table class="grid tight">
+          <thead><tr><th scope="col" style="width:34%">Resource</th><th scope="col">Cadence</th></tr></thead>
+          <tbody>
+          <tr><td class="k">What&rsquo;s New</td><td>Every release &mdash; the cheapest way to stay current</td></tr>
+          <tr><td class="k">Deprecations</td><td>Before every upgrade</td></tr>
+          <tr><td class="k">PEPs</td><td>Whenever a feature seems strange, read the PEP behind it</td></tr>
+          <tr><td class="k">CPython <code>Lib/</code> source</td><td>Whenever stdlib behaviour surprises you</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="reveal" style="margin-top:20px"><strong>Current stable: Python 3.14</strong> (October 2025);
+      3.15 is due October 2026. Always read the <code>/3/</code> documentation URLs &mdash; pinned versions
+      silently serve stale material.</p>
+
+      <p class="back"><a href="#contents">Back to Contents</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OUTSIDE ================= -->
+<section class="band" id="outside">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="num">Appendix</span>
+      <h2>What&rsquo;s Not Here</h2>
+    </div>
+
+    <p class="lede reveal">This is a Python roadmap. The skills below aren&rsquo;t Python &mdash; but
+    they&rsquo;re the most common gap in otherwise strong Python programmers, and you&rsquo;ll need most of
+    them professionally. Learn them separately, on your own schedule.</p>
+
+    <div class="card table-card reveal" style="margin-top:28px">
+      <table class="grid">
+        <thead><tr><th scope="col" style="width:22%">Skill</th><th scope="col" style="width:40%">What &ldquo;enough&rdquo; looks like</th><th scope="col">Covered here?</th></tr></thead>
+        <tbody>
+        <tr><td class="k">SQL</td><td>Joins, indexes, transactions, query plans. <strong>If you learn one thing here, learn this</strong></td><td>Partly &mdash; Phase 1.5 covers enough to build with</td></tr>
+        <tr><td class="k">Git</td><td>Branching, rebasing, conflict resolution, PR workflow</td><td>Partly &mdash; Phase 1.2 covers the working essentials</td></tr>
+        <tr><td class="k">Unix / CLI</td><td>Shell, pipes, processes, permissions, SSH, <code>grep</code>/<code>sed</code>/<code>awk</code></td><td>No</td></tr>
+        <tr><td class="k">HTTP</td><td>Verbs, status codes, headers, auth, pagination</td><td>Partly &mdash; Phase 1.5</td></tr>
+        <tr><td class="k">Web frameworks</td><td>One of FastAPI / Django / Flask, properly</td><td>Partly &mdash; Phase 1.5 uses FastAPI as a vehicle</td></tr>
+        <tr><td class="k">Docker &amp; deployment</td><td>Build an image, run it somewhere real</td><td>No &mdash; and deliberately not required by any capstone</td></tr>
+        <tr><td class="k">CI/CD</td><td>Lint and test on push</td><td>Partly &mdash; Phase 1.2 sets up test-and-lint CI</td></tr>
+        <tr><td class="k">Security hygiene</td><td>Secrets, injection, dependency vulnerabilities</td><td>No</td></tr>
+        </tbody>
+        </table>
+    </div>
+
+    <p class="reveal" style="margin-top:22px"><strong>When to pick these up:</strong> alongside
+    Phase 1.5, or immediately after Stage 1 &mdash; not after Stage 2. SQL, Git, Unix and deployment are
+    what turn a strong Python programmer into a hireable engineer, and they are the fastest return on
+    time anywhere on this page. Each one is a far smaller
+    undertaking than the Python language itself, which is exactly why keeping them out of this roadmap
+    costs you nothing.</p>
+
+    <div class="wrap-narrow" style="padding:0; margin-left:0">
+      <h3 class="reveal">Application domains</h3>
+      <p class="reveal">Domains are separate fields that happen to use Python; most of their difficulty is
+      domain knowledge and library surface, not Python itself. Listed to mark the boundary &mdash; and to
+      say when to cross it. <strong>Pick one after Stage 1.</strong> Rule 4 warns against domain tourism,
+      not against having a domain; the warning is about sampling four of them at once, early. One domain,
+      chosen deliberately, entered once the language is solid, is the whole point of getting the language
+      solid.</p>
+      <div class="card table-card reveal">
+        <table class="grid tight">
+          <thead><tr><th scope="col" style="width:36%">Domain</th><th scope="col">Note</th></tr></thead>
+          <tbody>
+          <tr><td class="k">Data analysis / science</td><td>pandas, Polars, NumPy. The hard part is statistics, not Python</td></tr>
+          <tr><td class="k">Data engineering</td><td>Airflow/Dagster, Spark, Kafka. The closest adjacency to this path</td></tr>
+          <tr><td class="k">Backend / web</td><td>FastAPI or Django, plus SQL and HTTP. The usual next step from here</td></tr>
+          <tr><td class="k">DevOps / platform</td><td>Python is a tooling language here</td></tr>
+          <tr><td class="k">Scientific computing, quant, security, geospatial, embedded, GUI/games</td><td>Each is its own field</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="reveal" style="margin-top:20px"><strong>Web scraping is not a domain</strong> &mdash;
+      it&rsquo;s a technique inside data acquisition. The hard parts aren&rsquo;t Python: JS rendering,
+      anti-bot systems, and the legal questions around terms of service, <code>robots.txt</code> and
+      personal data.</p>
+
+      <h3 class="reveal">What to skip</h3>
+      <p class="reveal">Deliberately excluded, so you can stop wondering.</p>
+      <ol class="steps plain reveal">
+        <li><span class="src">Tutorial-hopping</span>You have the authoritative sources. Watching a different
+        YouTube series will not help.</li>
+        <li><span class="src">Leetcode grinding</span>Beyond basic comfort with data structures and
+        complexity. It tests a different skill than the one you&rsquo;re building.</li>
+        <li><span class="src">A second language before finishing the fundamentals</span>Depth first.</li>
+        <li><span class="src">Framework collecting</span>Phase 1.5 uses FastAPI as a vehicle for the
+        language. Learning Django and Flask alongside it teaches you none of the three &mdash; pick one and
+        go deep.</li>
+        <li><span class="src">The C API and metaclass authoring before Advanced is complete</span>Interesting,
+        unretained, and not what anyone will ask you to do.</li>
+        <li><span class="src">Reading this page instead of writing code</span>The ratio should be roughly
+        1:3 in the fundamentals, nearer 1:1.5 in Advanced &mdash; never the other way round.</li>
+      </ol>
+
+      <p class="back"><a href="#contents">Back to Contents</a></p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Python Roadmap &middot; Fundamentals, Advanced &amp; Mastery</span>
+    <span>Current stable: Python 3.14</span>
+  </div>
+</footer>
+
+<script>
+/* Each block is independent: a failure in one can never blank the page. */
+
+/* ---------- 1. Theme switch ---------- */
+(function () {
+  var root = document.documentElement, btn = document.getElementById('themeToggle');
+  function sync() {
+    if (btn) btn.setAttribute('aria-checked', root.getAttribute('data-theme') === 'dark' ? 'true' : 'false');
+  }
+  sync();
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var n = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', n);
+      try { localStorage.setItem('pyroadmap-theme', n); } catch (e) {}
+      sync();
+    });
+  }
+  /* Follow system changes until the user picks a theme explicitly */
+  if (window.matchMedia) {
+    var mq = matchMedia('(prefers-color-scheme: dark)');
+    var onChange = function (e) {
+      var saved; try { saved = localStorage.getItem('pyroadmap-theme'); } catch (err) {}
+      if (!saved) { root.setAttribute('data-theme', e.matches ? 'dark' : 'light'); sync(); }
+    };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+  }
+})();
+
+/* ---------- 2. Reveal on scroll. Runs first among the layout blocks, and
+               always leaves content visible if anything goes wrong. ---------- */
+(function () {
+  var items = document.querySelectorAll('.reveal');
+  function showAll() {
+    for (var i = 0; i < items.length; i++) items[i].classList.add('in');
+  }
+  try {
+    if (!('IntersectionObserver' in window)) { showAll(); return; }
+    var io = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) { entries[i].target.classList.add('in'); io.unobserve(entries[i].target); }
+      }
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    for (var i = 0; i < items.length; i++) io.observe(items[i]);
+    /* Safety net: nothing stays invisible, whatever happens above. */
+    setTimeout(showAll, 4000);
+  } catch (e) { showAll(); }
+})();
+
+/* ---------- 3. Mobile navigation ---------- */
+(function () {
+  var t = document.getElementById('navToggle'), list = document.getElementById('navLinks');
+  if (!t || !list) return;
+  function close() { list.classList.remove('open'); t.setAttribute('aria-expanded', 'false'); }
+  t.addEventListener('click', function () {
+    var open = list.classList.toggle('open');
+    t.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  list.addEventListener('click', function (e) { if (e.target.tagName === 'A') close(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+})();
+
+/* ---------- 4. Active nav link ---------- */
+(function () {
+  if (!('IntersectionObserver' in window)) return;
+  var links = {};
+  var as = document.querySelectorAll('.nav .links a');
+  for (var i = 0; i < as.length; i++) links[as[i].getAttribute('href').slice(1)] = as[i];
+  var spy = new IntersectionObserver(function (entries) {
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      if (e.isIntersecting && links[e.target.id]) {
+        for (var k in links) links[k].classList.remove('active');
+        links[e.target.id].classList.add('active');
+      }
+    }
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  var secs = document.querySelectorAll('section[id]');
+  for (var j = 0; j < secs.length; j++) spy.observe(secs[j]);
+})();
+</script>
+</body>
+</html>
