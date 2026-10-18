@@ -1,0 +1,46 @@
+% ================================================================
+%  cover.tex — text-based front cover in the series style:
+%  teal band at the top, tagline, optional artwork, teal title band,
+%  subtitle and edition. All words come from book-meta.tex.
+% ================================================================
+\providecommand{\BookTitleLines}{\BookTitle}  % where a long title breaks; set in book-meta.tex
+\newlength{\CoverTitleWidth}
+\settowidth{\CoverTitleWidth}{\coverfont\fontsize{40}{44}\selectfont\BookTitle}
+\pagenumbering{Alph}   % the cover has its own page number, so hyperref never sees "page 1" twice
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay]
+  % top band
+  \fill[brand] (current page.north west) rectangle ([yshift=-23pt]current page.north east);
+  % tagline
+  \node[anchor=north east, font=\coverfont\itshape\fontsize{10.5}{13}\selectfont, text=ink]
+    at ([xshift=-32pt, yshift=-48pt]current page.north east) {\BookTagline};
+  % artwork (optional): \BookCoverImage in book-meta.tex, e.g. {../markdown/images/cover.png}
+  \ifx\BookCoverImage\empty
+    % no artwork: a quiet typographic mark (the series' concentric rings)
+    \begin{scope}[shift={([yshift=-222pt]current page.north)}]
+      \foreach \r/\o in {18/1, 36/0.8, 54/0.6, 72/0.42, 90/0.26, 108/0.14}
+        \draw[brand, opacity=\o, line width=0.8pt] (0,0) circle (\r pt);
+      \fill[brand] (0,0) circle (6pt);
+    \end{scope}
+  \else
+    \node[anchor=center] at ([yshift=-222pt]current page.north)
+      {\includegraphics[width=210pt, height=240pt, keepaspectratio]{\BookCoverImage}};
+  \fi
+  % title band
+  \fill[brand] ([yshift=-425pt]current page.north west) rectangle ([yshift=-517pt]current page.north east);
+  % one line at 40 pt if it fits the 435 pt between the margins; otherwise two lines at 34 pt
+  \ifdim\CoverTitleWidth>435pt
+    \node[anchor=west, text=white, inner sep=0pt, align=left, font=\coverfont\fontsize{34}{37}\selectfont]
+      at ([xshift=37pt, yshift=-471pt]current page.north west) {\BookTitleLines};
+  \else
+    \node[anchor=west, text=white, inner sep=0pt, font=\coverfont\fontsize{40}{44}\selectfont]
+      at ([xshift=37pt, yshift=-473pt]current page.north west) {\BookTitle};
+  \fi
+  % subtitle and edition
+  \node[anchor=north east, font=\coverfont\itshape\fontsize{15}{18}\selectfont, text=ink]
+    at ([xshift=-32pt, yshift=-532pt]current page.north east) {\BookSubtitle};
+  \node[anchor=south east, font=\sffamily\bfseries\fontsize{6.5}{8}\selectfont\addfontfeature{LetterSpace=18}, text=ink]
+    at ([xshift=-32pt, yshift=32pt]current page.south east) {\MakeUppercase{\BookEdition}};
+\end{tikzpicture}
+\null
+\clearpage

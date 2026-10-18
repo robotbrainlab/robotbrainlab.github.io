@@ -1,0 +1,98 @@
+% ================================================================
+%  book.tex — master file: the order of the book.
+%  Build:  make        (Markdown -> chapters/*.tex -> book.pdf)
+%
+%  Each Markdown file ../markdown/<stem>.md becomes chapters/<stem>.tex;
+%  include it here with \input{chapters/<stem>}.
+%  Parts:  \bookpart{<roman numeral>}{<title>}{<what to ignore for now, or empty>}
+% ================================================================
+\documentclass[10pt, twoside, openany]{book}
+\input{book-meta}
+\input{preamble}
+
+\begin{document}
+
+\input{front/cover}
+
+\frontmatter
+\input{front/titlepage}
+\input{front/copyright}
+\tableofcontents
+\input{front/preface}                 % includes chapters/00-preface (markdown/00-preface.md)
+
+\mainmatter
+
+%% -------------------------------------------------------------- Part I
+\bookpart{I}{Understand}
+  {every setting, price and product name; this part is only the shape of the thing.}
+% \input{chapters/01-chapter-slug}
+% \input{chapters/02-chapter-slug}
+% \input{chapters/03-chapter-slug}
+% \input{chapters/04-chapter-slug}
+% \input{chapters/05-chapter-slug}
+% \input{chapters/06-chapter-slug}
+% \input{chapters/07-chapter-slug}
+% \input{chapters/08-chapter-slug}
+% \input{chapters/09-chapter-slug}
+% \input{chapters/10-chapter-slug}
+
+%% -------------------------------------------------------------- Part II
+\bookpart{II}{Use}
+  {serving your own models, and the bill --- Part IV takes both.}
+% \input{chapters/11-chapter-slug}
+% \input{chapters/12-chapter-slug}
+% \input{chapters/13-chapter-slug}
+% \input{chapters/14-chapter-slug}
+% \input{chapters/15-chapter-slug}
+% \input{chapters/16-chapter-slug}
+% \input{chapters/17-chapter-slug}
+% \input{chapters/18-chapter-slug}
+% \input{chapters/19-chapter-slug}
+% \input{chapters/20-chapter-slug}
+% \input{chapters/21-chapter-slug}
+% \input{chapters/22-chapter-slug}
+% \input{chapters/23-chapter-slug}
+% \input{chapters/24-chapter-slug}
+% \input{chapters/25-chapter-slug}
+% \input{chapters/26-chapter-slug}
+% \input{chapters/27-chapter-slug}
+% \input{chapters/28-chapter-slug}
+% \input{chapters/29-chapter-slug}
+
+%% -------------------------------------------------------------- Part III
+\bookpart{III}{Apply}
+  {scale and deployment. Everything here runs on one machine.}
+% \input{chapters/30-chapter-slug}
+% \input{chapters/31-chapter-slug}
+% \input{chapters/32-chapter-slug}
+% \input{chapters/33-chapter-slug}
+% \input{chapters/34-chapter-slug}
+% \input{chapters/35-chapter-slug}
+% \input{chapters/36-chapter-slug}
+% \input{chapters/37-chapter-slug}
+% \input{chapters/38-chapter-slug}
+
+%% -------------------------------------------------------------- Part IV
+\bookpart{IV}{What Next}
+  {}
+% \input{chapters/39-chapter-slug}
+% \input{chapters/40-chapter-slug}
+% \input{chapters/41-chapter-slug}
+% \input{chapters/42-chapter-slug}
+% \input{chapters/43-chapter-slug}
+% \input{chapters/44-chapter-slug}
+
+% Chapters are commented out until their Markdown lands in ../markdown/.
+% Uncomment each \input, with its real slug, as the chapter is finished.
+% ---------------------------------------------------------------- Appendices
+\appendix
+%% \input{chapters/A-cheat-sheet}
+%% \input{chapters/B-interview-bank}
+%% \input{chapters/C-glossary}           % the glossary is the last appendix
+
+\backmatter
+\printindex
+
+\input{front/backcover}
+
+\end{document}
