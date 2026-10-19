@@ -19,11 +19,14 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 
 | Part | Chapters | Pages | Status |
 |---|---|---|---|
-| I · Understand | 1–10 | 150 | Not started |
-| II · Use | 11–29 | 300 | Not started |
-| III · Apply | 30–38 | 155 | Not started |
-| IV · What Next | 39–44 | 110 | Not started |
+| *Before Part I* · Inside the Model | 1–10 | 158 | Not started |
+| I · Understand | 11–17 | 98 | Not started |
+| II · Use | 18–36 | 304 | Not started |
+| III · Apply | 37–45 | 155 | Not started |
+| IV · What Next | 46–51 | 110 | Not started |
 | Appendices | A–D | 45 | Not started |
+
+About 875 numbered pages in all.
 
 Status values: *Not started* → *Drafting* → *Editing* → *Done*.
 

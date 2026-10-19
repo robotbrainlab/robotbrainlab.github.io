@@ -36,6 +36,18 @@
 \newfontfamily\symbolfont{SourceSans3}[Extension=.otf, UprightFont=*-Regular, BoldFont=*-Semibold]
 \newfontfamily\dejavufont{DejaVuSans.ttf}
 
+% ---- Mathematics ---------------------------------------------------
+% This book uses real notation (vectors, matrices, softmax, attention, big-O), so the
+% build needs a math font: Garamond-Math pairs with Crimson Pro's Garamond lineage and
+% with EB Garamond on the cover. Markdown writes maths as a raw LaTeX span or block
+% (`\(x\)`{=latex} and a ```{=latex} fence), because convert.sh deliberately disables
+% $...$ math so that prices like $5 stay text. See BOOK-GUIDE.md section 8.
+\usepackage{amsmath}
+\usepackage{unicode-math}
+\setmathfont{Garamond-Math.otf}[Scale=MatchUppercase]
+\setlength{\abovedisplayskip}{9pt}\setlength{\belowdisplayskip}{9pt}
+\setlength{\abovedisplayshortskip}{4pt}\setlength{\belowdisplayshortskip}{6pt}
+
 % Glyphs Crimson Pro lacks (arrows, check marks, shapes) come from Source Sans 3.
 % Inside code and diagrams the mono glyph is kept so columns stay aligned.
 \usepackage{newunicodechar}
@@ -75,7 +87,9 @@
 \definecolor{tablehead}{HTML}{E6E6E6}
 
 % ---- Core packages ----------------------------------------------------
-\usepackage{amssymb}
+% amssymb is deliberately NOT loaded: unicode-math (above) supplies the same symbols, and
+% loading both fails with "Command \eth already defined". Nothing in this book uses an
+% amssymb-only command. This is the one divergence from the shared book-template preamble.
 \usepackage{microtype}
 \usepackage{graphicx}
 \usepackage{calc}
@@ -312,6 +326,26 @@
   \vspace*{82pt}%
   \begingroup\raggedleft
     {\chapterlabelfont PART #1\par}\vspace{13pt}%
+    {\chaptertitlefont #2\par}\vspace{15pt}%
+  \endgroup
+  {\color{ink}\titlerule[1.2pt]}\par
+  \ifstrempty{#3}{}{%
+    \vspace{40pt}%
+    \begin{callout}{note}\textit{What to ignore for now:} #3\end{callout}}%
+  \clearpage}
+
+% \prebookpart{<label>}{<title>}{<what to ignore for now, or empty>}
+% A front section that comes BEFORE Part I and carries no part number, so Part I stays
+% Part I. Same opener design as \bookpart. Adapted from The Complete Software
+% Engineering Guide, which uses the same device for its "How Web Applications Work".
+\newcommand{\prebookpart}[3]{%
+  \clearpage
+  \thispagestyle{empty}\markboth{}{}%
+  \phantomsection
+  \addcontentsline{toc}{part}{#2}%
+  \vspace*{82pt}%
+  \begingroup\raggedleft
+    {\chapterlabelfont #1\par}\vspace{13pt}%
     {\chaptertitlefont #2\par}\vspace{15pt}%
   \endgroup
   {\color{ink}\titlerule[1.2pt]}\par

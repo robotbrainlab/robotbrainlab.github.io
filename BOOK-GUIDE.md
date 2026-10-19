@@ -71,14 +71,18 @@ note; Part IV has none, because its last chapter says what to skip.
 
 | Part | Purpose | Share |
 |---|---|---|
-| **I · Understand** | The mental model. Opens with the book's problem. Little or no code. | ~20% |
-| **II · Use** | Become a confident user of every piece of the system. | ~40% |
-| **III · Apply** | Labs that build one small system, lab by lab. | ~20% |
-| **IV · What Next** | The four threads, then what to learn next and what to skip. | ~15% |
+| *Before Part I · Inside the Model* | What the model computes when it answers. Notation, worked by hand. Set with `\prebookpart`, so it carries no part number and Part I stays Part I. | ~18% |
+| **I · Understand** | The system around the model. Opens with the book's problem. Little or no code. | ~11% |
+| **II · Use** | Become a confident user of every piece of the system. | ~35% |
+| **III · Apply** | Labs that build one small system, lab by lab. | ~18% |
+| **IV · What Next** | The four threads, then what to learn next and what to skip. | ~13% |
 | **Appendices** | Cheat sheet, interview bank, glossary, index. | ~5% |
 
 These shares differ from a short from-zero book on purpose: Part II carries most of the material,
 and Part IV is substantial because the four threads are where serving, cost and security live.
+Chapters are numbered straight through, 1--51, so the pre-part takes 1--10 and Part I opens at
+chapter 11. Parts I--III each open with a "What to ignore for now" note, and so does the
+pre-part.
 
 ### Every chapter (Parts I–III)
 
@@ -115,7 +119,35 @@ it. An answer is what the reader should be able to say in about sixty seconds: t
 trade-off, and how they would check it. This appendix is the reason the book exists; write it last,
 from the finished chapters, and never from memory.
 
-## 6. Writing style
+## 6. Mathematics, and the line it stops at
+
+The reader asked for mathematics and not for machine-learning theory. That line is exact, and it
+is the difference between **what the model computes when it answers** and **how it came to hold
+those numbers**. Teach the first with notation. State the second and move on.
+
+**Use notation freely for:** vectors and dimensions; matrices and matrix multiplication; the dot
+product and cosine similarity; softmax, with temperature; the attention formula, worked
+numerically; big-O for how cost grows; low-rank factorisation `W + BA` with real parameter
+counts; key--value cache size; bits per parameter for quantisation; active versus total
+parameters; cross-entropy and perplexity as definitions; logarithms and exponentials;
+probability, sampling distributions and confidence intervals; ranking metrics.
+
+**Never teach:** backpropagation derived; why gradient descent converges; optimiser design;
+initialisation; numerical stability; regularisation theory; bias--variance; learning theory;
+inductive biases; why depth helps in theory; convolutional or recurrent architectures; classical
+machine learning; the derivation of scaling laws; representation-learning theory.
+
+**The one boundary case, decided:** chapter 7 states the training objective as a formula and
+shows the parameter-update rule **once**, with a sentence of notation and no derivation, then
+names it explicitly as the edge of the book. Chapter 10 lists everything black-boxed, so the
+reader knows exactly what they cannot yet explain and what to say when an interviewer pushes.
+
+**Every mechanism chapter carries a worked numeric example** small enough to check by hand or in
+ten lines of Python with no framework: a 5-token vocabulary, 4-dimensional vectors, arithmetic
+only. This is what stops an explanation from becoming a metaphor that dies on the first
+follow-up question. A chapter that explains a mechanism without one is not finished.
+
+## 7. Writing style
 
 - Plain, simple and vivid. Short sentences. Explain things as you would to a friend.
 - Idea first, then commands. Never start a section with a code block.
@@ -125,7 +157,7 @@ from the finished chapters, and never from memory.
 - British spelling everywhere (colour, centre, organise), including the problems and questions.
   Proper names keep their own spelling.
 
-## 7. Markdown conventions
+## 8. Markdown conventions
 
 The build relies on these.
 
@@ -147,16 +179,21 @@ The build relies on these.
 - **Bold only key concepts.** Library and command names (`httpx`, `uv`, `pytest`) go in code font,
   not bold, and not in the glossary. A tool that is itself a concept the book teaches may be
   bolded and defined.
-- **Maths:** `$…$` is not maths in this build. Write O(n), O(n log n), ≤, ≥, ×, ≈ as plain text.
-  The superscript ⁿ is missing from the body font, so write `O(2^n)` in code font.
+- **Maths** is written as raw LaTeX, never as `$…$`. `tools/convert.sh` deliberately disables
+  dollar maths so that a price like $5 stays text, and this book is full of prices.
+  - Inline: `` `\(O(n^2 d)\)`{=latex} `` — the delimiters go *inside* the span.
+  - Display: a fenced block opened with ```` ```{=latex} ```` holding `\[ … \]`.
+  - Equations set in Garamond-Math (see `latex/preamble.tex`). `amsmath` is available;
+    `unicode-math` supplies the symbols, so never load or rely on `amssymb`.
+  - Simple inequalities and units in running prose stay as plain text: ≤, ≥, ×, ≈.
 
-## 8. Labs
+## 9. Labs
 
 - **Labs are isolated and safe.** Each lab starts in its own fresh folder (such as
   `~/sandbox/ch12`), never touches the reader's real folders or settings, and never risks data
   outside its folder.
 - **No account is required to read the book, and none is created by it.** Where a lab needs a
-  model, the reader supplies it; see section 9.
+  model, the reader supplies it; see section 10.
 - **Reproducible from the PDF alone.** Show every file a lab needs in full, or give a short
   command that creates it. Anything under `labs/` is also offered as a download beside the PDF.
 - **Expected results must hold for every reader.** Model output is stochastic, so never promise
@@ -165,7 +202,7 @@ The build relies on these.
 - **Pin versions.** A lab that needs a third-party package installs it in a virtual environment
   with a pinned version, and the package is listed in the preface's "What You Need Installed".
 
-## 9. Which model the labs use
+## 10. Which model the labs use
 
 Decided per lab, in this order:
 
@@ -179,7 +216,7 @@ Decided per lab, in this order:
 No lab, and no part of the build, ever reads or writes a credential file. Keys come from the
 environment and are never printed, logged or committed.
 
-## 10. Length
+## 11. Length
 
 The book runs about **240 words per printed page**, counting code and tables. A chapter's word
 budget is its page budget × 240; a 16-page chapter is about 3,800 words. Stay close to it: cut
@@ -191,7 +228,7 @@ so to win back a page, cut near a chapter's end.
 
 There is **no 100-page cap** on this book. It is one long book by design.
 
-## 11. Build
+## 12. Build
 
 Markdown → pandoc (with `latex/tools/filter.lua`) → XeLaTeX → PDF. The Markdown is the only
 source of truth; never edit the generated `latex/chapters/*.tex`.
@@ -210,13 +247,26 @@ Design (page size 7 × 9.19 in, Crimson Pro body, Source Sans 3 headings, Source
 callout icons, no shell prompts in code blocks) comes from `latex/preamble.tex` and is not to be
 changed.
 
-## 12. Delivered part by part
+**`latex/preamble.tex` has diverged from the shared book template in three ways**, so never
+re-copy it over this one:
+
+1. `amsmath` and `unicode-math` are loaded, with `\setmathfont{Garamond-Math.otf}`.
+2. `amssymb` is removed. Loading it alongside `unicode-math` fails with
+   "Command `\eth` already defined", and nothing here needs an amssymb-only command.
+3. `\prebookpart{<label>}{<title>}{<what to ignore>}` is added: an unnumbered part opener in
+   the same design as `\bookpart`.
+
+`markdown/_maths-proof.md` is the proof page for all of this. Its name starts with an underscore,
+so `convert.sh` skips it; to rebuild it, copy it to a name without the underscore and add its
+`\input`.
+
+## 13. Delivered part by part
 
 The reader studies the book while it is being written, so each part is built and handed over as
 its own PDF as it is finished, and the full book is assembled at the end. `latex/book.tex` lists
 only the chapters that exist; add each `\input` as its chapter lands, so the build always works.
 
-## 13. Writing with agents
+## 14. Writing with agents
 
 ```text
 TOC approved  ->  a writing agent drafts a part  ->  the editor edits every chapter  ->  build and check
@@ -229,7 +279,7 @@ TOC approved  ->  a writing agent drafts a part  ->  the editor edits every chap
 - **When editing finds something an agent got wrong because this guide did not say it, add it to
   this guide**, so the next agent gets it right.
 
-## 14. Before calling a part done
+## 15. Before calling a part done
 
 - `PAGES_MIN=<low> PAGES_MAX=<high> make check` passes: no overfull boxes, no text off any page,
   every bolded term in the glossary, page count within the part's target.
