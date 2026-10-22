@@ -28,7 +28,9 @@ PATTERNS = [
     (r"\bdata-intelligence\b",            "a website path"),
     (r"\bthe (?:web)?site\b",             "the website"),
     (r"\bresearch notes\b",               "the material the book was planned from"),
-    (r"\bBOOK-GUIDE\b|\bTOC\.md\b|\bHANDOVER\b", "a build document"),
+    # Case-SENSITIVE: these are file names. Matching them case-insensitively made the gate
+    # fail chapter 2 on the ordinary English word "handover" ("a handover to a human").
+    (r"\bBOOK-GUIDE\b|\bTOC\.md\b|\bHANDOVER\.md\b|\bLEDGER-[A-Z]+\b", "a build document", 0),
     (r"\bthis book was (?:built|written|planned)\b", "an origin statement"),
     (r"\bwe (?:decided|chose|agreed)\b",  "an origin statement"),
     (r"\bthe owner\b|\bDeepak\b",         "the reader named as a person"),
@@ -36,7 +38,8 @@ PATTERNS = [
     (r"Chapter \d+:\d+",                  "a line number - the book has pages"),
     (r"\bas (?:I|we) (?:said|wrote) (?:earlier|above) in chat\b", "an origin statement"),
 ]
-COMPILED = [(re.compile(p, re.I), why) for p, why in PATTERNS]
+# A pattern may set its own flags; the default is case-insensitive.
+COMPILED = [(re.compile(e[0], e[2] if len(e) > 2 else re.I), e[1]) for e in PATTERNS]
 
 
 def check(path):

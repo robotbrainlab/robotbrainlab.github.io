@@ -175,6 +175,9 @@ follow-up question. A chapter that explains a mechanism without one is not finis
 ## 7. Writing style
 
 - Plain, simple and vivid. Short sentences. Explain things as you would to a friend.
+- **Chapter 1 is the reference for voice**, confirmed by the reader on 22 October 2026:
+  easy language, simplicity, genuinely starting from scratch. Match it. Do not write up to
+  an imagined expert, and do not assume a term has been met before the book gives it.
 - Idea first, then commands. Never start a section with a code block.
 - Every command and code sample must work. Run it before it goes in the book, and show real
   output.

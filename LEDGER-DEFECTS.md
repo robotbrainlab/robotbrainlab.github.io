@@ -74,6 +74,13 @@ broadened the pattern when porting it. **Check a reported finding against the ge
 `.tex` before treating it as a defect** — the same instruction the source project gives
 for its own coverage gate, which has a known false-positive class of its own.
 
+*Second instance, chapter 2.* `verify-voice.py` failed the chapter on the ordinary English
+word **handover** — "a handover to a human" — because the pattern for build-document names
+was compiled case-insensitively along with every other pattern. File names are
+case-sensitive and now compile that way. **Two of the seven gates have now been wrong
+before the chapter was**, both in their first week, and both in the same direction: a
+pattern written for one shape matching a wider one. Expect the third.
+
 **12. A page budget is a guess until a chapter is built, and the words-per-page figure
 does not transfer between books.** Chapter 1 came in at **8 printed pages against a
 14-page budget**: 3,097 words of markdown, ~3,067 words printed across pages 8 to 15, so
@@ -83,3 +90,10 @@ with tables, practice blocks and vocabulary lists. Prose runs far tighter than t
 point** — Part I is the most prose-heavy part of this book and the least representative.
 Re-measure after a chapter with worked arithmetic (chapter 11) and after a lab
 (chapter 40).
+
+*Second data point, chapter 2:* 3,158 words, **11 printed pages against an 18-page
+budget** — 61 per cent, where chapter 1 was 71 per cent. Two chapters is still not enough
+to revise 55 budgets, and Part I remains the least representative part of the book. But if
+chapter 3 lands near the same fraction, the Part I budgets are wrong rather than the
+chapters, and the honest move then is to re-budget Part I rather than to keep writing
+chapters that silently miss their targets.

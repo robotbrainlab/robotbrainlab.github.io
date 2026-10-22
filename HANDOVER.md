@@ -44,6 +44,8 @@ Do not reopen these. Each one was decided with the owner.
 | 18 | **Appendix B's question list is written in week one** | It then acts as the acceptance test for each chapter as it lands. The answers are still written from the finished chapters, so decision 11 holds | Writing the whole appendix last, which left no time to drill it |
 | 19 | **Four chapters were added for what interviews test and the research does not name** | Ch 19 (calling a model reliably: streaming, rate limits, retries, concurrency, multi-turn state), ch 32 (evaluating a grounded answer), ch 55 (a system designed aloud), and the split of agents into ch 37 and ch 38 | Leaving them out because they are not among the 83 concepts |
 | 21 | **The chapter loop is a staged driver with evidenced records, two reviews, and a gate suite** | Imported from a finished 1,222-page book built under the same template, where every gate was paid for by a shipped defect. Its author's note on keeping the checklist as prose: *prose is what gets skipped* | A prose checklist in the guide, which is what §15 was until 22 Oct 2026 |
+| 23 | **The register is settled: plain, simple, genuinely from scratch** | Deepak on chapter 1, 22 Oct 2026: *"The language is really easy to understand, and I like the simplicity. It genuinely starts from scratch, which I really appreciate."* Chapter 1 is the reference for voice. Do not write up, and do not assume knowledge | — |
+| 24 | **Nothing is pushed until Part I is finished** | Deepak, 22 Oct 2026: *"After Part 1, we can commit."* Keep committing locally; create the private GitHub repository and push when chapters 1 to 7 are done | Pushing as soon as the repository exists |
 | 22 | **One chapter at a time, never a part at a time** | Context dilution is the main cause of invented content. Writing several chapters in one stretch makes the later ones get written from the pattern of the earlier ones rather than from their sources | A drafting agent per part, which was the plan until 22 Oct 2026 |
 | 20 | **Lab 50 attacks the system before chapter 51 explains security** | Meet the failure, then learn the framework. The lab uses what chapter 36 taught. Moving it after Part IV would break Part IV's "no labs" rule | Moving the lab after chapter 51 |
 
@@ -86,7 +88,8 @@ Source Code Pro is not embedded because no code block exists.
 
 ## 4. Blocked. The owner must decide these
 
-1. **The GitHub repository does not exist.** Create it **private**, named
+1. **The GitHub repository does not exist — and is deliberately not needed yet.** Decision
+   24: nothing is pushed until Part I is finished. When it is, create it **private**, named
    `modern-ai-interview-prep`, under the **robotbrainlab** account. The git remote is already set
    to `git@github-robotbrainlab:robotbrainlab/modern-ai-interview-prep.git`, and that SSH key
    authenticates. Then run `git push -u origin main`.
