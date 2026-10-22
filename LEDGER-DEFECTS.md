@@ -65,6 +65,87 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**20. A reading lab cannot ship its data, and `BOOK-GUIDE.md` §9 still applies to it.**
+§9 says **"Expected results must hold for every reader"** and **"Reproducible from the PDF
+alone"**, and forbids a lab saying "your own documents" because *"an expected result that
+depends on the reader's files holds for nobody"*. Those rules were written with the
+retrieval and evaluation labs in mind. Chapters 5 and 6 are awareness chapters with no
+code, and both labs were written as *archaeology*: go and find two engineering accounts, or
+one recent article, and sort what is in them. That is the same defect wearing different
+clothes — the reader's material instead of the reader's files — and it is how chapter 6's
+lab came to predict its own result (*"roughly half their **P**s move"*, then *"expect to
+move at least one"*).
+
+Chapter 6's lab was rewritten to carry **an invented announcement inside the chapter** —
+a fictional model, test, scores and prices — with nine claims and a key, and
+finding-a-real-article demoted to an optional last step with no key and no promise. Two
+things fell out of it that are worth having:
+
+1. **A specimen you wrote has a right answer, so the lab can be checked.** The reader can
+   be wrong and find out, which an "it is the habit that matters" lab never allows.
+2. **An invented specimen cannot date.** Naming a real model or benchmark in a chapter
+   *about* telling the durable from the dated would have put a dated detail in the one
+   chapter that must not have one. The first draft of the rewrite used a real benchmark
+   name; that was caught and replaced.
+
+**⚠ Chapter 5's lab still has this defect.** It is closed and sealed, and it was not
+reopened, because narrowing or widening the delivered work is the reader's call and not
+mine. It is written down here so it is not lost: its five steps ask for two accounts the
+reader finds, and its expected results therefore hold for nobody in particular. The fix is
+the same one chapter 6 got — ship a specimen, keep the archaeology as an optional step.
+
+**19. The `written` stage keeps getting skipped, and a hand-written timestamp is a lie
+waiting to fail.** Chapters 2, 3 and now 6: `python3 tools/chapter.py written <slug>` was
+not run, so the record's `written:` field was filled in by hand afterwards. In chapters 5
+and 6 the invented time was *later than the real `reviewed` stamp the driver had written*,
+and `verify-record.py` failed on "stages out of order" both times — correctly.
+
+The gate caught it, so nothing false reached a closed record. But note what the near-miss
+was: **a fabricated timestamp that happened to be in the right order would have passed**,
+and the record would then assert a time that never happened, in the one file whose whole
+job is to be evidence. The hash does not protect this, because the hash covers the chapter,
+not the record.
+
+**Run the stage when you reach it.** The driver exists so the clock, not memory, writes the
+time. Where a stage genuinely has to be reconstructed, say so in the field itself — both
+chapter 5's and chapter 6's now carry *"approximate, reconstructed"* and the reason — so
+the record never claims a precision it does not have.
+
+**18. A gate can be structurally blind to a whole class of prose.** Chapter 6 used
+*reranker* and *context window* in plain sentences. Both appear **zero** times in chapters
+1 to 5, and chapter 6 neither bolded nor defined either: it leaned on the reader already
+knowing field jargon the book had not given them. `verify-inputs.py` reported
+`new-terms: 0` and was not lying — it read only **backticked** spans, and chapter 6
+contains no backticks at all. The gate written to catch exactly this missed it because the
+defect arrived in a form the gate could not see.
+
+The fix was to add a second check that walks a curated jargon list and fails on any of
+those terms used without being defined there and without appearing earlier. Two things
+about building it are worth more than the gate itself:
+
+1. **The first version cried wolf and would have been ignored.** It derived its vocabulary
+   by splitting `TOC.md` on word boundaries. It caught the real defect — and flagged
+   *combine*, *choice*, *minutes* and *pair*: **30 false positives on one chapter.** The
+   second version used a hand-written list, which still flagged chapter 2's "a second model
+   **judge** it acceptable", chapter 3's "approval given without real **attention**" and
+   chapter 5's "a stack **trace**". Only the third version — jargon with no ordinary-English
+   sense — is clean on all six chapters. **A gate that fires on correct input is worse than
+   no gate** (rule 1), so a term that doubles as plain English is deliberately absent from
+   the list, and this gate will never catch those. The completeness review is what catches
+   them, and it is what caught these two.
+2. **Proved both ways before wiring in** (rule 2): clean on chapters 1 to 6, and
+   `bare-terms: 1 FAIL` on a chapter with one `reranker` appended. The suite's loop was
+   proved the same way, not just the script.
+
+**The general lesson.** `verify-inputs.py` was itself born from a defect — the French
+book's chapter 38 ran a rule on two verbs the book had never printed. It was written to
+stop that, and it stopped the backticked version of it. **When a gate passes a chapter and
+the review then finds the very thing the gate exists to catch, the question is not whether
+the gate is enabled but whether the defect can reach the page in a form the gate cannot
+read.** Ask that of every gate here: `verify-render.py` reads Markdown, so it cannot see a
+LaTeX macro; `verify-coverage.py` reads the `TOC.md` Covers list, so it cannot see a promise
+made in a chapter's prose; `verify-absolutes.py` lists absolutes and judges none of them.
+
 **17. I read "0 overfull" out of the log of a build that had died.** This is the worst
 process failure in the project so far, and it is worth the length.
 

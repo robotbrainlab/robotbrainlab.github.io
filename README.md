@@ -21,7 +21,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 
 | Part | Chapters | Pages | Status |
 |---|---|---|---|
-| I · Understand — *Mental Model* | 1–7 | 98 | **Drafting** — 5 of 7 done |
+| I · Understand — *Mental Model* | 1–7 | 98 | **Drafting** — 6 of 7 done |
 | I · Understand — *Inside the Model* | 8–17 | 168 | Not started |
 | II · Use | 18–39 | 362 | Not started |
 | III · Apply | 40–50 | 190 | Not started |
@@ -36,7 +36,15 @@ About 1,042 numbered pages in all. Measured from the current build (`latex/book.
 | 2 | 10 pp (13–22) | 18 | 56% |
 | 3 | 10 pp (23–32) | 14 | 71% |
 | 4 | 9 pp (33–41) | 16 | 56% |
-| 5 | 12 pp (42–53) | 14 | 86% |
+| 5 | 8 pp (42–49) | 14 | 57% |
+| 6 | 8 pp (50–57) | 12 | 67% |
+
+Chapters 1–6 average 9 printed pages against a 14-page average estimate.
+
+**Measure a chapter by where its own text ends, not by where the next chapter starts.**
+Chapter 5 was first recorded as 12 pp because the four part-opener pages that follow it
+were counted into it; it is 8. The part openers for *Inside the Model* and Parts II–IV all
+sit after the last written chapter until those parts have chapters of their own.
 
 The estimates are estimates, never targets — `BOOK-GUIDE.md` §11. Read `LEDGER-DEFECTS.md`
 entry 12 before drawing any conclusion from the percentages; the figures there were taken

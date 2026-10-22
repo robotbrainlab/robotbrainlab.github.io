@@ -14,6 +14,19 @@ run "VOICE    the book never refers to its own origins" python3 tools/verify-voi
 run "BOUNDARY no theory outside BOOK-GUIDE section 6"   python3 tools/verify-boundary.py
 run "RENDER   markdown renders as written"              python3 tools/verify-render.py
 run "RECORD   every chapter evidenced and fresh"        python3 tools/verify-record.py
+# Per-chapter, but the bare-jargon half of verify-inputs.py is a verdict rather than a hint
+# list, so it belongs in the suite. Chapter 6 used "reranker" and "context window", neither
+# of which the book had given the reader; every gate passed it, because this one read only
+# backticked spans and chapter 6 has no backticks. See LEDGER-DEFECTS.md entry 18.
+for ch in markdown/[0-9][0-9]-*.md; do
+  [ -e "$ch" ] || continue
+  out=$(python3 tools/verify-inputs.py "$ch" 2>&1) || {
+    printf '\n=== INPUTS   no field jargon used before the book gives it ===\n'
+    printf '%s\n' "$out" | grep -E 'BARE|bare-terms'
+    echo "  in $ch"
+    fail=1
+  }
+done
 run "OUTLINE  the PDF outline nests correctly"          python3 tools/verify-outline.py
 
 printf '\n=== BUILD  0 overfull / 0 glyphs / 0 undefined ===\n'

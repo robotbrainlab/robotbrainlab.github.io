@@ -88,6 +88,12 @@ end
 -- cell (capped), never narrower than its longest word. Measured before inline code
 -- is rewritten (stringify ignores raw LaTeX).
 local CHAR_PT = 4.5   -- average advance at table size (serif 9 pt / mono 7.6 pt)
+-- Bold runs wider than the average. Measured 2026-10-23 against chapter 6's evidence table,
+-- whose bold first column overflowed by 1.76pt on "Announcement" and 0.91pt on
+-- "Demonstration" while the estimate said both fitted: bold Crimson Pro at 9pt needs about
+-- 5.7pt per character where the serif average is 4.5. A column's minimum must be measured
+-- with the weight the text is actually set in, or the table silently overflows.
+local BOLD_FACTOR = 1.30
 local function measure_table(tbl)
   local ncols = #tbl.colspecs
   local maxlen, maxword = {}, {}
@@ -99,6 +105,16 @@ local function measure_table(tbl)
           local text = pandoc.utils.stringify(cell.contents)
           maxlen[c] = math.max(maxlen[c], utf8.len(text) or #text)
           for w in text:gmatch('%S+') do maxword[c] = math.max(maxword[c], utf8.len(w) or #w) end
+          -- the same scan again over bold runs only, charged at BOLD_FACTOR
+          local bold = {}
+          pandoc.walk_block(pandoc.Div(cell.contents), {
+            Strong = function(s) bold[#bold + 1] = pandoc.utils.stringify(s.content) end })
+          for _, bt in ipairs(bold) do
+            for w in bt:gmatch('%S+') do
+              local n = (utf8.len(w) or #w) * BOLD_FACTOR
+              maxword[c] = math.max(maxword[c], n)
+            end
+          end
         end
       end
     end
@@ -107,7 +123,7 @@ local function measure_table(tbl)
   for _, body in ipairs(tbl.bodies) do scan(body.body) end
   local minshare, want, sum = {}, {}, 0
   for c = 1, ncols do
-    minshare[c] = (math.min(maxword[c], 18) * CHAR_PT + 8) / TEXT_WIDTH
+    minshare[c] = (math.min(maxword[c], 18 * BOLD_FACTOR) * CHAR_PT + 8) / TEXT_WIDTH
     want[c] = math.min(maxlen[c], 60) + 4
     sum = sum + want[c]
   end
