@@ -9,6 +9,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 
 | | |
 |---|---|
+| **Start here** | `HANDOVER.md` — decisions, state, what is blocked |
 | Spec | `BOOK-GUIDE.md` |
 | Table of contents | `TOC.md` |
 | Chapter sources | `markdown/` (the only source of truth) |
