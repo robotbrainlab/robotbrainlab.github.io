@@ -93,6 +93,7 @@ Notes:
 | `_tools/text-check.py` | Proves a page's text, links and element ids did not change |
 | `_tools/link-check.py` | Checks every internal link and `#anchor` on the site resolves |
 | `_backup/data-intelligence/index.html` | The old D&I guide page with the pipeline diagram |
+| `_book/` | **The interview-prep book** — a whole separate project living here for safekeeping. Unpublished (leading `_`). See "The interview-prep book" below |
 
 Removed on purpose, so don't recreate them: the Mathematics and D&I on-ramps, the separate `cse/on-ramp.html` page
 (merged into the CS&E guide on 2026-09-27, so each discipline has one guide; the site is for the owner only, so no redirect is kept), and the old `redesign/`
@@ -232,6 +233,64 @@ The originals outside this repo were deleted. Commit **every** file in `_sources
 and `.DS_Store`. The books' own `.gitignore` files exclude LaTeX output, so use `git add -f` and check that
 the number of files on disk matches the `git ls-files` count. Scan for secrets before committing
 (the repo is public).
+
+---
+
+## The interview-prep book (`_book/`)
+
+*Added 2026-10-23.*
+
+**What it is.** A book, *Modern AI Engineering from Zero*, written to prepare the owner for
+AI/LLM application-engineer interviews before 31 December 2026. 57 chapters and 4 appendices
+planned, about 1,040 pages. Part I (chapters 1–7, 68 printed pages) is finished.
+
+**Why it is in this repository.** It started as its own local repository. Its GitHub remote
+was configured but the repository was never created, so nothing was ever pushed and the only
+copy was on one machine. Rather than lose it, the owner chose to keep it here, where a remote
+already exists. **It is temporary** and will be removed once the job search ends.
+
+**It has nothing to do with the website.** It is not linked from any page, it is not part of
+the restyle, and it must never appear on the live site. The leading underscore is what
+guarantees that: GitHub Pages runs Jekyll with default settings, so `_book/` is never
+published. `_tools/link-check.py` does not scan it either — it still reports 81 pages, the
+same as before the move.
+
+**Its history came with it.** The move was a subtree-style merge, not a copy, so all 31 of
+the book's own commits are in this repository's history. They are reachable but their paths
+are the old ones (`markdown/…`, not `_book/markdown/…`), so `git log --follow` will not trace
+a file across the move. To read a book file's history before the move:
+
+```bash
+git log --oneline e8aadd3 -- markdown/05-where-the-work-goes.md
+```
+
+**How to work on it.** The book governs itself and does not follow this file. Read, in order:
+
+| Read | For |
+| --- | --- |
+| `_book/HANDOVER.md` | Every decision with its reason, the current state, what is blocked |
+| `_book/BOOK-GUIDE.md` | Scope, the maths boundary, style, the five-step writing loop, the gates |
+| `_book/TOC.md` | All 57 chapters and 4 appendices, and who owns which concept |
+| `_book/LEDGER-TAUGHT.md` | What each finished chapter taught, and what a later chapter must not re-introduce |
+| `_book/LEDGER-DEFECTS.md` | 20 entries of what the gates cannot catch. Read before writing a chapter |
+
+Two rules worth knowing before you open any of them: **one chapter at a time** (never a part
+at a time), and **`bash _book/tools/check-all.sh` must end `ALL GATES PASS`** before a chapter
+is closed. Build the PDF with `bash _book/tools/build-probe.sh`, which reports a build's exit
+status beside its warning counts and refuses to report the counts at all when the build
+failed — read `LEDGER-DEFECTS.md` entry 17 for why that exists.
+
+**Cleaning it up later.** Removing it is one commit, and nothing on the site depends on it:
+
+```bash
+git rm -r -q _book
+git commit -m "Remove the interview-prep book; the job search is over"
+```
+
+That leaves the book's 31 commits in the history, so it stays recoverable
+(`git checkout <commit> -- markdown/`). To get it out of the history as well, the move
+commit `0343354` is the merge to drop — but that is a history rewrite on a published
+branch, so do it only if there is a reason, and never without asking.
 
 ---
 

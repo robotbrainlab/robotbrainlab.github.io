@@ -7,8 +7,12 @@ AskUserQuestion tool):
 
 1. **Changing the HTML look.** This means the restyle to the reference design; content stays letter-for-letter.
 2. **Working on the website.** This means content, pages, links, books, the roadmap sources, publishing.
+3. **Writing the interview-prep book.** The book in `_book/`. It has nothing to do with the
+   website and governs itself — go straight to `_book/HANDOVER.md` and `_book/BOOK-GUIDE.md`
+   and follow those, not this file.
 
-Then follow the matching section of the handover: "Restyle work" or "Website work".
+Then follow the matching section of the handover: "Restyle work", "Website work", or
+"The interview-prep book".
 If the user's first message already makes the answer obvious, confirm it in one line instead
 of asking.
 
