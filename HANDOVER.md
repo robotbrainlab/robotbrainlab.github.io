@@ -28,11 +28,11 @@ Do not reopen these. Each one was decided with the owner.
 | 3 | **About 1,040 pages, with headroom to 1,175** | The owner reads quickly and will put in more hours if the pages buy content. **A page target that costs theory is forbidden.** Page counts follow the material. Never pad a chapter to reach a number either | A 500-page version, and later a 650-page version, both recommended to the owner and both overruled |
 | 4 | **This repository sits outside the website repository** | The book is not website material. The website repository is public. This book is temporary, and the website repository's rule is "commit every file and keep it forever" | `_sources/modern-ai/` inside the website repository |
 | 5 | **The book never mentions the website** | The syllabus came from the owner's own research notes. The book stands alone. No chapter may name a website, a roadmap, a learning path, numbered steps or tracks | — |
-| 6 | **Four parts, plus an unnumbered pre-part** | The owner's books always have four parts. *The Complete Software Engineering Guide* already uses an unnumbered pre-part for *How Web Applications Work*, so the device is proven | A fifth part |
-| 7 | **An interlude teaches the model's mechanism** | Interviews ask how attention works, why long context costs more, why models hallucinate, and what a key--value cache is. The earlier plan treated the model as a black box. That was a real gap | Leaving the model as a black box |
-| 7a | **The interlude comes *after* Part I, not before it** | Four of its chapters open with problems only Part I makes sensible ("I was billed for tokens", "I set temperature to zero"). The old plan's own preface told the reader he could read Part I first and come back — if the preface must say that, the order is wrong. Putting Part I first also removes a duplication without cutting a page | The interlude first, which was the plan until 2026-10-22 |
+| 6 | **Four parts, and one of them has two halves** | The owner's books always have four parts, and that convention held. The device for dividing a part came from the same place as everything else here: `\prebookpart` in *The Complete Software Engineering Guide*, scaled down into `\booksubpart`. See decision 7a for where the division landed | A fifth part |
+| 7 | **The book teaches the model's mechanism, not just its interface** | Interviews ask how attention works, why long context costs more, why models hallucinate, and what a key--value cache is. The earlier plan treated the model as a black box. That was a real gap | Leaving the model as a black box |
+| 7a | **"Inside the Model" is the second half of Part I, not a part and not an interlude** | Deepak, 22 Oct 2026: *"it is understanding right?"* He is correct, and it settles a question I had answered badly twice. By the book's own part names — Understand, Use, Apply, What Next — chapter 11 "Attention, Worked by Hand" files under Understand without hesitation. Part I therefore has two halves, both Understand: *Mental Model* (chs 1–7, the system around the model) and *Inside the Model* (chs 8–17, the model itself), divided by `\booksubpart`. The order within the part is load-bearing: four of the second half's chapters open with problems only the first half makes sensible | Making it Part II and renumbering (wrong in kind — it is not a step in the Understand→Use→Apply progression); keeping it unnumbered and relabelling it "Interlude" (Deepak rejected it, and he was right: the label marked as a detour something that is not one) |
 | 8 | **Mathematics yes. ML and DL theory no** | The owner asked for this exactly. The line is: teach what the model computes when it answers; state how it learned and move on. `BOOK-GUIDE.md` §6 draws the line | Teaching gradients, optimisers and learning theory |
-| 9 | **Chapters are numbered straight through, 1 to 57** | Appendix B keys 100 interview answers to chapter numbers. Unnumbered chapters make that clumsy | Unnumbered interlude chapters, as in the big book |
+| 9 | **Chapters are numbered straight through, 1 to 57** | Appendix B keys 100 interview answers to chapter numbers. Unnumbered chapters make that clumsy. Part I takes 1–17 across both halves | Restarting the numbering at each half |
 | 10 | **Serving, cost and security live in Part IV** | They are the answers to the four threads — Security, Speed, Cost, Failure. Part IV therefore carries 110 pages and is not a thin ending | Ordinary chapters in Part II |
 | 11 | **Appendix B is an interview bank** | It is the reason the book exists. Write it last, from the finished chapters, never from memory | — |
 | 12 | **Part III is one system that grows** | Lab 42 builds on labs 40 and 41. Standalone labs repeat themselves and cost about 25 more pages | Nine independent labs |
@@ -120,8 +120,11 @@ template's preamble over this one.**
    matches Crimson Pro, which is a Garamond face, and EB Garamond on the cover.
 2. `amssymb` is removed. With `unicode-math` it fails with "Command `\eth` already defined".
    Nothing here uses an amssymb-only command.
-3. `\prebookpart{<label>}{<title>}{<what to ignore>}` is added. It is an unnumbered part opener
-   in the same design as `\bookpart`.
+3. Two opener macros are added. `\booksubpart{<numeral>}{<title>}{<what to ignore>}` divides a
+   numbered part into halves, in smaller type with a thinner rule and an indented contents
+   entry; Part I uses it twice. `\prebookpart` is an unnumbered opener for a section before
+   Part I — ported from the big book, currently **unused**, and it should stay unused unless
+   something genuinely belongs before chapter 1.
 
 **Mathematics is written as raw LaTeX, never as `$…$`.** `tools/convert.sh` disables dollar maths
 on purpose, so a price like $5 stays text. This book is full of prices.

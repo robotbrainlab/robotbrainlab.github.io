@@ -73,8 +73,7 @@ note; Part IV has none, because its last chapter says what to skip.
 
 | Part | Purpose | Share |
 |---|---|---|
-| *Before Part II · Inside the Model* | What the model computes when it answers. Notation, worked by hand. Set with `\prebookpart`, so it carries no part number and the four numbered parts stay four. It comes **after** Part I: the reader must know what a model is for before the mechanism means anything, and four of its chapters open with problems only Part I makes sensible. | ~16% |
-| **I · Understand** | The system around the model. Opens with the book's problem. Little or no code. The book starts here. | ~9% |
+| **I · Understand** | What the thing is and how it works. Little or no code. **It has two halves, and both are Understand:** *Mental Model* (chapters 1–7) is the system around the model and opens with the book's problem; *Inside the Model* (chapters 8–17) is the model itself, with notation worked by hand. The join is marked with `\booksubpart`, not with a new part — a reader filing "Attention, Worked by Hand" under Understand, Use, Apply or What Next files it under Understand without hesitating. The order within the part matters: the mechanism means nothing until you know what the model is for. | ~25% |
 | **II · Use** | Become a confident user of every piece of the system. | ~35% |
 | **III · Apply** | Labs that build one small system, lab by lab, on data the book ships. | ~18% |
 | **IV · What Next** | The four threads, one whole system designed aloud, then what to learn next and what to skip. | ~13% |
@@ -82,9 +81,15 @@ note; Part IV has none, because its last chapter says what to skip.
 
 These shares differ from a short from-zero book on purpose: Part II carries most of the material,
 and Part IV is substantial because the four threads are where serving, cost and security live.
-Chapters are numbered straight through, 1--57: Part I takes 1--7, the interlude 8--17, Part II
+Chapters are numbered straight through, 1--57: Part I takes 1--17 across its two halves, Part II
 18--39, Part III 40--50 and Part IV 51--57. Parts I--III each open with a "What to ignore for now"
-note, and so does the interlude.
+note, and so does each half of Part I.
+
+**Three opener macros, and they are not interchangeable.** `\bookpart` opens a numbered part.
+`\booksubpart` opens a half of one, in smaller type with a thinner rule and an indented
+contents entry. `\prebookpart` opens an unnumbered section before Part I; it is ported from the
+big book, it is currently unused here, and it should stay unused unless something genuinely
+belongs before chapter 1.
 
 ### Every chapter (Parts I–III)
 
@@ -302,8 +307,9 @@ re-copy it over this one:
 1. `amsmath` and `unicode-math` are loaded, with `\setmathfont{Garamond-Math.otf}`.
 2. `amssymb` is removed. Loading it alongside `unicode-math` fails with
    "Command `\eth` already defined", and nothing here needs an amssymb-only command.
-3. `\prebookpart{<label>}{<title>}{<what to ignore>}` is added: an unnumbered part opener in
-   the same design as `\bookpart`.
+3. Two opener macros are added: `\booksubpart`, which divides a numbered part into halves
+   (Part I uses it twice), and `\prebookpart`, an unnumbered opener for a section before
+   Part I, currently unused.
 
 `markdown/_maths-proof.md` is the proof page for all of this. Its name starts with an underscore,
 so `convert.sh` skips it; to rebuild it, copy it to a name without the underscore and add its

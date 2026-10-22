@@ -16,8 +16,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 # Each part of TOC.md becomes one chapter of the review PDF.
 CHAPTERS = {
-    'Part I · Understand': '01-part-i',
-    'Before Part II · Inside the Model': '02-interlude',
+    'Part I · Mental Model': '01-part-i-mental-model',
+    'Part I · Inside the Model': '02-part-i-inside-the-model',
     'Part II · Use': '03-part-ii',
     'Part III · Apply': '04-part-iii',
     'Part IV · What Next': '05-part-iv',

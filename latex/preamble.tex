@@ -334,6 +334,28 @@
     \begin{callout}{note}\textit{What to ignore for now:} #3\end{callout}}%
   \clearpage}
 
+% \booksubpart{<part numeral>}{<title>}{<what to ignore for now, or empty>}
+% A division INSIDE a numbered part, for a part that has two halves of different
+% character. Part I has two: the system around the model, and the model itself. Both are
+% Understand, which is why neither is a part of its own -- but the ground changes at the
+% join and the reader is told so. Lighter than \bookpart: smaller title, thinner rule, and
+% its contents entry is indented under the part's.
+\newcommand{\booksubpart}[3]{%
+  \clearpage
+  \thispagestyle{empty}\markboth{}{}%
+  \phantomsection
+  \addcontentsline{toc}{part}{\hspace*{1.2em}#2}%
+  \vspace*{96pt}%
+  \begingroup\raggedleft
+    {\chapterlabelfont PART #1\par}\vspace{11pt}%
+    {\chaptertitlefont\fontsize{22}{26}\selectfont #2\par}\vspace{13pt}%
+  \endgroup
+  {\color{ink}\titlerule[0.6pt]}\par
+  \ifstrempty{#3}{}{%
+    \vspace{34pt}%
+    \begin{callout}{note}\textit{What to ignore for now:} #3\end{callout}}%
+  \clearpage}
+
 % \prebookpart{<label>}{<title>}{<what to ignore for now, or empty>}
 % A front section that comes BEFORE Part I and carries no part number, so Part I stays
 % Part I. Same opener design as \bookpart. Adapted from The Complete Software

@@ -6,13 +6,14 @@
   estimate for planning, not a limit.** No chapter is capped at the cost of its content, and
   nothing is padded to reach a number. Chapters that need more take more; chapters that need
   less are not padded. See `BOOK-GUIDE.md` §11.
-- **Structure:** Part I · Understand (98 pp), then the unnumbered interlude *Inside the Model*
-  (168 pp), then II · Use (362 pp) · III · Apply (190 pp) · IV · What Next (136 pp) ·
-  Appendices (83 pp), plus five part-opener pages.
+- **Structure: four parts.** I · Understand (266 pp, in two halves — *Mental Model*,
+  chapters 1–7, and *Inside the Model*, chapters 8–17) · II · Use (362 pp) · III · Apply
+  (190 pp) · IV · What Next (136 pp) · Appendices (83 pp), plus the part and sub-part
+  opener pages.
 - **Order is reading order.** The book is written in the order it is read, and each part is
   delivered as its own PDF as it is finished.
-- **Chapters are numbered straight through, 1–57.** The interlude is unnumbered as a *part*; its
-  chapters are not.
+- **Chapters are numbered straight through, 1–57.** Part I takes 1–17 across both of its
+  halves; the halves divide the part, they do not restart the numbering.
 - **Coverage:** all 83 concepts of the nine subject areas, each **owned** by one chapter (see
   *Who owns what*), plus the model's own mechanism, plus the material an interview tests that the
   nine subject areas do not name.
@@ -23,9 +24,17 @@
 
 ---
 
-## Part I · Understand — 7 chapters, 98 pp
+## Part I · Mental Model — chapters 1–7, 98 pp
 
-*What to ignore for now:* what is inside the model, and every setting, price and product name.
+**Part I has two halves, and both of them are *Understand*.** The first is the system
+around the model; the second is the model itself. Neither is a part of its own, because
+both answer the same question — *what is this thing and how does it work* — but the ground
+changes at chapter 8 and the reader is told so, with a sub-part opener (`\booksubpart`).
+
+*Part I's own note:* ignore every setting, price and product name. This part is what the
+thing is, not how you drive it.
+
+*What to ignore for now, in this half:* what is inside the model — the second half opens it.
 
 | # | Chapter | Opens with | Covers | pp |
 |---|---|---|---|---|
@@ -35,13 +44,14 @@
 | 4 | The Agent Loop, and How Much Freedom It Actually Gets | "Agent" sounds like it does the whole job by itself. That can't be how anyone ships this. | The loop: decide, call a tool, read the result, continue; where control flow moves; compounding error; how short real deployed loops are; approval points; why bounded autonomy is the norm | 16 |
 | 5 | Where the Work Actually Goes | I assumed the hard part was writing the prompt. People who do this for a living say it isn't. | Choosing what information reaches the model; deciding what it may do; finding out whether the output was any good; controlling what it costs; how much of the real job is evaluation and error analysis | 14 |
 | 6 | What Changes Fast, and What Changes Slowly | Half of what I read is already out of date and I can't tell which half. | Lasting principles, current conventions, and details that will date; telling which of the three a claim is; **how strong the evidence is** — one study, a survey, or settled practice — and how to say so out loud; how to read a release announcement; what to memorise and what to look up | 12 |
-| 7 | A Map of This Book | There's clearly a lot here. I don't know what order to learn it in, or what I can safely leave until later. | The four parts and the interlude; the chapters an interview reaches first; the one small system the labs build; what this book deliberately leaves out | 10 |
+| 7 | A Map of This Book | There's clearly a lot here. I don't know what order to learn it in, or what I can safely leave until later. | The four parts, and Part I's two halves; the chapters an interview reaches first; the one small system the labs build; what this book deliberately leaves out | 10 |
 
-## Before Part II · Inside the Model — 10 chapters, 168 pp
+## Part I · Inside the Model — chapters 8–17, 168 pp
 
-An unnumbered interlude, set with `\prebookpart`, so the four numbered parts stay four. Part I
-said what the model is for. This says what it *does* when it answers, with real notation. It does
-**not** teach machine-learning or deep-learning theory: `BOOK-GUIDE.md` §6 draws the line.
+The second half of Part I, set with `\booksubpart`. The first half said what the model is
+for; this says what it *does* when it answers, with real notation. Both halves are
+*Understand*, which is why neither is a part of its own. It does **not** teach
+machine-learning or deep-learning theory: `BOOK-GUIDE.md` §6 draws the line.
 
 *What to ignore for now:* how the model was trained, beyond the shape of the loop.
 
