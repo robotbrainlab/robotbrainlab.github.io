@@ -6,32 +6,32 @@ Tick a box only with **evidence** after it: a command result, a count, a line nu
 `shasum -a 256 markdown/<stem>.md`
 
 chapter: markdown/01-what-a-model-is.md
-sources:
-non-scope:
+sources: TOC.md L28-30 (Part I heading + the chapter-1 row: opening problem, 5-item Covers list, 14 pp); orientation concept 1 "The model, and what you get from it", read with all 7 concepts so concepts 2-7 could be excluded as chapters 2-7's property. No published book was available on this machine; subject matter is my own knowledge, which is why every durable claim is written as mechanism and every datable one is a Note.
+non-scope: context/retrieval/tools/checks/people as a system (ch 2); why it is assembled that way (ch 3); agents and the loop (ch 4); where the effort goes (ch 5); durable vs datable (ch 6); tokens and the unit of text (ch 10); anything inside the model (chs 8-17); fine-tuning as a procedure (ch 39); measuring or reducing cost and latency (chs 52-53).
 begun: 2026-10-22T15:38:21+05:30
-written:
+written: 2026-10-22T15:52:56+05:30
 reviewed:
-absolutes:
-new-terms:
-covers-misses:
+absolutes: 44 after the fixes (38 before). 6 failed a counter-example and were rewritten: "disappoint you in the same way tomorrow" (false - replies vary, ch 13), "nothing is remembered" (true of the model, false of products that resend history), "never seen your material" (public material may well have been trained on), "cannot look anything up" (true of the model, not of products with search), "refuses almost nothing" (models refuse plenty; the claim meant the interface sets no limit), "two requests meet the identical model" (providers replace models).
+new-terms: 0 new backticked terms against 0 earlier chapters. Triaged by hand instead: grep confirms the chapter uses none of token/context/retrieval/tool/agent, so chapters 2, 4 and 10 may introduce all five. Latency is used and defined here, so chs 15 and 52 must not call it new - recorded in LEDGER-TAUGHT.md.
+covers-misses: 0. verify-coverage.py reports 0 against the chapter-1 Covers list, before and after the fixes.
 sha256:
 
 ## Before writing
 
-- [ ] `LEDGER-TAUGHT.md` consulted — what the reader already knows, and every "Do not" row read. The opening claims nothing false about what came before
-- [ ] The chapter's `TOC.md` row read: its opening problem, its Covers list, its page budget
-- [ ] **The chapter's non-scope declared** in the field above — what this chapter does not cover, so review has an edge and can terminate
-- [ ] Sources read **in full, immediately before writing** — named, with what was read
-- [ ] `BOOK-GUIDE.md` §6 boundary cases and `LEDGER-DEFECTS.md` to hand
+- [x] `LEDGER-TAUGHT.md` consulted — what the reader already knows, and every "Do not" row read. The opening claims nothing false about what came before — ch 1 is the first chapter, so the ownership table applies but no per-chapter row existed; grep 'Do not' returned 10 rows, all for chapters 8+; none constrains this chapter. Its own row was written on close and then corrected after a grep disproved it
+- [x] The chapter's `TOC.md` row read: its opening problem, its Covers list, its page budget — L28-30; opening problem copied word for word into the chapter's *The problem.* line; 5 Covers items; 14 pp budget
+- [x] **The chapter's non-scope declared** in the field above — what this chapter does not cover, so review has an edge and can terminate — written in the field above before writing, from orientation concepts 2-7 and the Part I 'what to ignore for now' line
+- [x] Sources read **in full, immediately before writing** — named, with what was read — all 7 orientation concepts extracted and read in one pass, then the chapter written with nothing read in between
+- [x] `BOOK-GUIDE.md` §6 boundary cases and `LEDGER-DEFECTS.md` to hand — §6's four decided cases read; none applies to ch 1, which teaches no mechanism. LEDGER-DEFECTS entries 5, 7, 8 and 10 used as the while-writing checks
 
 ## While writing
 
-- [ ] **Every number recomputed** against the thing it describes, in the file, before it was written — say how many
-- [ ] **Every absolute tested** against a counter-example *in the book*, not only in this chapter — `verify-absolutes.py` count, and what failed
-- [ ] **Every term the chapter builds on** already given to the reader — `verify-inputs.py` count, each triaged
-- [ ] Maths written as raw LaTeX spans and fences, never `$…$`
-- [ ] The chapter holds the structure in `BOOK-GUIDE.md` §5; any lab is isolated and safe
-- [ ] Where a well-known explanation is wrong, the book states the correct rule — and it is flagged in the report
+- [x] **Every number recomputed** against the thing it describes, in the file, before it was written — say how many — the cost example is the only arithmetic: 8 numbers recomputed independently in Python after the rewrite - 0.0018/call, 18/day, 540/month, 0.00205/call, 20.5/day, 615/month, 13.9% ~ 'about 14 per cent', 25% input growth ~ 'a quarter'. The first version of this example was wrong and was replaced
+- [x] **Every absolute tested** against a counter-example *in the book*, not only in this chapter — `verify-absolutes.py` count, and what failed — verify-absolutes.py: 38 before fixes, 44 after; 6 failed and were rewritten (listed in the absolutes field above)
+- [x] **Every term the chapter builds on** already given to the reader — `verify-inputs.py` count, each triaged — verify-inputs.py: 0; hand-triaged by grep for the five deferred terms
+- [x] Maths written as raw LaTeX spans and fences, never `$…$` — no mathematics in this chapter; the one display block is a ```text block, not maths
+- [x] The chapter holds the structure in `BOOK-GUIDE.md` §5; any lab is isolated and safe — title, intro paragraph, *The problem.* / *The question.*, body, Lab with expected results per step, Summary / Key Terms / Review Questions / Review Answers, closing 'You understand this when'. No code, per Part I
+- [x] Where a well-known explanation is wrong, the book states the correct rule — and it is flagged in the report — two: that a model 'remembers' you (the product resends history), and that zero variation follows from fixed weights. Both corrected in the body and flagged in the report
 
 ## After writing
 
