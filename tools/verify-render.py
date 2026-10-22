@@ -6,8 +6,10 @@ and no other gate caught any of them. 0 overfull boxes, 0 missing glyphs and a c
 voice gate all pass a chapter whose practice items collapsed into one paragraph.
 
 Checks:
-  1. Consecutive numbered items with no blank line - two non-blank lines are ONE
-     paragraph in Markdown, so a list written without blank lines silently collapses.
+  1. Consecutive BOLD item markers (**A1.**) with no blank line - these are paragraphs,
+     not list syntax, so two non-blank lines become ONE paragraph and the items collapse.
+     A real "1. " marker is a list and is left alone: matching it fired on every Review
+     Questions block, which was a fault in this gate and not in the chapter.
   2. A table row followed directly by text - the row absorbs it.
   3. A heading with no blank line after it.
   4. Orphaned table rows: a run of `|...|` with no `|---|` as its second line. A note
@@ -25,7 +27,11 @@ Usage: python3 tools/verify-render.py [FILE ...]
 import glob, os, re, sys
 
 ROOT  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ITEM  = re.compile(r"^\*\*[A-Z]?\d+\.\*\*|^\d+\.\s")
+# Bold paragraph markers only - **A1.**, **3.** - which are NOT list syntax and so do
+# collapse into one paragraph. A real ordered-list marker ("1. ") makes a tight
+# \begin{enumerate} and is correct; matching it here was a false positive that fired on
+# every Review Questions block in chapter 1. Verified against the generated .tex.
+ITEM  = re.compile(r"^\*\*[A-Z]?\d+[.)]\*\*")
 ROW   = re.compile(r"^\s*\|.*\|\s*$")
 DELIM = re.compile(r"^\s*\|[\s:|-]+\|\s*$")
 HEAD  = re.compile(r"^#{1,6}\s")

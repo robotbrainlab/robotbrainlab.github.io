@@ -65,4 +65,21 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
-*(empty — add the first entry the first time something gets past every gate)*
+**11. A gate can encode a claim and be wrong the same way the writer would be.**
+`verify-render.py` flagged every Review Questions block in chapter 1 as "items run
+together into one paragraph". It was wrong: a real `1. ` marker is list syntax and makes
+a tight `\begin{enumerate}`, which renders correctly. The defect it was ported for is a
+**bold** paragraph marker (`**A1.**`), which is not list syntax and does collapse. I had
+broadened the pattern when porting it. **Check a reported finding against the generated
+`.tex` before treating it as a defect** — the same instruction the source project gives
+for its own coverage gate, which has a known false-positive class of its own.
+
+**12. A page budget is a guess until a chapter is built, and the words-per-page figure
+does not transfer between books.** Chapter 1 came in at **8 printed pages against a
+14-page budget**: 3,097 words of markdown, ~3,067 words printed across pages 8 to 15, so
+about **380 words per printed page**. The plan assumed 240, inherited from a book dense
+with tables, practice blocks and vocabulary lists. Prose runs far tighter than that.
+**Do not pad a chapter to reach its budget, and do not revise 57 budgets off one data
+point** — Part I is the most prose-heavy part of this book and the least representative.
+Re-measure after a chapter with worked arithmetic (chapter 11) and after a lab
+(chapter 40).
