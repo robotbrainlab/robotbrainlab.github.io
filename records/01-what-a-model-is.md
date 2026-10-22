@@ -10,11 +10,11 @@ sources: TOC.md L28-30 (Part I heading + the chapter-1 row: opening problem, 5-i
 non-scope: context/retrieval/tools/checks/people as a system (ch 2); why it is assembled that way (ch 3); agents and the loop (ch 4); where the effort goes (ch 5); durable vs datable (ch 6); tokens and the unit of text (ch 10); anything inside the model (chs 8-17); fine-tuning as a procedure (ch 39); measuring or reducing cost and latency (chs 52-53).
 begun: 2026-10-22T15:38:21+05:30
 written: 2026-10-22T15:52:56+05:30
-reviewed:
+reviewed: 2026-10-22T15:59:55+05:30
 absolutes: 44 after the fixes (38 before). 6 failed a counter-example and were rewritten: "disappoint you in the same way tomorrow" (false - replies vary, ch 13), "nothing is remembered" (true of the model, false of products that resend history), "never seen your material" (public material may well have been trained on), "cannot look anything up" (true of the model, not of products with search), "refuses almost nothing" (models refuse plenty; the claim meant the interface sets no limit), "two requests meet the identical model" (providers replace models).
 new-terms: 0 new backticked terms against 0 earlier chapters. Triaged by hand instead: grep confirms the chapter uses none of token/context/retrieval/tool/agent, so chapters 2, 4 and 10 may introduce all five. Latency is used and defined here, so chs 15 and 52 must not call it new - recorded in LEDGER-TAUGHT.md.
 covers-misses: 0. verify-coverage.py reports 0 against the chapter-1 Covers list, before and after the fixes.
-sha256:
+sha256: 1548e9d3b6be78d6235876836715e9f1449a3fdf85a5786c6af467eb47dc044f
 
 ## Before writing
 
@@ -35,16 +35,16 @@ sha256:
 
 ## After writing
 
-- [ ] `verify-render.py` · `verify-voice.py` · `verify-boundary.py` — all CLEAN
-- [ ] `verify-coverage.py` — every miss triaged **one by one**, not counted
-- [ ] `\input{chapters/01-what-a-model-is}` in `latex/book.tex`; `make` → 0 overfull · 0 missing glyphs · 0 undefined
-- [ ] **Completeness review** launched with the `BOOK-GUIDE.md` §14 brief
-- [ ] Each finding **verified before accepting**; each fix **grepped book-wide, count before and after — zero, or it is not done**
-- [ ] **Fix-verification pass** launched, naming every changed passage
-- [ ] `LEDGER-TAUGHT.md` row added; `LEDGER-DEFECTS.md` updated if a new defect class appeared
-- [ ] `README.md` status updated; the part's PDF delivered
+- [x] `verify-render.py` · `verify-voice.py` · `verify-boundary.py` — all CLEAN — all three CLEAN on the final text. render FAILED once with 8 findings, all false: the gate matched real ordered-list markers. Checked against the generated .tex, corrected the gate, re-proved it both ways (LEDGER-DEFECTS entry 11)
+- [x] `verify-coverage.py` — every miss triaged **one by one**, not counted — covers-misses 0 at draft, after the completeness fixes, and after the verification fixes. Nothing to triage
+- [x] `\input{chapters/01-what-a-model-is}` in `latex/book.tex`; `make` → 0 overfull · 0 missing glyphs · 0 undefined — present, grep count 1; make -> 23 pp total, the chapter is 10 printed pages, 0 overfull, 0 missing glyphs, 0 undefined
+- [x] **Completeness review** launched with the `BOOK-GUIDE.md` §14 brief — brief carried the chapter, both sources, the declared non-scope, the six categories, 7 named claims to verify independently, and the wrong-finding warning. Returned 16 findings ranked, plus verdicts on all 7 claims
+- [x] Each finding **verified before accepting**; each fix **grepped book-wide, count before and after — zero, or it is not done** — 16 accepted, 0 rejected. Both high findings verified against TOC.md directly: chapter 2 has five parts not four, and chapter 3's four reasons contain no cost-watching need. Every replacement asserted count==1 before and 0 survivors after; a closing grep for all phrasings of the withdrawn claims returned zero
+- [x] **Fix-verification pass** launched, naming every changed passage — 14 changed passages named individually. Returned 6 findings, all accepted and applied with counted sweeps. It recomputed all 11 numbers in the cost example independently and confirmed each; items 1, 2, 4, 8, 10 and 11 of the list returned NO ISSUES
+- [x] `LEDGER-TAUGHT.md` row added; `LEDGER-DEFECTS.md` updated if a new defect class appeared — row added, corrected after a grep disproved its own claim, then extended with the three request labels the worked exchange spends. LEDGER-DEFECTS gained entries 11 and 12
+- [x] `README.md` status updated; the part's PDF delivered — README Part I row set to Drafting, and its stale chapter ranges from the reorder corrected at the same time. PDF delivered
 
 ## Reviews
 
-completeness-review:
-fix-verification:
+completeness-review: 16 findings, 0 rejected. Two high, both checkable against the plan: a closing paragraph promising four parts where chapter 2 has five, with accountability silently swapped for a cost-watching need matching no part; and a worked cost example whose flat per-request premise refuted its own doubling conclusion while omitting the reply. 14 moderate/low, all applied. It verified 7 named claims independently, found all 7 true, and corrected my own premise about the page budget.
+fix-verification: 6 findings, 0 rejected, all applied with counted sweeps. One exposed a gap in the PLAN rather than the chapter: the Settings bullet pointed at chapter 13 for 'how long the reply may run', and no chapter in the whole TOC owned an output-length setting. Chapter 13's Covers extended. All 11 numbers recomputed and confirmed right.

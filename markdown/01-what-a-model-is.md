@@ -42,7 +42,7 @@ very large collection of numbers.
 
 **Inference** is what you do. You send text to the finished model and it computes a reply.
 Nothing is learned: the numbers do not change because you called it, so the model itself
-carries nothing from one call to the next. Products that appear to remember you store your
+carries nothing from one call to the next. Products that appear to remember you, store your
 earlier messages and send them again with the next request. The memory is in the product.
 It is never in the model.
 
@@ -57,8 +57,8 @@ The model you call was trained once and its numbers are now fixed. Two things ar
 it, and the second surprises people.
 
 The first: it will not get better at your task overnight. A weakness you find today is
-still there tomorrow — unless the provider swaps the model underneath you, which is the
-next paragraph.
+still there tomorrow — unless the provider swaps the model underneath you, and more on
+that in a moment.
 
 The second: it will not repeat itself exactly either. Two identical requests usually come
 back worded differently. That has nothing to do with the numbers being fixed. It comes
@@ -100,16 +100,9 @@ You get back:
   code can read.
 - **An accounting of how much text moved**, which is what you are billed on.
 
-That is the whole interface. There is no query language to learn, nothing to configure, no
-index to build. The absence is disorienting at first. Most components you call accept only
-the requests they were built for and refuse everything else, so the limit on what you can
-ask is obvious and the answer, when it comes, is the right kind of thing. A model's interface sets no
-such limit: you can ask it anything, and it will almost always produce something that
-looks like an answer. Your difficulty moves somewhere else entirely — to finding out
-whether what came back is right.
-
-Here is one, with every part labelled. Nothing here is special to any provider, and no
-library is involved: it is text going out and text coming back.
+Here is one exchange with the three parts of the request marked. The settings are not
+shown, because they travel beside the text rather than in it, and the accounting comes
+back with the reply. Nothing here is special to any provider.
 
 ```text
 WHAT YOUR PROGRAM SENDS
@@ -126,10 +119,18 @@ WHAT COMES BACK
     You can track it with the reference KP-9930.
 ```
 
-Two things in that exchange are worth marking now, because the rest of Part I grows out of
-them. The model had never heard of order 4471; it answered because the order's details were
-**put into the request** by somebody's code. And the instruction *"say you do not know"* is
-there because, left alone, the model would have answered anyway.
+Two things in that exchange are worth marking, because the rest of Part I grows out of
+them. The model had never heard of order 4471. It answered because the order's details
+were put there by somebody's code, in the request itself. And the instruction *"say you do
+not know"* is in there because, left alone, the model would have answered anyway.
+
+That is the whole interface. There is no query language to learn, nothing to configure, no
+index to build. The absence is disorienting at first. Most components you call accept only
+the requests they were built for and refuse everything else, so the limit on what you can
+ask is obvious, and the answer, when it comes, is the right kind of thing. A model's
+interface sets no such limit: you can ask it anything, and it will almost always produce
+something that looks like an answer. Your difficulty moves somewhere else entirely — to
+finding out whether what came back is right.
 
 > **Note:** The amount of text is not measured in words or characters. It has its own unit
 > with its own rules, and those rules explain several things that look like bugs. Chapter
@@ -145,7 +146,8 @@ usually written, how documents are usually shaped. This breadth is what makes a 
 model useful on a task nobody prepared it for.
 
 **Its knowledge stops at a date.** Training consumed text gathered up to some point and no
-further. That point is the model's **training cut-off**. Anything after that point is absent — not wrong, absent. The model has no way of
+further. That point is the model's **training cut-off**. Anything after that point is absent
+— not wrong, absent. The model has no way of
 knowing that it is missing something, which is why it will often answer a question about
 last week with the confidence it uses for a question about last century.
 
@@ -222,7 +224,8 @@ input goes from 1,000 words to 1,250, so the call costs 0.00125 + 0.0008 = 0.002
 
 The feature has not changed and no user has noticed. The bill is up about 14 per cent, for
 as long as the feature exists. Note what did *not* happen: the input grew by a quarter and
-the bill grew by a seventh, because the dearer half of it is the reply. **Which half of
+the bill grew by a seventh, because the dearer half of the exchange is the reply. **Which
+half of
 the exchange you are growing decides how much a change costs you.**
 
 > **Note:** Every price in this field changes, and the cheap model of this year is the
@@ -306,10 +309,12 @@ a later part of this book spends so long on measurement.
 **Step 5.** Ask one of them a question about something that happened in the last few days,
 and one about your own private information.
 
-*Expected result:* one of two things, and both are worth having. Either a confident answer
+*Expected result:* one of three things, and all three are worth having. A confident answer
 that cannot possibly be grounded in anything the model knows — keep it, it is the most
-useful thing in this lab. Or an answer that is correct, which means it did not come from
-the model at all: something fetched it and put it in the request. That is Chapter 2.
+useful thing in this lab. Or a correct answer, which means it did not come from the model
+at all: something fetched it and put it in the request, and that is Chapter 2. Or a
+refusal — "I cannot browse the web", "I have no access to your account" — which is the
+product telling you where its boundary is.
 
 ## Summary, Key Terms, and Review Questions
 
@@ -337,19 +342,34 @@ phases, one before the first word and one that paces the rest.
 
 ### Review Questions
 
-1. A colleague says "we trained the model on our support tickets". What two different things could they mean, and how would the costs differ?
-2. You ask a model about an event from last week and get a confident, detailed answer. Give two reasons the answer might be worthless.
-3. Your feature sends a page of standing instructions with every request. The feature is unchanged for six months. What happens to its cost, and what decides how much it costs you?
+1. A colleague says "we trained the model on our support tickets". What two different things
+could they mean, and how would the costs differ?
+2. You ask a model about an event from last week and get a confident, detailed answer. Give
+two reasons the answer might be worthless.
+3. Your feature sends half a page of standing instructions with every request. The feature
+is unchanged for six months. What happens to its cost, and what decides how much it costs
+you?
 4. Why does a long reply take longer to arrive than a short one, even on the same model?
-5. Name the one thing in the exchange you do not control, and the three options you have when the model does something you do not want.
+5. Name the one thing in the exchange you do not control, and the three options you have
+when the model does something you do not want.
 
 ### Review Answers
 
-1. They may mean **inference** — sending ticket text in each request, which costs per call and changes nothing permanently. Or they may mean continuing the model's **training** on those tickets, which is a one-off project with its own costs and leaves them owning a model they must maintain. Chapter 39 covers the second.
-2. The event may fall after the model's training cut-off, so it cannot know about it; and the model has no way to signal that it is missing information, so it produces something plausible instead of refusing.
-3. You pay for that page on every single call, for six months. How much it adds depends on which half of the exchange it grows: input is the cheaper half, so a page that grows the input by a quarter raises the bill by less than a quarter — in the worked example, a quarter more input gave about a seventh more bill.
-4. The reply is produced a piece at a time, in order. More pieces take more time. The length of the reply, not its difficulty, sets that part of the wait.
-5. You do not control what the model knows or how it behaves. Your three options are: change what you send, change which model you call, or check the reply and handle the bad cases.
+1. They may mean **inference** — sending ticket text in each request, which costs per call
+and changes nothing permanently. Or they may mean continuing the model's **training** on
+those tickets, which is a one-off project with its own costs and leaves them owning a model
+they must maintain. Chapter 39 covers the second.
+2. The event may fall after the model's training cut-off, so it cannot know about it; and
+the model has no way to signal that it is missing information, so it produces something
+plausible instead of refusing.
+3. You pay for that page on every single call, for six months. How much it adds depends on
+which half of the exchange it grows: input is the cheaper half, so a page that grows the
+input by a quarter raises the bill by less than a quarter — in the worked example, a quarter
+more input gave about a seventh more bill.
+4. The reply is produced a piece at a time, in order. More pieces take more time. The length
+of the reply, not its difficulty, sets that part of the wait.
+5. You do not control what the model knows or how it behaves. Your three options are: change
+what you send, change which model you call, or check the reply and handle the bad cases.
 
 > **You understand this when** you can explain to someone why a model cannot answer a
 > question about your own documents unless you put those documents in the request.

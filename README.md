@@ -21,14 +21,15 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 
 | Part | Chapters | Pages | Status |
 |---|---|---|---|
-| *Before Part I* · Inside the Model | 1–10 | 158 | Not started |
-| I · Understand | 11–17 | 98 | Not started |
-| II · Use | 18–36 | 304 | Not started |
-| III · Apply | 37–45 | 155 | Not started |
-| IV · What Next | 46–51 | 110 | Not started |
-| Appendices | A–D | 45 | Not started |
+| I · Understand | 1–7 | 98 | **Drafting** — chapter 1 done |
+| *Before Part II* · Inside the Model | 8–17 | 168 | Not started |
+| II · Use | 18–39 | 362 | Not started |
+| III · Apply | 40–50 | 190 | Not started |
+| IV · What Next | 51–57 | 136 | Not started |
+| Appendices | A–D | 83 | Not started |
 
-About 875 numbered pages in all.
+About 1,042 numbered pages in all. Chapter 1 came in at 10 printed pages against a 14-page
+budget; see `LEDGER-DEFECTS.md` entry 12 before reading anything into that.
 
 Status values: *Not started* → *Drafting* → *Editing* → *Done*.
 
