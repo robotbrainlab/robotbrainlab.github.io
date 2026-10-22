@@ -296,21 +296,134 @@ The reader studies the book while it is being written, so each part is built and
 its own PDF as it is finished, and the full book is assembled at the end. `latex/book.tex` lists
 only the chapters that exist; add each `\input` as its chapter lands, so the build always works.
 
-## 14. Writing with agents
+## 14. The loop — how a chapter gets made
 
-```text
-TOC approved  ->  a writing agent drafts a part  ->  the editor edits every chapter  ->  build and check
+**One chapter at a time. Never a part at a time.**
+
+Context dilution is the main cause of invented content in a long book. Writing several
+chapters in one stretch pushes the first chapter's sources out of working context, and
+the chapter then gets written **from the pattern of the previous chapters** rather than
+from its material. In the project this loop is taken from, every invented example across
+eighteen chapters traced to exactly that. Parts are *delivered* whole; they are not
+*written* whole.
+
+### The five steps, in order. Do not reorder, and do not soften step 1's timing.
+
+| # | Step | What it is |
+|---|---|---|
+| 1 | **Read the sources in full, immediately before writing.** Not earlier in the session | Named in the record, with what was read |
+| 2 | **Write the chapter** | |
+| 3 | **Completeness review** — a subagent reads the sources and the chapter side by side | Brief below |
+| 4 | **Apply the findings**, verifying each before accepting it | And sweep: §14.2 |
+| 5 | **Fix-verification** — a second subagent reads **only the changed passages**, named | Brief below |
+
+### 14.1 Why step 5 exists
+
+The recurring defect is not writing a chapter badly. **It is fixing a claim where you are
+looking and missing it where you are not.** In the source project this pass caught four to
+thirteen survivals per chapter, every chapter, without exception. A false claim removed
+from three places with a fourth surviving four hundred lines away. A correction applied in
+a practice answer while the same error sat in a table a hundred lines earlier.
+
+### 14.2 Every applied fix is a sweep, counted
+
+> **Grep the whole book for every phrasing of the claim. Count N before. Count N after.
+> Zero, or it is not done.**
+
+A fix that needed six places once landed in five, and the survivor was in Key Terms — a
+section no reviewer re-reads, because it is a glossary rather than an argument. Include
+the summary, the key terms and the review answers in every sweep.
+
+### 14.3 The stopping rule
+
+**One review round is the norm.**
+
+| Signal | What it means | What to do |
+|---|---|---|
+| Round 1 finds no false-teaching error | The chapter is sound | Fix the rest and ship. **No second round** |
+| Round 1 finds a false-teaching error | Normal for a dense chapter | Fix, run **one** more round |
+| Round 2 still finds them | **The chapter is mis-scoped, not under-reviewed** | Stop. Narrow it, or move the hard part to a chapter where its prerequisites exist |
+| A third round is being contemplated | Something structural is wrong | Stop and ask |
+
+This is why every chapter declares its **non-scope** in its record before it is written.
+Without an edge, review never terminates: once a chapter claims to handle *any* case,
+"what about rotary embeddings?" is a correct question and every answer creates the next
+one.
+
+### 14.4 Briefing a review agent
+
+The briefs that work are long and specific. Every time, include:
+
+- The chapter path and **its sources**, named
+- *"Read BOTH in full"*, and name anything you did not read closely
+- The six finding categories: **omission · alteration · false claim · self-contradiction ·
+  out-of-boundary theory · cross-chapter error**
+- The chapter's **declared non-scope**, so findings outside it can be rejected
+- The boundary cases from §6 and the relevant rows of `LEDGER-TAUGHT.md`, so they are not
+  reported as errors — but ask the agent to say if it thinks one is wrong
+- Specific claims to verify independently, named
+- *"If unsure, say so rather than asserting. A wrong finding costs more than a missed
+  one."*
+
+For step 5, additionally **list every changed passage**. A re-check told only "look at the
+chapter" re-reads everything and finds what step 3 already found.
+
+### 14.5 The driver
+
+The checklist is not prose. It is a staged driver that refuses:
+
+```bash
+python3 tools/chapter.py begin    NN-slug   # refuses once the chapter file exists
+python3 tools/chapter.py written  NN-slug   # refuses on any unticked or unevidenced box
+python3 tools/chapter.py reviewed NN-slug   # refuses without both verdicts; writes sha256 last
 ```
 
-- **The agent drafts.** One agent per part, in the background, so parts can be drafted at once.
-- **The editor is the main session.** It reads every chapter in full, checks every fact, re-runs
-  every lab, and rewrites rather than patches anything that is not good enough. A draft is never
-  the final book.
-- **When editing finds something an agent got wrong because this guide did not say it, add it to
-  this guide**, so the next agent gets it right.
+A record is in `records/NN-slug.md`. Tick a box only with **evidence** after it — a command
+result, a count, a line number. The hash is written last, so editing one character
+afterwards makes the record stale and fails the suite.
 
-## 15. Before calling a part done
+Nineteen chapters of the source project were built with this checklist as prose. The note
+its author left: *prose is what gets skipped.*
 
+### 14.6 The gates
+
+```bash
+bash tools/check-all.sh          # must end ALL GATES PASS
+```
+
+| Gate | Catches | Born from |
+|---|---|---|
+| `verify-voice.py` | Any sentence revealing the book's origins | Every other gate passed a chapter that opened *"Your first tutor opened the course…"* |
+| `verify-boundary.py` | Theory outside §6, undeclared | The honest reason for normalisation *is* numerical stability. A writer reaching for the real reason does not feel like one breaking a rule |
+| `verify-render.py` | Markdown that renders wrong on the page | A chapter shipped with its recall questions run together into one paragraph. Every other check passed it |
+| `verify-record.py` | Checklist complete, evidenced, fresh, in order | Prose gets skipped |
+| `verify-coverage.py` | Plan → chapter: what the TOC promised and the chapter lacks | Every other check runs chapter → plan and is **structurally blind to omission** |
+| `verify-absolutes.py` | Lists every absolute for testing | No gate can test an absolute; this forces the list and the count |
+| `verify-inputs.py` | Terms built on that no earlier chapter gave the reader | A chapter demonstrated its rule on two things the book had never printed |
+
+**Three rules about the gates themselves**, all of them paid for:
+
+1. **A gate nobody reads the output of is worse than no gate.** Three of nine gates in the
+   source project were at some point lying to the suite — one failing on an empty folder,
+   one crashing on a renamed column, one printing CLEAN over nothing for a whole
+   forty-eight-chapter build. **When the suite says FAILED, find out which gate and why,
+   every time.**
+2. **The only way to know a gate works is to break something it should catch and watch it
+   exit 1.** Every gate here was proved that way before it was wired in.
+3. **A gate that checked nothing says so.** `verify-record.py` prints VACUOUS rather than
+   CLEAN when there are no chapters yet.
+
+### 14.7 Correctness outranks the source
+
+Where a well-known explanation is wrong, **the book states the correct rule**. Our field is
+dense with confidently wrong received wisdom — that temperature zero is deterministic, that
+embeddings "understand meaning", that longer context is better. A source is evidence that
+something is *said*, never evidence that it is *true*. Flag every such correction in the
+report; it is the reader's only way to learn that the common explanation is wrong.
+
+## 15. Before calling a chapter done
+
+- `bash tools/check-all.sh` → **ALL GATES PASS**
 - `PAGES_MIN=<low> PAGES_MAX=<high> make check` passes: no overfull boxes, no text off any page,
   every bolded term in the glossary, page count within the part's target.
 - Every page has been looked at, cover to cover (`pdftoppm -r 40` contact sheets).

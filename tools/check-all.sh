@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# The suite. It must end ALL GATES PASS.
+#
+# A gate nobody reads the output of is worse than no gate: in the French project three
+# of nine gates were at some point lying to the suite - one failing on an empty folder,
+# one crashing on a renamed column, one printing CLEAN over nothing for a whole build.
+# When this says FAILED, find out which gate and why, every time.
+set -uo pipefail
+cd "$(dirname "$0")/.."
+fail=0
+run () { printf '\n=== %s ===\n' "$1"; shift; "$@" || fail=1; }
+
+run "VOICE    the book never refers to its own origins" python3 tools/verify-voice.py
+run "BOUNDARY no theory outside BOOK-GUIDE section 6"   python3 tools/verify-boundary.py
+run "RENDER   markdown renders as written"              python3 tools/verify-render.py
+run "RECORD   every chapter evidenced and fresh"        python3 tools/verify-record.py
+
+printf '\n=== BUILD  0 overfull / 0 glyphs / 0 undefined ===\n'
+if [ -d latex ]; then
+  ( cd latex && make >/dev/null 2>&1 ) || { echo "build FAILED"; fail=1; }
+  if [ -f latex/book.log ]; then
+    for pat in 'Overfull' 'Missing character'; do
+      n=$(grep -c "$pat" latex/book.log || true)
+      printf '%-22s %s\n' "$pat" "$n"
+      [ "$n" = "0" ] || fail=1
+    done
+  fi
+fi
+
+printf '\n'
+if [ "$fail" = "0" ]; then echo "ALL GATES PASS"; else echo "GATES FAILED"; fi
+exit "$fail"

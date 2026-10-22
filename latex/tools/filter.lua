@@ -264,9 +264,31 @@ local function Span(el)
   return out
 end
 
+-- Markdown does not parse **bold** inside a backtick span, so the asterisks print on the
+-- page. Ported from the French book, where 110 spans across 8 chapters shipped that way --
+-- in exactly the places the text marks which token changed. Split the span into code and
+-- bold-code runs instead, so writing it is no longer fatal.
+local function split_bold_code(text)
+  if not text:find('**', 1, true) then return nil end
+  local out, i = {}, 1
+  while true do
+    local a, b = text:find('%*%*.-%*%*', i)
+    if not a then
+      if i <= #text then out[#out + 1] = pandoc.Code(text:sub(i)) end
+      break
+    end
+    if a > i then out[#out + 1] = pandoc.Code(text:sub(i, a - 1)) end
+    out[#out + 1] = pandoc.Strong({ pandoc.Code(text:sub(a + 2, b - 2)) })
+    i = b + 1
+  end
+  return out
+end
+
 -- Long inline code may break after / , = & ? (and . _ - : when very long) so it never
 -- runs into the margin. Short identifiers never break.
 local function Code(el)
+  local bold = split_bold_code(el.text)
+  if bold then return bold end
   local len = utf8.len(el.text) or #el.text
   if len < 18 then return nil end
   local breakers = len >= 24 and '^[/,=&%?%._%-:]$' or '^[/,=&%?]$'
