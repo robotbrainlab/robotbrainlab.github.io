@@ -120,7 +120,12 @@ template's preamble over this one.**
    matches Crimson Pro, which is a Garamond face, and EB Garamond on the cover.
 2. `amssymb` is removed. With `unicode-math` it fails with "Command `\eth` already defined".
    Nothing here uses an amssymb-only command.
-3. Two opener macros are added. `\booksubpart{<numeral>}{<title>}{<what to ignore>}` divides a
+3. The PDF outline covers the whole book, not only the chapters: `\pdfbookmark` entries for
+   the cover, title page, copyright, contents and back cover, and `\bookmarksetup{startatroot}`
+   before the index and the back cover, without which the back matter nests under Part IV.
+   A sub-part's contents indentation is wrapped in `\texorpdfstring` so it does not leak a
+   leading space into the bookmark.
+4. Two opener macros are added. `\booksubpart{<numeral>}{<title>}{<what to ignore>}` divides a
    numbered part into halves, in smaller type with a thinner rule and an indented contents
    entry; Part I uses it twice. `\prebookpart` is an unnumbered opener for a section before
    Part I — ported from the big book, currently **unused**, and it should stay unused unless

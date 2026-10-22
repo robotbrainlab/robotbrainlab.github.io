@@ -344,7 +344,9 @@
   \clearpage
   \thispagestyle{empty}\markboth{}{}%
   \phantomsection
-  \addcontentsline{toc}{part}{\hspace*{1.2em}#2}%
+  % \texorpdfstring: the printed contents gets the indent, the PDF bookmark gets the
+  % bare title. Without it the bookmark reads " Mental Model", with a leading space.
+  \addcontentsline{toc}{part}{\texorpdfstring{\hspace*{1.2em}#2}{#2}}%
   \vspace*{96pt}%
   \begingroup\raggedleft
     {\chapterlabelfont PART #1\par}\vspace{11pt}%

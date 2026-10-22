@@ -12,11 +12,19 @@
 
 \begin{document}
 
+% Front and back matter get their own PDF bookmarks. Without these the outline pane opens
+% on "Preface" and there is no way to jump to the contents, which is the page a reader of a
+% thousand-page book goes to most. \pdfbookmark takes the level, the text and an anchor
+% name; level 1 is the same level as a part, so the front matter sits beside them.
+\pdfbookmark[1]{Cover}{bm:cover}
 \input{front/cover}
 
 \frontmatter
+\pdfbookmark[1]{Title Page}{bm:titlepage}
 \input{front/titlepage}
+\pdfbookmark[1]{Copyright}{bm:copyright}
 \input{front/copyright}
+\pdfbookmark[1]{Contents}{bm:contents}
 \tableofcontents
 \input{front/preface}                 % includes chapters/00-preface (markdown/00-preface.md)
 
@@ -112,8 +120,13 @@
 %% \input{chapters/C-glossary}           % the glossary is the last appendix
 
 \backmatter
+% startatroot: without it the back matter nests under Part IV, because the last part is
+% still the open bookmark level. The Index came out three levels deep for that reason.
+\bookmarksetup{startatroot}
 \printindex
 
+\bookmarksetup{startatroot}
+\pdfbookmark[1]{Back Cover}{bm:backcover}
 \input{front/backcover}
 
 \end{document}

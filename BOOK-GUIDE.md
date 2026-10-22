@@ -307,7 +307,10 @@ re-copy it over this one:
 1. `amsmath` and `unicode-math` are loaded, with `\setmathfont{Garamond-Math.otf}`.
 2. `amssymb` is removed. Loading it alongside `unicode-math` fails with
    "Command `\eth` already defined", and nothing here needs an amssymb-only command.
-3. Two opener macros are added: `\booksubpart`, which divides a numbered part into halves
+3. The PDF outline covers the whole book: `\pdfbookmark` entries for the cover, title page,
+   copyright, contents and back cover, with `\bookmarksetup{startatroot}` before the back
+   matter so it does not nest under the last part.
+4. Two opener macros are added: `\booksubpart`, which divides a numbered part into halves
    (Part I uses it twice), and `\prebookpart`, an unnumbered opener for a section before
    Part I, currently unused.
 
