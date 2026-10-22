@@ -437,6 +437,7 @@ bash tools/check-all.sh          # must end ALL GATES PASS
 | `verify-coverage.py` | Plan → chapter: what the TOC promised and the chapter lacks | Every other check runs chapter → plan and is **structurally blind to omission** |
 | `verify-absolutes.py` | Lists every absolute for testing | No gate can test an absolute; this forces the list and the count |
 | `verify-inputs.py` | Terms built on that no earlier chapter gave the reader | A chapter demonstrated its rule on two things the book had never printed |
+| `verify-render.py` check 8 | A `text` block line wider than 64 characters | §8 has said 64 since the start and nothing enforced it. Chapters 1 and 4 had both drifted past |
 | `verify-outline.py` | The PDF outline: front matter present, nothing orphaned, sub-parts under their part and chapters under their sub-part | The outline was wrong three times running and the reader found all three. Every other gate reads Markdown; none of them opens the PDF |
 
 **Three rules about the gates themselves**, all of them paid for:

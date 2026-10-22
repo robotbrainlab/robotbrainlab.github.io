@@ -18,6 +18,7 @@ Checks:
      follows the row and `>` is exempt.
   5. Unbalanced backticks on a line. A code span cannot cross a line break, so an odd
      count means the span never closes and the rest of the line renders as code.
+  8. A ```text block line wider than 64 characters.
   7. A blockquote starting directly under ordinary text mid-sentence - usually the
      remains of an edited-away callout.
   6. Unbalanced maths delimiters. This book writes maths as raw LaTeX spans
@@ -70,6 +71,19 @@ def check(path):
                 and not ln.rstrip().endswith((":", "."))):
             out.append((i + 1, "text runs straight into a blockquote - the paragraph ends "
                                "here and the rest renders as a quote", ln[-58:]))
+
+    # 8. BOOK-GUIDE section 8: a ```text block is at most 64 characters wide, so it never
+    # runs into the margin. Nothing checked it, and chapters 1 and 4 both drifted past it.
+    fence8, lang = False, ""
+    for i, ln in enumerate(lines):
+        st = ln.lstrip()
+        if st.startswith("```"):
+            lang = st[3:].strip() if not fence8 else ""
+            fence8 = not fence8
+            continue
+        if fence8 and lang == "text" and len(ln) > 64:
+            out.append((i + 1, f"text block line is {len(ln)} characters - the limit is 64",
+                        ln[:60]))
 
     if rawfence % 2:
         out.append((0, "an odd number of ```{=latex} fences - one never closes", ""))

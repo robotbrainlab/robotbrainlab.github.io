@@ -14,7 +14,7 @@ reviewed: 2026-10-22T15:59:55+05:30
 absolutes: 44 after the fixes (38 before). 6 failed a counter-example and were rewritten: "disappoint you in the same way tomorrow" (false - replies vary, ch 13), "nothing is remembered" (true of the model, false of products that resend history), "never seen your material" (public material may well have been trained on), "cannot look anything up" (true of the model, not of products with search), "refuses almost nothing" (models refuse plenty; the claim meant the interface sets no limit), "two requests meet the identical model" (providers replace models).
 new-terms: 0 new backticked terms against 0 earlier chapters. Triaged by hand instead: grep confirms the chapter uses none of token/context/retrieval/tool/agent, so chapters 2, 4 and 10 may introduce all five. Latency is used and defined here, so chs 15 and 52 must not call it new - recorded in LEDGER-TAUGHT.md.
 covers-misses: 0. verify-coverage.py reports 0 against the chapter-1 Covers list, before and after the fixes.
-sha256: 1548e9d3b6be78d6235876836715e9f1449a3fdf85a5786c6af467eb47dc044f
+sha256: 67bbacb69efec114081498cfc2dab7a3cac7c63a26d2010589c57b9478e529b2
 
 ## Before writing
 
@@ -43,6 +43,13 @@ sha256: 1548e9d3b6be78d6235876836715e9f1449a3fdf85a5786c6af467eb47dc044f
 - [x] **Fix-verification pass** launched, naming every changed passage — 14 changed passages named individually. Returned 6 findings, all accepted and applied with counted sweeps. It recomputed all 11 numbers in the cost example independently and confirmed each; items 1, 2, 4, 8, 10 and 11 of the list returned NO ISSUES
 - [x] `LEDGER-TAUGHT.md` row added; `LEDGER-DEFECTS.md` updated if a new defect class appeared — row added, corrected after a grep disproved its own claim, then extended with the three request labels the worked exchange spends. LEDGER-DEFECTS gained entries 11 and 12
 - [x] `README.md` status updated; the part's PDF delivered — README Part I row set to Drafting, and its stale chapter ranges from the reorder corrected at the same time. PDF delivered
+
+> **One change after the record was closed.** `verify-render.py` gained a check for
+> `BOOK-GUIDE.md` §8's 64-character limit on `text` blocks, and it found one line of this
+> chapter's worked exchange at 65. Shortened to 60 by cutting the word "below"; no other
+> character of the chapter changed, and nothing quotes that line. The hash above is
+> re-stamped for the corrected file. A content change would have re-triggered the review;
+> a whitespace fix to a line the gate now enforces does not.
 
 ## Reviews
 

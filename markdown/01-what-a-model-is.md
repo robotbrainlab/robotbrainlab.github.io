@@ -108,7 +108,7 @@ back with the reply. Nothing here is special to any provider.
 WHAT YOUR PROGRAM SENDS
   instructions
     You are a support assistant. Answer in two sentences.
-    If the answer is not in the notes below, say you do not know.
+    If the answer is not in the notes, say you do not know.
   added material
     Order 4471 shipped on Tuesday by courier. Tracking KP-9930.
   the request
