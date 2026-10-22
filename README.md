@@ -21,15 +21,26 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 
 | Part | Chapters | Pages | Status |
 |---|---|---|---|
-| I · Understand — *Mental Model* | 1–7 | 98 | **Drafting** — 4 of 7 done |
+| I · Understand — *Mental Model* | 1–7 | 98 | **Drafting** — 5 of 7 done |
 | I · Understand — *Inside the Model* | 8–17 | 168 | Not started |
 | II · Use | 18–39 | 362 | Not started |
 | III · Apply | 40–50 | 190 | Not started |
 | IV · What Next | 51–57 | 136 | Not started |
 | Appendices | A–D | 83 | Not started |
 
-About 1,042 numbered pages in all. Chapter 1 came in at 10 printed pages against a 14-page
-budget; see `LEDGER-DEFECTS.md` entry 12 before reading anything into that.
+About 1,042 numbered pages in all. Measured from the current build (`latex/book.toc`, 2026-10-23):
+
+| Ch | Printed | Estimate | |
+|---|---|---|---|
+| 1 | 10 pp (3–12) | 14 | 71% |
+| 2 | 10 pp (13–22) | 18 | 56% |
+| 3 | 10 pp (23–32) | 14 | 71% |
+| 4 | 9 pp (33–41) | 16 | 56% |
+| 5 | 12 pp (42–53) | 14 | 86% |
+
+The estimates are estimates, never targets — `BOOK-GUIDE.md` §11. Read `LEDGER-DEFECTS.md`
+entry 12 before drawing any conclusion from the percentages; the figures there were taken
+before the front matter settled and are a page or two lower than these.
 
 Status values: *Not started* → *Drafting* → *Editing* → *Done*.
 

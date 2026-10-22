@@ -120,7 +120,7 @@ make
 PAGES_MIN=600 PAGES_MAX=1000 make check
 ```
 
-`latex/preamble.tex` has **three changes** from the shared `book-template`. **Never copy the
+`latex/preamble.tex` has **five changes** from the shared `book-template`. **Never copy the
 template's preamble over this one.**
 
 1. `amsmath` and `unicode-math` are loaded, with `\setmathfont{Garamond-Math.otf}`. Garamond-Math
@@ -128,15 +128,30 @@ template's preamble over this one.**
 2. `amssymb` is removed. With `unicode-math` it fails with "Command `\eth` already defined".
    Nothing here uses an amssymb-only command.
 3. The PDF outline covers the whole book, not only the chapters: `\pdfbookmark` entries for
-   the cover, title page, copyright, contents and back cover, and `\bookmarksetup{startatroot}`
-   before the index and the back cover, without which the back matter nests under Part IV.
-   A sub-part's contents indentation is wrapped in `\texorpdfstring` so it does not leak a
-   leading space into the bookmark.
+   the cover, title page, copyright, contents and back cover. The nesting is controlled by
+   three macros that renew `\toclevel@chapter`, `\toclevel@section` and
+   `\toclevel@subsection` together with `tocdepth` — `\toplevelchapters` (front and back
+   matter, chapters at the top), `\partlevels` (chapters under their part) and
+   `\subpartlevels` (chapters under a sub-part). `latex/book.tex` switches between them;
+   without `\toplevelchapters` before `\printindex` the back matter nests under Part IV.
+   **`\usepackage{bookmark}` is deliberately not loaded**: it reimplements the outline and
+   ignores `\toclevel@<type>`, which is the only hook that can put a sub-part's chapters one
+   level deeper. A sub-part's contents indentation is wrapped in `\texorpdfstring` so it does
+   not leak a leading space into the bookmark. `tools/verify-outline.py` reads the built PDF
+   and is the only gate that checks any of this.
 4. Two opener macros are added. `\booksubpart{<numeral>}{<title>}{<what to ignore>}` divides a
    numbered part into halves, in smaller type with a thinner rule and an indented contents
    entry; Part I uses it twice. `\prebookpart` is an unnumbered opener for a section before
    Part I — ported from the big book, currently **unused**, and it should stay unused unless
    something genuinely belongs before chapter 1.
+5. `\indexletter`'s space is **flexible**, `9pt plus 3pt minus 3pt`, and the **first** letter
+   group gets none. `book.cls`'s own `\indexspace` is `10pt plus5pt minus3pt`; this macro had
+   replaced it with a rigid `\addvspace{9pt}`, so the index could not absorb being ~9pt over
+   one page and the build went overfull by `9.33658pt` the moment chapter 5's two Key Terms
+   opened letter group `E`. The index paginates correctly on its own — 120 injected entries
+   give 3 index pages and 0 overfull — so keep the shrink. The `\newif` names carry no `@`,
+   because this block sits outside `\makeatletter`. See `LEDGER-DEFECTS.md` entry 17, which
+   is also where the reason to run `tools/build-probe.sh` instead of grepping `book.log` is.
 
 **Mathematics is written as raw LaTeX, never as `$…$`.** `tools/convert.sh` disables dollar maths
 on purpose, so a price like $5 stays text. This book is full of prices.

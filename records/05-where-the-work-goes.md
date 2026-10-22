@@ -6,45 +6,45 @@ Tick a box only with **evidence** after it: a command result, a count, a line nu
 `shasum -a 256 markdown/<stem>.md`
 
 chapter: markdown/05-where-the-work-goes.md
-sources:
-non-scope:
+sources: TOC.md L45 (the chapter-5 row: opening problem, 5-item Covers list, 14 pp estimate) plus rows 6, 18, 30, 32, 33 and 53 to fix the ownership boundary; orientation concept 5 "The work is mostly around the model", read in full with concepts 4 and 6 to bound it - its load-bearing sentence is "Practitioners report that evaluation and error analysis alone ... take a substantial part of application development"; markdown/01 to 04 in full as the authority on what the reader knows; LEDGER-TAUGHT.md all four per-chapter rows and the Claims in their corrected form table, grepped for 'Do not'; LEDGER-DEFECTS.md entries 13 and 16 to hand.
+non-scope: The chapter NAMES four activities and says where the time goes. It teaches none of them. Out of scope and not omissions: how to write prompts (ch 18), how to build an evaluation set or a judge (chs 30-33), retrieval mechanics (chs 24-28), cost-optimisation method (ch 53), observability tooling (ch 33), and any ML or DL theory (BOOK-GUIDE §6). It gives no number for how much of the work telling failures apart is, because the source supports none.
 begun: 2026-10-23T00:38:15+05:30
-written:
-reviewed:
-absolutes:
-new-terms:
-covers-misses:
-sha256:
+written: 2026-10-23T00:52:00+05:30 (approximate, reconstructed after the fact: a full rewrite of a draft the first review rejected)
+reviewed: 2026-10-23T01:10:58+05:30
+absolutes: verify-absolutes.py: 54 listed. Three failed a counter-example in the book and were changed: 'the one move that cannot distinguish between them' -> 'the move that tells you least about which'; 'the only way that class reaches you' -> scoped to 'only if somebody goes looking for it', after chapter 2's shape check and chapter 4's step limit were found as counter-examples; 'a tool that only reads cannot damage anything' -> 'cannot change anything', after chapter 3 L45 (per-reader scope) and TOC 51 (per-user tool authorisation) showed disclosure is damage. 'five possible causes' -> 'five common causes' after chapter 4's tool-returns-wrong-result failure was found outside the list. 'Most of the safety' -> 'Much of the safety'. 'Nothing in the output tells you which' was tested against chapter 3's citation row and survives: the citation lives in your record (ch 33), not in the output.
+new-terms: verify-inputs.py: 0 (5 earlier chapters read). Two terms are introduced here on purpose, both bolded and in Key Terms: evaluation, error analysis. Grep of markdown/00-04 for both returned 0 hits, so this is first use and the TOC Covers item is delivered. LEDGER-TAUGHT.md row 5 now pins chapter 30 to the method and forbids re-introducing either name as new.
+covers-misses: verify-coverage.py: 0 misses. All five Covers items delivered: choosing what information reaches the model (with the order-4471 instance); deciding what it may do (4-row decision table + per-tool design review); finding out whether the output was any good (evaluation defined, error analysis named); controlling what it costs (4 invisible drivers + the attribution problem); how much of the real job is evaluation and error analysis (the Note, at the source's strength).
+sha256: 39883b83311b519a9d5204682c3a6d2be95d14d81af96a882971a5763fd019fa
 
 ## Before writing
 
-- [ ] `LEDGER-TAUGHT.md` consulted — what the reader already knows, and every "Do not" row read. The opening claims nothing false about what came before
-- [ ] The chapter's `TOC.md` row read: its opening problem, its Covers list, its page estimate (an estimate, never a target — `BOOK-GUIDE.md` §11)
-- [ ] **The chapter's non-scope declared** in the field above — what this chapter does not cover, so review has an edge and can terminate
-- [ ] Sources read **in full, immediately before writing** — named, with what was read
-- [ ] `BOOK-GUIDE.md` §6 boundary cases and `LEDGER-DEFECTS.md` to hand
+- [x] `LEDGER-TAUGHT.md` consulted — what the reader already knows, and every "Do not" row read. The opening claims nothing false about what came before — all four per-chapter rows read plus the Claims in their corrected form table; grep 'Do not' returned the rows for chs 1-4. **One was violated and the review caught it**: L56 forbids "the model can only ask for tools you described", and the tools table printed it. Fixed. The opening claims nothing false about chapters 1-4
+- [x] The chapter's `TOC.md` row read: its opening problem, its Covers list, its page estimate (an estimate, never a target — `BOOK-GUIDE.md` §11) — L45: opening problem copied word for word into the *The problem.* line; 5 Covers items, all delivered (verify-coverage 0 misses); 14 pp estimate, printed at 12 pp. Rows 6, 18, 30, 32, 33 and 53 read for the ownership boundary
+- [x] **The chapter's non-scope declared** in the field above — what this chapter does not cover, so review has an edge and can terminate — written in the field above before the rewrite; it is what let the reviewer reject findings about prompt method, eval construction and retrieval mechanics
+- [x] Sources read **in full, immediately before writing** — named, with what was read — orientation concept 5 extracted from the generated HTML and read with concepts 4 and 6 in one pass; its load-bearing sentence quoted in `sources:` above and matched against the chapter's Note word for word
+- [x] `BOOK-GUIDE.md` §6 boundary cases and `LEDGER-DEFECTS.md` to hand — §6's four decided cases read; none applies, the chapter teaches no mechanism and verify-boundary is CLEAN. Entries 13 and 16 were the while-writing checks, and **both fired**: 13 on the forbidden tools claim, 16 twice in the back matter
 
 ## While writing
 
-- [ ] **Every number recomputed** against the thing it describes, in the file, before it was written — say how many
-- [ ] **Every absolute tested** against a counter-example *in the book*, not only in this chapter — `verify-absolutes.py` count, and what failed
-- [ ] **Every term the chapter builds on** already given to the reader — `verify-inputs.py` count, each triaged
-- [ ] Maths written as raw LaTeX spans and fences, never `$…$`
-- [ ] The chapter holds the structure in `BOOK-GUIDE.md` §5; any lab is isolated and safe
-- [ ] Where a well-known explanation is wrong, the book states the correct rule — and it is flagged in the report
+- [x] **Every number recomputed** against the thing it describes, in the file, before it was written — say how many — 4 numbers in the chapter. The one-third figure recomputed from chapter 4's table (0.9^10 = 0.349, L99-124) and used only as a back-reference; 'four activities' counted against the source's own four; 'five common causes' counted against chapter 2 L227-231 one-for-one; the 14 pp estimate deliberately NOT printed, after the review found 'Chapter 18 is sixteen pages' stated a TOC estimate as fact
+- [x] **Every absolute tested** against a counter-example *in the book*, not only in this chapter — `verify-absolutes.py` count, and what failed — verify-absolutes.py: 54. Five failed a counter-example in the book and were changed; see `absolutes:` above for each counter-example and the file and line it came from
+- [x] **Every term the chapter builds on** already given to the reader — `verify-inputs.py` count, each triaged — verify-inputs.py: 0. Two terms introduced here on purpose (evaluation, error analysis); grep of markdown/00-04 for both returned 0 hits, so neither is built on and both are first use
+- [x] Maths written as raw LaTeX spans and fences, never `$…$` — no maths in this chapter; grep for '$' returned 0 hits
+- [x] The chapter holds the structure in `BOOK-GUIDE.md` §5; any lab is isolated and safe — confirmed by the reviewer against §5: intro, problem/question, sections, Lab with an expected result per step, `## Summary, Key Terms, and Review Questions` with all three `###`, 5 review questions, and the `You understand this when` close. The lab is archaeology - no code, nothing to run, nothing to install
+- [x] Where a well-known explanation is wrong, the book states the correct rule — and it is flagged in the report — one correction, flagged: the chapter states that a model-based system **does** have a loud failure class (crash, timeout, unreadable output) and that what is special is the additional silent one. The draft said it 'has no equivalent', which is the common framing and is false; chapter 2's shape check and chapter 4's step limit are the counter-examples
 
 ## After writing
 
-- [ ] `verify-render.py` · `verify-voice.py` · `verify-boundary.py` — all CLEAN
-- [ ] `verify-coverage.py` — every miss triaged **one by one**, not counted
-- [ ] `\input{chapters/05-where-the-work-goes}` in `latex/book.tex`; `make` → 0 overfull · 0 missing glyphs · 0 undefined
-- [ ] **Completeness review** launched with the `BOOK-GUIDE.md` §14 brief
-- [ ] Each finding **verified before accepting**; each fix **grepped book-wide, count before and after — zero, or it is not done**
-- [ ] **Fix-verification pass** launched, naming every changed passage
-- [ ] `LEDGER-TAUGHT.md` row added; `LEDGER-DEFECTS.md` updated if a new defect class appeared
-- [ ] `README.md` status updated; the part's PDF delivered
+- [x] `verify-render.py` · `verify-voice.py` · `verify-boundary.py` — all CLEAN — all three CLEAN over 6 files
+- [x] `verify-coverage.py` — every miss triaged **one by one**, not counted — 0 misses. Each of the 5 Covers items located in the chapter by hand and named in `covers-misses:` above with the passage that delivers it
+- [x] `\input{chapters/05-where-the-work-goes}` in `latex/book.tex`; `make` → 0 overfull · 0 missing glyphs · 0 undefined — present; verified with `bash tools/build-probe.sh`: exit=0, latex-errors=0, overfull=0, glyphs=0. The chapter's two Key Terms opened the index's first `E` letter group and exposed a rigid `\addvspace{9pt}` in `\indexletter` where book.cls uses `10pt plus5pt minus3pt` - the index could not absorb being ~9pt over one page. Fixed by restoring the shrink; pagination proved separately with 120 injected entries (3 index pages, 0 overfull). **I first read `0 overfull` out of three builds that had died on a LaTeX error, and had to throw away and redo every measurement**; that is LEDGER-DEFECTS entry 17, and it is why `tools/build-probe.sh` now exists and why nothing here cites a hand-run grep of `book.log`
+- [x] **Completeness review** launched with the `BOOK-GUIDE.md` §14 brief — round 2, on the rewrite, with the §14.4 brief: chapter and source named, both read in full, the six categories, the declared non-scope, the §6 cases and the LEDGER-TAUGHT rows, 9 named claims to verify independently, and the 'if unsure, say so' instruction. See `completeness-review:` above
+- [x] Each finding **verified before accepting**; each fix **grepped book-wide, count before and after — zero, or it is not done** — all 13 checked against the files first: LEDGER-TAUGHT L56 and chapter 2 L145-147 for the tools claim, chapter 3's section order for the gap number, TOC L77 for chapter 18's estimate, chapter 3 L45 and TOC 51 for the read-only tool, chapter 2 L227-231 for the five causes, chapter 1 L113-123 for the order-4471 instance. Final sweep: 16 phrasings grepped across all of markdown/, **0 survivors**
+- [x] **Fix-verification pass** launched, naming every changed passage — run in parallel, briefed with all 13 original findings listed one by one and told to sweep Summary, Key Terms and Review Answers for each. See `fix-verification:` above. It found the 2 back-matter survivals the body-first sweep missed
+- [x] `LEDGER-TAUGHT.md` row added; `LEDGER-DEFECTS.md` updated if a new defect class appeared — row 5 appended, pinning evaluation and error analysis as first use here and the method to chapter 30. LEDGER-DEFECTS entry 17 added for the index bug
+- [x] `README.md` status updated; the part's PDF delivered — chapter 5 marked done; Part I is 5 of 7
 
 ## Reviews
 
-completeness-review:
-fix-verification:
+completeness-review: Round 2, on the rewrite. 13 findings, 3 blocking. All 13 verified against the files before accepting; all applied. Blocking: (1) the tools table printed the exact claim LEDGER-TAUGHT L56 forbids - 'the model cannot ask for a tool you never described' - which chapter 2 L145-147 explicitly corrects; this is LEDGER-DEFECTS entry 13's predicted regression and it was confirmed by grep. (2) 'A model-based system has no equivalent [loud failure class]' is false - chapter 2's shape check and chapter 4's step limit are both loud. (3) 'Chapter 18 is sixteen pages' states a TOC estimate as fact, which BOOK-GUIDE §11 and LEDGER-DEFECTS entry 12 forbid; it was the only page-count reference in markdown/. Non-blocking and also applied: the read-only-tool absolute, the closed five-cause enumeration, the lab's two overlapping labels, the words-not-hours caveat, the garbled 'check that catching it is the whole problem' sentence, 'those three questions' against a four-row table, the unhedged claim about plans, the unhedged closing line, two 'invisible in a single call' absolutes, and 142 words of thinness in 'Choosing What Reaches the Model' (now 221, with the order-4471 instance). Verified clean by the reviewer: the gap numbering (chs 3, 4, 5 agree - tools close the SECOND gap), the share claim never escalated anywhere, the one-third figure not stretched past chapter 4's ten-step arithmetic, chapter 2's promise kept, concept ownership respected, BOOK-GUIDE §5 structure complete, §6 untouched, §8 held.
+fix-verification: Run in parallel on the same rewrite, briefed with the 13 original findings. Verdict: 11 of 13 FIXED, 2 PARTLY FIXED, plus 5 new problems. It independently found four of the same passages as the completeness review (the tools table, the read-only-tool Tip, the garbled sentence, the lab's overlapping labels), which is the useful signal. The 2 partly-fixed were both back-matter survivals - exactly LEDGER-DEFECTS entry 16: the share claim restated as magnitude in the Warning, and the parts/activities conflation surviving in Review Answer 1 ('The other activities'). Both fixed. Its 5th new finding, 'Most of the safety', was the same escalation species as the central claim. The Warning was not attributed to the practitioner accounts as suggested, because the demo-to-reliable gap is not what those accounts measured; the unsourced magnitude was removed instead. Final sweep: 16 phrasings grepped across all of markdown/, 0 survivors (the single 'afternoon' hit is chapter 3's unrelated 'different this afternoon').

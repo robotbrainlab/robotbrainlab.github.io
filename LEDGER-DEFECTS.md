@@ -65,6 +65,51 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**17. I read "0 overfull" out of the log of a build that had died.** This is the worst
+process failure in the project so far, and it is worth the length.
+
+Chapter 5's two Key Terms opened the index's first `E` letter group and the build went
+overfull by exactly `9.33658pt`. Over the next hour I "diagnosed" it, "fixed" it three
+different ways, watched the count go to `0`, wrote the fix up in this ledger and in
+`HANDOVER.md`, and **every one of those zeros was false**. My fix had used `\newif\ifti@…`
+in a block that sits outside `\makeatletter`, so `@` was not a letter, so LaTeX died with
+`Missing \begin{document}` on line 415 — and a log from a build that stopped at line 415
+contains no overfull boxes at all. I was grepping `book.log` for `Overfull` and reading the
+count without once checking the exit status or grepping for `^!`.
+
+Everything I believed for that hour was wrong, including the diagnosis itself. The real
+fault was not the leading `\addvspace`. It was **rigidity**: `book.cls`'s own `\indexspace`
+is `10pt plus5pt minus3pt`, and `\indexletter` had replaced it with a rigid
+`\addvspace{9pt}`. The index was about 9pt more than one page and had no flexibility to
+absorb it. Restoring a `minus 3pt` shrink fixed it. The index paginates correctly on its
+own — 120 injected entries give three index pages and 0 overfull — so nothing structural
+was ever wrong.
+
+**The rules this bought:**
+
+1. **A count from a log is worthless unless the build that wrote it succeeded.** Never
+   `grep -c Overfull book.log` by hand. Run `bash tools/build-probe.sh`, which prints
+   `exit=`, `latex-errors=`, `overfull=` and `glyphs=` on one line and **refuses to report
+   the counts at all** when the build did not succeed. `tools/check-all.sh` already checked
+   `make`'s exit status; the hole was entirely in my manual checking, which is exactly the
+   place a gate cannot reach.
+2. **Every test run before the harness existed had to be thrown away and redone.** Three
+   candidate fixes, a pagination test and the whole causal story — all void. Re-running them
+   honestly took ten minutes and gave a different answer. **When you discover a measurement
+   was broken, re-run every measurement that used it**, not just the last one.
+3. **A fix that "works" without an explanation you can state is not a fix.** I could not
+   have said why suppressing one 9pt space would fix a 9.33pt overflow. That gap should have
+   stopped me, and instead the false `0` reassured me past it.
+4. **`@` is not a letter outside `\makeatletter`.** The specific trap: `\newif\ifti@foo`
+   fails silently-looking at the top of a run, far from where you are working.
+
+**And the thing that was true all along:** the apparatus was built against a four-chapter
+book, and anything with a first-item or last-item special case — the index, the contents,
+running heads, part pages — has not yet met the input that breaks it. When the build breaks
+on a new chapter, **suspect the apparatus as readily as the chapter**, and prove which by
+putting the old chapter back. That test (old chapter 5 → 0 overfull, on a build that
+actually succeeded) is the one measurement from that hour that survived.
+
 **16. A fix reaches the body and not the back matter — four times in three chapters.**
 Chapter 1: a claim fixed in the body survived in the Review Answers. Chapter 2: the person
 removed from the checks table survived in the Summary *and* in the Key Terms definition.
