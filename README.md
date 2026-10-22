@@ -15,6 +15,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | Chapter sources | `markdown/` (the only source of truth) |
 | Lab files | `labs/` |
 | Build | `latex/` — `cd latex && make` |
+| Review PDF | `python3 tools/make-toc-pdf.py` — builds `TOC.pdf` from `TOC.md` in the book's own design |
 
 ## Status
 
