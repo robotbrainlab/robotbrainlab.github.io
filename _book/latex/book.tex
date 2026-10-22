@@ -1,0 +1,133 @@
+% ================================================================
+%  book.tex — master file: the order of the book.
+%  Build:  make        (Markdown -> chapters/*.tex -> book.pdf)
+%
+%  Each Markdown file ../markdown/<stem>.md becomes chapters/<stem>.tex;
+%  include it here with \input{chapters/<stem>}.
+%  Parts:  \bookpart{<roman numeral>}{<title>}{<what to ignore for now, or empty>}
+% ================================================================
+\documentclass[10pt, twoside, openany]{book}
+\input{book-meta}
+\input{preamble}
+
+\begin{document}
+
+% Front and back matter get their own PDF bookmarks. Without these the outline pane opens
+% on "Preface" and there is no way to jump to the contents, which is the page a reader of a
+% thousand-page book goes to most. \pdfbookmark takes the level, the text and an anchor
+% name; level 1 is the same level as a part, so the front matter sits beside them.
+\pdfbookmark[-1]{Cover}{bm:cover}
+\input{front/cover}
+
+\frontmatter
+\pdfbookmark[-1]{Title Page}{bm:titlepage}
+\input{front/titlepage}
+\pdfbookmark[-1]{Copyright}{bm:copyright}
+\input{front/copyright}
+\pdfbookmark[-1]{Contents}{bm:contents}
+\tableofcontents
+\toplevelchapters
+\input{front/preface}
+\partlevels                 % includes chapters/00-preface (markdown/00-preface.md)
+
+\mainmatter
+
+% Chapters are commented out until their Markdown lands in ../markdown/.
+% Uncomment each \input, with its real slug, as the chapter is finished.
+
+% --------------------------------------------------------------
+\bookpart{I}{Understand}
+  {every setting, price and product name. This part is what the thing is,
+   not how you drive it.}
+
+\booksubpart{I}{Mental Model}
+  {what is inside the model --- the second half of this part opens it.}
+\input{chapters/01-what-a-model-is}
+\input{chapters/02-the-parts-around-the-model}
+\input{chapters/03-why-it-is-assembled-this-way}
+\input{chapters/04-the-agent-loop}
+\input{chapters/05-where-the-work-goes}
+\input{chapters/06-what-changes-fast}
+\input{chapters/07-a-map-of-this-book}
+
+% --------------------------------------------------------------
+\booksubpart{I}{Inside the Model}
+  {how the model was trained, beyond the shape of the loop.}
+% \input{chapters/08-chapter-slug}
+% \input{chapters/09-chapter-slug}
+% \input{chapters/10-chapter-slug}
+% \input{chapters/11-chapter-slug}
+% \input{chapters/12-chapter-slug}
+% \input{chapters/13-chapter-slug}
+% \input{chapters/14-chapter-slug}
+% \input{chapters/15-chapter-slug}
+% \input{chapters/16-chapter-slug}
+% \input{chapters/17-chapter-slug}
+
+% --------------------------------------------------------------
+\bookpart{II}{Use}
+  {serving your own models, and the bill --- Part IV takes both.}
+% \input{chapters/18-chapter-slug}
+% \input{chapters/19-chapter-slug}
+% \input{chapters/20-chapter-slug}
+% \input{chapters/21-chapter-slug}
+% \input{chapters/22-chapter-slug}
+% \input{chapters/23-chapter-slug}
+% \input{chapters/24-chapter-slug}
+% \input{chapters/25-chapter-slug}
+% \input{chapters/26-chapter-slug}
+% \input{chapters/27-chapter-slug}
+% \input{chapters/28-chapter-slug}
+% \input{chapters/29-chapter-slug}
+% \input{chapters/30-chapter-slug}
+% \input{chapters/31-chapter-slug}
+% \input{chapters/32-chapter-slug}
+% \input{chapters/33-chapter-slug}
+% \input{chapters/34-chapter-slug}
+% \input{chapters/35-chapter-slug}
+% \input{chapters/36-chapter-slug}
+% \input{chapters/37-chapter-slug}
+% \input{chapters/38-chapter-slug}
+% \input{chapters/39-chapter-slug}
+
+% --------------------------------------------------------------
+\bookpart{III}{Apply}
+  {scale and deployment. Everything here runs on one machine.}
+% \input{chapters/40-chapter-slug}
+% \input{chapters/41-chapter-slug}
+% \input{chapters/42-chapter-slug}
+% \input{chapters/43-chapter-slug}
+% \input{chapters/44-chapter-slug}
+% \input{chapters/45-chapter-slug}
+% \input{chapters/46-chapter-slug}
+% \input{chapters/47-chapter-slug}
+% \input{chapters/48-chapter-slug}
+% \input{chapters/49-chapter-slug}
+% \input{chapters/50-chapter-slug}
+
+% --------------------------------------------------------------
+\bookpart{IV}{What Next}{}
+% \input{chapters/51-chapter-slug}
+% \input{chapters/52-chapter-slug}
+% \input{chapters/53-chapter-slug}
+% \input{chapters/54-chapter-slug}
+% \input{chapters/55-chapter-slug}
+% \input{chapters/56-chapter-slug}
+% \input{chapters/57-chapter-slug}
+
+% ---------------------------------------------------------------- Appendices
+\appendix
+%% \input{chapters/A-cheat-sheet}
+%% \input{chapters/B-interview-bank}
+%% \input{chapters/C-glossary}           % the glossary is the last appendix
+
+\backmatter
+% \partlevels puts the chapter and section depths back, so the back matter does not
+% inherit the deeper levels a sub-parted part leaves behind.
+\toplevelchapters
+\printindex
+
+\pdfbookmark[-1]{Back Cover}{bm:backcover}
+\input{front/backcover}
+
+\end{document}
