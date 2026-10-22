@@ -36,11 +36,11 @@ About 1,042 numbered pages in all. Measured from the current build (`latex/book.
 | 2 | 10 pp (13–22) | 18 | 56% |
 | 3 | 10 pp (23–32) | 14 | 71% |
 | 4 | 9 pp (33–41) | 16 | 56% |
-| 5 | 8 pp (42–49) | 14 | 57% |
-| 6 | 11 pp (50–60) | 12 | 92% |
-| 7 | 8 pp (61–68) | 10 | 80% |
+| 5 | 10 pp (42–51) | 14 | 71% |
+| 6 | 11 pp (52–62) | 12 | 92% |
+| 7 | 8 pp (63–70) | 10 | 80% |
 
-**Part I · Mental Model: 66 printed pages against a 98-page estimate (67%).**
+**Part I · Mental Model: 68 printed pages against a 98-page estimate (69%).**
 
 **Measure a chapter by where its own text ends, not by where the next chapter starts.**
 Chapter 5 was first recorded as 12 pp because the four part-opener pages that follow it

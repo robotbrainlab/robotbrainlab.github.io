@@ -88,11 +88,31 @@ things fell out of it that are worth having:
    chapter that must not have one. The first draft of the rewrite used a real benchmark
    name; that was caught and replaced.
 
-**⚠ Chapter 5's lab still has this defect.** It is closed and sealed, and it was not
-reopened, because narrowing or widening the delivered work is the reader's call and not
-mine. It is written down here so it is not lost: its five steps ask for two accounts the
-reader finds, and its expected results therefore hold for nobody in particular. The fix is
-the same one chapter 6 got — ship a specimen, keep the archaeology as an optional step.
+**Chapter 5's lab had the same defect and was fixed the same way**, on the reader's
+instruction, after being flagged here and left alone for one turn — narrowing or widening
+delivered work is their call, not mine. Its specimen is a twelve-paragraph invented
+engineering account; the reader labels each paragraph with one of the four activities, *the
+instructions*, or *none of these*, against a key.
+
+Two things that specimen does which are worth copying into any lab of this shape:
+
+1. **It refuses to demonstrate the chapter's own thesis.** The counts come out with *none
+   of these* largest at four, two of the four activities at two and two at one, and the lab
+   says outright that this supports no claim about which activity takes longest, because
+   the author wrote the paragraphs and could have made any of them win. **The first draft
+   of that sentence said "a three-way tie at two among the activities"**, which counted
+   *the instructions* as an activity — the one thing the chapter forbids on its own line 33
+   and in this ledger's own `LEDGER-TAUGHT` row 5. It also happened to make the spread look
+   more neutral than it is, since the chapter's own thesis activity is at joint first. The
+   honest version states the real counts and says they prove nothing anyway. **A specimen that
+   quietly confirmed the chapter would have been worse than the lab it replaced** — it
+   would have taught the reader to trust a rigged demonstration, in a chapter whose
+   neighbour teaches the opposite.
+2. **One step has no answer in the five-cause list.** Step 5 asks which of the chapter's
+   five causes produced a wrong answer, and the key is *none of them*: the tool acted with
+   the service's rights rather than the caller's. That is the chapter's hard-won "five
+   **common** causes" earning its adjective, and it teaches the reader that a list of
+   causes trusted too far is its own failure mode.
 
 **19. The `written` stage keeps getting skipped, and a hand-written timestamp is a lie
 waiting to fail.** Chapters 2, 3 and now 6: `python3 tools/chapter.py written <slug>` was

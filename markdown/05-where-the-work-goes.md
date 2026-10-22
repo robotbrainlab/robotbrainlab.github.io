@@ -154,7 +154,8 @@ Two reasons, and they are different in kind.
 better? Is the tool boundary too tight, blocking useful work? Can the instructions be
 shortened without making the answers worse? Each of those is a measurement question, and
 without a measurement you are changing things and hoping — and because the system is not
-repeatable, trying it twice does not settle it either.
+repeatable, trying it twice does not settle it either. Chapter 20 is where you learn how
+many times is enough.
 
 Not every question is like this. The tool boundary has a part that measurement cannot
 decide: some things are refused because of what they would cost if they went wrong, not
@@ -205,47 +206,134 @@ None of this makes the instructions unimportant — Chapter 18 is a whole chapte
 them properly, and a badly specified request wastes everything downstream of it. The claim
 is narrower: they are the part you will finish first and think about least.
 
-## Lab: Where Did the Time Go?
+## Lab: Sort an Account of Real Work
 
-No code. This one is archaeology, and it is built so you can be wrong.
+No code, nothing to install, fifteen minutes. The account below is **invented**, which
+matters and is said again in step 3: because it was written for this exercise, it cannot
+tell you anything about where real engineering time goes. What it can do is show you
+whether you can tell the four activities apart in somebody's prose, which is a skill you
+need before any real account is worth reading. It has a key, so you can be wrong and find
+out.
 
-**Step 1.** Before you read anything, write down your guess: of the four activities, which
-do you expect a real engineering account to spend most of its words on? One line.
+**Step 1.** Before reading it, write one line: of the four activities, which do you expect
+an account like this to spend the most paragraphs on?
 
-*Expected result:* a written prediction. The point of writing it first is that you cannot
-quietly adjust it later.
+*Expected result:* a written prediction. Writing it first is the whole point — you cannot
+quietly adjust it afterwards.
 
-**Step 2.** Find two written accounts of somebody building a real AI feature — an
-engineering blog post, a conference talk, a long post from somebody who shipped one. Not a
-tutorial, and not a product announcement. Take whatever you find first; do not pick the
-ones that look most interesting, because that is how you choose your own answer.
+### The account
 
-*Expected result:* two accounts, chosen before you knew what was in them.
+> **1.** We had three weeks before the demo and two engineers, one of whom was new.
+>
+> **2.** The feature was a support assistant. A customer asks about an order and it
+> answers from our own records rather than from anything the model was trained on.
+>
+> **3.** The first version pasted the customer's entire order history into every request.
+> It worked. It also cost about nine cents a question, and the projected monthly figure was
+> the first thing anyone outside the team asked about.
+>
+> **4.** So we cut it down to the three most recent orders plus the returns policy, which
+> meant deciding what gets dropped when somebody has forty orders and only three fit.
+>
+> **5.** We spent two days on the wording of the instruction that tells it to refuse
+> anything it cannot answer from the records.
+>
+> **6.** We gave it one tool, a lookup by order number. We spent longer agreeing that it
+> must not issue refunds than we spent writing the lookup itself.
+>
+> **7.** In week two the platform team moved us onto the new queue, which cost us a day
+> and was nobody's fault.
+>
+> **8.** We had no way of telling whether any of it was working, so we wrote down forty
+> real customer questions with the answer each one should have, and started scoring them
+> by hand.
+>
+> **9.** Reading forty scored answers in one sitting, we noticed the bad ones were mostly
+> a single kind of mistake: when a customer mentioned two orders, it answered about the
+> wrong one.
+>
+> **10.** We added a sentence to the instruction about which order to prefer, and the
+> score went from 31 of 40 to 34 of 40.
+>
+> **11.** The demo went well. We shipped it to a hundred users the week after.
+>
+> **12.** Three weeks later a customer was shown the correct details of an order that was
+> not theirs. The lookup took an order number and never checked whose order it was.
 
-**Step 3.** Go through each one paragraph by paragraph and label it with one of six
-things: the four activities, *the instructions*, or **none of these**. A paragraph about the
-wording of a prompt is *the instructions*; one about which material goes in is *choosing
-what reaches the model*. Expect a lot of *none* — team, motivation, infrastructure and
-architecture are all common and are none of the four.
+**Step 2.** Label each of the twelve paragraphs with one of six things: the four
+activities, *the instructions*, or **none of these**. *The instructions* is on the list but
+is still not one of the four — it is part of the first, as this chapter said at the start.
+It is separated out here because telling the two apart in somebody's prose is the whole
+exercise.
 
-*Expected result:* six counts per account, with *none* often the largest. If you find
-yourself forcing a paragraph into an activity, label it *none*; the forcing is how a
-prediction gets confirmed by accident.
+*Expected result:* the key is below. Six labels, twelve paragraphs.
 
-**Step 4.** Compare the two accounts with each other, and with your guess from step 1.
+| Label | Paragraphs | Count |
+|---|---|---|
+| **None of these** | 1, 2, 7, 11 | 4 |
+| **The instructions** | 5, 10 | 2 |
+| **Deciding what it may do** | 6, 12 | 2 |
+| **Finding out whether it works** | 8, 9 | 2 |
+| **Choosing what reaches the model** | 4 | 1 |
+| **Controlling what it costs** | 3 | 1 |
 
-*Expected result:* one of three. The two accounts agree with each other and with your
-guess. They agree with each other and not with your guess — the useful case. Or they
-disagree with each other, which tells you two accounts is too small a sample, and is the
-honest finding. Whichever you get, remember what you measured: words, not hours. A word
-count says what somebody chose to write about.
+Three of those are worth arguing with, so argue with them:
 
-**Step 5.** In each account, find the sentence where they say how they knew something had
-improved, and write it down exactly. If there is no such sentence, write *none* — and note
-whether the piece still claims an improvement.
+- **Paragraph 3** is cost, not *choosing what reaches the model*. Pasting the whole
+  history is a choice about what reaches the model, but what the paragraph is *about* is
+  the bill and who asked about it. Paragraph 4 is where that choice gets made.
+- **Paragraph 10** is *the instructions*, even though it ends in a number. What they did
+  was change some wording; the score is how they checked it. Keep the change and the check
+  apart — conflating them is how teams come to believe a reworded prompt fixed something.
+- **Paragraph 12** is *deciding what it may do*. The failure happened in production, but
+  it was decided in paragraph 6, when a tool was given an order number and no notion of
+  whose order it was. That is the point of the Tip in *Deciding What It May Do*: "a tool
+  whose scope is one customer's records cannot touch another's".
 
-*Expected result:* for each account, either a described measurement or a stated absence.
-Both are common, and the absence beside a claimed improvement is the thing worth keeping.
+**Step 3.** Compare the counts with your prediction from step 1.
+
+*Expected result:* **none of these** is the largest label, at four — team, product
+description, platform work and shipping are all real paragraphs and none of the four
+activities. Among the four activities, *finding out whether it works* and *deciding what it
+may do* tie at two, while *choosing what reaches the model* and *controlling what it costs*
+have one each. *The instructions* also has two, and is not one of the four.
+
+Now notice what that distribution is worth: **nothing.** I wrote these paragraphs, so I
+chose those counts, and I could have made any activity win — including the one this chapter
+argues for, which is sitting at joint first. If your prediction looks confirmed here, it is
+a coincidence I manufactured. I wrote the ending too, so the account cannot tell you how
+often a project goes this way either. The share claim earlier in this chapter rests on what
+practitioners report; one invented account is evidence neither for it nor against it.
+
+**Step 4.** Find the sentence where the account says how it knew something had improved.
+Write down what it would take to believe it.
+
+*Expected result:* paragraph 10 — "the score went from 31 of 40 to 34 of 40". That is a
+measurement, taken on a written-down set of cases, and it is more than most accounts offer.
+It is also three answers out of forty, from one run, with no indication of how much the
+score moves when nothing changes. Chapter 20 is where you learn whether a difference like
+that is real. Noticing that the question is open is this chapter's job; answering it is not.
+
+**Step 5.** Paragraph 12 describes a failure reaching a customer. Work through the five
+causes this chapter listed and say which one it was.
+
+*Expected result:* **none of the five** — and the first reason is that the answer was not
+even wrong. The details were correct; they went to the wrong person. The chapter's five are
+causes of a *wrong answer*, so none of them is in the running. Nor would they be if the
+answer had been wrong: retrieval found what it was asked for, the context was assembled
+correctly, the model used what it was given, no check was wrong about what it checked (the
+authorisation check never existed, so nothing judged badly), and no person was needed. The tool did exactly what it was built to do,
+for the wrong person. That is why this chapter says *five common causes* rather than five
+causes — a tool that acts with the service's rights instead of the caller's is a sixth, and
+Chapter 51 owns it. A list of causes you trust too far is its own failure mode.
+
+**Step 6, optional, and the only step that can tell you anything about the world.** Find
+two real written accounts of somebody building an AI feature — an engineering post, a
+conference talk, a retrospective. Not a tutorial and not an announcement. Label their
+paragraphs the same way, and compare the two with each other. There is no key. If they
+disagree with each other, that is the honest finding and two accounts is too small a
+sample. Whatever you get, remember you counted words rather than hours: a word count says
+what somebody chose to write about.
 
 ## Summary, Key Terms, and Review Questions
 
