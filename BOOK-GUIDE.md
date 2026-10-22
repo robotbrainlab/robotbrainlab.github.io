@@ -53,8 +53,10 @@ way a beginner would say them.
 
 - Cover exactly what `TOC.md` says, at interview depth. Explain each concept clearly, not
   exhaustively.
-- **Every concept in `TOC.md` appears exactly once.** If a later chapter needs an earlier idea,
-  refer back by chapter number; do not re-teach it.
+- **Every concept is owned by one chapter.** `TOC.md` has a *Who owns what* table for the ten
+  concepts more than one chapter touches. The owner teaches it. Every other chapter refers to it
+  by chapter number and does not re-teach it. This is the rule that stops chapter 39 repeating
+  chapter 14 and chapter 52 repeating chapter 15, and both overflowing their budgets.
 - **Separate three things everywhere**, because the reader must know which is which in an
   interview:
   - the **lasting principle** — why this is done at all;
@@ -71,18 +73,18 @@ note; Part IV has none, because its last chapter says what to skip.
 
 | Part | Purpose | Share |
 |---|---|---|
-| *Before Part I · Inside the Model* | What the model computes when it answers. Notation, worked by hand. Set with `\prebookpart`, so it carries no part number and Part I stays Part I. | ~18% |
-| **I · Understand** | The system around the model. Opens with the book's problem. Little or no code. | ~11% |
+| *Before Part II · Inside the Model* | What the model computes when it answers. Notation, worked by hand. Set with `\prebookpart`, so it carries no part number and the four numbered parts stay four. It comes **after** Part I: the reader must know what a model is for before the mechanism means anything, and four of its chapters open with problems only Part I makes sensible. | ~16% |
+| **I · Understand** | The system around the model. Opens with the book's problem. Little or no code. The book starts here. | ~9% |
 | **II · Use** | Become a confident user of every piece of the system. | ~35% |
-| **III · Apply** | Labs that build one small system, lab by lab. | ~18% |
-| **IV · What Next** | The four threads, then what to learn next and what to skip. | ~13% |
+| **III · Apply** | Labs that build one small system, lab by lab, on data the book ships. | ~18% |
+| **IV · What Next** | The four threads, one whole system designed aloud, then what to learn next and what to skip. | ~13% |
 | **Appendices** | Cheat sheet, interview bank, glossary, index. | ~5% |
 
 These shares differ from a short from-zero book on purpose: Part II carries most of the material,
 and Part IV is substantial because the four threads are where serving, cost and security live.
-Chapters are numbered straight through, 1--51, so the pre-part takes 1--10 and Part I opens at
-chapter 11. Parts I--III each open with a "What to ignore for now" note, and so does the
-pre-part.
+Chapters are numbered straight through, 1--57: Part I takes 1--7, the interlude 8--17, Part II
+18--39, Part III 40--50 and Part IV 51--57. Parts I--III each open with a "What to ignore for now"
+note, and so does the interlude.
 
 ### Every chapter (Parts I–III)
 
@@ -137,10 +139,33 @@ initialisation; numerical stability; regularisation theory; bias--variance; lear
 inductive biases; why depth helps in theory; convolutional or recurrent architectures; classical
 machine learning; the derivation of scaling laws; representation-learning theory.
 
-**The one boundary case, decided:** chapter 7 states the training objective as a formula and
-shows the parameter-update rule **once**, with a sentence of notation and no derivation, then
-names it explicitly as the edge of the book. Chapter 10 lists everything black-boxed, so the
-reader knows exactly what they cannot yet explain and what to say when an interviewer pushes.
+**The boundary cases, each decided. Do not widen the boundary beyond these four.**
+
+1. **Chapter 14 states the training objective as a formula** and shows the parameter-update rule
+   **once**, with a sentence of notation and no derivation, then names it as the edge of the book.
+   It also states the **preference objective once as a formula**, named, not derived: a pairwise
+   preference objective is an objective, not optimiser design, and interviewers ask what DPO is.
+2. **Chapter 12 may give one sentence on why normalisation is there** — it stops activations
+   growing through a deep stack. That is numerical stability, which this section otherwise
+   forbids. One sentence, no more. "What more layers let the model do" is fair; *why depth helps*
+   is not, and goes on chapter 17's list.
+3. **Chapter 9 must not explain why the embedding geometry carries meaning.** That is
+   representation learning. It says exactly this: the coordinates are whatever made next-token
+   prediction work, nobody chose them, and no dimension means anything. The question goes on
+   chapter 17's list.
+4. **Chapter 16 explains intermediate reasoning with the mechanism, not with training.** The
+   model's only scratchpad is its own output, so emitting intermediate tokens lets later tokens
+   condition on partial work. This follows from chapter 9. Do not reach for reinforcement
+   learning or serial-computation-depth arguments; both are outside the boundary.
+
+Two more things are **inside** the boundary and must not be skipped as if they were theory. The
+byte-pair merge procedure in chapter 10 is greedy corpus compression, and without it chapter 10
+asserts rather than explains. The reason zero temperature is not deterministic (chapter 13) is
+batching, floating-point order on a GPU, expert routing and provider-side change -- hardware and
+numerics, not machine learning. Give the mechanism, not a shrug.
+
+Chapter 17 lists everything black-boxed, so the reader knows exactly what they cannot yet explain
+and what to say when an interviewer pushes.
 
 **Every mechanism chapter carries a worked numeric example** small enough to check by hand or in
 ten lines of Python with no framework: a 5-token vocabulary, 4-dimensional vectors, arithmetic
@@ -194,6 +219,11 @@ The build relies on these.
   outside its folder.
 - **No account is required to read the book, and none is created by it.** Where a lab needs a
   model, the reader supplies it; see section 10.
+- **The book ships the lab data.** `labs/corpus/` holds about 40 short public-domain documents,
+  8 queries with graded (3-point) relevance labels, and one deliberately awkward PDF with a table
+  and a scanned page. No lab may say "your own documents": an expected result that depends on the
+  reader's files holds for nobody, and hand-labelling hundreds of query--document pairs is not a
+  lab, it is a punishment.
 - **Reproducible from the PDF alone.** Show every file a lab needs in full, or give a short
   command that creates it. Anything under `labs/` is also offered as a download beside the PDF.
 - **Expected results must hold for every reader.** Model output is stochastic, so never promise

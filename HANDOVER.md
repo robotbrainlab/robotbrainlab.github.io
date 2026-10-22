@@ -1,6 +1,6 @@
 # Handover — Modern AI Engineering from Zero
 
-Last updated: 2026-10-22.
+Last updated: 2026-10-22 (revised after an independent review of the plan).
 
 Read this file first, then `BOOK-GUIDE.md` (the spec), then `TOC.md` (the plan).
 
@@ -25,30 +25,37 @@ Do not reopen these. Each one was decided with the owner.
 |---|---|---|---|
 | 1 | **One book, not nine** | The nine subject areas are one system. Separate books must each stand alone, so they repeat the shared ground — about 100 pages of it. You also get nine prefaces, nine glossaries, nine cheat sheets, and the four threads split nine ways | One book per subject area |
 | 2 | **Claude writes the book. The owner reads it** | The owner's decision, stated more than once. **Do not argue about this again.** Earlier in the first session Claude pushed the owner to write the books. That was wrong and it was dropped | The owner writes, Claude edits |
-| 3 | **About 875 pages** | The owner reads quickly and accepts 1000+ pages. Page counts follow the material. Never pad a chapter to reach a number | A 500-page version, which Claude recommended and the owner overruled |
+| 3 | **About 1,040 pages, with headroom to 1,175** | The owner reads quickly and will put in more hours if the pages buy content. **A page target that costs theory is forbidden.** Page counts follow the material. Never pad a chapter to reach a number either | A 500-page version, and later a 650-page version, both recommended to the owner and both overruled |
 | 4 | **This repository sits outside the website repository** | The book is not website material. The website repository is public. This book is temporary, and the website repository's rule is "commit every file and keep it forever" | `_sources/modern-ai/` inside the website repository |
 | 5 | **The book never mentions the website** | The syllabus came from the owner's own research notes. The book stands alone. No chapter may name a website, a roadmap, a learning path, numbered steps or tracks | — |
 | 6 | **Four parts, plus an unnumbered pre-part** | The owner's books always have four parts. *The Complete Software Engineering Guide* already uses an unnumbered pre-part for *How Web Applications Work*, so the device is proven | A fifth part |
-| 7 | **The pre-part teaches the model's mechanism** | Interviews ask how attention works, why long context costs more, why models hallucinate, and what a key--value cache is. The earlier plan treated the model as a black box. That was a real gap | Leaving the model as a black box |
+| 7 | **An interlude teaches the model's mechanism** | Interviews ask how attention works, why long context costs more, why models hallucinate, and what a key--value cache is. The earlier plan treated the model as a black box. That was a real gap | Leaving the model as a black box |
+| 7a | **The interlude comes *after* Part I, not before it** | Four of its chapters open with problems only Part I makes sensible ("I was billed for tokens", "I set temperature to zero"). The old plan's own preface told the reader he could read Part I first and come back — if the preface must say that, the order is wrong. Putting Part I first also removes a duplication without cutting a page | The interlude first, which was the plan until 2026-10-22 |
 | 8 | **Mathematics yes. ML and DL theory no** | The owner asked for this exactly. The line is: teach what the model computes when it answers; state how it learned and move on. `BOOK-GUIDE.md` §6 draws the line | Teaching gradients, optimisers and learning theory |
-| 9 | **Chapters are numbered straight through, 1 to 51** | Appendix B keys about 100 interview answers to chapter numbers. Unnumbered chapters make that clumsy | Unnumbered pre-part chapters, as in the big book |
+| 9 | **Chapters are numbered straight through, 1 to 57** | Appendix B keys 100 interview answers to chapter numbers. Unnumbered chapters make that clumsy | Unnumbered interlude chapters, as in the big book |
 | 10 | **Serving, cost and security live in Part IV** | They are the answers to the four threads — Security, Speed, Cost, Failure. Part IV therefore carries 110 pages and is not a thin ending | Ordinary chapters in Part II |
 | 11 | **Appendix B is an interview bank** | It is the reason the book exists. Write it last, from the finished chapters, never from memory | — |
 | 12 | **Part III is one system that grows** | Lab 42 builds on labs 40 and 41. Standalone labs repeat themselves and cost about 25 more pages | Nine independent labs |
 | 13 | **Statistics and ranking metrics are taught inline** | Chapter 19 teaches variance and confidence intervals. Chapter 25 teaches recall@k, MRR and nDCG. Without them the book cannot stand alone | Sending the reader to another book |
-| 14 | **Each part is delivered as its own PDF** | The owner reads part 1 while part 2 is written. Writing order is the same as reading order | One delivery at the end |
+| 14 | **Each part is delivered as its own PDF** | The owner reads part 1 while part 2 is written. **Writing order is reading order** — the owner chose this explicitly on 2026-10-22, against a recommendation to write Part II first | One delivery at the end; writing Part II first |
+| 15 | **Each concept is *owned* by one chapter** | "Appears exactly once" was already broken ten times. `TOC.md` names the owner for each. Without this, chapter 39 re-teaches chapter 14 and both overflow | The exactly-once rule, which was unenforceable |
+| 16 | **The book ships its lab data** | `BOOK-GUIDE.md` demands expected results that hold for every reader, and six labs said "your own documents". Those cannot both be true. About 40 public-domain documents, 8 queries with graded labels, one awkward PDF | Each reader supplying a corpus, and hand-labelling ~360 pairs |
+| 17 | **Appendix B is 100 answers at 150 to 180 words, in 45 pp** | At the old 25 pp it was 60 words per answer, including the question. Sixty seconds of speech is 150 to 180 words | 25 pp, which was wrong by a factor of 2.7 |
+| 18 | **Appendix B's question list is written in week one** | It then acts as the acceptance test for each chapter as it lands. The answers are still written from the finished chapters, so decision 11 holds | Writing the whole appendix last, which left no time to drill it |
+| 19 | **Four chapters were added for what interviews test and the research does not name** | Ch 19 (calling a model reliably: streaming, rate limits, retries, concurrency, multi-turn state), ch 32 (evaluating a grounded answer), ch 55 (a system designed aloud), and the split of agents into ch 37 and ch 38 | Leaving them out because they are not among the 83 concepts |
+| 20 | **Lab 50 attacks the system before chapter 51 explains security** | Meet the failure, then learn the framework. The lab uses what chapter 36 taught. Moving it after Part IV would break Part IV's "no labs" rule | Moving the lab after chapter 51 |
 
 ## 3. State, as of 2026-10-22
 
 **Repository:** `~/LearningLab/towards-intelligence/modern-ai-interview-prep`, branch `main`,
-5 commits, nothing pushed.
+7 commits, nothing pushed.
 
 | Path | What it is | State |
 |---|---|---|
 | `HANDOVER.md` | This file | — |
 | `BOOK-GUIDE.md` | The spec. Self-contained, because a writing agent sees no other repository | Done |
-| `TOC.md` | 51 chapters, 4 appendices, page budgets | **Draft. Not approved** |
-| `TOC.pdf` | A review copy of `TOC.md` on A4. Generated, and in `.gitignore` | Sent to the owner |
+| `TOC.md` | 57 chapters, 4 appendices, page budgets, and the concept-ownership table | **Draft. Not approved** |
+| `TOC.pdf` | A review copy of `TOC.md`, built through the book template so it has the cover and the book design. Generated, and in `.gitignore` | Sent to the owner |
 | `README.md` | Status tracker, part by part | Done |
 | `markdown/00-preface.md` | A placeholder, so the build runs | Replace before release |
 | `markdown/_maths-proof.md` | Proves mathematics typesets. `convert.sh` skips it, because its name starts with `_` | Keep for regression |
@@ -56,6 +63,13 @@ Do not reopen these. Each one was decided with the owner.
 | `labs/` | Empty | — |
 
 **No chapter is written.** The build makes 12 pages: front matter and five part openers.
+
+**An independent review of the plan ran on 2026-10-22.** It found one real defect (two stale
+chapter numbers in `BOOK-GUIDE.md` §1, fixed in `6f39e90`), six gaps now filled by decisions 15
+to 20, and three places where the mathematics boundary could not hold, now repaired in
+`BOOK-GUIDE.md` §6. Its recommendation to cut to 650 pages was overruled by the owner. Its
+recommendation to write Part II first was overruled by the owner, who chose reading order. Its
+recommendation to put Part I first was accepted (decision 7a).
 
 **Checks:** `make` succeeds. `make check` reports 0 overfull boxes, 0 missing glyphs, 0 undefined
 references. It fails on two points only because no content exists yet: no glossary file, and
@@ -115,17 +129,18 @@ The nine topics and where each one now sits:
 
 | Topic | Concepts | Chapters |
 |---|---|---|
-| Orientation: Contemporary AI Systems | 7 | 11 to 17 |
-| Working with Models | 10 | 3, 6, 8, 18, 20, 21, 22 |
-| Embeddings and Semantic Search | 6 | 23, 24 |
-| Retrieval-Augmented Systems | 9 | 25 to 28 |
-| Evaluating and Observing AI Applications | 9 | 29 to 31 |
-| Agents, Tools and Context | 17 | 32 to 35 |
-| Adapting Models in Practice | 8 | 36 |
-| Securing AI Systems in Practice | 7 | 46 |
-| Inference, Cost and Production | 10 | 47 to 49 |
+| Orientation: Contemporary AI Systems | 7 | 1 to 7 |
+| Working with Models | 10 | 10, 13, 16, 18, 20, 21, 22, 23 |
+| Embeddings and Semantic Search | 6 | 24, 25 |
+| Retrieval-Augmented Systems | 9 | 26 to 29, 32 |
+| Evaluating and Observing AI Applications | 9 | 30 to 33 |
+| Agents, Tools and Context | 17 | 34 to 38 |
+| Adapting Models in Practice | 8 | 39 |
+| Securing AI Systems in Practice | 7 | 51 |
+| Inference, Cost and Production | 10 | 52 to 54 |
 
-The pre-part (chapters 1 to 10) is new. It is not in that research.
+The interlude (chapters 8 to 17) is new, and so are chapters 19, 32 and 55. None of them is in
+that research; they are there because interviews test them.
 
 ## 7. Gotchas
 
@@ -146,8 +161,9 @@ The pre-part (chapters 1 to 10) is new. It is not in that research.
 1. Read `BOOK-GUIDE.md` in full, then `TOC.md`.
 2. Check section 4 of this file. If anything there is still open, ask the owner.
 3. Check `README.md` for the status of each part.
-4. Write in the order `TOC.md` gives: the pre-part, then Part I, then Part II in two halves, then
-   labs 37 to 42, then Part IV, then labs 43 to 45, then the appendices.
+4. Write in the order `TOC.md` gives, which is the order the book is read: Part I, the interlude,
+   Part II in two halves, labs 40 to 46, labs 47 to 50, Part IV, then the appendices. Write
+   Appendix B's question list in week one and use it as the acceptance test for every chapter.
 5. For each part: a writing agent drafts it, then the main session edits **every** chapter by
    hand, then build and check (`BOOK-GUIDE.md` §14 and §15).
 6. Update `README.md` and this file after each part.
