@@ -14,6 +14,7 @@ run "VOICE    the book never refers to its own origins" python3 tools/verify-voi
 run "BOUNDARY no theory outside BOOK-GUIDE section 6"   python3 tools/verify-boundary.py
 run "RENDER   markdown renders as written"              python3 tools/verify-render.py
 run "RECORD   every chapter evidenced and fresh"        python3 tools/verify-record.py
+run "OUTLINE  the PDF outline nests correctly"          python3 tools/verify-outline.py
 
 printf '\n=== BUILD  0 overfull / 0 glyphs / 0 undefined ===\n'
 if [ -d latex ]; then

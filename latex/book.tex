@@ -16,17 +16,19 @@
 % on "Preface" and there is no way to jump to the contents, which is the page a reader of a
 % thousand-page book goes to most. \pdfbookmark takes the level, the text and an anchor
 % name; level 1 is the same level as a part, so the front matter sits beside them.
-\pdfbookmark[1]{Cover}{bm:cover}
+\pdfbookmark[-1]{Cover}{bm:cover}
 \input{front/cover}
 
 \frontmatter
-\pdfbookmark[1]{Title Page}{bm:titlepage}
+\pdfbookmark[-1]{Title Page}{bm:titlepage}
 \input{front/titlepage}
-\pdfbookmark[1]{Copyright}{bm:copyright}
+\pdfbookmark[-1]{Copyright}{bm:copyright}
 \input{front/copyright}
-\pdfbookmark[1]{Contents}{bm:contents}
+\pdfbookmark[-1]{Contents}{bm:contents}
 \tableofcontents
-\input{front/preface}                 % includes chapters/00-preface (markdown/00-preface.md)
+\toplevelchapters
+\input{front/preface}
+\partlevels                 % includes chapters/00-preface (markdown/00-preface.md)
 
 \mainmatter
 
@@ -42,7 +44,7 @@
   {what is inside the model --- the second half of this part opens it.}
 \input{chapters/01-what-a-model-is}
 \input{chapters/02-the-parts-around-the-model}
-% \input{chapters/03-chapter-slug}
+\input{chapters/03-why-it-is-assembled-this-way}
 % \input{chapters/04-chapter-slug}
 % \input{chapters/05-chapter-slug}
 % \input{chapters/06-chapter-slug}
@@ -120,13 +122,12 @@
 %% \input{chapters/C-glossary}           % the glossary is the last appendix
 
 \backmatter
-% startatroot: without it the back matter nests under Part IV, because the last part is
-% still the open bookmark level. The Index came out three levels deep for that reason.
-\bookmarksetup{startatroot}
+% \partlevels puts the chapter and section depths back, so the back matter does not
+% inherit the deeper levels a sub-parted part leaves behind.
+\toplevelchapters
 \printindex
 
-\bookmarksetup{startatroot}
-\pdfbookmark[1]{Back Cover}{bm:backcover}
+\pdfbookmark[-1]{Back Cover}{bm:backcover}
 \input{front/backcover}
 
 \end{document}

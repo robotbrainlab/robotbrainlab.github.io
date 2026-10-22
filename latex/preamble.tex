@@ -241,7 +241,10 @@
 
 % ---- Headings --------------------------------------------------------
 \setcounter{secnumdepth}{0}   % chapters are numbered (they are not affected); sections are not
-\setcounter{tocdepth}{1}      % contents: parts, chapters, sections
+\setcounter{tocdepth}{1}      % default: parts, chapters, sections. \subpartlevels,
+                              % \partlevels and \toplevelchapters move it with the
+                              % \toclevel@ shifts, so the printed contents and the PDF
+                              % outline keep the same set of entries in every part.
 
 \newcommand{\chapterlabelfont}{\sffamily\bfseries\fontsize{11.5}{13.5}\selectfont\addfontfeature{LetterSpace=10}}
 \newcommand{\chaptertitlefont}{\sffamily\bfseries\fontsize{27}{32}\selectfont}
@@ -319,6 +322,7 @@
 % \bookpart{I}{Understand}{networking theory, the history of the web, …}
 % The third argument is the "What to ignore for now" note (leave it empty for none).
 \newcommand{\bookpart}[3]{%
+  \partlevels
   \clearpage
   \thispagestyle{empty}\markboth{}{}%
   \phantomsection
@@ -340,13 +344,35 @@
 % Understand, which is why neither is a part of its own -- but the ground changes at the
 % join and the reader is told so. Lighter than \bookpart: smaller title, thinner rule, and
 % its contents entry is indented under the part's.
+\newcounter{subpartno}
+\makeatletter
+% Depth in the PDF outline is \toclevel@<type> + 2, so a part sits at depth 1 and a chapter
+% at depth 2. A sub-part has to sit between them, which no integer allows -- so inside a
+% part that has sub-parts, the chapters move one level deeper and the sub-part takes depth
+% 2. \bookpart puts them back, so a part without sub-parts is unaffected.
+\newcommand{\subpartlevels}{%
+  \renewcommand*{\toclevel@chapter}{1}\renewcommand*{\toclevel@section}{2}%
+  \renewcommand*{\toclevel@subsection}{3}\setcounter{tocdepth}{2}}
+\newcommand{\partlevels}{%
+  \renewcommand*{\toclevel@chapter}{0}\renewcommand*{\toclevel@section}{1}%
+  \renewcommand*{\toclevel@subsection}{2}\setcounter{tocdepth}{1}}
+% The preface and the index are \chapter-level but belong at the top of the outline, beside
+% the parts, not nested under whatever came before them.
+\newcommand{\toplevelchapters}{%
+  \renewcommand*{\toclevel@chapter}{-1}\renewcommand*{\toclevel@section}{0}%
+  \renewcommand*{\toclevel@subsection}{1}\setcounter{tocdepth}{0}}
+\makeatother
+
 \newcommand{\booksubpart}[3]{%
   \clearpage
   \thispagestyle{empty}\markboth{}{}%
-  \phantomsection
-  % \texorpdfstring: the printed contents gets the indent, the PDF bookmark gets the
-  % bare title. Without it the bookmark reads " Mental Model", with a leading space.
-  \addcontentsline{toc}{part}{\texorpdfstring{\hspace*{1.2em}#2}{#2}}%
+  \stepcounter{subpartno}%
+  % The printed contents line is written RAW, with \addtocontents rather than
+  % \addcontentsline, because \addcontentsline would also emit a top-level bookmark. The
+  % outline entry is made explicitly below, at the depth we want.
+  \addtocontents{toc}{\protect\contentsline{part}{\protect\hspace*{1.2em}#2}{\thepage}{}}%
+  \pdfbookmark[0]{#2}{subpart.\thesubpartno}%
+  \subpartlevels
   \vspace*{96pt}%
   \begingroup\raggedleft
     {\chapterlabelfont PART #1\par}\vspace{11pt}%
@@ -390,7 +416,10 @@
 
 % ---- Links & PDF metadata ------------------------------------------------------
 \usepackage{hyperref}
-\usepackage{bookmark}
+% \usepackage{bookmark} is deliberately NOT loaded. It reimplements the outline and
+% ignores \toclevel@<type>, which is the only hook that can put a part's chapters one
+% level under a sub-part. With hyperref alone the levels are: part -1, sub-part 0,
+% chapter 1, section 2 inside a sub-parted part; and chapter 0, section 1 elsewhere.
 \usepackage{xurl}
 \hypersetup{
   colorlinks=true, linkcolor=ink, urlcolor=ink, citecolor=ink,

@@ -65,6 +65,25 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**14. The gates read Markdown. The book is a PDF.** The outline was wrong three times in a
+row — front matter missing from it, then sub-parts beside Part I instead of under it, then
+chapters beside the sub-parts instead of under them — and the reader found all three. Every
+gate passed each time, because every gate opened a `.md` file. **Anything that only exists
+after typesetting is unchecked unless something opens the output**: the outline, the running
+heads, the page breaks, the index, the cover. `verify-outline.py` now covers the first of
+those. The general lesson is the one to keep: when the reader reports something twice, the
+answer is a gate, not more care.
+
+**13. The same false claim will come back in the next chapter that needs it.** "A rule is
+free and it is **right** every time" was written in chapter 2, fixed there, and then
+written again in chapter 3's check table as "Certainty, free, every time". Nobody copied
+it; it is simply the sentence that comes to mind when describing a rule-based check, and
+the true version — *the same verdict every time, which is not the same as the right one* —
+is one word longer and less satisfying. **A corrected claim is not corrected book-wide; it
+is corrected in one chapter.** When a fix lands on a claim the book will make again, write
+the claim into `LEDGER-TAUGHT.md` in its corrected form, and grep for the wrong form in
+every later chapter that touches the subject.
+
 **11. A gate can encode a claim and be wrong the same way the writer would be.**
 `verify-render.py` flagged every Review Questions block in chapter 1 as "items run
 together into one paragraph". It was wrong: a real `1. ` marker is list syntax and makes

@@ -42,6 +42,19 @@ to it by chapter number and does not re-teach it.
 | Tracing a request | 33 | 45, 54 | Do not introduce tracing in 54. Chapter 33 owns what a trace holds and what to capture |
 | Citation and attribution | 28 | 32, 33 | Do not re-teach how citations are assembled in 32 — it owns whether the citation *supports the claim* |
 
+## Claims in their corrected form
+
+Claims the book makes more than once, written here the way they are true, because the
+false version is the one that comes to mind. Grep this list before writing a chapter that
+touches the subject.
+
+| Say this | Not this | Why |
+|---|---|---|
+| A rule gives **the same verdict** every time, for nothing | A rule is **right** every time / gives certainty | Deterministic is not correct. A rule is only as right as whoever wrote it, and a shape check says nothing about whether the answer is true |
+| A second answer stands in the same relation to the truth as the first — usually right, sometimes confidently wrong | A model's answer has **no** relation to the truth | Models are useful because their answers do correlate with truth. The point is that a self-check is not independent, not that it is worthless |
+| The model itself cannot look anything up | The model cannot look anything up | Products with search do look things up, with machinery around the model |
+| The model can only **use** tools you described | The model can only **ask for** tools you described | It will ask for functions that do not exist; your code refuses them |
+
 ## Per-chapter record
 
 One row per finished chapter. Fill it when the chapter is closed, before the next one
