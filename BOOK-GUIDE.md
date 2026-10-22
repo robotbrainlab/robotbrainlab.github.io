@@ -24,8 +24,8 @@ to the depth an interview reaches, and it says plainly where the deeper theory b
   tracks, or "the guide". The book stands alone and is the reader's only source.
 - **Where a concept leans on something the reader has not studied, the book teaches it inline.**
   Two cases are load-bearing: comparing two prompts needs sampling variance and a confidence
-  interval (chapter 12 teaches them from zero), and judging retrieval needs ranking metrics
-  (chapter 18 teaches recall@k, MRR and nDCG from zero). Do not send the reader elsewhere.
+  interval (chapter 19 teaches them from zero), and judging retrieval needs ranking metrics
+  (chapter 25 teaches recall@k, MRR and nDCG from zero). Do not send the reader elsewhere.
 
 ## 2. The reader
 
