@@ -100,7 +100,14 @@ Source Code Pro is not embedded because no code block exists.
    - write the labs against a hosted API, with the key read from an environment variable.
    Claude's recommendation is both: `ollama` for most labs, a hosted API only for strict
    structured outputs, prompt-prefix caching and reasoning modes. This blocks Part III only.
-3. **`TOC.md` is not approved.** No chapter is drafted until the owner approves it.
+3. ~~**`TOC.md` is not approved.**~~ **Approved 22 Oct 2026** — *"Approved, let's see how
+   chapter 1 turns out."* Chapters are written one at a time against it. The plan has moved
+   since: chapter 13 gained an output-length setting (found by chapter 1's fix-verification
+   pass), and Part I was reorganised into two halves. Both are in `TOC.md`.
+
+**Nothing on this list blocks the next chapter.** Item 1 is due when chapter 7 is finished;
+item 2 is due before chapter 42, which is the first lab needing reliable tool calls and
+strict structured output.
 
 ## 5. The build, and how it differs from the other books
 
