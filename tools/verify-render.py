@@ -18,6 +18,8 @@ Checks:
      follows the row and `>` is exempt.
   5. Unbalanced backticks on a line. A code span cannot cross a line break, so an odd
      count means the span never closes and the rest of the line renders as code.
+  7. A blockquote starting directly under ordinary text mid-sentence - usually the
+     remains of an edited-away callout.
   6. Unbalanced maths delimiters. This book writes maths as raw LaTeX spans
      (`\\(x\\)`{=latex}) and fenced blocks (```{=latex}). An unclosed \\( swallows the
      rest of the line into maths mode; an unclosed raw fence swallows the chapter.
@@ -60,6 +62,14 @@ def check(path):
             out.append((i + 1, "unbalanced backticks - a code span never closes", ln[:60]))
         if ln.count("\\(") != ln.count("\\)"):
             out.append((i + 1, "unbalanced \\( \\) - maths mode never closes", ln[:60]))
+        # 7. A '>' line directly under ordinary text. A blockquote can interrupt a
+        # paragraph, so the paragraph ends there and the rest becomes a quote - which is
+        # what an edited-away callout leaves behind. It split a sentence in chapter 2 and
+        # every other gate passed it.
+        if (nxt.lstrip().startswith(">") and ln.strip() and not ln.lstrip().startswith((">", "#", "|", "-", "*"))
+                and not ln.rstrip().endswith((":", "."))):
+            out.append((i + 1, "text runs straight into a blockquote - the paragraph ends "
+                               "here and the rest renders as a quote", ln[-58:]))
 
     if rawfence % 2:
         out.append((0, "an odd number of ```{=latex} fences - one never closes", ""))

@@ -16,7 +16,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def field(text, name):
-    m = re.search(rf"^{name}:\s*(.*)$", text, re.M)
+    # [^\S\n]* and not \s* : \s matches newlines, so an EMPTY field read the next
+    # line's content and looked filled. That made "written:" report as "reviewed:" and
+    # produced a spurious "stages out of order". LEDGER-DEFECTS entry 11, third instance.
+    m = re.search(rf"^{name}:[^\S\n]*(.*)$", text, re.M)
     return (m.group(1).strip() if m else "")
 
 

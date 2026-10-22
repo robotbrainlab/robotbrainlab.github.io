@@ -19,7 +19,7 @@ sha256:
 ## Before writing
 
 - [ ] `LEDGER-TAUGHT.md` consulted — what the reader already knows, and every "Do not" row read. The opening claims nothing false about what came before
-- [ ] The chapter's `TOC.md` row read: its opening problem, its Covers list, its page budget
+- [ ] The chapter's `TOC.md` row read: its opening problem, its Covers list, its page estimate (an estimate, never a target — `BOOK-GUIDE.md` §11)
 - [ ] **The chapter's non-scope declared** in the field above — what this chapter does not cover, so review has an edge and can terminate
 - [ ] Sources read **in full, immediately before writing** — named, with what was read
 - [ ] `BOOK-GUIDE.md` §6 boundary cases and `LEDGER-DEFECTS.md` to hand

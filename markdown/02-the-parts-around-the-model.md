@@ -135,11 +135,11 @@ puts the result back into the context so the model can carry on.
 | Your code | Defines which tools exist, validates the request, runs it, returns the result | Write the request itself |
 
 Both of them decide something, and the two decisions are different. The model decides
-*that* a tool is wanted. Your code decides *whether that happens*. Your code can also
-decide the first one — calling a tool itself, or insisting the model use a particular one —
-but the model can never decide the second.
+*that* a tool is wanted. Your code decides *whether that happens*. Your code can take the
+first decision away — insisting the model use a particular tool, or offering it none at all
+— but the model can never take the second.
 
-Two consequences follow immediately, and both come back later with force.
+Three consequences follow immediately, and all three come back later with force.
 
 **You decide what exists.** The model can only use tools you described to it. It may well
 ask for something you never offered — a plausible-sounding function that does not exist —
@@ -161,7 +161,7 @@ the model uses well is Chapter 36.
 A **check** is anything that verifies the output before it is used. Chapter 1 established
 that you cannot predict what the model will produce. A check is what you do about that.
 
-By *shape*, start with something concrete: your code expects an answer and a price it can
+What *shape* means is easiest to see concretely: your code expects an answer and a price it can
 do arithmetic with, and what came back is a friendly paragraph with the price written out
 in words. A shape check is what notices. Chapter 21 is how you ask for one properly.
 
@@ -173,8 +173,8 @@ Checks come in a range, from cheap and certain to expensive and approximate:
 | Does it pass a rule you can write? | A price below zero, a date in the past, a missing citation | Almost nothing |
 | Does a second model judge it acceptable? | Rudeness, irrelevance, an answer that ignored the material | A whole extra call, and it is approximate |
 
-Below the bottom of that table there is a person. A person is not a fourth rung of
-checking, though: they are the fifth part, and the next section is about them.
+Below the bottom of that table there is a person — and a person is not a fourth rung of
+checking. They are the next section.
 
 Work down that table in order. Anything a rule can decide should be decided by a rule,
 because a rule costs nothing and gives the same verdict every time. Judgement is kept for what actually
@@ -211,9 +211,9 @@ human. The system does the volume, and a person owns the consequential tail.
 The durable reason is not that models are not good enough yet. It is that somebody has to
 be accountable for a decision that affects a customer, and accountability does not sit in
 a component. How much a person is asked to approve will move as systems get better. That
-there is a person who answers for the consequential cases is a different kind of claim. Chapter 3 makes
-> that argument properly; Chapter 51 shows what goes wrong when the approval step is
-> missing from a place that needed one.
+there is a person who answers for the consequential cases is a different kind of claim.
+Chapter 3 makes that argument properly, and Chapter 51 shows what goes wrong when the
+approval step is missing from a place that needed one.
 
 ## The Whole Thing Has a Name
 
@@ -323,7 +323,7 @@ instructions, added material and the request — assembled fresh every time, lim
 and responsible for most of the cost. **Retrieval** finds the added material in your own
 collection and supplies facts the model does not hold. **Tools** are actions the model may
 ask for: it proposes, your code decides, runs and returns. **Checks** verify the output
-before anybody uses it, from a shape the output must fit through to a person's judgement.
+before anybody uses it, from a shape it must fit through to a second model's opinion.
 **People** approve the consequential cases and own the result. The whole arrangement is a
 **compound system**, and once you see it as parts, "is the model any good?" stops being the
 question.
@@ -335,7 +335,7 @@ question.
 | **Context** | Everything sent to the model on one call: the instructions, any added material, and the request |
 | **Retrieval** | Searching your own collection for the passages that bear on a request, so they can be put into the context |
 | **Tool** | An action the model may ask for. The model proposes it; your code decides whether to run it |
-| **Check** | Anything that verifies the output before it is used, from a required shape to a person's judgement |
+| **Check** | Anything that verifies the output before it is used, from a required shape through to a second model's opinion |
 | **People** | The reviewers and approvers who handle the consequential cases and carry responsibility for them |
 | **Compound system** | A system of several parts with the model as one of them, rather than as the whole product |
 

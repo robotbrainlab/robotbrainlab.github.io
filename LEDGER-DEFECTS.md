@@ -81,6 +81,16 @@ case-sensitive and now compile that way. **Two of the seven gates have now been 
 before the chapter was**, both in their first week, and both in the same direction: a
 pattern written for one shape matching a wider one. Expect the third.
 
+*Third instance, the same day.* `verify-record.py` read its fields with `^name:\s*(.*)$`.
+`\s` matches newlines, so an **empty** field swallowed the line break and returned the
+next line's text: `written:` reported as `reviewed:`, and the gate announced "stages out
+of order" on a record whose stages were simply not filled in yet. Fixed with
+`[^\S\n]*`. **All three were the same mistake** — a character class wider than the thing
+it was written for — and all three were found by the gate failing on correct input rather
+than by passing bad input. The lesson is not "write better patterns". It is that **a
+failing gate is a claim to be checked like any other**, and the first question is always
+whether the gate or the text is wrong.
+
 **12. A page budget is a guess until a chapter is built, and the words-per-page figure
 does not transfer between books.** Chapter 1 came in at **8 printed pages against a
 14-page budget**: 3,097 words of markdown, ~3,067 words printed across pages 8 to 15, so
