@@ -93,7 +93,10 @@ Re-measure after a chapter with worked arithmetic (chapter 11) and after a lab
 
 *Second data point, chapter 2:* 3,158 words, **11 printed pages against an 18-page
 budget** — 61 per cent, where chapter 1 was 71 per cent. Two chapters is still not enough
-to revise 55 budgets, and Part I remains the least representative part of the book. But if
-chapter 3 lands near the same fraction, the Part I budgets are wrong rather than the
-chapters, and the honest move then is to re-budget Part I rather than to keep writing
-chapters that silently miss their targets.
+to revise 55 budgets, and Part I remains the least representative part of the book. **That trigger was cancelled on 22 October 2026**, by the
+reader: budgets are a rough estimate, never a limit, and content is not cut to fit one or
+padded to reach one. See `BOOK-GUIDE.md` §11.
+
+What survives of this entry is the part that is still true and still useful: **a large gap
+is a prompt to re-read the Covers list**, because in both chapters it pointed at something
+genuinely thin. It is not a reason to add words, and it is not a reason to re-plan.

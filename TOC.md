@@ -2,8 +2,10 @@
 
 **Status: draft, awaiting approval.** Nothing is drafted until this is approved.
 
-- **Target:** about **1,040 numbered pages** (~250,000 words), with headroom to 1,175. No chapter
-  is capped at the cost of its content, and nothing is padded to reach a number.
+- **Target:** about **1,040 numbered pages** (~250,000 words). **Every page number below is an
+  estimate for planning, not a limit.** No chapter is capped at the cost of its content, and
+  nothing is padded to reach a number. Chapters that need more take more; chapters that need
+  less are not padded. See `BOOK-GUIDE.md` §11.
 - **Structure:** Part I · Understand (98 pp), then the unnumbered interlude *Inside the Model*
   (168 pp), then II · Use (362 pp) · III · Apply (190 pp) · IV · What Next (136 pp) ·
   Appendices (83 pp), plus five part-opener pages.

@@ -251,9 +251,25 @@ environment and are never printed, logged or committed.
 
 ## 11. Length
 
-The book runs about **240 words per printed page**, counting code and tables. A chapter's word
-budget is its page budget × 240; a 16-page chapter is about 3,800 words. Stay close to it: cut
-padding rather than adding filler.
+**A page budget is an estimate, not a limit.** Decided by the reader on 22 October 2026:
+*"the best outcome is when the content flows naturally… we shouldn't cut valuable content just
+to stay within the estimate."*
+
+So, in order:
+
+1. **Never pad a chapter to reach its budget.** Filler is worse than a short chapter.
+2. **Never cut material that earns its place to fit one.** A chapter that needs more pages
+   takes them.
+3. **A large gap is still information.** When a chapter lands far under, read its Covers list
+   again and ask whether anything is thin or merely asserted — that question found real gaps in
+   chapters 1 and 2. If nothing is thin, the chapter is finished and the estimate was wrong.
+4. **Do not re-budget the plan on the strength of a few chapters.** The estimate is carried in
+   `TOC.md` for planning, not enforced.
+
+The original figure, kept because it is still the best way to size a chapter before writing it:
+about **240 words per printed page** counting code and tables, so a 16-page chapter is roughly
+3,800 words. Measured here, prose-heavy chapters run nearer 350, so a page budget written at 240
+will usually over-estimate.
 
 Page counts are **numbered pages**, from Part I's opener to the end of the glossary; part-opener
 pages count, the front matter and index do not. Code blocks and tables never split across pages,
