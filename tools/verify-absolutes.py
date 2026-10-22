@@ -13,7 +13,15 @@ Usage: python3 tools/verify-absolutes.py <chapter.md>   # prints the list and `a
 """
 import os, re, sys
 
-WORDS = r"always|never|all|only|every|any|none|must|cannot|can't|impossible|guarantee[sd]?|identical|the same"
+# "nothing", "nobody", "no X" and "almost" were missing until 2026-10-23. Chapter 7 shipped
+# "Nothing here is a lab" in its own four-parts table while carrying a lab 120 lines below,
+# and this gate listed none of it. An absolute whose counter-example is in the same file is
+# exactly what the gate exists to surface, so the list now covers the negative forms too.
+# `no \w+` was tried and dropped: it added ~27 hits per chapter, nearly all of them "no idea",
+# "no longer", "no code". A hint list too long to read is the same failure as a gate that cries
+# wolf, so only the forms that have actually carried a defect here are listed.
+WORDS = (r"always|never|all|only|every|any|none|nothing|nobody|no one|almost|must|cannot|can't"
+         r"|impossible|guarantee[sd]?|identical|the same")
 RX = re.compile(r"\b(" + WORDS + r")\b", re.I)
 
 

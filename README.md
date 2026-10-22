@@ -21,7 +21,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 
 | Part | Chapters | Pages | Status |
 |---|---|---|---|
-| I · Understand — *Mental Model* | 1–7 | 98 | **Drafting** — 6 of 7 done |
+| I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | Not started |
 | II · Use | 18–39 | 362 | Not started |
 | III · Apply | 40–50 | 190 | Not started |
@@ -37,9 +37,10 @@ About 1,042 numbered pages in all. Measured from the current build (`latex/book.
 | 3 | 10 pp (23–32) | 14 | 71% |
 | 4 | 9 pp (33–41) | 16 | 56% |
 | 5 | 8 pp (42–49) | 14 | 57% |
-| 6 | 8 pp (50–57) | 12 | 67% |
+| 6 | 11 pp (50–60) | 12 | 92% |
+| 7 | 8 pp (61–68) | 10 | 80% |
 
-Chapters 1–6 average 9 printed pages against a 14-page average estimate.
+**Part I · Mental Model: 66 printed pages against a 98-page estimate (67%).**
 
 **Measure a chapter by where its own text ends, not by where the next chapter starts.**
 Chapter 5 was first recorded as 12 pp because the four part-opener pages that follow it

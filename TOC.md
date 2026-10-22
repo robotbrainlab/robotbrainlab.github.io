@@ -151,7 +151,7 @@ no expected result holds for every reader.
 
 ## Who owns what
 
-`BOOK-GUIDE.md` §4 says each concept appears exactly once. Ten concepts are naturally touched by
+`BOOK-GUIDE.md` §4 says each concept appears exactly once. Eleven concepts are naturally touched by
 more than one chapter. Each is **owned** by the chapter below; every other chapter refers to it by
 number and does not re-teach it.
 

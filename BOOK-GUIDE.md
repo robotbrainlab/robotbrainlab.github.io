@@ -24,8 +24,8 @@ to the depth an interview reaches, and it says plainly where the deeper theory b
   tracks, or "the guide". The book stands alone and is the reader's only source.
 - **Where a concept leans on something the reader has not studied, the book teaches it inline.**
   Two cases are load-bearing: comparing two prompts needs sampling variance and a confidence
-  interval (chapter 19 teaches them from zero), and judging retrieval needs ranking metrics
-  (chapter 25 teaches recall@k, MRR and nDCG from zero). Do not send the reader elsewhere.
+  interval (chapter 20 teaches them from zero), and judging retrieval needs ranking metrics
+  (chapter 26 teaches recall@k, MRR and nDCG from zero). Do not send the reader elsewhere.
 
 ## 2. The reader
 
@@ -53,7 +53,7 @@ way a beginner would say them.
 
 - Cover exactly what `TOC.md` says, at interview depth. Explain each concept clearly, not
   exhaustively.
-- **Every concept is owned by one chapter.** `TOC.md` has a *Who owns what* table for the ten
+- **Every concept is owned by one chapter.** `TOC.md` has a *Who owns what* table for the eleven
   concepts more than one chapter touches. The owner teaches it. Every other chapter refers to it
   by chapter number and does not re-teach it. This is the rule that stops chapter 39 repeating
   chapter 14 and chapter 52 repeating chapter 15, and both overflowing their budgets.

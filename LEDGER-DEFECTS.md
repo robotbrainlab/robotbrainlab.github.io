@@ -137,6 +137,20 @@ about building it are worth more than the gate itself:
    `bare-terms: 1 FAIL` on a chapter with one `reranker` appended. The suite's loop was
    proved the same way, not just the script.
 
+*Second instance, same day, different gate.* `verify-absolutes.py` listed **none** of
+chapter 7's negative absolutes. The chapter's four-parts table said **"Nothing here is a
+lab"** — flatly false, since every chapter of Parts I to III carries one, chapter 7 included,
+120 lines further down the same file. The gate's word list held `always|never|all|only|every|
+any|none|must|cannot|…` and had no `nothing`, no `nobody`, no `almost`. **An absolute whose
+counter-example sits in the same file is the exact thing this gate exists to surface**, and it
+printed 38 hits without that one among them. The list now covers the negative forms.
+
+Calibration again decided the shape of the fix: adding `no \w+` as well caught more but added
+about 27 hits a chapter, nearly all `no idea`, `no longer`, `no code`. **A hint list too long
+to read carefully is the same failure as a gate that cries wolf**, so it was dropped and only
+the forms that have actually carried a defect here are listed. Counts rose from 38-83 to
+47-99 per chapter, which is still a list a person reads.
+
 **The general lesson.** `verify-inputs.py` was itself born from a defect — the French
 book's chapter 38 ran a rule on two verbs the book had never printed. It was written to
 stop that, and it stopped the backticked version of it. **When a gate passes a chapter and
