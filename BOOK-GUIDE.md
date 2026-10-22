@@ -362,6 +362,10 @@ success for them on the way past.
 
 > **Grep the whole book for every phrasing of the claim. Count N before. Count N after.
 > Zero, or it is not done.**
+>
+> **And sweep the back matter first.** Four times in three chapters the survivor was in a
+> Summary, a Key Terms row or a Review Answer — sections read as settled because they are a
+> glossary or a crib rather than an argument. Those are where a fix goes to not happen.
 
 A fix that needed six places once landed in five, and the survivor was in Key Terms — a
 section no reviewer re-reads, because it is a glossary rather than an argument. Include

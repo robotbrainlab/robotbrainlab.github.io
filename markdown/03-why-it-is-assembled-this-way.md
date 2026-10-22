@@ -46,9 +46,11 @@ user may not see that record. It would be wrong wherever permissions differ or t
 moved since — which, in most companies, is most of the time.
 
 > **Note:** You may have heard that continuing a model's training on your own documents
-> solves this. It does not solve the second and third of those — training is a snapshot too,
-> and weights carry no notion of who is allowed to see what. It is one of several reasons
-> Chapter 39 treats tuning as the last lever rather than the first.
+> solves this. It does not. Training is a snapshot too, so the data still goes stale; and
+> weights carry no notion of who is allowed to see what, so per-reader scope is still
+> impossible. It also puts your private material into a set of weights, which is the thing
+> the first point says you would rather avoid. It is one of several reasons Chapter 39
+> treats tuning as the last lever rather than the first.
 
 ### What closes it, and what it costs
 
@@ -116,7 +118,8 @@ Yes, and the reason is structural rather than a matter of effort.
 Ask a model whether its last answer was correct and it produces another answer. That second
 answer comes from the same process as the first and works from the same information, so it
 stands in the same relation to the truth as the first did: usually right, sometimes
-confidently wrong, and not consulting any record either way. **A confident answer and a confident check are the same kind of object.**
+confidently wrong, and not consulting any record either way. **A confident answer and a
+confident check are the same kind of object.**
 
 You can often improve things by asking in a way that makes the model look harder, and
 Chapter 31 is about where that does and does not work. But the structural point stands: a
@@ -160,8 +163,8 @@ threshold on the check you have.
 ### Is the gap real?
 
 Yes — but not in the way it is usually told, and the usual telling gets the design wrong.
-It is also the one gap whose cause sits outside engineering altogether, which is why no
-better model dissolves it.
+It is also the only one of the four where adding the part that closes it leaves the cause
+exactly where it was.
 
 Here is the version to discard first: *without a person in the loop, nobody is answerable.*
 That is false. If your company deploys a system that refuses a loan, loses a customer's
@@ -179,7 +182,7 @@ for you**:
 - It cannot notice that this particular case is the one that should not be decided by rule.
 
 That is the real gap, and it is sharper than the usual one. **You are answerable for
-decisions you did not see, cannot reconstruct, and could not have defended.** The system
+decisions you did not see and could not have defended.** The system
 produced them; the responsibility was yours the whole time.
 
 > **Note:** This is usually filed under "ethics" and set aside. It is better understood as a
@@ -188,9 +191,10 @@ produced them; the responsibility was yours the whole time.
 > Where that set is drawn is partly law and partly judgement — the legal floor is not yours
 > to move, and everything above it is a design decision you own.
 
-**Does a better model close this?** It changes how large the set is, because a system that
-is wrong less often needs fewer decisions defended. It does not change who is answerable,
-which is why this gap is unlike the first three: progress moves its cost, never its cause.
+**Does a better model close this?** It can shrink the part of the set you draw yourself — a
+system you trust more is one you choose to supervise less closely. It cannot touch the part
+the law draws, and it does not change who is answerable. That is why this gap is unlike the
+first three: progress moves its cost, never its cause.
 
 ### What closes it, and what it costs
 
@@ -204,8 +208,10 @@ discharges what it already owes.
 | A record of who decided what, and on what evidence | Approval is a bottleneck that grows with volume |
 | — | **Rubber-stamping, which looks like review and is not** |
 
-The last row is the failure that catches people out. That is **rubber-stamping**: approval given without real attention. Show a reviewer a
-hundred confident approvals an hour and most will approve nearly all of them: almost every one is fine, and
+The last row is the failure that catches people out. That is **rubber-stamping**: approval
+given without real attention. Show a reviewer a
+hundred confident approvals an hour and most will approve nearly all of them: almost every
+one is fine, and
 attention does not survive that. The effect has two halves, and the second is less obvious
 than the first — volume wears attention down, and a confident recommendation pulls a
 reviewer toward agreeing with it even when there is plenty of time. You then pay the full
@@ -230,7 +236,7 @@ Read those four together and the shape is the same every time.
 | Retrieval | Answering from nothing | Retrieving the wrong thing |
 | Tools | Being unable to act | Acting wrongly |
 | Checks | Shipping bad output unnoticed | Blocking good output, and a false sense of safety |
-| People | Nobody answerable | Delay, cost, and rubber-stamping |
+| People | Decisions made unseen that nobody could defend | Delay, cost, and rubber-stamping |
 
 This is not pessimism, and it is not an argument for building less. It is the reason
 compound systems are **designed** rather than assembled: you are choosing which failures
@@ -294,9 +300,11 @@ with a second system that can be wrong on its own. It cannot act, because it onl
 text, so tools close it and you pay with every surface a tool can reach, including actions
 that cannot be undone. It cannot reliably check itself, because a check from the same
 component shares its failures, so checks close it and you pay for what they were not built
-to catch, and for the good answers a strict check rejects. It is not accountable, because
-accountability is a property of people, so people close it and you pay in delay, cost and
-the risk of rubber-stamping. The pattern is the lesson: **every part removes one failure and
+to catch, and for the good answers a strict check rejects. It is not accountable —
+accountability stays with you
+whatever you build — so people are how you discharge it on the cases that need defending,
+and you pay in delay, cost and the risk of rubber-stamping. The pattern is the lesson:
+**every part removes one failure and
 introduces another**, which is why the simplest arrangement that works is usually right.
 
 ### Key Terms
@@ -309,19 +317,38 @@ introduces another**, which is why the simplest arrangement that works is usuall
 
 ### Review Questions
 
-1. A colleague says the "does not know your data" gap will disappear once models can be retrained cheaply every week. Give the strongest reason they are wrong.
-2. What is the difference in kind between a wrong answer and a wrong action, and what does that difference imply about which tools you offer?
+1. A colleague says the "does not know your data" gap will disappear once models can be
+retrained cheaply every week. Give the strongest reason they are wrong.
+2. What is the difference in kind between a wrong answer and a wrong action, and what does
+that difference imply about which tools you offer?
 3. Why is asking a model to check its own answer weaker evidence than it feels?
-4. Your system sends 100 cases an hour to a human reviewer who approves 99 of them. What have you bought, and what have you paid?
-5. A teammate proposes adding a second model to judge every answer. Name two costs, and name the question you would ask before agreeing.
+4. Your system sends 100 cases an hour to a human reviewer who approves 99 of them. What
+have you bought, and what have you paid?
+5. A teammate proposes adding a second model to judge every answer. Name two costs, and name
+the question you would ask before agreeing.
 
 ### Review Answers
 
-1. Per-reader scope. Even a model retrained this morning on everything the company owns answers every user from the same body of knowledge, so it cannot be told that this user may not see that record. Freshness is the half of the gap that shrinks; privacy and per-reader scope are not.
-2. A wrong answer can be read and discarded. A wrong action has already happened — the refund is paid, the message is sent. So the decision about which tools to offer is made before anything runs, and the cheapest protection is not offering an irreversible one.
-3. The check comes from the same component, works from the same information, and fails in the same places. It is not consulting a record. Certainty is not something the model measures, so it is as confident about a wrong answer as a right one.
-4. You have bought accountability — somebody is answerable for those decisions. You are paying the full cost of review, and at 100 an hour you are probably also paying for rubber-stamping, so the value may be much lower than the cost. The fix is fewer, better-chosen cases, not a faster reviewer.
-5. It costs a whole extra call per answer, in money and latency, and it adds a component with the same kind of unpredictability as the first — a different model will not fail in exactly the same places, but it is not an independent referee either. The question to ask first: what failure are we trying to catch, and could a rule catch it instead?
+1. Per-reader scope. Even a model retrained this morning on everything the company owns
+answers every user from the same body of knowledge, so it cannot be told that this user may
+not see that record. Freshness is the half of the gap that shrinks; privacy and per-reader
+scope are not.
+2. A wrong answer can be read and discarded. A wrong action has already happened — the
+refund is paid, the message is sent. So the decision about which tools to offer is made
+before anything runs, and the cheapest protection is not offering an irreversible one.
+3. The check comes from the same component and works from the same information, so it tends
+to fail in the same places. It is not consulting a record. And what it says about its own
+confidence is produced the same way as everything else it says, so it is not a measurement
+of whether the answer is right.
+4. You have bought defensibility on those cases: somebody looked, and could account for the
+decision afterwards. You were accountable either way — that never moved. You are paying the
+full cost of review, and at 100 an hour you are probably also paying for rubber-stamping, so
+the value may be much lower than the cost. The fix is fewer, better-chosen cases, not a
+faster reviewer.
+5. It costs a whole extra call per answer, in money and latency, and it adds a component
+with the same kind of unpredictability as the first — a different model will not fail in
+exactly the same places, but it is not an independent referee either. The question to ask
+first: what failure are we trying to catch, and could a rule catch it instead?
 
 > **You understand this when** you can say, for any part of an AI system, what failure it
 > removes and what failure it introduces.

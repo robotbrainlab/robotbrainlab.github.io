@@ -21,7 +21,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 
 | Part | Chapters | Pages | Status |
 |---|---|---|---|
-| I · Understand — *Mental Model* | 1–7 | 98 | **Drafting** — 2 of 7 done |
+| I · Understand — *Mental Model* | 1–7 | 98 | **Drafting** — 3 of 7 done |
 | I · Understand — *Inside the Model* | 8–17 | 168 | Not started |
 | II · Use | 18–39 | 362 | Not started |
 | III · Apply | 40–50 | 190 | Not started |

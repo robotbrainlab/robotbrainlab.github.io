@@ -97,6 +97,10 @@ def main():
         print("written recorded. Now the completeness review, then the fix-verification pass.")
         return
 
+    # The stages are an order, not a checklist. `reviewed` used to pass with `written:`
+    # empty, so the stage could be -- and twice was -- skipped entirely.
+    if re.search(r"^written:\s*$", text, re.M):
+        sys.exit(f"REFUSED: `written:` is empty. Run `chapter.py written {stem}` first.")
     miss = unticked(text, 2)
     if miss:
         sys.exit("REFUSED: unticked after writing:\n  - " + "\n  - ".join(miss))

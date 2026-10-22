@@ -65,6 +65,17 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**16. A fix reaches the body and not the back matter — four times in three chapters.**
+Chapter 1: a claim fixed in the body survived in the Review Answers. Chapter 2: the person
+removed from the checks table survived in the Summary *and* in the Key Terms definition.
+Chapter 3: the rewritten accountability argument did not reach the Pattern table or Review
+Answer 4, and a corrected claim about model confidence survived in Review Answer 3. Every
+single survivor was in a Summary, a Key Terms row, or an answer key — sections that get
+written once and then read as settled, because they are a glossary or a crib rather than an
+argument. **§14.2 already says to sweep them. The instruction is not the problem; doing it
+is.** After applying any finding, grep the Summary, Key Terms, Review Questions and Review
+Answers for the claim in every phrasing, before touching anything else.
+
 **15. A batch of edits that aborts part-way writes nothing, and the edits it reported as
 applied are lost.** Three times now a patch script has asserted its way through a list of
 replacements and written the file only at the end, so one mismatched string discarded every
