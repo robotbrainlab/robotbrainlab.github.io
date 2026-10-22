@@ -18,10 +18,10 @@ Here is the whole cast. Five parts, and the model in the middle of them.
             +-------------------------------------------+
             |                 CONTEXT                   |
             |   instructions · added material · request |
-            +---------------------+---------------------+
-                                  |
-     RETRIEVAL ------------------>|
-     finds the added material     |
+            +----------^----------+---------------------+
+                       |          |
+     RETRIEVAL --------+          |
+     fills in the added material  |
                                   v
                             +-----------+
             TOOLS <-------->|   MODEL   |
@@ -36,16 +36,23 @@ Here is the whole cast. Five parts, and the model in the middle of them.
                     approve what matters, own the result
 ```
 
-Every part in that picture is doing a job the model does not do. **Chapter 3 is the
-argument for why**, part by part. This chapter is the tour: what each one is, what it is
-for, and what it looks like when it is there.
+Chapter 1 ended on four gaps: the model does not know your data, cannot act in the world,
+cannot reliably check itself, and is not accountable. Four of the parts above answer one
+gap each — retrieval, tools, checks, people, in that order. The fifth, the context, answers
+no gap. It is the thing you hand over, and the other four exist to fill it, to act on what
+comes back, or to decide whether any of it may be used.
+
+**Chapter 3 is the argument for why those four gaps are real**, and what each part costs
+you in return. This chapter is the tour: what each one is, what it is for, and what it
+looks like when it is there.
 
 ## Context: Everything You Send
 
 Chapter 1 showed one request going out, with three labelled pieces: the instructions, the
 added material and the request itself. Those three pieces together have a name. They are
-the **context** — everything the model gets on this call, assembled by your code, sent as
-one block of text.
+the **context** — the settings from Chapter 1 are not part of it, because they travel
+beside the text rather than in it — everything the model gets on this call, assembled
+by your code and sent together.
 
 | Piece | What it is | Who writes it |
 |---|---|---|
@@ -61,8 +68,10 @@ you. If a conversation is to continue, the earlier turns are part of what gets s
 If a document is to be discussed, the document goes in. Chapter 1 put it as a corollary;
 here it is as a design rule: *what is not in the context does not exist.*
 
-**The context is where the money is.** Cost grows with the text you move, and the context
-is most of the text you move. A page of instructions is paid for on every call forever.
+**The context is where the money is.** Chapter 1 established that cost grows with the text
+you move. What this chapter adds is *where that text lives*: almost all of it is the
+context. That turns the size of the context into an engineering decision rather than a
+detail, and Chapter 53 is where it becomes a budget.
 
 **The context has a ceiling.** There is a limit on how much text a model will accept in
 one call. It is large, and it is not infinite, and real systems hit it. What to do when
@@ -101,8 +110,8 @@ retrieval, even when it is a single database query.
 > puts a row into the context is doing the same job in the same place. The part is defined
 > by where it sits, not by how clever it is.
 
-What retrieval is *for* is narrow and worth stating exactly: it supplies **facts the model
-does not hold**. It does not make the model cleverer, and it cannot fix an
+What retrieval is *for* is narrow and worth stating exactly: it supplies facts the model does
+not hold. It does not make the model cleverer, and it cannot fix an
 answer that was badly reasoned. What it changes is what the model knows at the moment it
 answers — not how well it reasons about it.
 
@@ -123,18 +132,26 @@ puts the result back into the context so the model can carry on.
 | | What it does | What it does not do |
 |---|---|---|
 | The model | Asks for a tool, with arguments | Run anything |
-| Your code | Defines the tools, validates the request, runs it, returns the result | Decide when a tool is wanted |
+| Your code | Defines which tools exist, validates the request, runs it, returns the result | Write the request itself |
+
+Both of them decide something, and the two decisions are different. The model decides
+*that* a tool is wanted. Your code decides *whether that happens*. Your code can also
+decide the first one — calling a tool itself, or insisting the model use a particular one —
+but the model can never decide the second.
 
 Two consequences follow immediately, and both come back later with force.
 
 **You decide what exists.** The model can only use tools you described to it. It may well
 ask for something you never offered — a plausible-sounding function that does not exist —
-and your code refuses it, because there is nothing there to run. A tool that cannot touch a
-system cannot damage it.
+and your code refuses it, because there is nothing there to run.
 
-**You decide what happens.** A proposed call is a suggestion arriving in text. It can be
-wrong, it can have nonsense arguments, and — Chapter 51 — it can be there because somebody
-put it there. Validating it is your code's job, not the model's.
+**You decide what each tool may reach.** A tool that cannot touch a system cannot damage
+that system, so what each one is allowed to do is a decision you make once, in your code.
+
+**You decide what happens on the day.** A proposed call is a suggestion arriving in text. It can be
+wrong, it can have nonsense arguments, and it can be there because something the model
+read told it to ask — which is Chapter 51, and is as alarming as it sounds. Validating it
+is your code's job, not the model's.
 
 How the proposal is expressed and handled in practice is Chapter 23. What makes a tool one
 the model uses well is Chapter 36.
@@ -144,6 +161,10 @@ the model uses well is Chapter 36.
 A **check** is anything that verifies the output before it is used. Chapter 1 established
 that you cannot predict what the model will produce. A check is what you do about that.
 
+By *shape*, start with something concrete: your code expects an answer and a price it can
+do arithmetic with, and what came back is a friendly paragraph with the price written out
+in words. A shape check is what notices. Chapter 21 is how you ask for one properly.
+
 Checks come in a range, from cheap and certain to expensive and approximate:
 
 | Check | Catches | Cost |
@@ -151,15 +172,18 @@ Checks come in a range, from cheap and certain to expensive and approximate:
 | Does it fit the required shape? | Output your code cannot read | Nothing, and it is certain |
 | Does it pass a rule you can write? | A price below zero, a date in the past, a missing citation | Almost nothing |
 | Does a second model judge it acceptable? | Rudeness, irrelevance, an answer that ignored the material | A whole extra call, and it is approximate |
-| Does a person agree? | Everything, in principle | Slow and expensive, so it is reserved |
+
+Below the bottom of that table there is a person. A person is not a fourth rung of
+checking, though: they are the fifth part, and the next section is about them.
 
 Work down that table in order. Anything a rule can decide should be decided by a rule,
 because a rule costs nothing and gives the same verdict every time. Judgement is kept for what actually
 needs judgement.
 
 > **Warning:** A check that is itself a model call is not a referee standing outside the
-> system. It is another component with the same properties as the first: it will not
-> predict, it can be wrong, and it has to be checked before it is trusted. Chapter 31 is
+> system. It is another component with the same properties as the first: you
+> cannot predict what it will say, it can be wrong, and it has to be checked before it is
+> trusted. Chapter 31 is
 > entirely about how you earn the right to believe one.
 
 There is a second half to checking that is easy to miss on the first pass. A check tells
@@ -168,20 +192,26 @@ different activity, with different machinery, and the book spends Chapters 30 to
 
 ## People: Who Actually Decides
 
-The fifth part is the one engineers forget when they draw the diagram, and the one every
-serious system has.
+The fifth part is **people**: the one engineers forget when they draw the diagram, and
+the one every serious system has.
 
 In most systems that do anything consequential, a person still reviews or approves the
 cases that matter. Not every case — that would remove the point of building it — but the
 ones where being wrong is expensive.
 
+> **Note:** That "most" is current practice rather than a law, and the evidence behind it
+> is thinner than it sounds: the figures people quote come from a small number of surveys
+> of deployed systems. Treat it as what teams are doing now. The reason underneath it is
+> the durable part, and it is next.
+
 The usual arrangement is a threshold. Refunds under a small amount go through; larger ones
 reach a queue. Routine replies send themselves; anything touching a complaint waits for a
 human. The system does the volume, and a person owns the consequential tail.
 
-> **Note:** This is not a failure of the technology, and it is not a temporary stage that
-> better models will remove. It is a design choice about where responsibility sits, and
-> somebody has to be accountable for a decision that affects a customer. Chapter 3 makes
+The durable reason is not that models are not good enough yet. It is that somebody has to
+be accountable for a decision that affects a customer, and accountability does not sit in
+a component. How much a person is asked to approve will move as systems get better. That
+there is a person who answers for the consequential cases is a different kind of claim. Chapter 3 makes
 > that argument properly; Chapter 51 shows what goes wrong when the approval step is
 > missing from a place that needed one.
 
@@ -200,24 +230,29 @@ should be asking. The useful questions are about parts and joins:
 - Did the checks catch what they should have?
 - Did the right cases reach a person?
 
-A system can fail at any one of those while every other part works perfectly. Most of the
-engineering in this book is the work of telling them apart.
+A system can fail at any one of those while every other part works perfectly. Telling them
+apart is its own skill, and Chapter 5 is about how much of the real work it turns out to
+be.
 
 ## The Same Small Cast, Arranged Differently
 
 Look at AI products for a week and the five parts keep reappearing in different
 proportions. The arrangement is the product; the parts barely change.
 
+Every product here has a context, because a context is what you send — so the interesting
+columns are the four that vary.
+
 | Product | Retrieval | Tools | Checks | People |
 |---|---|---|---|---|
 | Answers questions about a company's documents | The whole point of it | Usually none | Is the answer supported by what was found? | Reviewed when a customer sees it |
-| Writes a first draft inside an editor | Your current document | Formatting, inserting | Mostly the human reading it | The author, always, by design |
-| Triages incoming tickets | Similar past tickets | Tagging, routing, replying | Confidence rule before it replies by itself | Anything it is unsure about |
+| Writes a first draft inside an editor | The parts of your document near the cursor | Formatting, inserting | Mostly the human reading it | The author, always, by design |
+| Triages incoming tickets | Similar past tickets | Tagging, routing, replying | A rule about when it may reply unaided | Anything it is unsure about |
 | Writes and runs code | The repository | Read a file, write a file, run the tests | **The tests themselves** | A review before it merges |
 
 The last row is worth a second look. Running the tests is both a tool and a check: the
-model asks for it like any other action, and the result is the most trustworthy verdict in
-the table, because it is a rule and not an opinion. Where a real, cheap, automatic verdict
+model asks for it like any other action, and the result is the most trustworthy *automatic*
+verdict here, because it is a rule and not an opinion — though only about what the tests
+actually cover, and not at all if the model wrote them. Where a real, cheap, automatic verdict
 exists, the system around the model gets simpler and much more reliable. Where none exists
 — "is this summary good?" — everything gets harder. That difference will come up again and
 again.
@@ -257,11 +292,14 @@ be right, but try: what must the product have told the model about how to behave
 *Expected result:* at least one instruction you are confident about, usually a refusal —
 something the product consistently will not do.
 
-**Step 3.** Find the ceiling. Give one of them far more material than it expects — a long
-document, or a very long conversation — and watch what happens to the earliest part of it.
+**Step 3.** Look for the ceiling. Give one of them far more material than it expects — a
+long document, or a very long conversation — then ask it about something from well inside
+that material.
 
-*Expected result:* either a refusal, or an answer that has quietly lost the beginning. Both
-tell you a limit was reached.
+*Expected result:* one of three. A refusal, which is the limit stated out loud. An answer
+that has quietly lost part of what you gave it. Or no visible effect at all, which means
+you have not reached the ceiling yet — modern limits are large. Which part gets lost, and
+why long inputs are used unevenly, is Chapter 16.
 
 **Step 4.** Find a place where a person must be in the loop. Ask one of them to do
 something consequential and irreversible.
@@ -298,6 +336,7 @@ question.
 | **Retrieval** | Searching your own collection for the passages that bear on a request, so they can be put into the context |
 | **Tool** | An action the model may ask for. The model proposes it; your code decides whether to run it |
 | **Check** | Anything that verifies the output before it is used, from a required shape to a person's judgement |
+| **People** | The reviewers and approvers who handle the consequential cases and carry responsibility for them |
 | **Compound system** | A system of several parts with the model as one of them, rather than as the whole product |
 
 ### Review Questions
@@ -306,13 +345,13 @@ question.
 2. A colleague says their system "lets the model update the database". What is actually happening, and where is the decision made?
 3. Why should a rule-based check run before a model-based one, when the model-based one catches more?
 4. A product summarises documents and a product writes code. Which has the easier time checking its own output, and why?
-5. You are shown a diagram with the model, retrieval, tools and checks. Which part is missing, and what job does it do?
+5. You are shown a diagram with the model, the context, retrieval, tools and checks. Which part is missing, and what job does it do?
 
 ### Review Answers
 
 1. **Retrieval** may have failed to find the material, or the **context** may have been assembled differently — a longer conversation pushing the useful part out, for instance. You tell them apart by looking at what was actually sent: if the right passage was in the context and the answer is still wrong, retrieval did its job and the problem is elsewhere.
 2. The model is proposing a tool call, and their code is deciding whether to run it and then running it. The model updates nothing. The decision sits in their code, which is also where the validation has to be.
-3. A rule is free and it is right every time. A model-based check costs a whole extra call and is only approximate — it is a component with the same unpredictability as the first one. You spend judgement only on what needs judgement.
+3. A rule costs nothing and gives the same verdict every time. A model-based check costs a whole extra call and is only approximate — it is a component with the same unpredictability as the first one. You spend judgement only on what needs judgement.
 4. The code product. Running the tests is a real, cheap, automatic verdict, and it is a rule rather than an opinion. "Is this summary good?" has no equivalent, which is why everything around it is harder.
 5. **People.** They approve the consequential cases and carry the responsibility for them, which is why the threshold for what reaches them is a design decision and not an afterthought.
 
