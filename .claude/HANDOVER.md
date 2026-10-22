@@ -249,6 +249,12 @@ was configured but the repository was never created, so nothing was ever pushed 
 copy was on one machine. Rather than lose it, the owner chose to keep it here, where a remote
 already exists. **It is temporary** and will be removed once the job search ends.
 
+**`_book/` is the only copy.** The old folder at `~/LearningLab/towards-intelligence/modern-ai-interview-prep`
+was deleted on 2026-10-23, after checking that all 65 of its tracked files were byte-identical
+here and all 31 of its commits reachable. Do not go looking for it. The book is also published
+on the public repository, which the owner decided deliberately: the content is general
+technical material, and `_sources/` was already public on the same terms.
+
 **It has nothing to do with the website.** It is not linked from any page, it is not part of
 the restyle, and it must never appear on the live site. The leading underscore is what
 guarantees that: GitHub Pages runs Jekyll with default settings, so `_book/` is never
