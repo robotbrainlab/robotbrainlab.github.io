@@ -155,7 +155,7 @@ The nine topics and where each one now sits:
 | Securing AI Systems in Practice | 7 | 51 |
 | Inference, Cost and Production | 10 | 52 to 54 |
 
-The interlude (chapters 8 to 17) is new, and so are chapters 19, 32 and 55. None of them is in
+Part I's second half, *Inside the Model* (chapters 8 to 17), is new, and so are chapters 19, 32 and 55. None of them is in
 that research; they are there because interviews test them.
 
 ## 7. Gotchas
@@ -177,8 +177,9 @@ that research; they are there because interviews test them.
 1. Read `BOOK-GUIDE.md` in full, then `TOC.md`.
 2. Check section 4 of this file. If anything there is still open, ask the owner.
 3. Check `README.md` for the status of each part.
-4. Write in the order `TOC.md` gives, which is the order the book is read: Part I, the interlude,
-   Part II in two halves, labs 40 to 46, labs 47 to 50, Part IV, then the appendices. Write
+4. Write in the order `TOC.md` gives, which is the order the book is read: Part I's first
+   half (1–7), its second half (8–17), Part II in two stretches, labs 40 to 46, labs 47 to
+   50, Part IV, then the appendices. Write
    Appendix B's question list in week one and use it as the acceptance test for every chapter.
 5. For each part: a writing agent drafts it, then the main session edits **every** chapter by
    hand, then build and check (`BOOK-GUIDE.md` §14 and §15).
