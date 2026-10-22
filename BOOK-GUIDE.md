@@ -355,6 +355,11 @@ a practice answer while the same error sat in a table a hundred lines earlier.
 
 ### 14.2 Every applied fix is a sweep, counted
 
+**Apply edits with `tools/patch.py`**, which writes after each one. A script that collects
+replacements and saves at the end loses every edit before the first mismatch, and prints
+success for them on the way past.
+
+
 > **Grep the whole book for every phrasing of the claim. Count N before. Count N after.
 > Zero, or it is not done.**
 

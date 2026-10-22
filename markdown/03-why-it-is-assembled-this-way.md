@@ -29,7 +29,7 @@ Yes, and it is permanent, which is not obvious.
 
 The easy version of this gap is the one Chapter 1 gave: the model's training stopped at a
 date, so it has not seen anything since. That half does shrink — models get retrained, and
-each one knows more recent things than the last.
+newer ones tend to know more recent things.
 
 The half that does not shrink is everything else:
 
@@ -41,12 +41,14 @@ The half that does not shrink is everything else:
   one body of knowledge, identical for everyone who calls it.
 
 That last point is the one to keep. Even a model trained this morning on everything your
-company owns would still be wrong, because it would answer every user from the same store
-and could not be told that this user may not see that record.
+company owns would answer every user from the same store, and could not be told that this
+user may not see that record. It would be wrong wherever permissions differ or the data has
+moved since — which, in most companies, is most of the time.
 
 > **Note:** You may have heard that continuing a model's training on your own documents
-> solves this. It does not, for the three reasons above, and that is one of several
-> reasons Chapter 39 treats tuning as the last lever rather than the first.
+> solves this. It does not solve the second and third of those — training is a snapshot too,
+> and weights carry no notion of who is allowed to see what. It is one of several reasons
+> Chapter 39 treats tuning as the last lever rather than the first.
 
 ### What closes it, and what it costs
 
@@ -55,9 +57,9 @@ Retrieval closes it, and the price is a second system that can be wrong on its o
 | You gain | You pay |
 |---|---|
 | Answers about material the model never saw | A search system to build, fill and keep current |
-| Material that is current as of this request | Latency: the search happens before the model can start |
+| Material that is current as of this request | Latency: a search has to happen somewhere in the request |
 | Per-user answers, because you choose what to fetch | Context space, which is finite and not free |
-| A citation, when you keep track of what you fetched | **A new failure mode: retrieving the wrong thing** |
+| A citation — a pointer back to the passage an answer came from — when you keep track of what you fetched | **A new failure mode: retrieving the wrong thing** |
 
 The last row is the important one. Before retrieval, a wrong answer meant the model was
 wrong. After retrieval, a wrong answer might mean the search found nothing useful, or found
@@ -91,16 +93,19 @@ Tools close it, and the price is everything a tool can reach.
 |---|---|
 | The system can do things, not only say them | Every tool is a way in, and it has to be secured |
 | The model can fetch what it needs mid-answer | A tool that is slow makes the whole answer slow |
-| Actions can be logged, reviewed and reversed — if you build that | A tool that is down takes a working feature with it |
-| | **Actions can happen that nobody intended** |
+| Actions can be logged, and some can be compensated — if you build that | A tool that is down takes a working feature with it |
+| — | **Actions can happen that nobody intended** |
 
 That last cost deserves its own sentence, because it is different in kind from the others.
 A wrong answer is a wrong answer. A wrong **action** has already happened by the time you
-read it. Refunds, messages, deletions and bookings do not come back when you notice.
+read it. You can sometimes issue a second action that compensates — re-charge the card, send
+a correction — but that is not an undo, and for a deleted record or a message somebody has
+already read there is often nothing to issue.
 
-This is the whole reason Chapter 2 insisted that your code decides. It is also why the
-cheapest safety measure in this book is refusing to give a tool the ability to do something
-irreversible, and why Chapter 51 spends so long on what a tool may touch.
+An **irreversible action** is one of these: something a tool does that no later action
+undoes. This is the whole reason Chapter 2 insisted that your code decides, and it is why
+the cheapest safety measure in this book is declining to give a tool an irreversible action
+at all. Chapter 51 spends a long time on what a tool may touch.
 
 ## It Cannot Reliably Check Itself
 
@@ -119,8 +124,9 @@ check that shares a component's failure modes is not an independent check. It wi
 be wrong in the same places, for the same reasons.
 
 > **Warning:** This is why "I asked it to double-check and it said it was sure" is worth
-> nothing as evidence. The model is as sure of a wrong answer as a right one, because
-> certainty is not something it measures.
+> very little as evidence. What the model says about its own confidence is produced the
+> same way as everything else it says. It is not reading off a measurement of whether the
+> answer is right, because it has none to read.
 
 ### What closes it, and what it costs
 
@@ -132,55 +138,86 @@ Checks close it, partially, and the price depends entirely on which kind you can
 | A second model asked to judge | Catches what rules cannot describe | Another call, and another component that can be wrong |
 | A person | Real judgement | Time, money, and a queue |
 
-The deeper cost is one the table cannot show: **a check only catches what it was built to
-catch.** Every check encodes somebody's idea of what might go wrong, so a system is blind
-to failures nobody imagined. That is not an argument against checking. It is the reason
+The deeper cost is one the table cannot show: **every check is built against somebody's
+idea of what might go wrong.** A rule is built narrowly, against one named failure. A model
+judge is built broadly — "is this rude?" covers rudeness nobody listed — but it is still
+built against a question somebody thought to ask. Either way, a system is blind to the
+failures nobody imagined. That is not an argument against checking. It is the reason
 Chapters 30 to 33 start by reading real failures rather than by writing checks.
 
-There is also a cost in the other direction, and it is the one teams discover late. A check
-that is too strict rejects good answers. Set the bar wherever you like and you will be
-throwing away something: either bad answers you let through, or good ones you blocked.
+There is also a cost in the other direction, and it is the one teams discover late. **A
+check that is too strict rejects good answers.** Say your rule is that an answer must cite
+a source. A reply that answers the question perfectly from a single obvious fact, without
+citing anything, now fails — and your users see a refusal where a good answer was waiting.
+
+Every check that has a setting has this shape. Tighten it and you block more bad output and
+more good output; loosen it and you let more of both through. You can escape the trade by
+building a *better* check, which is real work; you cannot escape it by choosing a cleverer
+threshold on the check you have.
 
 ## It Is Not Accountable
 
 ### Is the gap real?
 
-Yes, and it is the one gap no technical progress touches at all.
+Yes — but not in the way it is usually told, and the usual telling gets the design wrong.
+It is also the one gap whose cause sits outside engineering altogether, which is why no
+better model dissolves it.
 
-The first three gaps are about what a model can do. This one is about what a model can
-*be*. Accountability means somebody can be asked to answer for a decision, and can bear a
-consequence for it. A component cannot be asked. It cannot be sanctioned, it cannot be
-struck off, it cannot be called in front of a regulator, and it cannot be sued.
+Here is the version to discard first: *without a person in the loop, nobody is answerable.*
+That is false. If your company deploys a system that refuses a loan, loses a customer's
+money or publishes something defamatory, **your company is answerable**, whether or not
+anybody looked at the decision. Automating something does not move responsibility onto the
+thing you automated it with. In many fields that is written into law.
 
-When a system refuses a loan, loses a customer's money, or publishes something defamatory,
-somebody is answerable. That does not become untrue because the decision was automated,
-and in many fields it is written into law. A better model changes nothing here, because the
-gap is not about the quality of the decision. It is about who carries it.
+So **accountability** — somebody who can be asked to answer for a decision, and who bears a
+consequence for it — **never actually moves.** It sits with the operator — you, your team,
+your company — from the first line of code. What the model cannot do is **carry any of it
+for you**:
 
-> **Note:** This is the part that tends to be filed under "ethics" and set aside. It is
-> better understood as a design constraint, like a rate limit. There is a set of decisions
-> your system is not allowed to make alone, the set is decided outside engineering, and the
-> system has to be built so those decisions reach somebody.
+- It cannot be asked to explain a decision in terms a person can defend.
+- It cannot be sanctioned, struck off, called in front of a regulator, or sued.
+- It cannot notice that this particular case is the one that should not be decided by rule.
+
+That is the real gap, and it is sharper than the usual one. **You are answerable for
+decisions you did not see, cannot reconstruct, and could not have defended.** The system
+produced them; the responsibility was yours the whole time.
+
+> **Note:** This is usually filed under "ethics" and set aside. It is better understood as a
+> design constraint, like a rate limit: there is a set of decisions your organisation cannot
+> defend making unseen, and the system has to be built so those reach somebody who can.
+> Where that set is drawn is partly law and partly judgement — the legal floor is not yours
+> to move, and everything above it is a design decision you own.
+
+**Does a better model close this?** It changes how large the set is, because a system that
+is wrong less often needs fewer decisions defended. It does not change who is answerable,
+which is why this gap is unlike the first three: progress moves its cost, never its cause.
 
 ### What closes it, and what it costs
 
-People close it, and the price is the thing you were trying to avoid.
+People close it — not by becoming accountable, but by being how an accountable organisation
+discharges what it already owes.
 
 | You gain | You pay |
 |---|---|
-| Somebody is answerable | The system is now as fast as its queue |
+| A decision somebody can defend, on the cases that need defending | The system is now as fast as its queue |
 | Judgement on the cases nobody anticipated | Reviewers are expensive, and good ones are scarce |
-| A record of who decided what | Approval is a bottleneck that grows with volume |
-| | **Rubber-stamping, which looks like review and is not** |
+| A record of who decided what, and on what evidence | Approval is a bottleneck that grows with volume |
+| — | **Rubber-stamping, which looks like review and is not** |
 
-The last row is the failure that catches people out. A reviewer shown a hundred confident
-approvals an hour will approve them, because almost all of them are fine and attention does
-not survive that. You have then paid the full cost of human review and received none of its
-value.
+The last row is the failure that catches people out. That is **rubber-stamping**: approval given without real attention. Show a reviewer a
+hundred confident approvals an hour and most will approve nearly all of them: almost every one is fine, and
+attention does not survive that. The effect has two halves, and the second is less obvious
+than the first — volume wears attention down, and a confident recommendation pulls a
+reviewer toward agreeing with it even when there is plenty of time. You then pay the full
+cost of review and receive very little of its value.
 
-Which is why the question is never *should a person review this?* It is **which cases, how
-many per hour, and with what shown to them** — and that is a design problem, not a policy
-you can declare.
+> **Note:** That is a well-studied effect in people supervising automated systems rather
+> than something peculiar to this field, and it is one of the sturdier findings behind any
+> claim in this chapter. Expect it; design against it.
+
+So the question is never *should a person review this?* It is **which cases, how many an
+hour, and with what put in front of them** — and above the legal floor, that is a design
+decision like any other.
 
 ## The Pattern
 
@@ -206,10 +243,11 @@ is virtuous, but because every part is a failure you are buying. A part that is 
 its cost should not be there, and the way you find out whether it earns its cost is to
 measure — which is why so much of this book is about measurement.
 
-**Where a cheap, certain check exists, take it.** Chapter 2 noted that a system which can
-run its own tests has an advantage over one that can only ask whether a summary is good.
-Now you can see why: it is the only place in this table where the cost column is nearly
-empty.
+**Where a cheap, automatic verdict exists, take it.** Chapter 2 noted that a system which
+can run its own tests has an advantage over one that can only ask whether a summary is
+good. Now you can see why: its check is the one kind whose cost stays small. Not nothing —
+a test suite is a rule, so it still only catches what somebody wrote down, and it tells you
+nothing at all if the model wrote the tests. Small is rare enough.
 
 ## Lab: What Does It Cost Them?
 
@@ -223,15 +261,17 @@ from documents or from your own data. Ask it something whose answer you can veri
 **Step 2.** Now ask it something that sounds like it should be in its material but is not —
 a plausible neighbouring question about something that does not exist.
 
-*Expected result:* one of three. It says it does not know, which means something is
-checking. It answers from general knowledge without saying so, which is the retrieval cost
-in action. Or it invents something, which is the same cost, further along.
+*Expected result:* one of three. It says it does not know — which usually means an
+instruction told it to, as in Chapter 1's exchange, rather than that anything checked. It
+answers from general knowledge without saying so, which is the retrieval cost in action. Or
+it invents something, which is the same cost, further along.
 
 **Step 3.** For a product with tools, find the most irreversible thing it can do. Do not do
 it. Work out what stands between you and it: a confirmation, a limit, a person, or nothing.
 
-*Expected result:* at least one confirmation step you can describe. That step is somebody's
-answer to the cost in the tools table.
+*Expected result:* either a step you can describe — a confirmation, a limit, a person — which
+is somebody's answer to the cost in the tools table. Or nothing at all between you and it,
+which is also an answer, and a more interesting one.
 
 **Step 4.** Find a queue. Use a product where something you submit is reviewed, and notice
 how long it takes and what you are told while waiting.
@@ -281,7 +321,7 @@ introduces another**, which is why the simplest arrangement that works is usuall
 2. A wrong answer can be read and discarded. A wrong action has already happened — the refund is paid, the message is sent. So the decision about which tools to offer is made before anything runs, and the cheapest protection is not offering an irreversible one.
 3. The check comes from the same component, works from the same information, and fails in the same places. It is not consulting a record. Certainty is not something the model measures, so it is as confident about a wrong answer as a right one.
 4. You have bought accountability — somebody is answerable for those decisions. You are paying the full cost of review, and at 100 an hour you are probably also paying for rubber-stamping, so the value may be much lower than the cost. The fix is fewer, better-chosen cases, not a faster reviewer.
-5. It costs a whole extra call per answer, in money and latency, and it adds a component that can be wrong in the same way the first one is. The question to ask first: what failure are we trying to catch, and could a rule catch it instead?
+5. It costs a whole extra call per answer, in money and latency, and it adds a component with the same kind of unpredictability as the first — a different model will not fail in exactly the same places, but it is not an independent referee either. The question to ask first: what failure are we trying to catch, and could a rule catch it instead?
 
 > **You understand this when** you can say, for any part of an AI system, what failure it
 > removes and what failure it introduces.

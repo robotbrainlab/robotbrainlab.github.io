@@ -65,6 +65,16 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**15. A batch of edits that aborts part-way writes nothing, and the edits it reported as
+applied are lost.** Three times now a patch script has asserted its way through a list of
+replacements and written the file only at the end, so one mismatched string discarded every
+edit before it — while still printing `1 -> 0` for each, which reads exactly like success.
+The third time, four findings were silently lost and only turned up when I rendered the
+page and saw the old sentence still there. **`tools/patch.py` now applies one edit at a
+time and writes after each**, reports misses without stopping, and exits non-zero if
+anything missed. The general rule: *a tool that reports progress it has not committed is
+worse than one that says nothing.*
+
 **14. The gates read Markdown. The book is a PDF.** The outline was wrong three times in a
 row — front matter missing from it, then sub-parts beside Part I instead of under it, then
 chapters beside the sub-parts instead of under them — and the reader found all three. Every
