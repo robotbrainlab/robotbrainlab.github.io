@@ -86,6 +86,14 @@ time and writes after each**, reports misses without stopping, and exits non-zer
 anything missed. The general rule: *a tool that reports progress it has not committed is
 worse than one that says nothing.*
 
+*Second instance, chapter 4.* Writing per-edit fixed the losing; it does not stop the
+edits **interacting**. A removal with `count: 2` was meant to delete one leftover sentence
+and deleted two — because an earlier edit in the same batch had just inserted the second
+copy. The Warning lost its conclusion entirely, and `patch.py` reported both as applied,
+correctly. **Order the edits so no edit's target string can have been created by an earlier
+one in the same batch**, and when a batch both inserts and removes the same text, do it in
+two runs with a read in between.
+
 **14. The gates read Markdown. The book is a PDF.** The outline was wrong three times in a
 row — front matter missing from it, then sub-parts beside Part I instead of under it, then
 chapters beside the sub-parts instead of under them — and the reader found all three. Every

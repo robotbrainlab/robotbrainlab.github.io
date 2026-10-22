@@ -1,7 +1,8 @@
 # The Agent Loop, and How Much Freedom It Actually Gets
 
 Chapter 2 put five parts around the model and left your code in charge of the sequence:
-your code retrieved, your code decided whether a tool ran, your code applied the checks. This
+your code retrieved, your code decided whether a tool ran, your code applied the checks.
+This
 chapter hands one of those decisions to the model, repeatedly, and looks at what that
 changes. It is the arrangement everybody means by *agent*, and the gap between how it
 sounds and how it is actually deployed is the most useful thing in the chapter.
@@ -49,7 +50,7 @@ refund the delivery fee."*
 ```
 
 Three turns. Each one is a complete exchange of the kind Chapter 1 showed: text out, text
-back. Two things are new. The result of each turn is added to the **context** — Chapter 2's word
+back. Two things are new. The result of each turn is added to the context — Chapter 2's word
 for everything you send — so the model decides turn 3 with turns 1 and 2 in front of it.
 And something has to decide when to stop, which is its own section below.
 
@@ -84,12 +85,11 @@ is enough to know that the same request can take a different path.
 **A mistake on step 2 is still being acted on at step 9.** This one deserves its own
 section.
 
-## Compounding
+## Compounding Error
 
 A single model call is usually right. A sequence of them is a different question, and the
-arithmetic is unkind. The name for what goes wrong is **compounding error**: each step's
-chance of being right multiplies against every other step's, so a run is only as good as
-all of its parts together.
+arithmetic is unkind. The name for it is **compounding error**, and it is the
+governing fact of this chapter.
 
 Suppose each step is right nine times out of ten — which would be a good model on a
 well-chosen task. Then a run of several steps succeeds only if *every* step was right:
@@ -104,11 +104,11 @@ well-chosen task. Then a run of several steps succeeds only if *every* step was 
      20     0.122
 ```
 
-The arithmetic is only multiplication: three steps at nine-in-ten is
-0.9 × 0.9 × 0.9 = 0.729. Two simplifications are buried in it, and both are worth knowing.
-It treats the steps as independent, as though one going well told you nothing about the
-next. And it uses the same figure for every step, when in practice some steps are far
-riskier than others.
+Worked once: three steps at nine-in-ten is
+0.9 × 0.9 × 0.9 = 0.729. Three simplifications are buried in it. Two are worth knowing
+now: it treats the steps as independent, as though one going well told you nothing about
+the next, and it uses the same figure for every step, when in practice some are far riskier
+than others. The third is in the note below.
 
 **Seven steps is where nine-in-ten per step becomes worse than a coin toss.** At twenty
 steps it is one run in eight.
@@ -126,7 +126,7 @@ system that fails most long runs and one that mostly completes them. That is why
 this book is about measuring per-step quality: at the scale of a single call the gap looks
 like a rounding error, and over a run it is the whole outcome.
 
-> **Note:** That table assumes a wrong step sinks the run. Real agents sometimes notice and
+> **Note:** The third simplification is that the table assumes a wrong step sinks the run. Real agents sometimes notice and
 > recover — a failed search retried with better words, a tool error read and worked around —
 > so the true numbers are better than the table. The *shape* is not: whatever the per-step
 > figure is, multiplying it by itself enough times takes it to the floor.
@@ -134,10 +134,12 @@ like a rounding error, and over a run it is the whole outcome.
 > **Warning:** Do not lean on that recovery. A wrong step does not simply fail: it produces
 > a *result*, and that result goes into the next step as though it were true. A model
 > working from one bad fact is not choosing badly — it is choosing well from the wrong
-> starting point, which is much harder to spot. Practitioners also report that a model which
-> has committed to a plan tends to carry on rather than reconsider; that is a widely shared
-> impression rather than a settled measurement, so weigh it accordingly. So recovery is rarer than it sounds, and
+> starting point, which is much harder to spot. So recovery is rarer than it sounds, and
 > real runs sit closer to the table than the note above might suggest.
+>
+> Practitioners also report that a model which has committed to a plan tends to carry on
+> rather than reconsider; that is a widely shared impression rather than a settled
+> measurement, so weigh it accordingly.
 
 This is also why "it worked when I tried it" is such weak evidence for an agent. One
 successful run out of a distribution that succeeds a third of the time is not surprising;
@@ -203,12 +205,13 @@ a path you cannot predict, errors that compound, and a cost per task that is dec
 time rather than written down — a step limit caps it, but only by cutting the work off.
 
 **So: the least freedom that solves the problem.** Not because autonomy is dangerous in the
-abstract, but because each extra step is multiplied into the number at the bottom of that
-first table.
+abstract, but because each extra step is multiplied into the figure at the bottom of the
+compounding table.
 
 ## Approval Points
 
-An **approval point** is a step the loop cannot pass without a person. It is how Chapter 3's fourth gap
+An **approval point** is a step the loop cannot pass without a person. It is how Chapter 3's
+fourth gap
 actually gets closed, and it is usually one line in the code that decides
 whether a tool call runs.
 
@@ -252,7 +255,7 @@ tried; "I could not reach it" is different from "there is none".
 
 **Step 4.** Find an approval point. Ask for something consequential — and as in Chapter 3,
 do not let it complete. Watch whether it stops and waits, asks and carries on regardless,
-or begins without asking at all; cancel at that point.
+or begins without asking at all. Cancel as soon as you have seen which.
 
 *Expected result:* one of those three. The second is the interesting one: a product that
 asks and proceeds regardless has an approval point in its instructions and not in its code.
@@ -269,8 +272,10 @@ worked. The second is compounding, visible.
 
 An **agent** is the same arrangement as before with one change: the model decides what
 happens next, repeatedly, instead of your code deciding. No new component is added; control
-flow moves, and you write a loop and the rules that end it. That means you cannot read the program and know its sequence, two runs can differ,
-and a mistake early is still being built on later. Compounding is the governing fact: at
+flow moves, and you write a loop and the rules that end it. That means you cannot read the
+program and know its sequence, two runs can differ,
+and a mistake early is still being built on later. Compounding error is the governing fact:
+at
 nine-in-ten per step, seven steps is worse than a coin toss and twenty is one run in eight.
 A loop needs a **stopping condition** — the model saying it is done, a step limit, and your
 code refusing. Deployed systems are kept short and supervised: in one study,
@@ -283,25 +288,38 @@ right setting is the least that solves the problem.
 |---|---|
 | **Agent** | A system in which the model decides what to do next, repeatedly, rather than your code deciding the sequence |
 | **Step** | One pass through the loop: the model decides, something runs, the result comes back |
-| **Compounding error** | The multiplying of per-step success across a run, so that a high chance of each step being right becomes a low chance of the whole run being right |
+| **Compounding error** | Two things at once across a run: each step's chance of being right multiplies against the others, so a high per-step figure becomes a low whole-run one; and a wrong step's result is carried into the next step as though it were true |
 | **Stopping condition** | The set of rules that end a run — the model finishing, a step limit, or your code refusing |
 | **Approval point** | A step the loop cannot pass without a person, enforced in your code rather than requested in the instructions |
 
 ### Review Questions
 
 1. What exactly is added to a system to turn it into an agent, and what is taken away?
-2. Each step of your agent is right 90% of the time. Your task needs ten steps. Roughly how often does a whole run succeed, and what does that tell you about demonstrations?
+2. Each step of your agent is right 90% of the time. Your task needs ten steps. Roughly how
+often does a whole run succeed, and what does that tell you about demonstrations?
 3. Give two reasons a step limit is not optional.
-4. A colleague says their agent is safe because the instructions tell it to ask before deleting anything. What is wrong with that, and what would you do instead?
+4. A colleague says their agent is safe because the instructions tell it to ask before
+deleting anything. What is wrong with that, and what would you do instead?
 5. Why can two identical requests to the same agent take different numbers of steps?
 
 ### Review Answers
 
-1. No new component — none of Chapter 2's five parts, and the same model. What is added is code: the loop itself and the rules that end it. What is taken away is your code's control of the sequence: the model decides what happens next, repeatedly, until a stopping condition is met.
-2. About a third of the time — 0.9 to the tenth is 0.349. A demonstration that worked tells you almost nothing, because a system that succeeds a third of the time produces a successful run roughly every third attempt.
-3. The model may never decide it is done, so the loop has no guaranteed exit without one. And each step costs money and time, so an unbounded loop is an unbounded bill on a task that may never finish.
-4. The instruction is a request, not a guarantee — you cannot rely on what comes back, and nothing stops the model proposing the delete anyway. The approval point belongs in the code that decides whether the call runs, where refusing it is certain.
-5. The model decides each step fresh, and two identical requests do not have to come back the same. The same request can produce a different plan, a different order, and a different number of steps.
+1. No new component — none of Chapter 2's five parts, and the same model. What is added is
+code: the loop itself and the rules that end it. What is taken away is your code's control
+of the sequence: the model decides what happens next, repeatedly, until a stopping condition
+is met.
+2. About a third of the time — 0.9 to the tenth is 0.349. A demonstration that worked tells
+you almost nothing, because a system that succeeds a third of the time produces a successful
+run roughly every third attempt.
+3. The model may never decide it is done, so the loop has no guaranteed exit without one.
+And each step costs money and time, so an unbounded loop is an unbounded bill on a task that
+may never finish.
+4. The instruction is a request, not a guarantee — you cannot rely on what comes back, and
+nothing stops the model proposing the delete anyway. The approval point belongs in the code
+that decides whether the call runs, where refusing it is certain.
+5. The model decides each step fresh, and two identical requests do not have to come back
+the same. The same request can produce a different plan, a different order, and a different
+number of steps.
 
 > **You understand this when** you can explain why a system that is right nine times out of
 > ten per step is a bad bet over twenty steps.
