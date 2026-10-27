@@ -64,3 +64,9 @@ written from memory.
 | The three stages | Pretraining, supervised fine-tuning, preference optimisation | 14 |
 | Where knowledge comes from | Pretraining, overwhelmingly | 14 |
 | What the loss ignores | Everything except the probability of the token that actually came next | 14 |
+| Key–value cache | `\(2 \times \text{layers} \times d \times \text{tokens} \times \text{bytes}\)`{=latex} | 15 |
+| At a common shape | 32 layers, `\(d\)`{=latex} 4,096, 2 bytes: 512 KiB per token | 15 |
+| An 8,000-token conversation | 3.91 GiB of cache, on top of the weights | 15 |
+| Weights at 7 billion parameters | 14 GB at 16 bits, 7 GB at 8, 3.5 GB at 4 | 15 |
+| What limits each phase | Prefill: arithmetic. Decode: reading the parameters the pass uses | 15 |
+| Why batching is nearly free | The parameters are read once and shared | 15 |
