@@ -24,8 +24,13 @@ def field(text, name):
 
 
 def main():
+    # A chapter is a NUMBERED markdown file. "_" drafts, the preface, and the generated
+    # appendices are not chapters and have no hand-written record: Appendix C is produced by
+    # tools/glossary.py and its correctness is that gate's job, not a checklist's. Before this
+    # was explicit, enabling the glossary made this gate report "C-glossary: NO RECORD".
     chapters = sorted(f for f in glob.glob(os.path.join(ROOT, "markdown", "*.md"))
-                      if not os.path.basename(f).startswith(("_", "00-")))
+                      if re.match(r"\d+-", os.path.basename(f))
+                      and not os.path.basename(f).startswith("00-"))
     problems = []
     for ch in chapters:
         stem = os.path.basename(ch)[:-3]

@@ -71,39 +71,12 @@ done
 other=$(echo "$fonts" | grep -v -E '^(CrimsonPro|SourceSans3|SourceCodePro|EBGaramond)' | tr '\n' ' ')
 [[ -n "$other" ]] && echo "Other fonts:           $other"
 
-# Bold terms missing from the glossary (glossary = the Markdown file titled "# Glossary")
-python3 - "$HERE/${MARKDOWN_DIR:-../markdown}" <<'PY'
-import re, sys, pathlib
-md = pathlib.Path(sys.argv[1])
-files = sorted(p for p in md.glob('*.md') if not p.name.startswith('_'))
-gloss = next((p for p in files if re.search(r'^#\s+Glossary\s*$', p.read_text(), re.M)), None)
-if not gloss:
-    print('Glossary:              none found (a file titled "# Glossary")'); sys.exit(0)
-def norm(t): return re.sub(r'\s*\(.*?\)\s*', ' ', t.replace('`', '')).strip().lower().rstrip('s')
-terms = set()
-for line in gloss.read_text().splitlines():
-    m = re.match(r'^(\*\*)?([^:*][^:]*?)(\*\*)?\s*$', line)
-    if m and line.strip() and not line.startswith(('#', ':', '>', '-', '|')):
-        terms.add(norm(m.group(2)))
-    m = re.match(r'^\*\*(.+?)\*\*\s*:', line)
-    if m: terms.add(norm(m.group(1)))
-    if line.startswith('|'):                      # a table glossary: | Term | Meaning |
-        cell = line.strip('|').split('|')[0].strip().strip('*').strip()
-        if cell and cell.lower() != 'term' and not set(cell) <= set('-: '):
-            terms.add(norm(cell))
-missing = {}
-for p in files:
-    if p == gloss or re.search(r'^#\s+Preface\s*$', p.read_text(), re.M): continue
-    text = re.sub(r'```.*?```', '', p.read_text(), flags=re.S)
-    for t in re.findall(r'\*\*([^*\n]+?)\*\*', text):
-        t = t.strip()
-        if re.search(r'[:.!?]$', t) or len(t.split()) > 4 or t.lower().startswith(('you understand', 'tip', 'note', 'warning')):
-            continue
-        if norm(t) not in terms and norm(t).removesuffix('e').rstrip('s') not in terms: missing.setdefault(t, p.name)  # 'addresses'
-print(f'Bold terms not in glossary: {len(missing)}')
-for t, f in sorted(missing.items(), key=lambda x: x[0].lower())[:40]:
-    print(f'    {t}   ({f})')
-PY
+# Glossary freshness. NOT a scan of bold spans: that version flagged 40 things of which
+# about 36 were emphasis or lab labels ("not", "second", "P", "Paragraph 10"), because the
+# book bolds whole phrases for emphasis as house style. 90% noise is a gate nobody reads
+# (LEDGER-DEFECTS.md entry 18). The curated term list is each chapter's `### Key Terms`
+# table, so Appendix C is generated from those and this only asks whether it is current.
+if ! python3 "$HERE/../tools/glossary.py" --check; then fail=1; fi
 
 if [[ $fail -eq 0 ]]; then echo "PRE-FLIGHT OK"; else echo "PRE-FLIGHT FAILED"; fi
 exit $fail

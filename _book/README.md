@@ -26,7 +26,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | II · Use | 18–39 | 362 | Not started |
 | III · Apply | 40–50 | 190 | Not started |
 | IV · What Next | 51–57 | 136 | Not started |
-| Appendices | A–D | 83 | Not started |
+| Appendices | A–D | 83 | **C (glossary) generated and current**, 29 terms. A, B, D not started |
 
 About 1,042 numbered pages in all. Measured from the current build (`latex/book.toc`, 2026-10-23):
 

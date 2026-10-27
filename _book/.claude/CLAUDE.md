@@ -7,7 +7,8 @@ Read these three files, in this order, before you do anything else:
 1. `HANDOVER.md` — what this is, every decision and its reason, the current state, and what is
    blocked.
 2. `BOOK-GUIDE.md` — the spec: structure, the maths boundary, Markdown and build conventions.
-3. `TOC.md` — the plan: 51 chapters and 4 appendices, with page budgets.
+3. `TOC.md` — the plan: 57 chapters and 4 appendices, with page budgets, the
+   concept-ownership table, and the writing-order table that is the schedule.
 
 Then check `README.md` for the status of each part, and before writing any chapter read
 `LEDGER-TAUGHT.md` (what the reader already knows — grep it for "Do not") and

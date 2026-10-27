@@ -96,7 +96,13 @@ belongs before chapter 1.
 - A short opening paragraph saying what the chapter gives the reader.
 - `*The problem.*` and `*The question.*`, two short paragraphs, from `TOC.md`.
 - The idea explained **before** any command or code, with an everyday picture where it helps.
-- **Bold** every new term the first time it is explained. Every bolded term goes in the glossary.
+- **Bold** every new term the first time it is explained, and put it in that chapter's
+  `### Key Terms` table. **The Key Terms tables are the glossary**: `tools/glossary.py`
+  generates Appendix C from them and `tools/check-all.sh` fails if it is stale, so never edit
+  `markdown/C-glossary.md` by hand. Bolding a whole phrase for emphasis is house style and is
+  *not* a term — only the Key Terms table decides. (The earlier rule was "every bolded term
+  goes in the glossary"; a check built on that flagged 40 spans of which about 36 were
+  emphasis or lab labels. See `LEDGER-DEFECTS.md` entry 18 on gates that cry wolf.)
 - Callouts: *tip* (saves time or trouble), *note* (something to be aware of, including anything
   that will date), *warning* (can cost data, money or security).
 - A **lab** with expected results, so the reader can check their work. In Part III the whole
