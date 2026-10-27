@@ -58,3 +58,9 @@ written from memory.
 | Top-p against top-k | Top-p keeps the smallest set reaching `\(p\)`{=latex}; top-k keeps a fixed count | 13 |
 | The order of operations | Temperature, then the cut, then draw | 13 |
 | Why `\(T=0\)`{=latex} is not a guarantee | Float order, batching, expert routing, provider change | 13 |
+| The objective | `\(\mathcal{L} = -\frac{1}{N}\sum_i \log p(t_i \mid t_1 \ldots t_{i-1})\)`{=latex} | 14 |
+| Perplexity | `\(\exp(\mathcal{L})\)`{=latex}; a uniform choice among `\(V\)`{=latex} options gives `\(V\)`{=latex} | 14 |
+| The update rule | `\(\theta \leftarrow \theta - \eta \nabla_{\theta}\mathcal{L}\)`{=latex} — and that is the edge of this book | 14 |
+| The three stages | Pretraining, supervised fine-tuning, preference optimisation | 14 |
+| Where knowledge comes from | Pretraining, overwhelmingly | 14 |
+| What the loss ignores | Everything except the probability of the token that actually came next | 14 |

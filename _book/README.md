@@ -22,11 +22,11 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | Part | Chapters | Pages | Status |
 |---|---|---|---|
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
-| I · Understand — *Inside the Model* | 8–17 | 168 | **Drafting** — 6 of 10 done |
+| I · Understand — *Inside the Model* | 8–17 | 168 | **Drafting** — 7 of 10 done |
 | II · Use | 18–39 | 362 | Not started |
 | III · Apply | 40–50 | 190 | Not started |
 | IV · What Next | 51–57 | 136 | Not started |
-| Appendices | A–D | 83 | **A (cheat sheet, 45 items), B (100 questions) and C (glossary, 75 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
+| Appendices | A–D | 83 | **A (cheat sheet, 51 items), B (100 questions) and C (glossary, 83 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
 About 1,042 numbered pages in all. **Measure with `python3 tools/pages.py`**, which reads the
 built PDF and ends each chapter where the next opener begins. Do not subtract folios by hand:
@@ -49,9 +49,10 @@ sub-part opener pages sitting after the last written chapter were counted into i
   11   114-131    18   24     75%
   12   132-144    13   16     81%
   13   145-157    13   14     93%
+  14   158-170    13   22     59%
 ```
 
-**Chapters 1–13: 154 printed pages against a 198-page estimate (78%).** Chapter 9 is the only
+**Chapters 1–14: 167 printed pages against a 220-page estimate (76%).** Chapter 9 is the only
 one to land exactly on its estimate, and none has yet exceeded one.
 
 The estimates are estimates, never targets — `BOOK-GUIDE.md` §11. Read `LEDGER-DEFECTS.md`
