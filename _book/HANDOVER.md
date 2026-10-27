@@ -103,13 +103,15 @@ do not reopen it. Dates, assuming the Part I rate holds:
 Appendix B (the question bank) are the two most interview-useful pieces in the book and they
 land in the last ten days. If anything slips, they are what slips.
 
-*Second, two of them need not wait.* `TOC.md` already says **Appendix B's question list is
+*Second, one of them no longer waits.* `TOC.md` always said **Appendix B's question list is
 written in week one** — the questions only, from the contents, as the acceptance test every
-chapter is then measured against. That did not happen, and seven chapters have shipped without
-it. It is the first thing to do now, and it pays twice: it gives the owner the whole syllabus
-as questions while most of the book is unwritten. **Appendix A** (the cheat sheet — the numbers
+chapter is then measured against. It had not happened and seven chapters had shipped without
+it. **Written 2026-10-27**: 100 questions keyed to chapters, in the PDF, with the answers to
+follow as the chapters do. `BOOK-GUIDE.md` §15 now makes it a condition of a chapter being
+done, and eight chapters carry no question deliberately (the bank's header lists them and
+says why). **Appendix A** (the cheat sheet — the numbers
 worth memorising) should likewise accumulate as each chapter lands, not be written at the end
-from 57 finished chapters.
+from 57 finished chapters. It is the one end-loaded item left.
 
 *If the schedule slips*, drop in this order: the index (Appendix D, generated), then labs 47–50
 (stage 6), then depth in chapters 8–17. **Never drop chapter 55 or Appendix B.**

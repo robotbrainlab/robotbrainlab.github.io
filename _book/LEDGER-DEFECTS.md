@@ -218,6 +218,16 @@ was ever wrong.
 4. **`@` is not a letter outside `\makeatletter`.** The specific trap: `\newif\ifti@foo`
    fails silently-looking at the top of a run, far from where you are working.
 
+*Third instance, 2026-10-27, and this one was predicted by the paragraph below.* Appendices B
+and C were enabled while A (the cheat sheet) is still unwritten. `\appendix` letters by
+**position**, not by filename, so the Interview Bank printed as "Appendix A" and the Glossary
+as "Appendix B" — while `TOC.md`, `BOOK-GUIDE.md`, the glossary generator and every
+cross-reference called them B and C. The reader would have met a book that disagreed with
+itself about its own appendix letters. Fixed with `\setcounter{chapter}{1}` and a comment
+saying to delete that line when `A-cheat-sheet.md` lands. **A missing FIRST item silently
+renumbers everything after it**, which is the same shape as the index's leading `\addvspace`
+above.
+
 **And the thing that was true all along:** the apparatus was built against a four-chapter
 book, and anything with a first-item or last-item special case — the index, the contents,
 running heads, part pages — has not yet met the input that breaks it. When the build breaks

@@ -39,6 +39,9 @@ bash tools/check-all.sh                    # must end ALL GATES PASS
 - **One chapter at a time. Never a part at a time.** Read its sources in full immediately
   before writing it. Writing several chapters in one stretch is how invention happens.
 - **Two reviews per chapter.** The second reads only the changed passages, named.
+- **A chapter is not done until its questions in `markdown/B-interview-bank.md` can be
+  answered from it.** The hundred questions were written from `TOC.md` before any chapter
+  existed, so they are the standard, not a summary. See `BOOK-GUIDE.md` §15.
 - **Every applied fix is a sweep: grep book-wide, count before and after. Zero, or it is
   not done.**
 

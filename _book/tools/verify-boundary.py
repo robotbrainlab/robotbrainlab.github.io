@@ -43,8 +43,14 @@ def exemptions():
 
 
 def chapter_of(path):
-    m = re.match(r"(\d+)-", os.path.basename(path))
-    return str(int(m.group(1))) if m else "?"
+    """A chapter's number, or an appendix's letter. Appendices used to all return "?", so one
+    exemption would have covered every one of them at once."""
+    base = os.path.basename(path)
+    m = re.match(r"(\d+)-", base)
+    if m:
+        return str(int(m.group(1)))
+    m = re.match(r"([A-Z])-", base)
+    return m.group(1) if m else "?"
 
 
 def check(path, allowed):

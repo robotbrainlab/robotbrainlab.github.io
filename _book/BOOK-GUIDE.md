@@ -470,7 +470,14 @@ report; it is the reader's only way to learn that the common explanation is wron
 
 - `bash tools/check-all.sh` → **ALL GATES PASS**
 - `PAGES_MIN=<low> PAGES_MAX=<high> make check` passes: no overfull boxes, no text off any page,
-  every bolded term in the glossary, page count within the part's target.
+  the glossary current, page count within the part's target.
+- **Its questions in `markdown/B-interview-bank.md` can be answered from it.** Grep the bank for
+  the chapter number, read its questions, and answer each one out of the chapter alone. This is
+  the acceptance test and it is not a formality: the hundred questions were written from `TOC.md`
+  **before any chapter existed**, so they are a standard the chapter has to meet rather than a
+  summary of what it happens to contain. A question you cannot answer from the chapter means the
+  chapter is short of something — reopen it, or move the question and say why in the record.
+  Eight chapters carry no question deliberately; the bank's own header lists them.
 - Every page has been looked at, cover to cover (`pdftoppm -r 40` contact sheets).
 - Every command and code sample has been run.
 - Every chapter has its lab, summary, key terms, review questions and "You understand this when…".
