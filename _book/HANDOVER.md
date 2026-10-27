@@ -95,7 +95,7 @@ do not reopen it. Dates, assuming the Part I rate holds:
 | 5 | Part III, labs 40–46 | 132 | 6 Dec – 15 Dec |
 | 6 | Part III, labs 47–50 | 58 | 16 Dec – 19 Dec |
 | 7 | Part IV, chs 51–57 | 136 | 20 Dec – 28 Dec |
-| 8 | Appendices A, B, D | 83 | 29 Dec – 31 Dec |
+| 8 | Appendix B's answers, and the index | 83 | 29 Dec – 31 Dec |
 
 **This schedule has no slack, and two things about it are worth saying plainly.**
 
@@ -110,8 +110,11 @@ it. **Written 2026-10-27**: 100 questions keyed to chapters, in the PDF, with th
 follow as the chapters do. `BOOK-GUIDE.md` §15 now makes it a condition of a chapter being
 done, and eight chapters carry no question deliberately (the bank's header lists them and
 says why). **Appendix A** (the cheat sheet — the numbers
-worth memorising) should likewise accumulate as each chapter lands, not be written at the end
-from 57 finished chapters. It is the one end-loaded item left.
+worth memorising) likewise accumulates: each chapter carries an optional
+`### Worth Memorising` table and `tools/cheatsheet.py` generates the appendix from them, with
+a gate on freshness. **Built 2026-10-27**, so nothing in the appendices is end-loaded any
+more: A and C are generated, B's questions are written and only its answers follow the
+chapters, and D is the LaTeX index.
 
 *If the schedule slips*, drop in this order: the index (Appendix D, generated), then labs 47–50
 (stage 6), then depth in chapters 8–17. **Never drop chapter 55 or Appendix B.**

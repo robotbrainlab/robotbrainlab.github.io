@@ -10,11 +10,11 @@ sources: TOC.md rows for chs 1-5 plus 34, 37 and 38 to fix the ownership boundar
 non-scope: the named agent patterns and when an agent is warranted (ch 34); context engineering, compaction, sub-agents, memory (ch 35); tool design and MCP (ch 36); multi-agent systems (ch 37); evaluating an agent, and pass@k / pass^k BY NAME (ch 38); where the effort goes (ch 5); tokens (ch 10); how a tool call is expressed (ch 23); security and injection (ch 51); cost and latency measurement (chs 52-53).
 begun: 2026-10-22T23:06:35+05:30
 written: 2026-10-22T23:28:32+05:30
-reviewed: 2026-10-22T23:28:32+05:30
+reviewed: 2026-10-27T21:41:12+05:30
 absolutes: 45. Four failed a counter-example before review and were rewritten: 'left your code in charge of all of them' over five parts, 'the same every run' for a path that branches on data, the compounding table presented as a law rather than a model, and 'a bill you cannot bound in advance' which contradicted the step limit taught two sections earlier.
 new-terms: 3 - lookup_order(4471), refund(...), and the turn block's labels. All introduced here as illustration; none is built on without being given.
 covers-misses: 0 throughout. The completeness review found two Covers items thin by reading rather than matching: 'compounding error' was taught but never named, and 'how short real deployed loops are' rested on one paragraph whose causal reading overclaimed. Both fixed.
-sha256: 71776c5bcb6d37ea552821d49e09c93b69f8afc96a662c7d5ef1032c8caef907
+sha256: 1055ec3ab9f4f2c6ed7a30930568bac46d7e2a6b32bc3c842b01a1638e564ce5
 
 ## Before writing
 
@@ -47,4 +47,4 @@ sha256: 71776c5bcb6d37ea552821d49e09c93b69f8afc96a662c7d5ef1032c8caef907
 ## Reviews
 
 completeness-review: 14 findings, all accepted. Two serious. The headline claim 'Nothing new has been added' contradicted the chapter's own later line 'the loop is a part' and the stopping condition it says you must have; it appeared in four places including the Summary and an answer. And the two callouts under the compounding table disagreed about the same quantity - the Note said real numbers are better, the Warning said worse, and the Warning's reasons supported neither. It also found the approval thresholds repeating chapter 2 against a pinned 'Do not', and 'compounding error' never named although chapter 34 refers back to it.
-fix-verification: 5 findings and 3 notes, all accepted. The count of 'two simplifications' was exceeded by the chapter itself twenty lines later; the multiplication was stated three times in eighteen lines; the Key Terms row covered the arithmetic and not the second mechanism; **context** was bolded although chapter 2 owns it. While applying them I removed the Warning's conclusion by deleting two copies of a sentence an earlier edit in the same batch had just inserted - caught by reading the passage, and recorded as a second instance of LEDGER-DEFECTS entry 15.
+fix-verification: 5 findings and 3 notes, all accepted. The count of 'two simplifications' was exceeded by the chapter itself twenty lines later; the multiplication was stated three times in eighteen lines; the Key Terms row covered the arithmetic and not the second mechanism; **context** was bolded although chapter 2 owns it. While applying them I removed the Warning's conclusion by deleting two copies of a sentence an earlier edit in the same batch had just inserted - caught by reading the passage, and recorded as a second instance of LEDGER-DEFECTS entry 15. **Reopened 2026-10-27** to add an optional `### Worth Memorising` table, which is the source `tools/cheatsheet.py` generates Appendix A from. Nothing else in the chapter changed; the table restates numbers the chapter already worked. Appendix A was the one end-loaded item in the schedule (HANDOVER §3.1) and would otherwise have been assembled from 57 finished chapters in the last three days, from memory.

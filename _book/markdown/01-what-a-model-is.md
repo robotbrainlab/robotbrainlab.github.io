@@ -340,6 +340,14 @@ phases, one before the first word and one that paces the rest.
 | **Training cut-off** | The point in time after which no text reached the model's training. It knows nothing later, and cannot tell that it does not |
 | **Latency** | The delay between sending a request and receiving the reply, felt as a wait before the first word and a pace after it |
 
+### Worth Memorising
+
+| Item | Value or formula |
+|---|---|
+| What cost scales with | The amount of text moved, in and out. Not the difficulty of the question |
+| The two rates are not equal | Text you get back costs several times text you send — about 4× in the book's worked shape |
+| Cost of a feature, per call | (words in × rate in) + (words out × rate out), then × calls × days |
+
 ### Review Questions
 
 1. A colleague says "we trained the model on our support tickets". What two different things

@@ -26,7 +26,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | II · Use | 18–39 | 362 | Not started |
 | III · Apply | 40–50 | 190 | Not started |
 | IV · What Next | 51–57 | 136 | Not started |
-| Appendices | A–D | 83 | **B (100 questions) and C (glossary, 29 terms) in the PDF.** B's answers come as chapters land. A and D not started |
+| Appendices | A–D | 83 | **A (cheat sheet, 7 items), B (100 questions) and C (glossary, 29 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
 About 1,042 numbered pages in all. Measured from the current build (`latex/book.toc`, 2026-10-23):
 

@@ -292,6 +292,15 @@ right setting is the least that solves the problem.
 | **Stopping condition** | The set of rules that end a run — the model finishing, a step limit, or your code refusing |
 | **Approval point** | A step the loop cannot pass without a person, enforced in your code rather than requested in the instructions |
 
+### Worth Memorising
+
+| Item | Value or formula |
+|---|---|
+| Whole-run success over *n* steps | per-step reliability to the power *n* |
+| Ten steps at nine-in-ten | 0.9^10 = 0.349 — about a third of runs finish |
+| Ten steps at ninety-nine in a hundred | 0.99^10 = 0.904 — the same loop, now usable |
+| What that means for a demonstration | A system succeeding a third of the time shows you a good run roughly every third try |
+
 ### Review Questions
 
 1. What exactly is added to a system to turn it into an agent, and what is taken away?

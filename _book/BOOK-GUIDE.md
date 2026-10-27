@@ -109,7 +109,13 @@ belongs before chapter 1.
   chapter is the lab: the title starts with "Lab:", its sections are `## Step 1: …`, and there is
   no separate `## Lab:` heading.
 - `## Summary, Key Terms, and Review Questions`, with `### Summary`, `### Key Terms` (a table:
-  Term | Meaning) and `### Review Questions` (numbered, 4–6).
+  Term | Meaning), an **optional** `### Worth Memorising` (a table: Item | Value or formula)
+  and `### Review Questions` (numbered, 4–6). **The Key Terms tables are the glossary and the
+  Worth Memorising tables are the cheat sheet**: `tools/glossary.py` and
+  `tools/cheatsheet.py` generate Appendices C and A from them, and `tools/check-all.sh` fails
+  if either is stale, so never edit `markdown/C-glossary.md` or `markdown/A-cheat-sheet.md`
+  by hand. Worth Memorising is for **numbers, defaults and formulas** only, as `TOC.md`
+  specifies; a chapter whose material is principles has none, and most of Part I does not.
 - `> **You understand this when** …`, one sentence.
 
 Part IV chapters have none of the last four items.

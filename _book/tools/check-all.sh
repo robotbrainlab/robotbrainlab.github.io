@@ -29,6 +29,7 @@ for ch in markdown/[0-9][0-9]-*.md; do
 done
 run "OUTLINE  the PDF outline nests correctly"          python3 tools/verify-outline.py
 run "GLOSSARY Appendix C matches every Key Terms table"  python3 tools/glossary.py --check
+run "CHEATSHT Appendix A matches every Worth Memorising"  python3 tools/cheatsheet.py --check
 
 printf '\n=== BUILD  0 overfull / 0 glyphs / 0 undefined ===\n'
 if [ -d latex ]; then

@@ -10,11 +10,11 @@ sources: TOC.md L28-30 (Part I heading + the chapter-1 row: opening problem, 5-i
 non-scope: context/retrieval/tools/checks/people as a system (ch 2); why it is assembled that way (ch 3); agents and the loop (ch 4); where the effort goes (ch 5); durable vs datable (ch 6); tokens and the unit of text (ch 10); anything inside the model (chs 8-17); fine-tuning as a procedure (ch 39); measuring or reducing cost and latency (chs 52-53).
 begun: 2026-10-22T15:38:21+05:30
 written: 2026-10-22T15:52:56+05:30
-reviewed: 2026-10-22T15:59:55+05:30
+reviewed: 2026-10-27T21:41:12+05:30
 absolutes: 44 after the fixes (38 before). 6 failed a counter-example and were rewritten: "disappoint you in the same way tomorrow" (false - replies vary, ch 13), "nothing is remembered" (true of the model, false of products that resend history), "never seen your material" (public material may well have been trained on), "cannot look anything up" (true of the model, not of products with search), "refuses almost nothing" (models refuse plenty; the claim meant the interface sets no limit), "two requests meet the identical model" (providers replace models).
 new-terms: 0 new backticked terms against 0 earlier chapters. Triaged by hand instead: grep confirms the chapter uses none of token/context/retrieval/tool/agent, so chapters 2, 4 and 10 may introduce all five. Latency is used and defined here, so chs 15 and 52 must not call it new - recorded in LEDGER-TAUGHT.md.
 covers-misses: 0. verify-coverage.py reports 0 against the chapter-1 Covers list, before and after the fixes.
-sha256: 67bbacb69efec114081498cfc2dab7a3cac7c63a26d2010589c57b9478e529b2
+sha256: 4309f32611ac8338d75d1fb825716375b9dc3eef46da5ad5d29073ce745090c8
 
 ## Before writing
 
@@ -54,4 +54,4 @@ sha256: 67bbacb69efec114081498cfc2dab7a3cac7c63a26d2010589c57b9478e529b2
 ## Reviews
 
 completeness-review: 16 findings, 0 rejected. Two high, both checkable against the plan: a closing paragraph promising four parts where chapter 2 has five, with accountability silently swapped for a cost-watching need matching no part; and a worked cost example whose flat per-request premise refuted its own doubling conclusion while omitting the reply. 14 moderate/low, all applied. It verified 7 named claims independently, found all 7 true, and corrected my own premise about the page budget.
-fix-verification: 6 findings, 0 rejected, all applied with counted sweeps. One exposed a gap in the PLAN rather than the chapter: the Settings bullet pointed at chapter 13 for 'how long the reply may run', and no chapter in the whole TOC owned an output-length setting. Chapter 13's Covers extended. All 11 numbers recomputed and confirmed right.
+fix-verification: 6 findings, 0 rejected, all applied with counted sweeps. One exposed a gap in the PLAN rather than the chapter: the Settings bullet pointed at chapter 13 for 'how long the reply may run', and no chapter in the whole TOC owned an output-length setting. Chapter 13's Covers extended. All 11 numbers recomputed and confirmed right. **Reopened 2026-10-27** to add an optional `### Worth Memorising` table, which is the source `tools/cheatsheet.py` generates Appendix A from. Nothing else in the chapter changed; the table restates numbers the chapter already worked. Appendix A was the one end-loaded item in the schedule (HANDOVER §3.1) and would otherwise have been assembled from 57 finished chapters in the last three days, from memory.
