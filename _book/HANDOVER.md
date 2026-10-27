@@ -50,7 +50,7 @@ Do not reopen these. Each one was decided with the owner.
 | 22 | **One chapter at a time, never a part at a time** | Context dilution is the main cause of invented content. Writing several chapters in one stretch makes the later ones get written from the pattern of the earlier ones rather than from their sources | A drafting agent per part, which was the plan until 22 Oct 2026 |
 | 20 | **Lab 50 attacks the system before chapter 51 explains security** | Meet the failure, then learn the framework. The lab uses what chapter 36 taught. Moving it after Part IV would break Part IV's "no labs" rule | Moving the lab after chapter 51 |
 
-## 3. State, as of 2026-10-27
+## 3. State, as of 2026-10-28
 
 **Where it lives:** `_book/` inside the website repository
 (`~/LearningLab/towards-intelligence/robotbrainlab.github.io`), branch `main`, **pushed**.
@@ -60,25 +60,32 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Part I is finished: chapters 1 to 7, 68 printed pages against a 98-page estimate.**
-`bash tools/check-all.sh` ends `ALL GATES PASS`.
+**Part I's first half is finished: chapters 1 to 7, 70 printed pages against a 98-page
+estimate. *Inside the Model* is under way: chapters 8 and 9 are closed, 24 printed pages
+against 26.** `bash tools/check-all.sh` ends `ALL GATES PASS`.
+
+**Measure printed pages with `python3 tools/pages.py`**, never by subtracting folios.
+Three chapters were over-counted that way; `LEDGER-DEFECTS.md` entry 23 has the detail.
 
 | Path | What it is | State |
 |---|---|---|
 | `markdown/01` … `markdown/07` | Part I · *Mental Model* | **Done.** Two review passes each, records sealed |
-| `markdown/08` … `markdown/57` | Chapters 8 to 57 | Not started |
+| `markdown/08`, `markdown/09` | Part I · *Inside the Model*, first two | **Done.** Two review passes each, records sealed |
+| `markdown/10` … `markdown/57` | Chapters 10 to 57 | Not started |
 | `markdown/00-preface.md` | A placeholder, so the build runs | Replace before release |
-| `markdown/C-glossary.md` | Appendix C. **Generated** by `tools/glossary.py` from every chapter's Key Terms table | 29 terms, in the PDF |
-| `records/` | One record per chapter, ticked with evidence, hashed last | 7 of 57 |
+| `markdown/C-glossary.md` | Appendix C. **Generated** by `tools/glossary.py` from every chapter's Key Terms table | 46 terms, in the PDF |
+| `records/` | One record per chapter, ticked with evidence, hashed last | 9 of 57 |
 | `labs/` | The data every Part III lab runs on | **Empty — see section 4** |
-| `LEDGER-TAUGHT.md` | What each chapter taught, with "Do not" rows | 7 rows |
-| `LEDGER-DEFECTS.md` | What the gates cannot catch | 20 entries |
+| `LEDGER-TAUGHT.md` | What each chapter taught, with "Do not" rows | 9 rows |
+| `LEDGER-DEFECTS.md` | What the gates cannot catch | 23 entries |
 | `tools/` | The driver, the gate suite, the glossary generator, the build probe | Done |
 | `latex/` | The template, with five changes (section 5) | Builds clean |
 
-**Measured, not estimated.** Part I came in at 69% of its page budget, evenly: 71, 56, 71, 56,
-71, 92, 80 per cent. Budgets are estimates and nothing was padded (`BOOK-GUIDE.md` §11), so
-expect the whole book around 650 printed pages rather than 1,040. Do not re-plan on this.
+**Measured, not estimated.** Chapters 1 to 9 came in at 76% of their page budget — 94 printed
+pages against 124 — and the per-chapter shares are 71, 56, 71, 62, 79, 92, 80, 86 and 100 per
+cent. The last of those is chapter 9, the first to land exactly on its estimate; none has yet
+exceeded one. Budgets are estimates and nothing was padded (`BOOK-GUIDE.md` §11), so expect
+the whole book around 700 printed pages rather than 1,040. Do not re-plan on this.
 
 ### 3.1 The schedule to 31 December
 
@@ -89,7 +96,7 @@ do not reopen it. Dates, assuming the Part I rate holds:
 | Stage | What | Est. pp | Target |
 |---|---|---|---|
 | 1 | Part I, chs 1–7 | 98 | **Done 2026-10-23** |
-| 2 | *Inside the Model*, chs 8–17 | 168 | 27 Oct – 9 Nov |
+| 2 | *Inside the Model*, chs 8–17 | 168 | 27 Oct – 9 Nov. **8 and 9 done, 28 Oct** |
 | 3 | Part II, chs 18–29 | 196 | 10 Nov – 23 Nov |
 | 4 | Part II, chs 30–39 | 166 | 24 Nov – 5 Dec |
 | 5 | Part III, labs 40–46 | 132 | 6 Dec – 15 Dec |
@@ -146,8 +153,8 @@ arrived there anyway without cutting anything. Its recommendation to write Part 
    and 30–33 will use them, but only *practitioner report* is in Key Terms — so Appendix C
    carries one of five. Fixing it is one chapter edit and one `chapter.py reviewed` reseal.
 
-**Nothing on this list blocks chapter 8.** Item 2 is due before chapter 40, item 3 before
-chapter 40, and items 1 and 4 are small.
+**Nothing on this list blocks chapter 10.** Items 2 and 3 are due before chapter 40, and
+items 1 and 4 are small.
 
 ## 5. The build, and how it differs from the other books
 

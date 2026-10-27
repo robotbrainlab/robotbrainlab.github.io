@@ -27,3 +27,8 @@ written from memory.
 | Logarithms turn products into sums | `\(\ln(xy) = \ln x + \ln y\)`{=latex} | 8 |
 | `\(e\)`{=latex} | About 2.718. `\(e^x\)`{=latex} is positive for every `\(x\)`{=latex} | 8 |
 | Quadratic growth | `\(O(n^2)\)`{=latex}: ten times the input, a hundred times the work | 8 |
+| Embedding table size | vocabulary × width numbers. 128,000 × 4,096 = 524,288,000 | 9 |
+| The output step | One score per vocabulary entry, so the final shape is (1 × `\(d\)`{=latex}) times (`\(d\)`{=latex} × vocabulary) | 9 |
+| What one forward pass yields | Exactly one next-token distribution | 9 |
+| Passes for a reply | One per token produced, each over an input one token longer | 9 |
+| The three shape numbers | Vocabulary, width, depth | 9 |

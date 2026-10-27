@@ -65,6 +65,41 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**23. The same chapter-length miscount, three times, under a warning against it.** A
+chapter's printed length was read by subtracting folios by hand, and the pages counted into
+it were the `PART II`, `PART III`, `PART IV` and `APPENDIX A` opener pages that sit
+immediately after the last written chapter. Chapter 5 was recorded as 12 pp when it was 8.
+Chapter 7 as 9 when it was 8 — the extra page was the *Inside the Model* sub-part opener.
+Chapter 8 as **15 against a 14-page estimate**, which made it "the first chapter to exceed
+its estimate"; it is 12, which is 86 per cent, and no chapter has exceeded one. That false
+figure reached the record, `README.md`, `HANDOVER.md` and a report to the reader.
+
+**What makes this worth an entry is where it happened.** `README.md` already carried the
+rule, in bold, two lines under the table: *"Measure a chapter by where its own text ends,
+not by where the next chapter starts."* It was written after the chapter 5 instance. The
+chapter 8 figure was then entered into that same table, by somebody who had written the
+warning, and the arithmetic was done the forbidden way anyway — because the folios are right
+there and subtracting them takes five seconds, while opening the PDF and finding the next
+opener does not.
+
+So this is `LEDGER-DEFECTS` entry 14's lesson arriving a third time: **when the same defect
+comes back, the answer is a gate, not more care.** `tools/pages.py` now reads the built PDF,
+finds every chapter, part and appendix opener, ends each chapter one page before the next
+opener, and prints the range, the count and the `TOC.md` estimate beside it. It is the only
+figure that goes in a record from now on. Proved against the known-good cases (chapters 1,
+2, 3 and 6, whose hand figures were right) and against the three wrong ones.
+
+Two smaller things fell out of building it:
+
+1. **A blank page would have broken it, and there are none.** The three blank pages in the
+   book are all in the front and back matter, so no chapter is credited with a blank verso.
+   If a future chapter ends on one, `pages.py` will count it — and that is the right
+   answer for a page budget, since `BOOK-GUIDE.md` §11 counts numbered pages.
+2. **The per-chapter percentages in `HANDOVER.md` §3 were wrong for two more chapters**
+   (4 and 5) in the other direction, and nobody had noticed, because a figure that is
+   roughly right attracts no attention. A measurement nobody can reproduce is not a
+   measurement.
+
 **22. "I verified every number" meant the numbers I wrote first.** Chapter 8 is the
 mathematics chapter, and its whole argument is that you should substitute small numbers and
 check by hand. Before writing a word of it I ran every figure through Python and said so, to

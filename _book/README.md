@@ -22,37 +22,36 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | Part | Chapters | Pages | Status |
 |---|---|---|---|
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
-| I · Understand — *Inside the Model* | 8–17 | 168 | **Drafting** — 1 of 10 done |
+| I · Understand — *Inside the Model* | 8–17 | 168 | **Drafting** — 2 of 10 done |
 | II · Use | 18–39 | 362 | Not started |
 | III · Apply | 40–50 | 190 | Not started |
 | IV · What Next | 51–57 | 136 | Not started |
-| Appendices | A–D | 83 | **A (cheat sheet, 7 items), B (100 questions) and C (glossary, 29 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
+| Appendices | A–D | 83 | **A (cheat sheet, 19 items), B (100 questions) and C (glossary, 46 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
-About 1,042 numbered pages in all. Measured from the current build (`latex/book.toc`, 2026-10-23):
+About 1,042 numbered pages in all. **Measure with `python3 tools/pages.py`**, which reads the
+built PDF and ends each chapter where the next opener begins. Do not subtract folios by hand:
+three chapters were over-counted that way (5 as 12 pp, 7 as 9, 8 as 15) because the part and
+sub-part opener pages sitting after the last written chapter were counted into it. See
+`LEDGER-DEFECTS.md` entry 23. From the current build:
 
-| Ch | Printed | Estimate | |
-|---|---|---|---|
-| 1 | 10 pp (3–12) | 14 | 71% |
-| 2 | 10 pp (13–22) | 18 | 56% |
-| 3 | 10 pp (23–32) | 14 | 71% |
-| 4 | 10 pp (33–42) | 16 | 62% |
-| 5 | 11 pp (43–53) | 14 | 79% |
-| 6 | 11 pp (54–64) | 12 | 92% |
-| 7 | 9 pp (65–73) | 10 | 90% |
-| 8 | 15 pp (74–88) | 14 | **107%** |
+```text
+  ch    printed   pp  est  of est
+   1     3-12     10   14     71%
+   2    13-22     10   18     56%
+   3    23-32     10   14     71%
+   4    33-42     10   16     62%
+   5    43-53     11   14     79%
+   6    54-64     11   12     92%
+   7    65-72      8   10     80%
+   8    74-85     12   14     86%
+   9    86-97     12   12    100%
+```
 
-**Chapters 1–8: 86 printed pages against a 112-page estimate (77%).** Chapter 8 is the first
-to exceed its estimate; worked arithmetic takes the room and `BOOK-GUIDE.md` §11 forbids
-cutting to fit.
-
-**Measure a chapter by where its own text ends, not by where the next chapter starts.**
-Chapter 5 was first recorded as 12 pp because the four part-opener pages that follow it
-were counted into it; it is 8. The part openers for *Inside the Model* and Parts II–IV all
-sit after the last written chapter until those parts have chapters of their own.
+**Chapters 1–9: 94 printed pages against a 124-page estimate (76%).** Chapter 9 is the first
+to land exactly on its estimate. No chapter has yet exceeded one.
 
 The estimates are estimates, never targets — `BOOK-GUIDE.md` §11. Read `LEDGER-DEFECTS.md`
-entry 12 before drawing any conclusion from the percentages; the figures there were taken
-before the front matter settled and are a page or two lower than these.
+entry 12 before drawing any conclusion from the percentages.
 
 Status values: *Not started* → *Drafting* → *Editing* → *Done*.
 
