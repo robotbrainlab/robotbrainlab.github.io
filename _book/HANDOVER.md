@@ -60,9 +60,8 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Part I's first half is finished: chapters 1 to 7, 70 printed pages against a 98-page
-estimate. *Inside the Model* is under way: chapters 8 to 16 are closed, 119 printed pages
-against 160.** `bash tools/check-all.sh` ends `ALL GATES PASS`.
+**Part I is complete: all 17 chapters, 197 printed pages against a 266-page estimate.**
+Its first half (1 to 7) is 70 pages against 98; *Inside the Model* (8 to 17) is 127 against 168. `bash tools/check-all.sh` ends `ALL GATES PASS`.
 
 **Measure printed pages with `python3 tools/pages.py`**, never by subtracting folios.
 Three chapters were over-counted that way; `LEDGER-DEFECTS.md` entry 23 has the detail.
@@ -70,20 +69,20 @@ Three chapters were over-counted that way; `LEDGER-DEFECTS.md` entry 23 has the 
 | Path | What it is | State |
 |---|---|---|
 | `markdown/01` … `markdown/07` | Part I · *Mental Model* | **Done.** Two review passes each, records sealed |
-| `markdown/08` … `markdown/16` | Part I · *Inside the Model*, first nine | **Done.** Two review passes each, records sealed |
-| `markdown/17` … `markdown/57` | Chapters 17 to 57 | Not started |
+| `markdown/08` … `markdown/17` | Part I · *Inside the Model* | **Done.** Two review passes each, records sealed |
+| `markdown/18` … `markdown/57` | Chapters 18 to 57 | Not started |
 | `markdown/00-preface.md` | A placeholder, so the build runs | Replace before release |
-| `markdown/C-glossary.md` | Appendix C. **Generated** by `tools/glossary.py` from every chapter's Key Terms table | 95 terms, in the PDF |
-| `records/` | One record per chapter, ticked with evidence, hashed last | 16 of 57 |
+| `markdown/C-glossary.md` | Appendix C. **Generated** by `tools/glossary.py` from every chapter's Key Terms table | 106 terms, in the PDF |
+| `records/` | One record per chapter, ticked with evidence, hashed last | 17 of 57 |
 | `labs/` | The data every Part III lab runs on | **Empty — see section 4** |
-| `LEDGER-TAUGHT.md` | What each chapter taught, with "Do not" rows | 16 rows |
+| `LEDGER-TAUGHT.md` | What each chapter taught, with "Do not" rows | 17 rows |
 | `LEDGER-DEFECTS.md` | What the gates cannot catch | 28 entries |
 | `tools/` | The driver, the gate suite, the glossary generator, the build probe | Done |
 | `latex/` | The template, with five changes (section 5) | Builds clean |
 
-**Measured, not estimated.** Chapters 1 to 16 came in at 73% of their page budget — 189
-printed pages against 258 — and the per-chapter shares are 71, 56, 71, 62, 79, 92, 80, 86, 100,
-80, 75, 81, 93, 59, 60 and 56 per cent. Chapter 14's 59% is the largest gap in the book and both
+**Measured, not estimated.** Chapters 1 to 17 came in at 74% of their page budget — 197
+printed pages against 266 — and the per-chapter shares are 71, 56, 71, 62, 79, 92, 80, 86, 100,
+80, 75, 81, 93, 59, 60, 56 and 100 per cent. Chapter 14's 59% is the largest gap in the book and both
 reviewers concluded the estimate predates the decision that its biggest subjects sit outside
 the boundary. Chapter 9 is the only one to land exactly on its estimate; none has yet
 exceeded one. Budgets are estimates and nothing was padded (`BOOK-GUIDE.md` §11), so expect
@@ -98,7 +97,7 @@ do not reopen it. Dates, assuming the Part I rate holds:
 | Stage | What | Est. pp | Target |
 |---|---|---|---|
 | 1 | Part I, chs 1–7 | 98 | **Done 2026-10-23** |
-| 2 | *Inside the Model*, chs 8–17 | 168 | 27 Oct – 9 Nov. **8 to 16 done, 28 Oct** |
+| 2 | *Inside the Model*, chs 8–17 | 168 | **Done 2026-10-28**, twelve days early |
 | 3 | Part II, chs 18–29 | 196 | 10 Nov – 23 Nov |
 | 4 | Part II, chs 30–39 | 166 | 24 Nov – 5 Dec |
 | 5 | Part III, labs 40–46 | 132 | 6 Dec – 15 Dec |
@@ -155,7 +154,7 @@ arrived there anyway without cutting anything. Its recommendation to write Part 
    and 30–33 will use them, but only *practitioner report* is in Key Terms — so Appendix C
    carries one of five. Fixing it is one chapter edit and one `chapter.py reviewed` reseal.
 
-**Nothing on this list blocks chapter 17.** Items 2 and 3 are due before chapter 40, and
+**Nothing on this list blocks chapter 18.** Items 2 and 3 are due before chapter 40, and
 items 1 and 4 are small.
 
 ## 5. The build, and how it differs from the other books
