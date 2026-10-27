@@ -65,6 +65,44 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**25. A demonstration that works only under a condition the chapter never stated — and the
+chapter handed it to the reader as an interview answer.** Chapter 11 proves that attention is
+blind to word order by swapping two tokens and showing the output vector is unchanged. The
+proof is real and the arithmetic is right. But it holds only when the swap leaves the **last**
+position alone, because the last position supplies the query: change the token there and the
+output moves for a reason that has nothing to do with order.
+
+The chapter did not say so. Worse, it did two things that made the omission expensive. A Tip
+told the reader this was "the answer to give" in an interview and that it is "impossible to
+argue with". And a review question asked why attention cannot tell *"the dog bit the man"*
+from *"the man bit the dog"* — which is a swap of the last token, so attention **can** tell
+them apart. Run on the chapter's own matrices, the output goes from
+`(0.216, 3.378, 1.879, 1.013)` to `(0.901, 2.180, 1.963, 1.679)`.
+
+So the answer key contained a counter-example to the chapter's own claim, and the Tip armed
+the reader to perform the demonstration in the one way that loses the argument.
+
+**Two things make this its own class.**
+
+*A condition that is satisfied by the worked example is invisible.* Every number on the page
+was right, and position 5 was the readout throughout, so the constraint never had occasion to
+announce itself. No gate can find a missing precondition: `verify-arithmetic.py` checks that
+the printed sums hold, and they did. The completeness review found it only because it was told
+to verify claims in Python rather than read them.
+
+*A demonstration offered as an interview answer has to carry its own edge.* The book's purpose
+is to make the reader able to say this out loud under questioning. A proof with an unstated
+condition is worse than no proof there, because it will be produced confidently in exactly the
+situation where somebody is looking for the gap. **When a chapter tells the reader "this is the
+answer to give", state what would make it wrong in the same breath.**
+
+*Related, and found in the same pass:* the chapter's own stronger claim — "neither can anything
+built out of attention alone" — is false, because the causal mask is defined by position, so a
+stack of masked attention is not blind to order even though the formula is. The narrow claim
+(*this formula*) is true; the general one is not, and the counter-example was two sections away
+in the same chapter. That is entry 5 again, and the rule stands: an absolute about everything
+built from a thing is a claim about the whole book, not about the thing.
+
 **24. I wrote a lab step explaining a bug in a program I had not run, and the bug was not
 there.** Chapter 10's lab builds a byte-pair vocabulary and then hands the reader a program to
 check their hand arithmetic against. Steps 8 and 9 of the first draft said the program had a

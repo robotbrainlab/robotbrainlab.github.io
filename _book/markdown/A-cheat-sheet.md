@@ -39,3 +39,10 @@ written from memory.
 | Which half is dear | Output, at several times input, and one forward pass per token | 10 |
 | What a token count is a fact about | One particular model. A different vocabulary gives a different count | 10 |
 | The worst case | One token per byte — the most byte-pair encoding can ever charge you | 10 |
+| The attention formula | `\(\mathrm{softmax}(QK^{\top}/\sqrt{d_k})\,V\)`{=latex} | 11 |
+| What the three views are for | Query = what I want, key = what I offer, value = what I give | 11 |
+| Why divide by `\(\sqrt{d_k}\)`{=latex} | A dot product grows with width; without it softmax saturates and attention stops blending. The *square root*, because the slot products partly cancel, so the sum grows like `\(\sqrt{d_k}\)`{=latex} | 11 |
+| The score grid | `\(n \times n\)`{=latex}, one entry per pair of positions | 11 |
+| Attention cost | `\(O(n^2 d)\)`{=latex} — double the tokens, four times the work | 11 |
+| What a row of weights is | Positive, adds to exactly 1, one number per visible position | 11 |
+| Why positional encoding exists | Attention's output is a sum, so it is blind to the order of its inputs | 11 |

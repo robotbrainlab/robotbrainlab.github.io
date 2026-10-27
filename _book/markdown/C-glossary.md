@@ -8,9 +8,13 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Accountability** | Somebody who can be asked to answer for a decision, and who bears a consequence for it. A property of people and organisations, never of a component | 3 |
 | **Agent** | A system in which the model decides what to do next, repeatedly, rather than your code deciding the sequence | 4 |
 | **Approval point** | A step the loop cannot pass without a person, enforced in your code rather than requested in the instructions | 4 |
+| **Attention** | The step in which each position takes a weighted blend of information from the others, in amounts computed from the content rather than fixed in advance | 11 |
+| **Attention head** | One complete set of query, key and value matrices and the weights they produce. A layer runs several in parallel over slices of the width, and a final matrix mixes their outputs | 11 |
+| **Attention weights** | One row of the grid after scaling, masking and softmax: positive numbers adding to 1, saying how much of each position to take | 11 |
 | **Autoregressive** | Producing output one token at a time, with each token appended to the input before the next pass | 9 |
 | **Big-O** | How a cost grows as an input grows, with constants and smaller terms deliberately discarded. Not a measurement of time | 8 |
 | **Byte-pair encoding** | Building a vocabulary by starting from the 256 single bytes and repeatedly merging the commonest adjacent pair in a corpus until the vocabulary is the size wanted. Starting from bytes is what makes any text at all representable | 10 |
+| **Causal mask** | Setting every score for a later position to minus infinity before softmax, so it gets exactly zero weight. It makes a position's output depend only on what precedes it, so the arithmetic is the same whether or not the rest of the sentence exists | 11 |
 | **Check** | Anything that verifies the output before it is used, from a required shape through to a second model's opinion | 2 |
 | **Compound system** | A system of several parts with the model as one of them, rather than as the whole product | 2 |
 | **Compounding error** | Two things at once across a run: each step's chance of being right multiplies against the others, so a high per-step figure becomes a low whole-run one; and a wrong step's result is carried into the next step as though it were true | 4 |
@@ -32,6 +36,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Input tokens** | Everything you send on a call — instructions, attached material and the request. Countable exactly before you send | 10 |
 | **Interview depth** | Knowing something well enough to give the mechanism, the trade-off, and how you would check it, in about a minute of speech. Not exhaustive, and more than a summary | 7 |
 | **Irreversible action** | Something a tool does that cannot be undone once it has happened — a refund, a message, a deletion. The reason a tool's reach is decided before it is offered | 3 |
+| **Key** | The vector saying what a position offers to others, made with `\(W_K\)`{=latex}. Scored against every query | 11 |
 | **Lasting principle** | A reason for doing something, or a shape that does not move, which outlives the technique it was first attached to. It stops being true only if the reason itself is wrong | 6 |
 | **Latency** | The delay between sending a request and receiving the reply, felt as a wait before the first word and a pace after it | 1 |
 | **Layer** | A block of arithmetic taking one vector per position and returning one per position, same width in as out. Every layer has the same shape and its own numbers | 9 |
@@ -44,7 +49,9 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Output tokens** | Everything that comes back. Priced several times higher than input, one forward pass each, and not knowable in advance | 10 |
 | **Parameter** | One number inside the model, set by training and unchanged by inference. The count is what "a 7B model" reports | 9 |
 | **People** | The reviewers and approvers who handle the consequential cases and carry responsibility for them | 2 |
+| **Positional encoding** | How a token's position is put into the arithmetic, since the attention formula carries no notion of order. Added to the embedding before the stack, or applied as a rotation to queries and keys, or added to the scores themselves | 11 |
 | **Practitioner report** | A survey or a set of accounts of what people say they do. It is a practitioner report however it was published, and it supports what people *do* far better than whether it works | 6 |
+| **Query** | The vector saying what a position is looking for, made by multiplying its vector by `\(W_Q\)`{=latex} | 11 |
 | **Retrieval** | Searching your own collection for the passages that bear on a request, so they can be put into the context | 2 |
 | **Rubber-stamping** | Approval given without real attention, usually because the volume is too high for any. It costs what review costs and delivers none of its value | 3 |
 | **Softmax** | Turns a list of scores into positive numbers that sum to 1, preserving their order and exaggerating the gaps between them | 8 |
@@ -56,6 +63,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Tool** | An action the model may ask for. The model proposes it; your code decides whether to run it | 2 |
 | **Training** | The one-time process that produced the model's numbers. Not something you do on a request | 1 |
 | **Training cut-off** | The point in time after which no text reached the model's training. It knows nothing later, and cannot tell that it does not | 1 |
+| **Value** | The vector a position hands over when it is attended to, made with `\(W_V\)`{=latex}. What the weights are spent on | 11 |
 | **Vector** | An ordered list of numbers. Two vectors can be compared only if they have the same number of slots | 8 |
 | **Vocabulary** | The fixed, numbered list of every piece of text a model can read or produce. Built once, before training, and fixed while you use the model | 9 |
 | **Width** | The number of slots in the vectors moving from layer to layer, the same all the way through. Written `\(d\)`{=latex} in formulas | 9 |
