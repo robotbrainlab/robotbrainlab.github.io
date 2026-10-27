@@ -58,7 +58,8 @@ on them.
 
 **The pieces are not words.** They are usually fragments — part of a word, a word with its
 leading space, a punctuation mark. This is why asking a model to count the letters in a word
-asks about something the word was not divided into.
+asks about something the piece does not carry: a piece arrives as a seat number, and a seat
+number is not spelled. Chapter 10 is where that is worked out properly.
 
 **Every token is just an index.** The number is a seat number, not a quantity: nothing in
 the model treats token 1 as one more than token 0. It is used to find a row and for nothing

@@ -65,6 +65,43 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**24. I wrote a lab step explaining a bug in a program I had not run, and the bug was not
+there.** Chapter 10's lab builds a byte-pair vocabulary and then hands the reader a program to
+check their hand arithmetic against. Steps 8 and 9 of the first draft said the program had a
+bug — that keying its dictionary by the tuple of symbols makes two words collide and
+overwrite each other — then explained the collision in a paragraph, told the reader to count
+the printed lines and find three instead of five, quoted the wrong output, and set a step
+asking them to fix it.
+
+**None of it was true.** All five words reduce to distinct symbol tuples at every step, so
+nothing collides and the program prints five correct lines. I had reasoned about the data
+structure, found a plausible failure, written it up with its symptom and its fix, and never
+run the file. The chapter was two sections from a sentence telling the reader to have the
+model write code rather than trust it to count.
+
+What makes this its own entry rather than another instance of entry 22 is the *shape* of the
+invention. Entry 22 was arithmetic invented while writing, after the verification step. This
+was a **causal story** — a defect, its symptom, and its remedy — which is far more convincing
+than a wrong number and has no gate behind it at all. `verify-arithmetic.py` cannot read it:
+there is no equation. The completeness review might not have caught it either, since the
+explanation is internally coherent and a reviewer who did not run the program would have no
+reason to doubt it.
+
+**The rule: a claim about what a program does is a claim to be run, not reasoned.** Every
+output block in that lab is now copied from a real run, and the two invented steps were
+replaced with two experiments that were actually performed — changing the tie-break, which
+turns merge 5 from `er` into `runn`, and raising one word's frequency, which makes an
+unrelated word cost four tokens instead of three. Both are better lab steps than the bug
+story was, because both teach something true about the procedure rather than something true
+about dictionaries.
+
+*And the related near-miss in the same chapter.* The chapter's answer key converted 200 words
+to "150 tokens" using the chapter's own rule of thumb upside down — it is 267. The arithmetic
+gate passed it, correctly, because the number sits in prose rather than in a maths span.
+**The gate reads equations; a crib sheet is not an equation.** Numbers written as English
+prose in a Summary or an answer key are outside every gate this book has, and the review is
+the only thing that reads them.
+
 **23. The same chapter-length miscount, three times, under a warning against it.** A
 chapter's printed length was read by subtracting folios by hand, and the pages counted into
 it were the `PART II`, `PART III`, `PART IV` and `APPENDIX A` opener pages that sit

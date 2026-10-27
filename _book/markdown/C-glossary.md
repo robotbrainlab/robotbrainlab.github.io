@@ -10,6 +10,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Approval point** | A step the loop cannot pass without a person, enforced in your code rather than requested in the instructions | 4 |
 | **Autoregressive** | Producing output one token at a time, with each token appended to the input before the next pass | 9 |
 | **Big-O** | How a cost grows as an input grows, with constants and smaller terms deliberately discarded. Not a measurement of time | 8 |
+| **Byte-pair encoding** | Building a vocabulary by starting from the 256 single bytes and repeatedly merging the commonest adjacent pair in a corpus until the vocabulary is the size wanted. Starting from bytes is what makes any text at all representable | 10 |
 | **Check** | Anything that verifies the output before it is used, from a required shape through to a second model's opinion | 2 |
 | **Compound system** | A system of several parts with the model as one of them, rather than as the whole product | 2 |
 | **Compounding error** | Two things at once across a run: each step's chance of being right multiplies against the others, so a high per-step figure becomes a low whole-run one; and a wrong step's result is carried into the next step as though it were true | 4 |
@@ -28,6 +29,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Forward pass** | One journey through the model — lookup, the stack once, one distribution out. It produces exactly one distribution | 9 |
 | **Foundation model** | A model trained once on general material, then used for many tasks it was not specifically built for | 1 |
 | **Inference** | Running a finished model to get a reply. This is what "using a model" means | 1 |
+| **Input tokens** | Everything you send on a call — instructions, attached material and the request. Countable exactly before you send | 10 |
 | **Interview depth** | Knowing something well enough to give the mechanism, the trade-off, and how you would check it, in about a minute of speech. Not exhaustive, and more than a summary | 7 |
 | **Irreversible action** | Something a tool does that cannot be undone once it has happened — a refund, a message, a deletion. The reason a tool's reach is decided before it is offered | 3 |
 | **Lasting principle** | A reason for doing something, or a shape that does not move, which outlives the technique it was first attached to. It stops being true only if the reason itself is wrong | 6 |
@@ -36,8 +38,10 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Length** | What a ruler would measure if the slots were coordinates: square every slot, add them, take the square root | 8 |
 | **Logarithm** | The inverse of raising `\(e\)`{=latex} to a power. It turns multiplication into addition, which is why it appears wherever many probabilities are combined | 8 |
 | **Matrix** | A grid of numbers, read as rows or as columns depending on what you are doing | 8 |
+| **Merge list** | The merges, in the order they were made. Kept with the model and replayed in that order to tokenise any later text | 10 |
 | **Model** | A service that takes text and returns generated text, charged by the amount of text | 1 |
 | **Next-token distribution** | One probability for every entry in the vocabulary, adding to 1, saying how likely each is to come next. The entire output of one call | 9 |
+| **Output tokens** | Everything that comes back. Priced several times higher than input, one forward pass each, and not knowable in advance | 10 |
 | **Parameter** | One number inside the model, set by training and unchanged by inference. The count is what "a 7B model" reports | 9 |
 | **People** | The reviewers and approvers who handle the consequential cases and carry responsibility for them | 2 |
 | **Practitioner report** | A survey or a set of accounts of what people say they do. It is a practitioner report however it was published, and it supports what people *do* far better than whether it works | 6 |
@@ -46,6 +50,9 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Softmax** | Turns a list of scores into positive numbers that sum to 1, preserving their order and exaggerating the gaps between them | 8 |
 | **Step** | One pass through the loop: the model decides, something runs, the result comes back | 4 |
 | **Stopping condition** | The set of rules that end a run — the model finishing, a step limit, or your code refusing | 4 |
+| **Subword** | A token that is part of a word rather than a whole one. What makes it possible to represent a word the vocabulary has never seen | 10 |
+| **Token** | One entry in a model's vocabulary — one piece text is cut into. Beyond the single bytes, which are always there, which pieces earned an entry is a matter of frequency in the corpus the vocabulary was built from — not of meaning or length | 10 |
+| **Tokeniser** | The program that cuts text into tokens and maps them to indexes, using one model's vocabulary and merge list. A different model's tokeniser gives a different count | 10 |
 | **Tool** | An action the model may ask for. The model proposes it; your code decides whether to run it | 2 |
 | **Training** | The one-time process that produced the model's numbers. Not something you do on a request | 1 |
 | **Training cut-off** | The point in time after which no text reached the model's training. It knows nothing later, and cannot tell that it does not | 1 |

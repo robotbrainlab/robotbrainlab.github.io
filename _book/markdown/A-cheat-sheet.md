@@ -32,3 +32,10 @@ written from memory.
 | What one forward pass yields | Exactly one next-token distribution | 9 |
 | Passes for a reply | One per token produced, each over an input one token longer | 9 |
 | The three shape numbers | Vocabulary, width, depth | 9 |
+| Rule of thumb, English prose | 1 token ≈ 4 characters ≈ ¾ of a word; 1,000 tokens ≈ 750 words | 10 |
+| What a token really measures | Frequency in the corpus the vocabulary was built from, not meaning or length | 10 |
+| The merge step | Merge the commonest adjacent pair; recount; repeat | 10 |
+| Why a word is one token | It was common enough for a merge to be spent on it | 10 |
+| Which half is dear | Output, at several times input, and one forward pass per token | 10 |
+| What a token count is a fact about | One particular model. A different vocabulary gives a different count | 10 |
+| The worst case | One token per byte — the most byte-pair encoding can ever charge you | 10 |
