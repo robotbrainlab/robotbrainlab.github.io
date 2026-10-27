@@ -46,3 +46,9 @@ written from memory.
 | Attention cost | `\(O(n^2 d)\)`{=latex} — double the tokens, four times the work | 11 |
 | What a row of weights is | Positive, adds to exactly 1, one number per visible position | 11 |
 | Why positional encoding exists | Attention's output is a sum, so it is blind to the order of its inputs | 11 |
+| What a layer does | `\(x \leftarrow x + \mathrm{attention}(x)\)`{=latex}, then `\(x \leftarrow x + \mathrm{feedforward}(x)\)`{=latex} | 12 |
+| Attention block parameters | `\(4d^2\)`{=latex} — four matrices of `\(d \times d\)`{=latex} | 12 |
+| Feed-forward block parameters | `\(2 \times d \times d_{ff}\)`{=latex}, with the middle width `\(d_{ff}\)`{=latex} between about `\(2.5d\)`{=latex} and `\(4d\)`{=latex} | 12 |
+| Which half is bigger | Feed-forward, at roughly 57 per cent of a layer | 12 |
+| Where the parameters are | In the layers — about nine in ten, at a common shape | 12 |
+| Matrices compose | `\(W_2(W_1 x) = (W_2 W_1)x\)`{=latex}, which is why a block without its activation is one matrix | 12 |

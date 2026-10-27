@@ -65,6 +65,41 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**26. A true fact, used to support a claim it does not support.** Chapter 12 explains why the
+feed-forward block has an activation in it, and reached for the standard argument: a matrix
+multiplication followed by another matrix multiplication is a single matrix multiplication, so
+without a non-linear step the stack would collapse into one matrix.
+
+The fact is true. `\(W_2(W_1 x) = (W_2 W_1)x\)`{=latex}, always. **The conclusion does not
+follow**, because attention is not a matrix multiplication. Softmax is in the middle of it. A
+stack with every feed-forward activation removed is still not one matrix, and the book had
+already proved it two chapters earlier without noticing: double every input vector in chapter
+11's worked example and the output does not double. It goes from
+`\((0.216, 3.378, 1.879, 1.013)\)`{=latex} to `\((0.001, 7.996, 3.999, 2.000)\)`{=latex},
+because the weights saturate.
+
+The correct claim is narrower and still does the teaching work: without the activation **this
+block's** two matrices are one matrix, and no condition can be expressed in it.
+
+**Why this is its own class.** Every gate in this project reads for wrongness in the
+*ingredients*. `verify-arithmetic.py` checks that printed equations hold — and this one held.
+`verify-absolutes.py` lists absolutes — and "the activation is what stops the stack collapsing"
+is a causal claim rather than an absolute, so it did not appear. `verify-boundary.py` passed it
+because nothing in it is theory. **A valid fact wired to an invalid conclusion is invisible to
+every check that reads the parts rather than the join**, and the only thing that found it was a
+reviewer told to verify claims in Python rather than read them.
+
+The practice that follows: **when a chapter uses a fact to justify a design, state what the
+fact is a fact *about*, and check that the thing being justified is the same thing.** Here the
+fact is about a sequence of matrix multiplications; the thing being justified was a stack that
+is not one. Writing "this block's two matrices" instead of "the stack" is the whole fix, and it
+is the kind of narrowing that looks like pedantry until somebody asks the follow-up question.
+
+*And the version of this the same chapter also shipped:* "the one step in a model that is not a
+matrix multiplication", of the activation. Chapter 11 prints a softmax and a division; chapter
+9 prints another softmax. Same shape — a claim about *a model* made from a fact about *a
+block*.
+
 **25. A demonstration that works only under a condition the chapter never stated — and the
 chapter handed it to the reader as an interview answer.** Chapter 11 proves that attention is
 blind to word order by swapping two tokens and showing the output vector is unchanged. The
