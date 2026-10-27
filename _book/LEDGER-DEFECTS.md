@@ -65,6 +65,41 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**21. An acceptance test written after the thing it tests is not a test.** `TOC.md` said from
+the start that Appendix B's hundred questions are written **in week one**, from the contents,
+as the standard every chapter is then measured against. That did not happen. The bank was
+written on 27 October, four days after Part I was finished, by somebody who had just read all
+seven chapters closely.
+
+The result passed — twelve of thirteen Part I questions answerable — and the pass is close to
+worthless. A review pass checking the bank against the chapters found that **five of the
+thirteen land near a review question the chapter already asks**, four of them almost
+word for word:
+
+| Bank | The chapter's own review question |
+|---|---|
+| 9 | ch 4: "Each step of your agent is right 90% of the time. Your task needs ten steps…" |
+| 11 | ch 5: "A user reports a wrong answer. Name three different parts that could have caused it…" |
+| 12 (before replacement) | ch 6: "A colleague says 'everyone re-orders their search results now.'…" |
+| 13 | ch 6: "A provider's announcement says their new model is 30% better at coding…" |
+
+None of those phrasings is in `TOC.md`. They came from the chapters. **A question
+reverse-engineered from an answer tests nothing**, and a suite of them produces a confident
+green that means only that the writer could remember what they wrote.
+
+What was done: the bank's header now says plainly that questions 1 to 13 are the exception and
+names the five, the worst lift was replaced with a question covering a `TOC.md` item nothing
+tested (what to memorise against what to look up), and the one genuine finding was acted on —
+question 4 asks for each part's cost, which chapter 2 is forbidden to teach, so its key became
+*2–3* rather than widening chapter 2 past its ownership.
+
+**The general rule, which cost Part I its clean pass: a test must be written before, or by
+somebody who has not seen, the thing it tests.** Where neither is possible, the test's own
+output has to carry the caveat, or a later reader will take a weak pass for a strong one. Two
+places in this project already get this right and are worth copying: a chapter's
+fix-verification pass is briefed with the findings and *not* the writer's reasoning, and every
+gate here was proved by breaking something it should catch rather than by watching it pass.
+
 **20. A reading lab cannot ship its data, and `BOOK-GUIDE.md` §9 still applies to it.**
 §9 says **"Expected results must hold for every reader"** and **"Reproducible from the PDF
 alone"**, and forbids a lab saying "your own documents" because *"an expected result that
