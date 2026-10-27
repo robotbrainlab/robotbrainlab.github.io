@@ -52,3 +52,9 @@ written from memory.
 | Which half is bigger | Feed-forward, at roughly 57 per cent of a layer | 12 |
 | Where the parameters are | In the layers — about nine in ten, at a common shape | 12 |
 | Matrices compose | `\(W_2(W_1 x) = (W_2 W_1)x\)`{=latex}, which is why a block without its activation is one matrix | 12 |
+| Temperature | `\(p_i = \exp(z_i/T) / \sum_j \exp(z_j/T)\)`{=latex} | 13 |
+| What temperature does | Below 1 sharpens, above 1 flattens, never reorders | 13 |
+| Temperature and greedy | No effect whatsoever — greedy takes the largest logit either way | 13 |
+| Top-p against top-k | Top-p keeps the smallest set reaching `\(p\)`{=latex}; top-k keeps a fixed count | 13 |
+| The order of operations | Temperature, then the cut, then draw | 13 |
+| Why `\(T=0\)`{=latex} is not a guarantee | Float order, batching, expert routing, provider change | 13 |

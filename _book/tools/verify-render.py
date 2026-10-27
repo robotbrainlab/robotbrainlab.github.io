@@ -41,13 +41,11 @@ HEAD  = re.compile(r"^#{1,6}\s")
 
 
 def check(path):
-    out, fence, rawfence = [], False, 0
+    out, fence = [], False
     lines = open(path, encoding="utf-8").read().split("\n")
     for i, ln in enumerate(lines):
         stripped = ln.lstrip()
         if stripped.startswith("```"):
-            if "{=latex}" in stripped:
-                rawfence += 1
             fence = not fence
             continue
         if fence:
@@ -85,8 +83,8 @@ def check(path):
             out.append((i + 1, f"text block line is {len(ln)} characters - the limit is 64",
                         ln[:60]))
 
-    if rawfence % 2:
-        out.append((0, "an odd number of ```{=latex} fences - one never closes", ""))
+    if fence:
+        out.append((0, "the file ends inside a code fence - one never closes", ""))
 
     fence, i = False, 0
     while i < len(lines):

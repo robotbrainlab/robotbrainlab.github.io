@@ -65,6 +65,34 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**27. A gate that could never have caught the thing it was checking for, and failed everything
+else instead.** `verify-render.py` carried a check for an unclosed display-maths fence. It
+counted lines beginning ` ```{=latex} ` and failed the file on an odd total.
+
+That can never work. A display fence opens with ` ```{=latex} ` and closes with a bare
+` ``` `, so the closing line was never counted — which means the count is the number of
+*display blocks in the chapter*, and the check was really asserting that every chapter has an
+even number of them. Chapters 8, 11 and 12 happened to have 4, 2 and 0. Chapter 13 has one
+display formula, and the gate failed it with "an odd number of ```{=latex} fences - one never
+closes" on a file whose fences were all closed.
+
+So the gate was simultaneously **blind** to the defect it was written for and **wrong** about
+correct input — the two failure modes this ledger treats as opposites, in one check. It had
+been in the suite since the beginning and had never fired, which is exactly what you would
+expect of a check that only fires on an odd count of a thing that is usually even.
+
+The fix is the obvious one and is what the loop already tracked: the scanner toggles a
+`fence` flag on every ` ``` `, so if that flag is still set when the file ends, a fence never
+closed. Proved by appending an unclosed ` ```text ` block and watching it fail, then removing
+it and watching it pass.
+
+**The practice.** `LEDGER-DEFECTS` entry 11 says a failing gate is a claim to be checked like
+any other, and the first question is whether the gate or the text is wrong. This is the fourth
+time the gate was wrong. Add to that question a second one: **when a gate has never fired, ask
+what input would make it fire, and check that input is possible.** A check whose trigger
+condition cannot occur is not protection; it is a line in a report that makes the suite look
+longer than it is.
+
 **26. A true fact, used to support a claim it does not support.** Chapter 12 explains why the
 feed-forward block has an activation in it, and reached for the standard argument: a matrix
 multiplication followed by another matrix multiplication is a single matrix multiplication, so
@@ -167,6 +195,22 @@ turns merge 5 from `er` into `runn`, and raising one word's frequency, which mak
 unrelated word cost four tokens instead of three. Both are better lab steps than the bug
 story was, because both teach something true about the procedure rather than something true
 about dictionaries.
+
+*Second instance, chapter 13, by somebody who had written this entry.* The lab's program prints
+a thousand sampled draws at three temperatures. I wrote the expected-output block from what the
+probabilities implied — plausible counts, plausible probabilities — and only then ran it. **Four
+of the twelve printed probabilities were wrong** (0.863 for 0.865, 0.456 for 0.455, and two
+more) and **every one of the twelve counts was wrong**, because a seeded draw is not something
+you can reason your way to. The prose around the block was wrong with it: it said the full stop
+"comes up about a tenth of the time" where the real run gives 109 in a thousand, and "twice in a
+thousand" where the real run gives 2 — right by luck.
+
+What is worth recording is how it happened the second time. The program was *written* correctly,
+the chapter's hand-worked steps were all verified in Python first, and the block was typed last,
+in the flow of writing the lab, as if it were prose rather than a result. **Output is not prose.
+It is a measurement, and it goes in the file only by being copied out of a terminal.** The rule
+from the first instance stands and now has a procedure: write the program, run it, paste the
+output, then write the sentences about the output — in that order, never the other.
 
 *And the related near-miss in the same chapter.* The chapter's answer key converted 200 words
 to "150 tokens" using the chapter's own rule of thumb upside down — it is 267. The arithmetic

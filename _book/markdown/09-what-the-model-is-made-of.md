@@ -28,8 +28,8 @@ Three stages, in order, every time.
 ```
 
 So the thing you get back from a single call is not a word. It is a **probability
-distribution**: one number for every piece of text the model is able to produce, saying how
-likely that one is to come next. Something outside the model then picks one. That pick, and
+distribution**: one number for every entry the model is able to produce, saying how likely
+that one is to come next. Something outside the model then picks one. That pick, and
 the settings that steer it, belong to Chapter 13.
 
 Everything else in this chapter is detail on those three stages, plus one fact that follows
@@ -41,8 +41,9 @@ distributions, so a hundred-token reply is a hundred passes.
 A model does not work on letters or on words. Before anything else happens, your text is cut
 into pieces, and each piece is replaced by its position in a fixed list.
 
-That fixed list is the model's **vocabulary**: every piece of text the model can read or
-produce, numbered. A vocabulary is built once, before training, and does not change while
+That fixed list is the model's **vocabulary**: every entry the model can read or produce,
+numbered. Nearly all of them are pieces of text, and a handful are not — Chapter 13 meets one
+of those. A vocabulary is built once, before training, and does not change while
 you are using the model.
 Each piece is called a token, and tokens are what you are billed for.
 
@@ -464,7 +465,7 @@ model's name reports.
 
 | Term | Meaning |
 |---|---|
-| **Vocabulary** | The fixed, numbered list of every piece of text a model can read or produce. Built once, before training, and fixed while you use the model |
+| **Vocabulary** | The fixed, numbered list of every entry a model can read or produce — nearly all pieces of text, and a few that are not. Built once, before training, and fixed while you use the model |
 | **Embedding table** | A matrix with one row per vocabulary entry. Looking a token up in it is how that token enters the model; the rows are called embeddings |
 | **Width** | The number of slots in the vectors moving from layer to layer, the same all the way through. Written `\(d\)`{=latex} in formulas |
 | **Layer** | A block of arithmetic taking one vector per position and returning one per position, same width in as out. Every layer has the same shape and its own numbers |
