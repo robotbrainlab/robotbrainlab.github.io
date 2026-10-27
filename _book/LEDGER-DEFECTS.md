@@ -65,6 +65,37 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**28. I read the tail of a tool's output and took a failure for a success.** `tools/patch.py`
+applies edits one at a time and prints a line for each — `ok` or `MISS` — then a summary and a
+non-zero exit if anything missed. Chapter 16's first round of fixes was twenty-one edits, so
+the output was twenty-one lines plus the summary, and I piped it through `tail -4`.
+
+The four lines I read were the four misses. I found them, fixed those four by hand, and moved
+on satisfied. **One of the `MISS` lines was in the part I did not read** — the chapter 6
+evidence-ladder sentence, which is the one finding in that round that was about the book's own
+discipline rather than about a fact. It stayed in the chapter, and in the built `.tex`, through
+a whole build and gate run, and was found only because the fix-verification pass was given the
+list of changes and checked each one against the file.
+
+**The tool did its job.** It printed the miss and it exited non-zero. The failure was entirely
+in how I read it — and the reason I piped to `tail` is that twenty-one `ok` lines are noise,
+which is the same economy that makes long gate output get skimmed (entry 18).
+
+Two practices follow, and the second is the one that generalises:
+
+1. **Never truncate the output of something that reports per-item success.** Grep it for the
+   failure token instead — `| grep -E 'MISS|did not apply'` — which is short whether there are
+   three edits or thirty.
+2. **An exit status is a claim and a summary line is a claim.** `patch.py` exits non-zero and
+   says "N edit(s) did not apply"; both were there and neither was read, because the eye went
+   to the last few lines. This is entry 17's lesson in a smaller room: *a count from a tool is
+   worthless unless you have checked what the tool said about whether it succeeded.*
+
+*And what caught it is worth noting too.* The fix-verification pass is briefed with the list of
+changes rather than with the chapter, which means it checks that each one landed rather than
+reading for sense. That is the only reason an unapplied edit is visible at all — a reviewer
+reading the chapter fresh would have found the original defect again and reported it as new.
+
 **27. A gate that could never have caught the thing it was checking for, and failed everything
 else instead.** `verify-render.py` carried a check for an unclosed display-maths fence. It
 counted lines beginning ` ```{=latex} ` and failed the file on an odd total.
