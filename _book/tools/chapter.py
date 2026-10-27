@@ -101,6 +101,29 @@ def main():
     # empty, so the stage could be -- and twice was -- skipped entirely.
     if re.search(r"^written:\s*$", text, re.M):
         sys.exit(f"REFUSED: `written:` is empty. Run `chapter.py written {stem}` first.")
+
+    # And refuse a FABRICATED `written:`. Checking only for emptiness let the field be filled
+    # in by hand, which happened on chapters 2, 3, 5, 6 and 8 - and three of those hand-written
+    # times were impossible: later than the `reviewed` stamp the driver had just written, or
+    # earlier than `begun`. A record's whole job is to be evidence, and the hash covers the
+    # chapter rather than the record, so nothing else catches an invented timestamp in range.
+    # LEDGER-DEFECTS entry 19.
+    stamps = {}
+    for field in ("begun", "written"):
+        m = re.search(rf"^{field}:\s*(\S+)", text, re.M)
+        if m:
+            try:
+                stamps[field] = datetime.fromisoformat(m.group(1))
+            except ValueError:
+                sys.exit(f"REFUSED: `{field}:` is not an ISO timestamp: {m.group(1)!r}")
+    if "begun" in stamps and "written" in stamps:
+        if stamps["written"] < stamps["begun"]:
+            sys.exit(f"REFUSED: `written:` ({stamps['written']}) is BEFORE `begun:` "
+                     f"({stamps['begun']}). That did not happen. Run "
+                     f"`chapter.py written {stem}` and let the clock write it.")
+        if stamps["written"] > datetime.now(stamps["written"].tzinfo):
+            sys.exit(f"REFUSED: `written:` ({stamps['written']}) is in the future. "
+                     f"Run `chapter.py written {stem}`.")
     miss = unticked(text, 2)
     if miss:
         sys.exit("REFUSED: unticked after writing:\n  - " + "\n  - ".join(miss))

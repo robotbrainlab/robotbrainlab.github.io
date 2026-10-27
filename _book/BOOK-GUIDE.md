@@ -451,6 +451,8 @@ bash tools/check-all.sh          # must end ALL GATES PASS
 | `verify-inputs.py` | Terms built on that no earlier chapter gave the reader | A chapter demonstrated its rule on two things the book had never printed |
 | `verify-render.py` check 8 | A `text` block line wider than 64 characters | §8 has said 64 since the start and nothing enforced it. Chapters 1 and 4 had both drifted past |
 | `verify-outline.py` | The PDF outline: front matter present, nothing orphaned, sub-parts under their part and chapters under their sub-part | The outline was wrong three times running and the reader found all three. Every other gate reads Markdown; none of them opens the PDF |
+| `verify-arithmetic.py` | Every printed equation, evaluated. Chains too, so a denominator must equal the product above it | Chapter 8 shipped six arithmetic errors, three of them equations that simply do not hold, written by somebody who had checked the body's numbers and never run the lab's. A machine should find those |
+| `glossary.py --check` · `cheatsheet.py --check` | Appendices C and A are generated from the Key Terms and Worth Memorising tables, and go stale the moment a chapter changes | Writing them at the end means writing them from memory |
 
 **Three rules about the gates themselves**, all of them paid for:
 

@@ -65,6 +65,42 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**22. "I verified every number" meant the numbers I wrote first.** Chapter 8 is the
+mathematics chapter, and its whole argument is that you should substitute small numbers and
+check by hand. Before writing a word of it I ran every figure through Python and said so, to
+the reader and in this repository. The completeness review then found **six arithmetic
+errors**, and a gate written afterwards found a seventh the reviewer had missed.
+
+What actually happened is worth being precise about, because the failure is not carelessness:
+
+- The numbers in the **body** went through Python before writing. Those were all correct.
+- The **lab's** vectors were invented *while* writing, after the verification step, and never
+  checked. `v = (1, 0, 4, 2)` has squares summing to **21**, and step 2 asserted that both lab
+  vectors had length `\(\sqrt{14}\)`. Steps 3 and 4 then printed cosines that followed from
+  the false premise. **Three expected results in a row, in a lab whose point is checking your
+  own arithmetic.**
+- Three more were a subtler class: `3.742 x 4.243 = 15.875` prints the product of the
+  *unrounded* lengths, not of the two figures on the page. Same for `37.42 x 4.243 = 158.75`
+  and `7.389 + 2.718 + 1.105 = 11.213`. Each is off in the last digit, each is invisible on a
+  read-through, and each tells a reader doing exactly what the chapter asked that their own
+  correct arithmetic disagrees with the book.
+
+**The rule: verification is a property of the file, not of the session.** Numbers checked
+before the writing began say nothing about numbers invented during it. So the check has to run
+**against the finished file**, which means it has to be a gate — and `tools/verify-arithmetic.py`
+now is one. It parses every printed equation in a `text` block or a maths span, evaluates the
+chain, and compares at the precision the answer was printed to. It would have caught four of
+the seven on its own, including the one the human reviewer missed
+(`7.389 / 2.718 = 2.718`, which is 2.719 when you divide the rounded figures).
+
+*And the gate itself shipped blind for twenty minutes.* Its first version pre-filtered each
+block line against a character class that did not contain `=`, so **every equation in a text
+block failed the filter and only maths spans were ever checked** — it printed `CLEAN` over 35
+equations while ignoring the 29 that mattered. Proved by injecting a wrong total and watching
+nothing happen. That is `LEDGER-DEFECTS` entry 18's exact shape, committed by somebody who had
+written entry 18. **Prove a new gate by breaking something it should catch, every time, before
+believing a single CLEAN it prints.**
+
 **21. An acceptance test written after the thing it tests is not a test.** `TOC.md` said from
 the start that Appendix B's hundred questions are written **in week one**, from the contents,
 as the standard every chapter is then measured against. That did not happen. The bank was
@@ -161,10 +197,21 @@ and the record would then assert a time that never happened, in the one file who
 job is to be evidence. The hash does not protect this, because the hash covers the chapter,
 not the record.
 
+*Fourth instance, chapter 8, and it is now fixed mechanically.* The hand-written stamp was
+09:40 when `begun` said 21:41 — nine hours of a day that had not happened. The gate caught the
+ordering, as it had twice before, and the pattern was by then unmistakable: **I do not know
+what time it is, so every timestamp I write by hand is a guess, and a guess that lands inside
+the range passes silently.** Checking only for emptiness was never enough.
+
+`tools/chapter.py reviewed` now **refuses a `written:` stamp that is before `begun:` or in the
+future**, and says to run the driver and let the clock write it. Proved against the fabricated
+value already in chapter 8's record, which it rejected with both timestamps quoted; the field
+was then cleared and `chapter.py written` stamped the real time.
+
 **Run the stage when you reach it.** The driver exists so the clock, not memory, writes the
-time. Where a stage genuinely has to be reconstructed, say so in the field itself — both
-chapter 5's and chapter 6's now carry *"approximate, reconstructed"* and the reason — so
-the record never claims a precision it does not have.
+time. Where a stage genuinely has to be reconstructed, say so in the field itself — chapters 5
+and 6 carry *"approximate, reconstructed"* and the reason — so the record never claims a
+precision it does not have.
 
 **18. A gate can be structurally blind to a whole class of prose.** Chapter 6 used
 *reranker* and *context window* in plain sentences. Both appear **zero** times in chapters
