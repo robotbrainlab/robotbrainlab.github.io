@@ -31,12 +31,15 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Case** | One input plus whatever marks the answer right or wrong. The unit the statistics count — and they count rows, so forty rephrasings of one question are worth nearer one case than forty | 20 |
 | **Causal mask** | Setting every score for a later position to minus infinity before softmax, so it gets exactly zero weight. It makes a position's output depend only on itself and what precedes it, so the arithmetic is the same whether or not the rest of the sentence exists | 11 |
 | **Check** | Anything that verifies the output before it is used, from a required shape through to a second model's opinion | 2 |
+| **Chunk** | One piece of a split document: the unit that is embedded, stored in the index and returned by retrieval | 27 |
+| **Chunk size** | How much text a chunk holds. A floor on it is set by taking the *shortest* passage that answers each of your questions and keeping the longest of those | 27 |
 | **Compound system** | A system of several parts with the model as one of them, rather than as the whole product | 2 |
 | **Compounding error** | Two things at once across a run: each step's chance of being right multiplies against the others, so a high per-step figure becomes a low whole-run one; and a wrong step's result is carried into the next step as though it were true | 4 |
 | **Compute-bound** | A step whose speed is set by the arithmetic it has to do rather than by how fast its numbers arrive. Prefill is; a large enough batch becomes so | 15 |
 | **Concept owner** | The single chapter that teaches a given concept. Every other chapter refers to it by number rather than re-teaching it, so the reader never meets three partial explanations of one thing | 7 |
 | **Confidence interval** | The range a measurement would fall in most of the time if you repeated it. Here, the 2.5th to 97.5th percentiles of the resampled scores | 20 |
 | **Constrained decoding** | Restricting each token choice to what the format allows, by editing the scores before the pick. The model is unchanged | 22 |
+| **Content stream** | A PDF page's list of drawing instructions, each placing a string at a position. Its order is the order the marks were made, not a reading order | 27 |
 | **Context** | Everything sent to the model on one call: the instructions, any added material, and the request | 2 |
 | **Context window** | The maximum number of tokens a model will accept at once. A cost limit rather than a memory, counting the reply as well as the request. The whole conversation is re-sent every call, and something is dropped — or the call refused — when it fills | 16 |
 | **Cosine similarity** | The dot product divided by both lengths, which removes magnitude and keeps direction. Always between −1 and 1 | 8 |
@@ -90,6 +93,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Lasting principle** | A reason for doing something, or a shape that does not move, which outlives the technique it was first attached to. It stops being true only if the reason itself is wrong | 6 |
 | **Latency** | The delay between sending a request and receiving the reply, felt as a wait before the first word and a pace after it | 1 |
 | **Layer** | A block of arithmetic taking one vector per position and returning one per position, same width in as out. Every layer has the same shape and its own numbers | 9 |
+| **Layout analysis** | Inferring a page's structure — columns, tables, headings — from where its marks sit. Always approximate; the chapter's version turns on one threshold fitted to one page | 27 |
 | **Length** | What a ruler would measure if the slots were coordinates: square every slot, add them, take the square root | 8 |
 | **Lexical retrieval** | Scoring a document by the query terms it contains. Not a filter: every document gets a number and the list is sorted | 26 |
 | **Logarithm** | The inverse of raising `\(e\)`{=latex} to a power. It turns multiplication into addition, which is why it appears wherever many probabilities are combined | 8 |
@@ -107,12 +111,16 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Normalised discounted cumulative gain** | A DCG divided by the DCG of the best possible ranking of the same documents, making it comparable across queries | 26 |
 | **Numerical stability** | How quantities behave through long chains of arithmetic, and what keeps them in a usable range. The subject behind Chapter 12's one sentence on normalisation. Not taught in this book | 17 |
 | **Objective design** | Why one expression rather than another is the right thing for a model to minimise. The question Chapter 14 states its preference objective without answering. Not taught in this book | 17 |
+| **OCR** | Recognising characters in an image, for pages that have no text layer at all. Imperfect, and a separate step before parsing can begin | 27 |
 | **Optimisation theory** | The study of when a procedure like the update rule converges, to what, and how fast. Not taught in this book | 17 |
 | **Optimiser design** | Choosing and adapting the step size and the form of the update. Not taught in this book | 17 |
 | **Output format** | The shape the answer must take, stated rather than hoped for. Part of the specification | 18 |
 | **Output tokens** | Everything that comes back. Priced several times higher than input, one forward pass each, and not knowable in advance | 10 |
+| **Overlap** | Starting each chunk a little before the last one ended, so a passage cut by one boundary survives whole in a neighbour. Costs storage and returns near-duplicates | 27 |
+| **Page furniture** | Headers, footers, page numbers and watermarks: text on the page that is not part of the document | 27 |
 | **Paired comparison** | Running both versions on the same cases and keeping the results together, so the part of case-to-case variation the two versions share cancels when you subtract | 20 |
 | **Parameter** | One number inside the model, set by training and unchanged by inference. The count is what "a 7B model" reports | 9 |
+| **Parsing** | Turning a file into text a program can work on. For a document format this means reconstructing something the file does not record | 27 |
 | **People** | The reviewers and approvers who handle the consequential cases and carry responsibility for them | 2 |
 | **Perplexity** | The exponential of the cross-entropy. Reads as the number of equally likely options the model is effectively choosing between; a uniform choice among `\(V\)`{=latex} options has perplexity `\(V\)`{=latex} | 14 |
 | **Positional encoding** | How a token's position is put into the arithmetic, since the attention formula carries no notion of order. Added to the embedding before the stack, or applied as a rotation to queries and keys, or added to the scores themselves | 11 |
@@ -123,6 +131,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Proposal** | What the model emits — tokens your code reads as a request to run something. Nothing has happened yet | 23 |
 | **Quantisation** | Storing each parameter in fewer bits. Halving the bits halves the memory and roughly halves the time spent reading, at a cost in precision that has to be measured | 15 |
 | **Query** | The vector saying what a position is looking for, made by multiplying its vector by `\(W_Q\)`{=latex} | 11 |
+| **Reading order** | The order a person reads a page in. A human fact about a layout, and not something a page description like PDF records — some formats do store an order, which is why the problem is format-specific | 27 |
 | **Recall@k** | The fraction of all relevant documents appearing in the top k. Blind to their order | 26 |
 | **Reciprocal rank** | One divided by the position of the first relevant result, for a single query | 26 |
 | **Reciprocal rank fusion** | Combining rankings by summing one over a constant plus each rank, using positions only and never the scores | 26 |

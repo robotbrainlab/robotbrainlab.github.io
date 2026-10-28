@@ -65,6 +65,37 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**45. I wrote a program to demonstrate a claim, and the program printed the counter-example.**
+Chapter 27's headline derivation was that *the set of questions your system can answer is
+bounded by what is whole inside some row*. I called it the most useful thing in the chapter, put
+it in six places and the generated cheat sheet, and had `index.py` print *"the question is
+unanswerable from this index"*.
+
+It is false, and the refutation was in the program's own output. The three size-60 rows **tile
+the document** — rejoin them and you have the original exactly — so rows 0 and 1 together
+contain the whole answer sentence. Return both and a reader has the answer. The chapter printed
+all three rows directly above the claim.
+
+Worse, I had handed the reader the mechanism too. Every row stores a `start` offset, which the
+chapter calls citation metadata — and an offset plus a document name is exactly how a real system
+fetches a retrieved chunk's neighbours. The refutation sat two paragraphs below the claim,
+described as a feature.
+
+**Entry 24 says write and run the program before any sentence about it. This is the next failure
+along: I checked that the program produced the output I expected, not that the output supported
+the claim I was drawing from it.** Those are different readings and only the first is automatic.
+The question to ask of a demonstration is not *did it print what I predicted* but *what else
+does this output show*, and in this case the answer was sitting in three lines of `repr`.
+
+The narrow claim survives and is better — no retrieval method can return a single *passage* that
+answers it, so bad cuts move the reassembly downstream rather than destroying information — and
+the program now prints the tiling check and the pair check itself, so it argues both sides.
+
+*And the fix overclaimed in turn*, which is entry 40 for the third chapter running: "bad cuts do
+not put the information beyond reach" is true only of cuts that tile, while this chapter's own
+method discards page furniture on purpose. A replacement claim is new prose. It gets its own
+reading, every time.
+
 **44. Two reviews per chapter was not enough for one whole class of defect, and ten closed
 chapters proved it.** The reader asked, on 28 Oct 2026, whether the attention paid to page
 counts had damaged the content. An audit said no — no record anywhere shows material cut or

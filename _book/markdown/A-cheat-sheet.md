@@ -151,3 +151,13 @@ written from memory.
 | Cross-encoder cost | One forward pass per document per query, so a million documents cost a million passes. Hence two stages | 26 |
 | What forces symmetry | Putting both sides through the *same function*, as chapter 24's dense retrieval does. Shared weights alone do not: one model given a `query:` or `passage:` marker is not symmetric | 26 |
 | What merely permits asymmetry | A two-tower bi-encoder and a cross-encoder are *free* to be asymmetric, not guaranteed to be | 26 |
+| Why parsing is the bottleneck | A derivation: every later stage reads the parser's output and none reconsults the file, so no later stage can restore information that output does not contain. Removing text that is there stays available | 27 |
+| What a page actually holds | Strings and positions. No sentence, no column, no reading order — those are reconstructed | 27 |
+| The three readings | Stream order is a bet on how the file was generated; sorting by position reads across columns; grouping by column needs a threshold fitted to the page | 27 |
+| What a chunk boundary decides | What shares one vector, what can be returned together, and which questions are answerable at all | 27 |
+| When overlap cannot help | When the chunk is smaller than the answer. 60-character chunks never held a 65-character answer at any overlap | 27 |
+| When overlap is the fix | When the chunk is big enough and the cut falls inside the answer | 27 |
+| The retrieval ceiling | A derivation: retrieval returns rows, so if no row holds a whole answer, no method, model or reranker can return a single passage that answers it | 27 |
+| What that ceiling does *not* say | Where the cuts tile the document, the information is still there across two rows, and the reassembly moves downstream to Chapter 28 rather than becoming impossible. A chunker that discards text is another matter | 27 |
+| The ten-minute check | Write five real questions, find the shortest passage answering each, make the chunk bigger than the longest | 27 |
+| The first diagnostic | Print the extracted text and read it against the page. Before anything downstream exists | 27 |

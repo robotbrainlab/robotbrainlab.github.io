@@ -23,7 +23,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 |---|---|---|---|
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
-| II · Use | 18–39 | 362 | **Drafting** — 9 of 22 done |
+| II · Use | 18–39 | 362 | **Drafting** — 10 of 22 done |
 | III · Apply | 40–50 | 190 | Not started |
 | IV · What Next | 51–57 | 136 | Not started |
 | Appendices | A–D | 83 | **A (cheat sheet, 131 items), B (100 questions) and C (glossary, 171 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
@@ -66,6 +66,7 @@ sub-part opener pages sitting after the last written chapter were counted into i
   24   297-309    13   14     93%
   25   310-323    14   12    117%
   26   324-353    30   28    107%
+  27   356-378    23   16    144%
 ```
 
 **Part I is complete: chapters 1–17, 197 printed pages against a 266-page estimate (74%).**
