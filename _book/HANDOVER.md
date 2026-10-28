@@ -114,8 +114,9 @@ Three chapters were over-counted that way; `LEDGER-DEFECTS.md` entry 23 has the 
 | `markdown/C-glossary.md` | Appendix C. **Generated** by `tools/glossary.py` from every chapter's Key Terms table | 115 terms, in the PDF |
 | `records/` | One record per chapter, ticked with evidence, hashed last | 18 of 57 |
 | `labs/` | The data every Part III lab runs on | **Empty — see section 4** |
-| `LEDGER-TAUGHT.md` | What each chapter taught, with "Do not" rows | 18 rows |
-| `LEDGER-DEFECTS.md` | What the gates cannot catch | 28 entries |
+| `LEDGER-TAUGHT.md` | What each chapter taught, with "Do not" rows | 32 rows |
+| `LEDGER-DEFECTS.md` | What the gates cannot catch | 57 entries |
+| `LEDGER-SHORTHAND.md` | What an interviewer calls each concept the book teaches, which chapter names the shorthand, which shorthands wait on an unwritten chapter, and which were checked and left out on purpose | Written 2026-10-29 |
 | `tools/` | The driver, the gate suite, the glossary generator, the build probe | Done |
 | `latex/` | The template, with five changes (section 5) | Builds clean |
 

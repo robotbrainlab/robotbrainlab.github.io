@@ -53,31 +53,33 @@ sub-part opener pages sitting after the last written chapter were counted into i
   11   114-131    18   24     75%
   12   132-144    13   16     81%
   13   145-157    13   14     93%
-  14   158-170    13   22     59%
-  15   171-182    12   20     60%
-  16   183-192    10   18     56%
-  17   193-200     8    8    100%
-  18   202-213    12   16     75%
-  19   214-232    19   20     95%
-  20   233-250    18   18    100%
-  21   251-265    15   14    107%
-  22   266-279    14   12    117%
-  23   281-296    16   16    100%
-  24   297-309    13   14     93%
-  25   310-323    14   12    117%
-  26   324-353    30   28    107%
-  27   356-378    23   16    144%
-  28   379-400    22   16    138%
-  29   401-420    20   14    143%
-  30   421-439    19   14    136%
-  31   440-463    24   18    133%
-  32   464-488    25   16    156%
-  33   489-514    26   16    162%
-  34   515-537    23   16    144%
+  14   158-171    14   22     64%
+  15   172-183    12   20     60%
+  16   184-194    11   18     61%
+  17   195-202     8    8    100%
+  18   204-215    12   16     75%
+  19   216-234    19   20     95%
+  20   235-253    19   18    106%
+  21   254-268    15   14    107%
+  22   269-283    15   12    125%
+  23   284-299    16   16    100%
+  24   300-312    13   14     93%
+  25   313-326    14   12    117%
+  26   327-356    30   28    107%
+  27   357-379    23   16    144%
+  28   380-401    22   16    138%
+  29   402-421    20   14    143%
+  30   422-440    19   14    136%
+  31   441-465    25   18    139%
+  32   466-490    25   16    156%
+  33   491-516    26   16    162%
+  34   517-539    23   16    144%
+  35   540-565    26   22    118%
 ```
 
-**Part I is complete: chapters 1–17, 197 printed pages against a 266-page estimate (74%).**
-Part II has begun: chapters 18 to 34 come to 338 pages, so 535 printed pages in all. Chapters 30
+**Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
+Part II has begun: chapters 18 to 35 come to 362 pages, so 561 printed pages of chapters, and
+581 with Appendices A and B as they stand. Chapters 30
 to 33 are the evaluation run of the part, and the first chapters since 17 whose material is a
 method rather than a mechanism. Their reviews find more per chapter than the mechanism chapters'
 did, and almost all of it is the same defect: a claim one notch wider than its demonstration. Chapter 26

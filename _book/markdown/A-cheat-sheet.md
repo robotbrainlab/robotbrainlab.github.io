@@ -226,3 +226,9 @@ written from memory.
 | When an agent is warranted | You cannot enumerate the paths **or the shape** — if the shape is one of the five you have a pattern, not an agent — **and** there is a cheap check. The second is a veto on letting a model choose outside a list your code wrote, not a reason for it | 34 |
 | What decides the approval point | Whether a wrong step can be undone — not whether to use an agent | 34 |
 | The order to try | One call, chain, router, parallelise, orchestrator, evaluator–optimiser, loop. An order of added machinery, not of freedom. Climb when the evaluation set fails | 34 |
+| Where a loop's context goes | Tool results — 91.5% of the worked run, against 2.6% instruction and 1.4% tool definitions | 35 |
+| The compaction trigger | Room left must be at least the largest single result: `\(\text{window} - p \times \text{window}/100 \ge \text{largest}\)`{=latex} | 35 |
+| Worked: trigger | 128,000-token window, 8,400-token largest result, so 93% — not 95% | 35 |
+| Up front against just in time | Up front only wins at 11 of 12 documents | 35 |
+| First into the must-keep list | The negative results — the cheapest line in it | 35 |
+| A note's two fields | Where it came from, and when it was written | 35 |

@@ -65,6 +65,63 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**57. A fix that cites another chapter to weaken a claim is the easiest kind to get wrong,
+and no gate reads a citation.** Chapter 35 over-claimed that a summary drops negative results
+"rather than an accident of this example", and the repair demoted it with "In Chapter 6's terms
+this is a mechanism argument and not a measured finding". Chapter 6 has no such category. Its
+ladder runs demonstration, one study, practitioner report, settled practice — and it keeps **a
+derivation** off the ladder altogether as the *strongest* kind of evidence there is: "When a
+claim can be derived, derive it." So the repair reached for chapter 6 to demote a claim, and
+named the one thing in chapter 6 that would have promoted it. The honest label was there in the
+same table: *demonstration — it worked, on an example chosen by the person showing you.* The
+same pass mis-cited chapter 4, crediting it with "the stopping condition belongs in your code"
+where chapter 4 says a loop needs **all three** of its stopping reasons and the first of them,
+the model saying it is done, is not in your code at all.
+
+Both survived the gate suite, `verify-boundary.py` and a completeness review, because a
+citation is the one claim a gate cannot evaluate: `citations.py` prints the cited chapter's
+`TOC.md` covers line beside the citation and stops there, deliberately. **A fix made by
+appealing to another chapter is not applied until that chapter has been re-read at the line,
+not recalled** — and the risk is highest when the appeal is being used to narrow something,
+because a hedge feels safe and is a claim like any other (entry 54).
+
+Three more of the same round's repairs failed for reasons no gate reaches. One inserted a verb
+without removing the old one, leaving "a later step that reads it will not has no reason to look
+for tickets" — grammar, which nothing checks. One renamed a noun and left its article, giving
+"an catalogue". One replaced a figure with a worse one: "of the order of sixty tokens" became
+"121 characters, so about thirty tokens", and 121 was derivable from nothing — the lines it
+pointed at are 200 characters, so the figure it replaced had been the closer of the two. **A
+patch applying cleanly is not a fix verifying.** Re-read the sentence, and re-derive the number
+from the source the sentence names.
+
+**56. No gate asks whether the book names a concept the way the field names it.** The book
+teaches retrieval-augmented generation across chapters 2 and 24 to 29 and 32, about 147 printed
+pages, and the string "RAG" appeared in no chapter, in `TOC.md`, in the glossary's 216 terms or
+in any of the 100 bank questions. The reader searched for it and found nothing. A
+word-boundary sweep over nineteen such shorthands found sixteen absent: RAG,
+retrieval-augmented, chain-of-thought, few-shot, zero-shot, prompt engineering, vector
+database, vector store, LLM-as-a-judge, function calling, agentic, evals, A/B test,
+transformer, SFT, KV cache. Every one of them has its concept taught, under a formal name
+instead — intermediate reasoning, supervised fine-tuning, key–value cache, evaluation set,
+paired comparison, judge, attention — and every gate passed, because a gate can check that a
+concept is present, inside the boundary, evidenced, rendered and indexed, and none of them can
+check that it is **findable under the name an interviewer will say**. This is not a new policy
+either: `BOOK-GUIDE.md` section 6 already states the preference objective as a formula
+*because* "interviewers ask what DPO is", and chapter 14 already names DPO and RLHF in the
+shape the fix uses. The rule existed for one term and was never swept.
+
+`verify-inputs.py` is the nearest thing to a defence and it points the other way: it fails a
+chapter for using field jargon the book has not given the reader, which is a reason not to
+write the shorthand rather than a reason to. It also could not see the names it polices —
+its escape hatch compared an upper-case entry in `JARGON` against lower-cased bold spans, so a
+chapter that *did* name "RAG" or the "KV cache" in bold was reported BARE anyway. One
+`term.lower()` fixes it, and nothing had ever reached that branch to find out.
+
+**The practice.** The chapter that owns a concept names the field's word for it once, where it
+explains the formal name, and `LEDGER-SHORTHAND.md` holds the list — what is named, what waits
+on an unwritten chapter, and what was checked and deliberately left out. A chapter is not
+finished until the shorthand for anything it owns is in it.
+
 **55. A program's printed sentence about a comparison it does not compute is not checked by
 running the program.** Chapter 33's `regress.py` printed "That set catches all 3 regressions on
 the next change, because version 2's breakages are in it now." The program had the data for
