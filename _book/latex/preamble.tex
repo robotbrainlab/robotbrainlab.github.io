@@ -415,13 +415,17 @@
 %    9.33658pt the moment chapter 5's two Key Terms opened a new letter group. The index
 %    paginates correctly on its own - proved by flooding book.ind with 120 entries, which
 %    gave 3 index pages and 0 overfull - so rigidity was the whole fault. Keep the shrink.
+%    The shrink went 3pt -> 4pt on 2026-10-28, when chapter 19 made the book 19 pages longer
+%    and the last index page landed 0.22693pt over. Same defect, same cure, one point more.
+%    A tolerance in the build gate was written first and thrown away: the box is real, it is
+%    the index, and it costs one point of glue to remove. Page count did not change.
 % 2. The FIRST group gets no space above it, because \addvspace there follows the index
 %    chapter heading, which is a box, so it is added rather than discarded.
 %
 % No `@` in the \newif names: this block sits outside \makeatletter.
 % No `@` in these names: this block is outside \makeatletter, so `@` is not a letter here.
 \newif\iftifirstidxletter \tifirstidxlettertrue
-\newcommand{\indexletter}[1]{\par\iftifirstidxletter\tifirstidxletterfalse\else\addvspace{9pt plus 3pt minus 3pt}\fi{\sffamily\bfseries\fontsize{10}{12}\selectfont #1}\par\nobreak\vspace{1pt}}
+\newcommand{\indexletter}[1]{\par\iftifirstidxletter\tifirstidxletterfalse\else\addvspace{9pt plus 3pt minus 4pt}\fi{\sffamily\bfseries\fontsize{10}{12}\selectfont #1}\par\nobreak\vspace{1pt}}
 \makeatletter
 \renewcommand{\@idxitem}{\par\hangindent 1.5em}
 \makeatother

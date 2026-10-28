@@ -65,6 +65,90 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**32. A tolerance is not a fix, and a cause you did not read out of the log is not a cause.**
+Chapter 19 made the book nineteen pages longer, and the last page of the index landed
+0.22693pt over the text height. I decided, without reading the log far enough to see which
+file the page belonged to, that it was a long table in the generated glossary. `\vfuzz` did not
+suppress the report, so I wrote `tools/overfull.py`: a gate that ignores an overfull `\vbox`
+under 1pt, proved against injected failures, wired into both build gates, and carrying a
+docstring that stated the glossary as the cause.
+
+**Every part of that was wrong except the arithmetic.** The log says
+`(./book.ind [256 … ]` immediately before the box: it is the **index**. `latex/preamble.tex`
+already carries ten lines about this exact defect from entry 17 — the index letter-group glue
+was once rigid, went overfull by 9.33658pt, and was given flexibility precisely so the index
+could absorb being slightly over a page. The shrink was 3pt. Making it 4pt removes the box,
+changes no page, and needed one character. The fix-verification pass found this by reading the
+log I had not read, and ran the control builds to prove it.
+
+So a gate had been loosened, for a chapter of mine, on a diagnosis I had invented, when the
+real fix was available and already written down in the file I was editing around.
+
+**How to apply.** Before touching a gate: read the log until you can name the page *and* the
+file the box is on, and say it out loud. Then grep the preamble and the ledger for the
+mechanism — if either already discusses it, the fix is almost certainly there and somebody has
+already paid for the reasoning. Changing a gate is the last resort and it needs a cause the log
+supports in words, not a threshold that makes the symptom go away. The giveaway here was that I
+could not state the cause without hedging, and I wrote the docstring anyway.
+
+---
+
+**31. A gate that always fails gates nothing.** `make check` runs `latex/tools/check.sh`, the
+documented pre-flight: page size, embedded fonts, overfull boxes, undefined references, text
+off the page. It also checked that the book was between 50 and 100 numbered pages, which is the
+figure that came with the template. The book passed 100 pages somewhere in Part I, so every run
+since has ended `PRE-FLIGHT FAILED` with every real check passing.
+
+Nobody read it, including me. The cost showed up in chapter 19: after the build-gate change
+above, `check-all.sh` and `make check` disagreed about whether the book built clean, and the
+fix-verification pass had to point that out, because the pre-flight's own verdict carried no
+information. The target is now 100–1400, against the roughly 1,040 pages `TOC.md` plans.
+
+**How to apply.** A gate that fails on something you have decided not to care about gets fixed
+or retired the same day. A standing failure trains you to skip the output, and skipping the
+output is worse than not having the gate — you keep the cost and lose the signal.
+
+---
+
+**30. The interview bank is the standard, and I read a range of it I remembered.** Chapter 19
+owns bank questions 39, 40, 41 **and 42**. I wrote the chapter against 39–41, because 39–41 is
+what my own working note said, and 42 — *"A multi-step pipeline fails half way. How do you
+resume it?"* — was never read. `TOC.md` row 19 promised the same thing in its own words,
+*"partial failure in a multi-step pipeline, and how to resume it"*, and the chapter shipped to
+review answering neither. It had a section on one job over many items and nothing at all on a
+pipeline of stages, which is a different problem with a different resume key.
+
+`verify-coverage.py` passed it, because the Covers list's words appear in the chapter. The
+completeness review found it in one grep of the bank.
+
+**How to apply.** The chapter's question list is produced by grepping
+`markdown/B-interview-bank.md` for the chapter number, every time, and the grep's result goes
+into the record's `sources:` field. Never a remembered range, and never a range copied from a
+plan. `BOOK-GUIDE.md` §15 says the bank is the standard rather than a summary; a standard you
+quote from memory is not one.
+
+---
+
+**29. The transformation was the experiment, and the transformation silently did nothing.**
+Checking chapter 19's claim about `f.flush()` meant running the resume program with the flush
+and without it, under `kill -9`. I wrote a script that read the listing out of the markdown and
+inserted `os.kill(os.getpid(), 9)` by string replacement. The replacement used the wrong
+indentation, matched nothing, and the script carried on.
+
+Both runs then printed `all done` and left ten lines on disk, and I was two seconds from
+reading that as *the flush makes no difference* — which is the opposite of the truth. Done
+properly: with the flush, ten lines; without it, **zero**.
+
+This is entry 28's shape pointed at a different tool. There the tool reported the miss and I
+did not read it; here the tool was mine and reported nothing at all.
+
+**How to apply.** When a string replacement, a patch or an injected line *is* the experiment,
+assert that it happened before you trust the result — `assert s.count(old) == 1`, or print the
+changed lines and look at them. An experiment whose setup can fail silently produces a number
+that means nothing, and it will be a plausible number.
+
+---
+
 **28. I read the tail of a tool's output and took a failure for a success.** `tools/patch.py`
 applies edits one at a time and prints a line for each — `ok` or `MISS` — then a summary and a
 non-zero exit if anything missed. Chapter 16's first round of fixes was twenty-one edits, so

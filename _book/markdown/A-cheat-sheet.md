@@ -81,3 +81,11 @@ written from memory.
 | Worked: ten turns | 14,250 input tokens against 3,000 for ten separate questions | 18 |
 | What never gets dropped | Your specification: the system message, and the example turns if that is where they live | 18 |
 | What to change per experiment | One block | 18 |
+| Backoff with jitter | `wait = random.uniform(0, min(cap, base * 2 ** attempt))` | 19 |
+| Attempts and waits | *n* attempts make *n* − 1 waits. Five attempts at base 0.5 is 7.5 s at worst | 19 |
+| How many at once | rate × duration — 120 a minute at 2 seconds each is 4. It bounds concurrency, not rate, so leave a margin | 19 |
+| Timeouts | Three: connect, read between chunks, total. Derive the **total** from the token cap | 19 |
+| Retryable | 429, 5xx, timeouts. **Not** a malformed request, a bad key, an over-length one, or a 429 from an exhausted quota | 19 |
+| What to stream | To a person, yes. One answer you must validate whole, no. Independent units, yes | 19 |
+| `asyncio.gather` | One failure loses every result unless you pass `return_exceptions=True` | 19 |
+| The resume file | One flushed line per item, or per `(item, stage)` for a pipeline. Keyed by input, holding the result | 19 |

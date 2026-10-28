@@ -12,7 +12,11 @@ set -uo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$HERE"
 PDF="${PDF:-book.pdf}"; LOG="${PDF%.pdf}.log"
-MIN="${PAGES_MIN:-50}"; MAX="${PAGES_MAX:-100}"
+# The 50-100 default came from the book template and this book passed it before Part I was
+# finished, so `make check` had been reporting PRE-FLIGHT FAILED on nothing else for weeks and
+# nobody read it. TOC.md plans about 1,040 printed pages; the window is that, with room either
+# side. A gate that always fails is a gate that gates nothing. Raised 2026-10-28.
+MIN="${PAGES_MIN:-100}"; MAX="${PAGES_MAX:-1400}"
 export PATH="/Library/TeX/texbin:/opt/homebrew/bin:$PATH"
 fail=0
 

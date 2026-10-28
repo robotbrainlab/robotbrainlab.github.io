@@ -23,7 +23,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 |---|---|---|---|
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
-| II · Use | 18–39 | 362 | **Drafting** — 1 of 22 done |
+| II · Use | 18–39 | 362 | **Drafting** — 2 of 22 done |
 | III · Apply | 40–50 | 190 | Not started |
 | IV · What Next | 51–57 | 136 | Not started |
 | Appendices | A–D | 83 | **A (cheat sheet, 63 items), B (100 questions) and C (glossary, 115 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
@@ -54,11 +54,15 @@ sub-part opener pages sitting after the last written chapter were counted into i
   16   183-192    10   18     56%
   17   193-200     8    8    100%
   18   202-213    12   16     75%
+  19   214-232    19   20     95%
 ```
 
 **Part I is complete: chapters 1–17, 197 printed pages against a 266-page estimate (74%).**
-Part II has begun: chapter 18 is 12 pages against 16. Chapter 9 is the only
-one to land exactly on its estimate, and none has yet exceeded one.
+Part II has begun: chapters 18 and 19 come to 31 pages against 36, so 216 printed pages in
+all. Chapters 9 and 17 are the only two to land exactly on their estimates, and none has yet
+exceeded one. Chapter 19 is the closest of Part II at 95 per cent, and it got there by
+answering a bank question the first draft had missed rather than by padding — see
+`LEDGER-DEFECTS.md` entry 30.
 
 The estimates are estimates, never targets — `BOOK-GUIDE.md` §11. Read `LEDGER-DEFECTS.md`
 entry 12 before drawing any conclusion from the percentages.
