@@ -14,7 +14,9 @@ reviewed: 2026-10-28T03:24:27+05:30
 absolutes: verify-absolutes.py: 100 at close. Three false absolutes, all of them exhaustive claims, plus a fourth introduced by one of my own fixes and caught by the second pass. Each is listed under 'While writing'.
 new-terms: verify-inputs.py: bare-terms 0 CLEAN. Seven terms introduced here, all bolded and all in Key Terms: logits, greedy decoding, temperature, top-k, top-p, stop token, stop condition. Stop token was added during review, after the glossary was found defining *stop condition* in terms of it.
 covers-misses: verify-coverage.py: 0 misses. All eight Covers items delivered: logits as raw scores, with the shift-invariance argument that makes 'only the differences matter' true rather than asserted; softmax turning them into probabilities, by reference to chapter 8 as the ownership table requires; temperature worked at three settings; top-k and top-p worked and compared; how long a reply may run and what a stop condition is, with the stop token given its own worked distribution and a lab step on telling the four outcomes apart; greedy decoding; why zero temperature is still not a guarantee, with four causes and the near-tie; and why one good output proves nothing.
-sha256: 69d97d9a0fe32eac7bf5139081d85215226700debbcb4cf91d576cbf9e391df7
+amended:
+  - 2026-10-28T12:52:40+05:30: Sharpen pass: 'every token after the change is different' is refuted by the chapter's own near-tie condition - if no tie flips, the greedy path is identical - and it was in the Summary and Review Answer 2; 'the smallest number that reliably shows you the spread exists' asserted a minimality property immediately after disclaiming the theory, and chapter 20 shows sets where five runs show nothing; 'which it always does' was a universal added only in Review Answer 4; the near-tie was ranked 'the thing that actually bites' on two chosen logits; greedy 'does not produce the most likely sentence' is a universal from a can-argument; and 'four places' was stated as a complete enumeration
+sha256: 32bb134023d8aa4a04a8ae0b662bddf5da9552f77c8534c9465ba20dd5daa757
 
 ## Before writing
 

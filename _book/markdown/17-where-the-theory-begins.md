@@ -1,7 +1,8 @@
 # Where the Theory You're Skipping Begins
 
 Nine chapters ago this book started opening the model, and six times it stopped and said *not
-this*, about thirteen different things in all. This chapter collects those points in one place. It is short, it is a
+this* — about eight things in all, and there are five more it never needed, which makes
+thirteen. This chapter collects those points in one place. It is short, it is a
 list, and it is the one chapter here you should be able to recite — because the difference
 between a gap you can name and a gap you cannot is the difference between sounding bounded and
 sounding ignorant.
@@ -50,16 +51,21 @@ recite is a boundary you can defend.
 
 Look down the "what it actually is" column and one pattern runs through all of it.
 
-**Every item is on the far side of "the numbers are given".** Not one of them is needed to
-follow the arithmetic of a single reply. Chapters 9 to 13, 15 and 16 took that computation
-apart completely — tokens, the
+**Not one of them is needed to follow the arithmetic of a single reply.** That is the claim
+that holds of all thirteen, and it is worth being exact about it, because the tidier version —
+that every item is about why the numbers came to be what they are — is not quite true. Most
+are. Two are not: *why depth helps* is about what a deeper computation can do, and *numerical
+stability* is about the arithmetic itself, beyond the one sentence Chapter 12 gives it. What
+all thirteen share is that a single reply can be followed without any of them.
+
+Chapters 9 to 13, 15 and 16 took that computation apart — tokens, the
 embedding table, attention, the stack, the output distribution, the sampling, the cost, the
 failures — and at no point did any of it require knowing why the numbers came to be what they
 are.
 
 That is not a coincidence; it is the line the book was built on. The numbers are given, and
 everything downstream of them is arithmetic you can do by hand. **The things you skipped are
-the things on the other side of "the numbers are given".**
+the things that computation never needed.**
 
 Which has a consequence worth stating plainly, because it is the thing to say when somebody
 suggests you have missed the real subject. For the work of building applications on top of
@@ -180,8 +186,7 @@ how the gradient is computed, why repeating the update rule — gradient descent
 a step size is chosen, and why the preference objective is the right thing to minimise (Chapter
 14); and why models got better at producing useful intermediate steps (Chapter 16). Five more —
 initialisation, regularisation, inductive bias, scaling laws and generalisation theory — were
-never needed. **Every one of them sits on the far side of "the numbers are given", and not one is needed to
-follow the arithmetic of a single reply**, which is the line the book was built on. When somebody pushes past it, the answer
+never needed. **Not one of them is needed to follow the arithmetic of a single reply**, which is the line the book was built on. When somebody pushes past it, the answer
 has three parts: name the thing correctly, say what you know that borders it, and say what you
 would do if you needed it. A boundary is not a claim that the material is easy, it is not
 permanent, and it is not the same as not knowing the material is there.
@@ -220,8 +225,7 @@ buys what it buys, and where the returns stop, I have not studied. What I can te
 a layer does, that the feed-forward block holds more of the parameters than attention does,
 and what depth costs at inference." The answer works because every sentence in it is true and
 the boundary is drawn exactly.
-2. Every one of them sits on the far side of **"the numbers are given"** — none is needed to
-follow the arithmetic of a single reply. That matters for two reasons. It explains why the book could take
+2. **None is needed to follow the arithmetic of a single reply.** That matters for two reasons. It explains why the book could take
 the whole computation apart without any of them — the numbers are given, and everything after
 that is arithmetic. And it gives you the sentence to use when somebody suggests you have
 missed the real subject: these are load bearing for building a model, which is a different job

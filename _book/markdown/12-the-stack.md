@@ -220,8 +220,8 @@ position 5 gathered from "cat" plus what the feed-forward block made of the two 
 layer 2's queries and keys are computed from *that*. So position 5 now offers a different key
 to every other position than it did at layer 1, and asks a different question.
 
-**That is the whole of what depth buys, mechanically: each round gathers from what the last
-round assembled.** A result put together at layer 20 is available to be gathered from, by a
+**That is what depth buys, mechanically: each round gathers from, and computes on, what the
+last round assembled.** A result put together at layer 20 is available to be gathered from, by a
 different position, at layer 21 — and the thing being gathered did not exist in the input at
 all.
 
@@ -235,7 +235,7 @@ can derive, and nobody has a clean account of it."
 > **Warning:** You will meet confident stories about what particular layers "do" — early layers
 > handle syntax, middle layers handle facts, late layers handle output format. There is real
 > measurement behind some of this, and it is a finding about particular models arrived at by
-> probing them, not a design anybody specified and not a rule that transfers. Treat it the way
+> probing them, not a design anybody specified and not shown to be a rule that transfers. Treat it the way
 > Chapter 6 says to treat any claim: ask what it was measured on.
 
 ## Where Is the Fact Stored?
@@ -428,7 +428,7 @@ a **residual connection**, and the running vector every layer adds into is the *
 stream**. Each layer writes twice: the **attention block** of Chapter 11, which is the only
 part that moves information between positions, and the **feed-forward block**, which works on
 each position in isolation — two matrices with an **activation function** between them and a
-middle several times wider than the ends. The activation is what stops that block's two matrices from
+middle between about two and a half and four times the width of the ends. The activation is what stops that block's two matrices from
 collapsing into one, and it is where a condition is expressed — not, as is often said, what
 stops the whole stack collapsing, since attention is not a linear step either. The stream is
 **normalised** before each block, which keeps its numbers in range as a deep stack adds to it.
@@ -447,8 +447,8 @@ roughly nine in ten of all parameters in the stack rather than the embedding tab
 | **Residual connection** | Adding a block's output to the vector that went into it, rather than replacing it. What lets a layer contribute nothing and pass its input through |
 | **Residual stream** | The running vector passing up through the stack, which every block adds into. By the end it is a sum of every contribution made along the way, with nothing marking which is which |
 | **Attention block** | The half of a layer that moves information between positions — Chapter 11's formula in full. The only part of a model that does |
-| **Feed-forward block** | The half of a layer that works on each position alone: two matrices with an activation between them, the middle several times wider than the ends. Holds more of a layer's parameters than attention does |
-| **Activation function** | The feed-forward block's one step that is not a matrix multiplication, such as keeping positives and zeroing negatives. Without it the block's two matrices would collapse into one |
+| **Feed-forward block** | The half of a layer that works on each position alone: two matrices with an activation between them, the middle between about two and a half and four times the width of the ends. Holds more of a layer's parameters than attention does |
+| **Activation function** | The step in the feed-forward block that is not a matrix multiplication, such as keeping positives and zeroing negatives. Without it the block's two matrices would collapse into one |
 | **Normalisation** | Rescaling the stream to a predictable range before each block reads it, so the numbers do not grow out of hand as layer after layer adds to them |
 
 ### Worth Memorising

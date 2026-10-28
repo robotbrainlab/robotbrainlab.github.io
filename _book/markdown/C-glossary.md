@@ -7,7 +7,7 @@ chapter; every other chapter refers to it rather than redefining it.
 |---|---|---|
 | **429** | *Too many requests.* The provider's rate limit, on requests per minute and on tokens per minute. Retryable when you are going too fast; the same status comes back when the account is out of credit, which no wait fixes | 19 |
 | **Accountability** | Somebody who can be asked to answer for a decision, and who bears a consequence for it. A property of people and organisations, never of a component | 3 |
-| **Activation function** | The feed-forward block's one step that is not a matrix multiplication, such as keeping positives and zeroing negatives. Without it the block's two matrices would collapse into one | 12 |
+| **Activation function** | The step in the feed-forward block that is not a matrix multiplication, such as keeping positives and zeroing negatives. Without it the block's two matrices would collapse into one | 12 |
 | **Active parameters** | The parameters that actually run for a given token, as against the total the model holds. Cost follows the active figure; the name usually quotes the total | 15 |
 | **Agent** | A system in which the model decides what to do next, repeatedly, rather than your code deciding the sequence | 4 |
 | **Answer key** | Which document each of your queries is actually about. The only input in the procedure that has to come from you | 24 |
@@ -29,7 +29,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Byte-pair encoding** | Building a vocabulary by starting from the 256 single bytes and repeatedly merging the commonest adjacent pair in a corpus until the vocabulary is the size wanted. Starting from bytes is what makes any text at all representable | 10 |
 | **Candidate set** | The documents the first stage passes to the second. A reranker can only permute it, so it is a ceiling | 26 |
 | **Case** | One input plus whatever marks the answer right or wrong. The unit the statistics count — and they count rows, so forty rephrasings of one question are worth nearer one case than forty | 20 |
-| **Causal mask** | Setting every score for a later position to minus infinity before softmax, so it gets exactly zero weight. It makes a position's output depend only on what precedes it, so the arithmetic is the same whether or not the rest of the sentence exists | 11 |
+| **Causal mask** | Setting every score for a later position to minus infinity before softmax, so it gets exactly zero weight. It makes a position's output depend only on itself and what precedes it, so the arithmetic is the same whether or not the rest of the sentence exists | 11 |
 | **Check** | Anything that verifies the output before it is used, from a required shape through to a second model's opinion | 2 |
 | **Compound system** | A system of several parts with the model as one of them, rather than as the whole product | 2 |
 | **Compounding error** | Two things at once across a run: each step's chance of being right multiplies against the others, so a high per-step figure becomes a low whole-run one; and a wrong step's result is carried into the next step as though it were true | 4 |
@@ -48,7 +48,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Decode** | One forward pass per output token. Does almost no arithmetic and is limited by reading every parameter the pass uses out of memory once per token | 15 |
 | **Delta** | One streamed piece: what to add to what you have, not the whole answer again | 19 |
 | **Dense retrieval** | Embedding every document once, embedding the query at search time with the *same* model, and ranking by cosine | 24 |
-| **Depth** | The number of layers in the stack. The last of the three numbers — vocabulary, width, depth — that describe a model's shape | 9 |
+| **Depth** | The number of layers in the stack. The last of the three numbers — vocabulary, width, depth — that describe most of a model's shape | 9 |
 | **Dimension** | One slot in a vector. A position in a list, not a direction in space, and usually not nameable on its own | 8 |
 | **Direct preference optimisation (DPO)** | The preference objective written as one formula: raise the preferred reply's probability relative to the rejected one, both measured against the model as it was before this stage. Stated in this book, not derived | 14 |
 | **Discounted cumulative gain** | The sum of each result's grade divided by a discount that grows with position | 26 |
@@ -64,7 +64,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Evidence strength** | How much a claim is supported: announcement, demonstration, one study, practitioner report, settled practice — or a derivation, which stands outside the ladder because you can check it yourself | 6 |
 | **Examples** | What a good answer looks like, shown rather than described. Part of the specification | 18 |
 | **Exponential backoff** | Doubling the wait after each failed attempt, up to a cap, so a struggling system is not hammered | 19 |
-| **Feed-forward block** | The half of a layer that works on each position alone: two matrices with an activation between them, the middle several times wider than the ends. Holds more of a layer's parameters than attention does | 12 |
+| **Feed-forward block** | The half of a layer that works on each position alone: two matrices with an activation between them, the middle between about two and a half and four times the width of the ends. Holds more of a layer's parameters than attention does | 12 |
 | **Finish reason** | The response's own statement of why generation stopped. What distinguishes a truncated reply from a malformed one | 21 |
 | **Forward pass** | One journey through the model — lookup, the stack once, one distribution out. It produces exactly one distribution | 9 |
 | **Foundation model** | A model trained once on general material, then used for many tasks it was not specifically built for | 1 |
@@ -98,7 +98,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Masking** | Setting a forbidden token's score to `\(-\infty\)`{=latex}, which makes its probability exactly zero after the softmax — as long as one token survives. Mask them all and you get `nan`, not zero | 22 |
 | **Matrix** | A grid of numbers, read as rows or as columns depending on what you are doing | 8 |
 | **Mean reciprocal rank** | The average of the reciprocal rank over a set of queries | 26 |
-| **Memory-bound** | A step whose speed is set by how fast numbers arrive from memory rather than by the arithmetic done with them. Decode reads about one byte for every operation it performs, on hardware built for hundreds | 15 |
+| **Memory-bound** | A step whose speed is set by how fast numbers arrive from memory rather than by the arithmetic done with them. At two bytes per parameter, decode does about one operation for every byte it reads, on hardware built for hundreds | 15 |
 | **Merge list** | The merges, in the order they were made. Kept with the model and replayed in that order to tokenise any later text | 10 |
 | **Mixture of experts** | Replacing one feed-forward block per layer with several and routing each token through a few of them. The model holds all of them and runs some | 15 |
 | **Model** | A service that takes text and returns generated text, charged by the amount of text | 1 |
@@ -117,7 +117,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Perplexity** | The exponential of the cross-entropy. Reads as the number of equally likely options the model is effectively choosing between; a uniform choice among `\(V\)`{=latex} options has perplexity `\(V\)`{=latex} | 14 |
 | **Positional encoding** | How a token's position is put into the arithmetic, since the attention formula carries no notion of order. Added to the embedding before the stack, or applied as a rotation to queries and keys, or added to the scores themselves | 11 |
 | **Practitioner report** | A survey or a set of accounts of what people say they do. It is a practitioner report however it was published, and it supports what people *do* far better than whether it works | 6 |
-| **Preference optimisation** | Training on pairs of replies with a preference between them, to make the preferred kind more likely relative to the other. Changes which of its existing behaviours come out, rather than adding knowledge | 14 |
+| **Preference optimisation** | Training on pairs of replies with a preference between them, to make the preferred kind more likely relative to the other. Changes which of its existing behaviours come out; nothing in its objective rewards adding knowledge | 14 |
 | **Prefill** | The pass that processes the whole prompt, every position at once. Limited by arithmetic, whose attention part grows with the square of the prompt length and overtakes the rest on a long one. What you wait for before the first word | 15 |
 | **Pretraining** | Running the loop on an enormous quantity of general text. Where essentially all of a model's knowledge comes from, and nearly all of the computation | 14 |
 | **Proposal** | What the model emits — tokens your code reads as a request to run something. Nothing has happened yet | 23 |
@@ -144,7 +144,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Semantic search** | What dense retrieval is usually called. The same thing, in the words people use when they complain about it | 25 |
 | **Semaphore** | A counter that bounds how many jobs run at once. Three words of code, and the difference between concurrency and attacking your own account | 19 |
 | **Server-sent events** | A long-lived HTTP response carrying one small event per line as the server produces them. How a streamed reply arrives | 19 |
-| **Softmax** | Turns a list of scores into positive numbers that sum to 1, preserving their order and exaggerating the gaps between them | 8 |
+| **Softmax** | Turns a list of scores into positive numbers that sum to 1, preserving their order and turning each gap between scores into a multiple between shares | 8 |
 | **State machine** | What a schema compiles into: a set of states, each with the tokens allowed next. Engines call it an automaton | 22 |
 | **Step** | One pass through the loop: the model decides, something runs, the result comes back | 4 |
 | **Stop condition** | A string you nominate that halts generation when it appears. Providers call it a stop sequence; it is not Chapter 4's stopping condition. One of the ordinary ways a reply ends, alongside the model's own stop token and your maximum | 13 |
@@ -160,7 +160,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Term frequency** | How often a term appears in one document | 26 |
 | **Token** | One entry in a model's vocabulary — usually a piece text is cut into. Beyond the single bytes, which are always there, which pieces earned an entry is a matter of frequency in the corpus the vocabulary was built from — not of meaning or length | 10 |
 | **Token bucket** | A limiter on the *rate* rather than on how many run at once, for when the requests-per-minute limit is the one that hurts | 19 |
-| **Tokeniser** | The program that cuts text into tokens and maps them to indexes, using one model's vocabulary and merge list. A different model's tokeniser gives a different count | 10 |
+| **Tokeniser** | The program that cuts text into tokens and maps them to indexes, using one model's vocabulary and merge list. A count does not carry from one model's tokeniser to another's | 10 |
 | **Tool** | An action the model may ask for. The model proposes it; your code decides whether to run it | 2 |
 | **Tool description** | The text your code sends about one function: a name, a sentence and the parameter names and types. Not the function, and not your constraints | 23 |
 | **Tool message** | A result your code returns after the model asked for something. Chapter 23 | 18 |

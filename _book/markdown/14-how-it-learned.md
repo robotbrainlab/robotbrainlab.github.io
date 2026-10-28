@@ -188,8 +188,9 @@ the update rule and I can tell you what it does; I have not studied why it works
 
 What is worth carrying instead is the *shape* of the loop, because three practical facts come
 straight out of it. Training happens once, before you ever call the model — Chapter 1's point,
-now with a mechanism. Nothing you send at inference runs step 4, so nothing you send changes a
-parameter. And steps 1 and 4 are the same whatever the data is.
+now with a mechanism. Nothing you send at inference runs step 4, so answering your request
+changes no parameter. (Whether what you send is kept and used in a *later* training run is a
+different question, and a matter of the provider's policy rather than of the loop.) And steps 1 and 4 are the same whatever the data is.
 What step 3 compares changes for one of the three stages, and so does what step 2 has to run
 for it — a point the third stage's own section makes concrete. That is why the next section is
 about data rather than about algorithms.
@@ -256,8 +257,9 @@ That ratio is the whole argument of the last section of this chapter, arrived at
 rather than by assertion. It is also where the compute shares in the table come from: the work
 of training is dominated by running the loop over tokens, so a stage that sees one part in two
 hundred thousand of the tokens accounts for about that share of the computation. A stage
-that is one part in two hundred thousand of the data is not
-where a model's knowledge is going to come from.
+that sees one part in two hundred thousand of the tokens cannot be where the *bulk* of a
+model's knowledge came from. Note what that does and does not reach: it is a claim about share
+of exposure, and it says nothing on its own about whether one small corpus comes back.
 
 > **Note:** Those figures are dated details of the worst kind — they have moved by an order of
 > magnitude more than once and will again. What does not move is the *shape*: the first stage
@@ -345,13 +347,16 @@ material begin.
 fetch anything, and no amount of training changes that. Training moves numbers; it does not
 attach a database.
 
-**Knowledge is overwhelmingly a pretraining phenomenon.** Fine-tuning on a few thousand of your
-documents does not reliably install their contents as facts the model can recall. The stage is
+**Knowledge is overwhelmingly a pretraining phenomenon**, and that much is arithmetic. Whether
+fine-tuning on a few thousand of your own documents installs their contents as recallable facts
+is a separate question the ratio does not settle — a small curated set is exactly the case where
+repeated exposure might help rather than hurt. What practitioners report is that it does not
+work reliably, and Chapter 20 is how you would find out for your own case. The stage is
 small, the examples are few, and what it is good at is shaping *how* the model responds rather
 than *what it knows*. The reliable way to make a model use your information is still Chapter
 1's: put the information in the request.
 
-**And nothing in training makes the model able to tell what is true.** Every stage optimises
+**And nothing in training is a test of whether anything is true.** Every stage optimises
 agreement with text that people produced — tokens that continue a document, replies people
 wrote, replies people preferred. None of those is a test of correctness. Chapter 16 is where
 that becomes the characteristic failure of these systems.
@@ -362,12 +367,12 @@ that becomes the characteristic failure of these systems.
 > section rather than in anybody's opinion.
 
 What each stage *can* do is worth stating just as plainly. Pretraining gives the model
-everything it knows. Supervised fine-tuning gives it a job and a format. Preference
+essentially everything it knows. Supervised fine-tuning gives it a job and a format. Preference
 optimisation
 chooses between the things it was already capable of saying. That last one is the subtlest and
-the most useful to be able to say out loud: **a preference stage does not add knowledge — it
-changes
-which of its existing behaviours come out.**
+the most useful to be able to say out loud: **a preference stage is not where knowledge comes
+from — nothing in its objective rewards adding any, and what it changes is which of its existing
+behaviours come out.**
 
 ## Lab: Compute a Loss
 
@@ -470,7 +475,8 @@ one your company would be changing by "fine-tuning on our support tickets".
 request–response pairs; preference optimisation on pairs of replies with a preference between
 them. Fine-tuning on support tickets is the second stage, and what it would reliably change is
 the *shape* of replies — tone, format, the house way of saying things. What it would not
-reliably do is install the tickets' contents as facts the model can recall.
+reliably do is install the tickets' contents as facts the model can recall — reliably being the
+word, since the ratio argument bounds the share of knowledge and not this particular case.
 
 ## Summary, Key Terms, and Review Questions
 
@@ -506,7 +512,7 @@ true.
 | **Supervised fine-tuning** | Running the same loop with the same objective on curated request–response pairs. Turns a model that continues text into one that answers |
 | **Base model** | A model that has had only pretraining. It continues text rather than answering, which is what the later stages change |
 | **Direct preference optimisation (DPO)** | The preference objective written as one formula: raise the preferred reply's probability relative to the rejected one, both measured against the model as it was before this stage. Stated in this book, not derived |
-| **Preference optimisation** | Training on pairs of replies with a preference between them, to make the preferred kind more likely relative to the other. Changes which of its existing behaviours come out, rather than adding knowledge |
+| **Preference optimisation** | Training on pairs of replies with a preference between them, to make the preferred kind more likely relative to the other. Changes which of its existing behaviours come out; nothing in its objective rewards adding knowledge |
 
 ### Worth Memorising
 
@@ -541,7 +547,7 @@ on a much smaller set of curated request–response pairs, which turns a continu
 that answers, and sets format and tone. **Preference optimisation** uses pairs of replies
 with a
 preference between them and shifts which of the model's existing behaviours come out; it does
-not add knowledge.
+not where knowledge comes from, because nothing in its objective rewards adding any.
 2. Because its data needs no labels. Cut any text anywhere: what comes before is the input and
 the next token is the correct answer, so a thousand-token document is a thousand examples and
 the text is its own answer key. The other two stages need curated material — someone writing a
@@ -561,7 +567,7 @@ times a natural one, and exponentiating in the matching base cancels that exactl
 perplexities over the same text agree whichever base was used to compute them.
 5. That it is the last lever rather than the first, and that the stage they are reaching for
 shapes *how* the model responds rather than *what it knows*. Knowledge is overwhelmingly a
-pretraining phenomenon; a few thousand fine-tuning examples do not reliably install their
+pretraining phenomenon — that part is arithmetic — and practitioners report that a few thousand fine-tuning examples do not reliably install their
 contents as recallable facts, and nothing in training attaches a database. The reliable way to
 make the model use the documents is to put the relevant parts in the request. Chapter 39 is
 where fine-tuning is genuinely the right answer, and what it costs.

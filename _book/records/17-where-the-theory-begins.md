@@ -14,7 +14,9 @@ reviewed: 2026-10-28T05:12:39+05:30
 absolutes: verify-absolutes.py: 46. Two were false and both were central to the chapter - its organising claim about all thirteen items, and the column heading over the normalisation row. Each is listed under 'While writing'.
 new-terms: verify-inputs.py: bare-terms 1 FAIL (`fine-tune`) -> 0 CLEAN. Eleven terms introduced here, all bolded and all in Key Terms, and all of them names of things the book does not teach - which is the point: the glossary should answer 'what is backpropagation' with a definition and the sentence that this book does not cover it.
 covers-misses: verify-coverage.py: 0 misses - **but the second reviewer showed that 0 is accidental for this chapter**, because the gate flags an item only when all its non-stopword tokens are absent, and the cell's remaining words occur throughout. The real check was done by hand three ways: against every 'Chapter 17' deferral in the book, against the TOC cell, and against BOOK-GUIDE §6's never-teach list item by item in both directions. All fourteen §6 entries are accounted for; nothing on the list is outside §6.
-sha256: 89056a4c3c00c8c2b689849dd115a63b5c11ffe910c85a5008d53194b33e6a9f
+amended:
+  - 2026-10-28T12:52:40+05:30: Sharpen pass: the organising claim that every item sits 'on the far side of the numbers are given' fails on two of its own thirteen rows - numerical stability is the downstream arithmetic itself and why-depth-helps is about what a deeper computation can do, which are the same two rows that killed the previous formulation. It now leads with the claim that holds of all thirteen (none is needed to follow a single reply) and names the two exceptions; swept the Summary and Review Answer 2. Also the opening credited all thirteen items to the six stopping points where eight were deferred and five were never needed, which the Summary already had right
+sha256: 944cbda1d31d903ced72f5c2738cddb8a76a2eaf7b07d0585ffa86f00ed9c165
 
 ## Before writing
 

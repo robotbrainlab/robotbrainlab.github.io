@@ -138,7 +138,8 @@ Two consequences of "same width in and out".
 
 **The stack can be any depth.** Because the shape coming out of a layer is the shape going
 into one, you can put thirty-two of them in a row, or ninety-six, without changing anything
-else. That is the whole reason the design scales by stacking.
+else. That is the whole reason the design *can be* scaled by stacking. What more depth buys is
+Chapter 12's, and why it buys it is on Chapter 17's list.
 
 **There is no loop.** The vectors go through layer 1, then layer 2, and so on to the end,
 once. Nothing goes back. The model does not re-read or reconsider, and one pass over a hard
@@ -430,8 +431,10 @@ again. Which scores moved, which did not, and why?
 "i" and "." did not move, because their rows have 0 in slot 2 and that slot now contributes
 nothing either way. The other three fell, each by twice its own slot-2 value. And the
 prediction is destroyed: "tea" has gone from 0.826 to a tie with "i" at 0.348. One slot out
-of four, in one vector, did that — which is a useful thing to have felt before anybody tells
-you a model is robust.
+of four, in one vector, did that. Be exact about what it shows: these numbers are invented and
+four slots is not 4,096, so it says nothing about how far a real model moves when one slot
+changes. What it shows is that nothing in this arithmetic protects any one score from any one
+slot.
 
 **Step 8.** The model must produce the reply "tea ." — two tokens. How many forward passes,
 and what is the input to each?
@@ -469,7 +472,7 @@ model's name reports.
 | **Embedding table** | A matrix with one row per vocabulary entry. Looking a token up in it is how that token enters the model; the rows are called embeddings |
 | **Width** | The number of slots in the vectors moving from layer to layer, the same all the way through. Written `\(d\)`{=latex} in formulas |
 | **Layer** | A block of arithmetic taking one vector per position and returning one per position, same width in as out. Every layer has the same shape and its own numbers |
-| **Depth** | The number of layers in the stack. The last of the three numbers — vocabulary, width, depth — that describe a model's shape |
+| **Depth** | The number of layers in the stack. The last of the three numbers — vocabulary, width, depth — that describe most of a model's shape |
 | **Next-token distribution** | One probability for every entry in the vocabulary, adding to 1, saying how likely each is to come next. The entire output of one call |
 | **Forward pass** | One journey through the model — lookup, the stack once, one distribution out. It produces exactly one distribution |
 | **Autoregressive** | Producing output one token at a time, with each token appended to the input before the next pass |
@@ -483,7 +486,7 @@ model's name reports.
 | The output step | One score per vocabulary entry, so the final shape is (1 × `\(d\)`{=latex}) times (`\(d\)`{=latex} × vocabulary) |
 | What one forward pass yields | Exactly one next-token distribution |
 | Passes for a reply | One per token produced, each over an input one token longer |
-| The three shape numbers | Vocabulary, width, depth |
+| The three top-level shape numbers | Vocabulary, width, depth. There are more inside a layer, which is Chapter 12's |
 
 ### Review Questions
 

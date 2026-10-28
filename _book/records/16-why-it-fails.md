@@ -14,7 +14,9 @@ reviewed: 2026-10-28T04:50:01+05:30
 absolutes: verify-absolutes.py: 68. Three were false and each had its counter-example elsewhere in this book, one of them forty lines later in this chapter. Each is listed under 'While writing'.
 new-terms: verify-inputs.py: bare-terms 0 CLEAN. Three terms introduced here, all bolded and all in Key Terms: hallucination, context window, intermediate reasoning. A consequences chapter should introduce few, and this one does.
 covers-misses: verify-coverage.py: 0 misses. All six Covers items delivered: plausible continuation with no truth oracle, by walking the pipeline and asking the reader to point at the step that consults anything; hallucination as the default rather than a defect; the tokenisation artefacts as a family, now with a worked digit split showing that there is no units column to carry from; the context window and what falls out of it, now with a window spent in a block; uneven use of long inputs, placed on chapter 6's ladder rather than asserted; and intermediate reasoning explained from chapter 9's two facts alone, with its cost in output tokens and the two-sided claim about what the trace is and is not.
-sha256: b3f7bd59b2a592c7a598d2931bb7e7427d4af75a8eb715278ca6d44e99918bf5
+amended:
+  - 2026-10-28T12:52:40+05:30: Sharpen pass: the chapter asserted that the output-as-scratchpad mechanism 'is why asking for step by step working improves accuracy', which chapter 22 explicitly refuses - it needs a third premise neither chapter can supply, and chapter 22 puts the accuracy half on chapter 6's ladder. Narrowed in three body places; the back matter already had the capability form. Also the dropped-instruction diagnosis was stated as fact in the lab key and Review Answer 3 where the body says 'the usual explanation' and forty turns need not overflow a 128,000-token window; 'better models reduce the rate' is an unlabelled empirical trend; and 'the wording is not a signal' claimed more than the fluency argument gives
+sha256: 1e37232c7fc99ecc424bbf6e32248039e0d63fdaf5da3260b099658ecded5a2c
 
 ## Before writing
 

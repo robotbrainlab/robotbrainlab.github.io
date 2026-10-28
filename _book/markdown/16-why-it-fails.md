@@ -46,7 +46,7 @@ continuation is constrained by something real. Citations let a person verify. Ch
 output against a rule. None of these makes the model truthful. They make the system's output
 checkable, which is a different and achievable thing.
 
-> **Warning:** The *wording* is not a signal here. The model's prose is as fluent for the
+> **Warning:** *Fluency* is not a signal here. The model's prose is as fluent for the
 > invented citation as for the real one, because fluency is what the probabilities measure.
 > A hedge — "I believe", "if I recall" — is itself a likely continuation in contexts where
 > people hedge, not a report of an internal uncertainty. Chapter 31 is where you build
@@ -158,7 +158,8 @@ what to put in and in what order, and this is the reason it is a decision at all
 
 ## Why Thinking Out Loud Works
 
-This is the one with a genuinely satisfying explanation, and it follows from Chapter 9 alone.
+This is the one with a genuinely satisfying explanation, and the mechanism follows from Chapter
+9 alone.
 
 Recall two facts. **One forward pass does a fixed amount of arithmetic for the input it is
 given** — a fixed number of layers, run once each, and no more of them for a harder question —
@@ -175,8 +176,12 @@ answer.
 If the model emits its intermediate steps as tokens, those tokens become part of the input for
 every later pass. The partial result is now in the context, where later tokens can condition
 on it. **The model's only scratchpad is its own output** — which is a strange and slightly
-undignified fact about the design, and it is why asking for step by step working improves
-accuracy on multi-step problems.
+undignified fact about the design, and it is why a problem needing several steps has nowhere to
+put them unless they are emitted. That the working *improves the answer* is a separate and
+weaker claim: the mechanism cannot reach it, because a model may compress the same computation
+into one pass and be right anyway. On Chapter 6's ladder it has been demonstrated and studied
+in particular settings and is short of settled practice, so how much it buys on your task is
+something to measure. Chapter 22 makes the same split for strict output formats.
 
 ```text
   without intermediate tokens
@@ -234,7 +239,8 @@ like any other output.
 
 > **Note:** This is worth being precise about in an interview, because the sloppy version
 > — "the reasoning is fake" — is wrong in the other direction. The intermediate tokens are
-> doing real work: later passes genuinely condition on them, which is why accuracy improves.
+> doing real work: later passes genuinely condition on them, which is why the working can change
+> the answer at all.
 > They are causally involved and they are not a description of the cause. Both halves are true
 > and the useful answer says both.
 
@@ -250,8 +256,10 @@ Worth separating, because the engineering is different for each.
 | Uneven use of long inputs | Measured behaviour, not a design rule | Put less in, and order it; measure |
 | Needing to think out loud | One pass gets no deeper for a harder question | Ask for working where it earns its cost |
 
-**None of the rows says "use a better model".** Better models reduce the rate of the first
-and the second without changing why either happens. The third and fifth are properties of how
+**None of the rows says "use a better model".** Better models are reported to make the first
+and the second less frequent — Chapter 10 says so for the token-level case — and nothing about
+either mechanism predicts a rate, so that half is a report rather than a consequence. What does
+not change is why either happens. The third and fifth are properties of how
 the thing is used and of the design. The fourth is measured behaviour that varies by model, so
 a better model can move it — and what you put in the context is still yours.
 
@@ -278,8 +286,11 @@ in yours.
 **Step 3.** Your chat application is told at the start to answer only in French. Forty turns
 later it answers in English.
 
-*Expected result:* the instruction fell out of the window. It was the oldest thing in the
-conversation, and whatever rule drops text when the window fills does not know it mattered.
+*Expected result:* the first thing to check is whether the instruction is still in the request,
+and the usual answer is that it is not. It was the oldest thing in the conversation, and
+whatever rule drops text when the window fills does not know it mattered. Check what you
+actually send before blaming the model: forty turns of chat may still fit inside a large
+window, in which case the instruction is present and simply not being followed.
 The fix is not a sterner instruction — it is to put the instruction back in on every request,
 which costs tokens and is worth it.
 
@@ -310,7 +321,7 @@ answer was produced, because nothing in the mechanism writes one.
 
 **Step 7.** Which of the six could be fixed by a better model, and which could not?
 
-*Expected result:* steps 1, 2 and 4 get *less frequent* with better models and do not change in
+*Expected result:* steps 1, 2 and 4 are *reported* to get less frequent with better models, and do not change in
 kind — the mechanism that produces them is the mechanism that produces everything else. Step 3 is not about the model at
 all — it is a decision in somebody's product code. Step 5 is half yours: how much you put in is
 your decision, and how evenly a long input is used varies by model, so measure it. Step 6 is a property of the design and will not change while the
@@ -373,7 +384,7 @@ more computation is applied and it is applied to a partly-answered question. The
 reliable account because it is generated text, produced the same way as everything else, with
 no step consulting what the layers actually did. Both halves matter: the tokens do real work,
 and they are not a description of the cause.
-3. The instruction fell out of the context window — it was the oldest thing in the conversation,
+3. Most likely the instruction is no longer in the request — it was the oldest thing in the conversation,
 and the rule that drops text when the window fills does not know what mattered. Nothing was
 forgotten by the model, because the model has no memory: your words simply were not in the
 request. The fix is to re-send the instruction on every call rather than to word it more
@@ -388,7 +399,7 @@ used evenly: a passage's position affects how reliably it is used, measured repe
 models and tasks, so burying the right passage among twenty others is not a neutral act. The
 honest version is that this is a thing to measure on their own data rather than to assume in
 either direction — and that ordering what goes in is a decision, not a default.
-6. The rate of invented facts and token-level mistakes falls with better models, without the
+6. The rate of invented facts and token-level mistakes is reported to fall with better models, without the
 reason for either changing. The only other one that moves with the model is the uneven use of long
 inputs, which varies by model and by task and is a thing to measure rather than to assume. The
 rest are not about the model: an instruction falling out of the window is a decision in

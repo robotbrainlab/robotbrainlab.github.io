@@ -194,7 +194,7 @@ holding, and makes every token of the reply more expensive. None of those is "a 
 
 > **Tip:** This is the honest answer to "why can't I just put everything in the prompt". Not
 > "because the model gets confused" — that is Chapter 16's separate and also-true point — but
-> because the cost is superlinear in three different places at once, and somebody is paying
+> because three different costs rise at once and one of them faster than proportionally, and somebody is paying
 > for it.
 
 ## Batching: Your Request Runs With Others
@@ -203,9 +203,12 @@ Decode is limited by reading the parameters out of memory. Read them once and yo
 one token. Read them once and you could just as easily compute a token for *fifty* different
 conversations, because the expensive part — getting the numbers — has already happened.
 
-That is **batching**, and it is why providers do it: it is close to free. Running fifty
-requests together costs barely more than running one, so the cost per request falls by
-something approaching fifty — approaching, for a reason the next paragraph makes exact.
+That is **batching**, and it is why providers do it. One read of the parameters serves every
+request in the batch, so the cost per request falls — but by how much depends entirely on how
+much cache each request is also reading, and that is worth doing rather than guessing. With
+short conversations the cache is almost nothing beside the 13 GiB of weights, and a batch of
+fifty really does approach a fiftyfold saving: at 100 tokens each it is about forty-two times.
+At the 8,000 tokens the next paragraph picks, it is about *four*.
 
 **But only the read of the parameters is shared, and nothing else is.** Every request in the
 batch has its own cache to read and its own arithmetic to do, so the saving flattens as the
@@ -254,9 +257,10 @@ biggest lever on the size of machine a model needs, which is why a model that wi
 a card at 16 bits will often fit comfortably at 4.
 
 **What it costs you is precision.** Each number is stored less exactly, and the outputs change
-— usually a little, sometimes in ways that matter for a particular task. The honest position is
-that the effect is small at 8 bits, usually acceptable at 4, and that *usually* is doing real
-work in that sentence. It is a thing to measure on your own task rather than to assume, and
+— usually a little, sometimes in ways that matter for a particular task. What practitioners
+report is that the effect is small at 8 bits and usually acceptable at 4: a practitioner report
+on Chapter 6's ladder rather than anything this chapter measures, and that *usually* is doing
+real work in the sentence. It is a thing to measure on your own task rather than to assume, and
 Chapter 20 is how you would measure it.
 
 > **Note:** Quantisation applies to the weights, and separately to the cache from two sections
@@ -401,7 +405,7 @@ a very large model can be cheap per token while still needing all of that memory
 | **Decode** | One forward pass per output token. Does almost no arithmetic and is limited by reading every parameter the pass uses out of memory once per token |
 | **Key–value cache** | The stored keys and values for every position in every layer, so decode attends to earlier positions without recomputing them. Costs `\(2 \times \text{layers} \times d \times \text{tokens} \times \text{bytes}\)`{=latex} |
 | **Compute-bound** | A step whose speed is set by the arithmetic it has to do rather than by how fast its numbers arrive. Prefill is; a large enough batch becomes so |
-| **Memory-bound** | A step whose speed is set by how fast numbers arrive from memory rather than by the arithmetic done with them. Decode reads about one byte for every operation it performs, on hardware built for hundreds |
+| **Memory-bound** | A step whose speed is set by how fast numbers arrive from memory rather than by the arithmetic done with them. At two bytes per parameter, decode does about one operation for every byte it reads, on hardware built for hundreds |
 | **Batching** | Running many requests through the same forward pass, so one read of the parameters serves all of them. Close to free up to a point — each request still reads its own cache and does its own arithmetic — which is why the price per token is low and why your neighbours affect your output |
 | **Quantisation** | Storing each parameter in fewer bits. Halving the bits halves the memory and roughly halves the time spent reading, at a cost in precision that has to be measured |
 | **Mixture of experts** | Replacing one feed-forward block per layer with several and routing each token through a few of them. The model holds all of them and runs some |
@@ -416,7 +420,7 @@ a very large model can be cheap per token while still needing all of that memory
 | An 8,000-token conversation | 3.91 GiB of cache, on top of the weights |
 | Weights at 7 billion parameters | 14 GB at 16 bits, 7 GB at 8, 3.5 GB at 4 |
 | What limits each phase | Prefill: arithmetic. Decode: reading the parameters the pass uses |
-| Why batching is nearly free | The parameters are read once and shared |
+| What batching shares, and what it does not | The parameters are read once and shared; each request's own cache is not. So the saving is large at short contexts and small at long ones — about 4x at 8,000 tokens each |
 
 ### Review Questions
 
@@ -442,8 +446,8 @@ pass uses, once per token, not the arithmetic it then does.
 attention arithmetic grows with the square of the length, so it roughly quadruples. The
 key–value cache grows with the length, so the memory you are holding doubles. And every decode
 pass attends over the whole cache, so each token of the reply costs more to produce than it
-did — a reply that starts fast gets slower. "A bit more text" is three superlinear costs at
-once.
+did — a reply that starts fast gets slower. "A bit more text" is three costs rising at once,
+one of them faster than proportionally.
 3. The stored key and value vectors for every position in every layer, kept so that decode does
 not recompute them on every pass. Its size is `\(2 \times \text{layers} \times d \times \text{tokens} \times \text{bytes}\)`{=latex} — at 32 layers, a width of 4,096 and two bytes,
 that is 512 KiB per token, so 3.91 GiB for an 8,000-token conversation and about 39 GiB for ten

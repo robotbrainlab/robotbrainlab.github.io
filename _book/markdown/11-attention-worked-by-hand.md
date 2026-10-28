@@ -327,7 +327,7 @@ the written form by convention rather than because it is optional.
 multiplication for each of the three views, a fourth to build the grid, a division, a softmax,
 and a fifth to spend the weights. Nothing in it is harder than Chapter 8.
 
-## Attention Alone Cannot Tell the Order
+## This Formula Cannot Tell the Order
 
 Chapter 9 said position has to be supplied separately, and promised the reason here. This is
 it — and it is checkable with the numbers already on the page.
@@ -351,8 +351,10 @@ The weight of 0.702 followed "cat" to its new seat, exactly as it should. **And 
 identical.** Of course it is: the output is a sum, and addition does not care what order you
 add in.
 
-So "the cat sat on it" and "the sat cat on it" produce the same vector at position 5. Attention
-cannot tell them apart, and nothing in this formula puts the order back. The order of your
+So "the cat sat on it" and "the sat cat on it" produce the same vector at position 5. Nothing in
+this formula puts the order back — and *this formula* is the careful phrasing, because the mask
+is not in it. The mask is defined by position, so masked attention is not order-blind; swap
+positions 2 and 3 and the output at position 2 changes, since it blends a different pair. The order of your
 words carries no information in it at all.
 
 **That is why position has to be supplied separately.** Something must put "I am the second
@@ -680,7 +682,7 @@ its own opinion, and a final matrix mixes their outputs. Building the grid costs
 | **Key** | The vector saying what a position offers to others, made with `\(W_K\)`{=latex}. Scored against every query |
 | **Value** | The vector a position hands over when it is attended to, made with `\(W_V\)`{=latex}. What the weights are spent on |
 | **Attention weights** | One row of the grid after scaling, masking and softmax: positive numbers adding to 1, saying how much of each position to take |
-| **Causal mask** | Setting every score for a later position to minus infinity before softmax, so it gets exactly zero weight. It makes a position's output depend only on what precedes it, so the arithmetic is the same whether or not the rest of the sentence exists |
+| **Causal mask** | Setting every score for a later position to minus infinity before softmax, so it gets exactly zero weight. It makes a position's output depend only on itself and what precedes it, so the arithmetic is the same whether or not the rest of the sentence exists |
 | **Attention head** | One complete set of query, key and value matrices and the weights they produce. A layer runs several in parallel over slices of the width, and a final matrix mixes their outputs |
 | **Positional encoding** | How a token's position is put into the arithmetic, since the attention formula carries no notion of order. Added to the embedding before the stack, or applied as a rotation to queries and keys, or added to the scores themselves |
 
@@ -694,7 +696,7 @@ its own opinion, and a final matrix mixes their outputs. Building the grid costs
 | The score grid | `\(n \times n\)`{=latex}, one entry per pair of positions |
 | Attention cost | `\(O(n^2 d)\)`{=latex} — double the tokens, four times the work |
 | What a row of weights is | Positive, adds to exactly 1, one number per visible position |
-| Why positional encoding exists | Attention's output is a sum, so it is blind to the order of its inputs |
+| Why positional encoding exists | The formula's output is a sum, so *the formula* is blind to the order of its inputs. Masked attention is not — the mask is positional |
 
 ### Review Questions
 
@@ -703,7 +705,7 @@ its own opinion, and a final matrix mixes their outputs. Building the grid costs
 3. Why does attention cost grow with the square of the input length, and name two things that follow in practice.
 4. What do several heads give you that one does not?
 5. Your colleague says the attention weights prove the model linked "it" to "cat". How do you answer?
-6. Why can attention not tell "the cat sat on it" from "the sat cat on it"? Why would swapping the *last* word not make the same point?
+6. Why can the attention formula not tell "the cat sat on it" from "the sat cat on it"? Why would swapping the *last* word not make the same point?
 
 ### Review Answers
 
@@ -726,8 +728,8 @@ at 4,096.
 3. Because every position is compared with every other, so there are `\(n^2\)`{=latex} pairs per
 head, each costing a dot product of the head's width — and since the heads divide the width
 between them, the whole layer comes to about `\(n^2 d\)`{=latex} whatever the number of heads. Double the input and the work goes up four
-times. Two consequences: long inputs cost more than proportionally, which is why a context
-limit is a number somebody chose rather than a preference; and recomputing the whole grid for
+times. Two consequences: long inputs cost more than proportionally, which is a large part of
+why a context limit is a number somebody chose rather than a preference; and recomputing the whole grid for
 every token of a reply would be ruinous, since all but the newest row and column are unchanged
 — which is what the key–value cache exists to avoid.
 4. Several independent opinions about what is relevant, computed in parallel. One head produces
@@ -741,7 +743,7 @@ its blend from that position — and that it is one head in one layer out of doz
 which everything is mixed again and passed up the stack. A weight says where a blend came from.
 It is not a reason, and "the model understood" is a claim about the whole computation made from
 a reading of one step of it.
-6. Because the output of attention is a sum of the value vectors, and addition does not depend
+6. Because the output of the attention formula is a sum of the value vectors, and addition does not depend
 on order. Swap two tokens and their weights swap with them, so the total is unchanged — this
 chapter shows exactly that, with the same output vector before and after. Swapping the last
 word would not make the point, because the last position is the one supplying the query: change

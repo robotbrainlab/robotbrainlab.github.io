@@ -180,7 +180,7 @@ often itself a formula you already know. The dot product above is just
 
 > **Tip:** You met `\(\prod\)`{=latex} in Chapter 4 without the notation. "Ten steps, each
 > right nine times in ten" is a product: `\(0.9^{10} = 0.349\)`{=latex}. Compounding error is
-> a `\(\prod\)`{=latex}, and that is why it falls so fast — multiplying numbers below one
+> a `\(\prod\)`{=latex}, and that is why it falls so fast — multiplying numbers between 0 and 1
 > always shrinks them.
 
 ## Matrices, and Multiplying Them
@@ -252,8 +252,8 @@ power is written `\(e^x\)`{=latex} or `\(\exp(x)\)`{=latex}, and the two mean th
 figures were each rounded on the way, which is the same effect step 9 of the lab makes
 explicit. Equal steps in, multiplication out. And
 `\(e^x\)`{=latex} is always positive, for every `\(x\)`{=latex} including negative ones:
-`\(e^{-2} = 0.135\)`{=latex}. That property is the entire reason softmax works, two sections
-from now.
+`\(e^{-2} = 0.135\)`{=latex}. That property is what lets softmax produce probabilities at all,
+two sections from now — nothing else in it keeps a result from coming out negative.
 
 A **logarithm** undoes it. `\(\ln(y)\)`{=latex} answers "what power of `\(e\)`{=latex} gives
 `\(y\)`{=latex}?", so `\(\ln(7.389) = 2\)`{=latex}. The one property to carry:
@@ -269,9 +269,11 @@ A **logarithm** undoes it. `\(\ln(y)\)`{=latex} answers "what power of `\(e\)`{=
   ln 2 + ln 3 = 0.693 + 1.099 = 1.792
 ```
 
-That is why logarithms appear wherever many probabilities get multiplied together. Multiply a
-thousand numbers below one and you get something too small for a computer to hold; add their
-logarithms instead and nothing overflows. Chapter 14 uses exactly this.
+That is why logarithms appear wherever many probabilities get multiplied together. Multiply
+enough numbers below one and you get something too small for a computer to hold: a thousand
+factors of 0.1 is already far past the limit, where a thousand factors of 0.99 is only
+`\(4.3 \times 10^{-5}\)`{=latex} and perfectly fine. Add their logarithms instead and
+nothing underflows. Chapter 14 uses exactly this.
 
 ## Softmax, Read as a Formula
 
@@ -312,11 +314,14 @@ Four properties follow straight from the arithmetic, and all four get used later
 | Every result is positive | `\(e^x\)`{=latex} is always positive, whatever the score was |
 | They add to exactly 1 | Every share is divided by the same total |
 | The order is preserved | A bigger score always gets a bigger share |
-| Gaps get exaggerated | Scores 2.0 and 1.0 differ by 1; their shares differ by a factor of 2.7 |
+| Gaps get exaggerated | Two shares differ by `\(e\)`{=latex} to the power of their score gap: a gap of 1 becomes a factor of 2.7 |
 
-That last one is the interesting one. The scores went in roughly evenly spread, and the
-probabilities came out heavily favouring the top. Softmax does not just normalise — it
-sharpens. Chapter 13 is about controlling how much.
+That last one is the interesting one. These scores went in about a point apart, and the
+probabilities came out heavily favouring the top. So softmax does not just normalise — it turns
+a *gap* in the scores into a *multiple* in the shares, and how much it sharpens depends entirely
+on how far apart the scores were. Put in `\((0.2, 0.1, 0.01)\)`{=latex}, which is just as
+evenly spread, and the shares come out `\((0.366, 0.331, 0.303)\)`{=latex} — barely sharpened
+at all. Chapter 13 is about controlling that.
 
 > **Note:** Nothing about softmax knows what the scores mean. It is arithmetic on a list. When
 > you see it inside the attention formula in Chapter 11 and again on the way to a word in
@@ -409,7 +414,8 @@ are `\(e^{1} = 2.718\)`{=latex} and `\(e^{3} = 20.086\)`{=latex}.
 
 *Expected result:* total `\(2.718 + 2.718 + 20.086 = 25.522\)`{=latex}, and dividing each
 exponential by it gives `\((0.106,\ 0.106,\ 0.787)\)`{=latex}. Two equal scores give two equal
-shares, and a score two higher takes about four fifths of the whole. That is the sharpening, in
+shares, and a score two higher takes about four fifths of the whole. That is the sharpening at
+gaps of about a point, in
 one line.
 
 Your three figures add to 0.999 rather than 1, and that is not a mistake: the two exponentials
@@ -445,7 +451,8 @@ multiplying two matrices is the dot product of every row with every column, whic
 columns of the first must match the rows of the second. `\(e^x\)`{=latex} is always positive
 and turns equal steps into multiplication; a **logarithm** undoes it and turns multiplication
 into addition. **Softmax** exponentiates every score and divides by the total, giving positive
-numbers that sum to 1, in the same order, with the gaps exaggerated. **Big-O** says how a cost
+numbers that sum to 1, in the same order, turning each gap in the scores into a multiple in the
+shares. **Big-O** says how a cost
 grows rather than how long it takes, and throws away constants on purpose.
 
 ### Key Terms
@@ -459,7 +466,7 @@ grows rather than how long it takes, and throws away constants on purpose.
 | **Length** | What a ruler would measure if the slots were coordinates: square every slot, add them, take the square root |
 | **Logarithm** | The inverse of raising `\(e\)`{=latex} to a power. It turns multiplication into addition, which is why it appears wherever many probabilities are combined |
 | **Matrix** | A grid of numbers, read as rows or as columns depending on what you are doing |
-| **Softmax** | Turns a list of scores into positive numbers that sum to 1, preserving their order and exaggerating the gaps between them |
+| **Softmax** | Turns a list of scores into positive numbers that sum to 1, preserving their order and turning each gap between scores into a multiple between shares |
 | **Big-O** | How a cost grows as an input grows, with constants and smaller terms deliberately discarded. Not a measurement of time |
 
 ### Worth Memorising

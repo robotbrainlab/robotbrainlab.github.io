@@ -65,6 +65,44 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**44. Two reviews per chapter was not enough for one whole class of defect, and ten closed
+chapters proved it.** The reader asked, on 28 Oct 2026, whether the attention paid to page
+counts had damaged the content. An audit said no — no record anywhere shows material cut or
+padded to fit a budget, and the page spread runs 56% to 125% with no cluster at 100%. But the
+audit surfaced something else: the failure mode that had dominated every recent review, **a
+claim stated one notch wider than its own support**, was not named as a class until entries 34,
+37 and 40, which came out of chapters 20, 22 and 25. Chapters 1 to 19 were reviewed before any
+brief hunted for it. And of the three chapters where a *third* reading was ever run — 23, 25,
+26 — it found a blocking teaching error in all three.
+
+So a narrow pass went over chapters 8 to 17, briefed on that one mode and told to reject
+omissions, style and coverage outright. **It found 36 claims needing narrowing across ten
+chapters, about 3.6 each**, in chapters that were twice-reviewed and gate-clean. The worst were
+not vague: chapter 15 told the reader a batch of fifty makes each request cost "something
+approaching fifty" times less, where its own next paragraph picks a configuration whose ceiling
+is **4.34x**; chapter 16 asserted that the output-as-scratchpad mechanism is why working-out
+improves accuracy, which **chapter 22 explicitly refuses** in as many words; chapter 10's claim
+that different vocabularies give different token counts is refuted by **its own lab step 8**;
+chapter 13 told the reader every token after a flipped near-tie differs, where its own
+mechanism requires a tie to flip at all.
+
+**Three things are worth carrying from the shape of it.**
+
+*The crib sections are where this lives.* Of the 36, a large share sat in a Summary, a Key
+Terms row, a Worth Memorising row, a lab key or an answer key — and in several cases the
+Summary held the *correct* narrow form while a glossary row or an answer held the wide one,
+which is the inversion of the usual direction. A fix that reaches the argument and not the
+glossary has not been made.
+
+*A gate cannot catch this.* Every one of these chapters passes every gate, and the gates are
+not the weaker for it — arithmetic, index shape, bank coverage and citations are all now checked
+book-wide. What no machine can check is whether a true sentence is stated at the strength its
+evidence carries. That is why the pass had to be a reading.
+
+*The mode is still sharpening.* Each chapter written teaches more about what it looks like, so a
+pass run later catches more than the same pass run earlier — which is the argument for running
+this again over chapters 18 to 26 once Part II is finished, rather than once per chapter.
+
 **42. A citation is the one claim a reviewer cannot check without leaving the chapter.**
 Chapter 23 credited chapter 51's premise to chapter 16 and chapter 21's sentence to chapter 20.
 Chapter 25 credited one of chapter 21's to chapter 20 as well. All three read perfectly in place:

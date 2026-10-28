@@ -14,7 +14,9 @@ reviewed: 2026-10-28T03:22:38+05:30
 absolutes: verify-absolutes.py: 93 before, 103 after the byte paragraph. Five were false; each is listed with its counter-example under 'While writing'. The third exposed a real gap rather than a loose sentence - the chapter was using the byte floor without ever giving it to the reader.
 new-terms: verify-inputs.py: bare-terms 0 CLEAN. Seven terms introduced here, all bolded and all in Key Terms: token, subword, tokeniser, byte-pair encoding, merge list, input tokens, output tokens. Chapters 1-8 use the word 'token' zero times; chapter 9 uses it informally and hands it here.
 covers-misses: verify-coverage.py: 0 misses. All eight Covers items delivered: why text becomes tokens (the two failures of words and of characters, with the parameter arithmetic); subword vocabularies; **the merge procedure run by hand on a toy corpus** (five words, every pair table printed, five merges, the resulting 12-entry vocabulary and the tokenisation it gives); input and output tokens (a table of four properties); tokens as the unit of both cost and latency; counting before sending (the rule of thumb and the exact method, with a warning about which to use when); why code and non-English text cost more (both derived from where the merges were spent); why a model miscounts the letters in a word.
-sha256: b0d7741e0fb95a2b70e1964ddffc156d85fd0833c64064a5d253830862623c6b
+amended:
+  - 2026-10-28T12:52:40+05:30: Sharpen pass: 'two models with different vocabularies will cut the same sentence into different numbers of pieces' is refuted by the chapter's own lab step 8, where a different vocabulary gives runner as 3 tokens either way - narrowed to 'can' in the body and to 'a count does not carry' in Key Terms and Worth Memorising; a letters vocabulary was credited with making everything representable, which the bytes paragraph refutes twenty lines later; and the Summary turned the body's capability claim into the flat outcome 'a model miscounts', which the body twice declines to make
+sha256: 705b2338d44f0e8e6aae4da52b4144ed5cb2635ddf2ef4fb04b86ed82c61b8b1
 
 ## Before writing
 

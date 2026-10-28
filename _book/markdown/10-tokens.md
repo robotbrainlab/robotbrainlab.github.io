@@ -42,14 +42,14 @@ which keeps the program running and throws the word itself away: every unknown n
 the same unknown name. That is not a quality problem, it is a hole.
 
 **Letters fix the hole and create a different one.** An alphabet, digits and punctuation make
-a vocabulary of a hundred-odd entries. Everything is representable and the lookup table is
-tiny. But an English word runs about five characters, so cutting at letters makes the list of
+a vocabulary of a hundred-odd entries. Every *word* is representable — no word arrives as
+nothing — and the lookup table is tiny. But an English word runs about five characters, so cutting at letters makes the list of
 pieces several times longer than cutting at words — and Chapter 9 showed that every piece of
 a reply costs one whole forward pass. Several times the pieces is several times the passes,
 and the input grows the same way.
 
 So the two obvious answers fail in opposite directions: words give you a vocabulary too large
-to hold and still cannot represent everything, letters represent everything but make the
+to hold and still cannot represent everything, letters leave no unknown words but make the
 sequences too long.
 
 **The working answer is to let the corpus decide where to cut.** Keep single characters in
@@ -204,8 +204,9 @@ corpus had seen a great deal and yours was not.
 
 > **Note:** The merge list is part of the model, fixed when the model was built, exactly like
 > the embedding table of Chapter 9. As a caller you do not choose it and cannot change it, and
-> two models with different vocabularies will cut the same sentence into different numbers of
-> pieces. A token count
+> two models with different vocabularies can cut the same sentence into different numbers of
+> pieces — can, not must: step 8 of the lab builds a different vocabulary that happens to give
+> the same count. A token count
 > is therefore a fact about a *particular* model, never about your text on its own.
 
 ## The Space Belongs to the Word
@@ -343,8 +344,8 @@ that matters — a number ten times too big.
 model you are calling. That program — the one that cuts text into tokens and maps each to its
 index, using one model's vocabulary and merge list — is its **tokeniser**. Providers publish
 theirs, or an endpoint that counts for you, and the
-count is a function of the vocabulary and the merge list, so a count from the wrong model is a
-different number. Your reply also
+count is a function of the vocabulary and the merge list, so a count from the wrong model does
+not carry. Your reply also
 reports what was actually used, which is the figure to trust and the figure to log.
 
 > **Warning:** Do not estimate the input to a feature that runs ten thousand times a day. The
@@ -560,7 +561,8 @@ meaning or of length. The leading space belongs to the word, so "cat" and " cat"
 tokens. **Input tokens** and **output tokens** are counted and priced separately, output costs
 several times more and sets how long the rest of the reply takes, and only the input can be
 counted before you send. Code and non-English text cost more because the merges were spent on English prose.
-A model miscounts the letters in a word because a token's spelling is not in its input. Count
+A model has no way to count the letters in a word, because a token's spelling is not in its
+input; a right answer is recall of the spelling rather than counting. Count
 roughly at four characters to the token, and exactly with the tokeniser of the model you are
 calling.
 
@@ -570,7 +572,7 @@ calling.
 |---|---|
 | **Token** | One entry in a model's vocabulary — usually a piece text is cut into. Beyond the single bytes, which are always there, which pieces earned an entry is a matter of frequency in the corpus the vocabulary was built from — not of meaning or length |
 | **Subword** | A token that is part of a word rather than a whole one. What makes it possible to represent a word the vocabulary has never seen |
-| **Tokeniser** | The program that cuts text into tokens and maps them to indexes, using one model's vocabulary and merge list. A different model's tokeniser gives a different count |
+| **Tokeniser** | The program that cuts text into tokens and maps them to indexes, using one model's vocabulary and merge list. A count does not carry from one model's tokeniser to another's |
 | **Byte-pair encoding** | Building a vocabulary by starting from the 256 single bytes and repeatedly merging the commonest adjacent pair in a corpus until the vocabulary is the size wanted. Starting from bytes is what makes any text at all representable |
 | **Merge list** | The merges, in the order they were made. Kept with the model and replayed in that order to tokenise any later text |
 | **Input tokens** | Everything you send on a call — instructions, attached material and the request. Countable exactly before you send |
@@ -585,7 +587,7 @@ calling.
 | The merge step | Merge the commonest adjacent pair; recount; repeat |
 | Why a word is one token | It was common enough for a merge to be spent on it |
 | Which half is dear | Output, at several times input, and one forward pass per token |
-| What a token count is a fact about | One particular model. A different vocabulary gives a different count |
+| What a token count is a fact about | One particular model. A count does not carry across vocabularies |
 | The worst case | One token per byte — the most byte-pair encoding can ever charge you |
 
 ### Review Questions

@@ -52,7 +52,7 @@ Greedy sounds like it should be the good option, and it is the right choice for 
 the wrong one for a surprising amount of it. Two reasons.
 
 **It is locally greedy, and text is not local.** Taking the most likely next token at every
-step does not produce the most likely sentence. A high-scoring first token can lead into a
+step is not guaranteed to produce the most likely sentence, and usually does not. A high-scoring first token can lead into a
 corner where every continuation is poor, while a second-choice first token opens onto something
 much better. Nothing in the procedure looks ahead.
 
@@ -241,7 +241,7 @@ zero, get greedy decoding, take the biggest logit every time — and still get d
 two identical calls. There is no randomness in that procedure. So where does the variation come
 from?
 
-**Four places, and none of them is the model being unpredictable.**
+**Four places that bite in practice, and none of them is the model being unpredictable.**
 
 **Floating-point addition is not associative.** Adding a list of numbers in a different order
 can give a slightly different answer, because each intermediate result is rounded to a fixed
@@ -254,9 +254,9 @@ efficiency. How many, and which ones, depends on who else is calling at that mom
 batch's shape changes how the arithmetic is grouped, which by the point above changes the last
 digits. Chapter 15 is where batching is explained properly.
 
-Those two combine into the thing that actually bites. Two logits are 6.0000001 and 6.0000000;
+Those two combine into the case that is easiest to see. Suppose two logits are 6.0000001 and 6.0000000;
 greedy takes the first. Change the last digit through a different summation order and greedy
-takes the second — **a different token, and from there a different sentence.** The difference is
+takes the second — **a different token, and from there the reply may diverge entirely.** The difference is
 not in the model, the prompt or the settings. It is a tie broken the other way.
 
 **Some models route tokens to different parts of themselves.** In a model built with experts,
@@ -299,8 +299,9 @@ verdict you could defend. This half of the book is mechanism; Chapter 20 is wher
 turns to how you would know.
 
 > **Tip:** The habit to build now, before Chapter 20 gives you the statistics: **run it five
-> times before you believe it.** Five is not a number with a theory behind it. It is the
-> smallest number that reliably shows you the spread exists.
+> times before you believe it.** Five is not a number with a theory behind it. It is small
+> enough to do every time and usually enough to show you the spread is there at all — and
+> Chapter 20, which says how small a spread can be, is why *usually* is the honest word.
 
 ## Lab: Draw From a Distribution
 
@@ -425,7 +426,7 @@ provider may have changed the model, or the hardware and libraries it runs on.
 
 The raw scores coming out of the final matrix multiplication are the **logits**, one per
 vocabulary entry, and only their differences matter. **Greedy decoding** takes the largest and
-is what temperature zero does in practice; it is locally greedy, so it does not produce the most
+is what temperature zero does in practice; it is locally greedy, so it is not guaranteed to produce the most
 likely sentence, and it makes models repeat themselves. **Temperature** divides the logits
 before softmax — below 1 it sharpens the distribution, above 1 it flattens it, and it never
 changes the order, so it has no effect at all on greedy decoding. **Top-k** keeps a fixed number
@@ -437,8 +438,8 @@ supplied is matched; outside it, the input can fill up or your code can cancel.
 **Temperature zero is not a guarantee**: floating-point addition is not associative, batching
 changes the summation order, expert routing can depend on your neighbours, and what the
 provider runs underneath you can change. Some of those move the last digits of a score, which
-flips a near-tie; others change the computation outright. Either way every token after the
-change is different. And because one call
+flips a near-tie; others change the computation outright. Where a near-tie does flip, the reply
+may diverge from that token on; where none is close enough, the greedy path is identical. And because one call
 is one draw, **one good output is not evidence**, which is the problem Chapter 20 solves.
 
 ### Key Terms
@@ -487,7 +488,7 @@ is largest — can change for reasons that have nothing to do with the model. Fl
 addition is not associative, so a different summation order gives different last digits; a GPU
 splits a long addition across many units and combines their partial sums, and how it splits
 depends on what else was in your batch. Two
-logits a hair apart can swap, greedy takes the other token, and every token after it differs.
+logits a hair apart can swap, greedy takes the other token, and from there the reply may diverge.
 Models with expert routing can also depend on batch composition, and the provider may have
 changed the model, or the hardware and libraries it runs on. Nothing there is randomness in the
 usual sense, which is why a seed does not fix it.
@@ -496,7 +497,7 @@ dividing every logit by the same positive number cannot change which is largest 
 they are reaching for is already disconnected. If the output is varying anyway, the cause is one
 of the four in this chapter, and the fix is in their code: assert on shape rather than on
 strings, log what came back, and stabilise with a validator or a cache rather than a setting.
-4. When the model's confidence varies across the generation, which it always does. Top-k keeps
+4. When the model's confidence varies across the generation, which it usually does. Top-k keeps
 the same number of options whether the model is certain or not — so it leaves thirty-nine bad
 options in play when one token is at 0.98, and cuts away good ones when a hundred tokens are
 near-equal. Top-p keeps however many it takes to cover the mass, so it is narrow where the model
