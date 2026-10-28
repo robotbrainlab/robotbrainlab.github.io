@@ -1,6 +1,6 @@
 # Handover — Modern AI Engineering from Zero
 
-Last updated: 2026-10-28 (chapter 25 closed; Part II state in section 3).
+Last updated: 2026-10-28 (chapter 26 closed, sharpen pass over 8-17 applied; stopped at the reader's request).
 
 Read this file first, then `BOOK-GUIDE.md` (the spec), then `TOC.md` (the plan).
 
@@ -63,8 +63,20 @@ repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the c
 **Part I is complete: all 17 chapters, 197 printed pages against a 266-page estimate.**
 Its first half (1 to 7) is 70 pages against 98; *Inside the Model* (8 to 17) is 127 against 168. `bash tools/check-all.sh` ends `ALL GATES PASS`.
 
-**Part II is drafting: chapters 18 to 25 closed, 121 printed pages against 122.** The book is
-**332 printed pages** over 25 of 57 chapters. Chapters 21, 22 and 25 are the first to exceed
+**Part II is drafting: chapters 18 to 26 closed, 152 printed pages.** The book is
+**365 printed pages** over 26 of 57 chapters. Chapter 26 is the longest at 30 pages.
+
+**Stopped here on 28 Oct 2026, at the reader's request, with everything pushed and the PDF
+delivered.** Nothing is half-finished: chapter 26 is closed and sealed, the sharpen pass over
+chapters 8-17 is applied and every record amended, and `bash tools/check-all.sh` ends
+`ALL GATES PASS`. **The next chapter to write is 27, Parsing, Chunking and Indexing Your
+Documents** — begin with `python3 tools/chapter.py begin 27-<slug>` and read its sources in
+full first, per §14 step 1.
+
+**Two things waiting, neither blocking chapter 27.** The sharpen pass should be run again over
+chapters 18 to 26 once Part II is finished, and `LEDGER-DEFECTS.md` entry 44 says why later is
+better than per-chapter. And `labs/` is still empty, which chapter 7 promises and §9 specifies;
+chapter 26 had to print its own corpus because of it. Chapters 21, 22 and 25 are the first to exceed
 their estimates, each in its fix pass rather than in drafting. The reviews have changed
 character across Part II: the early chapters failed on arithmetic and on invented program
 output, which is gone now that every program is written and run before any sentence about it,
