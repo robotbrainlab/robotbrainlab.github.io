@@ -172,3 +172,12 @@ written from memory.
 | Why a corpus outgrows a window | 100 documents × 2,000 tokens = 200,000, about 1.6× a 128,000-token window | 28 |
 | What filling a window costs | Chapter 15's cache is 512 KiB per token, so 128,000 tokens is 62.5 GiB, against 13 GiB of weights. Multiply the per-token figure, not its rounded total — and divide by the head-sharing ratio before quoting any multiple | 28 |
 | Long context against retrieval | Different questions: which text is relevant, and how much you can afford to show. Neither replaces the other | 28 |
+| Why exhaustive search runs out | Its cost is linear in the collection. Not an inefficiency — it follows from comparing against everything | 29 |
+| What an ANN index trades | Exactness for work. Call it a speedup whose cost you have measured, or you have not measured it | 29 |
+| The work a probing index does | Centroids + the vectors in the lists probed. The first term never goes away | 29 |
+| When an index is worse than none | When you probe every list: 2020 comparisons against brute force's 2000 | 29 |
+| How recall is measured here | Against the exhaustive answer, once, offline, on a sample. Chapter 26's recall@k, not Chapter 24's answer key | 29 |
+| The number people do not look at | The worst query. Mean 0.925 with a worst of 0.4 is fourteen perfect queries averaged with six partial ones, not a uniform small loss | 29 |
+| What post-filtering returns | About `f × s`: fetch `f` from a tenant holding share `s`. 100 × 0.01 ≈ 1, when you asked for 10 | 29 |
+| Why pre-filtering can be cheaper | An ANN index avoids comparing against a million vectors; a tenant owning twenty has no such problem | 29 |
+| The number to write down for multi-tenancy | The smallest tenant's share of the corpus | 29 |

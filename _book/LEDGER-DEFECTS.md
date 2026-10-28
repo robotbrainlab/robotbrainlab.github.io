@@ -65,6 +65,37 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**47. Generated data can have a property you did not put there, and a program's seeding can
+encode the answer it is presented as finding.** Chapter 29 made a corpus of twenty clusters with
+`sin(group * 1.7 + d)` and said so. It was not twenty. Because 11 × 1.7 = 18.7, within 0.15 of
+6π, groups eleven apart came out at cosine **0.9858** against −0.0192 for adjacent ones — so by
+the only measure the index uses, the corpus held about eleven clusters, and the index was
+splitting 18 of the 20 nominal groups across two lists. Two passages explained their
+measurements using a structure the data did not have.
+
+**What made it invisible is that I checked the wrong thing.** The list *sizes* came out 94 to
+106, close to the hundred I expected, and that matched. Memberships did not, and nothing prints
+memberships unless you ask.
+
+**Then the fix did it again, one level up.** The rebuilt corpus genuinely has twenty separable
+groups, and the index genuinely finds them — but only because `build` seeds from one vector
+every `N // nlist` over groups that are blocks of `N // nlist`, so it starts with a point inside
+each one. Seeded at random it recovers them in **0 of 10** trials, with lists from empty to
+double size. "Discovered rather than told" was false again, for an entirely different reason, in
+five places including the program's own docstring.
+
+**So the entry has two halves and they share a cause.** *Check the property you claim, on the
+data you generated, by the measure the program actually uses* — not a proxy like size, and not
+the formula's intent. And *check what the starting conditions give away*: a demonstration that
+finds structure is only a demonstration if it would still find it from somewhere else. Both are
+one line of code and neither is reachable by any gate, because a gate reads prose and arithmetic
+and this lives in the data and the seed.
+
+A third thing worth carrying: the docstring written to confess the first defect contained three
+errors of its own, including a cosine of 0.99 described as "0.99 apart" — which inverts it — and
+a mention of an earlier draft of this book, which the voice rule forbids and no pattern caught.
+**A confession is new prose. It gets the same reading as anything else.**
+
 **46. A qualifier added to scope a claim can invert it, and the sentence defending it will say
 "the direction holds".** Chapter 28 computed that filling a 128,000-token window costs 62.5 GiB
 of key-value cache against 13 GiB of weights, and wrote that this is *nearly five times the
