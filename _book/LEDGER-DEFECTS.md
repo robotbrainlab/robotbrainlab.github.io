@@ -65,6 +65,40 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**58. Given a list, a writer supplies the reason the source withheld.** The 2026-07-28 MCP
+specification deprecates roots, sampling and logging. Chapter 36's first draft of that passage
+said why: "All three needed a connection held open in both directions, which is exactly what a
+stateless protocol gives up." It is a good sentence. The specification's deprecation registry
+gives three *unrelated* migration paths — pass directories as tool arguments, call a model
+provider directly, log the way you log everything else — and **elicitation needed the same
+held-open stream and was kept**, re-expressed as a multi-round-trip request. Roots itself still
+works inside the stateless protocol. So the tidy cause was not merely unsupported; the source
+contains its counter-example, one page away.
+
+The same paragraph did the smaller version of it twice. The specification says roots "are
+informational guidance rather than an access-control mechanism" and that "the protocol does not
+enforce that servers stay within roots"; the draft wrote "which directories it may look in",
+which is the permission reading the source explicitly disclaims. And it dated the HTTP+SSE
+transport's deprecation to this revision with "an offramp of about a year", where the registry
+says 2025-03-26 and a removal three months after a policy reaches Final — the release post and
+the registry disagree, and reading only the post made the chapter pick a side without knowing
+there was one.
+
+**The shape.** A list of things with no stated reason is an invitation, and the reason that
+comes to mind is the one that makes the list look designed. No gate can reach this:
+`verify-boundary.py` sees no theory, `verify-absolutes.py` lists the sentence as an absolute and
+cannot test it, and `citations.py` only reads citations to *chapters*, so an external source is
+outside every check the suite has. **When a source enumerates without explaining, write the
+enumeration.** And when two official pages of one source disagree, say so in the chapter rather
+than choosing — that is what chapter 6's dated-detail row is for.
+
+**And entry 57's grammar half has now happened in consecutive chapters.** Chapter 35 shipped "a
+later step that reads it will not has no reason to look"; chapter 36 shipped "the one a generated
+wrapper can cannot write". Both are a verb inserted without the old one removed, both reached a
+built PDF, and nothing reads grammar. Two in two chapters is a habit, not an accident: **after a
+patch to a sentence, read the sentence** — not the diff, which is where the eye goes and where
+the old half is invisible.
+
 **57. A fix that cites another chapter to weaken a claim is the easiest kind to get wrong,
 and no gate reads a citation.** Chapter 35 over-claimed that a summary drops negative results
 "rather than an accident of this example", and the repair demoted it with "In Chapter 6's terms

@@ -232,3 +232,12 @@ written from memory.
 | Up front against just in time | Up front only wins at 11 of 12 documents | 35 |
 | First into the must-keep list | The negative results — the cheapest line in it | 35 |
 | A note's two fields | Where it came from, and when it was written | 35 |
+| Endpoints against purposeful tools | 12 at 210 characters is 2,520; 4 at 340 is 1,360 — 46% less, each description longer. 210 is measured, 340 is chosen | 36 |
+| What the 46% is | Money on every call, not room: Chapter 35 puts tool definitions at 1.4% of a run's context | 36 |
+| What an output carries | What the task reads, plus anything the model would need a second call to work out | 36 |
+| Worked: an unread output | 19 of 26 fields, 78% of the characters | 36 |
+| The three error styles | A status recovers 0 of 8, naming the fault 2, saying what to do next 6 | 36 |
+| What to rank tools by | Defects, not failure rate | 36 |
+| MCP's three participants | Host, one client per server, server | 36 |
+| What an MCP server offers | Tools, resources, prompts | 36 |
+| MCP's dated part | The handshake and session header, retired in the 2026-07-28 revision | 36 |

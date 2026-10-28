@@ -70,6 +70,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Document frequency** | How many documents in the collection contain a term at all | 26 |
 | **Document length** | How many terms a document holds, compared with the collection average. BM25's third input, and the reason a long document is not automatically more relevant | 26 |
 | **Dot product** | Multiply two vectors slot by slot and add the results. Large when both are large in the same slots — and also larger when either is simply longer | 8 |
+| **Elicitation** | The one thing a client offers a server: a way for the server to ask the user for something it needs. The only client feature the 2026-07-28 revision lists, now that roots and sampling are deprecated | 36 |
 | **Embedding** | The vector an embedding model returns for a given text. Its width is the model's, and it is the same for a word, a sentence and a page | 24 |
 | **Embedding model** | A model whose whole job is to turn one piece of text into one vector of fixed width. No output tokens, nothing to continue | 24 |
 | **Embedding table** | A matrix with one row per vocabulary entry. Looking a token up in it is how that token enters the model; the rows are called embeddings | 9 |
@@ -126,15 +127,20 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Masked mass** | How much probability the constraint deleted at a step. Small means the constraint was free; large means it overruled the model | 22 |
 | **Masking** | Setting a forbidden token's score to `\(-\infty\)`{=latex}, which makes its probability exactly zero after the softmax — as long as one token survives. Mask them all and you get `nan`, not zero | 22 |
 | **Matrix** | A grid of numbers, read as rows or as columns depending on what you are doing | 8 |
+| **MCP client** | The connector inside the host, one per server, so "a client per connection" and "a client per server" are the same sentence. It is what makes the calls; the model never sees it | 36 |
+| **MCP host** | The application holding the model. It opens the connections, holds one client per server, and is where consent for a tool call lives | 36 |
+| **MCP server** | A service offering tools, resources and prompts to a client. Its tool descriptions are input to your prompt, so they are untrusted unless you run the server | 36 |
 | **Mean reciprocal rank** | The average of the reciprocal rank over a set of queries | 26 |
 | **Memory-bound** | A step whose speed is set by how fast numbers arrive from memory rather than by the arithmetic done with them. At two bytes per parameter, decode does about one operation for every byte it reads, on hardware built for hundreds | 15 |
 | **Merge list** | The merges, in the order they were made. Kept with the model and replayed in that order to tokenise any later text | 10 |
 | **Metadata filter** | Restricting a search to documents with some property — an owner, a date, a department | 29 |
 | **Mixture of experts (MoE)** | Replacing one feed-forward block per layer with several and routing each token through a few of them. The model holds all of them and runs some | 15 |
 | **Model** | A service that takes text and returns generated text, charged by the amount of text | 1 |
+| **Model Context Protocol (MCP)** | A documented wire format between an application holding a model and a service offering tools, resources and prompts. Collapses per-integration glue. Adds no step to Chapter 23's five and moves no decision; step 4 becomes a call into another process. The model is not a participant | 36 |
 | **Multi-head attention (MHA)** | Several attention heads run in parallel over slices of the width, their outputs joined by one further matrix. What this chapter's one head is a simplification of. Chapter 15's Note is what real systems do to the keys and values from here | 11 |
 | **Multi-tenant retrieval** | Retrieval where each user may see only their own documents, so the filter is a correctness requirement rather than an optimisation | 29 |
 | **Must-keep list** | The facts the rest of the task depends on, named before the summary is written and checked against it after. Written afterwards it is written from the summary and tests nothing | 35 |
+| **Namespaced name** | A tool name carrying its area before its verb, as in `orders.look_up`. The one part of a tool that appears again in every proposal and every result, and the cheapest edit available: renaming touches the registry key and nothing inside the function | 36 |
 | **Neighbour expansion** | Fetching the rows adjacent to a retrieved row in the original document and supplying them together. Needs some recorded locator — an offset, or an ordinal in the id; costs budget; does not know what is relevant | 28 |
 | **Next-token distribution** | One probability for every entry in the vocabulary, adding to 1, saying how likely each is to come next. The entire output of one call | 9 |
 | **Normalisation** | Rescaling the stream to a predictable range before each block reads it, so the numbers do not grow out of hand as layer after layer adds to them | 12 |
@@ -166,8 +172,10 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Pretraining** | Running the loop on an enormous quantity of general text. Where essentially all of a model's knowledge comes from, and nearly all of the computation | 14 |
 | **Probe** | One group the index looks inside at query time. More probes always mean more work, and never less recall — but once recall is exact, further probes buy nothing | 29 |
 | **Prompt chaining** | Stages in sequence, each call's output the next one's input. Used when the work has nameable stages that are easier asked separately | 34 |
+| **Prompt template** | A templated message or workflow an MCP server offers to users. Not a tool, and not something the model selects | 36 |
 | **Proposal** | What the model emits — tokens your code reads as a request to run something. Nothing has happened yet | 23 |
 | **Provenance** | A note's two extra fields: where it came from — read, inferred or told — and when it was written. They do not make a note true; they say which notes expire and which were never checked | 35 |
+| **Purposeful tool** | A tool written for a task somebody asks for rather than for an endpoint that exists. Does the joining your code would have done, and costs less in total than the endpoints it replaces even though its description is longer | 36 |
 | **Quantisation** | Storing each parameter in fewer bits. Halving the bits halves the memory and roughly halves the time spent reading, at a cost in precision that has to be measured | 15 |
 | **Query** | The vector saying what a position is looking for, made by multiplying its vector by `\(W_Q\)`{=latex} | 11 |
 | **Reading order** | The order a person reads a page in. A human fact about a layout, and not something a page description like PDF records — some formats do store an order, which is why the problem is format-specific | 27 |
@@ -186,6 +194,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Reranking** | Rescoring a small candidate set with a more expensive method than the one that produced it | 26 |
 | **Residual connection** | Adding a block's output to the vector that went into it, rather than replacing it. What lets a layer contribute nothing and pass its input through | 12 |
 | **Residual stream** | The running vector passing up through the stack, which every block adds into. By the end it is a sum of every contribution made along the way, with nothing marking which is which | 12 |
+| **Resource** | Context and data an MCP server offers for the user or the model to use, as against a function for the model to execute | 36 |
 | **Retrieval** | Searching your own collection for the passages that bear on a request, so they can be put into the context | 2 |
 | **Retrieval-augmented generation (RAG)** | The arrangement where your code searches your own material, puts what it found into the context, and the model answers out of that. Names the whole arrangement rather than any one part of it | 2 |
 | **Routing** | One call picks a branch from a menu your code wrote; your code runs the branch. The model sees the labels and never the code behind them. Chapter 52's routing is a different thing — choosing between models for one request | 34 |
@@ -217,6 +226,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Token bucket** | A limiter on the *rate* rather than on how many run at once, for when the requests-per-minute limit is the one that hurts | 19 |
 | **Tokeniser** | The program that cuts text into tokens and maps them to indexes, using one model's vocabulary and merge list. A count does not carry from one model's tokeniser to another's | 10 |
 | **Tool** | An action the model may ask for. The model proposes it; your code decides whether to run it | 2 |
+| **Tool defect** | A failure the tool or its description could have prevented. Distinct from a refusal your code made correctly, which is the system working, and from a service being down, which is Chapter 19's. Rank tools by this, not by failure rate | 36 |
 | **Tool description** | The text your code sends about one function: a name, a sentence and the parameter names and types. Not the function, and not your constraints | 23 |
 | **Tool message** | A result your code returns after the model asked for something. Chapter 23 | 18 |
 | **Top-k** | Keeping only the `\(k\)`{=latex} highest-scoring tokens and renormalising. Keeps the same number of options however confident the model is | 13 |
