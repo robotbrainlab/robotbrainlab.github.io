@@ -211,7 +211,7 @@ questions, because that is a thing documents do.
 smaller set of curated examples: a request, and a good response to it. Nothing about the
 mechanism changes — it is still predicting the next token — but the text it is now predicting
 is the text of a helpful reply. This is the stage that turns a text continuer into something
-that answers.
+that answers. It is usually abbreviated to SFT[]{idx="SFT"}, in interviews as much as in writing.
 
 That distinction has a name you will meet on every provider's model list. A model that has had
 only the first stage is a **base model**; one that has had the later stages is usually called
@@ -304,7 +304,7 @@ one stretch of text: it runs *two* models — the one being trained and the froz
 over *two* replies, to get the four probabilities the formula needs. Step 3 then compares two
 whole replies rather than scoring one next token. Steps 1 and 4 are unchanged.
 
-This is **direct preference optimisation**, usually called DPO. It is stated here and not
+This is **direct preference optimisation**, usually called DPO[]{idx="DPO"}. It is stated here and not
 derived; why this particular expression is the right thing to minimise is outside this book.
 
 **But you can put numbers in it, and you should.** Take `\(\beta = 0.5\)`{=latex}, and write
@@ -333,7 +333,7 @@ at 0.693. The model has changed and the objective has not noticed.
 
 > **Note:** There is an older approach to the same job, where human rankings are used to train
 > a separate model that scores replies, and the main model is then trained against that scorer.
-> That is reinforcement learning from human feedback, RLHF. DPO's selling point is that it skips
+> That is reinforcement learning from human feedback, RLHF[]{idx="RLHF"}. DPO's selling point is that it skips
 > the separate scorer and optimises the preferences directly. Both are in use; the thing to be
 > able to say is what the *data* is — pairs of replies with a preference between them — because
 > that is what does not change.
@@ -509,7 +509,7 @@ true.
 | **Perplexity** | The exponential of the cross-entropy. Reads as the number of equally likely options the model is effectively choosing between; a uniform choice among `\(V\)`{=latex} options has perplexity `\(V\)`{=latex} |
 | **Gradient** | For each parameter, how much the loss would rise if that parameter rose. The update rule moves every parameter a small step against it. How it is computed is outside this book |
 | **Pretraining** | Running the loop on an enormous quantity of general text. Where essentially all of a model's knowledge comes from, and nearly all of the computation |
-| **Supervised fine-tuning** | Running the same loop with the same objective on curated request–response pairs. Turns a model that continues text into one that answers |
+| **Supervised fine-tuning (SFT)** | Running the same loop with the same objective on curated request–response pairs. Turns a model that continues text into one that answers |
 | **Base model** | A model that has had only pretraining. It continues text rather than answering, which is what the later stages change |
 | **Direct preference optimisation (DPO)** | The preference objective written as one formula: raise the preferred reply's probability relative to the rejected one, both measured against the model as it was before this stage. Stated in this book, not derived |
 | **Preference optimisation** | Training on pairs of replies with a preference between them, to make the preferred kind more likely relative to the other. Changes which of its existing behaviours come out; nothing in its objective rewards adding knowledge |

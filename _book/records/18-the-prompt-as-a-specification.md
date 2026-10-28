@@ -14,7 +14,9 @@ reviewed: 2026-10-28T05:44:38+05:30
 absolutes: verify-absolutes.py: 80. Three were false and one of them - 'never drop the system message' - had its counter-example in a Note on the same page. Each is listed under 'While writing'.
 new-terms: verify-inputs.py: bare-terms 0 CLEAN. Nine terms introduced here, all bolded and all in Key Terms: instructions, examples, output format, supplied information, system message, user message, assistant message, tool message, turn. Four were added during review.
 covers-misses: verify-coverage.py: 0 misses. All five Covers items delivered: the four separable parts, with a prompt pulled apart and three concrete reasons the split matters; the system, user, assistant and tool message list, shown as text and as the JSON a client library takes; multi-turn conversation state, with a ten-turn table showing the input growing from 300 to 2,550 and a definition of what a turn is; truncating a history that will not fit, with four strategies, what each loses and - added in review - how to choose between them; and changing one thing at a time, handed from chapter 13 and handed on to chapter 20. The fifth Covers item, why current practice weights what the model receives over how it is worded, is the chapter's closing section and its evidence label was rewritten twice.
-sha256: 4332dc35c0f555a07eada7696fdfd5e984d738543ba1d6871a7bf64f6d19aeb0
+amended:
+  - 2026-10-29T03:43:55+05:30: Name the interview shorthand: prompt engineering, few-shot and zero-shot, named where the four parts are given
+sha256: 7054b3d23158052571e1c839d071f0c4bd20438190fa9d70dd9e6522ca4a3adc
 
 ## Before writing
 

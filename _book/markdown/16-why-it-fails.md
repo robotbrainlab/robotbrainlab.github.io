@@ -144,7 +144,9 @@ been measured across several models and several tasks, and it is a repeated expe
 result rather than a single study — more than one study, and short of settled practice, because
 Chapter 6's tell for settled practice is written-down failure modes and nobody has written down
 where this stops holding — and still a finding about particular models rather than a law of the
-design.
+design. The field's name for it is **lost in the middle**, and that is the phrase an
+interviewer will use. It is a name for the effect and not a description of it, which is what
+the note below is about.
 
 **What it means for you.** Putting more in the context does not reliably mean more of it gets
 used. Doubling the retrieved passages in the hope that the right one is in there somewhere is
@@ -182,6 +184,10 @@ weaker claim: the mechanism cannot reach it, because a model may compress the sa
 into one pass and be right anyway. On Chapter 6's ladder it has been demonstrated and studied
 in particular settings and is short of settled practice, so how much it buys on your task is
 something to measure. Chapter 22 makes the same split for strict output formats.
+
+Emitting the steps like that is **chain-of-thought** — CoT[]{idx="CoT"} for short — which is what an
+interviewer will call it, both for the instruction that asks for the steps and for the tokens
+that come back.
 
 ```text
   without intermediate tokens
@@ -353,8 +359,9 @@ real work *and* are not an account of how the answer was produced.
 | Term | Meaning |
 |---|---|
 | **Hallucination** | Output that is fluent, plausible and not true. Not a malfunction: no step in the computation checks anything, so a plausible continuation is all the mechanism can produce |
+| **Lost in the middle** | The field's name for a measured effect: one relevant passage in a long input is used less reliably in the middle than near either end. A finding about particular models, not a rule of the design |
 | **Context window** | The maximum number of tokens a model will accept at once. A cost limit rather than a memory, counting the reply as well as the request. The whole conversation is re-sent every call, and something is dropped — or the call refused — when it fills |
-| **Intermediate reasoning** | Emitting the steps of a problem as tokens so that later passes can condition on them. The only way to carry partial work forward, because one pass runs its layers once however hard the question is, and nothing persists between passes |
+| **Intermediate reasoning (chain-of-thought)** | Emitting the steps of a problem as tokens so that later passes can condition on them. The only way to carry partial work forward, because one pass runs its layers once however hard the question is, and nothing persists between passes |
 
 ### Review Questions
 

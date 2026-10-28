@@ -14,7 +14,9 @@ reviewed: 2026-10-28T10:01:13+05:30
 absolutes: 87 flagged after the fix pass (76 before it) by verify-absolutes.py, each tested against the rest of the book. The chapter's strongest claim is made as a mechanism rather than an assertion: 'validation belongs in your code because your code is the only participant that can refuse' is supported by walking the five-step table and observing that nothing in it compares a proposal's VALUES against an instruction. That claim was first written without 'values' and was therefore false: constrained decoding is a check inside step 2, as this chapter's own text says 100 lines earlier, and the completeness review caught it. The narrowed form is now in the body, the Summary, Worth Memorising and the cheat sheet. 'The model's entire contribution is step 2, and step 2 is text' is chapter 9's finding applied, not a new claim. 'A year of compliance is a correlation rather than a limit' is this chapter's own; the validator-that-has-never-fired sentence beside it is **chapter 21's**, and the chapter first credited it to chapter 20, which contains the word 'validator' not once
 new-terms: verify-inputs.py: 34 new after the fix pass (21 before it), bare-terms 0 CLEAN. Tool description, proposal, registry and dispatcher are introduced here and all four are in Key Terms and all four are bolded at first explanation. Two gate failures were earned and fixed before review: 'Tool message' clashed with chapter 18, which owns and defines it, so it came out of this chapter's Key Terms and is now cited; and 'prompt injection' was used bare in an answer key when chapter 51 owns it and the book has not given it yet - replaced with chapter 2's own description of the thing
 covers-misses: 0 (verify-coverage.py markdown/23-how-a-tool-call-works.md)
-sha256: 8c196ddf3fd072a0b433b542ca74ba4e8d8633b43180917b085c019c18373535
+amended:
+  - 2026-10-29T03:44:01+05:30: Name the interview shorthand: function calling and tool calling, named where the five steps are given
+sha256: c8bce9e02d27bc10d636cb858c7c4e780827c7d39642705ef64a1279757e89d4
 
 ## Before writing
 

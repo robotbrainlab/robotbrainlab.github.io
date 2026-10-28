@@ -42,6 +42,11 @@ activity from running a comparison.
 > and a verdict for each, because that is the smallest thing you can do statistics to. Forty is
 > not a recommendation; by the end of the chapter it will be clear what it is.
 
+All of that together — the set, the verdict on each case, the runs and the numbers that come
+out — is what the field calls evaluation, and in speech it is shortened and pluralised to
+**evals**. An interviewer asking what your evals look like is asking for this chapter and
+chapters 30 to 33 in one answer.
+
 ## One Run Is Not a Score
 
 Start with a single prompt, forty cases, and a model that gets any given case right about 70 per
@@ -472,6 +477,12 @@ the thing the measurement was there to replace.
 > further between the two versions for the same forty cases. It is the ratio that improves, not
 > the width on its own: a richer measurement can be noisier too. Designing one is chapters 30
 > and 31, and that is why they come before the rest of the measurement chapters.
+
+> **Note:** An interviewer may call an experiment like this an **A/B test**. The phrase is
+> usually kept for splitting live traffic between the two versions, which is not what this
+> chapter does: both versions run over the same fixed cases, before any user sees either, and
+> that is what makes the paired comparison possible at all. The question the two are asking —
+> is the difference real — is the same question.
 
 ## Lab: Measure a Difference You Cannot See
 

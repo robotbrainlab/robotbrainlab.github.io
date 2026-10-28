@@ -20,7 +20,9 @@ separate things, and the added material and the request turn out to be one — b
 matters now is not who wrote a piece but how often it changes. (Chapter 2 keeps the word
 *context* for everything sent, because *prompt* is used three ways. This chapter says *prompt*
 where the thing being edited is the specification, which is the third of those three and the
-one a person means when they say they are writing one.)
+one a person means when they say they are writing one.) Writing and revising that
+specification is what the field calls **prompt engineering**, and that is the phrase an
+interviewer will use for everything in this chapter.
 
 | Part | What it does | How often it changes |
 |---|---|---|
@@ -76,6 +78,12 @@ SUPPLIED INFORMATION
 The first three are 332 characters, so eighty-odd tokens by Chapter 10's rule, and they never
 change. The fourth is a line of about thirty characters, so eight or so tokens, and it changes
 every time.
+
+> **Note:** A prompt carrying examples like those three is called **few-shot**; one carrying
+> none is **zero-shot**. The *shot* is an example, so the two words count the examples in the
+> specification and say nothing else about it — which is worth knowing, because an interviewer
+> asking whether you tried few-shot is asking whether you showed the model what a good answer
+> looks like.
 
 ## The Message List
 
@@ -372,6 +380,8 @@ information is not in the request, no wording fixes it.
 | **Instructions** | What to do, what not to do and who to be. Part of the specification, so it changes rarely and is paid for on every call |
 | **Examples** | What a good answer looks like, shown rather than described. Part of the specification |
 | **Output format** | The shape the answer must take, stated rather than hoped for. Part of the specification |
+| **Few-shot** | A prompt that carries examples of a good answer. The *shot* is an example, so the word counts them and says nothing else |
+| **Zero-shot** | A prompt that carries no examples: instructions, output format and the request only |
 | **System message** | The message holding your instructions and usually the output format. Your specification, set once per conversation and never the thing to drop when the history will not fit — nor are the example turns, if that is where your examples live |
 | **User message** | The request and the material it is about, from the person or from your code on their behalf |
 | **Assistant message** | What the model said earlier in the conversation, sent back to it by your code. The model does not remember saying it |

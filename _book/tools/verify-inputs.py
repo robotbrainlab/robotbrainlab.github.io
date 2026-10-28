@@ -83,7 +83,10 @@ def used_bare(path, vocab, earlier_text):
         pat = re.compile(r"\b" + re.escape(term) + r"(s|es)?\b", re.I)
         if not pat.search(text):
             continue
-        if any(term in d for d in defined):
+        # `defined` is lower-cased, so an upper-case entry in JARGON could never match it:
+        # a chapter naming "RAG" or the "KV cache" in bold was reported BARE anyway. Fold the
+        # term too, which is what the line above always meant to do.
+        if any(term.lower() in d for d in defined):
             continue                       # the chapter introduces it properly
         if pat.search(earlier_text):
             continue                       # the reader has met it

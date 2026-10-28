@@ -210,6 +210,14 @@ the inside visible — and the stream arrives at the end carrying the sum of eve
 made along the way. Depths of a few dozen to a hundred are usual; the worked model later in
 this chapter has thirty-two layers, and the arithmetic is the same at any depth.
 
+The design now has all of its pieces, and it has a name. A stack of identical layers, each one
+an attention block and a feed-forward block with a residual connection and a normalisation
+step, is a **transformer**; where Chapter 11's mask is in place, so that every position may
+look only backwards, it is called *decoder-only*. That is the shape of every model this book
+has shown producing a next token. An interviewer will use the word for the whole design, and
+what it refers to is what Chapters 11 and 12 have built — not an account of why it works,
+which is on Chapter 17's list.
+
 What more layers let the model do is easy to say at the level of mechanism: more layers means
 more separate opportunities to gather from other positions and more separate opportunities to
 compute something at each position.
@@ -449,6 +457,7 @@ roughly nine in ten of all parameters in the stack rather than the embedding tab
 | **Attention block** | The half of a layer that moves information between positions — Chapter 11's formula in full. The only part of a model that does |
 | **Feed-forward block** | The half of a layer that works on each position alone: two matrices with an activation between them, the middle between about two and a half and four times the width of the ends. Holds more of a layer's parameters than attention does |
 | **Activation function** | The step in the feed-forward block that is not a matrix multiplication, such as keeping positives and zeroing negatives. Without it the block's two matrices would collapse into one |
+| **Transformer** | A stack of identical layers, each adding an attention block's output and a feed-forward block's output into the residual stream. *Decoder-only* adds that every position may look only backwards |
 | **Normalisation** | Rescaling the stream to a predictable range before each block reads it, so the numbers do not grow out of hand as layer after layer adds to them |
 
 ### Worth Memorising

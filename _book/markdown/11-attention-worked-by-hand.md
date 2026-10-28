@@ -327,6 +327,10 @@ the written form by convention rather than because it is optional.
 multiplication for each of the three views, a fourth to build the grid, a division, a softmax,
 and a fifth to spend the weights. Nothing in it is harder than Chapter 8.
 
+The field's full name for the formula is **self-attention**, and the *self* is the first row
+of that table: the queries, the keys and the values are all made from the same five vectors.
+An interviewer may use either word and mean exactly this.
+
 ## This Formula Cannot Tell the Order
 
 Chapter 9 said position has to be supplied separately, and promised the reason here. This is
@@ -439,7 +443,9 @@ see the effect of one change. Head 1's keys are
 head 2 puts most of its on position 5 itself. Neither is right or wrong — they are two
 different questions being asked of the same five tokens, and that is what the extra heads buy.
 One head has one set of weights and therefore one opinion about what is relevant; a layer with
-sixteen heads has sixteen, computed independently and in parallel.
+sixteen heads has sixteen, computed independently and in parallel. Several heads over the same
+input is **multi-head attention**, MHA[]{idx="MHA"} in writing, and it is what this chapter has meant by a
+real layer. Chapter 15 is where real systems do something cheaper to the keys and values.
 
 Each head produces its own output vector, of its own narrower width, by spending its weights on
 its own values. Give head 1 the value projection `\((x_1,\ x_2)\)`{=latex} and head 2
@@ -677,13 +683,14 @@ its own opinion, and a final matrix mixes their outputs. Building the grid costs
 
 | Term | Meaning |
 |---|---|
-| **Attention** | The step in which each position takes a weighted blend of information from the others, in amounts computed from the content rather than fixed in advance |
+| **Attention (self-attention)** | The step in which each position takes a weighted blend of information from the others, in amounts computed from the content rather than fixed in advance |
 | **Query** | The vector saying what a position is looking for, made by multiplying its vector by `\(W_Q\)`{=latex} |
 | **Key** | The vector saying what a position offers to others, made with `\(W_K\)`{=latex}. Scored against every query |
 | **Value** | The vector a position hands over when it is attended to, made with `\(W_V\)`{=latex}. What the weights are spent on |
 | **Attention weights** | One row of the grid after scaling, masking and softmax: positive numbers adding to 1, saying how much of each position to take |
 | **Causal mask** | Setting every score for a later position to minus infinity before softmax, so it gets exactly zero weight. It makes a position's output depend only on itself and what precedes it, so the arithmetic is the same whether or not the rest of the sentence exists |
 | **Attention head** | One complete set of query, key and value matrices and the weights they produce. A layer runs several in parallel over slices of the width, and a final matrix mixes their outputs |
+| **Multi-head attention (MHA)** | Several attention heads run in parallel over slices of the width, their outputs joined by one further matrix. What this chapter's one head is a simplification of. Chapter 15's Note is what real systems do to the keys and values from here |
 | **Positional encoding** | How a token's position is put into the arithmetic, since the attention formula carries no notion of order. Added to the embedding before the stack, or applied as a rotation to queries and keys, or added to the scores themselves |
 
 ### Worth Memorising

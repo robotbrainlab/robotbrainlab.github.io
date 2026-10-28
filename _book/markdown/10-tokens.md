@@ -75,8 +75,8 @@ The rest of this chapter is what that does to you.
 
 ## Building the Vocabulary: Merge the Commonest Pair
 
-The usual way to pick those combinations is **byte-pair encoding**. The name sounds
-forbidding and the procedure is four lines:
+The usual way to pick those combinations is **byte-pair encoding**, usually shortened to BPE[]{idx="BPE"}.
+The name sounds forbidding and the procedure is four lines:
 
 1. Start with a vocabulary of every single character in the corpus — in a real run, every one
    of the 256 bytes.
@@ -573,7 +573,7 @@ calling.
 | **Token** | One entry in a model's vocabulary — usually a piece text is cut into. Beyond the single bytes, which are always there, which pieces earned an entry is a matter of frequency in the corpus the vocabulary was built from — not of meaning or length |
 | **Subword** | A token that is part of a word rather than a whole one. What makes it possible to represent a word the vocabulary has never seen |
 | **Tokeniser** | The program that cuts text into tokens and maps them to indexes, using one model's vocabulary and merge list. A count does not carry from one model's tokeniser to another's |
-| **Byte-pair encoding** | Building a vocabulary by starting from the 256 single bytes and repeatedly merging the commonest adjacent pair in a corpus until the vocabulary is the size wanted. Starting from bytes is what makes any text at all representable |
+| **Byte-pair encoding (BPE)** | Building a vocabulary by starting from the 256 single bytes and repeatedly merging the commonest adjacent pair in a corpus until the vocabulary is the size wanted. Starting from bytes is what makes any text at all representable |
 | **Merge list** | The merges, in the order they were made. Kept with the model and replayed in that order to tokenise any later text |
 | **Input tokens** | Everything you send on a call — instructions, attached material and the request. Countable exactly before you send |
 | **Output tokens** | Everything that comes back. Priced several times higher than input, one forward pass each, and not knowable in advance |

@@ -100,6 +100,12 @@ The shape is usually this, whatever the implementation.
 Not every system runs those steps in that order — some let the model ask for the search
 itself, once it has seen the question — but the job being done is the same one.
 
+Those five steps have a name: **retrieval-augmented generation**, almost always shortened to
+RAG[]{idx="RAG"}. An interviewer will use the three letters and expect you to recognise them. The name is
+for the whole arrangement and not for any one part of it — the search, the context built from
+what it found, and the model answering out of that. Doing each piece well is Chapters 24 to
+29, and Chapter 32 is how you find out whether the answers were any good.
+
 Chapter 1's support example is a retrieval system with the retrieval taken out. The line
 `Order 4471 shipped on Tuesday by courier` did not come from the model and did not come
 from the user. Something looked up order 4471 and put that line in. That something is
@@ -334,6 +340,7 @@ question.
 |---|---|
 | **Context** | Everything sent to the model on one call: the instructions, any added material, and the request |
 | **Retrieval** | Searching your own collection for the passages that bear on a request, so they can be put into the context |
+| **Retrieval-augmented generation (RAG)** | The arrangement where your code searches your own material, puts what it found into the context, and the model answers out of that. Names the whole arrangement rather than any one part of it |
 | **Tool** | An action the model may ask for. The model proposes it; your code decides whether to run it |
 | **Check** | Anything that verifies the output before it is used, from a required shape through to a second model's opinion |
 | **People** | The reviewers and approvers who handle the consequential cases and carry responsibility for them |

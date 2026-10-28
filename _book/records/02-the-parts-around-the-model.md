@@ -14,7 +14,10 @@ reviewed: 2026-10-22T17:49:43+05:30
 absolutes: 54. Six failed a counter-example and were rewritten before review: 'the model can only ASK for tools you described' (it can ask for anything; it cannot have one run), instructions written 'once' (they can be per user), retrieval's shape 'always the same' (some systems retrieve after a first model call), 'only ever changes what the model knows' (a retrieved example changes how it writes), 'the model never reaches out' (scoped to the model, as ch 1 does), and 'a rule is right every time' (deterministic is not correct). The last of those was fixed in the body and SURVIVED in Review Answer 3 until the completeness review found it - see the fix-verification note.
 new-terms: 2, both triaged: the order line reused verbatim from chapter 1's worked exchange, and `refund` as an example tool name introduced here. Neither is built on without being given.
 covers-misses: 0 at draft and after both rounds of fixes. The completeness review nonetheless found four Covers items thin by reading them rather than matching words - context's 'what it is for', the five-part cast delivered at four, people, and the compound system. All four addressed.
-sha256: caa2cd8910cee940e47a9d9a0ec38b2e2ad7b6e4e36c0f99f330c10802be05eb
+amended:
+  - 2026-10-29T03:43:50+05:30: Name the interview shorthand: retrieval-augmented generation and RAG, named where the chapter gives retrieval's five steps
+  - 2026-10-29T04:03:08+05:30: The index carried only the long form of each interview shorthand, so a reader looking up the abbreviation they will actually hear found nothing. Added an index entry for the abbreviation beside its naming sentence; no visible text changed.
+sha256: 267485394109f8781eab981ebeb721ffe8f83cab4eaeb0b4f79842ded9c3f862
 
 ## Before writing
 

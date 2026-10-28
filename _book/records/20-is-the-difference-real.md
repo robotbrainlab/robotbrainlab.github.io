@@ -16,7 +16,9 @@ new-terms: verify-inputs.py: 64 new after the fix pass (47 before it), bare-term
 covers-misses: 0 (verify-coverage.py markdown/20-is-the-difference-real.md)
 amended:
   - 2026-10-28T20:12:48+05:30: The Note listed where evaluation cases come from as chapters 30, 31 and 33, which left out 32 - the chapter that generates a set from your own documents, and one of only two sources of cases in the book. Found while writing chapter 32, whose own account of where the forty come from would have contradicted it. Each of the four chapters is now named with what it owns.
-sha256: 589fe6eab32972d7f5b54c293187335001b2d516d3c474ec40317722b98a669b
+  - 2026-10-29T03:43:55+05:30: Name the interview shorthand: evals, and A/B test distinguished from the paired comparison this chapter runs
+  - 2026-10-29T03:51:20+05:30: Move the A/B test note to the experiment section, where it does not split a lead-in from its method
+sha256: 13a2579be018f92888556ca8dfe1b97146a3ab477593044fc03da755e9d631c1
 reseal-2:
   Reopened 2026-10-28 again, for emphasis in a Worth Memorising row that `latex/tools/filter.lua`
   was turning into an index entry in the generated cheat sheet - `filter.lua` skips a chapter's

@@ -16,7 +16,9 @@ new-terms: verify-inputs.py: bare-terms 0 CLEAN. Six terms introduced here, all 
 covers-misses: verify-coverage.py: 0 misses. All six Covers items delivered: the residual stream as a running representation each layer edits (with both of a layer's residual additions worked on real numbers); attention and feed-forward blocks, with a table of how they differ and the feed-forward block worked end to end; normalisation and **the one honest sentence**, which is all §6 case 2 allows; what more layers let the model do, now shown by taking the chapter's own output vector and saying what layer 2 reads; why 'where is the fact stored' has no clean answer, in three reasons each tied to arithmetic on the page; and parameter counts at two shapes, with the feed-forward share and the stack share both computed.
 amended:
   - 2026-10-28T12:52:40+05:30: Sharpen pass: the activation was called the feed-forward block's 'one step that is not a matrix multiplication', which is false of the gated three-matrix form the chapter says most models now use - the body reads as the worked block, the Key Terms definition cannot; layer-role findings were asserted 'not a rule that transfers' where one study supports neither transfer nor non-transfer, and the chapter's own Review Answer 6 treats it as open; 'the whole of what depth buys' kept only the gathering half of the two the chapter gives; and 'several times wider than the ends' survived in Summary and Key Terms after the body was narrowed to 2.5-4x
-sha256: c21f47026132ed9ddbf86ab6a9e75db7680457bb69fd68fe1e08269eef59b206
+  - 2026-10-29T03:43:55+05:30: Name the interview shorthand: transformer, and decoder-only, named where the stack is complete
+  - 2026-10-29T03:51:20+05:30: Reword the transformer sentence: shown producing a next token
+sha256: 4c7c4e75df30eae7ed1787c1fe93b3e6313f5dd75ce4cfa4efb2a04ddf3a78cb
 
 ## Before writing
 

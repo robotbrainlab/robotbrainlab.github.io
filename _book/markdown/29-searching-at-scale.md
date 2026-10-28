@@ -186,7 +186,7 @@ if __name__ == "__main__":
           320 comparisons, 10 of the true 10
 ```
 
-An **approximate nearest neighbour index** — usually shortened to ANN — is any structure that
+An **approximate nearest neighbour index** — usually shortened to ANN[]{idx="ANN"} — is any structure that
 answers *which vectors are closest* without comparing against all of them, accepting that the
 answer may be wrong. This one is the simplest useful kind: a list per group, and a parameter
 saying how many groups to look in. Each group it looks in is a **probe**, and that parameter is
@@ -380,6 +380,12 @@ index, and whether you can afford to rebuild it when your process restarts. The 
 taking: a million vectors of 768 dimensions at four bytes a number is
 `\(10^{6} \times 768 \times 4 = 3.1\)`{=latex} GB, which fits in a process; a hundred million
 is 307 GB, which does not, and that is the point where the decision is made for you.
+
+The right-hand column is what the field calls a **vector database**, or a *vector store*. The
+two are worth keeping apart: the approximate index above is a data structure, and a vector
+database is a product that wraps one and adds what that column lists — a network interface,
+shared access, and one more thing to operate. Choosing one does not change what the index
+trades or the recall you measured; it changes who runs it.
 
 > **Note:** Products in this area change constantly, so this book names none. What does not
 > change is the shape of the table: a network hop, an operational burden and shared access on
@@ -695,6 +701,7 @@ avoiding.
 |---|---|
 | **Exhaustive search** | Comparing the query against every vector. Exact, and linear in the size of the collection |
 | **Approximate nearest neighbour index** | A structure that answers which vectors are closest without comparing against all of them, accepting that the answer may be wrong. Shortened to ANN |
+| **Vector database** | A product that wraps an index like this one and serves it over a network, also called a vector store. The index is the data structure; the database is a deployment choice around it |
 | **Probe** | One group the index looks inside at query time. More probes always mean more work, and never less recall — but once recall is exact, further probes buy nothing |
 | **Metadata filter** | Restricting a search to documents with some property — an owner, a date, a department |
 | **Multi-tenant retrieval** | Retrieval where each user may see only their own documents, so the filter is a correctness requirement rather than an optimisation |

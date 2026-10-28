@@ -14,7 +14,10 @@ reviewed: 2026-10-27T21:41:12+05:30
 absolutes: 44 after the fixes (38 before). 6 failed a counter-example and were rewritten: "disappoint you in the same way tomorrow" (false - replies vary, ch 13), "nothing is remembered" (true of the model, false of products that resend history), "never seen your material" (public material may well have been trained on), "cannot look anything up" (true of the model, not of products with search), "refuses almost nothing" (models refuse plenty; the claim meant the interface sets no limit), "two requests meet the identical model" (providers replace models).
 new-terms: 0 new backticked terms against 0 earlier chapters. Triaged by hand instead: grep confirms the chapter uses none of token/context/retrieval/tool/agent, so chapters 2, 4 and 10 may introduce all five. Latency is used and defined here, so chs 15 and 52 must not call it new - recorded in LEDGER-TAUGHT.md.
 covers-misses: 0. verify-coverage.py reports 0 against the chapter-1 Covers list, before and after the fixes.
-sha256: 4309f32611ac8338d75d1fb825716375b9dc3eef46da5ad5d29073ce745090c8
+amended:
+  - 2026-10-29T03:43:50+05:30: Name the interview shorthand: large language model and LLM, named where the chapter says what a model is
+  - 2026-10-29T04:03:08+05:30: The index carried only the long form of each interview shorthand, so a reader looking up the abbreviation they will actually hear found nothing. Added an index entry for the abbreviation beside its naming sentence; no visible text changed.
+sha256: 98bd7c489ceab5088f13bb216b5fff025ae09895f252486de8317ae2c615d2d7
 
 ## Before writing
 

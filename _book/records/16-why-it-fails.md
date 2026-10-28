@@ -16,7 +16,9 @@ new-terms: verify-inputs.py: bare-terms 0 CLEAN. Three terms introduced here, al
 covers-misses: verify-coverage.py: 0 misses. All six Covers items delivered: plausible continuation with no truth oracle, by walking the pipeline and asking the reader to point at the step that consults anything; hallucination as the default rather than a defect; the tokenisation artefacts as a family, now with a worked digit split showing that there is no units column to carry from; the context window and what falls out of it, now with a window spent in a block; uneven use of long inputs, placed on chapter 6's ladder rather than asserted; and intermediate reasoning explained from chapter 9's two facts alone, with its cost in output tokens and the two-sided claim about what the trace is and is not.
 amended:
   - 2026-10-28T12:52:40+05:30: Sharpen pass: the chapter asserted that the output-as-scratchpad mechanism 'is why asking for step by step working improves accuracy', which chapter 22 explicitly refuses - it needs a third premise neither chapter can supply, and chapter 22 puts the accuracy half on chapter 6's ladder. Narrowed in three body places; the back matter already had the capability form. Also the dropped-instruction diagnosis was stated as fact in the lab key and Review Answer 3 where the body says 'the usual explanation' and forty turns need not overflow a 128,000-token window; 'better models reduce the rate' is an unlabelled empirical trend; and 'the wording is not a signal' claimed more than the fluency argument gives
-sha256: 1e37232c7fc99ecc424bbf6e32248039e0d63fdaf5da3260b099658ecded5a2c
+  - 2026-10-29T03:43:55+05:30: Name the interview shorthand: chain-of-thought (CoT) and lost in the middle, named where each effect is stated
+  - 2026-10-29T04:03:08+05:30: The index carried only the long form of each interview shorthand, so a reader looking up the abbreviation they will actually hear found nothing. Added an index entry for the abbreviation beside its naming sentence; no visible text changed.
+sha256: a53eef5417aa1ff5f79df4032483b49fa75048eaa0e82e1e1e4f172537b6a5cf
 
 ## Before writing
 

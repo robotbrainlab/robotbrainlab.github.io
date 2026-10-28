@@ -229,6 +229,10 @@ Now the **judge**. It returns pass or fail on one named mode, which means it is 
 answers into two groups — and there is a settled way to find out whether such a thing works,
 which is to compare its groups against yours on cases where you have decided for yourself.
 
+The field's name for the arrangement is **LLM-as-a-judge**, and that is what an interviewer
+will call it. The name is wider than what this chapter builds: it is used wherever a model
+scores output, including the score out of five this chapter's first section threw out.
+
 **You have to label some cases by hand**, because every figure below is a comparison against
 your own verdicts and there is nobody else's to compare against. The set here is sixty: an input, an answer, and my own verdict on each.
 
@@ -917,7 +921,7 @@ other 16.
 
 | Term | Meaning |
 |---|---|
-| **Judge** | A model asked to return a verdict on one named thing about one output. Pass or fail on a named failure mode, never a score out of five |
+| **Judge (LLM-as-a-judge)** | A model asked to return a verdict on one named thing about one output. Pass or fail on a named failure mode, never a score out of five. The field's name is used wherever a model scores output, whatever it returns, so it is wider than this chapter's version |
 | **Baseline** | What a judge that always says pass would score on your set. Every agreement figure has to be read against it, and on a working application it is high |
 | **Self-agreement** | How often a judge gives the same verdict on the same answer shown twice. Every point of flipping is a point any other figure could have landed elsewhere, and measuring it needs no labels |
 | **Position bias** | A judge preferring an answer for where it was printed rather than for what it says. Measured by showing each pair both ways and counting the flips |

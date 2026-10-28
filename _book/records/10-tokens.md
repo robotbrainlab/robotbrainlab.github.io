@@ -16,7 +16,11 @@ new-terms: verify-inputs.py: bare-terms 0 CLEAN. Seven terms introduced here, al
 covers-misses: verify-coverage.py: 0 misses. All eight Covers items delivered: why text becomes tokens (the two failures of words and of characters, with the parameter arithmetic); subword vocabularies; **the merge procedure run by hand on a toy corpus** (five words, every pair table printed, five merges, the resulting 12-entry vocabulary and the tokenisation it gives); input and output tokens (a table of four properties); tokens as the unit of both cost and latency; counting before sending (the rule of thumb and the exact method, with a warning about which to use when); why code and non-English text cost more (both derived from where the merges were spent); why a model miscounts the letters in a word.
 amended:
   - 2026-10-28T12:52:40+05:30: Sharpen pass: 'two models with different vocabularies will cut the same sentence into different numbers of pieces' is refuted by the chapter's own lab step 8, where a different vocabulary gives runner as 3 tokens either way - narrowed to 'can' in the body and to 'a count does not carry' in Key Terms and Worth Memorising; a letters vocabulary was credited with making everything representable, which the bytes paragraph refutes twenty lines later; and the Summary turned the body's capability claim into the flat outcome 'a model miscounts', which the body twice declines to make
-sha256: 705b2338d44f0e8e6aae4da52b4144ed5cb2635ddf2ef4fb04b86ed82c61b8b1
+  - 2026-10-29T03:43:50+05:30: Name the interview shorthand: BPE, named where the chapter gives byte-pair encoding
+  - 2026-10-29T03:49:26+05:30: Soften a usage claim from the same pass: usually shortened to BPE, not everybody
+  - 2026-10-29T03:51:20+05:30: Rewrap the BPE line to the file's column width; no change of wording
+  - 2026-10-29T04:03:08+05:30: The index carried only the long form of each interview shorthand, so a reader looking up the abbreviation they will actually hear found nothing. Added an index entry for the abbreviation beside its naming sentence; no visible text changed.
+sha256: 1f96bcf9f693f81cf84488cf42e0e1b2041c9a2d00cb21d7b1fdc8089979eb86
 
 ## Before writing
 

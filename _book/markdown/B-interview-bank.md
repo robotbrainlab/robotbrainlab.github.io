@@ -35,7 +35,7 @@ appear here are the ones you would be asked to describe rather than explain.
 
 | # | Question | Ch |
 |---|---|---|
-| 1 | What is a language model, described as a component in a system rather than as a product? | 1 |
+| 1 | What is a language model (an LLM), described as a component in a system rather than as a product? | 1 |
 | 2 | What can a model not know, and why does a better model not fix it? | 1 |
 | 3 | What do you choose when you use a model, and what do you not choose? | 1 |
 | 4 | Name the parts a contemporary AI application combines, say what each is for, and say what each one costs you. | 2–3 |
@@ -59,7 +59,7 @@ appear here are the ones you would be asked to describe rather than explain.
 | 17 | Why is text turned into tokens rather than words or characters? | 10 |
 | 18 | Why does code cost more tokens than ordinary English? | 10 |
 | 19 | Why does a model miscount the letters in a word? | 10 |
-| 20 | Walk me through attention on a short sentence. | 11 |
+| 20 | Walk me through attention (self-attention) on a short sentence. | 11 |
 | 21 | Why is the attention score divided by the square root of the key dimension? | 11 |
 | 22 | Why does attention cost grow with the square of the input length, and what follows from that in practice? | 11 |
 | 23 | What do several attention heads give you that one does not? | 11 |
@@ -70,10 +70,10 @@ appear here are the ones you would be asked to describe rather than explain.
 | 28 | Name the training stages and say what each one changes. | 14 |
 | 29 | Why is the first token slow and every token after it fast? | 15 |
 | 30 | Your prompt doubles in length. Why does the work more than double? | 15 |
-| 31 | What is the key–value cache, and how big is it? | 15 |
+| 31 | What is the key–value cache (the KV cache), and how big is it? | 15 |
 | 32 | Why can a very large model be cheap per token? | 15 |
 | 33 | Why is hallucination the default behaviour rather than a defect? | 16 |
-| 34 | Why does asking a model to work step by step improve accuracy, and why is the visible reasoning not a reliable account of how it answered? | 16 |
+| 34 | Why does asking a model to work step by step (chain-of-thought) improve accuracy, and why is the visible reasoning not a reliable account of how it answered? | 16 |
 | 35 | An interviewer asks why depth helps. You have not studied that. What do you say? | 17 |
 
 ## Part II · Use
@@ -94,7 +94,7 @@ appear here are the ones you would be asked to describe rather than explain.
 | 47 | You are asking for JSON. How do you measure how often you do not get it, and what do you do with the failures? | 21 |
 | 48 | How is a format constraint actually enforced while the model generates? | 22 |
 | 49 | When can a strict output format make the answer worse? | 22 |
-| 50 | Walk me through a tool call. Who decides what runs? | 23 |
+| 50 | Walk me through a tool call (function calling). Who decides what runs? | 23 |
 | 51 | Where does validation of a tool call belong, and why not in the instructions? | 23 |
 | 52 | How would you choose an embedding model for your own data? | 24 |
 | 53 | Why is a public benchmark score a starting point rather than a verdict? | 24 |
@@ -112,7 +112,7 @@ appear here are the ones you would be asked to describe rather than explain.
 | 65 | Each user may see only their own documents. How does that change your retrieval? | 29 |
 | 66 | You have forty bad outputs and no metrics. What do you do first? | 30 |
 | 67 | Why let the failure modes choose the metrics rather than measuring what is conventional? | 30 |
-| 68 | When do you use a model as a judge rather than code? | 31 |
+| 68 | When do you use a model as a judge (LLM-as-a-judge) rather than code? | 31 |
 | 69 | How do you establish that a judge can be trusted? | 31 |
 | 70 | What is position bias, and what does it do to your numbers? | 31 |
 | 71 | Why measure retrieval and generation separately? | 32 |

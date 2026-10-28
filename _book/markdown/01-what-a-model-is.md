@@ -19,6 +19,10 @@ noticeable pause before the first word, and longer still for a long reply.
 That is the whole of it. Everything else in this book is about what you send, what you do
 with what comes back, and how you find out whether any of it was any good.
 
+Written out in full, the kind of model this book is about is a **large language model**.
+Almost nobody says that aloud: the shorthand is LLM[]{idx="LLM"}, and that is the word an interviewer will
+use. This book says *model*, and names the kind whenever it means a different one.
+
 The sentence is worth reading twice, because it contradicts the picture most people start
 with. You do not download a brain. You do not teach it your business. You do not own it.
 You make a request over a network to a program running on somebody else's machine, in the
@@ -334,6 +338,7 @@ phases, one before the first word and one that paces the rest.
 | Term | Meaning |
 |---|---|
 | **Model** | A service that takes text and returns generated text, charged by the amount of text |
+| **Large language model (LLM)** | The field's full name for the kind of model this book means by *model*: text in, generated text out. Shortened to LLM almost everywhere it is used |
 | **Training** | The one-time process that produced the model's numbers. Not something you do on a request |
 | **Inference** | Running a finished model to get a reply. This is what "using a model" means |
 | **Foundation model** | A model trained once on general material, then used for many tasks it was not specifically built for |

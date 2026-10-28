@@ -310,7 +310,7 @@ what does not depend on my choosing is that the two have no common unit. Added t
 top. You could rescale, but into what? There is no unit either number is measured in, so there
 is no principled scale to put them on. Any rescaling is a weight you chose.
 
-**Reciprocal rank fusion** sidesteps the problem by throwing the scores away and keeping only
+**Reciprocal rank fusion**[]{idx="RRF"} sidesteps the problem by throwing the scores away and keeping only
 the positions:
 
 ```{=latex}
@@ -516,7 +516,7 @@ recall against your key, and a document nobody ever judged is invisible to it. T
 25's invisible miss, still here, one level further up.
 
 **Reciprocal rank** is one divided by the position of the first relevant result; averaged over
-many queries it is the **mean reciprocal rank**, or MRR. It asks *how far did the reader have to
+many queries it is the **mean reciprocal rank**, or MRR[]{idx="MRR"}. It asks *how far did the reader have to
 look*, which is the right question when there is one answer and finding it ends the task.
 
 **Both of these are binary measures, and they need a convention stated too.** Recall and
@@ -528,7 +528,7 @@ meaningless without its gain convention: a reader cannot interpret the number ot
 
 **And here it is worth 1.000, which should stop you.** The first result is `d1`, graded 2, so the
 first relevant document is at position one and the reciprocal rank is perfect. Meanwhile a
-grade-3 document sits at position six. **MRR says this ranking is flawless, and nDCG says it is
+grade-3 document sits at position six. **MRR says this ranking is flawless, and nDCG[]{idx="nDCG"} says it is
 0.6216.** Neither is wrong: MRR measures the distance to the first relevant thing, and this
 ranking is genuinely excellent at that. It simply cannot see the difference between a partial
 answer and a complete one, because it stops looking after the first non-zero grade.

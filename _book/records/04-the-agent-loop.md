@@ -14,7 +14,9 @@ reviewed: 2026-10-27T21:41:12+05:30
 absolutes: 45. Four failed a counter-example before review and were rewritten: 'left your code in charge of all of them' over five parts, 'the same every run' for a path that branches on data, the compounding table presented as a law rather than a model, and 'a bill you cannot bound in advance' which contradicted the step limit taught two sections earlier.
 new-terms: 3 - lookup_order(4471), refund(...), and the turn block's labels. All introduced here as illustration; none is built on without being given.
 covers-misses: 0 throughout. The completeness review found two Covers items thin by reading rather than matching: 'compounding error' was taught but never named, and 'how short real deployed loops are' rested on one paragraph whose causal reading overclaimed. Both fixed.
-sha256: 1055ec3ab9f4f2c6ed7a30930568bac46d7e2a6b32bc3c842b01a1638e564ce5
+amended:
+  - 2026-10-29T03:43:50+05:30: Name the interview shorthand: the adjective agentic, named where the chapter defines an agent
+sha256: 35970a092a6a0c70ecb1be47d4f6dd47a90372ccc1f2d1912eb0e8d4a4e897fb
 
 ## Before writing
 

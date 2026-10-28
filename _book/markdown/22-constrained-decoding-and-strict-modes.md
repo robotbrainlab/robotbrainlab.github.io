@@ -190,6 +190,12 @@ schema that forbids the working, and the section after next is about it.
 Now the part that answers the first half of the opening problem, and it is not vendor
 capriciousness. It is a genuinely awkward computation.
 
+The names vary before the behaviour does. A provider may sell this as **JSON mode**, as
+*structured outputs*, or as a strict flag on the request, and the names do not all promise the
+same thing — one may undertake only that the reply parses as JSON, another that it satisfies
+the schema you sent. The rule this section ends with is the one that survives the naming: read
+what the engine says it accepts, and keep validating.
+
 **Your schema is written over characters. Generation happens over tokens.** JSON's syntax is
 defined in characters — a `{`, then a `"`, then field characters. The model does not emit
 characters; it emits tokens from Chapter 10's vocabulary, and a token can carry several
@@ -484,7 +490,7 @@ change to be measured Chapter 20's way — paired, same cases, an interval on th
 |---|---|
 | **Constrained decoding** | Restricting each token choice to what the format allows, by editing the scores before the pick. The model is unchanged |
 | **Masking** | Setting a forbidden token's score to `\(-\infty\)`{=latex}, which makes its probability exactly zero after the softmax — as long as one token survives. Mask them all and you get `nan`, not zero |
-| **Strict mode** | A provider's facility for enforcing a schema during generation, as against asking for it in the prompt |
+| **Strict mode (JSON mode, structured outputs)** | A provider's facility for enforcing a schema during generation, as against asking for it in the prompt. Providers use all three names and they do not all promise the same thing — one may undertake only that the reply parses |
 | **Masked mass** | How much probability the constraint deleted at a step. Small means the constraint was free; large means it overruled the model |
 | **Dead state** | A grammar state with no legal token. It does not raise — the mask stops meaning anything and the decoder emits whatever was first |
 | **State machine** | What a schema compiles into: a set of states, each with the tokens allowed next. Engines call it an automaton |

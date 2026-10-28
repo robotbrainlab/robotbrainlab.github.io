@@ -46,6 +46,11 @@ So the wait before the first word grows with the prompt. Send twice as much and 
 more than twice the work, for the reason Chapter 11 gave — the grid is square in
 `\(n\)`{=latex}.
 
+That wait has a name: **time to first token**, shortened to TTFT[]{idx="TTFT"}, which is what you will see
+on a dashboard and hear in an interview. The pace of the words after it is **time per token**.
+This chapter is why they are two different numbers; measuring them on your own system is
+Chapter 52.
+
 Then decode starts, and each token takes roughly the same time as the one before it —
 roughly, and two sections below says what makes it drift. The
 arithmetic for one new token is tiny by comparison: one position, not `\(n\)`{=latex} of them.
@@ -97,6 +102,9 @@ the lot.
 
 That turns the work per decode token from "recompute everything" into "compute one position and
 read the rest", which is the difference between a system that works and one that does not.
+
+In writing and in speech the key–value cache is the **KV cache**, and that is how an
+interviewer will ask about it.
 
 **And it is also the memory bill.** Here is the calculation, and it is worth being able to do
 it from memory, because it is the one that decides how many users fit on a machine.
@@ -273,7 +281,8 @@ The last piece, and it is the one that makes model sizes confusing to compare.
 
 Chapter 12 showed that most of a layer's parameters are in the feed-forward block. A
 **mixture-of-experts** model replaces that one block with several — say eight — and adds a
-small piece of arithmetic that chooses which two of the eight each token goes through.
+small piece of arithmetic that chooses which two of the eight each token goes through. The
+abbreviation is MoE[]{idx="MoE"}.
 
 So the model *holds* eight feed-forward blocks per layer and *uses* two. Take Chapter 12's
 numbers, with attention at 67,108,864 parameters and one feed-forward block at 90,177,536:
@@ -403,12 +412,12 @@ a very large model can be cheap per token while still needing all of that memory
 |---|---|
 | **Prefill** | The pass that processes the whole prompt, every position at once. Limited by arithmetic, whose attention part grows with the square of the prompt length and overtakes the rest on a long one. What you wait for before the first word |
 | **Decode** | One forward pass per output token. Does almost no arithmetic and is limited by reading every parameter the pass uses out of memory once per token |
-| **Key–value cache** | The stored keys and values for every position in every layer, so decode attends to earlier positions without recomputing them. Costs `\(2 \times \text{layers} \times d \times \text{tokens} \times \text{bytes}\)`{=latex} |
+| **Key–value cache (KV cache)** | The stored keys and values for every position in every layer, so decode attends to earlier positions without recomputing them. Costs `\(2 \times \text{layers} \times d \times \text{tokens} \times \text{bytes}\)`{=latex} |
 | **Compute-bound** | A step whose speed is set by the arithmetic it has to do rather than by how fast its numbers arrive. Prefill is; a large enough batch becomes so |
 | **Memory-bound** | A step whose speed is set by how fast numbers arrive from memory rather than by the arithmetic done with them. At two bytes per parameter, decode does about one operation for every byte it reads, on hardware built for hundreds |
 | **Batching** | Running many requests through the same forward pass, so one read of the parameters serves all of them. Close to free up to a point — each request still reads its own cache and does its own arithmetic — which is why the price per token is low and why your neighbours affect your output |
 | **Quantisation** | Storing each parameter in fewer bits. Halving the bits halves the memory and roughly halves the time spent reading, at a cost in precision that has to be measured |
-| **Mixture of experts** | Replacing one feed-forward block per layer with several and routing each token through a few of them. The model holds all of them and runs some |
+| **Mixture of experts (MoE)** | Replacing one feed-forward block per layer with several and routing each token through a few of them. The model holds all of them and runs some |
 | **Active parameters** | The parameters that actually run for a given token, as against the total the model holds. Cost follows the active figure; the name usually quotes the total |
 
 ### Worth Memorising

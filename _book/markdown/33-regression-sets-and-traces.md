@@ -626,6 +626,10 @@ Everything above runs on cases, and cases come from somewhere. A **trace** is th
 request through the application, and it is where cases come from — which makes the decision about
 what a trace holds a decision about what you can measure later.
 
+Keeping these records and being able to read them is what the field calls **observability**,
+and *tracing* is the part of it this section is about. An interviewer asking whether you have
+observability is asking whether a request that went wrong can be reconstructed after the fact.
+
 ```python
 """One request's trace, and the decision about what goes in it.
 

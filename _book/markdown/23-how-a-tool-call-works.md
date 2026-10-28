@@ -23,6 +23,10 @@ API, the sentence has compressed five steps into one, and four of them are yours
 **The model's entire contribution is step 2, and step 2 is text.** Everything that touches the
 world is yours.
 
+Providers sell the five steps as **function calling**, and you will hear *tool calling* for the
+same thing. Both names describe the convention as a whole, and both make it sound like step 4,
+which is where the opening sentence comes from.
+
 **So there are two decisions, not one, and conflating them is the mistake in the opening
 sentence.** The model decides *what to propose*. Your code decides *what runs*. People say the
 model called the API because the two decisions sit next to each other in time and the second one
@@ -539,6 +543,7 @@ also makes the model choose from a longer menu.
 
 | Term | Meaning |
 |---|---|
+| **Function calling** | The provider's name for the whole five-step convention, also sold as tool calling. The model does step 2 of it and nothing else |
 | **Tool description** | The text your code sends about one function: a name, a sentence and the parameter names and types. Not the function, and not your constraints |
 | **Proposal** | What the model emits — tokens your code reads as a request to run something. Nothing has happened yet |
 | **Registry** | The map from a name to a function your code is willing to run. The lookup that refuses a name the model invented |

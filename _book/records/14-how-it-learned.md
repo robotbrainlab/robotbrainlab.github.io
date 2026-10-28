@@ -16,7 +16,10 @@ new-terms: verify-inputs.py: bare-terms 1 FAIL (`fine-tune`, which the chapter d
 covers-misses: verify-coverage.py: 0 misses. All six Covers items delivered: next-token prediction as the objective, written as a formula and with the cut diagram that shows why the text is its own answer key; cross-entropy worked on chapter 9's own distribution at three probabilities; perplexity, with the identity that a uniform choice among V options gives exactly V; the training loop's shape from outside, with the update rule stated once and the edge named out loud; the three stages, with a table, their data, and the 0.0005-per-cent arithmetic that makes the knowledge claim quantitative; **the preference objective stated once as a formula**, named DPO, not derived, and now worked at three states of training; and what each stage changes and what it cannot.
 amended:
   - 2026-10-28T12:52:40+05:30: Sharpen pass: the token-ratio arithmetic (0.0005 per cent) supports a claim about share of exposure and was spent on the outcome claim that a few thousand documents will not be recallable, which needs an unstated uniformity premise the chapter's own 'passes its corpus roughly once' undercuts - narrowed in the body, the lab key and Review Answer 5; 'nothing in training makes the model able to tell what is true' is a capability claim where the objectives support 'nothing is a test of whether anything is true', which the Summary already said; 'everything it knows' was the lone unhedged instance among eight; the preference-stage claim now says nothing in its objective rewards adding knowledge; and 'nothing you send changes a parameter' is now scoped to answering the request
-sha256: 57bf6af2bdc3aa299d45629a7df3ee4e41db129674d7ffc5a3909bff1831f26e
+  - 2026-10-29T03:43:55+05:30: Name the interview shorthand: SFT, named where supervised fine-tuning is explained
+  - 2026-10-29T03:49:26+05:30: Soften a usage claim from the same pass: usually abbreviated to SFT, not almost everywhere
+  - 2026-10-29T04:03:08+05:30: The index carried only the long form of each interview shorthand, so a reader looking up the abbreviation they will actually hear found nothing. Added an index entry for the abbreviation beside its naming sentence; no visible text changed.
+sha256: cb592f67c40037b9f6e570f5d3b5d22edbbae6e19935bb099a325013c644efec
 
 ## Before writing
 

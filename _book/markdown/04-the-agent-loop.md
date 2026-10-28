@@ -31,6 +31,10 @@ loop, and the rules that end it. What *changed* is **who decides the order**.
 
 That second row is the whole chapter.
 
+The adjective for it is **agentic**, and it is used loosely. A system described that way has
+some of this loop in it; how much of it is a question of degree, and the degree is what the
+section on the dial below is about.
+
 ## The Loop, Step by Step
 
 Here is one run. The task is a support request: *"Where is my order, and if it is late,

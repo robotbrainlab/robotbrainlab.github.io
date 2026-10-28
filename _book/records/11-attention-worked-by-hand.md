@@ -16,7 +16,11 @@ new-terms: verify-inputs.py: bare-terms 1 FAIL (`context window`, which chapter 
 covers-misses: verify-coverage.py: 0 misses. All ten Covers items delivered: queries, keys and values; the dot product as a score; the scaling, with both the reason to divide and the reason it is the square root; softmax over the scores; the weighted blend; **the full formula worked numerically on a 5-token sentence with 4-dimensional vectors**, which is the chapter's spine and runs from the three matrices to the output vector; multiple heads, with two of them computed and compared; masking in a decoder; how position reaches the model, with two dot products showing the same token scoring 22 in one seat and 24 in another; and why every pair is compared, with the circularity argument, plus the `O(n^2 d)` cost and a table of what it means at three input lengths.
 amended:
   - 2026-10-28T12:52:40+05:30: Sharpen pass: LEDGER-TAUGHT row 11 says to write 'this formula' and never 'anything built out of attention', because the mask is positional and masked attention is not order-blind. That narrowing had reached the Summary and Key Terms and stopped there - the section heading, the body sentence, Worth Memorising and Review Question and Answer 6 were all still wide, so four of six places. Also Review Answer 3 had dropped the body's 'a large part of' on the context limit, and the causal-mask Key Term said output depends 'only on what precedes it' where the diagonal is unmasked
-sha256: bd94b9c4480566f13d0731298f32e9d90bab2f1cb7911620aa3ee12874b06fbd
+  - 2026-10-29T03:43:50+05:30: Name the interview shorthand: self-attention and multi-head attention (MHA), named where the formula and the heads are given
+  - 2026-10-29T03:51:20+05:30: Fix the referent in the multi-head attention sentence: this chapter throughout, not the paragraph above
+  - 2026-10-29T04:00:52+05:30: The multi-head attention row claimed MHA is what a real layer does, which chapter 15's Note contradicts: real systems share one set of keys and values across several heads. Softened and pointed at 15.
+  - 2026-10-29T04:03:08+05:30: The index carried only the long form of each interview shorthand, so a reader looking up the abbreviation they will actually hear found nothing. Added an index entry for the abbreviation beside its naming sentence; no visible text changed.
+sha256: 73f7cc0ddf064d0520b54f514e1822d9474eb388288c586704b334d6a897dfcf
 
 ## Before writing
 
