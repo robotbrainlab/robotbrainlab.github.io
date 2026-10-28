@@ -36,8 +36,9 @@ will happily hand you a narrow interval on a set that is four questions wearing 
 have stopped measuring. Chapter 33 is about the set growing over time, which is a different
 activity from running a comparison.
 
-> **Note:** Where the cases come from, how to turn real failures into them, and how to build a
-> judgement you can trust are chapters 30, 31 and 33. This chapter assumes you have forty cases
+> **Note:** How to turn real failures into cases is chapter 30, how to build a judgement you can
+> trust is chapter 31, where a set comes from besides your failures is chapter 32, and keeping a
+> set over time is chapter 33. This chapter assumes you have forty cases
 > and a verdict for each, because that is the smallest thing you can do statistics to. Forty is
 > not a recommendation; by the end of the chapter it will be clear what it is.
 

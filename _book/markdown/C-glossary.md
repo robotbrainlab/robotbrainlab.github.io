@@ -11,6 +11,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Active parameters** | The parameters that actually run for a given token, as against the total the model holds. Cost follows the active figure; the name usually quotes the total | 15 |
 | **Agent** | A system in which the model decides what to do next, repeatedly, rather than your code deciding the sequence | 4 |
 | **Answer key** | Which document each of your queries is actually about. The only input in the procedure that has to come from you | 24 |
+| **Answer relevance** | Whether the answer addresses what was asked. Independent of groundedness, and not a yes or no once the question has parts | 32 |
 | **Approval point** | A step the loop cannot pass without a person, enforced in your code rather than requested in the instructions | 4 |
 | **Approximate nearest neighbour index** | A structure that answers which vectors are closest without comparing against all of them, accepting that the answer may be wrong. Shortened to ANN | 29 |
 | **Assistant message** | What the model said earlier in the conversation, sent back to it by your code. The model does not remember saying it | 18 |
@@ -37,6 +38,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Chunk** | One piece of a split document: the unit that is embedded, stored in the index and returned by retrieval | 27 |
 | **Chunk size** | How much text a chunk holds. A floor on it is set by taking the *shortest* passage that answers each of your questions and keeping the longest of those | 27 |
 | **Citation** | A pointer from something a reply says to the text it came from. Checkable only if it carries a document id, a locator and the quoted span | 28 |
+| **Claim-level check** | Decomposing an answer into its claims and giving each one a verdict against the retrieved passages. The verdicts are what tell you which sentence to fix | 32 |
 | **Compound system** | A system of several parts with the model as one of them, rather than as the whole product | 2 |
 | **Compounding error** | Two things at once across a run: each step's chance of being right multiplies against the others, so a high per-step figure becomes a low whole-run one; and a wrong step's result is carried into the next step as though it were true | 4 |
 | **Compute-bound** | A step whose speed is set by the arithmetic it has to do rather than by how fast its numbers arrive. Prefill is; a large enough batch becomes so | 15 |
@@ -75,6 +77,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Exhaustive search** | Comparing the query against every vector. Exact, and linear in the size of the collection | 29 |
 | **Exponential backoff** | Doubling the wait after each failed attempt, up to a cap, so a struggling system is not hammered | 19 |
 | **Failure mode** | A named kind of wrong output, named after what went wrong rather than after the part of the system suspected of causing it | 30 |
+| **Faithfulness** | The same property under the name an interviewer may use: the answer is faithful to the passages it was given | 32 |
 | **Feed-forward block** | The half of a layer that works on each position alone: two matrices with an activation between them, the middle between about two and a half and four times the width of the ends. Holds more of a layer's parameters than attention does | 12 |
 | **Finish reason** | The response's own statement of why generation stopped. What distinguishes a truncated reply from a malformed one | 21 |
 | **Forward pass** | One journey through the model — lookup, the stack once, one distribution out. It produces exactly one distribution | 9 |
@@ -84,6 +87,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Gradient** | For each parameter, how much the loss would rise if that parameter rose. The update rule moves every parameter a small step against it. How it is computed is outside this book | 14 |
 | **Greedy decoding** | Always taking the highest-scoring token. What "temperature zero" does in practice, since dividing by zero is not defined | 13 |
 | **Greedy fill** | Keeping any passage that fits in the room remaining. Silently promotes short passages over higher-ranked long ones | 28 |
+| **Grounded** | Every claim the answer makes is supported by a passage that was retrieved. Says nothing about whether the passages were right or the answer useful | 32 |
 | **Hallucination** | Output that is fluent, plausible and not true. Not a malfunction: no step in the computation checks anything, so a plausible continuation is all the mechanism can produce | 16 |
 | **Hybrid retrieval** | Running lexical and dense retrieval and combining their rankings | 26 |
 | **Idempotency** | Doing an operation twice has the same effect as doing it once. What makes a retry after a timeout safe | 19 |
