@@ -199,7 +199,7 @@ written from memory.
 | Why one number hides it | 48 of 60 cases are passes, so agreement is mostly agreement about passes. Judge B caught 10 of 12 against A's 5 and scored 82 against 85 | 31 |
 | How many cases to label | Enough *failures*, not enough cases. 60 labels bought 12 failures; the catch rate's interval was 12% to 73% | 31 |
 | Position bias, measured | Show each pair both ways and count the flips: 16 of 40 here, a 70%-against-30% swing in the headline | 31 |
-| Why two scores per case | One verdict cannot say which stage failed. 62 per cent end to end was 75 per cent retrieval and 73 per cent generation given good retrieval | 32 |
+| Why two scores per case | One verdict cannot say which stage failed. 62.5 per cent end to end was 75 per cent retrieval and 73 per cent generation given good retrieval | 32 |
 | The four cells | Fine; answer there and got it wrong (generation's); answer not there (retrieval's); answer not there and right anyway (a failure, counted as a success) | 32 |
 | The cell people miss | Right answer, no supporting passage. 3 of 40 here. Nothing can show where it came from, and nothing notices when the document changes | 32 |
 | What grounded means | Every claim supported by a retrieved passage. Chapter 28's entailment test applied to every claim, not only the cited ones | 32 |
@@ -207,4 +207,4 @@ written from memory.
 | The two independent measures | Groundedness and answer relevance. A sentence copied from an off-topic retrieved passage is 100% grounded and answers nothing | 32 |
 | The no-claims answer | A refusal has nothing to support, so a careless groundedness figure scores it 100% and rewards refusing. Pair it with a refusal detector | 32 |
 | Where cases come from | Real failures for the questions people ask; generated questions for a free answer key and coverage | 32 |
-| The cost of a generated set | 8 of 8 generated against 2 of 8 asked, on the same passages — a generated question shares 3 to 6 words with its source, a real one none or one | 32 |
+| The cost of a generated set | With a word-overlap retriever, 8 of 8 generated against 2 of 8 asked on the same passages — a generated question shares 3 to 6 words with its source, a real one none or one. A retriever that does not match words would narrow the gap; by how much is a measurement, not a prediction | 32 |

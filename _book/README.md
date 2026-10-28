@@ -71,12 +71,14 @@ sub-part opener pages sitting after the last written chapter were counted into i
   29   401-420    20   14    143%
   30   421-439    19   14    136%
   31   440-463    24   18    133%
+  32   464-488    25   16    156%
 ```
 
 **Part I is complete: chapters 1–17, 197 printed pages against a 266-page estimate (74%).**
-Part II has begun: chapters 18 to 31 come to 266 pages, so 463 printed pages in all. Chapters 30
-and 31 open the evaluation run of the part (30 to 33) and are the first chapters since 17 whose
-material is a method rather than a mechanism. Chapter 26
+Part II has begun: chapters 18 to 32 come to 291 pages, so 488 printed pages in all. Chapters 30
+to 32 are the evaluation run of the part, and the first chapters since 17 whose material is a
+method rather than a mechanism. Their reviews find more per chapter than the mechanism chapters'
+did, and almost all of it is the same defect: a claim one notch wider than its demonstration. Chapter 26
 is the longest in the book at 30 pages, and it holds seven Covers items of which three are
 formulas that have to be worked rather than quoted.
 Chapters 9, 17 and 20 landed exactly on their estimates; **21, 22 and 25 exceed one**, by one

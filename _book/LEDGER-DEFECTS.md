@@ -65,6 +65,61 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**54. A qualifier written to fix an overclaim is itself a claim, and propagating it multiplies
+the error.** Chapter 32's generated-set figure — 8 of 8 against 2 of 8 — is an artefact of a
+word-overlap retriever, which the first review was right to say needed qualifying. The
+qualifier I wrote was **"a dense retriever narrows the gap and does not close it"**, and I put
+it in three places plus the body's program. Nothing in the chapter measures a dense retriever
+on anything, and chapter 24 says in terms that paraphrase behaviour "is an empirical property
+of that model"; with eight passages on eight distinct topics a dense retriever could plausibly
+score 8 of 8 on both sets, which closes the gap entirely. So the repair for one unqualified
+claim was another unqualified claim, three times over, and **one copy had already been
+generated into `markdown/A-cheat-sheet.md`** — the fix propagated the wide form into the
+appendix rather than out of it.
+
+The same round over-corrected in the other direction: "no amount of better retrieval touches
+it" became "Chapter 28's order and trimming **can**", which is the proposition chapter 28's own
+Warning calls "a comfortable thing to believe" and refuses. **Eleven of that round's
+twenty-six fixes were unsound** — the worst score of any chapter so far — and the pattern in
+nearly all of them is the same: a sentence written to retire an absolute, written at the speed
+of a correction rather than the speed of a claim. **Write a fix as though it were the first
+draft of a claim, because it is**, and regenerate the appendices before checking rather than
+after, so a propagated fix is visible while you are still looking.
+
+**53. Python rounds a printed share half to even, and the book invites the reader to check by
+hand.** `f"{25/40:.0%}"` is `62%`, not `63%`, because 62.5 rounds to the even digit. Chapter
+32 printed that figure and quoted "62 per cent" ten times, including in a lab step's expected
+result, beside a program whose docstring says **"every count below can be had by hand"** — and
+a reader who does it by hand gets 62.5 and conventional rounding gives 63, so the only
+conclusion available to them is that they have made a mistake. Fixed by printing the one
+half-way figure to a decimal place and quoting it as 62.5 throughout. **Which shares are at risk is narrower than it looks**, and
+checking that is how this entry avoided its own overclaim: a half-way share is a problem only
+when the even digit is the LOWER one. 25/40 is 62.5 and prints 62, where a reader gets 63 —
+at risk. 35/40 is 87.5 and prints 88, which is what a reader gets too — not at risk. Out of
+forty, the at-risk numerators are 1, 5, 9, 13, 17, 21, 25, 29, 33 and 37. The general rule is
+that a figure the reader is told to verify must round the way the reader rounds, and that
+`:.0%` does not always. Every printed share in all 32 chapters was then swept for the same
+thing — each `N of M … P%` line checked against conventional rounding — and chapter 32 was
+the only one, so this is a trap and not a backlog.
+
+**52. A conclusion can need more than the column it was drawn from, and the chapter had already
+written the limit down.** Chapter 32 scores each case twice and calls one cell "the answer was
+in the retrieved passages and the system got it wrong". It then said that cell "is generation's,
+and no amount of better retrieval touches it". Chapter 28 has a whole section on exactly that
+cell — *Order, and the Passage That Gets Ignored*, which opens "Chapter 25's closing table
+listed one failure it could not place: the right passage retrieved and still not used. That
+lands here" — and its levers are the order of the passages, what gets trimmed, and what the
+instruction asks. None of that is generation.
+
+What makes this worth an entry rather than a correction is that **the chapter had stated the
+limit on its own conclusion one Note away**: the retrieval verdict is defined as whether an
+answer was present and explicitly *not* whether they were the best passages, which it hands to
+chapter 26. A column built blind to ranking cannot license a claim about whether ranking work
+would help. The reviewer found it by reading the Note against the claim. **When a chapter
+defines a verdict narrowly, go back and check every conclusion drawn from it against that
+definition** — the narrowing is usually written down, and in a voice confident enough to be
+mistaken for a licence.
+
 **51. `tools/citations.py` dropped every citation on a four-space-indented line, and said
 nothing.** It skipped any line starting with four spaces or a tab, with the comment "program
 source and printed output". That worked while every numbered list in the book had

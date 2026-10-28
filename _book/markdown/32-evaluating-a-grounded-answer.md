@@ -49,7 +49,7 @@ if __name__ == "__main__":
     found = count("Y", "Y") + count("Y", "N")
     print(f"  {N} cases.\n")
     print(f"  End-to-end: the answer was right on {right} of {N}"
-          f"   {right/N:.0%}")
+          f"   {right/N:.1%}")
     print("  That is the number on the dashboard, and it is the")
     print("  only one most systems report.\n")
 
@@ -66,8 +66,11 @@ if __name__ == "__main__":
     print("  Now the four cells, which is the whole point.\n")
     print(f"  {count('Y','Y'):2d}  fine.")
     print(f"  {count('Y','N'):2d}  the passages held an answer and the system")
-    print("      still got it wrong. This is generation's, and no")
-    print("      amount of better retrieval touches it.")
+    print("      still got it wrong. Finding MORE passages fixes")
+    print("      none of these. Chapter 28's order, trimming and")
+    print("      instruction are where this cell is worked on -")
+    print("      and chapter 28 is blunt that those change what")
+    print("      you can CHECK, not what the model does.")
     print(f"  {count('N','N'):2d}  the passages held no answer, so the answer")
     print("      was wrong. This is retrieval's, and a better")
     print("      prompt will not fix one of them.")
@@ -81,13 +84,13 @@ if __name__ == "__main__":
     gen, ret = count("Y", "N"), count("N", "N")
     print(f"  {right} of {N} told you nothing about where to work.")
     print(f"  {gen} against {ret} says both, in almost equal measure -")
-    print("  and the two fixes have nothing in common.")
+    print("  and the two have little in common.")
 ```
 
 ```text
   40 cases.
 
-  End-to-end: the answer was right on 25 of 40   62%
+  End-to-end: the answer was right on 25 of 40   62.5%
   That is the number on the dashboard, and it is the
   only one most systems report.
 
@@ -102,8 +105,11 @@ if __name__ == "__main__":
 
   22  fine.
    8  the passages held an answer and the system
-      still got it wrong. This is generation's, and no
-      amount of better retrieval touches it.
+      still got it wrong. Finding MORE passages fixes
+      none of these. Chapter 28's order, trimming and
+      instruction are where this cell is worked on -
+      and chapter 28 is blunt that those change what
+      you can CHECK, not what the model does.
    7  the passages held no answer, so the answer
       was wrong. This is retrieval's, and a better
       prompt will not fix one of them.
@@ -116,21 +122,27 @@ if __name__ == "__main__":
 
   25 of 40 told you nothing about where to work.
   8 against 7 says both, in almost equal measure -
-  and the two fixes have nothing in common.
+  and the two have little in common.
 ```
 
 **The four cells are the chapter's first claim and the easiest to act on.** Eight cases had an
-answer sitting in the context and got it wrong: that is generation's, and better retrieval does
-not touch one of them. Seven had no answer in the context: that is retrieval's, and a better
+answer sitting in the context and got it wrong: **finding more passages fixes none of them.**
+Chapter 28 spends a section on exactly this cell — the right passage retrieved and still not used
+— and its levers are the order of the passages, what gets trimmed and what the instruction asks
+for — none of which changes whether the passage arrived. Chapter 28 is also blunt about what
+those levers do: they change what you can *check*, not what the model does. Seven had no answer in the context: that is retrieval's, and a better
 instruction will not fix one of them. Eight against seven says *both*, in almost equal measure,
-and the single 62 per cent said nothing at all.
+and the single 62.5 per cent said nothing at all.
 
 **The fourth cell is the one worth arguing about.** Three cases had no answer in the retrieved
 passages and the system answered correctly anyway. The end-to-end figure counts those as
 successes. They are not successes: the answer did not come from the passages, so nothing in the
 system can show where it did come from, nobody can check it, and when the document changes the
 answer will not change with it. **A right answer that no passage supports is a failure of a
-grounded system**, because being grounded is the property you were building.
+grounded system**, because being grounded is the property you were building. One case needs care:
+an answer *derived* from the passages — a total from a unit price in one and a quantity in another
+— is traceable and does move when either document changes, so whether the passages "held an
+answer" is a judgement you have to settle and write down before you score forty cases.
 
 > **Note:** You need both verdicts per case, which means reading each case twice with a different
 > question in mind. "Did the passages contain an answer?" is a judgement about the retrieved set
@@ -139,8 +151,9 @@ grounded system**, because being grounded is the property you were building.
 > establishing a judge before believing it.
 
 > **Tip:** Do the retrieval column first and on its own. It is the cheaper of the two to judge,
-> because you are reading passages against a question rather than an answer against passages, and
-> the cases where retrieval failed can be set aside before you spend any effort on the answers.
+> because you are reading passages against a question rather than an answer against passages. The
+> cases where retrieval failed can then be set aside for the *fix* work — but they still need an
+> answer verdict, because that is the only place the fourth cell above comes from.
 
 ## Grounded, and What That Buys
 
@@ -156,8 +169,10 @@ the answer is faithful to the passages it was given. It is worth knowing both, b
 interviewer may use either, and worth knowing that neither says anything about whether the
 passages were right or whether the answer was useful.
 
-The check that produces it is the **claim-level check**: take the answer apart into the claims it
-makes and give each one a verdict against the retrieved passages. Here it is on one answer, which is how
+The check that produces it is the **claim-level check** — the one Chapter 30 listed as *every
+claim supported by a passage* and named the claim-support check, and which Chapter 31 files among
+the checks that need a judgement: take the answer
+apart into the claims it makes and give each one a verdict against the retrieved passages. Here it is on one answer, which is how
 you see what the number costs and what it hides.
 
 ```python
@@ -263,13 +278,19 @@ if __name__ == "__main__":
 
     print("  And the claim that answers the question asked is")
     print("  claim 5, 'about 18 days in total'. It is unsupported,")
-    print("  it is wrong, and it is built on claim 4, which reads")
-    print("  a real passage as saying something it does not say.")
-    print("  Both of the system's citations would pass chapter")
-    print("  28's three mechanical checks: shipping.pdf exists,")
-    print("  the quote is in it, at the offset claimed. What fails")
-    print("  is the thing chapter 28 says those checks cannot")
-    print("  reach - whether the quote entails the sentence.")
+    print("  and it is built on claim 4, which reads a real passage")
+    print("  as saying something it does not say. Note what it")
+    print("  also does with units: refunds.pdf says 14 days and")
+    print("  shipping.pdf says 3 to 5 WORKING days, so the sum is")
+    print("  two kinds of day added together.")
+    print("  This answer carries no citations at all. Had it")
+    print("  cited refunds.pdf for the 14 days and shipping.pdf")
+    print("  for the 3 to 5, BOTH citations would pass chapter")
+    print("  28's three mechanical checks: the document exists,")
+    print("  the quote is in it, at the offset claimed. What")
+    print("  fails is the thing chapter 28 says those checks")
+    print("  cannot reach - whether the quote entails the")
+    print("  sentence it is attached to.")
 ```
 
 ```text
@@ -311,13 +332,19 @@ if __name__ == "__main__":
 
   And the claim that answers the question asked is
   claim 5, 'about 18 days in total'. It is unsupported,
-  it is wrong, and it is built on claim 4, which reads
-  a real passage as saying something it does not say.
-  Both of the system's citations would pass chapter
-  28's three mechanical checks: shipping.pdf exists,
-  the quote is in it, at the offset claimed. What fails
-  is the thing chapter 28 says those checks cannot
-  reach - whether the quote entails the sentence.
+  and it is built on claim 4, which reads a real passage
+  as saying something it does not say. Note what it
+  also does with units: refunds.pdf says 14 days and
+  shipping.pdf says 3 to 5 WORKING days, so the sum is
+  two kinds of day added together.
+  This answer carries no citations at all. Had it
+  cited refunds.pdf for the 14 days and shipping.pdf
+  for the 3 to 5, BOTH citations would pass chapter
+  28's three mechanical checks: the document exists,
+  the quote is in it, at the offset claimed. What
+  fails is the thing chapter 28 says those checks
+  cannot reach - whether the quote entails the
+  sentence it is attached to.
 ```
 
 **Start with the two figures, 75 per cent and 50 per cent, from the same answer and the same
@@ -329,11 +356,15 @@ count in is a claim about the thing you are measuring, and here the coarser unit
 answer.**
 
 **Then the finding that matters more than either figure.** The claim that answers the question
-asked — *about 18 days in total* — is unsupported, wrong, and built on a claim that reads a real
-passage as saying something it does not say. `shipping.pdf` gives three to five working days for
-delivery *to* the customer; the answer used it for the return journey. **Both of those citations
-would pass Chapter 28's three mechanical checks**: the document exists, the quote is in it, it is
-at the offset claimed. What fails is exactly the thing Chapter 28 said those checks cannot reach.
+asked — *about 18 days in total* — is unsupported, and built on a claim that reads a real passage
+as saying something it does not say. `shipping.pdf` gives three to five working days for delivery
+*to* the customer; the answer used it for the return journey. Note what it also does with units:
+`refunds.pdf` says 14 days and `shipping.pdf` says three to five *working* days, so the sum adds
+two kinds of day together. **And the answer carries no citations at all** — it is four sentences
+of prose. Had it cited `refunds.pdf` for the 14 days and `shipping.pdf` for the three to five,
+**both citations would pass Chapter 28's three mechanical checks**: the document exists, the quote
+is in it, it is at the offset claimed. What fails is exactly the thing Chapter 28 said those
+checks cannot reach.
 
 **And decomposing the answer into claims is itself a judgement.** Six claims is what one careful
 reader found in four sentences; another reader might find five or seven, and the denominator
@@ -359,7 +390,7 @@ return postage. For each answer: how many of its claims a passage
 supports, and which parts of the question it answers. Both columns
 are verdicts a person recorded.
 """
-from claims import PASSAGES, QUESTION, wrap
+from claims import QUESTION, wrap
 
 PARTS = ("how long", "who pays postage")
 
@@ -402,15 +433,29 @@ if __name__ == "__main__":
     print("  and is about something else. So a groundedness")
     print("  figure on its own ranks it level with answer 1.\n")
 
-    print("  Answer 4 is the one that breaks a leaderboard. It")
-    print("  makes no claims, so there is nothing to support and")
-    print("  nothing to contradict. Score it 100% - which is what")
+    print("  Answer 4 is the one that breaks a leaderboard, and")
+    print("  it takes a decision to score at all. 'I do not have")
+    print("  information' IS an assertion, and a false one, since")
+    print("  refunds.pdf was retrieved and does give the timing.")
+    print("  It is a claim about what the SYSTEM knows, though,")
+    print("  not about the documents - so it decomposes to zero")
+    print("  claims about the documents, which is the rule used")
+    print("  here and exactly the kind of rule that has to be")
+    print("  written down. Scored that way it makes no claims,")
+    print("  so there is nothing to support and nothing to")
+    print("  contradict. Score it 100% - which is what")
     print("  a share of supported claims does if you are not")
     print("  careful about zero - and refusing becomes the best")
     print("  strategy your metric knows. That is why this program")
     print("  prints 'no claims' instead of a number, and why a")
     print("  refusal detector belongs beside it.\n")
 
+    print("  Answer 3 earns 1 of 2 parts while being the answer")
+    print("  the chapter has just taken apart. That is correct:")
+    print("  relevance asks whether a part of the question was")
+    print("  ADDRESSED, not whether the answer to it was right.")
+    print("  Correctness is a third verdict, and it is the one")
+    print("  the first program's A column records.\n")
     print("  Answer 5 is grounded, true, and answers one part of")
     print("  a two-part question. Relevance is not a yes or no")
     print("  once the question has parts, and a system that")
@@ -455,14 +500,29 @@ if __name__ == "__main__":
   and is about something else. So a groundedness
   figure on its own ranks it level with answer 1.
 
-  Answer 4 is the one that breaks a leaderboard. It
-  makes no claims, so there is nothing to support and
-  nothing to contradict. Score it 100% - which is what
+  Answer 4 is the one that breaks a leaderboard, and
+  it takes a decision to score at all. 'I do not have
+  information' IS an assertion, and a false one, since
+  refunds.pdf was retrieved and does give the timing.
+  It is a claim about what the SYSTEM knows, though,
+  not about the documents - so it decomposes to zero
+  claims about the documents, which is the rule used
+  here and exactly the kind of rule that has to be
+  written down. Scored that way it makes no claims,
+  so there is nothing to support and nothing to
+  contradict. Score it 100% - which is what
   a share of supported claims does if you are not
   careful about zero - and refusing becomes the best
   strategy your metric knows. That is why this program
   prints 'no claims' instead of a number, and why a
   refusal detector belongs beside it.
+
+  Answer 3 earns 1 of 2 parts while being the answer
+  the chapter has just taken apart. That is correct:
+  relevance asks whether a part of the question was
+  ADDRESSED, not whether the answer to it was right.
+  Correctness is a third verdict, and it is the one
+  the first program's A column records.
 
   Answer 5 is grounded, true, and answers one part of
   a two-part question. Relevance is not a yes or no
@@ -483,12 +543,22 @@ Measured on groundedness alone it is level with answer 1, which is correct and c
 second measure is not optional: **answer relevance**, which asks whether the answer addresses
 what was asked, and which has nothing to do with whether its claims are supported.
 
-**Answer 4 is the one that breaks a leaderboard.** It makes no claims, so there is nothing to
-support and nothing to contradict. Score that 100 per cent — which is what a share of supported
+**Answer 4 is the one that breaks a leaderboard, and scoring it takes a decision.** *I do not
+have information about refund timing* is an assertion, and a false one, since `refunds.pdf` was
+retrieved and does give the timing — it is Chapter 30's mode *Refuses when the answer is there*,
+exactly. But it is a claim about what the *system* knows rather than about the documents, so
+under the rule used here it decomposes to zero claims about the documents. **That rule is the
+kind the Warning above says to write down**, and this is what writing it down looks like. Scored
+that way, there is nothing to support and nothing to contradict. Score that 100 per cent — which is what a share of supported
 claims does if you are careless about zero — and **refusing becomes the best strategy your metric
 knows**. This is why the program prints *no claims* rather than a number, and why a refusal detector —
 Chapter 30's, filed by Chapter 31 among the checks code can decide — belongs beside a
 groundedness figure rather than after it.
+
+**Answer 3 earns one part of two while being the answer this chapter has just taken apart**, and
+that is correct: relevance asks whether a part of the question was *addressed*, not whether the
+answer to it was right. Correctness is a third verdict, and it is the one the first program's `A`
+column records.
 
 **Answer 5 shows that relevance is not a yes or no.** The question has two parts and the answer
 gives one of them, grounded and true. A system that reliably answers the first half of every
@@ -497,9 +567,9 @@ so decompose the *question* as well as the answer, and count parts.
 
 > **Note:** Three measures, and each one answers a question the others cannot. Retrieval: was an
 > answer there? Groundedness: is what the answer says supported by what was there? Relevance:
-> does it answer what was asked? Each can be high while another is low, and the only answer in the
-> five above that is fully grounded *and* fully relevant is answer 1 — which no single number
-> would have picked out.
+> does it answer what was asked? Groundedness can be high while relevance is low, which answer 2
+> shows, and answer 3 is 0 per cent grounded while addressing one part, which is the reverse. The only answer in the five above that is
+> fully grounded *and* fully relevant is answer 1 — which no single number would have picked out.
 
 ## Where the Forty Cases Come From
 
@@ -604,9 +674,19 @@ if __name__ == "__main__":
         print(f"    passage {i}: {og} shared generated,"
               f" {oa} asked{mark}")
     print("\n  A generated question is made of the passage's own")
-    print("  words, so a word-overlap retriever cannot miss it. It")
-    print("  is not a question about your documents; it is a")
-    print("  question about your vocabulary.\n")
+    print("  words, and this retriever matches words, so it found")
+    print("  all eight. A generated question is not a question")
+    print("  about your documents; it is a question about your")
+    print("  vocabulary.\n")
+    print("  How big the gap is depends on the retriever. The")
+    print("  asked questions here are clean paraphrases sharing")
+    print("  none or one word with their passages, which is the")
+    print("  case chapter 24's embeddings exist to catch, so a")
+    print("  dense retriever may well score above 2 of 8 here -")
+    print("  and by how much is a measurement to make, not a")
+    print("  prediction to publish. What does not depend on the")
+    print("  retriever is where the generated questions came")
+    print("  from: they were made from the passages.\n")
 
     print("  That does NOT make generation useless. It gives you")
     print("  two things nothing else does: an answer key you did")
@@ -646,9 +726,20 @@ if __name__ == "__main__":
     passage 7: 5 shared generated, 1 asked
 
   A generated question is made of the passage's own
-  words, so a word-overlap retriever cannot miss it. It
-  is not a question about your documents; it is a
-  question about your vocabulary.
+  words, and this retriever matches words, so it found
+  all eight. A generated question is not a question
+  about your documents; it is a question about your
+  vocabulary.
+
+  How big the gap is depends on the retriever. The
+  asked questions here are clean paraphrases sharing
+  none or one word with their passages, which is the
+  case chapter 24's embeddings exist to catch, so a
+  dense retriever may well score above 2 of 8 here -
+  and by how much is a measurement to make, not a
+  prediction to publish. What does not depend on the
+  retriever is where the generated questions came
+  from: they were made from the passages.
 
   That does NOT make generation useless. It gives you
   two things nothing else does: an answer key you did
@@ -680,8 +771,10 @@ matches words found all eight of them.
 
 **So generate the set, and then do the one thing that makes it honest: rewrite the questions away
 from the passage's wording and keep the key.** The rewrite is the work. It is also a part of this
-that cannot be automated by the thing you are testing, which is a general rule worth carrying: an evaluation set written by the same mechanism you are evaluating will tell you that
-the mechanism works.
+that cannot be automated by the thing you are testing. What this set shows is narrower than the
+rule people state: reusing a passage's words flatters a retriever that matches words. Carry the
+wider version as a caution rather than a law — a set built by the mechanism under test may well
+report that the mechanism works, and the way to find out is to measure the overlap.
 
 > **Warning:** This is the most common way an evaluation set is quietly worthless, and it does
 > not announce itself — the numbers are high, the set is large, and every case has a key. If your
@@ -694,8 +787,9 @@ the mechanism works.
    once for whether the answer was right. Two columns, not one.
 2. **Read all four of the cells**, and read the right-answer-no-passage cell as a failure. It is the
    one the end-to-end number is lying to you about.
-3. **Work on the larger of the two fault cells**, and expect them to be comparable — in which
-   case the retrieval work and the generation work are separate projects with nothing in common.
+3. **Work on the larger of the two fault cells.** If they are comparable, as they are here, the
+   two bodies of work are largely separate — finding passages on one side, Chapter 28's
+   assembly and the generation side on the other.
 4. **For the answers, decompose into claims** and give each one a verdict against the retrieved
    passages. Write down what you counted as a claim, and keep that rule still.
 5. **Report the per-claim verdicts, not only the share.** The share tells you how bad; the
@@ -729,7 +823,7 @@ only ordering that matters is that `claims.py` is saved before `relevance.py`, w
 
 **Step 1.** Save `separate.py` and run it.
 
-*Expected result:* 62 per cent end to end, 75 per cent retrieval, 73 per cent generation given
+*Expected result:* 62.5 per cent end to end, 75 per cent retrieval, 73 per cent generation given
 good retrieval, and the four cells at 22, 8, 7 and 3.
 
 **Step 2.** Move the three right-answer-no-passage cases into the wrong column: change
@@ -737,13 +831,15 @@ good retrieval, and the four cells at 22, 8, 7 and 3.
 
 *Expected result:* end-to-end falls to 55 per cent while **retrieval and generation are both
 unchanged** at 75 and 73. The three cases were never telling you anything about either stage, and
-the headline figure was the only number that moved.
+the two stage percentages hold, while the end-to-end figure,
+the bottom two cells and the "8 against 7" line all move. The top two cells hold as well, which
+is the point: the three cases were never about either stage.
 
 **Step 3.** Put it back. Now make retrieval better and generation worse: change the shapes to
 `("Y","Y",22)`, `("Y","N",12)`, `("N","N",3)`, `("N","Y",3)`.
 
 *Expected result:* retrieval rises to 85 per cent, generation falls to 65, and **end-to-end stays
-at 62 per cent** — the same headline, from a system with a different problem. That is the
+at 62.5 per cent** — the same headline, from a system with a different problem. That is the
 argument of the whole section in one edit.
 
 **Step 4.** Save `claims.py` and run it. Read the three passages and the four sentences before
@@ -757,7 +853,10 @@ thing.
 
 *Expected result:* 3 of 5 claims, 60 per cent, and the sentence figure unchanged at 75. **A
 reader who simply did not notice a claim produces a higher groundedness figure**, and nothing in
-the output marks the difference. This is why step 4 of *What To Actually Do* says to write the
+the output marks the difference. Read the program's closing paragraphs while you are there: they
+are written against six claims and now contradict the figures printed above them — *25 points
+apart* is 15, and *claim 5* is claim 4. That is the moving denominator again, and it is why the
+verdicts matter more than the share. This is why step 4 of *What To Actually Do* says to write the
 rule down.
 
 **Step 6.** Put it back and save `relevance.py`. Run it.
@@ -801,8 +900,10 @@ hit is the kind of defect that only ever moves a number in your favour.
 
 A grounded answer has two halves, and one verdict on the answer cannot say which failed. **Score
 every case twice** — did the retrieved passages hold an answer, and was the answer right — and
-the single 62 per cent becomes four cells: 22 fine, **8 where an answer was in the context and
-the system got it wrong, which is generation's and no retrieval work touches**, 7 where no answer
+the single 62.5 per cent becomes four cells: 22 fine, **8 where an answer was in the context and
+the system got it wrong, which finding more passages fixes none of** — Chapter 28's section on
+this cell puts the levers at order, trimming and the instruction, and is blunt that they change
+what you can check rather than what the model does — 7 where no answer
 was there, which is retrieval's and no prompt work touches, and 3 where **no passage held an
 answer and the answer was right anyway.** The end-to-end figure counts those three as successes
 and they are failures of a grounded system: the answer did not come from the passages, so nothing
@@ -815,9 +916,10 @@ rather than only to the cited ones. **Faithfulness** is the other name for the s
 Worked on one answer: 3 of 6 claims supported against 3 of 4 sentences, **two figures 25 points
 apart from the same answer**, and the whole difference is the unit, because sentence 1 carries one
 supported claim and one invented one and checking by sentence lets the first vouch for the second.
-The claim that answered the question — *about 18 days* — is unsupported, wrong, and built on a
-real passage read as saying something it does not say, and **both citations would pass Chapter
-28's three mechanical checks.** Decomposing into claims is itself a judgement, so a groundedness
+The claim that answered the question — *about 18 days* — is unsupported, built on a real passage
+read as saying something it does not say, and adds two kinds of day together. The answer
+carries no citations at all, and **had it cited the two passages it leaned on, both citations
+would have passed Chapter 28's three mechanical checks.** Decomposing into claims is itself a judgement, so a groundedness
 figure is comparable only against itself under one rule held still.
 
 **Grounded is not relevant, and the demonstration is one answer.** A sentence copied from a
@@ -832,8 +934,8 @@ Relevance is not a yes or no either — decompose a question with parts and coun
 **Your cases come from two places and neither is enough.** Real failures give you the questions
 people ask; generated questions give you an answer key for free, because you know which passage
 each came from, and coverage of the corners nobody has asked about. **The trap is that a generated
-set is easy by construction**: retrieval ranks the right passage first on 8 of 8 generated
-questions and 2 of 8 asked ones, because a generated question shares three to six words with its
+set is easy by construction**: a word-overlap retriever ranks the right passage first on 8 of 8
+generated questions and 2 of 8 asked ones, because a generated question shares three to six words with its
 source passage and a real one shares none or one. A question built from a passage is a question
 about your vocabulary. So generate, then **rewrite the questions away from the passage's wording
 and keep the key** — and keep the two sets apart, because averaging them gives a number that
@@ -852,7 +954,7 @@ means neither.
 
 | Item | Value or formula |
 |---|---|
-| Why two scores per case | One verdict cannot say which stage failed. 62 per cent end to end was 75 per cent retrieval and 73 per cent generation given good retrieval |
+| Why two scores per case | One verdict cannot say which stage failed. 62.5 per cent end to end was 75 per cent retrieval and 73 per cent generation given good retrieval |
 | The four cells | Fine; answer there and got it wrong (generation's); answer not there (retrieval's); answer not there and right anyway (a failure, counted as a success) |
 | The cell people miss | Right answer, no supporting passage. 3 of 40 here. Nothing can show where it came from, and nothing notices when the document changes |
 | What grounded means | Every claim supported by a retrieved passage. Chapter 28's entailment test applied to every claim, not only the cited ones |
@@ -860,7 +962,7 @@ means neither.
 | The two independent measures | Groundedness and answer relevance. A sentence copied from an off-topic retrieved passage is 100% grounded and answers nothing |
 | The no-claims answer | A refusal has nothing to support, so a careless groundedness figure scores it 100% and rewards refusing. Pair it with a refusal detector |
 | Where cases come from | Real failures for the questions people ask; generated questions for a free answer key and coverage |
-| The cost of a generated set | 8 of 8 generated against 2 of 8 asked, on the same passages — a generated question shares 3 to 6 words with its source, a real one none or one |
+| The cost of a generated set | With a word-overlap retriever, 8 of 8 generated against 2 of 8 asked on the same passages — a generated question shares 3 to 6 words with its source, a real one none or one. A retriever that does not match words would narrow the gap; by how much is a measurement, not a prediction |
 
 ### Review Questions
 
@@ -872,19 +974,20 @@ means neither.
 
 ### Review Answers
 
-1. Because one verdict on the answer cannot say which half failed, and the two halves have no
-fix in common. Score each case twice — did the retrieved passages hold an answer at all, and was
-the answer right — and the single figure turns into four cells. In the chapter's forty, 62 per
+1. Because one verdict on the answer cannot say which half failed, and the two halves have little
+in common. Score each case twice — did the retrieved passages hold an answer at all, and was
+the answer right — and the single figure turns into four cells. In the chapter's forty, 62.5 per
 cent end to end was 22 fine, 8 where an answer was sitting in the context and the system still
 got it wrong, 7 where nothing in the context answered the question, and 3 where no passage held
-the answer and the answer was right anyway. The 8 is generation's and no amount of better
-retrieval touches one of them; the 7 is retrieval's and no instruction will fix one of them; and
-8 against 7 says work on both, which the 62 per cent could not have told you. The detail that
+the answer and the answer was right anyway. The 8 is where an answer was present and the system still missed it, and finding more passages
+fixes none of them — Chapter 28's section on the passage that gets ignored is about this cell,
+and its levers are order, trimming and the instruction; the 7 is retrieval's and no instruction will fix one of them; and
+8 against 7 says work on both, which the 62.5 per cent could not have told you. The detail that
 shows this has been used rather than read is the fourth cell: **a right answer with no supporting
 passage is a failure**, not a success, because the answer did not come from the passages, nothing
 in the system can show where it did, and when the document changes nothing about that case will
 notice — yet the end-to-end figure counts it as a win. The lab makes the argument in one edit:
-hold retrieval at 85 per cent and drop generation to 65 and the headline sits at 62 per cent,
+hold retrieval at 85 per cent and drop generation to 65 and the headline sits at 62.5 per cent,
 exactly where it was for a system with a different problem.
 2. Decomposing the answer into the claims it makes, and giving each claim a verdict against the
 retrieved passages — supported, or not. The share of supported claims is the groundedness figure;
@@ -910,14 +1013,15 @@ already asked. **Your own documents** give you the rest: write a question from a
 have a case whose answer key you did not have to label, because you know which passage you made
 it from, and you can generate one per passage to find the corners of your documents nobody has
 ever asked about. The thing to know — and the reason this is a question worth asking — is that a
-generated set is easy by construction. In the chapter's eight passages, retrieval ranks the right
-passage first on **8 of 8** generated questions and **2 of 8** of the same facts asked the way a
-person would ask them, because a generated question shares three to six words with its source
+generated set is easy by construction. In the chapter's eight passages, a word-overlap retriever ranks
+the right passage first on **8 of 8** generated questions and **2 of 8** of the same facts asked
+the way a person would ask them — a retriever that does not match words would likely do better
+on the asked set, which is a measurement to make rather than a prediction — because a generated question shares three to six words with its source
 passage and a real question shares none or one. A question built from a passage is a question
 about your vocabulary rather than about your documents. So generate for the key and the coverage,
 then rewrite every question away from the passage's wording, keeping the key — and keep the two
 sets apart rather than averaging them, because the average measures neither.
-4. The two things groundedness cannot see, in this order. First, **relevance**: an answer can be
+4. The two things groundedness cannot see, in this order. First, **answer relevance**: an answer can be
 grounded on every claim it makes and answer nothing that was asked. The chapter's example is a
 sentence copied out of a retrieved passage about standard delivery, offered to a question about
 refunds — 100 per cent grounded, zero parts of the question answered, and level with a correct
@@ -940,7 +1044,8 @@ thing to ask for is the **word overlap between each question and its target pass
 that is where the problem lives: in the chapter's set the generated questions shared three to six
 words with their source passages and scored 8 of 8, while the same facts asked naturally shared
 none or one and scored 2 of 8. A set that has never been rewritten away from its passages will
-report a retrieval figure far above what users experience, and nothing about it looks wrong — the
+report a retrieval figure above what users experience, and furthest above it when the retriever
+matches words, and nothing about it looks wrong — the
 numbers are high, the set is large, and every case has a key. Then ask two more. Were the
 questions generated by the same model that answers them, because an evaluation set written by the
 mechanism under test will report that the mechanism works. And is this set kept apart from the
