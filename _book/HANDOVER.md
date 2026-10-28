@@ -67,13 +67,17 @@ Its first half (1 to 7) is 70 pages against 98; *Inside the Model* (8 to 17) is 
 **365 printed pages** over 26 of 57 chapters. Chapter 26 is the longest at 30 pages.
 
 **Stopped here on 28 Oct 2026, at the reader's request, with everything pushed and the PDF
-delivered.** Nothing is half-finished: chapters 27, 28, 29 and 30 are closed and sealed, the
-sharpen pass over chapters 8-17 is applied and every record amended, and
-`bash tools/check-all.sh` ends `ALL GATES PASS`. **The next chapter to write is 31, Checks and
-Judges, and Validating a Judge** — begin with `python3 tools/chapter.py begin 31-<slug>` and read
-its sources in full first, per §14 step 1. Chapter 30 is the one to read before it: it produces
-the failure modes that chapter 31's checks are built per, and it deliberately stops short of
-asking whether a check is reliable, which is 31's.
+delivered.** Nothing is half-finished: chapters 27 to 33 are closed and sealed, the sharpen pass
+over chapters 8-17 is applied and every record amended, and `bash tools/check-all.sh` ends
+`ALL GATES PASS`. **Chapters 30 to 33 are the evaluation run of Part II and they are done**, which
+means the next chapter to write is **34**; read its `TOC.md` row and `LEDGER-TAUGHT.md` for every
+row naming it before anything else, per §14 step 1.
+
+**The evaluation chapters cost more per chapter than the mechanism ones did, and the records say
+why.** Their reviews found 22, 17 and 15 findings, and in each case several of the FIRST round's
+fixes were themselves wrong — 4, 11 and 7. The pattern is the same every time: a sentence written
+to retire an absolute, written at the speed of a correction rather than of a claim. Entries 52 to
+55 of `LEDGER-DEFECTS.md` are all from this run, and entry 54 is the one to read first.
 
 **Three things waiting, none blocking chapter 31.** The sharpen pass should be run again over
 chapters 18 to 30 once Part II is finished, and `LEDGER-DEFECTS.md` entry 44 says why later is

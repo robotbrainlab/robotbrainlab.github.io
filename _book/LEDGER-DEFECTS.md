@@ -65,6 +65,36 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**55. A program's printed sentence about a comparison it does not compute is not checked by
+running the program.** Chapter 33's `regress.py` printed "That set catches all 3 regressions on
+the next change, because version 2's breakages are in it now." The program had the data for
+that comparison and never performed it. Running the chapter's own numbers gives **0 regressions
+and 5 fixes**: the three breakages were *failing* when the set was taken, so the next
+comparison sees them go fail-to-pass and reads them as fixes — and the general fact is stronger
+than the claim I was making, which is that **a before-and-after comparison cannot report a case
+that was already failing as a regression at all.** It reports a standing failure.
+
+Entry 45 is the ancestor of this — a program printing the counter-example to the claim it was
+written to demonstrate — but the mechanism is different and worse. There the output refuted the
+sentence beside it, so reading the output was enough. Here the output was silent, because the
+sentence was about a comparison the program had not been asked to make, and **every check in
+the loop passed**: the block was byte-exact against a real run, the arithmetic gate found
+nothing, and the first reviewer had to write the comparison themselves to see it. The claim had
+also reached the body, the Summary, Worth Memorising and a Review Answer.
+
+**The rule: a sentence that names a comparison is a claim that the comparison was run.** If a
+program has the data, make it compute the thing the prose asserts and print it — which in this
+case produced a better section than the one it replaced. The same pass turned up a second
+finding by the same route: forcing the repeats question into code showed that **four repeats is
+worse than three** (5 of 5 against 7 of 10 subsets reporting a regression that is not there)
+because a two-two split is not a majority and reads as fail. Nobody would have guessed that,
+and nobody had to.
+
+Every `print` in all 33 chapters was then screened for a sentence asserting a comparison
+(*catches all*, *reports no*, *would catch*, *finds all*). Two hits, both sound: chapter 30's
+"Exact match catches all 40" computes that set, and chapter 33's "it reports no regressions,
+and there were 3" computes both halves. So this one was a trap and not a backlog.
+
 **54. A qualifier written to fix an overclaim is itself a claim, and propagating it multiplies
 the error.** Chapter 32's generated-set figure — 8 of 8 against 2 of 8 — is an artefact of a
 word-overlap retriever, which the first review was right to say needed qualifying. The

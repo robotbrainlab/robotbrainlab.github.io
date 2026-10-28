@@ -51,6 +51,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Context budget** | How much of the window is left for passages once the instruction and the question are counted. Not the same number as Chapter 26's candidate set, and set by a different thing | 28 |
 | **Context window** | The maximum number of tokens a model will accept at once. A cost limit rather than a memory, counting the reply as well as the request. The whole conversation is re-sent every call, and something is dropped — or the call refused — when it fills | 16 |
 | **Cosine similarity** | The dot product divided by both lengths, which removes magnitude and keeps direction. Always between −1 and 1 | 8 |
+| **Criteria drift** | Your own standard moving as you see more output, measured by re-labelling old outputs blind and counting the flips | 33 |
 | **Cross-encoder** | Query and document passed through one model together, giving one score for the ordered pair. Not precomputable; free to be asymmetric | 26 |
 | **Cross-entropy** | The training objective: the average of `\(-\log p\)`{=latex} over every position, where `\(p\)`{=latex} is the probability given to the token that actually came next. Zero for a perfect prediction, unbounded for a confident mistake | 14 |
 | **Current convention** | How competent engineers work at the moment: true, load-bearing and replaceable. It usually names a technique rather than a reason, and usually has a predecessor you can remember | 6 |
@@ -159,6 +160,8 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Reciprocal rank** | One divided by the position of the first relevant result, for a single query | 26 |
 | **Reciprocal rank fusion** | Combining rankings by summing one over a constant plus each rank, using positions only and never the scores | 26 |
 | **Registry** | The map from a name to a function your code is willing to run. The lookup that refuses a name the model invented | 23 |
+| **Regression** | A case that passed before the change and fails after it — established over repeated runs, not from one | 33 |
+| **Regression set** | The cases you run on every change. Past failures are the minimum and cannot catch a case that has never failed, so it carries passing cases too | 33 |
 | **Regularisation** | The techniques that stop a model fitting its training data too closely | 17 |
 | **Relevance** | Whether this document answers that question, for this asker. A directed judgement, not a distance | 25 |
 | **Relevance judgement** | One recorded decision that a given document does or does not answer a given query. The unit an answer key is made of | 25 |
@@ -200,6 +203,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Top-k** | Keeping only the `\(k\)`{=latex} highest-scoring tokens and renormalising. Keeps the same number of options however confident the model is | 13 |
 | **Top-p** | Also called nucleus sampling. Keeping the smallest set of tokens whose probabilities add to at least `\(p\)`{=latex}, then renormalising. Narrow where the model is confident, wide where it is not, at the cost of not knowing in advance how many survive | 13 |
 | **Total timeout** | The cap on a whole call, as distinct from the gap between chunks that most libraries call the read timeout. Derived from the token cap | 19 |
+| **Trace** | The record of one request: input, retrieval and its candidates, model and version, tool calls, output, tokens and per-stage timings | 33 |
 | **Training** | The one-time process that produced the model's numbers. Not something you do on a request | 1 |
 | **Training cut-off** | The point in time after which no text reached the model's training. It knows nothing later, and cannot tell that it does not | 1 |
 | **Trials** | Repeated runs of the same case, which measure the model's own variation. Averaged within the case, never counted as extra cases | 20 |

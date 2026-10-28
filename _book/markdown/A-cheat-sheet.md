@@ -208,3 +208,12 @@ written from memory.
 | The no-claims answer | A refusal has nothing to support, so a careless groundedness figure scores it 100% and rewards refusing. Pair it with a refusal detector | 32 |
 | Where cases come from | Real failures for the questions people ask; generated questions for a free answer key and coverage | 32 |
 | The cost of a generated set | With a word-overlap retriever, 8 of 8 generated against 2 of 8 asked on the same passages — a generated question shares 3 to 6 words with its source, a real one none or one. A retriever that does not match words would narrow the gap; by how much is a measurement, not a prediction | 32 |
+| Score against list | A score is the net of fixes and breakages. Version 2 was +1 case = 4 fixed − 3 broken, which is +5 points on twenty cases | 33 |
+| The blind spot in a failures-only set | It reported 0 regressions when there were 3, because all three passed the previous version | 33 |
+| The two honest sets | Everything, or every case that has ever failed — the second reports the breakage it missed as a standing failure, not as a regression, and catches the NEXT breakage of that case | 33 |
+| When a case is a regression | When it fails *more often* than it passed — a tie is not one, and that tie-break moved this set's result from 5 of 5 to 0 of 5 at four repeats | 33 |
+| What one run costs | 2 regressions and 2 fixes reported against 1 real fix; all 5 available runs reported a regression that was not there | 33 |
+| Criteria drift, measured | The same 40 outputs: 85% in week 1, 72.5% in week 5, 7 flips, 6 of them to fail | 33 |
+| How to measure drift | Re-label a sample of old outputs without looking at the old label, and count the flips | 33 |
+| What a trace holds | Input, retrieval query and candidates with scores, model and version, tool calls, output, tokens, per-stage timings | 33 |
+| The content trade | Drop the 4 content fields of 16 and 5 of 8 questions survive; the 3 lost are the ones needing the text, including whether a case can exist at all | 33 |
