@@ -14,7 +14,9 @@ reviewed: 2026-10-28T04:22:39+05:30
 absolutes: verify-absolutes.py: 85. Two were false and both were headline sentences - 'every parameter has to be read' and 'doubling the prompt quadruples the prefill arithmetic'. Each is listed under 'While writing'. **A third was introduced by my own fix for the first** and caught by the second pass: the new worked block opened 'Every parameter is used once, in a multiply and an add'.
 new-terms: verify-inputs.py: bare-terms 0 CLEAN. Nine terms introduced here, all bolded and all in Key Terms: prefill, decode, key-value cache, batching, quantisation, mixture of experts, active parameters, memory-bound, compute-bound. The last two were added during review and compute-bound had to be added twice.
 covers-misses: verify-coverage.py: 0 misses. All seven Covers items delivered: prefill and decode as two different computations, with a table of how they differ and what limits each; the key-value cache with the size calculation, worked at three lengths and at ten users; why the first token is slow, now with the one-operation-per-byte block that makes 'memory-bound' a number rather than a word; why doubling the prompt more than doubles the work, with the two halves of prefill tabulated at four lengths; batching, with what is shared and what is not; quantisation as bits per parameter; and mixture-of-experts with the active share computed from chapter 12's own per-layer figures.
-sha256: 8d40c72f11a6734c92521deb071c68ca0fc7722feeb7b128104f5f8f10a2ee1f
+sha256: a90a7fa4b49a50300e34f1b2bb8da5923a11a783d4ee21d5556202700be964a5
+reseal:
+  Reopened 2026-10-28 for one change: a bold span that `latex/tools/filter.lua` turns into an automatic index entry began with a digit, which `tools/verify-index.py` now rejects. No text, claim or number was touched - see LEDGER-DEFECTS.md entry 33.
 
 ## Before writing
 

@@ -315,8 +315,8 @@ results = await asyncio.gather(*jobs, return_exceptions=True)
 
 Now a failure arrives as an exception *object* in the results list, in the position of the job
 that raised it, and every other result is intact. You walk the list, keep what worked, and
-decide what to do about the rest — which is exactly the record the last section of this chapter
-is about.
+decide what to do about the rest — which is exactly what the record in *When It Dies Half-Way*,
+two sections below, is for.
 
 ## Batch Endpoints
 
@@ -612,7 +612,7 @@ exist. Note that the `assert` keeps passing: ordering has nothing to do with the
 should you run at once?
 
 *Expected result:* `\(120 / 60 = 2\)`{=latex} requests a second, and each occupies a worker for
-2 seconds, so **4** at once keeps you at the limit. Go to 8 and you are asking for 240 a minute
+2 seconds, so four at once keeps you at the limit. Go to 8 and you are asking for 240 a minute
 and you will spend half your time in backoff. The formula is *rate × duration*, and it is worth
 writing in a comment next to the number.
 

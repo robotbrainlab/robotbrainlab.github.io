@@ -89,3 +89,12 @@ written from memory.
 | What to stream | To a person, yes. One answer you must validate whole, no. Independent units, yes | 19 |
 | `asyncio.gather` | One failure loses every result unless you pass `return_exceptions=True` | 19 |
 | The resume file | One flushed line per item, or per `(item, stage)` for a pipeline. Keyed by input, holding the result | 19 |
+| Spread of a score | `\(\sqrt{n p (1-p)} / n\)`{=latex} — one standard deviation over **which cases you drew**. 40 cases at 0.70 is 0.072, so two of them is the ±0.14 that spans 95 per cent. Run-to-run spread is a different number and is smaller unless the model is uncertain on every case | 20 |
+| The bootstrap | Resample your cases with replacement, score each, take the 2.5th and 97.5th percentiles | 20 |
+| What to put an interval on | The **difference**, paired. Never two separate intervals and a look | 20 |
+| Cost of resolution | Width shrinks as `\(1/\sqrt{n}\)`{=latex}, so halving it costs four times the cases | 20 |
+| What carries the comparison | Only the cases where the two versions disagree. Count them and say them out loud | 20 |
+| What pairing is worth | Here, 0.400 wide down to 0.250. It cancels the variation the two versions share, so the more they agree, the more it buys | 20 |
+| Cases against trials | Cases for the range of inputs, trials for the model's variation. Neither fixes the other | 20 |
+| How many trials | Averaging `\(k\)`{=latex} judgements divides a case's own variance by `\(k\)`{=latex}. Two or three, then stop | 20 |
+| Typical interval vs detection | A table built from a fixed mix shows the usual interval. Whether a real draw clears zero is a separate number, and lower | 20 |

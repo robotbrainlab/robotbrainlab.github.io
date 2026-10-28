@@ -44,6 +44,10 @@ if [ -d latex ]; then
   fi
 fi
 
+# After the build, because it reads the generated chapters/*.tex.
+printf '\n=== INDEX  every automatic index entry is shaped like a term ===\n'
+python3 tools/verify-index.py || fail=1
+
 printf '\n'
 if [ "$fail" = "0" ]; then echo "ALL GATES PASS"; else echo "GATES FAILED"; fi
 exit "$fail"

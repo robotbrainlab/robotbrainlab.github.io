@@ -65,6 +65,81 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**34. Every time chapter 20 validated a claim, it validated it against data chosen so the claim
+could not fail — and then stated the conclusion without the condition.** The completeness review
+found this four times in one chapter, and the four together are worse than any one of them.
+
+- **The headline number.** `one_run()` treats every case as a coin at 0.70. Under that model,
+  re-running the same forty cases and drawing forty fresh ones are *the same distribution*
+  (measured: 0.0723 and 0.0726), so the chapter's ±0.14 was a case-sampling figure presented as
+  run-to-run variation. A realistic set — reliably right on 28 cases, reliably wrong on 12 — has a
+  run-to-run spread of 0.022 against the same 0.072 of case-sampling spread.
+- **The check that was an identity.** The chapter had the bootstrap's interval for a single run
+  "agreeing to three decimal places" with ten thousand real runs, offered as evidence that the
+  method works. `A` holds exactly 28 ones of 40, so resampling it *is* Binomial(40, 0.7)/40 — the
+  very distribution the other procedure sampled. The exact percentiles are 0.550 and 0.825 too.
+  One distribution reached three ways, and it had to agree.
+- **A mechanism stated backwards.** "Pairing removed the variation that comes from which cases
+  you happened to draw" — if it had, the interval would have zero width, and it is 0.250 wide.
+  Pairing cancels the part of that variation the two versions *share*.
+- **A typical interval sold as a detection rate.** "Two hundred cases is where this difference
+  becomes visible" came from `PATTERN * k`, which replicates the forty-case mix exactly and so
+  pins the sample proportions to the population values. Over every real draw of two hundred,
+  weighted by likelihood, the interval clears zero 72 times in a hundred.
+
+**What the four have in common** is that the worked example satisfies the claim's hidden
+condition, so the condition never announces itself while you are writing. That is entry 25's
+shape, and entry 26's, arriving together in the chapter where it does most damage: a statistics
+chapter hands the reader sentences to repeat to somebody looking for exactly that gap.
+
+**How to apply.** When a chapter demonstrates a claim, write down what the demonstration assumes
+*before* writing the sentence the demonstration supports, and then ask what the same code does
+when the assumption is false. Run it. Every one of these four was settled in under a minute by
+changing one list and re-running — a near-deterministic set instead of coins, a list that is not
+exactly 70 per cent ones, fresh draws instead of a replicated pattern. And treat an exact
+agreement as a warning rather than a result: two procedures that match to three decimals are
+usually one procedure.
+
+A second lesson, from the same chapter's fix pass. **Three of the nine problems the
+fix-verification found were false statements in the Summary and the answer key while the body was
+right** — entry 16 recurring inside a pass whose brief was entry 16 — and two more were entry
+33's bold-is-a-term class recurring in the chapter that had just paid for that gate. A fix pass
+needs its own sweep, with counts, over the back matter and the generated appendices. Reading the
+body and believing you are done is how all five got through.
+
+---
+
+**33. Bold means "new term" in this book, and I had been using it for emphasis.**
+`latex/tools/filter.lua` turns every bold span of four words or fewer, not ending in
+punctuation, into an automatic `\index{}` entry, because in this book a bold short phrase *is*
+a new term. Chapter 19 shipped `\index{4}` from `**4** at once keeps you at the limit`, and
+nobody noticed, because nothing in the gate suite ever looked at the index.
+
+Chapter 20 made it a build failure. It bolded three intervals, and one of them was
+`**−0.050 to +0.200**` with a Unicode minus. makeindex letter-groups on the entry's **first
+byte**, so it emitted `\indexletter{<0xE2>}` — half of a two-byte character — into `book.ind`.
+XeLaTeX replaced the invalid sequence with U+FFFD, found no glyph for it in the letter-group
+font, and `Missing character` went to 1.
+
+`tools/verify-index.py` now rejects any entry whose first character is not an ASCII letter, and
+it is wired into `check-all.sh` after the build, because it reads the generated `.tex`. It found
+six across the book: two in chapter 15, one in 19 and three in 20. Chapters 15 and 19 were
+reopened for it and resealed; neither lost a word of text.
+
+**Its first draft also rejected a non-ASCII character anywhere in an entry, and that was wrong
+about the mechanism.** Chapter 7 indexes the four part names, "I · Understand" and its siblings,
+and their middle dot is harmless: only the first character becomes a letter group. The strict
+version would have made me mangle correct content to satisfy a rule I had reasoned badly — the
+same mistake as entry 32, one chapter later, caught this time before it shipped because the gate
+printed what it was rejecting and four of the ten hits were obviously innocent.
+
+**How to apply.** Bold is for terms. Emphasis on a number, an interval or a phrase that is not a
+term goes in *italics*, or in a bold sentence that ends in a full stop, which the filter skips,
+or carries `[**…**]{.noindex}`. When you write a new gate, read every hit of its first run: if
+some are plainly fine, the rule is wrong, not the content.
+
+---
+
 **32. A tolerance is not a fix, and a cause you did not read out of the log is not a cause.**
 Chapter 19 made the book nineteen pages longer, and the last page of the index landed
 0.22693pt over the text height. I decided, without reading the log far enough to see which

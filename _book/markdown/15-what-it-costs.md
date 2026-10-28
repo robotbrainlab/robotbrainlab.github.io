@@ -312,8 +312,8 @@ You are sizing a machine to serve one model. Its shape: **32 layers, width 4,096
 parameters, weights at 16 bits.** That is more than Chapter 12 counted for the same shape,
 because this model's feed-forward blocks are the gated three-matrix form Chapter 12's Note on
 real feed-forward blocks mentions — three matrices of 4,096 by 11,008 instead of two comes
-to 7.0 billion. The card has **40 GiB** of memory. Your product allows
-conversations up to **8,000 tokens**, and the cache is stored at 2 bytes per number.
+to 7.0 billion. The card has [**40 GiB**]{.noindex} of memory. Your product allows
+conversations up to [**8,000 tokens**]{.noindex}, and the cache is stored at 2 bytes per number.
 
 **Step 1.** How much memory do the weights take?
 

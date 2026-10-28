@@ -72,6 +72,7 @@ Three chapters were over-counted that way; `LEDGER-DEFECTS.md` entry 23 has the 
 | `markdown/08` … `markdown/17` | Part I · *Inside the Model* | **Done.** Two review passes each, records sealed |
 | `markdown/18` | Part II · *Use*, first chapter | **Done.** Two review passes, record sealed |
 | `markdown/19` | Calling a model reliably | **Done.** Two review passes, record sealed. The first pass found that bank question 42 had never been read, so the chapter went 13 → 20 pages |
+| `markdown/20` | Is the difference real? | **Done.** Two review passes, record sealed. Earned `tools/verify-index.py` and `LEDGER-DEFECTS.md` entry 34 |
 | `markdown/19` … `markdown/57` | Chapters 19 to 57 | Not started |
 | `markdown/00-preface.md` | A placeholder, so the build runs | Replace before release |
 | `markdown/C-glossary.md` | Appendix C. **Generated** by `tools/glossary.py` from every chapter's Key Terms table | 115 terms, in the PDF |
@@ -100,7 +101,7 @@ do not reopen it. Dates, assuming the Part I rate holds:
 |---|---|---|---|
 | 1 | Part I, chs 1–7 | 98 | **Done 2026-10-23** |
 | 2 | *Inside the Model*, chs 8–17 | 168 | **Done 2026-10-28**, twelve days early |
-| 3 | Part II, chs 18–29 | 196 | 10 Nov – 23 Nov. **18 and 19 done, 28 Oct** |
+| 3 | Part II, chs 18–29 | 196 | 10 Nov – 23 Nov. **18, 19 and 20 done, 28 Oct** |
 | 4 | Part II, chs 30–39 | 166 | 24 Nov – 5 Dec |
 | 5 | Part III, labs 40–46 | 132 | 6 Dec – 15 Dec |
 | 6 | Part III, labs 47–50 | 58 | 16 Dec – 19 Dec |
