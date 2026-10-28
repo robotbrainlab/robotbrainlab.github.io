@@ -134,3 +134,20 @@ written from memory.
 | What the negation case proves | Nothing about which one ranks first. It is a claim about the score: you get no handle on that ordering, so you cannot tune or threshold it | 25 |
 | What inspection finds | A wrong result that is present. Not a right result that is missing from the list | 25 |
 | What a five-query demo is | A demonstration on Chapter 6's ladder: it can work once | 25 |
+| BM25 | `\(\sum_{t \in q} \mathrm{IDF}(t) \cdot \dfrac{f_{t,d}(k_1+1)}{f_{t,d} + k_1(1 - b + b|d|/\mathrm{avgdl})}\)`{=latex} | 26 |
+| Its two knobs | `\(k_1 \approx 1.5\)`{=latex} controls saturation, `\(b \approx 0.75\)`{=latex} controls length normalisation. Tuned constants, not derived | 26 |
+| What `\(k_1 = 0\)`{=latex} does | Makes term frequency irrelevant: the factor is 1 whatever the count, so only presence matters | 26 |
+| Term-frequency ceiling | A term's contribution approaches `\((k_1+1)\)`{=latex} IDF. At `\(k_1=1.5\)`{=latex}, 100 mentions reach 98.5% of 2.5 IDF | 26 |
+| Inverse document frequency | `\(\ln\!\left(\dfrac{N - n_t + 0.5}{n_t + 0.5} + 1\right)\)`{=latex}. Without the `+1` it goes negative for a term in over half the collection | 26 |
+| Reciprocal rank fusion | `\(\sum_{r} 1/(k + \mathrm{rank}_r(d))\)`{=latex}, conventionally `\(k = 60\)`{=latex}. Uses ranks only, so no score comparability is needed | 26 |
+| DCG | `\(\sum_{i=1}^{k} g_i / \log_2(i+1)\)`{=latex} | 26 |
+| nDCG | DCG divided by the DCG of the ideal ordering of the same documents | 26 |
+| Change of base | `\(\log_c x = \ln x / \ln c\)`{=latex}, so a base-`\(c\)`{=latex} DCG is `\(\ln c\)`{=latex} times the natural-log one | 26 |
+| The log base cancels | A derivation: changing base scales DCG and ideal DCG by the same `\(\ln c\)`{=latex}. Base 2, 10 and e all gave nDCG 0.621602 | 26 |
+| The gain convention does not | Grade directly gave 0.6216; `\(2^{g}-1\)`{=latex} gave 0.5193 on the same ranking | 26 |
+| Why a logarithm at all | Convention, not derivation. It must decrease with position; a log decays slowly, which roughly matches how lists are read | 26 |
+| Recall@k against MRR | Recall ignores order, so it suits a first stage. MRR stops at the first non-zero grade, so it cannot see a better answer further down | 26 |
+| The reranking ceiling | A derivation: reordering a set cannot add to it, so the candidate set bounds everything the second stage can achieve | 26 |
+| Cross-encoder cost | One forward pass per document per query, so a million documents cost a million passes. Hence two stages | 26 |
+| What forces symmetry | Putting both sides through the *same function*, as chapter 24's dense retrieval does. Shared weights alone do not: one model given a `query:` or `passage:` marker is not symmetric | 26 |
+| What merely permits asymmetry | A two-tower bi-encoder and a cross-encoder are *free* to be asymmetric, not guaranteed to be | 26 |

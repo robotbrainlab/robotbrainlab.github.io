@@ -282,6 +282,14 @@ So, in order:
    chapters 1 and 2. If nothing is thin, the chapter is finished and the estimate was wrong.
 4. **Do not re-budget the plan on the strength of a few chapters.** The estimate is carried in
    `TOC.md` for planning, not enforced.
+5. **The whole-book total is not a target either, and this is the one most easily forgotten.**
+   Reaffirmed by the reader on 28 October 2026, who had already said it once: *"Never stick to
+   the page number estimates. Content is more important than the pages, so even if it is
+   1500-2000, I would not mind."* So `TOC.md`'s ~1,040 is the sum of the per-chapter estimates
+   and nothing more. **Do not report progress as a fraction of it, do not project a final page
+   count against it, and do not raise it as a concern.** A book that runs to 2,000 pages because
+   the material earned them is the intended outcome, not a problem to flag. The rule for
+   per-chapter budgets in points 1 and 2 applies unchanged to the total.
 
 The original figure, kept because it is still the best way to size a chapter before writing it:
 about **240 words per printed page** counting code and tables, so a 16-page chapter is roughly

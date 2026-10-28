@@ -22,9 +22,12 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Base model** | A model that has had only pretraining. It continues text rather than answering, which is what the later stages change | 14 |
 | **Batch endpoint** | Upload requests, collect results hours later, pay substantially less. For work nobody is waiting on | 19 |
 | **Batching** | Running many requests through the same forward pass, so one read of the parameters serves all of them. Close to free up to a point — each request still reads its own cache and does its own arithmetic — which is why the price per token is low and why your neighbours affect your output | 15 |
+| **Bi-encoder** | Query and document encoded separately and compared by a cosine, so document vectors are precomputable. With one shared model the score is symmetric | 26 |
 | **Big-O** | How a cost grows as an input grows, with constants and smaller terms deliberately discarded. Not a measurement of time | 8 |
+| **BM25** | The standard lexical scoring function, combining term frequency, inverse document frequency and document length, with a saturating term-frequency curve | 26 |
 | **Bootstrap** | Estimating how much a statistic would move by resampling your own cases with replacement. One procedure for every statistic you score, where a closed form is a different formula each time | 20 |
 | **Byte-pair encoding** | Building a vocabulary by starting from the 256 single bytes and repeatedly merging the commonest adjacent pair in a corpus until the vocabulary is the size wanted. Starting from bytes is what makes any text at all representable | 10 |
+| **Candidate set** | The documents the first stage passes to the second. A reranker can only permute it, so it is a ceiling | 26 |
 | **Case** | One input plus whatever marks the answer right or wrong. The unit the statistics count — and they count rows, so forty rephrasings of one question are worth nearer one case than forty | 20 |
 | **Causal mask** | Setting every score for a later position to minus infinity before softmax, so it gets exactly zero weight. It makes a position's output depend only on what precedes it, so the arithmetic is the same whether or not the rest of the sentence exists | 11 |
 | **Check** | Anything that verifies the output before it is used, from a required shape through to a second model's opinion | 2 |
@@ -37,6 +40,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Context** | Everything sent to the model on one call: the instructions, any added material, and the request | 2 |
 | **Context window** | The maximum number of tokens a model will accept at once. A cost limit rather than a memory, counting the reply as well as the request. The whole conversation is re-sent every call, and something is dropped — or the call refused — when it fills | 16 |
 | **Cosine similarity** | The dot product divided by both lengths, which removes magnitude and keeps direction. Always between −1 and 1 | 8 |
+| **Cross-encoder** | Query and document passed through one model together, giving one score for the ordered pair. Not precomputable; free to be asymmetric | 26 |
 | **Cross-entropy** | The training objective: the average of `\(-\log p\)`{=latex} over every position, where `\(p\)`{=latex} is the probability given to the token that actually came next. Zero for a perfect prediction, unbounded for a confident mistake | 14 |
 | **Current convention** | How competent engineers work at the moment: true, load-bearing and replaceable. It usually names a technique rather than a reason, and usually has a predecessor you can remember | 6 |
 | **Dated detail** | A fact with a date on it — a name, a number, a version. It stops being true when somebody ships something or changes a price | 6 |
@@ -47,7 +51,10 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Depth** | The number of layers in the stack. The last of the three numbers — vocabulary, width, depth — that describe a model's shape | 9 |
 | **Dimension** | One slot in a vector. A position in a list, not a direction in space, and usually not nameable on its own | 8 |
 | **Direct preference optimisation (DPO)** | The preference objective written as one formula: raise the preferred reply's probability relative to the rejected one, both measured against the model as it was before this stage. Stated in this book, not derived | 14 |
+| **Discounted cumulative gain** | The sum of each result's grade divided by a discount that grows with position | 26 |
 | **Dispatcher** | The code that takes a proposal, validates it, decides, and runs the function or refuses. The only participant that can refuse | 23 |
+| **Document frequency** | How many documents in the collection contain a term at all | 26 |
+| **Document length** | How many terms a document holds, compared with the collection average. BM25's third input, and the reason a long document is not automatically more relevant | 26 |
 | **Dot product** | Multiply two vectors slot by slot and add the results. Large when both are large in the same slots — and also larger when either is simply longer | 8 |
 | **Embedding** | The vector an embedding model returns for a given text. Its width is the model's, and it is the same for a word, a sentence and a page | 24 |
 | **Embedding model** | A model whose whole job is to turn one piece of text into one vector of fixed width. No output tokens, nothing to continue | 24 |
@@ -62,9 +69,11 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Forward pass** | One journey through the model — lookup, the stack once, one distribution out. It produces exactly one distribution | 9 |
 | **Foundation model** | A model trained once on general material, then used for many tasks it was not specifically built for | 1 |
 | **Generalisation theory** | Why a model fitted to one body of text works on text it never saw — the bias–variance trade-off, and what learning theory proves about it | 17 |
+| **Graded relevance** | A relevance judgement on a small scale rather than yes-or-no, so a partial answer and a full one can be told apart | 26 |
 | **Gradient** | For each parameter, how much the loss would rise if that parameter rose. The update rule moves every parameter a small step against it. How it is computed is outside this book | 14 |
 | **Greedy decoding** | Always taking the highest-scoring token. What "temperature zero" does in practice, since dividing by zero is not defined | 13 |
 | **Hallucination** | Output that is fluent, plausible and not true. Not a malfunction: no step in the computation checks anything, so a plausible continuation is all the mechanism can produce | 16 |
+| **Hybrid retrieval** | Running lexical and dense retrieval and combining their rankings | 26 |
 | **Idempotency** | Doing an operation twice has the same effect as doing it once. What makes a retry after a timeout safe | 19 |
 | **Inductive bias** | What a design assumes about the world before it sees any data | 17 |
 | **Inference** | Running a finished model to get a reply. This is what "using a model" means | 1 |
@@ -73,6 +82,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Instructions** | What to do, what not to do and who to be. Part of the specification, so it changes rarely and is paid for on every call | 18 |
 | **Intermediate reasoning** | Emitting the steps of a problem as tokens so that later passes can condition on them. The only way to carry partial work forward, because one pass runs its layers once however hard the question is, and nothing persists between passes | 16 |
 | **Interview depth** | Knowing something well enough to give the mechanism, the trade-off, and how you would check it, in about a minute of speech. Not exhaustive, and more than a summary | 7 |
+| **Inverse document frequency** | A weight that rises as a term gets rarer, so a term almost every document holds barely moves a score | 26 |
 | **Irreversible action** | Something a tool does that cannot be undone once it has happened — a refund, a message, a deletion. The reason a tool's reach is decided before it is offered | 3 |
 | **Jitter** | Waiting a random amount up to the backoff rather than exactly it, so many workers do not retry in step | 19 |
 | **Key** | The vector saying what a position offers to others, made with `\(W_K\)`{=latex}. Scored against every query | 11 |
@@ -81,17 +91,20 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Latency** | The delay between sending a request and receiving the reply, felt as a wait before the first word and a pace after it | 1 |
 | **Layer** | A block of arithmetic taking one vector per position and returning one per position, same width in as out. Every layer has the same shape and its own numbers | 9 |
 | **Length** | What a ruler would measure if the slots were coordinates: square every slot, add them, take the square root | 8 |
+| **Lexical retrieval** | Scoring a document by the query terms it contains. Not a filter: every document gets a number and the list is sorted | 26 |
 | **Logarithm** | The inverse of raising `\(e\)`{=latex} to a power. It turns multiplication into addition, which is why it appears wherever many probabilities are combined | 8 |
 | **Logits** | The raw scores from the final matrix multiplication, one per vocabulary entry, before softmax. Can be negative; only the differences between them matter | 13 |
 | **Masked mass** | How much probability the constraint deleted at a step. Small means the constraint was free; large means it overruled the model | 22 |
 | **Masking** | Setting a forbidden token's score to `\(-\infty\)`{=latex}, which makes its probability exactly zero after the softmax — as long as one token survives. Mask them all and you get `nan`, not zero | 22 |
 | **Matrix** | A grid of numbers, read as rows or as columns depending on what you are doing | 8 |
+| **Mean reciprocal rank** | The average of the reciprocal rank over a set of queries | 26 |
 | **Memory-bound** | A step whose speed is set by how fast numbers arrive from memory rather than by the arithmetic done with them. Decode reads about one byte for every operation it performs, on hardware built for hundreds | 15 |
 | **Merge list** | The merges, in the order they were made. Kept with the model and replayed in that order to tokenise any later text | 10 |
 | **Mixture of experts** | Replacing one feed-forward block per layer with several and routing each token through a few of them. The model holds all of them and runs some | 15 |
 | **Model** | A service that takes text and returns generated text, charged by the amount of text | 1 |
 | **Next-token distribution** | One probability for every entry in the vocabulary, adding to 1, saying how likely each is to come next. The entire output of one call | 9 |
 | **Normalisation** | Rescaling the stream to a predictable range before each block reads it, so the numbers do not grow out of hand as layer after layer adds to them | 12 |
+| **Normalised discounted cumulative gain** | A DCG divided by the DCG of the best possible ranking of the same documents, making it comparable across queries | 26 |
 | **Numerical stability** | How quantities behave through long chains of arithmetic, and what keeps them in a usable range. The subject behind Chapter 12's one sentence on normalisation. Not taught in this book | 17 |
 | **Objective design** | Why one expression rather than another is the right thing for a model to minimise. The question Chapter 14 states its preference objective without answering. Not taught in this book | 17 |
 | **Optimisation theory** | The study of when a procedure like the update rule converges, to what, and how fast. Not taught in this book | 17 |
@@ -110,12 +123,17 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Proposal** | What the model emits — tokens your code reads as a request to run something. Nothing has happened yet | 23 |
 | **Quantisation** | Storing each parameter in fewer bits. Halving the bits halves the memory and roughly halves the time spent reading, at a cost in precision that has to be measured | 15 |
 | **Query** | The vector saying what a position is looking for, made by multiplying its vector by `\(W_Q\)`{=latex} | 11 |
+| **Recall@k** | The fraction of all relevant documents appearing in the top k. Blind to their order | 26 |
+| **Reciprocal rank** | One divided by the position of the first relevant result, for a single query | 26 |
+| **Reciprocal rank fusion** | Combining rankings by summing one over a constant plus each rank, using positions only and never the scores | 26 |
 | **Registry** | The map from a name to a function your code is willing to run. The lookup that refuses a name the model invented | 23 |
 | **Regularisation** | The techniques that stop a model fitting its training data too closely | 17 |
 | **Relevance** | Whether this document answers that question, for this asker. A directed judgement, not a distance | 25 |
 | **Relevance judgement** | One recorded decision that a given document does or does not answer a given query. The unit an answer key is made of | 25 |
 | **Repair** | Editing a reply so it parses, restricted to things that were never part of the data: a code fence, text outside the braces, a comma JSON disallows | 21 |
 | **Representation learning** | Why fitting a model to predict text arranges its vectors so that the arrangement is useful for other things. The question Chapter 9 refused. Not taught in this book | 17 |
+| **Reranker** | The model that does the rescoring in the second stage — in current practice usually a cross-encoder | 26 |
+| **Reranking** | Rescoring a small candidate set with a more expensive method than the one that produced it | 26 |
 | **Residual connection** | Adding a block's output to the vector that went into it, rather than replacing it. What lets a layer contribute nothing and pass its input through | 12 |
 | **Residual stream** | The running vector passing up through the stack, which every block adds into. By the end it is a sum of every contribution made along the way, with nothing marking which is which | 12 |
 | **Retrieval** | Searching your own collection for the passages that bear on a request, so they can be put into the context | 2 |
@@ -138,6 +156,8 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Supplied information** | The part of a prompt that is different on every call. The only one of the four parts that is data rather than specification | 18 |
 | **System message** | The message holding your instructions and usually the output format. Your specification, set once per conversation and never the thing to drop when the history will not fit — nor are the example turns, if that is where your examples live | 18 |
 | **Temperature** | A number the logits are divided by before softmax. Below 1 sharpens the distribution, above 1 flattens it, and it never changes the order | 13 |
+| **Term** | The unit a lexical index counts — usually a lower-cased word, sometimes stemmed. Not the model's token from chapter 10 | 26 |
+| **Term frequency** | How often a term appears in one document | 26 |
 | **Token** | One entry in a model's vocabulary — usually a piece text is cut into. Beyond the single bytes, which are always there, which pieces earned an entry is a matter of frequency in the corpus the vocabulary was built from — not of meaning or length | 10 |
 | **Token bucket** | A limiter on the *rate* rather than on how many run at once, for when the requests-per-minute limit is the one that hurts | 19 |
 | **Tokeniser** | The program that cuts text into tokens and maps them to indexes, using one model's vocabulary and merge list. A different model's tokeniser gives a different count | 10 |
@@ -151,6 +171,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Training cut-off** | The point in time after which no text reached the model's training. It knows nothing later, and cannot tell that it does not | 1 |
 | **Trials** | Repeated runs of the same case, which measure the model's own variation. Averaged within the case, never counted as extra cases | 20 |
 | **Turn** | One exchange — the user's message and the model's reply to it. A conversation is a list of turns, and the whole list is re-sent on each one | 18 |
+| **Two-tower** | A bi-encoder with separate query and document encoders, so the score is `\(\cos(f(q), g(d))\)`{=latex} with `\(f \neq g\)`{=latex}: still precomputable, no longer symmetric | 26 |
 | **User message** | The request and the material it is about, from the person or from your code on their behalf | 18 |
 | **Validation layers** | Parses / right shape / values possible / values true. The first three are mechanical; the fourth needs a judgement and belongs elsewhere | 21 |
 | **Value** | The vector a position hands over when it is attended to, made with `\(W_V\)`{=latex}. What the weights are spent on | 11 |

@@ -15,6 +15,7 @@ run "BOUNDARY no theory outside BOOK-GUIDE section 6"   python3 tools/verify-bou
 run "RENDER   markdown renders as written"              python3 tools/verify-render.py
 run "ARITH    the arithmetic it can read holds"         python3 tools/verify-arithmetic.py
 run "RECORD   every chapter evidenced and fresh"        python3 tools/verify-record.py
+run "BANK     each record names the questions it owns" python3 tools/verify-bank.py
 # Per-chapter, but the bare-jargon half of verify-inputs.py is a verdict rather than a hint
 # list, so it belongs in the suite. Chapter 6 used "reranker" and "context window", neither
 # of which the book had given the reader; every gate passed it, because this one read only

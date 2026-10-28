@@ -85,6 +85,15 @@ shapes and only seven of 537 citations state ownership outright, so a pattern wi
 catch the rest would flag mostly correct prose. The script says this in its own docstring, so
 nobody later mistakes its exit code for a verdict.
 
+*Measured, 28 Oct 2026.* A keyword-overlap heuristic was tried over all 26 chapters, to see
+whether a gate was possible after all. Matching strong ownership forms only and comparing the
+claim against the cited row's covers list, it shortlisted **51** citations; joining each claim
+with the two following lines, because most wrap, brought that to **18**. All 18 were then read
+by hand against their `TOC.md` rows and **all 18 were correct** — so the heuristic's precision
+on this book is zero and the sweep's real finding is that **no false citation is currently in
+the book**, chapters 23's and 25's having been fixed. That is the evidence for leaving this an
+aid: a gate would have cried wolf eighteen times to catch nothing.
+
 **41. The entry-19 guard was bypassable by crashing.** Chapter 25's `written:` field said
 `2026-10-28` — a bare date, where the driver always writes a full offset-aware stamp. It was a
 bare date because I filled it in by hand instead of running `chapter.py written`, which is
@@ -129,6 +138,31 @@ a passage written to answer a review has had one reading; this is the sharper ca
 passage is *also* the place I am least likely to look again. **Every replacement claim gets its
 own reading, and the test is to ask what else it would prove** — if it would license a sentence
 the book elsewhere refutes, it proves too much and is not the narrow claim.
+
+*Chapter 26, twice more, and it widens the entry.* It is not only a retraction's replacement
+that escapes reading — it is **any qualifier written to narrow an overclaim**. Both of chapter
+26's second-round must-fixes were qualifiers added to fix a first-round finding. "It does not
+grow with the collection" was corrected to "Only the LAST of those three is flat in n", which is
+false (the query embedding is flat in n too) and contradicted the cost table printed two lines
+above it. And the bi-encoder correction, which rightly stopped calling it an escape, replaced
+that with "a shared-encoder bi-encoder is symmetric" — refuted by chapter 25's own body, which
+names a side marker on one shared model as the other route to `f != g`. **A qualifier is a new
+claim.** Read it against the thing it sits next to, which in both cases was enough to catch it.
+
+**43. `tools/verify-bank.py`: a record must name the bank questions the bank assigns it.**
+BOOK-GUIDE §15 makes the interview bank the standard a chapter is held to, and the failure mode
+is never disagreeing with it — it is never looking. Chapter 19 read its range as 39–41 when it
+owned 39–42, shipped to review with no answer to q42, and needed a whole new section (entry 30).
+Chapter 15 made the same error cheaply: its record said "29, 30 and 31" where the bank assigns
+29–32, and q32 happened to be answered anyway. Both were a *remembered range* standing in for a
+grep, and an audit on 28 Oct 2026 found the second one.
+
+The gate is weak by construction — a record can name a question it never answered — but it
+catches the one error that has now happened twice. Two bugs in it are worth remembering, because
+both are entry 18's cry-wolf shape and both flagged correct records: it must expand ranges
+("39 to 42" names 40 and 41), and the `q` prefix is load-bearing, since `\b54\b` does not match
+inside `q54`. It reported seven false problems before those were fixed. Proved by removing one
+question from a record and watching it exit 1.
 
 **39. The arithmetic gate reported 540 equations checked and was checking 56.** Chapter 24
 printed a display equation and told the reader to verify it by hand — "because the whole chapter
