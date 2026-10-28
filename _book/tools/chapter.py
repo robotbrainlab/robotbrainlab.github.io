@@ -4,11 +4,20 @@
     python3 tools/chapter.py begin    NN-slug
     python3 tools/chapter.py written  NN-slug
     python3 tools/chapter.py reviewed NN-slug
+    python3 tools/chapter.py amend    NN-slug "why"
 
 `begin` refuses once the chapter file exists, because a checklist ticked after the
 writing protects nothing. `written` refuses until every box before it carries evidence.
 `reviewed` refuses until both review verdicts are recorded, and writes the sha256 last,
 so editing one character afterwards makes the record stale and fails the gate.
+
+`amend` is the ONLY honest way to change a chapter that is already closed. It refuses
+unless the record is closed, demands a reason, appends a dated line to `amended:` and
+only then rewrites the sha256. Without it the way to edit a published chapter is to
+re-hash the record by hand, which silently converts the record from evidence into
+decoration -- the same defect as the hand-filled timestamp in entry 19, and the gate
+cannot tell the difference. Every amendment is therefore on the record, with its date
+and its reason, and `reviewed:` keeps the date of the original review.
 
 The French project built nineteen chapters with its checklist as prose and found that
 prose is what gets skipped. This is the same checklist with a lock on it.
@@ -17,7 +26,7 @@ import hashlib, os, re, shutil, sys
 from datetime import datetime
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STAGES = ("begin", "written", "reviewed")
+STAGES = ("begin", "written", "reviewed", "amend")
 
 
 def paths(stem):
@@ -58,9 +67,17 @@ def thin(text, upto):
 
 
 def main():
-    if len(sys.argv) != 3 or sys.argv[1] not in STAGES:
+    if len(sys.argv) < 3 or sys.argv[1] not in STAGES:
         sys.exit(__doc__)
     stage, stem = sys.argv[1], sys.argv[2]
+    if stage == "amend":
+        if len(sys.argv) != 4:
+            sys.exit('REFUSED: amend needs a reason: '
+                     'chapter.py amend NN-slug "why"')
+        amend(stem, sys.argv[3])
+        return
+    if len(sys.argv) != 3:
+        sys.exit(__doc__)
     chapter, record = paths(stem)
 
     if stage == "begin":
@@ -146,6 +163,34 @@ def main():
     text = re.sub(r"^sha256:.*$", f"sha256: {digest}", text, flags=re.M)
     open(record, "w", encoding="utf-8").write(text)
     print(f"reviewed recorded. sha256 {digest[:16]}…\nAny edit from here makes the record stale.")
+
+
+def amend(stem, reason):
+    chapter, record = paths(stem)
+    if not os.path.exists(record):
+        sys.exit(f"REFUSED: no record at {record}")
+    text = open(record, encoding="utf-8").read()
+    if re.search(r"(?m)^reviewed:\s*$", text) or re.search(r"(?m)^sha256:\s*$", text):
+        sys.exit(f"REFUSED: {stem} is not closed, so there is nothing to amend. "
+                 f"Use `chapter.py reviewed {stem}`.")
+    if not reason or len(reason.strip()) < 15:
+        sys.exit("REFUSED: give a real reason in quotes, at least 15 characters. "
+                 "It goes on the record beside the new hash.")
+    digest = hashlib.sha256(open(chapter, "rb").read()).hexdigest()
+    old = re.search(r"(?m)^sha256:\s*(\S+)", text)
+    if old and old.group(1) == digest:
+        sys.exit(f"REFUSED: {stem} has not changed since it was closed, so an "
+                 f"amendment would record nothing.")
+    line = f"  - {now()}: {reason.strip()}"
+    if re.search(r"(?m)^amended:", text):
+        text = re.sub(r"(?m)^(amended:.*(?:\n  - .*)*)",
+                      lambda m: m.group(1) + "\n" + line, text, count=1)
+    else:
+        text = re.sub(r"(?m)^(sha256:.*)$",
+                      lambda m: "amended:\n" + line + "\n" + m.group(1), text, count=1)
+    text = re.sub(r"(?m)^sha256:.*$", f"sha256: {digest}", text, count=1)
+    open(record, "w", encoding="utf-8").write(text)
+    print(f"amended recorded. sha256 {digest[:16]}…\n  {reason.strip()}")
 
 
 if __name__ == "__main__":

@@ -433,7 +433,21 @@ The checklist is not prose. It is a staged driver that refuses:
 python3 tools/chapter.py begin    NN-slug   # refuses once the chapter file exists
 python3 tools/chapter.py written  NN-slug   # refuses on any unticked or unevidenced box
 python3 tools/chapter.py reviewed NN-slug   # refuses without both verdicts; writes sha256 last
+python3 tools/chapter.py amend    NN-slug "why"   # the only honest way to change a closed chapter
 ```
+
+**`amend` exists because a closed chapter sometimes has to change**, and the obvious way to do
+it is dishonest. The record carries the chapter's `sha256`, so any edit makes it stale and fails
+the gate — and the quickest way past that is to re-hash the record by hand, which turns the
+record from evidence into decoration and leaves no trace that a published chapter moved. That is
+the hand-filled-timestamp defect of entry 19 wearing a different hat, and no gate can tell the
+difference after the fact.
+
+So `amend` refuses unless the record is already closed, refuses without a real reason, refuses
+if the chapter has not actually changed, appends a dated line to an `amended:` field, and only
+then rewrites the hash. `reviewed:` keeps the date of the original review, so the record shows
+both when the chapter was closed and every time it was reopened. `verify-record.py` checks each
+amendment is dated, reasoned, and not earlier than the review it follows.
 
 A record is in `records/NN-slug.md`. Tick a box only with **evidence** after it — a command
 result, a count, a line number. The hash is written last, so editing one character

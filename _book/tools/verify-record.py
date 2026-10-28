@@ -50,6 +50,25 @@ def main():
         begun, written, reviewed = (field(text, k) for k in ("begun", "written", "reviewed"))
         if begun and written and reviewed and not (begun <= written <= reviewed):
             problems.append(f"{stem}: stages out of order ({begun} / {written} / {reviewed})")
+        # An `amended:` field is how a closed chapter records a later change
+        # (tools/chapter.py amend). Each entry must be dated and reasoned, and
+        # dated at or after the review it comes after - otherwise the field is
+        # decoration and a re-hash can hide behind it.
+        if re.search(r"(?m)^amended:", text):
+            entries = re.findall(r"(?m)^  - (\S+): (.+)$", text)
+            block = re.search(r"(?m)^amended:(.*(?:\n  - .*)*)", text).group(1)
+            if not entries:
+                problems.append(f"{stem}: `amended:` has no dated entries")
+            if len([l for l in block.splitlines() if l.strip()]) != len(entries):
+                problems.append(f"{stem}: `amended:` has a line that is not "
+                                f"'  - <timestamp>: <reason>'")
+            for when, why in entries:
+                if len(why.strip()) < 15:
+                    problems.append(f"{stem}: amendment {when} has no real reason")
+                if reviewed and when < reviewed:
+                    problems.append(f"{stem}: amendment {when} predates "
+                                    f"`reviewed:` ({reviewed})")
+
         want = field(text, "sha256")
         if want:
             got = hashlib.sha256(open(ch, "rb").read()).hexdigest()
