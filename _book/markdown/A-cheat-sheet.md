@@ -70,3 +70,14 @@ written from memory.
 | Weights at 7 billion parameters | 14 GB at 16 bits, 7 GB at 8, 3.5 GB at 4 | 15 |
 | What limits each phase | Prefill: arithmetic. Decode: reading the parameters the pass uses | 15 |
 | Why batching is nearly free | The parameters are read once and shared | 15 |
+
+## Part II · Use
+
+| Item | Value or formula | Ch |
+|---|---|---|
+| The four parts | Instructions, examples, output format, supplied information | 18 |
+| The order to put them in | Specification first, data last, so the unchanging part is at the front | 18 |
+| Cost of a conversation | Every turn re-sends the whole list; the total over `\(n\)`{=latex} turns grows like `\(n^2\)`{=latex} | 18 |
+| Worked: ten turns | 14,250 input tokens against 3,000 for ten separate questions | 18 |
+| What never gets dropped | Your specification: the system message, and the example turns if that is where they live | 18 |
+| What to change per experiment | One block | 18 |

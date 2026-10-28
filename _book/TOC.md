@@ -164,7 +164,7 @@ number and does not re-teach it.
 | Fine-tuning: *when you would do it and what it costs you* | 39 | — |
 | Sub-agents | 35 | 37 |
 | Tool descriptions as untrusted input | 36 | 50, 51 |
-| Prompt-prefix caching | 52 | 53 |
+| Prompt-prefix caching | 52 | 18, 53 |
 | Routing and cascades | 52 | 53 |
 | Batching, and why your request runs with others | 15 | 13, 19, 52 |
 | Tracing a request | 33 | 45, 54 |

@@ -70,12 +70,13 @@ Three chapters were over-counted that way; `LEDGER-DEFECTS.md` entry 23 has the 
 |---|---|---|
 | `markdown/01` … `markdown/07` | Part I · *Mental Model* | **Done.** Two review passes each, records sealed |
 | `markdown/08` … `markdown/17` | Part I · *Inside the Model* | **Done.** Two review passes each, records sealed |
-| `markdown/18` … `markdown/57` | Chapters 18 to 57 | Not started |
+| `markdown/18` | Part II · *Use*, first chapter | **Done.** Two review passes, record sealed |
+| `markdown/19` … `markdown/57` | Chapters 19 to 57 | Not started |
 | `markdown/00-preface.md` | A placeholder, so the build runs | Replace before release |
-| `markdown/C-glossary.md` | Appendix C. **Generated** by `tools/glossary.py` from every chapter's Key Terms table | 106 terms, in the PDF |
-| `records/` | One record per chapter, ticked with evidence, hashed last | 17 of 57 |
+| `markdown/C-glossary.md` | Appendix C. **Generated** by `tools/glossary.py` from every chapter's Key Terms table | 115 terms, in the PDF |
+| `records/` | One record per chapter, ticked with evidence, hashed last | 18 of 57 |
 | `labs/` | The data every Part III lab runs on | **Empty — see section 4** |
-| `LEDGER-TAUGHT.md` | What each chapter taught, with "Do not" rows | 17 rows |
+| `LEDGER-TAUGHT.md` | What each chapter taught, with "Do not" rows | 18 rows |
 | `LEDGER-DEFECTS.md` | What the gates cannot catch | 28 entries |
 | `tools/` | The driver, the gate suite, the glossary generator, the build probe | Done |
 | `latex/` | The template, with five changes (section 5) | Builds clean |
@@ -98,7 +99,7 @@ do not reopen it. Dates, assuming the Part I rate holds:
 |---|---|---|---|
 | 1 | Part I, chs 1–7 | 98 | **Done 2026-10-23** |
 | 2 | *Inside the Model*, chs 8–17 | 168 | **Done 2026-10-28**, twelve days early |
-| 3 | Part II, chs 18–29 | 196 | 10 Nov – 23 Nov |
+| 3 | Part II, chs 18–29 | 196 | 10 Nov – 23 Nov. **18 done, 28 Oct** |
 | 4 | Part II, chs 30–39 | 166 | 24 Nov – 5 Dec |
 | 5 | Part III, labs 40–46 | 132 | 6 Dec – 15 Dec |
 | 6 | Part III, labs 47–50 | 58 | 16 Dec – 19 Dec |
@@ -154,7 +155,7 @@ arrived there anyway without cutting anything. Its recommendation to write Part 
    and 30–33 will use them, but only *practitioner report* is in Key Terms — so Appendix C
    carries one of five. Fixing it is one chapter edit and one `chapter.py reviewed` reseal.
 
-**Nothing on this list blocks chapter 18.** Items 2 and 3 are due before chapter 40, and
+**Nothing on this list blocks chapter 19.** Items 2 and 3 are due before chapter 40, and
 items 1 and 4 are small.
 
 ## 5. The build, and how it differs from the other books
