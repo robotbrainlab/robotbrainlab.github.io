@@ -65,6 +65,51 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**41. The entry-19 guard was bypassable by crashing.** Chapter 25's `written:` field said
+`2026-10-28` — a bare date, where the driver always writes a full offset-aware stamp. It was a
+bare date because I filled it in by hand instead of running `chapter.py written`, which is
+precisely what entry 19 added that guard to stop. The guard did notice. It then died with
+`TypeError: can't compare offset-naive and offset-aware datetimes` instead of refusing.
+
+**A gate that crashes is worse than a gate that is absent**, because a traceback reads as a tool
+fault rather than as a verdict about my work. The first thing a crash invites is a workaround —
+edit the field, get past it — which is the exact action the guard existed to prevent, now
+performed with the guard's blessing. An absent guard at least leaves the question open.
+`datetime.fromisoformat` accepts a date, so the value parsed and the comparison was what broke;
+the fix is an explicit `tzinfo is None` refusal with the reason in the message, and it is proved
+by running it against the bad field.
+
+**And the stamp itself could not be recovered.** The chapter file was untracked, so git held
+nothing, and a record's whole job is to be evidence. What went in is an evidence-backed *upper
+bound* — a scratchpad file that probes this chapter's own counter-example has mtime 11:03:30, and
+it was written after the completeness review, which follows writing — with a
+`written-stamp-note:` field saying in full that the value is a bound and not a clock reading.
+**When a stamp is lost, record the bound and say it is a bound.** Do not invent a plausible time:
+the precision is the whole value of the field, and a fabricated stamp in range is the one thing
+nothing else catches.
+
+**40. A retraction can smuggle in a fresh overclaim, because it is written in the same breath.**
+Chapter 25 claimed that nothing in dense retrieval prefers a true answer over its negation. The
+completeness review killed it: the vectors are stipulated, so they support no claim about any
+method, and it is an outcome claim where a mechanism can only support a claim about capability. I
+replaced it with "a cosine has no term that represents polarity", labelled it the narrow claim,
+and shipped it.
+
+**It proves far more than the thing it was narrowed to.** A cosine has no term representing
+*anything* — chapter 9 says outright that no single number in these vectors means a nameable
+thing. So the same sentence denies the method any handle on topic, and chapter 24's paraphrase
+with no shared words refutes that; this chapter's own closing concession refutes it too. The
+replacement was a *worse* claim than the one it retracted, and it carried the retraction's
+authority.
+
+The mechanism is the dangerous part. **A retraction feels like the end of the work, so the
+sentence that replaces it never gets read as new prose** — and it is new prose, written faster
+than the original and under the impression that the thinking has already been done. Entry 38 says
+a passage written to answer a review has had one reading; this is the sharper case, because the
+passage is *also* the place I am least likely to look again. **Every replacement claim gets its
+own reading, and the test is to ask what else it would prove** — if it would license a sentence
+the book elsewhere refutes, it proves too much and is not the narrow claim.
+
 **39. The arithmetic gate reported 540 equations checked and was checking 56.** Chapter 24
 printed a display equation and told the reader to verify it by hand — "because the whole chapter
 rests on being able to". The equation was wrong: `0.90 / (0.9695 × 0.9487)` is 0.9785, which

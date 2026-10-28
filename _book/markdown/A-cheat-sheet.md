@@ -126,3 +126,11 @@ written from memory.
 | A raw cosine | Has no meaning on its own. Not comparable across models, queries or corpora — rank, do not threshold | 24 |
 | What a benchmark is | One study, somebody else's corpus. A shortlist of three, not a choice of one | 24 |
 | The input only you have | The answer key: which document each query is about | 24 |
+| Why identifiers fail | A sketch, not a calculation: the vector holds the whole text at a fixed width, so a string appearing once competes for that room with everything else | 25 |
+| What kind of claim that is | An observation on Chapter 6's ladder. The mechanism gives a reason to expect it, not a derivation | 25 |
+| The illustration | Two notes differing in one character, on stipulated vectors: 0.99983 apart, so a distance of 0.00017 | 25 |
+| Similarity against relevance | `\(\cos(a,b) = \cos(b,a)\)`{=latex} always. Relevance depends on which is the question | 25 |
+| The negation case | On stipulated vectors, a true answer and its negation sat closer to each other than either did to the query | 25 |
+| What the negation case proves | Nothing about which one ranks first. It is a claim about the score: you get no handle on that ordering, so you cannot tune or threshold it | 25 |
+| What inspection finds | A wrong result that is present. Not a right result that is missing from the list | 25 |
+| What a five-query demo is | A demonstration on Chapter 6's ladder: it can work once | 25 |

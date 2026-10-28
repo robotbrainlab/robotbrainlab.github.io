@@ -23,10 +23,10 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 |---|---|---|---|
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
-| II · Use | 18–39 | 362 | **Drafting** — 7 of 22 done |
+| II · Use | 18–39 | 362 | **Drafting** — 8 of 22 done |
 | III · Apply | 40–50 | 190 | Not started |
 | IV · What Next | 51–57 | 136 | Not started |
-| Appendices | A–D | 83 | **A (cheat sheet, 63 items), B (100 questions) and C (glossary, 115 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
+| Appendices | A–D | 83 | **A (cheat sheet, 116 items), B (100 questions) and C (glossary, 152 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
 About 1,042 numbered pages in all. **Measure with `python3 tools/pages.py`**, which reads the
 built PDF and ends each chapter where the next opener begins. Do not subtract folios by hand:
@@ -60,17 +60,20 @@ sub-part opener pages sitting after the last written chapter were counted into i
   22   266-279    14   12    117%
   23   281-296    16   16    100%
   24   297-309    13   14     93%
+  25   310-323    14   12    117%
 ```
 
 **Part I is complete: chapters 1–17, 197 printed pages against a 266-page estimate (74%).**
-Part II has begun: chapters 18 to 24 come to 107 pages against 110, so 317 printed pages in all.
-Chapters 9, 17 and 20 landed exactly on their estimates; **21 and 22 are the first to exceed
-one**, by one page and two. Both gained those pages in their fix passes rather than in drafting,
+Part II has begun: chapters 18 to 25 come to 121 pages against 122, so 332 printed pages in all.
+Chapters 9, 17 and 20 landed exactly on their estimates; **21, 22 and 25 exceed one**, by one
+page, two and two. All three gained those pages in their fix passes rather than in drafting,
 which is the pattern across Part II: these chapters reach their estimates by answering a Covers
 item or a bank question the first draft had missed, not by padding. See `LEDGER-DEFECTS.md`
 entry 30 for chapter 19's, the trials half of bank question 45 for chapter 20's, entry 35 for
 what chapter 21's review found in the record rather than the prose, and entries 36 and 37 for
-chapter 22's.
+chapter 22's. Chapter 25's two pages are the clearest case of all: both reviews found it
+claiming more than its support allowed, and every narrowing is longer than the overclaim it
+replaced — see entries 40 and 41.
 
 The estimates are estimates, never targets — `BOOK-GUIDE.md` §11. Read `LEDGER-DEFECTS.md`
 entry 12 before drawing any conclusion from the percentages.

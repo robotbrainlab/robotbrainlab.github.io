@@ -112,6 +112,8 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Query** | The vector saying what a position is looking for, made by multiplying its vector by `\(W_Q\)`{=latex} | 11 |
 | **Registry** | The map from a name to a function your code is willing to run. The lookup that refuses a name the model invented | 23 |
 | **Regularisation** | The techniques that stop a model fitting its training data too closely | 17 |
+| **Relevance** | Whether this document answers that question, for this asker. A directed judgement, not a distance | 25 |
+| **Relevance judgement** | One recorded decision that a given document does or does not answer a given query. The unit an answer key is made of | 25 |
 | **Repair** | Editing a reply so it parses, restricted to things that were never part of the data: a code fence, text outside the braces, a comma JSON disallows | 21 |
 | **Representation learning** | Why fitting a model to predict text arranges its vectors so that the arrangement is useful for other things. The question Chapter 9 refused. Not taught in this book | 17 |
 | **Residual connection** | Adding a block's output to the vector that went into it, rather than replacing it. What lets a layer contribute nothing and pass its input through | 12 |
@@ -121,6 +123,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Rule of three** | With no failures in `\(n\)`{=latex} tries, the rate can still be about `\(3/n\)`{=latex}. What to use when a bootstrap has no failure to resample | 21 |
 | **Scaling laws** | The relationships between model size, data, compute and loss, and their derivation | 17 |
 | **Schema** | The list of claims your code makes about a reply — fields, types, allowed values, ranges — and enforces on every one. A contract you check, not a request you hope was honoured | 21 |
+| **Semantic search** | What dense retrieval is usually called. The same thing, in the words people use when they complain about it | 25 |
 | **Semaphore** | A counter that bounds how many jobs run at once. Three words of code, and the difference between concurrency and attacking your own account | 19 |
 | **Server-sent events** | A long-lived HTTP response carrying one small event per line as the server produces them. How a streamed reply arrives | 19 |
 | **Softmax** | Turns a list of scores into positive numbers that sum to 1, preserving their order and exaggerating the gaps between them | 8 |

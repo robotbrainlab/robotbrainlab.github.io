@@ -116,6 +116,17 @@ def main():
                 stamps[field] = datetime.fromisoformat(m.group(1))
             except ValueError:
                 sys.exit(f"REFUSED: `{field}:` is not an ISO timestamp: {m.group(1)!r}")
+            # A DATE is a valid ISO string, so `written: 2026-10-28` parsed and then crashed
+            # the comparison below with "can't compare offset-naive and offset-aware
+            # datetimes". That is the entry-19 guard being bypassed by a traceback instead of
+            # refusing, which is worse than not having it: a crash looks like a tool fault and
+            # invites a hand-edit. The driver always writes a full offset-aware stamp, so
+            # anything naive or date-only was filled in by hand. LEDGER-DEFECTS entry 41.
+            if stamps[field].tzinfo is None:
+                sys.exit(f"REFUSED: `{field}:` has no time or no timezone: {m.group(1)!r}. "
+                         f"The driver always writes a full offset-aware stamp, so this one "
+                         f"was filled in by hand. Run `chapter.py {field} {stem}` and let "
+                         f"the clock write it.")
     if "begun" in stamps and "written" in stamps:
         if stamps["written"] < stamps["begun"]:
             sys.exit(f"REFUSED: `written:` ({stamps['written']}) is BEFORE `begun:` "

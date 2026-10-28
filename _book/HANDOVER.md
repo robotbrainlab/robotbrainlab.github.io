@@ -1,6 +1,6 @@
 # Handover — Modern AI Engineering from Zero
 
-Last updated: 2026-10-22 (revised after an independent review of the plan).
+Last updated: 2026-10-28 (chapter 25 closed; Part II state in section 3).
 
 Read this file first, then `BOOK-GUIDE.md` (the spec), then `TOC.md` (the plan).
 
@@ -36,7 +36,7 @@ Do not reopen these. Each one was decided with the owner.
 | 10 | **Serving, cost and security live in Part IV** | They are the answers to the four threads — Security, Speed, Cost, Failure. Part IV therefore carries 110 pages and is not a thin ending | Ordinary chapters in Part II |
 | 11 | **Appendix B is an interview bank** | It is the reason the book exists. Write it last, from the finished chapters, never from memory | — |
 | 12 | **Part III is one system that grows** | Lab 42 builds on labs 40 and 41. Standalone labs repeat themselves and cost about 25 more pages | Nine independent labs |
-| 13 | **Statistics and ranking metrics are taught inline** | Chapter 19 teaches variance and confidence intervals. Chapter 25 teaches recall@k, MRR and nDCG. Without them the book cannot stand alone | Sending the reader to another book |
+| 13 | **Statistics and ranking metrics are taught inline** | Chapter 20 teaches the bootstrap, confidence intervals and paired comparison. Chapter 26 teaches recall@k, MRR and nDCG from zero. Without them the book cannot stand alone | Sending the reader to another book | *(The chapter numbers in this row said 19 and 25 until 28 Oct 2026; the TOC shifted after it was written, and chapter 25 is now "Where Dense Search Fails", which names no measure. The decision is unchanged.)*
 | 14 | **Each part is delivered as its own PDF** | The owner reads part 1 while part 2 is written. **Writing order is reading order** — the owner chose this explicitly on 2026-10-22, against a recommendation to write Part II first | One delivery at the end; writing Part II first |
 | 15 | **Each concept is *owned* by one chapter** | "Appears exactly once" was already broken ten times. `TOC.md` names the owner for each. Without this, chapter 39 re-teaches chapter 14 and both overflow | The exactly-once rule, which was unenforceable |
 | 16 | **The book ships its lab data** | `BOOK-GUIDE.md` demands expected results that hold for every reader, and six labs said "your own documents". Those cannot both be true. About 40 public-domain documents, 8 queries with graded labels, one awkward PDF | Each reader supplying a corpus, and hand-labelling ~360 pairs |
@@ -62,6 +62,15 @@ repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the c
 
 **Part I is complete: all 17 chapters, 197 printed pages against a 266-page estimate.**
 Its first half (1 to 7) is 70 pages against 98; *Inside the Model* (8 to 17) is 127 against 168. `bash tools/check-all.sh` ends `ALL GATES PASS`.
+
+**Part II is drafting: chapters 18 to 25 closed, 121 printed pages against 122.** The book is
+**332 printed pages** over 25 of 57 chapters. Chapters 21, 22 and 25 are the first to exceed
+their estimates, each in its fix pass rather than in drafting. The reviews have changed
+character across Part II: the early chapters failed on arithmetic and on invented program
+output, which is gone now that every program is written and run before any sentence about it,
+and the later ones fail on **claims stated one notch wider than their demonstrations support**
+and on false cross-chapter citations. Chapters 23 and 25 each needed a third reading for that
+reason — see `LEDGER-DEFECTS.md` entries 38 and 40.
 
 **Measure printed pages with `python3 tools/pages.py`**, never by subtracting folios.
 Three chapters were over-counted that way; `LEDGER-DEFECTS.md` entry 23 has the detail.
