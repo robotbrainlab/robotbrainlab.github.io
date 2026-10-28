@@ -669,8 +669,11 @@ index holds what the chunking made.
 
 **The other fields are what stop a chunk being an orphan.** A row that carries only text can be
 returned and cannot be placed: you cannot tell the reader which document it came from or where.
-Keeping the document name and the offset costs nothing at index time and is impossible to
-reconstruct afterwards. Chapter 28 is where they get used.
+Keeping the document name and the offset costs nothing at index time, and whether you can
+reconstruct them later depends on something you may not control: if the original documents are
+still there and the chunk text is verbatim, you can find a chunk by searching for its text, and
+if they are not, the position is gone for good. Storing it is free and recovering it is
+conditional, which settles the question. Chapter 28 is where they get used.
 
 ## What To Actually Do
 

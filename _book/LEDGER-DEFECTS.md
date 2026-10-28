@@ -65,6 +65,28 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**46. A qualifier added to scope a claim can invert it, and the sentence defending it will say
+"the direction holds".** Chapter 28 computed that filling a 128,000-token window costs 62.5 GiB
+of key-value cache against 13 GiB of weights, and wrote that this is *nearly five times the
+memory the model itself occupies*. A review asked for it to be scoped, because chapter 15's own
+Note says real systems share one set of keys and values across several heads. So I added the
+scope — and then wrote "The direction holds; the factor is the shape of an arithmetic."
+
+**It does not hold, on one of its two readings.** At a sharing ratio of eight the 62.5 GiB
+becomes 7.8, which is *less* than the 13 GiB of weights. So "the cache is a real cost" survives
+and "the cache dwarfs the model" is refuted — by the very footnote I had just added to protect
+the claim. The scoping sentence was doing the opposite of its job: it looked like diligence and
+it licensed the headline it was supposed to qualify.
+
+**The test that catches this is one question: after the qualifier, is the headline still true at
+the extremes the qualifier admits?** Not *is the claim more careful now* — qualifiers always
+look more careful — but *does the range I have just conceded contain a case that refutes me*.
+Here the arithmetic took one line and the answer was yes.
+
+This is entry 40's family and worth its own entry because the mechanism is different. Entry 40
+is a replacement claim that escapes reading. This is a replacement that gets read, approves of
+itself for being modest, and never has its own numbers run.
+
 **45. I wrote a program to demonstrate a claim, and the program printed the counter-example.**
 Chapter 27's headline derivation was that *the set of questions your system can answer is
 bounded by what is whole inside some row*. I called it the most useful thing in the chapter, put

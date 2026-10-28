@@ -17,6 +17,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Attention block** | The half of a layer that moves information between positions — Chapter 11's formula in full. The only part of a model that does | 12 |
 | **Attention head** | One complete set of query, key and value matrices and the weights they produce. A layer runs several in parallel over slices of the width, and a final matrix mixes their outputs | 11 |
 | **Attention weights** | One row of the grid after scaling, masking and softmax: positive numbers adding to 1, saying how much of each position to take | 11 |
+| **Attribution** | The claim that the cited text supports the statement it is attached to. No string comparison reaches it; Chapters 32 and 33 are where it gets checked by other means | 28 |
 | **Autoregressive** | Producing output one token at a time, with each token appended to the input before the next pass | 9 |
 | **Backpropagation** | The procedure that computes a derivative for every parameter in one backward sweep through the model. How the gradient of Chapter 14's update rule is obtained. Not taught in this book | 17 |
 | **Base model** | A model that has had only pretraining. It continues text rather than answering, which is what the later stages change | 14 |
@@ -33,6 +34,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Check** | Anything that verifies the output before it is used, from a required shape through to a second model's opinion | 2 |
 | **Chunk** | One piece of a split document: the unit that is embedded, stored in the index and returned by retrieval | 27 |
 | **Chunk size** | How much text a chunk holds. A floor on it is set by taking the *shortest* passage that answers each of your questions and keeping the longest of those | 27 |
+| **Citation** | A pointer from something a reply says to the text it came from. Checkable only if it carries a document id, a locator and the quoted span | 28 |
 | **Compound system** | A system of several parts with the model as one of them, rather than as the whole product | 2 |
 | **Compounding error** | Two things at once across a run: each step's chance of being right multiplies against the others, so a high per-step figure becomes a low whole-run one; and a wrong step's result is carried into the next step as though it were true | 4 |
 | **Compute-bound** | A step whose speed is set by the arithmetic it has to do rather than by how fast its numbers arrive. Prefill is; a large enough batch becomes so | 15 |
@@ -41,6 +43,8 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Constrained decoding** | Restricting each token choice to what the format allows, by editing the scores before the pick. The model is unchanged | 22 |
 | **Content stream** | A PDF page's list of drawing instructions, each placing a string at a position. Its order is the order the marks were made, not a reading order | 27 |
 | **Context** | Everything sent to the model on one call: the instructions, any added material, and the request | 2 |
+| **Context assembly** | Turning retrieved passages, an instruction and a question into the request the model is given — spread across Chapter 18's message list, and counting against one window | 28 |
+| **Context budget** | How much of the window is left for passages once the instruction and the question are counted. Not the same number as Chapter 26's candidate set, and set by a different thing | 28 |
 | **Context window** | The maximum number of tokens a model will accept at once. A cost limit rather than a memory, counting the reply as well as the request. The whole conversation is re-sent every call, and something is dropped — or the call refused — when it fills | 16 |
 | **Cosine similarity** | The dot product divided by both lengths, which removes magnitude and keeps direction. Always between −1 and 1 | 8 |
 | **Cross-encoder** | Query and document passed through one model together, giving one score for the ordered pair. Not precomputable; free to be asymmetric | 26 |
@@ -75,6 +79,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Graded relevance** | A relevance judgement on a small scale rather than yes-or-no, so a partial answer and a full one can be told apart | 26 |
 | **Gradient** | For each parameter, how much the loss would rise if that parameter rose. The update rule moves every parameter a small step against it. How it is computed is outside this book | 14 |
 | **Greedy decoding** | Always taking the highest-scoring token. What "temperature zero" does in practice, since dividing by zero is not defined | 13 |
+| **Greedy fill** | Keeping any passage that fits in the room remaining. Silently promotes short passages over higher-ranked long ones | 28 |
 | **Hallucination** | Output that is fluent, plausible and not true. Not a malfunction: no step in the computation checks anything, so a plausible continuation is all the mechanism can produce | 16 |
 | **Hybrid retrieval** | Running lexical and dense retrieval and combining their rankings | 26 |
 | **Idempotency** | Doing an operation twice has the same effect as doing it once. What makes a retry after a timeout safe | 19 |
@@ -98,6 +103,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Lexical retrieval** | Scoring a document by the query terms it contains. Not a filter: every document gets a number and the list is sorted | 26 |
 | **Logarithm** | The inverse of raising `\(e\)`{=latex} to a power. It turns multiplication into addition, which is why it appears wherever many probabilities are combined | 8 |
 | **Logits** | The raw scores from the final matrix multiplication, one per vocabulary entry, before softmax. Can be negative; only the differences between them matter | 13 |
+| **Long context** | A large maximum input. Buys a looser budget and whole documents; does not remove the need to select, and is not free | 28 |
 | **Masked mass** | How much probability the constraint deleted at a step. Small means the constraint was free; large means it overruled the model | 22 |
 | **Masking** | Setting a forbidden token's score to `\(-\infty\)`{=latex}, which makes its probability exactly zero after the softmax — as long as one token survives. Mask them all and you get `nan`, not zero | 22 |
 | **Matrix** | A grid of numbers, read as rows or as columns depending on what you are doing | 8 |
@@ -106,6 +112,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Merge list** | The merges, in the order they were made. Kept with the model and replayed in that order to tokenise any later text | 10 |
 | **Mixture of experts** | Replacing one feed-forward block per layer with several and routing each token through a few of them. The model holds all of them and runs some | 15 |
 | **Model** | A service that takes text and returns generated text, charged by the amount of text | 1 |
+| **Neighbour expansion** | Fetching the rows adjacent to a retrieved row in the original document and supplying them together. Needs some recorded locator — an offset, or an ordinal in the id; costs budget; does not know what is relevant | 28 |
 | **Next-token distribution** | One probability for every entry in the vocabulary, adding to 1, saying how likely each is to come next. The entire output of one call | 9 |
 | **Normalisation** | Rescaling the stream to a predictable range before each block reads it, so the numbers do not grow out of hand as layer after layer adds to them | 12 |
 | **Normalised discounted cumulative gain** | A DCG divided by the DCG of the best possible ranking of the same documents, making it comparable across queries | 26 |

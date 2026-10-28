@@ -161,3 +161,14 @@ written from memory.
 | What that ceiling does *not* say | Where the cuts tile the document, the information is still there across two rows, and the reassembly moves downstream to Chapter 28 rather than becoming impossible. A chunker that discards text is another matter | 27 |
 | The ten-minute check | Write five real questions, find the shortest passage answering each, make the chunk bigger than the longest | 27 |
 | The first diagnostic | Print the extracted text and read it against the page. Before anything downstream exists | 27 |
+| The budget arithmetic | Instruction + question are a fixed cost; each passage costs its length plus its label; the rest is the window, which Chapter 16 owns | 28 |
+| Why a greedy fill is a trap | It keeps whatever fits, so the context becomes the highest-ranked *short* passages rather than the top of the ranking — undoing a reranker's ordering, for free, with nothing announcing it | 28 |
+| What to do with too small a budget | Raise, do not truncate. A context without its instruction is a different request and still returns a plausible answer | 28 |
+| Why neighbour expansion needs a locator | A derivation: adjacency is a property of the document and an index sorted by score has no notion of it. An offset, or an ordinal in the id — but something, recorded at index time | 28 |
+| What an expansion costs | Each neighbour halves how many separate hits the budget can hold | 28 |
+| The three mechanical citation checks | Does the document exist; is the quote in it; is it at the offset claimed | 28 |
+| What a citation must support | That the quote *entails* the statement. The three checks are necessary and not sufficient | 28 |
+| What still gets past all three | A real quote attached to the wrong claim; a statement with no citation at all, which the checks never look at; and a quote undone by the document's next sentence | 28 |
+| Why a corpus outgrows a window | 100 documents × 2,000 tokens = 200,000, about 1.6× a 128,000-token window | 28 |
+| What filling a window costs | Chapter 15's cache is 512 KiB per token, so 128,000 tokens is 62.5 GiB, against 13 GiB of weights. Multiply the per-token figure, not its rounded total — and divide by the head-sharing ratio before quoting any multiple | 28 |
+| Long context against retrieval | Different questions: which text is relevant, and how much you can afford to show. Neither replaces the other | 28 |
