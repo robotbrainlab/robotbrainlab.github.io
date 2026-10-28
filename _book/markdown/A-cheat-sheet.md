@@ -181,3 +181,12 @@ written from memory.
 | What post-filtering returns | About `f × s`: fetch `f` from a tenant holding share `s`. 100 × 0.01 ≈ 1, when you asked for 10 | 29 |
 | Why pre-filtering can be cheaper | An ANN index avoids comparing against a million vectors; a tenant owning twenty has no such problem | 29 |
 | The number to write down for multi-tenancy | The smallest tenant's share of the corpus | 29 |
+| The four steps | Read outputs; note each failure; group and count; let the modes choose the metrics | 30 |
+| Why the notes come first | Categories you start with tend to be the ones you already believe, and the exercise exists to escape them | 30 |
+| How many failures | Forty is a working number: enough for a pattern to repeat, few enough to read in an afternoon. Sampled, not selected | 30 |
+| Why the verb grouping fails | It failed both ways on verbs: 5 of 10 groups held several modes, and 6 of 8 modes were split across groups | 30 |
+| How to name a mode | After the output, never after the suspected cause. "Contradicts the passage", not "retrieval problem" | 30 |
+| The check on the grouping | Every note in exactly one mode. It proves a partition, and not that the partition is right | 30 |
+| What a 1-to-5 score gives you | A number, not a decision about a failure. It may correlate with quality and still name no mode | 30 |
+| The cost of a metric chosen first | The best actionable check here covers 20 of 40. Perfect it and 20 failures remain | 30 |
+| Which check to build first | The one covering the most failures per unit of work — one check here was 20 failures and closed two modes | 30 |

@@ -73,6 +73,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Examples** | What a good answer looks like, shown rather than described. Part of the specification | 18 |
 | **Exhaustive search** | Comparing the query against every vector. Exact, and linear in the size of the collection | 29 |
 | **Exponential backoff** | Doubling the wait after each failed attempt, up to a cap, so a struggling system is not hammered | 19 |
+| **Failure mode** | A named kind of wrong output, named after what went wrong rather than after the part of the system suspected of causing it | 30 |
 | **Feed-forward block** | The half of a layer that works on each position alone: two matrices with an activation between them, the middle between about two and a half and four times the width of the ends. Holds more of a layer's parameters than attention does | 12 |
 | **Finish reason** | The response's own statement of why generation stopped. What distinguishes a truncated reply from a malformed one | 21 |
 | **Forward pass** | One journey through the model — lookup, the stack once, one distribution out. It produces exactly one distribution | 9 |
@@ -132,6 +133,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Paired comparison** | Running both versions on the same cases and keeping the results together, so the part of case-to-case variation the two versions share cancels when you subtract | 20 |
 | **Parameter** | One number inside the model, set by training and unchanged by inference. The count is what "a 7B model" reports | 9 |
 | **Parsing** | Turning a file into text a program can work on. For a document format this means reconstructing something the file does not record | 27 |
+| **Partition** | Every failure in exactly one mode, nothing dropped and nothing counted twice. Checkable, and worth checking | 30 |
 | **People** | The reviewers and approvers who handle the consequential cases and carry responsibility for them | 2 |
 | **Perplexity** | The exponential of the cross-entropy. Reads as the number of equally likely options the model is effectively choosing between; a uniform choice among `\(V\)`{=latex} options has perplexity `\(V\)`{=latex} | 14 |
 | **Positional encoding** | How a token's position is put into the arithmetic, since the attention formula carries no notion of order. Added to the embedding before the stack, or applied as a rotation to queries and keys, or added to the scores themselves | 11 |

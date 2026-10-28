@@ -65,6 +65,52 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**50. The unit a table is marked in is a claim, and every number derived from it inherits
+the error.** Chapter 30's `metrics.py` first mapped each candidate check to the failure
+*modes* it caught. That unit is wrong: a check catches failures, and a mode is a group of
+them, so the ordinary case is a mode covered in part. Two of the five rows were false as a
+result, and **both were refuted by the book itself**. Chapter 28's three mechanical citation
+checks were credited with the whole of *Citation does not support*, 8 failures, when they
+catch 3 — and chapter 28's own Worth Memorising row says the three are "necessary and not
+sufficient" and names three shapes that get past them, four of which are in that mode. And
+"exact match against a reference answer" was credited with 13 of 40 by reasoning about which
+modes it was *for*, when it fires on all 40, because every failure differs from the reference
+answer; its real defect is that it fires on correct paraphrases too, which is precision and
+not coverage. **The program computed its percentages correctly from both wrong inputs**, so
+nothing in the arithmetic gate, the build or the round-trip check could see it. Re-marked
+failure by failure, with a column for how many modes a check closes outright — which also
+produced the better lesson, since the partial-coverage case is now taught rather than
+hidden. The question to ask of any table of this shape is **what is one row, and is that the
+thing the claim is about.**
+
+**49. `filter.lua` silently refuses to index four words, so a Key Term named with one of them
+can never have an index entry.** `index_strong` returns nil for any bold whose text
+lower-cases to something starting with `note`, `tip`, `warning` or `you understand`, because
+those are the book's own admonition labels. Chapter 30's Key Terms table named a term
+**Note**. The table itself never indexes — a bold inside a table becomes `\textbf{}` with no
+`\index{}`, so **every chapter's index entries come from its body** — and the body's
+`**note**` was dropped on the floor by the admonition rule. No gate notices:
+`verify-index.py` only checks the shape of entries that exist, and the glossary gate only
+checks that the table matches Appendix C. The whole book was grepped and chapter 30 was the
+only chapter with such a term; the term was dropped rather than worked around, because
+"note" is ordinary English used plainly there rather than a term of the field. **The check is
+the one already in the session instructions, run in BOTH directions**: every index entry read
+against the Key Terms table, and every Key Term read against the index entries. Only the
+first direction had ever caught anything, and it cannot catch this.
+
+**48. `verify-voice.py` has no pattern for the book talking about its own drafting.** Its
+patterns cover the planning documents (`BOOK-GUIDE`, `TOC.md`, the roadmap, the website) and
+the authoring relationship (`we decided`, `the owner`, `this book was written`). Chapter 30
+shipped three sentences to a reviewer saying **"the first draft of this chapter failed that
+check"** — once in the body, once in a lab step and once in the Summary — and the gate was
+CLEAN on all three, because none of them names a build document or an author. The review did
+not raise it either; it was found reading the chapter against the rule rather than against
+the gate. The sentences were doing real work, crediting the partition check with catching
+something real, so they were rewritten to say what is true of the method rather than what
+happened while writing: a note that fits nowhere is the easiest of forty to lose. **A gate
+that passes is not the rule**, and this is the second kind of voice violation its patterns
+cannot see.
+
 **47. Generated data can have a property you did not put there, and a program's seeding can
 encode the answer it is presented as finding.** Chapter 29 made a corpus of twenty clusters with
 `sin(group * 1.7 + d)` and said so. It was not twenty. Because 11 × 1.7 = 18.7, within 0.15 of
