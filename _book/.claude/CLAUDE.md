@@ -23,19 +23,28 @@ python3 tools/chapter.py reviewed NN-slug
 bash tools/check-all.sh                    # must end ALL GATES PASS
 ```
 
-**Two things to do before the completeness review, every time, because both have been missed
-in four chapters running:**
+**Three things to do before the completeness review, every time, because each has been missed
+in several chapters running:**
 
 ```bash
 bash tools/check-all.sh 2>&1 | grep -E 'FAIL|GATES'   # never a tail: entry 35
 grep -o '\\index{[^}]*}' latex/chapters/NN-*.tex | sort -u
+python3 tools/citations.py NN
 ```
 
 Read every index entry and ask of each one: *is this a term, or did I bold it for emphasis?*
 `verify-index.py` only catches an entry starting with a non-letter, so the rest is judgement, and
 bold means **new term** in this book — see `LEDGER-DEFECTS.md` entry 33. Every chapter from 19 to
 23 shipped junk entries to a reviewer because this was done after the review rather than before
-it.
+it. Chapter 26 shipped three to this check and none to a reviewer, including a bold on a term
+chapter 25 owns.
+
+`tools/citations.py NN` prints every chapter this one cites with the cited chapter's own `TOC.md`
+covers line beside it. Ask of each: *does the chapter I am pointing at actually own this?*
+Chapters 23 and 25 each shipped a citation crediting a claim to the wrong chapter, and all three
+survived a completeness review, because verifying one means reading another chapter's row. It is
+an aid and not a gate, deliberately — see the script's own docstring for why a gate here would
+cry wolf.
 
 ## The rules that are easy to break
 

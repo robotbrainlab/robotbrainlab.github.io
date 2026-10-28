@@ -65,6 +65,26 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**42. A citation is the one claim a reviewer cannot check without leaving the chapter.**
+Chapter 23 credited chapter 51's premise to chapter 16 and chapter 21's sentence to chapter 20.
+Chapter 25 credited one of chapter 21's to chapter 20 as well. All three read perfectly in place:
+the sentence is true, the mechanism is right, and only the number beside the word *chapter* is
+wrong. Each survived a completeness review whose brief asked for cross-chapter errors.
+
+**The reason is structural.** Verifying "chapter 16 owns this" means opening `TOC.md`, finding
+row 16 and reading its covers list — for every citation, and a dense chapter has thirty. A
+reviewer reading the chapter in front of them has no cue that any particular number is the wrong
+one, because a wrong number looks exactly like a right one.
+
+So `tools/citations.py NN` prints each cited chapter with that chapter's own covers line beside
+it, and the question to ask of every line is *does the chapter I am pointing at actually own
+this?* It is now the third pre-review check in `.claude/CLAUDE.md`.
+
+**It is deliberately not a gate**, and the reason is entry 18. The book cites chapters in a dozen
+shapes and only seven of 537 citations state ownership outright, so a pattern wide enough to
+catch the rest would flag mostly correct prose. The script says this in its own docstring, so
+nobody later mistakes its exit code for a verdict.
+
 **41. The entry-19 guard was bypassable by crashing.** Chapter 25's `written:` field said
 `2026-10-28` — a bare date, where the driver always writes a full offset-aware stamp. It was a
 bare date because I filled it in by hand instead of running `chapter.py written`, which is
