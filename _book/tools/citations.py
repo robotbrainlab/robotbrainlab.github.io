@@ -47,13 +47,22 @@ def main():
     own = int(want)
 
     cites = collections.defaultdict(list)
+    # Every citation is listed, including the ones a program prints, which are
+    # tagged. This used to skip any line indented four spaces, to keep program
+    # source out - and that silently lost every citation on the continuation
+    # line of a numbered list item once a chapter reached item 10, which is how
+    # chapter 31's pointer to chapter 33 went missing. An aid that drops a
+    # citation without saying so is worse than no aid, so nothing is dropped.
+    in_fence = False
     for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-        if line.startswith(("    ", "\t")):
-            continue                      # program source and printed output
+        if line.lstrip().startswith("```"):
+            in_fence = not in_fence
+            continue
         for m in re.finditer(r"[Cc]hapters?\s+(\d+)(?:\s*(?:to|-|and|,)\s*(\d+))?", line):
             for g in m.groups():
                 if g:
-                    cites[int(g)].append((i, line.strip()))
+                    tag = "[in a program] " if in_fence else ""
+                    cites[int(g)].append((i, tag + line.strip()))
 
     print(f"{path.name}: cites {len(cites)} other chapter(s)\n")
     for n in sorted(cites):

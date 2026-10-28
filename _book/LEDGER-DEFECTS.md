@@ -65,6 +65,25 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**51. `tools/citations.py` dropped every citation on a four-space-indented line, and said
+nothing.** It skipped any line starting with four spaces or a tab, with the comment "program
+source and printed output". That worked while every numbered list in the book had
+single-digit items, because `1. ` indents its continuation by three. Chapter 31's *What To
+Actually Do* reaches item **10**, whose continuation is indented four — and the chapter's one
+pointer to chapter 33 sat on exactly that line. The aid reported "cites 4 other chapter(s)"
+and the fifth was invisible. Nothing else in the suite looks at citations, and this is the
+third review aid in this book to be wrong in the same direction as entry 11's three gates: a
+rule written for one shape matching a wider one.
+
+Fixed by tracking fenced blocks instead of indentation — and then fixed again, because the
+first repair *skipped* fenced content and so lost the citations a program PRINTS, which are
+citations in the book like any other. Chapter 30 prints two of chapter 28's and one of
+chapter 31's. Every citation is now listed and the in-fence ones are tagged, which raised
+chapter 30's count from 20 to 27 and chapter 31's to 21. **An aid that drops a finding without
+saying so is worse than no aid**, and the second repair was the same mistake as the first in
+miniature: trading a false negative for a different false negative because the output looked
+tidier.
+
 **50. The unit a table is marked in is a claim, and every number derived from it inherits
 the error.** Chapter 30's `metrics.py` first mapped each candidate check to the failure
 *modes* it caught. That unit is wrong: a check catches failures, and a mode is a group of

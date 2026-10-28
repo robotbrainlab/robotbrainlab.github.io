@@ -190,3 +190,12 @@ written from memory.
 | What a 1-to-5 score gives you | A number, not a decision about a failure. It may correlate with quality and still name no mode | 30 |
 | The cost of a metric chosen first | The best actionable check here covers 20 of 40. Perfect it and 20 failures remain | 30 |
 | Which check to build first | The one covering the most failures per unit of work — one check here was 20 failures and closed two modes | 30 |
+| When to use a judge rather than code | When the check needs a decision about what text means. Code handles every comparison between things that are both literally present | 31 |
+| What a judge returns | Pass or fail on one named failure mode. One judge per mode, never a score | 31 |
+| The three cheap measurements, in order | Self-agreement (no labels); flip count under an arbitrary change (no labels); then the baseline (no judge needed) | 31 |
+| The baseline | What "always pass" scores. 48 of 60 here, 80 per cent, finding nothing | 31 |
+| The two numbers to report | Of the real failures, how many caught; of its alarms, how many real. 5 of 12 and 5 of 7 for judge A | 31 |
+| Their interview names | Recall is the share of real failures caught; precision the share of alarms that are real. Chapter 26's recall@k is a different quantity — relevant documents reaching the top k | 31 |
+| Why one number hides it | 48 of 60 cases are passes, so agreement is mostly agreement about passes. Judge B caught 10 of 12 against A's 5 and scored 82 against 85 | 31 |
+| How many cases to label | Enough *failures*, not enough cases. 60 labels bought 12 failures; the catch rate's interval was 12% to 73% | 31 |
+| Position bias, measured | Show each pair both ways and count the flips: 16 of 40 here, a 70%-against-30% swing in the headline | 31 |

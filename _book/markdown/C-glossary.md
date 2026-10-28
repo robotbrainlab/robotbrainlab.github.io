@@ -22,6 +22,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Autoregressive** | Producing output one token at a time, with each token appended to the input before the next pass | 9 |
 | **Backpropagation** | The procedure that computes a derivative for every parameter in one backward sweep through the model. How the gradient of Chapter 14's update rule is obtained. Not taught in this book | 17 |
 | **Base model** | A model that has had only pretraining. It continues text rather than answering, which is what the later stages change | 14 |
+| **Baseline** | What a judge that always says pass would score on your set. Every agreement figure has to be read against it, and on a working application it is high | 31 |
 | **Batch endpoint** | Upload requests, collect results hours later, pay substantially less. For work nobody is waiting on | 19 |
 | **Batching** | Running many requests through the same forward pass, so one read of the parameters serves all of them. Close to free up to a point — each request still reads its own cache and does its own arithmetic — which is why the price per token is low and why your neighbours affect your output | 15 |
 | **Bi-encoder** | Query and document encoded separately and compared by a cosine, so document vectors are precomputable. With one shared model the score is symmetric | 26 |
@@ -96,6 +97,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Inverse document frequency** | A weight that rises as a term gets rarer, so a term almost every document holds barely moves a score | 26 |
 | **Irreversible action** | Something a tool does that cannot be undone once it has happened — a refund, a message, a deletion. The reason a tool's reach is decided before it is offered | 3 |
 | **Jitter** | Waiting a random amount up to the backoff rather than exactly it, so many workers do not retry in step | 19 |
+| **Judge** | A model asked to return a verdict on one named thing about one output. Pass or fail on a named failure mode, never a score out of five | 31 |
 | **Key** | The vector saying what a position offers to others, made with `\(W_K\)`{=latex}. Scored against every query | 11 |
 | **Key–value cache** | The stored keys and values for every position in every layer, so decode attends to earlier positions without recomputing them. Costs `\(2 \times \text{layers} \times d \times \text{tokens} \times \text{bytes}\)`{=latex} | 15 |
 | **Lasting principle** | A reason for doing something, or a shape that does not move, which outlives the technique it was first attached to. It stops being true only if the reason itself is wrong | 6 |
@@ -136,6 +138,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Partition** | Every failure in exactly one mode, nothing dropped and nothing counted twice. Checkable, and worth checking | 30 |
 | **People** | The reviewers and approvers who handle the consequential cases and carry responsibility for them | 2 |
 | **Perplexity** | The exponential of the cross-entropy. Reads as the number of equally likely options the model is effectively choosing between; a uniform choice among `\(V\)`{=latex} options has perplexity `\(V\)`{=latex} | 14 |
+| **Position bias** | A judge preferring an answer for where it was printed rather than for what it says. Measured by showing each pair both ways and counting the flips | 31 |
 | **Positional encoding** | How a token's position is put into the arithmetic, since the attention formula carries no notion of order. Added to the embedding before the stack, or applied as a rotation to queries and keys, or added to the scores themselves | 11 |
 | **Post-filtering** | Searching everything, then discarding what the user may not see. Returns about `f × s` of a tenant's documents from a fetch of `f` at share `s` | 29 |
 | **Practitioner report** | A survey or a set of accounts of what people say they do. It is a practitioner report however it was published, and it supports what people *do* far better than whether it works | 6 |
@@ -166,6 +169,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Rule of three** | With no failures in `\(n\)`{=latex} tries, the rate can still be about `\(3/n\)`{=latex}. What to use when a bootstrap has no failure to resample | 21 |
 | **Scaling laws** | The relationships between model size, data, compute and loss, and their derivation | 17 |
 | **Schema** | The list of claims your code makes about a reply — fields, types, allowed values, ranges — and enforces on every one. A contract you check, not a request you hope was honoured | 21 |
+| **Self-agreement** | How often a judge gives the same verdict on the same answer shown twice. Every point of flipping is a point any other figure could have landed elsewhere, and measuring it needs no labels | 31 |
 | **Semantic search** | What dense retrieval is usually called. The same thing, in the words people use when they complain about it | 25 |
 | **Semaphore** | A counter that bounds how many jobs run at once. Three words of code, and the difference between concurrency and attacking your own account | 19 |
 | **Server-sent events** | A long-lived HTTP response carrying one small event per line as the server produces them. How a streamed reply arrives | 19 |
