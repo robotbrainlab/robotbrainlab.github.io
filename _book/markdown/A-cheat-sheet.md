@@ -217,3 +217,12 @@ written from memory.
 | How to measure drift | Re-label a sample of old outputs without looking at the old label, and count the flips | 33 |
 | What a trace holds | Input, retrieval query and candidates with scores, model and version, tool calls, output, tokens, per-stage timings | 33 |
 | The content trade | Drop the 4 content fields of 16 and 5 of 8 questions survive; the 3 lost are the ones needing the text, including whether a case can exist at all | 33 |
+| The five fixed paths | Chaining, routing, parallelisation, orchestrator–workers, evaluator–optimiser | 34 |
+| The column that matters | Whether the call count is settled by your input or by something a model said. 4 of the chapter's 6 designs, not 6 | 34 |
+| Which patterns are not fixed in length | Orchestrator–workers and evaluator–optimiser — a model decides the pieces, a judge decides when to stop | 34 |
+| Why a loop costs more than a chain of the same length | It re-sends the whole record each step, so the total has a square in it | 34 |
+| The step-limit arithmetic | 10 steps to 20 doubles the calls and multiplies tokens by 3.4; 20 to 40 by 3.7 | 34 |
+| Where the window wall is | On a 128,000-token window: step 638 at 200 tokens a step, step 13 at 10,000. The window stops a terse loop nowhere useful and a fat-stepped one in the range where step limits are set | 34 |
+| When an agent is warranted | You cannot enumerate the paths **or the shape** — if the shape is one of the five you have a pattern, not an agent — **and** there is a cheap check. The second is a veto on letting a model choose outside a list your code wrote, not a reason for it | 34 |
+| What decides the approval point | Whether a wrong step can be undone — not whether to use an agent | 34 |
+| The order to try | One call, chain, router, parallelise, orchestrator, evaluator–optimiser, loop. An order of added machinery, not of freedom. Climb when the evaluation set fails | 34 |

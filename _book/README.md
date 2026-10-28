@@ -73,10 +73,11 @@ sub-part opener pages sitting after the last written chapter were counted into i
   31   440-463    24   18    133%
   32   464-488    25   16    156%
   33   489-514    26   16    162%
+  34   515-537    23   16    144%
 ```
 
 **Part I is complete: chapters 1–17, 197 printed pages against a 266-page estimate (74%).**
-Part II has begun: chapters 18 to 33 come to 316 pages, so 513 printed pages in all. Chapters 30
+Part II has begun: chapters 18 to 34 come to 338 pages, so 535 printed pages in all. Chapters 30
 to 33 are the evaluation run of the part, and the first chapters since 17 whose material is a
 method rather than a mechanism. Their reviews find more per chapter than the mechanism chapters'
 did, and almost all of it is the same defect: a claim one notch wider than its demonstration. Chapter 26

@@ -67,11 +67,13 @@ Its first half (1 to 7) is 70 pages against 98; *Inside the Model* (8 to 17) is 
 **365 printed pages** over 26 of 57 chapters. Chapter 26 is the longest at 30 pages.
 
 **Stopped here on 28 Oct 2026, at the reader's request, with everything pushed and the PDF
-delivered.** Nothing is half-finished: chapters 27 to 33 are closed and sealed, the sharpen pass
+delivered.** Nothing is half-finished: chapters 27 to 34 are closed and sealed, the sharpen pass
 over chapters 8-17 is applied and every record amended, and `bash tools/check-all.sh` ends
-`ALL GATES PASS`. **Chapters 30 to 33 are the evaluation run of Part II and they are done**, which
-means the next chapter to write is **34**; read its `TOC.md` row and `LEDGER-TAUGHT.md` for every
-row naming it before anything else, per §14 step 1.
+`ALL GATES PASS`. **The next chapter to write is 35, Context Engineering**; read its `TOC.md` row
+and every `LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1. Chapter 34 is the
+one to read first: it ends by handing 35 the problem a loop has at step 13 on a fat-stepped run,
+and 35's own opening problem ("works for three steps and then starts forgetting") is the same
+wound.
 
 **The evaluation chapters cost more per chapter than the mechanism ones did, and the records say
 why.** Their reviews found 22, 17 and 15 findings, and in each case several of the FIRST round's

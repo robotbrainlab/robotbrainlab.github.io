@@ -73,6 +73,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Embedding table** | A matrix with one row per vocabulary entry. Looking a token up in it is how that token enters the model; the rows are called embeddings | 9 |
 | **Error analysis** | The part of evaluation that means reading real outputs, sorting the failures into kinds, and working on the largest kind | 5 |
 | **Evaluation** | Building and using something that tells you whether a system works: a set of cases, a way to judge each answer, and a number you can compare over time | 5 |
+| **Evaluator–optimiser** | Produce, judge, revise, until the judge passes or your code gives up. Fixed in shape, not in length | 34 |
 | **Evidence strength** | How much a claim is supported: announcement, demonstration, one study, practitioner report, settled practice — or a derivation, which stands outside the ladder because you can check it yourself | 6 |
 | **Examples** | What a good answer looks like, shown rather than described. Part of the specification | 18 |
 | **Exhaustive search** | Comparing the query against every vector. Exact, and linear in the size of the collection | 29 |
@@ -81,6 +82,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Faithfulness** | The same property under the name an interviewer may use: the answer is faithful to the passages it was given | 32 |
 | **Feed-forward block** | The half of a layer that works on each position alone: two matrices with an activation between them, the middle between about two and a half and four times the width of the ends. Holds more of a layer's parameters than attention does | 12 |
 | **Finish reason** | The response's own statement of why generation stopped. What distinguishes a truncated reply from a malformed one | 21 |
+| **Fixed path** | A design in which the sequence lives in your code: your code runs every step, whatever selected it, and the order is written down rather than decided as the run goes. Five shapes: chaining, routing, parallelisation, orchestrator–workers, evaluator–optimiser | 34 |
 | **Forward pass** | One journey through the model — lookup, the stack once, one distribution out. It produces exactly one distribution | 9 |
 | **Foundation model** | A model trained once on general material, then used for many tasks it was not specifically built for | 1 |
 | **Generalisation theory** | Why a model fitted to one body of text works on text it never saw — the bias–variance trade-off, and what learning theory proves about it | 17 |
@@ -133,11 +135,13 @@ chapter; every other chapter refers to it rather than redefining it.
 | **OCR** | Recognising characters in an image, for pages that have no text layer at all. Imperfect, and a separate step before parsing can begin | 27 |
 | **Optimisation theory** | The study of when a procedure like the update rule converges, to what, and how fast. Not taught in this book | 17 |
 | **Optimiser design** | Choosing and adapting the step size and the form of the update. Not taught in this book | 17 |
+| **Orchestrator–workers** | Parallelisation where a model decides what the pieces are, so the call count is settled at run time | 34 |
 | **Output format** | The shape the answer must take, stated rather than hoped for. Part of the specification | 18 |
 | **Output tokens** | Everything that comes back. Priced several times higher than input, one forward pass each, and not knowable in advance | 10 |
 | **Overlap** | Starting each chunk a little before the last one ended, so a passage cut by one boundary survives whole in a neighbour. Costs storage and returns near-duplicates | 27 |
 | **Page furniture** | Headers, footers, page numbers and watermarks: text on the page that is not part of the document | 27 |
 | **Paired comparison** | Running both versions on the same cases and keeping the results together, so the part of case-to-case variation the two versions share cancels when you subtract | 20 |
+| **Parallelisation** | One call per piece, the pieces coming from the input, then one call to combine. Independent, so they can run at once | 34 |
 | **Parameter** | One number inside the model, set by training and unchanged by inference. The count is what "a 7B model" reports | 9 |
 | **Parsing** | Turning a file into text a program can work on. For a document format this means reconstructing something the file does not record | 27 |
 | **Partition** | Every failure in exactly one mode, nothing dropped and nothing counted twice. Checkable, and worth checking | 30 |
@@ -152,6 +156,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Prefill** | The pass that processes the whole prompt, every position at once. Limited by arithmetic, whose attention part grows with the square of the prompt length and overtakes the rest on a long one. What you wait for before the first word | 15 |
 | **Pretraining** | Running the loop on an enormous quantity of general text. Where essentially all of a model's knowledge comes from, and nearly all of the computation | 14 |
 | **Probe** | One group the index looks inside at query time. More probes always mean more work, and never less recall — but once recall is exact, further probes buy nothing | 29 |
+| **Prompt chaining** | Stages in sequence, each call's output the next one's input. Used when the work has nameable stages that are easier asked separately | 34 |
 | **Proposal** | What the model emits — tokens your code reads as a request to run something. Nothing has happened yet | 23 |
 | **Quantisation** | Storing each parameter in fewer bits. Halving the bits halves the memory and roughly halves the time spent reading, at a cost in precision that has to be measured | 15 |
 | **Query** | The vector saying what a position is looking for, made by multiplying its vector by `\(W_Q\)`{=latex} | 11 |
@@ -172,6 +177,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Residual connection** | Adding a block's output to the vector that went into it, rather than replacing it. What lets a layer contribute nothing and pass its input through | 12 |
 | **Residual stream** | The running vector passing up through the stack, which every block adds into. By the end it is a sum of every contribution made along the way, with nothing marking which is which | 12 |
 | **Retrieval** | Searching your own collection for the passages that bear on a request, so they can be put into the context | 2 |
+| **Routing** | One call picks a branch from a menu your code wrote; your code runs the branch. The model sees the labels and never the code behind them. Chapter 52's routing is a different thing — choosing between models for one request | 34 |
 | **Rubber-stamping** | Approval given without real attention, usually because the volume is too high for any. It costs what review costs and delivers none of its value | 3 |
 | **Rule of three** | With no failures in `\(n\)`{=latex} tries, the rate can still be about `\(3/n\)`{=latex}. What to use when a bootstrap has no failure to resample | 21 |
 | **Scaling laws** | The relationships between model size, data, compute and loss, and their derivation | 17 |
