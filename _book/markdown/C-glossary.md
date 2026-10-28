@@ -45,6 +45,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Depth** | The number of layers in the stack. The last of the three numbers — vocabulary, width, depth — that describe a model's shape | 9 |
 | **Dimension** | One slot in a vector. A position in a list, not a direction in space, and usually not nameable on its own | 8 |
 | **Direct preference optimisation (DPO)** | The preference objective written as one formula: raise the preferred reply's probability relative to the rejected one, both measured against the model as it was before this stage. Stated in this book, not derived | 14 |
+| **Dispatcher** | The code that takes a proposal, validates it, decides, and runs the function or refuses. The only participant that can refuse | 23 |
 | **Dot product** | Multiply two vectors slot by slot and add the results. Large when both are large in the same slots — and also larger when either is simply longer | 8 |
 | **Embedding table** | A matrix with one row per vocabulary entry. Looking a token up in it is how that token enters the model; the rows are called embeddings | 9 |
 | **Error analysis** | The part of evaluation that means reading real outputs, sorting the failures into kinds, and working on the largest kind | 5 |
@@ -102,8 +103,10 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Preference optimisation** | Training on pairs of replies with a preference between them, to make the preferred kind more likely relative to the other. Changes which of its existing behaviours come out, rather than adding knowledge | 14 |
 | **Prefill** | The pass that processes the whole prompt, every position at once. Limited by arithmetic, whose attention part grows with the square of the prompt length and overtakes the rest on a long one. What you wait for before the first word | 15 |
 | **Pretraining** | Running the loop on an enormous quantity of general text. Where essentially all of a model's knowledge comes from, and nearly all of the computation | 14 |
+| **Proposal** | What the model emits — tokens your code reads as a request to run something. Nothing has happened yet | 23 |
 | **Quantisation** | Storing each parameter in fewer bits. Halving the bits halves the memory and roughly halves the time spent reading, at a cost in precision that has to be measured | 15 |
 | **Query** | The vector saying what a position is looking for, made by multiplying its vector by `\(W_Q\)`{=latex} | 11 |
+| **Registry** | The map from a name to a function your code is willing to run. The lookup that refuses a name the model invented | 23 |
 | **Regularisation** | The techniques that stop a model fitting its training data too closely | 17 |
 | **Repair** | Editing a reply so it parses, restricted to things that were never part of the data: a code fence, text outside the braces, a comma JSON disallows | 21 |
 | **Representation learning** | Why fitting a model to predict text arranges its vectors so that the arrangement is useful for other things. The question Chapter 9 refused. Not taught in this book | 17 |
@@ -132,6 +135,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Token bucket** | A limiter on the *rate* rather than on how many run at once, for when the requests-per-minute limit is the one that hurts | 19 |
 | **Tokeniser** | The program that cuts text into tokens and maps them to indexes, using one model's vocabulary and merge list. A different model's tokeniser gives a different count | 10 |
 | **Tool** | An action the model may ask for. The model proposes it; your code decides whether to run it | 2 |
+| **Tool description** | The text your code sends about one function: a name, a sentence and the parameter names and types. Not the function, and not your constraints | 23 |
 | **Tool message** | A result your code returns after the model asked for something. Chapter 23 | 18 |
 | **Top-k** | Keeping only the `\(k\)`{=latex} highest-scoring tokens and renormalising. Keeps the same number of options however confident the model is | 13 |
 | **Top-p** | Also called nucleus sampling. Keeping the smallest set of tokens whose probabilities add to at least `\(p\)`{=latex}, then renormalising. Narrow where the model is confident, wide where it is not, at the cost of not knowing in advance how many survive | 13 |

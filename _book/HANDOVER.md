@@ -75,6 +75,7 @@ Three chapters were over-counted that way; `LEDGER-DEFECTS.md` entry 23 has the 
 | `markdown/20` | Is the difference real? | **Done.** Two review passes, record sealed. Earned `tools/verify-index.py` and `LEDGER-DEFECTS.md` entry 34 |
 | `markdown/21` | Structured output and schemas | **Done.** Two review passes, record sealed. Earned entries 35 and 36, and the index's `\raggedcolumns` fix |
 | `markdown/22` | Constrained decoding and strict modes | **Done.** Two review passes, record sealed. Earned entry 37, and `check-all.sh` now checks the "0 undefined" its header always promised |
+| `markdown/23` | How a tool call works | **Done.** **Three** review passes, record sealed — a section written to answer the first review had itself only been read once. Earned entry 38, and the first message list in the book that carries a tool message |
 | `markdown/19` … `markdown/57` | Chapters 19 to 57 | Not started |
 | `markdown/00-preface.md` | A placeholder, so the build runs | Replace before release |
 | `markdown/C-glossary.md` | Appendix C. **Generated** by `tools/glossary.py` from every chapter's Key Terms table | 115 terms, in the PDF |
@@ -103,7 +104,7 @@ do not reopen it. Dates, assuming the Part I rate holds:
 |---|---|---|---|
 | 1 | Part I, chs 1–7 | 98 | **Done 2026-10-23** |
 | 2 | *Inside the Model*, chs 8–17 | 168 | **Done 2026-10-28**, twelve days early |
-| 3 | Part II, chs 18–29 | 196 | 10 Nov – 23 Nov. **18 to 22 done, 28 Oct** |
+| 3 | Part II, chs 18–29 | 196 | 10 Nov – 23 Nov. **18 to 23 done, 28 Oct** |
 | 4 | Part II, chs 30–39 | 166 | 24 Nov – 5 Dec |
 | 5 | Part III, labs 40–46 | 132 | 6 Dec – 15 Dec |
 | 6 | Part III, labs 47–50 | 58 | 16 Dec – 19 Dec |

@@ -111,3 +111,9 @@ written from memory.
 | Why strict modes can hurt | No room for intermediate tokens, and the model's only scratchpad is its own output. Also: a schema too narrow to hold the right answer | 22 |
 | The fix, and its order | A `reasoning` field *before* the answer field — and only if the engine fixes field order | 22 |
 | What it never buys | Correctness, or the parts of your schema the engine did not compile | 22 |
+| The five steps | You send · model proposes · **you validate and decide** · you run · you return | 23 |
+| Who decides | The model decides what to *propose*. Your code decides what *runs* | 23 |
+| Why not in the instructions | Nothing in the loop checks a proposal's *values* against them except your code. A strict mode holds a shape, and an enum; not a range, and never a fact about the world | 23 |
+| What the model never sees | The function, and every constraint you kept on your side | 23 |
+| Description cost | Input on every call. A real tool schema is around 200 characters, so 30 tools is of the order of 1,500 tokens | 23 |
+| The refusal to send back | The specific reason, so the next proposal can be better | 23 |

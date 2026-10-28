@@ -23,6 +23,20 @@ python3 tools/chapter.py reviewed NN-slug
 bash tools/check-all.sh                    # must end ALL GATES PASS
 ```
 
+**Two things to do before the completeness review, every time, because both have been missed
+in four chapters running:**
+
+```bash
+bash tools/check-all.sh 2>&1 | grep -E 'FAIL|GATES'   # never a tail: entry 35
+grep -o '\\index{[^}]*}' latex/chapters/NN-*.tex | sort -u
+```
+
+Read every index entry and ask of each one: *is this a term, or did I bold it for emphasis?*
+`verify-index.py` only catches an entry starting with a non-letter, so the rest is judgement, and
+bold means **new term** in this book — see `LEDGER-DEFECTS.md` entry 33. Every chapter from 19 to
+23 shipped junk entries to a reviewer because this was done after the review rather than before
+it.
+
 ## The rules that are easy to break
 
 - **Claude writes the book. The owner reads it.** Do not suggest that the owner writes it. This

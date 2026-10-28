@@ -65,6 +65,35 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**38. A section added because of a review has not been reviewed.** Chapter 23's completeness
+review found that two of its Covers items were narrated rather than shown, and that chapter 18
+forwards the tool message here while no message list containing one is printed anywhere in the
+book. So a section was written to fix that — and then the fix-verification pass read it, which
+made that pass the section's *first* review rather than its second.
+
+The fix-verification noticed this itself and said so: nearly every substantive finding in it was
+inside the new section, which is what a *completeness* review produces. A third pass was run on
+that section alone, and it found a blocking teaching error the other two had missed. The rule the
+section gave for telling a prose answer from a truncated proposal does not separate them — both
+fail to parse in exactly the same way, which `handle` demonstrates — and the rule then labelled
+the surviving case a failure, which made the chapter's own successful final turn a failure. The
+chapter handed that non-rule to the reader twice, in the body and as the fix in a lab step.
+
+**The project's rule is two reviews per chapter, and I had satisfied it in letter.** The second
+pass did read the changed passages, as the rule says. But a passage written *in response* to a
+review has had one adversarial reading, not two, and the arithmetic does not care that it arrived
+late.
+
+**How to apply.** When a review's finding is "this is missing" rather than "this is wrong", the
+material you write to answer it starts the loop again for itself. Either name it in the
+fix-verification brief as new and unreviewed — which is worth doing anyway, and was done here —
+or expect to run a short third pass over that section alone. A focused pass is cheap: this one
+read one section and twenty lines of edits, and it caught a false rule that two broader passes
+had read straight past, because they were checking a list of findings and it was reading the
+prose.
+
+---
+
 **37. I widened a derivation's conclusion and kept the label.** Chapter 6 puts a *derivation*
 off the evidence ladder: it "follows from arithmetic, or from a mechanism you can check
 yourself", and it supports "whatever the arithmetic covers". Chapter 22 argued that a schema
