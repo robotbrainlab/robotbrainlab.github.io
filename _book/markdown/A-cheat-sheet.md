@@ -117,3 +117,12 @@ written from memory.
 | What the model never sees | The function, and every constraint you kept on your side | 23 |
 | Description cost | Input on every call. A real tool schema is around 200 characters, so 30 tools is of the order of 1,500 tokens | 23 |
 | The refusal to send back | The specific reason, so the next proposal can be better | 23 |
+| What you get back | One vector, fixed width, per text. A few hundred to a few thousand numbers | 24 |
+| The comparison | Chapter 8's cosine. Scale-free: multiplying a vector by 10 does not move it | 24 |
+| What a high cosine is | A fact about two vectors. **Not** evidence that two texts mean the same | 24 |
+| Dense retrieval | Embed the documents once, embed the query per search with the same model, sort by cosine | 24 |
+| What decides the model | Your language, your domain, your document length. Length first: it is the one that gets forgotten | 24 |
+| The hard limit | Every embedding model has a maximum input length. Past it, text is cut off, usually with no error | 24 |
+| A raw cosine | Has no meaning on its own. Not comparable across models, queries or corpora — rank, do not threshold | 24 |
+| What a benchmark is | One study, somebody else's corpus. A shortlist of three, not a choice of one | 24 |
+| The input only you have | The answer key: which document each query is about | 24 |

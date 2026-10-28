@@ -65,6 +65,42 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**39. The arithmetic gate reported 540 equations checked and was checking 56.** Chapter 24
+printed a display equation and told the reader to verify it by hand — "because the whole chapter
+rests on being able to". The equation was wrong: `0.90 / (0.9695 × 0.9487)` is 0.9785, which
+rounds to 0.979, not the 0.978 beside it. `verify-arithmetic.py` reported the file clean.
+
+**It had never looked at that line.** `value()` matches `PURE` against the *raw* text, and `PURE`
+admits only digits and arithmetic punctuation — so `\[`, `\]`, `\frac`, `\sqrt` and `\;` all
+defeat it, and every display equation in this book has at least one of them. Instrumented over
+all 25 chapters: **540 statements found, 56 with two evaluable parts, 480 silently skipped.** The
+gate reads text blocks and prose, which is genuinely useful, and it had been reporting a number
+ten times its real work since it was written.
+
+**A second hole was live underneath that one.** `places = min(decimals(p) for p, _ in vals)` took
+the comparison's precision from the *narrowest* part of a chain, and `decimals()` returns 0 for
+any part ending in `)`. So a chain with a bracketed step was compared to zero decimal places,
+where everything rounds to 0 and nothing can fail. Proved on a control:
+`50 / (37.42 x 4.243) = 50 / 999.99 = 0.315` passed — a wrong divisor in a chain, which is the
+exact defect the gate's own documentation says it catches.
+
+**What was changed, and what was not.** `places` now comes from the printed answer, which fails
+that control and leaves all 25 chapters clean — tested both ways. The summary now reports
+statements found, statements arithmetic-checked, and how many were skipped, and says in words
+that display maths and prose are not checked here. **Parsing `\frac` was considered and
+rejected**: it needs a brace-balanced rewriter, a strip list, an implicit-multiplication rule,
+and moving the `PURE` test off the raw text — and that last one dismantles the only thing keeping
+this gate off prose. A gate that cries wolf is worse than a narrow one that says so.
+
+**How to apply.** A gate that prints a count must count what it did, not what it saw. When a
+gate has never failed, ask what it would take to make it fail and then do that — entry 27 said
+this and it was applied to one gate rather than to the habit. And the discipline that actually
+caught this was the completeness review reading a display equation with a calculator, which is
+the answer to what covers the 480: a reviewer, named in the brief, told which equations the gate
+cannot see.
+
+---
+
 **38. A section added because of a review has not been reviewed.** Chapter 23's completeness
 review found that two of its Covers items were narrated rather than shown, and that chapter 18
 forwards the tool message here while no message list containing one is printed anywhere in the

@@ -10,6 +10,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Activation function** | The feed-forward block's one step that is not a matrix multiplication, such as keeping positives and zeroing negatives. Without it the block's two matrices would collapse into one | 12 |
 | **Active parameters** | The parameters that actually run for a given token, as against the total the model holds. Cost follows the active figure; the name usually quotes the total | 15 |
 | **Agent** | A system in which the model decides what to do next, repeatedly, rather than your code deciding the sequence | 4 |
+| **Answer key** | Which document each of your queries is actually about. The only input in the procedure that has to come from you | 24 |
 | **Approval point** | A step the loop cannot pass without a person, enforced in your code rather than requested in the instructions | 4 |
 | **Assistant message** | What the model said earlier in the conversation, sent back to it by your code. The model does not remember saying it | 18 |
 | **Attention** | The step in which each position takes a weighted blend of information from the others, in amounts computed from the content rather than fixed in advance | 11 |
@@ -42,11 +43,14 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Dead state** | A grammar state with no legal token. It does not raise — the mask stops meaning anything and the decoder emits whatever was first | 22 |
 | **Decode** | One forward pass per output token. Does almost no arithmetic and is limited by reading every parameter the pass uses out of memory once per token | 15 |
 | **Delta** | One streamed piece: what to add to what you have, not the whole answer again | 19 |
+| **Dense retrieval** | Embedding every document once, embedding the query at search time with the *same* model, and ranking by cosine | 24 |
 | **Depth** | The number of layers in the stack. The last of the three numbers — vocabulary, width, depth — that describe a model's shape | 9 |
 | **Dimension** | One slot in a vector. A position in a list, not a direction in space, and usually not nameable on its own | 8 |
 | **Direct preference optimisation (DPO)** | The preference objective written as one formula: raise the preferred reply's probability relative to the rejected one, both measured against the model as it was before this stage. Stated in this book, not derived | 14 |
 | **Dispatcher** | The code that takes a proposal, validates it, decides, and runs the function or refuses. The only participant that can refuse | 23 |
 | **Dot product** | Multiply two vectors slot by slot and add the results. Large when both are large in the same slots — and also larger when either is simply longer | 8 |
+| **Embedding** | The vector an embedding model returns for a given text. Its width is the model's, and it is the same for a word, a sentence and a page | 24 |
+| **Embedding model** | A model whose whole job is to turn one piece of text into one vector of fixed width. No output tokens, nothing to continue | 24 |
 | **Embedding table** | A matrix with one row per vocabulary entry. Looking a token up in it is how that token enters the model; the rows are called embeddings | 9 |
 | **Error analysis** | The part of evaluation that means reading real outputs, sorting the failures into kinds, and working on the largest kind | 5 |
 | **Evaluation** | Building and using something that tells you whether a system works: a set of cases, a way to judge each answer, and a number you can compare over time | 5 |

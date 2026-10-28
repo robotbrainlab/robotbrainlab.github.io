@@ -73,6 +73,10 @@ def decimals(s):
     return len(m.group(1)) if m else 0
 
 
+SKIPPED = []   # statements with fewer than two evaluable parts
+CHECKED = []   # statements this gate actually evaluated
+
+
 def check_statement(raw, path, lineno, problems):
     """A chain like `a + b = c = d`: every pure-arithmetic part must agree."""
     parts = [p for p in raw.split("=") if p.strip()]
@@ -91,8 +95,17 @@ def check_statement(raw, path, lineno, problems):
         if v is not None:
             vals.append((p.strip(), v))
     if len(vals) < 2:
+        SKIPPED.append(f"{os.path.basename(path)}:{lineno}")
         return
-    places = min(decimals(p) for p, _ in vals)
+    CHECKED.append(f"{os.path.basename(path)}:{lineno}")
+    # The precision comes from the PRINTED ANSWER, not from the narrowest part
+    # of the chain. `decimals()` returns 0 for any part ending in ')', so
+    # `min(...)` compared a chain with a bracketed step to zero decimal places,
+    # where everything rounds to 0 and nothing can fail. Proved 2026-10-28:
+    # `50 / (37.42 x 4.243) = 50 / 999.99 = 0.315` passed the old rule and
+    # fails this one, and all 25 chapters stay clean. That chain is the exact
+    # defect this gate was written to catch.
+    places = decimals(vals[-1][0])
     rounded = {round(v, places) for _, v in vals}
     if len(rounded) > 1:
         shown = "  =  ".join(f"{p} [{v:.6g}]" for p, v in vals)
@@ -132,7 +145,19 @@ def main():
         total += n
     for p in allp:
         print(f"  {p}")
-    print(f"\n{len(files)} file(s), {total} equation(s) checked, {len(allp)} problem(s)")
+    # `total` counts every statement the scanner FOUND. Only those with two or
+    # more evaluable parts were actually arithmetic-checked, and the gap is
+    # large: a display equation written as \[ \frac{a}{b} = c \] has no
+    # evaluable part at all, because PURE is matched against the raw text and
+    # the delimiters alone defeat it. Printing one number hid that for 24
+    # chapters - chapter 24's hand check was wrong and this gate reported the
+    # file clean. The completeness review is what reads display maths; this
+    # gate reads text blocks and prose. Say so rather than implying otherwise.
+    print(f"\n{len(files)} file(s), {total} statement(s) found, "
+          f"{len(CHECKED)} arithmetic-checked, {len(allp)} problem(s)")
+    if SKIPPED:
+        print(f"{len(SKIPPED)} had no two evaluable parts - display maths and "
+              f"prose are NOT checked here")
     if allp:
         print("FAIL - recompute it, or print the figure you actually divided by")
         sys.exit(1)

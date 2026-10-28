@@ -13,7 +13,7 @@ run () { printf '\n=== %s ===\n' "$1"; shift; "$@" || fail=1; }
 run "VOICE    the book never refers to its own origins" python3 tools/verify-voice.py
 run "BOUNDARY no theory outside BOOK-GUIDE section 6"   python3 tools/verify-boundary.py
 run "RENDER   markdown renders as written"              python3 tools/verify-render.py
-run "ARITH    every printed equation holds"             python3 tools/verify-arithmetic.py
+run "ARITH    the arithmetic it can read holds"         python3 tools/verify-arithmetic.py
 run "RECORD   every chapter evidenced and fresh"        python3 tools/verify-record.py
 # Per-chapter, but the bare-jargon half of verify-inputs.py is a verdict rather than a hint
 # list, so it belongs in the suite. Chapter 6 used "reranker" and "context window", neither
