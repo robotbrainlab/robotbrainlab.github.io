@@ -780,9 +780,10 @@ a decision about a failure — not because the scores are random, but because a 
 cannot say *which* of eight things went wrong, so nothing follows from it. Then separate the two objections, because they are usually run together. The
 one that belongs here is that it is **not actionable**: a score of 3.2 is not a thing you can
 work on. The other is whether the score is even a reliable measurement — whether it
-agrees with a person, which is Chapter 31's, where a judge gets validated before anybody relies
-on it, and whether the same output gets the same score twice, which is Chapter 20's repeated
-runs. So the reply is not "never use
+agrees with a person, and whether the same output gets the same score twice — and both of those
+are Chapter 31's, where a judge gets validated before anybody relies on it. Chapter 20 requires
+a verdict that does not wander and hands the building of one to 31; where it cannot be fixed,
+Chapter 20's trials bound it. So the reply is not "never use
 a model to judge", it is: run the error analysis first, so you know what the modes are; build
 pass-or-fail checks per mode rather than a score; use code wherever code can decide; and keep the
 model for the modes that genuinely need judgement, after you have checked that its judgement

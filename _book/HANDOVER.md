@@ -67,16 +67,21 @@ Its first half (1 to 7) is 70 pages against 98; *Inside the Model* (8 to 17) is 
 **365 printed pages** over 26 of 57 chapters. Chapter 26 is the longest at 30 pages.
 
 **Stopped here on 28 Oct 2026, at the reader's request, with everything pushed and the PDF
-delivered.** Nothing is half-finished: chapter 26 is closed and sealed, the sharpen pass over
-chapters 8-17 is applied and every record amended, and `bash tools/check-all.sh` ends
-`ALL GATES PASS`. **The next chapter to write is 27, Parsing, Chunking and Indexing Your
-Documents** — begin with `python3 tools/chapter.py begin 27-<slug>` and read its sources in
-full first, per §14 step 1.
+delivered.** Nothing is half-finished: chapters 27, 28, 29 and 30 are closed and sealed, the
+sharpen pass over chapters 8-17 is applied and every record amended, and
+`bash tools/check-all.sh` ends `ALL GATES PASS`. **The next chapter to write is 31, Checks and
+Judges, and Validating a Judge** — begin with `python3 tools/chapter.py begin 31-<slug>` and read
+its sources in full first, per §14 step 1. Chapter 30 is the one to read before it: it produces
+the failure modes that chapter 31's checks are built per, and it deliberately stops short of
+asking whether a check is reliable, which is 31's.
 
-**Two things waiting, neither blocking chapter 27.** The sharpen pass should be run again over
-chapters 18 to 26 once Part II is finished, and `LEDGER-DEFECTS.md` entry 44 says why later is
-better than per-chapter. And `labs/` is still empty, which chapter 7 promises and §9 specifies;
-chapter 26 had to print its own corpus because of it. Chapters 21, 22 and 25 are the first to exceed
+**Three things waiting, none blocking chapter 31.** The sharpen pass should be run again over
+chapters 18 to 30 once Part II is finished, and `LEDGER-DEFECTS.md` entry 44 says why later is
+better than per-chapter — **it has one concrete target already**: chapter 19 line 93 says "This
+is the commonest way a working script dies at scale", an empirical superlative the chapter has
+no evidence for, found while sweeping the same defect out of chapter 30. And `labs/` is still
+empty, which chapter 7 promises and §9 specifies; chapters 26, 27, 29 and 30 each had to print
+their own data because of it. Chapters 21, 22 and 25 are the first to exceed
 their estimates, each in its fix pass rather than in drafting. The reviews have changed
 character across Part II: the early chapters failed on arithmetic and on invented program
 output, which is gone now that every program is written and run before any sentence about it,
