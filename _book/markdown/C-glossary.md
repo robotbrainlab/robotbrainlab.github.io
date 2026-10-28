@@ -51,6 +51,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Examples** | What a good answer looks like, shown rather than described. Part of the specification | 18 |
 | **Exponential backoff** | Doubling the wait after each failed attempt, up to a cap, so a struggling system is not hammered | 19 |
 | **Feed-forward block** | The half of a layer that works on each position alone: two matrices with an activation between them, the middle several times wider than the ends. Holds more of a layer's parameters than attention does | 12 |
+| **Finish reason** | The response's own statement of why generation stopped. What distinguishes a truncated reply from a malformed one | 21 |
 | **Forward pass** | One journey through the model — lookup, the stack once, one distribution out. It produces exactly one distribution | 9 |
 | **Foundation model** | A model trained once on general material, then used for many tasks it was not specifically built for | 1 |
 | **Generalisation theory** | Why a model fitted to one body of text works on text it never saw — the bias–variance trade-off, and what learning theory proves about it | 17 |
@@ -100,12 +101,15 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Quantisation** | Storing each parameter in fewer bits. Halving the bits halves the memory and roughly halves the time spent reading, at a cost in precision that has to be measured | 15 |
 | **Query** | The vector saying what a position is looking for, made by multiplying its vector by `\(W_Q\)`{=latex} | 11 |
 | **Regularisation** | The techniques that stop a model fitting its training data too closely | 17 |
+| **Repair** | Editing a reply so it parses, restricted to things that were never part of the data: a code fence, text outside the braces, a comma JSON disallows | 21 |
 | **Representation learning** | Why fitting a model to predict text arranges its vectors so that the arrangement is useful for other things. The question Chapter 9 refused. Not taught in this book | 17 |
 | **Residual connection** | Adding a block's output to the vector that went into it, rather than replacing it. What lets a layer contribute nothing and pass its input through | 12 |
 | **Residual stream** | The running vector passing up through the stack, which every block adds into. By the end it is a sum of every contribution made along the way, with nothing marking which is which | 12 |
 | **Retrieval** | Searching your own collection for the passages that bear on a request, so they can be put into the context | 2 |
 | **Rubber-stamping** | Approval given without real attention, usually because the volume is too high for any. It costs what review costs and delivers none of its value | 3 |
+| **Rule of three** | With no failures in `\(n\)`{=latex} tries, the rate can still be about `\(3/n\)`{=latex}. What to use when a bootstrap has no failure to resample | 21 |
 | **Scaling laws** | The relationships between model size, data, compute and loss, and their derivation | 17 |
+| **Schema** | The list of claims your code makes about a reply — fields, types, allowed values, ranges — and enforces on every one. A contract you check, not a request you hope was honoured | 21 |
 | **Semaphore** | A counter that bounds how many jobs run at once. Three words of code, and the difference between concurrency and attacking your own account | 19 |
 | **Server-sent events** | A long-lived HTTP response carrying one small event per line as the server produces them. How a streamed reply arrives | 19 |
 | **Softmax** | Turns a list of scores into positive numbers that sum to 1, preserving their order and exaggerating the gaps between them | 8 |
@@ -131,6 +135,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Trials** | Repeated runs of the same case, which measure the model's own variation. Averaged within the case, never counted as extra cases | 20 |
 | **Turn** | One exchange — the user's message and the model's reply to it. A conversation is a list of turns, and the whole list is re-sent on each one | 18 |
 | **User message** | The request and the material it is about, from the person or from your code on their behalf | 18 |
+| **Validation layers** | Parses / right shape / values possible / values true. The first three are mechanical; the fourth needs a judgement and belongs elsewhere | 21 |
 | **Value** | The vector a position hands over when it is attended to, made with `\(W_V\)`{=latex}. What the weights are spent on | 11 |
 | **Vector** | An ordered list of numbers. Two vectors can be compared only if they have the same number of slots | 8 |
 | **Vocabulary** | The fixed, numbered list of every entry a model can read or produce — nearly all pieces of text, and a few that are not. Built once, before training, and fixed while you use the model | 9 |

@@ -412,24 +412,29 @@
 % 1. The space is FLEXIBLE. book.cls's own \indexspace is `10pt plus5pt minus3pt`; this
 %    macro replaced it with a rigid \addvspace{9pt} and dropped the flexibility. The index
 %    then had no way to absorb being slightly over one page, and the build went overfull by
-%    9.33658pt the moment chapter 5's two Key Terms opened a new letter group. The index
-%    paginates correctly on its own - proved by flooding book.ind with 120 entries, which
-%    gave 3 index pages and 0 overfull - so rigidity was the whole fault. Keep the shrink.
-%    The shrink went 3pt -> 4pt on 2026-10-28, when chapter 19 made the book 19 pages longer
-%    and the last index page landed 0.22693pt over. Same defect, same cure, one point more.
-%    A tolerance in the build gate was written first and thrown away: the box is real, it is
-%    the index, and it costs one point of glue to remove. Page count did not change.
+%    9.33658pt the moment chapter 5's two Key Terms opened a new letter group. Keep the shrink.
+%
+%    THE SHRINK WAS THEN THE WRONG LEVER THREE TIMES. 3pt -> 4pt on 2026-10-28 for a
+%    0.22693pt box, then 4pt -> 9pt the same day for an 8.71893pt box on the LAST index page.
+%    Each round was triggered by an unrelated chapter's page count, which was the signal that
+%    the index needed the slack - and each round bought less headroom than the next chapter
+%    would need. The real cause was two lines down: `columns=2` on \makeindex means imakeidx
+%    sets the index in multicol, and multicol BALANCES its last page's columns, so the final
+%    index page had to be full. Nothing about the glue could fix that. `\raggedcolumns` lets
+%    the last page's columns be short by design, and with it the shrink went back to
+%    book.cls's own 3pt and the build is clean at three different page counts (254, 257 and
+%    272 printed pages). See LEDGER-DEFECTS.md entry 36.
 % 2. The FIRST group gets no space above it, because \addvspace there follows the index
 %    chapter heading, which is a box, so it is added rather than discarded.
 %
 % No `@` in the \newif names: this block sits outside \makeatletter.
 % No `@` in these names: this block is outside \makeatletter, so `@` is not a letter here.
 \newif\iftifirstidxletter \tifirstidxlettertrue
-\newcommand{\indexletter}[1]{\par\iftifirstidxletter\tifirstidxletterfalse\else\addvspace{9pt plus 3pt minus 4pt}\fi{\sffamily\bfseries\fontsize{10}{12}\selectfont #1}\par\nobreak\vspace{1pt}}
+\newcommand{\indexletter}[1]{\par\iftifirstidxletter\tifirstidxletterfalse\else\addvspace{9pt plus 3pt minus 3pt}\fi{\sffamily\bfseries\fontsize{10}{12}\selectfont #1}\par\nobreak\vspace{1pt}}
 \makeatletter
 \renewcommand{\@idxitem}{\par\hangindent 1.5em}
 \makeatother
-\AtBeginEnvironment{theindex}{\setlength{\parskip}{0pt}}
+\AtBeginEnvironment{theindex}{\setlength{\parskip}{0pt}\raggedcolumns}
 \renewcommand{\indexspace}{}   % the letter heading already opens the group
 % Index entries from Markdown: [text]{.idx} or [text]{idx="key"} (see README)
 

@@ -23,7 +23,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 |---|---|---|---|
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
-| II · Use | 18–39 | 362 | **Drafting** — 3 of 22 done |
+| II · Use | 18–39 | 362 | **Drafting** — 4 of 22 done |
 | III · Apply | 40–50 | 190 | Not started |
 | IV · What Next | 51–57 | 136 | Not started |
 | Appendices | A–D | 83 | **A (cheat sheet, 63 items), B (100 questions) and C (glossary, 115 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
@@ -56,15 +56,17 @@ sub-part opener pages sitting after the last written chapter were counted into i
   18   202-213    12   16     75%
   19   214-232    19   20     95%
   20   233-250    18   18    100%
+  21   251-265    15   14    107%
 ```
 
 **Part I is complete: chapters 1–17, 197 printed pages against a 266-page estimate (74%).**
-Part II has begun: chapters 18, 19 and 20 come to 49 pages against 54, so 234 printed pages in
-all. Chapters 9, 17 and 20 are the three to land exactly on their estimates, and none has yet
-exceeded one. Both of Part II's recent chapters reached their estimates the same way — by
-answering a Covers item or a bank question the first draft had missed, not by padding. See
-`LEDGER-DEFECTS.md` entry 30 for chapter 19's and the trials half of bank question 45 for
-chapter 20's.
+Part II has begun: chapters 18 to 21 come to 64 pages against 68, so 249 printed pages in all.
+Chapters 9, 17 and 20 landed exactly on their estimates, and **chapter 21 is the first to exceed
+one**, by a page — and the page came from its fix pass rather than from drafting, which is the
+pattern across Part II so far: these chapters reach their estimates by answering a Covers item
+or a bank question the first draft had missed, not by padding. See `LEDGER-DEFECTS.md` entry 30
+for chapter 19's, the trials half of bank question 45 for chapter 20's, and entry 35 for what
+chapter 21's review found in the record rather than in the prose.
 
 The estimates are estimates, never targets — `BOOK-GUIDE.md` §11. Read `LEDGER-DEFECTS.md`
 entry 12 before drawing any conclusion from the percentages.

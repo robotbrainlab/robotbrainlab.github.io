@@ -65,6 +65,64 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**36. I widened a tolerance three times instead of looking two lines further down the file.**
+The index's letter-group glue has a shrink, documented since entry 17. On 2026-10-28 an overfull
+box appeared on an index page and I raised that shrink from 3pt to 4pt. Hours later, after
+another chapter, a bigger box appeared on the *last* index page and I raised it again, 4pt to
+9pt — fully collapsible, which I wrote up as "the end of this line, you cannot shrink below
+zero", correctly observing that each round had been triggered by an unrelated chapter's length.
+
+Having observed that, I did not ask why. **The cause was `columns=2` on `\makeindex`, two lines
+below the comment I was editing.** It makes imakeidx set the index in `multicol`, and multicol
+*balances* the columns on its last page — so the final index page was required to be full, and
+no amount of glue could change that. One `\raggedcolumns` lets it be short by design. With that
+in place the shrink went back to book.cls's own 3pt and the build is clean at 254, 257 and 272
+printed pages, where every shrink value had failed at one page count or another.
+
+The fix-verification pass found it by **bisecting my own fix**: `minus 5pt` still overfull,
+`minus 6pt` clean — so 9pt had spent all the remaining headroom for no measured reason, and at
+full collapse a bold letter heading butts against the previous group's last entry. It also
+falsified the obvious alternative, giving each index entry a little `\parskip` shrink, which
+did not move the box at all. That is what told it the slack had to come from somewhere other
+than glue.
+
+**How to apply.** When the same gate fails a third time on the same mechanism, stop adjusting
+the number. The pattern "an unrelated change's size decides whether this passes" means the
+thing has no slack by design, and the fix is to give it slack by design rather than to buy a
+little more each time. Read the package options as well as the macro: the behaviour that was
+forcing a full page was declared in the setup, not in the code I kept editing. And when you
+write "this is the end of this line", treat that sentence as the signal to go and find the
+cause — it is an admission that the current lever is exhausted, which is never the same thing
+as the problem being solved.
+
+---
+
+**35. I read `check-all.sh` through a `tail` and ticked a box that said the gates were clean.**
+Chapter 21's record claimed `verify-render.py · verify-voice.py · verify-boundary.py — all
+CLEAN`. `verify-render.py` was reporting **six** findings on that chapter and exiting 1: four
+`text` lines over the 64-character limit and an inline code span broken across a source line.
+I had run `bash tools/check-all.sh 2>&1 | grep -E '…' | tail -20`, and the RENDER section was
+above the cut. The suite ended `GATES FAILED`; I read that as the record gate alone, because the
+record gate was the failure I was expecting.
+
+**This is entry 28 for the third time in one session** — the first was `patch.py` through
+`tail -4`, the second was a transformation script whose replacement silently matched nothing
+(entry 29). The pattern is not carelessness about tails. It is that I truncate output when I
+already believe I know what it says, which is exactly when the truncation costs something.
+
+**The cost here was a false entry in a record**, which is worse than the defect it hid. Every
+other gate's evidence in that record is only as good as the habit that produced this one, and a
+reviewer had to find it.
+
+**How to apply.** Run `bash tools/check-all.sh` and read the whole thing, or grep for the
+failure token and nothing else: `bash tools/check-all.sh 2>&1 | grep -E 'FAIL|GATES'`. Never a
+`tail` or a `head` on a suite that reports per-item status. And before ticking a box that names
+a tool, run that tool on its own and read its exit status — `python3 tools/verify-render.py;
+echo $?` is two seconds. A record is evidence; a box ticked from a remembered expectation is
+not evidence, it is a claim.
+
+---
+
 **34. Every time chapter 20 validated a claim, it validated it against data chosen so the claim
 could not fail — and then stated the conclusion without the condition.** The completeness review
 found this four times in one chapter, and the four together are worse than any one of them.

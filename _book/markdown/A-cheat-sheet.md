@@ -98,3 +98,9 @@ written from memory.
 | Cases against trials | Cases for the range of inputs, trials for the model's variation. Neither fixes the other | 20 |
 | How many trials | Averaging `\(k\)`{=latex} judgements divides a case's own variance by `\(k\)`{=latex}. Two or three, then stop | 20 |
 | Typical interval vs detection | A table built from a fixed mix shows the usual interval. Whether a real draw clears zero is a separate number, and lower | 20 |
+| Why not prose | No contract, so your code guesses. Right 95 times in 100 is a defect 5 times in 100 | 21 |
+| The four layers | Parses · right shape · values possible · values true. Only the first three are free | 21 |
+| Rule of three | 0 failures in `\(n\)`{=latex} → the rate may be `\(3/n\)`{=latex}. Exactly, `\(1 - 0.05^{1/n}\)`{=latex} | 21 |
+| 0 in 40 | Consistent with a 7.5 per cent failure rate | 21 |
+| The repair line | Repair the envelope, never the contents. Needing to know what the model meant makes it a retry | 21 |
+| Failure options | Reject · retry · repair · record. Never a silent default | 21 |
