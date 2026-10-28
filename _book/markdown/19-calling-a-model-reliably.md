@@ -211,7 +211,7 @@ in most HTTP libraries, is *not* a budget for the whole response: it is the long
 between one piece of the body and the next. That is the right tool for noticing a dead
 connection, and it is useless for capping a long generation, because a model that sends a token
 every half second never trips a thirty-second read timeout however long it talks. The cap on
-the whole call is a third, **total** timeout — and some libraries do not have one, so you build
+the whole call is a third, **total timeout** — and some libraries do not have one, so you build
 it yourself by wrapping the call, with `asyncio.timeout` or the equivalent.
 
 **It is the total timeout you derive from the token cap.** If you cap the reply at 1,000 tokens
@@ -718,8 +718,8 @@ finished as you finish it — one flushed line per item for one job over many it
 | Backoff with jitter | `wait = random.uniform(0, min(cap, base * 2 ** attempt))` |
 | Attempts and waits | *n* attempts make *n* − 1 waits. Five attempts at base 0.5 is 7.5 s at worst |
 | How many at once | rate × duration — 120 a minute at 2 seconds each is 4. It bounds concurrency, not rate, so leave a margin |
-| Timeouts | Three: connect, read between chunks, total. Derive the **total** from the token cap |
-| Retryable | 429, 5xx, timeouts. **Not** a malformed request, a bad key, an over-length one, or a 429 from an exhausted quota |
+| Timeouts | Three: connect, read between chunks, total. Derive the *total* from the token cap |
+| Retryable | 429, 5xx, timeouts. *Not* a malformed request, a bad key, an over-length one, or a 429 from an exhausted quota |
 | What to stream | To a person, yes. One answer you must validate whole, no. Independent units, yes |
 | `asyncio.gather` | One failure loses every result unless you pass `return_exceptions=True` |
 | The resume file | One flushed line per item, or per `(item, stage)` for a pipeline. Keyed by input, holding the result |

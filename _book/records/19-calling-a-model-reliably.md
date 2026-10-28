@@ -18,7 +18,13 @@ absolutes: 144 flagged by verify-absolutes.py after the fix passes (80 before th
   emails from a resume that can only produce one.
 new-terms: verify-inputs.py: 100 new after the fix passes (58 before them), bare-terms 0 CLEAN. Triaged: server-sent events, delta, 429, exponential backoff, jitter, semaphore, batch endpoint and idempotent are all introduced here and all in Key Terms. 'idempotent' first failed the gate because only the whole sentence was bold; the word itself is now bold at its definition.
 covers-misses: 0 (verify-coverage.py markdown/19-calling-a-model-reliably.md)
-sha256: ff5cf52978789a3638457ec8cccfb98d7f28fce9cb39568b16a0d8e30916ebfa
+sha256: d856ca27b39ffb11e2757f09d7d8ff77f1af7356c74096bff1aec4305fbbe736
+reseal-2:
+  Reopened 2026-10-28 again, for emphasis in a Worth Memorising row that `latex/tools/filter.lua`
+  was turning into an index entry in the generated cheat sheet - `filter.lua` skips a chapter's
+  own Summary section but not Appendix A. Italics instead of bold; no text, claim or number
+  changed. Found by chapter 22's completeness review, which swept the appendices' index
+  entries book-wide: 5 before, 0 after. LEDGER-DEFECTS.md entry 33.
 reseal:
   Reopened 2026-10-28 for one change: a bold span that `latex/tools/filter.lua` turns into an automatic index entry began with a digit, which `tools/verify-index.py` now rejects. No text, claim or number was touched - see LEDGER-DEFECTS.md entry 33.
   Reopened again the same day for a stale cross-reference of my own making: the

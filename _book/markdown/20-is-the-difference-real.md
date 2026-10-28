@@ -636,9 +636,9 @@ answer.
 
 | Item | Value or formula |
 |---|---|
-| Spread of a score | `\(\sqrt{n p (1-p)} / n\)`{=latex} — one standard deviation over **which cases you drew**. 40 cases at 0.70 is 0.072, so two of them is the ±0.14 that spans 95 per cent. Run-to-run spread is a different number and is smaller unless the model is uncertain on every case |
+| Spread of a score | `\(\sqrt{n p (1-p)} / n\)`{=latex} — one standard deviation over *which cases you drew*. 40 cases at 0.70 is 0.072, so two of them is the ±0.14 that spans 95 per cent. Run-to-run spread is a different number and is smaller unless the model is uncertain on every case |
 | The bootstrap | Resample your cases with replacement, score each, take the 2.5th and 97.5th percentiles |
-| What to put an interval on | The **difference**, paired. Never two separate intervals and a look |
+| What to put an interval on | The *difference*, paired. Never two separate intervals and a look |
 | Cost of resolution | Width shrinks as `\(1/\sqrt{n}\)`{=latex}, so halving it costs four times the cases |
 | What carries the comparison | Only the cases where the two versions disagree. Count them and say them out loud |
 | What pairing is worth | Here, 0.400 wide down to 0.250. It cancels the variation the two versions share, so the more they agree, the more it buys |

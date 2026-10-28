@@ -65,6 +65,40 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**37. I widened a derivation's conclusion and kept the label.** Chapter 6 puts a *derivation*
+off the evidence ladder: it "follows from arithmetic, or from a mechanism you can check
+yourself", and it supports "whatever the arithmetic covers". Chapter 22 argued that a schema
+permitting only `{"answer": …}` forbids the intermediate tokens, and that Chapter 16 has already
+established the model's only scratchpad is its own output. That is a derivation, and its
+conclusion is exactly: **the scratchpad is gone.**
+
+What the chapter then wrote was that it "predicts exactly where the damage will be", and a lab
+key said "expect a loss". Those are claims about *accuracy*, and they need a premise the chapter
+has nowhere to get: that writing the working out actually improves the answer on this task. A
+model may compress the same computation into one forward pass and be right anyway. So the
+chapter had derived a **capability** claim and spent it on an **accuracy** claim, under a label
+that says no evidence is required.
+
+The fix-verification pass put it better than I had: the thing off the ladder is the capability
+claim, and the accuracy claim sits around demonstration or one study — which is where the
+chapter had already, correctly, placed the *size* of the effect. It had the right split one
+notch off, so the discipline was visible and still mis-applied.
+
+**It also noticed that one of my two premises was decorative.** "Masking deletes probability
+mass" does no work in that argument; the work is done entirely by "the grammar admits only the
+final object". A derivation with a spare premise in it is a sign that the conclusion was written
+first.
+
+**How to apply.** When you label something a derivation, write the conclusion as narrowly as the
+steps support and then read it back on its own. If it contains a word like *worse*, *better*,
+*faster* or *damage*, it is probably an outcome claim and outcomes need evidence; what a
+mechanism gives you is usually a capability or an impossibility. Then check each premise is load
+bearing — drop it and see whether the conclusion still follows. And remember the asymmetry
+Chapter 6 relies on: a derivation does not date, so mislabelling an empirical claim as one
+exempts it from ever being re-checked.
+
+---
+
 **36. I widened a tolerance three times instead of looking two lines further down the file.**
 The index's letter-group glue has a shrink, documented since entry 17. On 2026-10-28 an overfull
 box appeared on an index page and I raised that shrink from 3pt to 4pt. Hours later, after

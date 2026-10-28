@@ -14,7 +14,13 @@ reviewed: 2026-10-28T07:33:50+05:30
 absolutes: 128 flagged after the fix pass (86 before it) by verify-absolutes.py, each tested against the rest of the book. The load-bearing ones are narrowed where they need to be: 'a single run is not a score' is supported by the chapter's own arithmetic; 'overlapping intervals are not the test' is stated with the reason and with the admission that the conclusion happened to be right here; 'cannot tell' is offered as a result rather than as a counsel of despair. 'Nothing makes a provider repeat itself' is chapter 13's finding, cited not re-derived
 new-terms: verify-inputs.py: 64 new after the fix pass (47 before it), bare-terms 0 CLEAN. Case, bootstrap, confidence interval, paired comparison and trials are introduced here and all five are in Key Terms. 'Confidence interval' is named in BOOK-GUIDE section 6's allowed list
 covers-misses: 0 (verify-coverage.py markdown/20-is-the-difference-real.md)
-sha256: 3eff41482c373dfeb27a9edbaf31369f0cd2586638a48a8bd6ac6c1fe121c7d0
+sha256: 36ebf7ba328932169feed928e8e4ea3bc14899a96166397e8a5e2dab7c8701bf
+reseal-2:
+  Reopened 2026-10-28 again, for emphasis in a Worth Memorising row that `latex/tools/filter.lua`
+  was turning into an index entry in the generated cheat sheet - `filter.lua` skips a chapter's
+  own Summary section but not Appendix A. Italics instead of bold; no text, claim or number
+  changed. Found by chapter 22's completeness review, which swept the appendices' index
+  entries book-wide: 5 before, 0 after. LEDGER-DEFECTS.md entry 33.
 
 ## Before writing
 

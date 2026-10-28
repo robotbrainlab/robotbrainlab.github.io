@@ -84,14 +84,14 @@ written from memory.
 | Backoff with jitter | `wait = random.uniform(0, min(cap, base * 2 ** attempt))` | 19 |
 | Attempts and waits | *n* attempts make *n* − 1 waits. Five attempts at base 0.5 is 7.5 s at worst | 19 |
 | How many at once | rate × duration — 120 a minute at 2 seconds each is 4. It bounds concurrency, not rate, so leave a margin | 19 |
-| Timeouts | Three: connect, read between chunks, total. Derive the **total** from the token cap | 19 |
-| Retryable | 429, 5xx, timeouts. **Not** a malformed request, a bad key, an over-length one, or a 429 from an exhausted quota | 19 |
+| Timeouts | Three: connect, read between chunks, total. Derive the *total* from the token cap | 19 |
+| Retryable | 429, 5xx, timeouts. *Not* a malformed request, a bad key, an over-length one, or a 429 from an exhausted quota | 19 |
 | What to stream | To a person, yes. One answer you must validate whole, no. Independent units, yes | 19 |
 | `asyncio.gather` | One failure loses every result unless you pass `return_exceptions=True` | 19 |
 | The resume file | One flushed line per item, or per `(item, stage)` for a pipeline. Keyed by input, holding the result | 19 |
-| Spread of a score | `\(\sqrt{n p (1-p)} / n\)`{=latex} — one standard deviation over **which cases you drew**. 40 cases at 0.70 is 0.072, so two of them is the ±0.14 that spans 95 per cent. Run-to-run spread is a different number and is smaller unless the model is uncertain on every case | 20 |
+| Spread of a score | `\(\sqrt{n p (1-p)} / n\)`{=latex} — one standard deviation over *which cases you drew*. 40 cases at 0.70 is 0.072, so two of them is the ±0.14 that spans 95 per cent. Run-to-run spread is a different number and is smaller unless the model is uncertain on every case | 20 |
 | The bootstrap | Resample your cases with replacement, score each, take the 2.5th and 97.5th percentiles | 20 |
-| What to put an interval on | The **difference**, paired. Never two separate intervals and a look | 20 |
+| What to put an interval on | The *difference*, paired. Never two separate intervals and a look | 20 |
 | Cost of resolution | Width shrinks as `\(1/\sqrt{n}\)`{=latex}, so halving it costs four times the cases | 20 |
 | What carries the comparison | Only the cases where the two versions disagree. Count them and say them out loud | 20 |
 | What pairing is worth | Here, 0.400 wide down to 0.250. It cancels the variation the two versions share, so the more they agree, the more it buys | 20 |
@@ -104,3 +104,10 @@ written from memory.
 | 0 in 40 | Consistent with a 7.5 per cent failure rate | 21 |
 | The repair line | Repair the envelope, never the contents. Needing to know what the model meant makes it a retry | 21 |
 | Failure options | Reject · retry · repair · record. Never a silent default | 21 |
+| The mechanism | Score → `\(-\infty\)`{=latex} for forbidden tokens → softmax gives 0 → pick. One line, and only while one token survives | 22 |
+| What a constraint costs | The mass it deletes, which costs you only when that was the answer rather than the envelope | 22 |
+| Why engines differ | Schemas are over characters, generation is over tokens; the legal-token set is precomputed per state | 22 |
+| Both wrong checks | First character only is too loose (admits `{}`); a short window is too strict (rejects `{"s`) | 22 |
+| Why strict modes can hurt | No room for intermediate tokens, and the model's only scratchpad is its own output. Also: a schema too narrow to hold the right answer | 22 |
+| The fix, and its order | A `reasoning` field *before* the answer field — and only if the engine fixes field order | 22 |
+| What it never buys | Correctness, or the parts of your schema the engine did not compile | 22 |

@@ -48,7 +48,7 @@ model is *for*; the second says what it *does* when it answers. You can read Par
 the first half alone, and you will understand every instruction in it. You will not
 understand *why* any of them work until you have read the second.
 
-> **Note:** The second half uses real notation and does the arithmetic. It does **not** teach
+> **Note:** The second half uses real notation and does the arithmetic. It does *not* teach
 > machine-learning or deep-learning theory — no loss surfaces, no optimisers, no proofs.
 > Chapter 8 gives you exactly the mathematics the book uses and nothing more, and Chapter 17
 > marks the line where the theory you are skipping begins, so you know what you have skipped

@@ -36,7 +36,11 @@ printf '\n=== BUILD  0 overfull / 0 glyphs / 0 undefined ===\n'
 if [ -d latex ]; then
   ( cd latex && make >/dev/null 2>&1 ) || { echo "build FAILED"; fail=1; }
   if [ -f latex/book.log ]; then
-    for pat in 'Overfull' 'Missing character'; do
+    # The header has promised "0 undefined" since this gate was written and never
+    # checked for it: the loop below only ever had Overfull and Missing character in
+    # it. Found 2026-10-28 by a reviewer reading the gate's own output, which is
+    # LEDGER-DEFECTS.md entry 35's lesson arriving from the other direction.
+    for pat in 'Overfull' 'Missing character' 'undefined' 'Undefined'; do
       n=$(grep -c "$pat" latex/book.log || true)
       printf '%-22s %s\n' "$pat" "$n"
       [ "$n" = "0" ] || fail=1
