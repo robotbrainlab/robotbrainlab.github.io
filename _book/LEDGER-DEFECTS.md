@@ -65,6 +65,37 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**59. One artefact of a source is not the source, and an absence on it is not an absence.**
+Chapter 37 checked ten claims circulating about one study against *the arXiv abstract page* and
+reported the result as a property of the paper. Four of the ten are in the paper and the page
+does not carry them: the per-category shares 41.77 / 36.94 / 21.30, a second split from a later
+version, step repetition at 17.14 per cent, and "five frameworks", which the chapter marked
+CONTRADICTS when it is the five the taxonomy was built from against the seven the dataset spans.
+So the section's most emphatic passage — *two splits disagree, at most one can be right, a
+reader who quotes either has quoted a blog post* — was wrong in every clause, and it was wrong
+in the Tip, the Summary, a Review Answer and a lab key, because an emphatic finding propagates.
+
+The same reading made the paper a preprint. The abstract page has no venue line; the conference
+page labels it a spotlight poster. Entry 58's own instruction covers this — *when two official
+pages of one source disagree, say so in the chapter rather than choosing* — and it was followed
+for a transport's deprecation date one chapter earlier and not followed here, which is what a
+lesson looks like before it has been learned.
+
+**Why no gate reaches it.** `citations.py` reads citations to chapters, so an external source is
+outside the suite entirely. `verify-absolutes.py` listed *"four are not in it"* as an absolute
+and cannot test one. And the failure is not a wrong statement about a source — it is a true
+statement about a page, relabelled. A page saying nothing about X supports *this page does not
+say X* and nothing more.
+
+**The practice.** Name the artefact in the sentence, not the source: *the abstract page states
+no shares* is checkable and *the paper states none* was not. Before writing that a source lacks
+something, fetch the thing itself — the full text, not the landing page — and where artefacts of
+one source disagree, print the disagreement. In chapter 37's case the corrected finding is
+better than the one it replaced: eight of ten circulating claims are in the paper, the two
+"contradictory" splits are one paper at two versions because its dataset grew, and a share
+quoted without a version number says nothing. That is a more useful thing to know than that
+write-ups are careless.
+
 **58. Given a list, a writer supplies the reason the source withheld.** The 2026-07-28 MCP
 specification deprecates roots, sampling and logging. Chapter 36's first draft of that passage
 said why: "All three needed a connection held open in both directions, which is exactly what a

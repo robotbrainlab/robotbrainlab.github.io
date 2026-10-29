@@ -241,3 +241,10 @@ written from memory.
 | MCP's three participants | Host, one client per server, server | 36 |
 | What an MCP server offers | Tools, resources, prompts | 36 |
 | MCP's dated part | The handshake and session header, retired in the 2026-07-28 revision | 36 |
+| The most parallelism available | Pieces divided by the critical path, if the pieces are of similar size | 37 |
+| How many agents to buy | The parallel width, not one per piece | 37 |
+| Worked: planning a trip | 4 pieces, a chain of 4, a width of 1 — four agents buy nothing | 37 |
+| When several agents cost more | When they duplicate the work rather than divide it — and then the multiplier is just their number: 6.03 at six agents, against 0.61 divided | 37 |
+| What a non-stopping system costs | 4.56 times a single agent at a 10-step limit, 13.79 at 20 | 37 |
+| The three failure categories | System design, inter-agent misalignment, task verification | 37 |
+| What the evidence is | One study, NeurIPS 2025: 14 modes in 3 categories, from 5 frameworks and tested on 2 more. The shares by category moved between versions | 37 |

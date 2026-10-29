@@ -53,7 +53,9 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Context engineering** | Deciding what occupies the context at each step of a run. Distinct from writing a prompt (Chapter 18), because a prompt is written once and a run's context is rebuilt every step, mostly out of material you did not write | 35 |
 | **Context window** | The maximum number of tokens a model will accept at once. A cost limit rather than a memory, counting the reply as well as the request. The whole conversation is re-sent every call, and something is dropped — or the call refused — when it fills | 16 |
 | **Cosine similarity** | The dot product divided by both lengths, which removes magnitude and keeps direction. Always between −1 and 1 | 8 |
+| **Coupled task** | One whose pieces each need the one before, so the chain is the whole task. Given several agents it pays for all of them and finishes no sooner | 37 |
 | **Criteria drift** | Your own standard moving as you see more output, measured by re-labelling old outputs blind and counting the flips | 33 |
+| **Critical path** | The longest chain of pieces that must happen in order. The shortest a task can take however many agents you have, so pieces divided by it is the most parallelism the work contains | 37 |
 | **Cross-encoder** | Query and document passed through one model together, giving one score for the ordered pair. Not precomputable; free to be asymmetric | 26 |
 | **Cross-entropy** | The training objective: the average of `\(-\log p\)`{=latex} over every position, where `\(p\)`{=latex} is the probability given to the token that actually came next. Zero for a perfect prediction, unbounded for a confident mistake | 14 |
 | **Current convention** | How competent engineers work at the moment: true, load-bearing and replaceable. It usually names a technique rather than a reason, and usually has a predecessor you can remember | 6 |
@@ -104,6 +106,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Initialisation** | What the parameters are set to before training begins, and why the choice matters | 17 |
 | **Input tokens** | Everything you send on a call — instructions, attached material and the request. Countable exactly before you send | 10 |
 | **Instructions** | What to do, what not to do and who to be. Part of the specification, so it changes rarely and is paid for on every call | 18 |
+| **Inter-agent misalignment** | One agent's output not being what the next one needed. The middle of the three failure categories, and Chapter 35's summary problem with no shared context to catch it | 37 |
 | **Intermediate reasoning (chain-of-thought)** | Emitting the steps of a problem as tokens so that later passes can condition on them. The only way to carry partial work forward, because one pass runs its layers once however hard the question is, and nothing persists between passes | 16 |
 | **Interview depth** | Knowing something well enough to give the mechanism, the trade-off, and how you would check it, in about a minute of speech. Not exhaustive, and more than a summary | 7 |
 | **Inverse document frequency** | A weight that rises as a term gets rarer, so a term almost every document holds barely moves a score | 26 |
@@ -111,6 +114,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Jitter** | Waiting a random amount up to the backoff rather than exactly it, so many workers do not retry in step | 19 |
 | **Judge (LLM-as-a-judge)** | A model asked to return a verdict on one named thing about one output. Pass or fail on a named failure mode, never a score out of five. The field's name is used wherever a model scores output, whatever it returns, so it is wider than this chapter's version | 31 |
 | **Just-in-time retrieval** | Opening a document when a step needs it rather than loading the library before the run starts. Needs a catalogue of what exists — one line a document, not one of Chapter 29's indexes; beats loading up front unless a task reads nearly all of it | 35 |
+| **Kappa** | An agreement coefficient running to 1.0, used to say how far two labellers agree. Not a correctness figure: the study's 0.88 is three people agreeing with each other, and its 0.77 is a model agreeing with those people | 37 |
 | **Key** | The vector saying what a position offers to others, made with `\(W_K\)`{=latex}. Scored against every query | 11 |
 | **Key–value cache (KV cache)** | The stored keys and values for every position in every layer, so decode attends to earlier positions without recomputing them. Costs `\(2 \times \text{layers} \times d \times \text{tokens} \times \text{bytes}\)`{=latex} | 15 |
 | **Large language model (LLM)** | The field's full name for the kind of model this book means by *model*: text in, generated text out. Shortened to LLM almost everywhere it is used | 1 |
@@ -137,6 +141,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Mixture of experts (MoE)** | Replacing one feed-forward block per layer with several and routing each token through a few of them. The model holds all of them and runs some | 15 |
 | **Model** | A service that takes text and returns generated text, charged by the amount of text | 1 |
 | **Model Context Protocol (MCP)** | A documented wire format between an application holding a model and a service offering tools, resources and prompts. Collapses per-integration glue. Adds no step to Chapter 23's five and moves no decision; step 4 becomes a call into another process. The model is not a participant | 36 |
+| **Multi-agent system** | A design in which several agents run on one task, each with its own context and stopping condition, coordinated by your code or by one of them. Chapter 4 owns the agent and Chapter 35 the sub-agent; this is the arrangement of several | 37 |
 | **Multi-head attention (MHA)** | Several attention heads run in parallel over slices of the width, their outputs joined by one further matrix. What this chapter's one head is a simplification of. Chapter 15's Note is what real systems do to the keys and values from here | 11 |
 | **Multi-tenant retrieval** | Retrieval where each user may see only their own documents, so the filter is a correctness requirement rather than an optimisation | 29 |
 | **Must-keep list** | The facts the rest of the task depends on, named before the summary is written and checked against it after. Written afterwards it is written from the summary and tests nothing | 35 |
@@ -156,6 +161,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Overlap** | Starting each chunk a little before the last one ended, so a passage cut by one boundary survives whole in a neighbour. Costs storage and returns near-duplicates | 27 |
 | **Page furniture** | Headers, footers, page numbers and watermarks: text on the page that is not part of the document | 27 |
 | **Paired comparison** | Running both versions on the same cases and keeping the results together, so the part of case-to-case variation the two versions share cancels when you subtract | 20 |
+| **Parallel width** | The most pieces that can be in flight at once, and therefore the number of agents that earn their place. Chapter 9's *width* is a different thing — the size of a model's vectors | 37 |
 | **Parallelisation** | One call per piece, the pieces coming from the input, then one call to combine. Independent, so they can run at once | 34 |
 | **Parameter** | One number inside the model, set by training and unchanged by inference. The count is what "a 7B model" reports | 9 |
 | **Parsing** | Turning a file into text a program can work on. For a document format this means reconstructing something the file does not record | 27 |
@@ -224,6 +230,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Term frequency** | How often a term appears in one document | 26 |
 | **Token** | One entry in a model's vocabulary — usually a piece text is cut into. Beyond the single bytes, which are always there, which pieces earned an entry is a matter of frequency in the corpus the vocabulary was built from — not of meaning or length | 10 |
 | **Token bucket** | A limiter on the *rate* rather than on how many run at once, for when the requests-per-minute limit is the one that hurts | 19 |
+| **Token multiplication** | What several agents cost when they *duplicate* the work rather than divide it, which is simply their number: six agents each doing the whole task cost 6.03 times one. Dividing the work costs less than one agent, because the re-send cost falls with the length of a run. Neither the instruction block nor the shared material rises with the number of agents while the work is divided | 37 |
 | **Tokeniser** | The program that cuts text into tokens and maps them to indexes, using one model's vocabulary and merge list. A count does not carry from one model's tokeniser to another's | 10 |
 | **Tool** | An action the model may ask for. The model proposes it; your code decides whether to run it | 2 |
 | **Tool defect** | A failure the tool or its description could have prevented. Distinct from a refusal your code made correctly, which is the system working, and from a service being down, which is Chapter 19's. Rank tools by this, not by failure rate | 36 |
