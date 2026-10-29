@@ -436,6 +436,17 @@
 %    on its own pages only, which is what an index page in a printed book usually has. Clean at
 %    three consecutive builds from a deleted book.ind, and it scales with the index instead of
 %    needing a nudge per chapter. See LEDGER-DEFECTS.md entry 61.
+%
+%    AND IT CAME BACK AGAIN AT 43 CHAPTERS, on the index's LAST page (835), at exactly the same
+%    8.01865pt. That the figure is identical is the useful part: it is the same shape of page
+%    overflowing by the same amount, not a worse version of the problem, so the lever was right
+%    and one notch of it was not enough. Now 2\baselineskip, which clears it with room and is
+%    still what an index page in a printed book has. The claim "it scales with the index" above
+%    was wrong, and this is the correction: it scales with the index's CONTENT and not with the
+%    number of pages the index needs, so expect a third notch somewhere past 50 chapters. If it
+%    recurs, widen the same lever rather than reaching for a new one - four other levers were
+%    tried in the round above and three of them printed an identical figure, which is how we
+%    know they never reached the box.
 % 2. The FIRST group gets no space above it, because \addvspace there follows the index
 %    chapter heading, which is a box, so it is added rather than discarded.
 %
@@ -447,7 +458,7 @@
 \renewcommand{\@idxitem}{\par\hangindent 1.5em}
 \makeatother
 \AtBeginEnvironment{theindex}{\setlength{\parskip}{0pt}\raggedcolumns
-  \addtolength{\textheight}{\baselineskip}}
+  \addtolength{\textheight}{2\baselineskip}}
 \renewcommand{\indexspace}{}   % the letter heading already opens the group
 % Index entries from Markdown: [text]{.idx} or [text]{idx="key"} (see README)
 

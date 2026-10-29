@@ -24,9 +24,9 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
 | II · Use | 18–39 | 362 | **Done** — 22 of 22, 2026-10-29 |
-| III · Apply | 40–50 | 190 | **Drafting** — 3 of 11 done |
+| III · Apply | 40–50 | 190 | **Drafting** — 4 of 11 done |
 | IV · What Next | 51–57 | 136 | Not started |
-| Appendices | A–D | 83 | **A (cheat sheet, 272 items), B (100 questions) and C (glossary, 270 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
+| Appendices | A–D | 83 | **A (cheat sheet, 280 items), B (100 questions) and C (glossary, 272 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
 The estimates above sum to about 1,042 numbered pages. **That is a sum, not a target** — the
 book is as long as the material earns, and 1,500 to 2,000 would be welcome rather than a
@@ -82,6 +82,7 @@ sub-part opener pages sitting after the last written chapter were counted into i
   40   680-704    25   20    125%
   41   705-729    25   18    139%
   42   730-758    29   16    181%
+  43   759-787    29   16    181%
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
@@ -97,7 +98,12 @@ forgave the only instruction the other broke, and the headline score never showe
 runs the measurement chapters 21, 22 and 23 all defer**, and its lesson is the same shape one level
 down: a strict mode can enforce that a part code exists, by compiling your catalogue into the
 request, and then it orders a kettle filter for a chair — a grammar can only redirect where your
-code can refuse. 753 printed pages of chapters. Chapters 30
+code can refuse. **Chapter 43 is the first chapter with real embeddings**, and what it found is
+that chapters 24 and 25 argued with stipulated vectors crowded at 0.999 where a real model uses the
+whole range: a sentence and its negation sit at 0.8158, not 0.99976, and chapter 25's bolded
+arrangement claim half fails. It also found, in its own second review round, that two of its
+printed ranks are decided by gaps smaller than the drift between two embeddings of one string —
+`LEDGER-DEFECTS.md` entry 67. 782 printed pages of chapters. Chapters 30
 to 33 are the evaluation run of the part, and the first chapters since 17 whose material is a
 method rather than a mechanism. Their reviews find more per chapter than the mechanism chapters'
 did, and almost all of it is the same defect: a claim one notch wider than its demonstration.

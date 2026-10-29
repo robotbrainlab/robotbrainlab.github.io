@@ -112,6 +112,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Hallucination** | Output that is fluent, plausible and not true. Not a malfunction: no step in the computation checks anything, so a plausible continuation is all the mechanism can produce | 16 |
 | **Hybrid retrieval** | Running lexical and dense retrieval and combining their rankings | 26 |
 | **Idempotency** | Doing an operation twice has the same effect as doing it once. What makes a retry after a timeout safe | 19 |
+| **Identifier query** | A query whose intent is an exact string — a code, a surname, an invoice number, a postcode — rather than a topic. The test is what the query wants: the string itself, or a subject that happens to contain one. Chapter 25 names this as a case dense retrieval is weak on, and it is the one worth listing separately whenever you compare two models | 43 |
 | **Inductive bias** | What a design assumes about the world before it sees any data | 17 |
 | **Inference** | Running a finished model to get a reply. This is what "using a model" means | 1 |
 | **Initialisation** | What the parameters are set to before training begins, and why the choice matters | 17 |
@@ -229,6 +230,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Semaphore** | A counter that bounds how many jobs run at once. Three words of code, and the difference between concurrency and attacking your own account | 19 |
 | **Server-sent events** | A long-lived HTTP response carrying one small event per line as the server produces them. How a streamed reply arrives | 19 |
 | **Side effect** | A change to a task the tune was not for. Visible only if you kept a set for the thing you were not changing, and only if that set is big enough to see it | 39 |
+| **Similarity floor** | The cosine between two texts of your own that have nothing to do with each other. Until you have measured it no margin means anything, and it is per model: about 0.05 for both of these two. One pair gives an order of magnitude and not a constant — measure several | 43 |
 | **Softmax** | Turns a list of scores into positive numbers that sum to 1, preserving their order and turning each gap between scores into a multiple between shares | 8 |
 | **State machine** | What a schema compiles into: a set of states, each with the tokens allowed next. Engines call it an automaton | 22 |
 | **Step** | One pass through the loop: the model decides, something runs, the result comes back | 4 |

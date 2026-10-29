@@ -295,3 +295,11 @@ written from memory.
 | And it needs no enforcement | A unit enum with no member for *working days* got the same wrong answer from a prompt as from a grammar | 42 |
 | Shape against existence | A pattern says a code could exist. Only your catalogue says it does | 42 |
 | What to log | Every proposal, its verdict and its message. A refusal leaves no other trace | 42 |
+| What a real cosine looks like | The whole range, not the top of it. Floor about 0.05, one question two ways about 0.65, two texts differing in a code about 0.99 | 43 |
+| Chapter 25's stipulated pairs, measured | 0.9911 where it said 0.99983; 0.8158 where it said 0.99976. The conclusion held; the numbers and the arrangement did not | 43 |
+| Its arrangement claim, tested | The pair at 0.8158, the query 0.8582 from the answer and 0.7481 from the negation. Nearer each other than the negation is to the query, not nearer than the answer is | 43 |
+| The identifier margin | 0.0150 between two notes differing in a part code, against about 0.50 between the query's scores for a relevant and an irrelevant document — about a thirtieth | 43 |
+| Comparing two models | By order only. Different widths, different floors; a difference of two models' cosines is not a quantity | 43 |
+| Why a grouping must be chosen first | Ungrouped, 10 of 12 agreed. Grouped by query kind, 9 of 9 against 1 of 3 — or 8 of 8 against 2 of 4 if an exact phrase counts, which is the judgement to state rather than bury | 43 |
+| When a rank is not a rank | When the gap that decided it is of the order of the drift between two embeddings of one string. Three delivery pages inside 0.0005, against a floor of 0.05 | 43 |
+| What a top three hides | On one query, 3 of 8 judged-relevant documents, with a grade 2 at rank 4 | 43 |

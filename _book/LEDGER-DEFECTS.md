@@ -65,6 +65,42 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**67. A lab that reports a rank has to report the gap that decided it, because a rank whose margin
+is smaller than the measurement's own noise is not a result.** Chapter 43 printed ranks as findings
+for four steps: where the document holding a string came in, which model put which document first,
+and how far down a judged-relevant document sat. Two of those ranks are not safe. On the larger
+model the third, fourth and fifth places for one query sit at 0.2834, 0.2831 and 0.2821, and the
+document holding the string is the middle one, so whether it prints as fourth or fifth rests on ten
+ten-thousandths. On the smaller model the three pages in another query's top three sit inside five
+ten-thousandths, which is less than the drift, and the order inverts about once in dozens of runs —
+so the chapter's claim that *the page that lists the postcode is third* was a near-tie reported as
+a ranking.
+
+The drift itself is the thing nobody expects, and it is smaller than the first repair claimed. The
+same string embedded twice does not come back quite the same: usually by less than a ten-thousandth
+of a cosine, occasionally by several, and twenty-five consecutive runs of one program moved
+nothing at all. That is far too small to matter — unless two documents are closer together than
+that, in which case it decides the answer. **The over-correction is part of the lesson**: the first
+repair wrote the instability up as bigger and more frequent than the runs supported, and a third
+pass measured it properly. A figure you reach for to explain an anomaly needs measuring as much as
+the anomaly did.
+
+Why neither the gates nor the first review round could see it: every figure was real, every block
+matched its program on the run it was captured from, and a rank is an integer, so it carries no
+visible uncertainty at all. The second round found it only by running the same program ten times.
+
+The practice: **in any lab that ranks, print the scores beside the ranks, and measure the noise
+before quoting a position.** Three cheap habits follow. Run the measuring program twice before
+writing a word about it, and diff. Give the chapter a floor — two things with nothing in common —
+so a margin can be read as a fraction of the spread rather than as a bare number. And when a
+margin is of the order of the noise, say so: *real on the larger model and a near-tie on the
+smaller* is a better sentence than either half alone, and it is the one the data supports. Chapter
+24 already states the rule this is an instance of — which of two near-tied documents comes first is
+not a fact about the documents — and the failure here was to apply it to invented numbers and not
+to measured ones.
+
+---
+
 **66. A step that stops measuring is the step that over-claims — and in a lab, the two halves can
 be told apart by whether the figures come from a program's output or from the author.** Chapter 42
 measures in steps 1 to 4 and, in its first draft, asserted in step 5. Every claim in steps 1 to 4
