@@ -16,7 +16,8 @@ new-terms: verify-inputs.py: 102 new, bare-terms 0 CLEAN. 18 terms are introduce
 covers-misses: 0, and treated as a worksheet rather than a pass. Each of the seven Covers items has its own section or sub-argument: lexical retrieval and BM25 with its formula (two sections, the formula displayed and worked); bi-encoder against cross-encoder, named (its own section, with the cost arithmetic that forces two stages); two-stage reranking (same section, plus a section on what it cannot do); reciprocal rank fusion (its own section, with the formula, one hand-checkable sum and what k does); relevance judgements including graded ones (its own section, with the 3-point scale as a table); recall@k, MRR and nDCG from zero with DCG, the log discount and the ideal ranking worked in a table (the measures section prints both the ranking's DCG and the ideal's, term by term); and measuring hybrid against dense on your own data (the final section, which measures it and then says why two queries measure nothing)
 amended:
   - 2026-10-29T04:03:08+05:30: The index carried only the long form of each interview shorthand, so a reader looking up the abbreviation they will actually hear found nothing. Added an index entry for the abbreviation beside its naming sentence; no visible text changed.
-sha256: 00c47a007a2b148474b6fab1f62e1c50167772471e8b03d0974d924b642105ad
+  - 2026-10-30T02:11:26+05:30: 0.6216 against 0.5193 is ten points apart, not fourteen. Found by chapter 44's completeness review, which restated the slip as its own; the phrase wrapped across a line break, which is why no sweep caught it.
+sha256: 2980912655825f3c737a778df40529beaff54ed73501436af34a71f2f4771c83
 
 ## Before writing
 

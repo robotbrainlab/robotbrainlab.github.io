@@ -303,3 +303,11 @@ written from memory.
 | Why a grouping must be chosen first | Ungrouped, 10 of 12 agreed. Grouped by query kind, 9 of 9 against 1 of 3 — or 8 of 8 against 2 of 4 if an exact phrase counts, which is the judgement to state rather than bury | 43 |
 | When a rank is not a rank | When the gap that decided it is of the order of the drift between two embeddings of one string. Three delivery pages inside 0.0005, against a floor of 0.05 | 43 |
 | What a top three hides | On one query, 3 of 8 judged-relevant documents, with a grade 2 at rank 4 | 43 |
+| Read the key first | Its grade scale bounds what nDCG expresses; whether every document was judged decides whether recall is recall | 44 |
+| What an nDCG needs beside it | The gain convention, the discount, the `\(k\)`{=latex}, where a graded key was cut for a binary measure, and what a query whose ideal DCG is zero scores | 44 |
+| Fusion depth | Fuse the top of each list. BM25 matched 40 of 40 on some queries here, and `the` is why | 44 |
+| The RRF tie | `(1, 2)` and `(2, 1)` both score 0.032522 at k=60. Four ties straddled a grade; two were at rank one | 44 |
+| The candidate set is a ceiling | A permutation cannot introduce what the set does not hold. One query's ceiling was 0.739 and the reranker reached exactly it | 44 |
+| What eight queries bought | Two retrieval verdicts of three. Dense over lexical and fusion over lexical both cleared zero; fusion over dense did not, and neither did the reranking gain | 44 |
+| When a reranker is not ranking | When it returns fewer distinct scores than candidates. Two or three of ten here, so the reported gain was a stable sort preserving the first stage | 44 |
+| Where an interval's width comes from | The queries the two methods disagree on. Two of eight, for fusion against dense on recall | 44 |

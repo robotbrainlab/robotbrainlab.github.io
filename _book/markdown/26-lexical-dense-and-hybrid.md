@@ -587,8 +587,8 @@ query with one no longer live on different scales.
 **But the gain convention does not cancel, and this is the one that bites.** The last block
 computes the same nDCG two ways. Using the grade directly gives 0.6216. Using
 `\(2^{g}-1\)`{=latex} — the other standard choice, which weights a grade-3 document far above a
-grade-2 one — gives 0.5193. Same ranking, same key, same `\(k\)`{=latex}, two numbers fourteen
-points apart. **So an nDCG is not a number you can compare against one computed by a different
+grade-2 one — gives 0.5193. Same ranking, same key, same `\(k\)`{=latex}, two numbers ten points
+apart. **So an nDCG is not a number you can compare against one computed by a different
 tool** without knowing its gain convention, its `\(k\)`{=latex}, and how it treats a query whose
 ideal DCG is zero.
 

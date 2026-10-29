@@ -65,6 +65,70 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**69. A batch of edits that writes the file once at the end loses every edit in the batch when one
+of them fails to match — and re-running only the edit that raised the error leaves all the others
+silently undone.** This is the mechanical cause behind an entry that has appeared in this ledger
+three times as a habit of mind: *a fix that never reached the back matter*. Some of those fixes
+were made. They were discarded.
+
+Chapter 44's second review round found eight repairs unsound. A third round, run on those eight,
+found that **six of twelve had never reached the file at all** — while the chapter's record
+described all of them as made, and the built LaTeX carried the unrepaired text. The pattern in the
+edit scripts was always the same: read the file, apply five or six replacements to a string in
+memory, assert each one matched, write at the end. One assertion failed on wording that had already
+been changed by an earlier fix, the script aborted before the write, and nothing was saved. The
+error named only the edit that failed, so that is the one that got re-run; the five that had
+matched perfectly were lost without a word.
+
+What made it invisible: every later check passed. The gates were clean, the build was clean, the
+appendices regenerated from tables that were themselves unrepaired, and the record had already been
+written to say the work was done. A grep for the *new* text finds nothing missing, because the new
+text is what was never written. Only a grep for the *old* text finds it, and only a reader who does
+not trust the record thinks to run one.
+
+The practice is two lines of discipline and it costs nothing:
+
+- **Write the file after every single replacement**, not after the batch. A failure then loses one
+  edit instead of six, and the loss is the one the error names.
+- **After any batch, grep for the OLD string of every edit in it**, not just the ones that errored.
+  A count of zero is the only evidence that an edit landed; the script's own report is not.
+
+And the standing version, which is the part worth carrying: **a record that says a fix was applied
+is a claim about the past, not evidence about the file.** Check the file. This is entry 61's lesson
+(reading a count out of an empty stdout) in a new place, and it is why the fix-verification pass
+diffs rather than asks.
+
+---
+
+**68. A program's output must be captured from the program, not from the shell that ran it — and a
+block assembled by script is only as honest as what the script was pointed at.** Chapter 44 was
+built the careful way: its program and output blocks were written into the markdown from the files
+and from captured runs by a substitution script, precisely so that no figure was ever retyped.
+Chapter 42 and 43 had each shipped a block that disagreed with its program, and this was the fix.
+
+It shipped a block with the words `duplicate constants removed` in it, where ten lines of output
+should have been.
+
+The cause is the one thing the script could not check. A long run was sent to the background, and
+the command that started it did two things: a small `python3 -c` that tidied an import and printed
+a confirmation, and then the program itself. The background task's output file therefore began with
+that confirmation — and when the block was captured, the *task file* was copied rather than the
+program re-run. The script then pasted it faithfully. A `sed` that stripped the trailing
+`[exited with code 0]` was the only cleaning done, and it did not look at the top.
+
+Why nothing caught it: `verify-render.py` checks a `text` block's width and not its provenance, the
+build renders whatever is there, and the prose around it had been rewritten from the *real* figures,
+so the chapter read correctly while its evidence did not. The reviewer found it by diffing the
+block against a fresh run, which is the check that has now found a bad block in three consecutive
+chapters.
+
+The practice, in order of how much it buys: **run the program, redirect its stdout alone to a file,
+and build the block from that file** — never from a transcript, a task log, or a terminal
+scroll-back, all of which carry whatever else was said. If a run has to go to the background,
+background *only* the program. And diff every block against a fresh run before the chapter is
+reviewed rather than after, because the reviewer is now finding by hand what one command finds in a
+second.
+
 **67. A lab that reports a rank has to report the gap that decided it, because a rank whose margin
 is smaller than the measurement's own noise is not a result.** Chapter 43 printed ranks as findings
 for four steps: where the document holding a string came in, which model put which document first,

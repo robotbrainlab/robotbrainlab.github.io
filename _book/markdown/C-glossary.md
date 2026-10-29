@@ -215,6 +215,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Representation learning** | Why fitting a model to predict text arranges its vectors so that the arrangement is useful for other things. The question Chapter 9 refused. Not taught in this book | 17 |
 | **Reranker** | The model that does the rescoring in the second stage — in current practice usually a cross-encoder | 26 |
 | **Reranking** | Rescoring a small candidate set with a more expensive method than the one that produced it | 26 |
+| **Reranking headroom** | The gap between what your first stage scores and what a perfect reranker on the same candidate set would score. What a second stage can possibly win, before you buy one. It is 0.119 at a depth of ten here, and at a depth of fifteen the ceiling is 1.000 and the headroom 0.152 — a deeper set gives a reranker *more* to win, not less, so measure it before buying anything | 44 |
 | **Residual connection** | Adding a block's output to the vector that went into it, rather than replacing it. What lets a layer contribute nothing and pass its input through | 12 |
 | **Residual stream** | The running vector passing up through the stack, which every block adds into. By the end it is a sum of every contribution made along the way, with nothing marking which is which | 12 |
 | **Resource** | Context and data an MCP server offers for the user or the model to use, as against a function for the model to execute | 36 |
@@ -249,6 +250,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Temperature** | A number the logits are divided by before softmax. Below 1 sharpens the distribution, above 1 flattens it, and it never changes the order | 13 |
 | **Term** | The unit a lexical index counts — usually a lower-cased word, sometimes stemmed. Not the model's token from chapter 10 | 26 |
 | **Term frequency** | How often a term appears in one document | 26 |
+| **Tie range** | The span a measure covers when a ranking's ties have no ordering, so the number depends on your sort rather than on your retrieval. Report it instead of whichever end came out | 44 |
 | **Token** | One entry in a model's vocabulary — usually a piece text is cut into. Beyond the single bytes, which are always there, which pieces earned an entry is a matter of frequency in the corpus the vocabulary was built from — not of meaning or length | 10 |
 | **Token bucket** | A limiter on the *rate* rather than on how many run at once, for when the requests-per-minute limit is the one that hurts | 19 |
 | **Token multiplication** | What several agents cost when they *duplicate* the work rather than divide it, which is simply their number: six agents each doing the whole task cost 6.03 times one. Dividing the work costs less than one agent, because the re-send cost falls with the length of a run. Neither the instruction block nor the shared material rises with the number of agents while the work is divided | 37 |
