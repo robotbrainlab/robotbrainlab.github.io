@@ -79,11 +79,16 @@ sub-part opener pages sitting after the last written chapter were counted into i
   37   598-623    26   10    260%
   38   624-650    27   14    193%
   39   651-678    28   22    127%
+  40   680-704    25   20    125%
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
-Part II is complete: chapters 18 to 39 come to 475 pages, so 678 printed pages of chapters, and
-696 with Appendices A and B as they stand. Chapters 30
+Part II is complete: chapters 18 to 39 come to 475 pages, so 678 printed pages of chapters.
+**Part III has begun** with chapter 40, the first chapter in the book that calls a real model, and
+the labs now run on the corpus in `labs/corpus/` — 40 documents, 8 queries and 320 graded
+judgements, written for the book and dedicated to the public domain. `LEDGER-DEFECTS.md` entry 63
+is what the first non-deterministic chapter cost: prose that quotes a figure a re-run can change
+is false the moment anything re-embeds, and no gate can see it. Chapters 30
 to 33 are the evaluation run of the part, and the first chapters since 17 whose material is a
 method rather than a mechanism. Their reviews find more per chapter than the mechanism chapters'
 did, and almost all of it is the same defect: a claim one notch wider than its demonstration.

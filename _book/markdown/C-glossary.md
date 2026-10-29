@@ -37,6 +37,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Capability set** | Tasks at the edge of what the system can do, scored well below 1.0 on purpose. At 1.0 it has stopped measuring, and the fix is harder tasks | 38 |
 | **Case** | One input plus whatever marks the answer right or wrong. The unit the statistics count — and they count rows, so forty rephrasings of one question are worth nearer one case than forty | 20 |
 | **Causal mask** | Setting every score for a later position to minus infinity before softmax, so it gets exactly zero weight. It makes a position's output depend only on itself and what precedes it, so the arithmetic is the same whether or not the rest of the sentence exists | 11 |
+| **Chat template** | The markup a provider wraps round your text so the model sees a conversation turn. A fixed number of tokens — 7 for this model — charged on every call, and not Chapter 36's prompt template | 40 |
 | **Check** | Anything that verifies the output before it is used, from a required shape through to a second model's opinion | 2 |
 | **Chunk** | One piece of a split document: the unit that is embedded, stored in the index and returned by retrieval | 27 |
 | **Chunk size** | How much text a chunk holds. A floor on it is set by taking the *shortest* passage that answers each of your questions and keeping the longest of those | 27 |
@@ -149,6 +150,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Mixture of experts (MoE)** | Replacing one feed-forward block per layer with several and routing each token through a few of them. The model holds all of them and runs some | 15 |
 | **Model** | A service that takes text and returns generated text, charged by the amount of text | 1 |
 | **Model Context Protocol (MCP)** | A documented wire format between an application holding a model and a service offering tools, resources and prompts. Collapses per-integration glue. Adds no step to Chapter 23's five and moves no decision; step 4 becomes a call into another process. The model is not a participant | 36 |
+| **Model snapshot** | A model name with a date in it, as against a family name the provider may repoint. The thing to pin, and the thing to read back out of the reply | 40 |
 | **Multi-agent system** | A design in which several agents run on one task, each with its own context and stopping condition, coordinated by your code or by one of them. Chapter 4 owns the agent and Chapter 35 the sub-agent; this is the arrangement of several | 37 |
 | **Multi-head attention (MHA)** | Several attention heads run in parallel over slices of the width, their outputs joined by one further matrix. What this chapter's one head is a simplification of. Chapter 15's Note is what real systems do to the keys and values from here | 11 |
 | **Multi-tenant retrieval** | Retrieval where each user may see only their own documents, so the filter is a correctness requirement rather than an optimisation | 29 |

@@ -65,6 +65,44 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**63. A program whose output is not reproducible silently invalidates the prose written against
+it, and thirty-nine deterministic chapters had trained the opposite habit.** Chapter 40 is the
+first chapter that calls a model. Its programs were re-embedded three times during drafting — once
+to fix a Tamil escape, once to add a model pin, once to repair a measurement — and **each re-embed
+replaced the `text` blocks with a fresh run while the prose kept quoting the old one.** By the
+review, Step 4 and Step 5 described a run that was no longer in the chapter: the first-token range,
+the reply split, the latency ratio and the median gap were all from a superseded execution, and
+they had propagated into the Summary, Worth Memorising, three Review Answers and the generated
+cheat sheet.
+
+**No gate can see this.** `verify-render.py` reads markdown, `verify-arithmetic.py` checks
+equations and these are English, and `cheatsheet.py --check` passes *because* the appendix is
+generated from the stale table and therefore agrees with it perfectly. A consistency gate cannot
+see a figure that is wrong consistently (entry 62) — and here the figure was not even wrong
+when it was written.
+
+**The cause is a habit, not an oversight.** In chapters 1 to 39 every program was deterministic,
+so quoting its output in prose was free and the book's style does it everywhere. The moment a
+program's output moved, that style became a liability, and `BOOK-GUIDE.md` §9 had already said what
+to do about it: *never promise exact text: say what shape the output takes, which assertion must
+pass, or give a range.* I had read §9 that morning and applied it to the opening Note, then quoted
+exact milliseconds for the next twenty pages.
+
+**The practice.** For a program whose output is not reproducible, split the figures in two before
+writing a word of prose. **The deterministic ones may be quoted** — chapter 40's token counts come
+from a pinned model and a fixed vocabulary and are checkable to the digit. **Everything else is
+described by shape** — "a factor of two or more", "holds steady across a sixteen-fold change", "the
+commoner one" — and the reader is sent to the block for the figures. Then say so in the chapter, so
+the next person to edit it knows which half is which. And after *any* re-embed, re-read the prose
+against the blocks: the diff shows the block changing and says nothing about the paragraph that
+just became false.
+
+**And the smaller lesson, which cost four of fourteen repairs.** A fix applied to a body passage in
+a chapter this long has four other homes to reach — Summary, Worth Memorising, the Review Answers
+and a generated appendix. Chapter 40 left the back matter behind **three separate times in one
+chapter**, twice because the sweep was for a phrase that wrapped across a line break and so matched
+nothing. **Sweep for the figure, and sweep with a pattern that cannot be broken by a newline.**
+
 **62. I swept for the sentence I had rewritten, not for the number that was wrong — and
 accepted a finding whose citation I never opened.** Chapter 39's repair round fixed ten verified
 findings, and the pass that checked the repairs found **6 of 13 unsound. Four of the six were one

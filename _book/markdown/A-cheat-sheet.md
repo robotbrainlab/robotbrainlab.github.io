@@ -268,3 +268,17 @@ written from memory.
 | Base-model changes | A gate each. Current at the end needs only the latest tune, so it stays at the gate's own rate; having taken *every* change multiplies — three at 80 per cent is 51.2 per cent | 39 |
 | Sizing a general set | By the smallest regression you would refuse to ship. 40 cases at 0.90 see the 0.125 fall and miss anything under 0.095 | 39 |
 | Synthetic data | Added, never substituted. Replacing took 3 of 8 modes to zero; adding diluted them 6.0-fold | 39 |
+
+## Part III · Apply
+
+| Item | Value or formula | Ch |
+|---|---|---|
+| Finding a chat template's size | Add one known token at a time; the slope is 1 and the intercept is the template | 40 |
+| What a short prompt really costs | Your tokens plus the template. Three plus seven means 70 per cent of the call is not your prompt | 40 |
+| What a chars-per-token figure belongs to | Not a language, and not transferable. The same string was 8 tokens to one vocabulary and 26 to another from the same provider, while English and code were identical under both | 40 |
+| The two latency numbers | Time to first token, then the mean gap after it. The first does not depend on output length; the second is the pace | 40 |
+| Why the median gap is useless | Tokens arrive in bursts, so the median sits near zero while the largest gap is more than a dozen times the mean. Report the mean | 40 |
+| What the output cap is | A ceiling, not a length. Check `finish_reason`, not only the length | 40 |
+| What temperature 0 buys from a provider | Not repeatability. Twenty identical calls gave two different answers, on a split that moves between runs | 40 |
+| What to report for a latency | A range and the number of runs, never one timing | 40 |
+| Before counting distinct replies | Normalise | 40 |
