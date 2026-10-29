@@ -424,6 +424,18 @@
 %    the last page's columns be short by design, and with it the shrink went back to
 %    book.cls's own 3pt and the build is clean at three different page counts (254, 257 and
 %    272 printed pages). See LEDGER-DEFECTS.md entry 36.
+%
+%    AND IT CAME BACK AT 39 CHAPTERS, 8.01865pt, with \raggedcolumns in place. The glue was
+%    the wrong lever a fourth time, and so were three others: shrink on \parskip inside
+%    theindex, \raggedcolumns re-applied inside multicols, and a break penalty before each
+%    letter group. None of them moved the figure by a hundredth of a point, which is the tell
+%    that none of them reached it. \showboxdepth said why in four lines: the box is one
+%    multicol COLUMN, 524.96pt tall, printed `glue set - 1.0` - already shrinking as far as it
+%    can - and still 8pt over. A column with no shrink left does not want more shrink; it wants
+%    somewhere to put the line. So the index now gets one extra \baselineskip of \textheight,
+%    on its own pages only, which is what an index page in a printed book usually has. Clean at
+%    three consecutive builds from a deleted book.ind, and it scales with the index instead of
+%    needing a nudge per chapter. See LEDGER-DEFECTS.md entry 61.
 % 2. The FIRST group gets no space above it, because \addvspace there follows the index
 %    chapter heading, which is a box, so it is added rather than discarded.
 %
@@ -434,7 +446,8 @@
 \makeatletter
 \renewcommand{\@idxitem}{\par\hangindent 1.5em}
 \makeatother
-\AtBeginEnvironment{theindex}{\setlength{\parskip}{0pt}\raggedcolumns}
+\AtBeginEnvironment{theindex}{\setlength{\parskip}{0pt}\raggedcolumns
+  \addtolength{\textheight}{\baselineskip}}
 \renewcommand{\indexspace}{}   % the letter heading already opens the group
 % Index entries from Markdown: [text]{.idx} or [text]{idx="key"} (see README)
 

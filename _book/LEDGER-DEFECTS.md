@@ -65,6 +65,78 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**62. I swept for the sentence I had rewritten, not for the number that was wrong — and
+accepted a finding whose citation I never opened.** Chapter 39's repair round fixed ten verified
+findings, and the pass that checked the repairs found **6 of 13 unsound. Four of the six were one
+failure**: the program was repaired and the Summary, Worth Memorising, the Review Answer and the
+generated cheat sheet kept the old figure. That is entry 16, for the fifth time. What is new is
+*why it got past a sweep I actually ran*.
+
+I swept. I grepped for `"ratio settles it"`, `"make serving cheaper"`, `"those four settle 8"` —
+**the sentences I had just rewritten.** The stale copies said something else: *"leaves you
+current 51.2 per cent of the time"*, *"general 0.90→0.78"*, *"40 cases at 0.90 sees 0.12"*,
+*"a 12-point fall"*. Four different sentences carrying the same four wrong numbers, and not one of
+them contained a phrase from the passage I had edited. **A figure outlives the sentence it was
+written in.** So: after changing a number, sweep for the NUMBER — `51.2`, `0.78`, `0.12` — across
+`markdown/` including the generated appendices, and only then for the wording. Grepping prose finds
+the paragraph you remember writing; grepping digits finds the four you do not.
+
+Note what no gate could do here. `cheatsheet.py --check` and `glossary.py --check` both passed
+throughout, because the appendices are *generated from* the stale Worth Memorising rows and
+therefore agreed with them perfectly. **A consistency gate cannot see a figure that is wrong
+consistently.**
+
+**And the second half, which is worse, because it was a defect I introduced by accepting a
+correction.** The review said one row of `choose.py` was misclassified: a per-customer plan lookup
+is "chapter 2's tool", not retrieval, because "retrieval searches a *collection* for *passages*".
+It read as right, it cited a chapter and a definition, and I moved the row, rewrote the docstring,
+restated the counts in four places and wrote a new paragraph explaining the distinction — **without
+opening chapter 2.** Chapter 2 says the opposite, twice: *"That something is retrieval, even when
+it is a single database query"*, and a Tip whose last line is *"The part is defined by where it
+sits, not by how clever it is."* The original classification was correct and I replaced it with a
+mis-citation, at length.
+
+Entry 57 says a fix made by appealing to another chapter is not applied until that chapter has
+been re-read at the line. **It applies with the same force to a finding made that way.** A review
+that cites a chapter has done the easy half; the citation is still the one claim a reviewer cannot
+check without leaving the chapter, and accepting it unread moves the defect from their report into
+my book. Verify the arithmetic findings by recomputing — which I did, for six of them, catching a
+0.65^5 that should have been 0.35^5 — and verify the citation findings by opening the citation.
+
+**61. A repair that does not move the number did not reach the thing — and I read a clean build
+out of an empty file, twice.** Chapter 39's eleven new index entries made the index's last
+multicol column overflow by **8.01865pt**. The preamble already carried a three-round history of
+exactly this (entry 36), ending in `\raggedcolumns`, so I reached for the same family of levers:
+shrink on `\parskip` inside `theindex`, `\raggedcolumns` re-applied inside `multicols`, and a
+negative penalty before each letter group so a break there would be legal. Then a fourth, from the
+other direction: one more `\baselineskip` of `\textheight`.
+
+**The first three printed 8.01865pt. Not 8.0 and not 7.9 — the same five decimal places.** A
+figure that does not move by a hundredth of a point under three different interventions is not a
+figure resisting them; it is a figure none of them touched, and that is a measurement I had in
+hand after the first attempt and did not read. `\showboxdepth=4` then answered it in four lines:
+the box is one multicol column, 524.96pt tall, printed `glue set - 1.0` — already shrinking as far
+as it can — and still 8pt over. **A column with no shrink left does not want more shrink; it wants
+somewhere to put the line.** One extra line of `\textheight` on index pages, which is what an
+index page in a printed book usually has, and the build is clean at three consecutive builds from
+a deleted `book.ind`. **The practice: when a fix leaves a number bit-identical, stop fixing and
+start measuring.** Four attempts cost what one box dump would have.
+
+**And the worse half, which is entry 17 arriving by a new route.** Between attempts I ran
+`make >/dev/null 2>&1` and then counted `Overfull` in the file I had redirected stdout to. That
+file is empty by construction — `make` writes the log to `book.log` — so the count was zero, and I
+reported *"pass 2: overfull=0, pass 3: overfull=0"* and believed the overflow was transient.
+`check-all.sh` disagreed, because it greps `latex/book.log`, and the gate was right. **The tell was
+there in the output I had already printed**: a build that emits nothing to stdout cannot be the
+source of a count of anything.
+
+Entry 17 was about reading `0 overfull` out of the log of a build that had died. Entry 35 was
+about reading a gate's verdict through a `tail`. This is the third shape: reading a count out of a
+file that was never going to contain it. The rule that covers all three: **name the file you are
+counting in, and check it is the file the tool writes to.** A grep that returns 0 from a path you
+chose yourself is not evidence of anything until you have seen that path hold a non-zero count at
+least once.
+
 **60. Two bare `^` in one paragraph are a pandoc superscript, and the only symptom is an
 overfull box.** Chapter 38 is about pass@k and pass^k, so it writes both names dozens of times.
 Pandoc's `superscript` extension pairs the carets: `pass^k is the chance that all *k* succeed …

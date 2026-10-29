@@ -258,3 +258,13 @@ written from memory.
 | What *four out of five* is worth | A system at 0.50 shows it 18.8 per cent of the time; one at 0.95 shows it 97.7 per cent. *That result* does not separate them — none of five would, at three in ten million | 38 |
 | The two graders | Final state, then transcript. On 14 trials: 0.71 against 0.29 | 38 |
 | Two sets, two targets | Capability well below 1.0 and informative; regression at 1.0 and alarming. Mixed, a −0.033 breakage is netted against a +0.067 gain and reports +0.033 | 38 |
+| The order to try the three levers | Prompt, then retrieval, then tuning. The first two are reversible in an afternoon | 39 |
+| What decides the lever | What the ask *needs*: facts the model has not seen, behaviour, or neither | 39 |
+| Low-rank adaptation | `\(W + BA\)`{=latex}, with `\(B\)`{=latex} as `\(d \times r\)`{=latex} and `\(A\)`{=latex} as `\(r \times d\)`{=latex} | 39 |
+| What a pair saves on one matrix | `\(d^2\)`{=latex} becomes `\(2dr\)`{=latex}, a ratio of `\(d/2r\)`{=latex}. At `\(d = 4{,}096\)`{=latex}, rank 8 is one parameter in 256 | 39 |
+| The asymmetry that gets misremembered | Trainable count falls 1,325-fold; memory only 8.0-fold. The frozen weights still have to be in memory | 39 |
+| What an adapter does not make cheaper | A forward pass, the model's size, or one request's serving. Serving several variants it does make cheaper | 39 |
+| What owning weights costs | Five standing obligations a prompt has not, none of them about accuracy | 39 |
+| Base-model changes | A gate each. Current at the end needs only the latest tune, so it stays at the gate's own rate; having taken *every* change multiplies — three at 80 per cent is 51.2 per cent | 39 |
+| Sizing a general set | By the smallest regression you would refuse to ship. 40 cases at 0.90 see the 0.125 fall and miss anything under 0.095 | 39 |
+| Synthetic data | Added, never substituted. Replacing took 3 of 8 modes to zero; adding diluted them 6.0-fold | 39 |

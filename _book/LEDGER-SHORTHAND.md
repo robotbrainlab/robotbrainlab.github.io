@@ -44,6 +44,7 @@ indexed automatically.
 | ANN | approximate nearest neighbour index | 29 | Was already named, in the Key Terms row |
 | vector database, vector store | — | 29 | Named. Key Terms row added, and **kept apart** from the index: the index is a data structure, the database a product around it |
 | LLM-as-a-judge | judge | 31 | Named. Row extended, noting the field's name is wider than the chapter's version |
+| LoRA, PEFT, fine-tune | low-rank adaptation, parameter-efficient fine-tuning | 39 | Named. Key Terms rows for the two long forms, index spans for both abbreviations; *fine-tune* and *fine-tuned* are named in the body with no row, because chapter 14 prints only *fine-tuning* and the verb is this chapter's |
 | pass@k, pass^k | — | 38 | Named. Key Terms rows added for both, with index spans, because `\^` is escaped in prose and the bold span alone would have indexed the escape |
 | suite | the evaluation set, the regression set, the capability set | 38 | Named, *body*. One word the field uses for three sets this book keeps apart, so it is named and not adopted |
 | observability | trace, tracing | 33 | Named, *body* |
@@ -58,7 +59,6 @@ Name each one as its chapter lands, in the same shape.
 |---|---|---|
 | MCP | the Model Context Protocol | 36 |
 | multi-agent, orchestrator–workers | — | 37 |
-| LoRA, PEFT, QLoRA, distillation | parameter-efficient fine-tuning | 39 |
 | prompt injection, jailbreak, guardrails | — | 51 |
 | prompt caching, prefix caching | prompt-prefix caching | 52 |
 | speculative decoding, continuous batching, paged KV cache | — | 52 |
@@ -83,6 +83,10 @@ without reopening the reason.
   a regression set (33). Naming it would have to pick one, and nothing needs it.
 - **Hybrid search.** Chapter 26 says *hybrid retrieval*; the two differ by one ordinary word and
   any search for *hybrid* lands on it.
+- **QLoRA.** Chapter 39 names LoRA and PEFT and declines this one. It is LoRA over a quantised
+  base, and quantisation is chapter 15's with its own bits-per-parameter arithmetic; naming it in
+  39 would either re-teach that or assert a saving the chapter does not compute. Chapter 39's
+  record declares quantisation out of scope. Revisit only if chapter 52 ends up wanting it.
 - **ReAct.** It is not one of chapter 34's five fixed-path patterns, and chapter 4's loop is not
   presented as it. Naming it would add a pattern the book does not teach.
 

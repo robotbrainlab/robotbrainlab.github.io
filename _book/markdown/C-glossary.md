@@ -9,6 +9,8 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Accountability** | Somebody who can be asked to answer for a decision, and who bears a consequence for it. A property of people and organisations, never of a component | 3 |
 | **Activation function** | The step in the feed-forward block that is not a matrix multiplication, such as keeping positives and zeroing negatives. Without it the block's two matrices would collapse into one | 12 |
 | **Active parameters** | The parameters that actually run for a given token, as against the total the model holds. Cost follows the active figure; the name usually quotes the total | 15 |
+| **Adapter** | The trained pair itself, as a file you keep beside the base model. Megabytes against the model's gigabytes, which is what makes a shelf of them practical | 39 |
+| **Adapter rank** | The `\(r\)`{=latex} in `\(B\)`{=latex} of shape `\(d \times r\)`{=latex}. It alone sets the saving, at `\(d/2r\)`{=latex}, and doubling it doubles what the adapter can express | 39 |
 | **Agent** | A system in which the model decides what to do next, repeatedly, rather than your code deciding the sequence | 4 |
 | **Answer key** | Which document each of your queries is actually about. The only input in the procedure that has to come from you | 24 |
 | **Answer relevance** | Whether the answer addresses what was asked. Independent of groundedness, and not a yes or no once the question has parts | 32 |
@@ -70,6 +72,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Direct preference optimisation (DPO)** | The preference objective written as one formula: raise the preferred reply's probability relative to the rejected one, both measured against the model as it was before this stage. Stated in this book, not derived | 14 |
 | **Discounted cumulative gain** | The sum of each result's grade divided by a discount that grows with position | 26 |
 | **Dispatcher** | The code that takes a proposal, validates it, decides, and runs the function or refuses. The only participant that can refuse | 23 |
+| **Distillation** | Training a smaller model on a larger one's output. The student is cheaper to run; what it costs you is that its training set did not exist until you generated it | 39 |
 | **Document frequency** | How many documents in the collection contain a term at all | 26 |
 | **Document length** | How many terms a document holds, compared with the collection average. BM25's third input, and the reason a long document is not automatically more relevant | 26 |
 | **Dot product** | Multiply two vectors slot by slot and add the results. Large when both are large in the same slots — and also larger when either is simply longer | 8 |
@@ -79,6 +82,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Embedding table** | A matrix with one row per vocabulary entry. Looking a token up in it is how that token enters the model; the rows are called embeddings | 9 |
 | **Error analysis** | The part of evaluation that means reading real outputs, sorting the failures into kinds, and working on the largest kind | 5 |
 | **Evaluation** | Building and using something that tells you whether a system works: a set of cases, a way to judge each answer, and a number you can compare over time | 5 |
+| **Evaluation gate** | The rule a tune has to pass to be released: the target set moved *and* nothing else did. Two conditions, and the second is the one that gets dropped | 39 |
 | **Evaluator–optimiser** | Produce, judge, revise, until the judge passes or your code gives up. Fixed in shape, not in length | 34 |
 | **Evidence strength** | How much a claim is supported: announcement, demonstration, one study, practitioner report, settled practice — or a derivation, which stands outside the ladder because you can check it yourself | 6 |
 | **Examples** | What a good answer looks like, shown rather than described. Part of the specification | 18 |
@@ -131,6 +135,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Logits** | The raw scores from the final matrix multiplication, one per vocabulary entry, before softmax. Can be negative; only the differences between them matter | 13 |
 | **Long context** | A large maximum input. Buys a looser budget and whole documents; does not remove the need to select, and is not free | 28 |
 | **Lost in the middle** | The field's name for a measured effect: one relevant passage in a long input is used less reliably in the middle than near either end. A finding about particular models, not a rule of the design | 16 |
+| **Low-rank adaptation** | Freezing every parameter and training a pair of small matrices beside chosen ones, so the model computes `\(W + BA\)`{=latex}. Called LoRA[]{idx="LoRA"}, and the reason a tune fits on hardware you have | 39 |
 | **Masked mass** | How much probability the constraint deleted at a step. Small means the constraint was free; large means it overruled the model | 22 |
 | **Masking** | Setting a forbidden token's score to `\(-\infty\)`{=latex}, which makes its probability exactly zero after the softmax — as long as one token survives. Mask them all and you get `nan`, not zero | 22 |
 | **Matrix** | A grid of numbers, read as rows or as columns depending on what you are doing | 8 |
@@ -167,6 +172,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Parallel width** | The most pieces that can be in flight at once, and therefore the number of agents that earn their place. Chapter 9's *width* is a different thing — the size of a model's vectors | 37 |
 | **Parallelisation** | One call per piece, the pieces coming from the input, then one call to combine. Independent, so they can run at once | 34 |
 | **Parameter** | One number inside the model, set by training and unchanged by inference. The count is what "a 7B model" reports | 9 |
+| **Parameter-efficient fine-tuning** | The family low-rank adaptation belongs to: changing few parameters rather than all of them. PEFT[]{idx="PEFT"} in speech and in writing | 39 |
 | **Parsing** | Turning a file into text a program can work on. For a document format this means reconstructing something the file does not record | 27 |
 | **Partition** | Every failure in exactly one mode, nothing dropped and nothing counted twice. Checkable, and worth checking | 30 |
 | **pass@k** | The chance at least one of *k* trials succeeds, `\(1-(1-p)^k\)`{=latex}. Rises with *k*. Only a capability when something can tell a good attempt from a bad one | 38 |
@@ -217,6 +223,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Semantic search** | What dense retrieval is usually called. The same thing, in the words people use when they complain about it | 25 |
 | **Semaphore** | A counter that bounds how many jobs run at once. Three words of code, and the difference between concurrency and attacking your own account | 19 |
 | **Server-sent events** | A long-lived HTTP response carrying one small event per line as the server produces them. How a streamed reply arrives | 19 |
+| **Side effect** | A change to a task the tune was not for. Visible only if you kept a set for the thing you were not changing, and only if that set is big enough to see it | 39 |
 | **Softmax** | Turns a list of scores into positive numbers that sum to 1, preserving their order and turning each gap between scores into a multiple between shares | 8 |
 | **State machine** | What a schema compiles into: a set of states, each with the tokens allowed next. Engines call it an automaton | 22 |
 | **Step** | One pass through the loop: the model decides, something runs, the result comes back | 4 |
@@ -229,6 +236,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Subword** | A token that is part of a word rather than a whole one. What makes it possible to represent a word the vocabulary has never seen | 10 |
 | **Supervised fine-tuning (SFT)** | Running the same loop with the same objective on curated request–response pairs. Turns a model that continues text into one that answers | 14 |
 | **Supplied information** | The part of a prompt that is different on every call. The only one of the four parts that is data rather than specification | 18 |
+| **Synthetic data** | Training examples a model wrote rather than people. Added to real data, never substituted for it, because a generator's blind spots become absences nothing in the data can report | 39 |
 | **System message** | The message holding your instructions and usually the output format. Your specification, set once per conversation and never the thing to drop when the history will not fit — nor are the example turns, if that is where your examples live | 18 |
 | **Task** | An agent's unit, as a case is a single call's: a starting state, a goal, and a condition that can be checked when the run ends. If you cannot write the condition you do not have one | 38 |
 | **Temperature** | A number the logits are divided by before softmax. Below 1 sharpens the distribution, above 1 flattens it, and it never changes the order | 13 |
