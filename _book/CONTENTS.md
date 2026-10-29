@@ -592,7 +592,7 @@ Covers: Thirty labelled cases on a task with an **exact-match grader**, so no ju
 
 > I want output my code can trust, and one action the model can ask for but not take.
 
-Covers: A JSON schema and a validation rate; one tool the model proposes; your code validating and refusing a bad call; a log of every proposal
+Covers: A JSON schema and a validation failure rate; one tool the model proposes; your code validating and refusing a bad call; a log of every proposal
 
 ### 43. Lab: Two Embedding Models, and the Query That Breaks Them
 *Planned — estimate 16 pp.*

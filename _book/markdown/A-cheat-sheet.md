@@ -288,3 +288,10 @@ written from memory.
 | A case that fails every trial | The ordinary condition of a failing case (chapter 20), and not a signal about anything. What separates a wrong answer from a wrong key is reading the reply (chapter 30) | 41 |
 | What a narrow interval means | That the effect is consistent. Not that it is the effect you wanted | 41 |
 | The order of the question | Did the model know? Then: could a program read it? Those are different graders and different claims | 41 |
+| Two measurements, not one | The validation failure rate, and the answers paired against the other way of asking. They fail independently | 42 |
+| Zero failures in 60 | One in twenty, by the rule of three. A guarantee is a different kind of claim from a measurement | 42 |
+| The failure a guarantee misses | A reply cut off at the token cap. Every token legal, the object unparseable, `finish_reason` `length` | 42 |
+| A schema too narrow | `maxLength` 1 under enforcement gave 20 of 20 valid and 17 wrong, because the local validator still allowed 20. The silence is the gap between the two copies | 42 |
+| And it needs no enforcement | A unit enum with no member for *working days* got the same wrong answer from a prompt as from a grammar | 42 |
+| Shape against existence | A pattern says a code could exist. Only your catalogue says it does | 42 |
+| What to log | Every proposal, its verdict and its message. A refusal leaves no other trace | 42 |

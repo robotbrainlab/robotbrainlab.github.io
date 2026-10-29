@@ -90,6 +90,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Exact-match grader** | A grader whose verdict is string equality after a declared normalisation. Needs no judge, which is what makes it reachable first. Chapter 30 calls exact match *useless* and is right about its own case, grading free prose against a reference — and this chapter's step 6 shows why, with prompt A scoring 0.000 on thirty replies that a substring grader accepts in full. It works here only because the answer is one figure, and the declared normalisation is the whole of it | 41 |
 | **Examples** | What a good answer looks like, shown rather than described. Part of the specification | 18 |
 | **Exhaustive search** | Comparing the query against every vector. Exact, and linear in the size of the collection | 29 |
+| **Existence check** | The check that an identifier the model supplied names something your system actually holds. A grammar can express it, by compiling your catalogue into the request as an enum — and that copy goes stale, is sent on every call, and can only redirect the model rather than refuse it. The check belongs where the refusal can happen | 42 |
 | **Exponential backoff** | Doubling the wait after each failed attempt, up to a cap, so a struggling system is not hammered | 19 |
 | **Failure mode** | A named kind of wrong output, named after what went wrong rather than after the part of the system suspected of causing it | 30 |
 | **Faithfulness** | The same property under the name an interviewer may use: the answer is faithful to the passages it was given | 32 |
@@ -266,6 +267,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Turn** | One exchange — the user's message and the model's reply to it. A conversation is a list of turns, and the whole list is re-sent on each one | 18 |
 | **Two-tower** | A bi-encoder with separate query and document encoders, so the score is `\(\cos(f(q), g(d))\)`{=latex} with `\(f \neq g\)`{=latex}: still precomputable, no longer symmetric | 26 |
 | **User message** | The request and the material it is about, from the person or from your code on their behalf | 18 |
+| **Validation failure rate** | The proportion of real replies your schema rejects, measured over calls you made. Zero over sixty is one in twenty by the rule of three, and says nothing about whether the answers are right | 42 |
 | **Validation layers** | Parses / right shape / values possible / values true. The first three are mechanical; the fourth needs a judgement and belongs elsewhere | 21 |
 | **Value** | The vector a position hands over when it is attended to, made with `\(W_V\)`{=latex}. What the weights are spent on | 11 |
 | **Vector** | An ordered list of numbers. Two vectors can be compared only if they have the same number of slots | 8 |

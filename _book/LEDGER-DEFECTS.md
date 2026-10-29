@@ -65,6 +65,37 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**66. A step that stops measuring is the step that over-claims — and in a lab, the two halves can
+be told apart by whether the figures come from a program's output or from the author.** Chapter 42
+measures in steps 1 to 4 and, in its first draft, asserted in step 5. Every claim in steps 1 to 4
+came off a printed block; step 5's came from what I believed about strict modes. Three of them were
+false, and the chapter refuted its own central one four steps earlier: *no strict mode can check
+whether an identifier exists*, written three pages after a `unit` enum that is precisely a strict
+mode checking that a value is one of six. The `pattern` the step boasted about was never enforced,
+because the tool was not declared strict. And the pattern itself was too narrow in the way step 4
+is entirely about, rejecting a code the corpus documents.
+
+Why the first review round and the gates could not see it: every figure in the step was real, the
+programs ran, the output blocks matched, and the claims are what the field says. The reviewer found
+it by noticing that the step with the strongest claims about enforcement was the only step that
+never turned enforcement on.
+
+The repair made it the best section in the chapter. The same tool, run three ways — a pattern
+undeclared, the same pattern declared strict, and the catalogue compiled in as an enum — turns
+three assertions into three measurements, and the conclusion that survives is better than the one
+it replaced: a grammar *can* express existence, and it belongs in your code anyway, because a
+grammar can only redirect where code can refuse.
+
+The practice: **in a lab chapter, every claim in a step must be readable off that step's own
+output, and a step whose claims are not is a step that needs another run rather than another
+paragraph.** Before the first review, go through each step and ask of each strong sentence: which
+printed line is this? A sentence with no line behind it is either a credit to another chapter or a
+guess. And the specific version worth remembering: **when a chapter says a mechanism cannot do
+something, turn the mechanism on and watch** — it is one call, and the field's received wisdom is
+not evidence about your provider on your schema.
+
+---
+
 **65. When a thing varies along two axes, naming it by one of them identifies nothing — and the
 back matter is where it happens.** Chapter 41 has five graders. They differ in what counts as a
 match (equality, or the value present anywhere in the reply) and in which notation the key may be
