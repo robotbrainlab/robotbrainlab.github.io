@@ -21,6 +21,12 @@ Checks:
   8. A ```text block line wider than 64 characters.
   7. A blockquote starting directly under ordinary text mid-sentence - usually the
      remains of an edited-away callout.
+  9. Two or more unescaped `^` in one paragraph. Pandoc's superscript extension pairs
+     them and swallows everything between, so `pass^k ... pass^k` renders as
+     `pass\\textsuperscript{k ... pass}k` with the markup in between destroyed. The only
+     symptom in a build is an overfull box, and chapter 38 shipped it past a CLEAN
+     render gate. One caret in a paragraph is harmless (nothing pairs with it) and
+     chapter 4's table has two in separate cells, so cells are counted separately.
   6. Unbalanced maths delimiters. This book writes maths as raw LaTeX spans
      (`\\(x\\)`{=latex}) and fenced blocks (```{=latex}). An unclosed \\( swallows the
      rest of the line into maths mode; an unclosed raw fence swallows the chapter.
@@ -82,6 +88,43 @@ def check(path):
         if fence8 and lang == "text" and len(ln) > 64:
             out.append((i + 1, f"text block line is {len(ln)} characters - the limit is 64",
                         ln[:60]))
+
+    # 9. Two unescaped carets in one paragraph become a pandoc superscript. See the
+    # docstring. Inline code spans are protected, and this book's maths lives in them.
+    def bare_carets(text):
+        text = re.sub(r"`[^`]*`", "", text)
+        return len(re.findall(r"(?<!\\)\^", text))
+
+    fence9, para, start9 = False, [], 0
+    def flush(para, start9):
+        if not para:
+            return
+        n = 0
+        for ln in para:
+            if ROW.match(ln):
+                n = max(n, max((bare_carets(c) for c in ln.split("|")), default=0))
+            else:
+                n += bare_carets(ln)
+        if n >= 2:
+            out.append((start9, f"{n} unescaped ^ in one paragraph - pandoc pairs them "
+                                "into a superscript and eats the markup between",
+                        para[0][:60]))
+    for i, ln in enumerate(lines):
+        if ln.lstrip().startswith("```"):
+            flush(para, start9)
+            para = []
+            fence9 = not fence9
+            continue
+        if fence9:
+            continue
+        if not ln.strip():
+            flush(para, start9)
+            para = []
+            continue
+        if not para:
+            start9 = i + 1
+        para.append(ln)
+    flush(para, start9)
 
     if fence:
         out.append((0, "the file ends inside a code fence - one never closes", ""))

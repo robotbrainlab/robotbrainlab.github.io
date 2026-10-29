@@ -32,6 +32,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Bootstrap** | Estimating how much a statistic would move by resampling your own cases with replacement. One procedure for every statistic you score, where a closed form is a different formula each time | 20 |
 | **Byte-pair encoding (BPE)** | Building a vocabulary by starting from the 256 single bytes and repeatedly merging the commonest adjacent pair in a corpus until the vocabulary is the size wanted. Starting from bytes is what makes any text at all representable | 10 |
 | **Candidate set** | The documents the first stage passes to the second. A reranker can only permute it, so it is a ceiling | 26 |
+| **Capability set** | Tasks at the edge of what the system can do, scored well below 1.0 on purpose. At 1.0 it has stopped measuring, and the fix is harder tasks | 38 |
 | **Case** | One input plus whatever marks the answer right or wrong. The unit the statistics count — and they count rows, so forty rephrasings of one question are worth nearer one case than forty | 20 |
 | **Causal mask** | Setting every score for a later position to minus infinity before softmax, so it gets exactly zero weight. It makes a position's output depend only on itself and what precedes it, so the arithmetic is the same whether or not the rest of the sentence exists | 11 |
 | **Check** | Anything that verifies the output before it is used, from a required shape through to a second model's opinion | 2 |
@@ -87,6 +88,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Faithfulness** | The same property under the name an interviewer may use: the answer is faithful to the passages it was given | 32 |
 | **Feed-forward block** | The half of a layer that works on each position alone: two matrices with an activation between them, the middle between about two and a half and four times the width of the ends. Holds more of a layer's parameters than attention does | 12 |
 | **Few-shot** | A prompt that carries examples of a good answer. The *shot* is an example, so the word counts them and says nothing else | 18 |
+| **Final state** | What the world looks like when the run ends. The cheapest thing to grade and the easiest to pass for the wrong reason, which is why it is a claim about the *starting* state too | 38 |
 | **Finish reason** | The response's own statement of why generation stopped. What distinguishes a truncated reply from a malformed one | 21 |
 | **Fixed path** | A design in which the sequence lives in your code: your code runs every step, whatever selected it, and the order is written down rather than decided as the run goes. Five shapes: chaining, routing, parallelisation, orchestrator–workers, evaluator–optimiser | 34 |
 | **Forward pass** | One journey through the model — lookup, the stack once, one distribution out. It produces exactly one distribution | 9 |
@@ -94,6 +96,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Function calling** | The provider's name for the whole five-step convention, also sold as tool calling. The model does step 2 of it and nothing else | 23 |
 | **Generalisation theory** | Why a model fitted to one body of text works on text it never saw — the bias–variance trade-off, and what learning theory proves about it | 17 |
 | **Graded relevance** | A relevance judgement on a small scale rather than yes-or-no, so a partial answer and a full one can be told apart | 26 |
+| **Grader** | What decides whether one trial succeeded. Code, then a judge, then a person — in that order, because the order is the cost | 38 |
 | **Gradient** | For each parameter, how much the loss would rise if that parameter rose. The update rule moves every parameter a small step against it. How it is computed is outside this book | 14 |
 | **Greedy decoding** | Always taking the highest-scoring token. What "temperature zero" does in practice, since dividing by zero is not defined | 13 |
 | **Greedy fill** | Keeping any passage that fits in the room remaining. Silently promotes short passages over higher-ranked long ones | 28 |
@@ -166,6 +169,8 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Parameter** | One number inside the model, set by training and unchanged by inference. The count is what "a 7B model" reports | 9 |
 | **Parsing** | Turning a file into text a program can work on. For a document format this means reconstructing something the file does not record | 27 |
 | **Partition** | Every failure in exactly one mode, nothing dropped and nothing counted twice. Checkable, and worth checking | 30 |
+| **pass@k** | The chance at least one of *k* trials succeeds, `\(1-(1-p)^k\)`{=latex}. Rises with *k*. Only a capability when something can tell a good attempt from a bad one | 38 |
+| **pass\^k** | The chance all *k* trials succeed, `\(p^k\)`{=latex}. Falls with *k*, and it is the one to worry about | 38 |
 | **People** | The reviewers and approvers who handle the consequential cases and carry responsibility for them | 2 |
 | **Perplexity** | The exponential of the cross-entropy. Reads as the number of equally likely options the model is effectively choosing between; a uniform choice among `\(V\)`{=latex} options has perplexity `\(V\)`{=latex} | 14 |
 | **Position bias** | A judge preferring an answer for where it was printed rather than for what it says. Measured by showing each pair both ways and counting the flips | 31 |
@@ -225,6 +230,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Supervised fine-tuning (SFT)** | Running the same loop with the same objective on curated request–response pairs. Turns a model that continues text into one that answers | 14 |
 | **Supplied information** | The part of a prompt that is different on every call. The only one of the four parts that is data rather than specification | 18 |
 | **System message** | The message holding your instructions and usually the output format. Your specification, set once per conversation and never the thing to drop when the history will not fit — nor are the example turns, if that is where your examples live | 18 |
+| **Task** | An agent's unit, as a case is a single call's: a starting state, a goal, and a condition that can be checked when the run ends. If you cannot write the condition you do not have one | 38 |
 | **Temperature** | A number the logits are divided by before softmax. Below 1 sharpens the distribution, above 1 flattens it, and it never changes the order | 13 |
 | **Term** | The unit a lexical index counts — usually a lower-cased word, sometimes stemmed. Not the model's token from chapter 10 | 26 |
 | **Term frequency** | How often a term appears in one document | 26 |
@@ -242,6 +248,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Trace** | The record of one request: input, retrieval and its candidates, model and version, tool calls, output, tokens and per-stage timings | 33 |
 | **Training** | The one-time process that produced the model's numbers. Not something you do on a request | 1 |
 | **Training cut-off** | The point in time after which no text reached the model's training. It knows nothing later, and cannot tell that it does not | 1 |
+| **Transcript** | The ordered record of one trial's steps — what the model asked for, what ran, what came back. Not Chapter 33's trace, which is the per-request production record that holds one | 38 |
 | **Transformer** | A stack of identical layers, each adding an attention block's output and a feed-forward block's output into the residual stream. *Decoder-only* adds that every position may look only backwards | 12 |
 | **Trials** | Repeated runs of the same case, which measure the model's own variation. Averaged within the case, never counted as extra cases | 20 |
 | **Turn** | One exchange — the user's message and the model's reply to it. A conversation is a list of turns, and the whole list is re-sent on each one | 18 |

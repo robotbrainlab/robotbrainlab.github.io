@@ -65,6 +65,42 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**60. Two bare `^` in one paragraph are a pandoc superscript, and the only symptom is an
+overfull box.** Chapter 38 is about pass@k and pass^k, so it writes both names dozens of times.
+Pandoc's `superscript` extension pairs the carets: `pass^k is the chance that all *k* succeed …
+**pass^k is the one to worry about.**` came out as
+`pass\textsuperscript{k is the chance that all \emph{k} succeed, … **pass}k is the one to worry
+about.**` — the markup between the two carets destroyed, a stray `**` left in the body, and the
+`\textbf` swallowed. It happened in three paragraphs: the "So which one should worry you"
+passage, the Summary, and Review Answer 1.
+
+**Nothing read it.** `verify-render.py` reported CLEAN. `verify-voice.py`, `verify-boundary.py`,
+`verify-arith.py` and the index check all passed. The `\index{}` entries survived intact, because
+`filter.lua` runs on the already-parsed bold span, so even reading every index entry against the
+Key Terms — the mandated pre-review check — showed nothing wrong. The one signal was two
+`Overfull \hbox` lines in the build log, 123.88pt and 643.98pt, and an overfull box is the symptom
+of a long word just as often as of destroyed markup.
+
+**The spacing rule is not the protection it looks like.** Pandoc's superscript is documented as
+not containing unescaped spaces, which reads like a guarantee that `pass^k … pass^` cannot pair
+across a sentence. It paired across five lines of prose. Do not reason from a restriction in a
+format's documentation to a claim about what a build will produce — run the build and read the
+.tex.
+
+**The gate.** `verify-render.py` check 9: two or more unescaped carets in one paragraph, with
+inline code spans stripped (this book's maths lives in `` `\(x^k\)`{=latex} `` spans, so it is
+already protected) and table rows counted per cell, because chapter 4's Worth Memorising has
+`0.9^10` and `0.99^10` in separate cells and they are correct. Proved both ways before it was
+trusted: it fires on all three of chapter 38's real paragraphs when the escapes are stripped
+back out, and the whole book — 42 files — passes with it on.
+
+**And it broke a second gate in passing.** With the prose escaped to `pass\^k`,
+`verify-inputs.py` reported `pass^k` BARE although the chapter bolds it and gives it a Key Terms
+row: the gate compared `JARGON`'s unescaped string against the escaped bold span. That is entry
+56's bug in a second place, so `unescape()` now runs on both sides. **A term the book has to
+escape for the typesetter is a different string from the term, and anything matching on terms
+has to know it.**
+
 **59. One artefact of a source is not the source, and an absence on it is not an absence.**
 Chapter 37 checked ten claims circulating about one study against *the arXiv abstract page* and
 reported the result as a property of the paper. Four of the ten are in the paper and the page

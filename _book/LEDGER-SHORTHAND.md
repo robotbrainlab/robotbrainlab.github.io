@@ -44,6 +44,8 @@ indexed automatically.
 | ANN | approximate nearest neighbour index | 29 | Was already named, in the Key Terms row |
 | vector database, vector store | — | 29 | Named. Key Terms row added, and **kept apart** from the index: the index is a data structure, the database a product around it |
 | LLM-as-a-judge | judge | 31 | Named. Row extended, noting the field's name is wider than the chapter's version |
+| pass@k, pass^k | — | 38 | Named. Key Terms rows added for both, with index spans, because `\^` is escaped in prose and the bold span alone would have indexed the escape |
+| suite | the evaluation set, the regression set, the capability set | 38 | Named, *body*. One word the field uses for three sets this book keeps apart, so it is named and not adopted |
 | observability | trace, tracing | 33 | Named, *body* |
 | top-k, top-p | — | 13 | Was already named |
 | BM25, RRF, nDCG, MRR, recall@k | — | 26 | Already in the chapter. The Key Terms rows for reciprocal rank fusion, mean reciprocal rank and normalised discounted cumulative gain carry the long form only, so a reader scanning Appendix C for *nDCG* has to know the expansion. Worth extending; not done here |
@@ -56,7 +58,6 @@ Name each one as its chapter lands, in the same shape.
 |---|---|---|
 | MCP | the Model Context Protocol | 36 |
 | multi-agent, orchestrator–workers | — | 37 |
-| pass@k, pass^k | — | 38 |
 | LoRA, PEFT, QLoRA, distillation | parameter-efficient fine-tuning | 39 |
 | prompt injection, jailbreak, guardrails | — | 51 |
 | prompt caching, prefix caching | prompt-prefix caching | 52 |

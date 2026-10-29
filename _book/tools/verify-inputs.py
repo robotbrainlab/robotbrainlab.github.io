@@ -72,10 +72,22 @@ def terms(path):
     return out
 
 
+def unescape(s):
+    r"""Drop Markdown backslash-escapes before matching.
+
+    A term the chapter must escape for pandoc is a different string from the one in
+    JARGON: chapter 38 writes `pass\^k` in prose, because two bare carets in one
+    paragraph become a superscript, and the Key Terms row carries the escape too. So
+    the term was bolded AND defined and was reported BARE anyway - entry 56's bug in
+    a second place. Unescape both sides and they agree.
+    """
+    return re.sub(r"\\([^A-Za-z0-9])", r"\1", s)
+
+
 def used_bare(path, vocab, earlier_text):
     """Vocabulary words this chapter uses in prose, never bolded here, never printed before."""
-    text = open(path, encoding="utf-8").read()
-    defined = {t.lower() for t in terms(path)}
+    text = unescape(open(path, encoding="utf-8").read())
+    defined = {unescape(t).lower() for t in terms(path)}
     hits = []
     for term in sorted(vocab):
         if term in ALLOW:

@@ -248,3 +248,13 @@ written from memory.
 | What a non-stopping system costs | 4.56 times a single agent at a 10-step limit, 13.79 at 20 | 37 |
 | The three failure categories | System design, inter-agent misalignment, task verification | 37 |
 | What the evidence is | One study, NeurIPS 2025: 14 modes in 3 categories, from 5 frameworks and tested on 2 more. The shares by category moved between versions | 37 |
+| pass@k | `\(1-(1-p)^k\)`{=latex} — at least one of *k*. Rises with *k* | 38 |
+| pass\^k | `\(p^k\)`{=latex} — all *k*. Falls with *k*, and it is the one that should worry you | 38 |
+| The two at one rate | At `\(p=0.65\)`{=latex} and `\(k=5\)`{=latex}: pass@5 = 0.995, pass\^5 = 0.116. A factor of 8.6 from one number | 38 |
+| Estimating pass@k from *n* trials | `\(1 - \binom{n-c}{k}/\binom{n}{k}\)`{=latex}, with *c* passes. Never `\((1-c/n)\)`{=latex} to the *k*, which under-states it every time | 38 |
+| Twenty steps at 0.95 | `\(0.95^{20} = 0.358\)`{=latex} per trial — and 0.74, 0.36 or 0.05 depending on which of the three you quote | 38 |
+| Where 0.95 a step becomes a coin | Step 14: `\(0.95^{14} = 0.488\)`{=latex} | 38 |
+| What a 20-step task needs to finish 9 in 10 | `\(0.90^{1/20} = 0.9947\)`{=latex} a step | 38 |
+| What *four out of five* is worth | A system at 0.50 shows it 18.8 per cent of the time; one at 0.95 shows it 97.7 per cent. *That result* does not separate them — none of five would, at three in ten million | 38 |
+| The two graders | Final state, then transcript. On 14 trials: 0.71 against 0.29 | 38 |
+| Two sets, two targets | Capability well below 1.0 and informative; regression at 1.0 and alarming. Mixed, a −0.033 breakage is netted against a +0.067 gain and reports +0.033 | 38 |

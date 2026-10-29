@@ -77,14 +77,21 @@ sub-part opener pages sitting after the last written chapter were counted into i
   35   540-566    27   22    123%
   36   567-597    31   18    172%
   37   598-623    26   10    260%
+  38   624-650    27   14    193%
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
-Part II has begun: chapters 18 to 37 come to 420 pages, so 619 printed pages of chapters, and
-640 with Appendices A and B as they stand. Chapters 30
+Part II has begun: chapters 18 to 38 come to 447 pages, so 650 printed pages of chapters, and
+668 with Appendices A and B as they stand. Chapters 30
 to 33 are the evaluation run of the part, and the first chapters since 17 whose material is a
 method rather than a mechanism. Their reviews find more per chapter than the mechanism chapters'
-did, and almost all of it is the same defect: a claim one notch wider than its demonstration. Chapter 26
+did, and almost all of it is the same defect: a claim one notch wider than its demonstration.
+**Chapter 38 is where that pattern turned inward**: its review found ten things and every one was
+real, but the pass that checked the *repairs* found four of eleven unsound — the fourth chapter
+running at roughly that rate. Two of the four were an arithmetic slip and a doubled em dash, which
+is why `LEDGER-DEFECTS.md` entry 57's grammar half now names reading the sentence rather than the
+diff, and why entry 60 exists at all: chapter 38's own subject, `pass^k`, is a string pandoc
+silently turns into a superscript, and the only symptom was two overfull boxes. Chapter 26
 is the longest in the book at 30 pages, and it holds seven Covers items of which three are
 formulas that have to be worked rather than quoted.
 Chapters 9, 17 and 20 landed exactly on their estimates; **21, 22 and 25 exceed one**, by one
