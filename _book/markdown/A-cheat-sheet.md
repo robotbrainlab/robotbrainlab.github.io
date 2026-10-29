@@ -282,3 +282,9 @@ written from memory.
 | What temperature 0 buys from a provider | Not repeatability. Twenty identical calls gave two different answers, on a split that moves between runs | 40 |
 | What to report for a latency | A range and the number of runs, never one timing | 40 |
 | Before counting distinct replies | Normalise | 40 |
+| What a score needs beside it | The grader, the case count, the trial count and the interval. Any one alone can be misread | 41 |
+| Where the trials go | Averaged *within* a case, so one case stays one row (chapter 20) | 41 |
+| What to do before reading a score | Read the failures, and every grader's set rather than one grader's. Five of the nine here were the key and not the model | 41 |
+| A case that fails every trial | The ordinary condition of a failing case (chapter 20), and not a signal about anything. What separates a wrong answer from a wrong key is reading the reply (chapter 30) | 41 |
+| What a narrow interval means | That the effect is consistent. Not that it is the effect you wanted | 41 |
+| The order of the question | Did the model know? Then: could a program read it? Those are different graders and different claims | 41 |

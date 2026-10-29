@@ -13,6 +13,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Adapter rank** | The `\(r\)`{=latex} in `\(B\)`{=latex} of shape `\(d \times r\)`{=latex}. It alone sets the saving, at `\(d/2r\)`{=latex}, and doubling it doubles what the adapter can express | 39 |
 | **Agent** | A system in which the model decides what to do next, repeatedly, rather than your code deciding the sequence | 4 |
 | **Answer key** | Which document each of your queries is actually about. The only input in the procedure that has to come from you | 24 |
+| **Answer normalisation** | The rule saying which two strings count as the same answer: what case, punctuation, emphasis, units and notation are ignored. Not chapter 12's normalisation, which is about a model's internals. Write it down, because a score is a measurement of it as much as of the model | 41 |
 | **Answer relevance** | Whether the answer addresses what was asked. Independent of groundedness, and not a yes or no once the question has parts | 32 |
 | **Approval point** | A step the loop cannot pass without a person, enforced in your code rather than requested in the instructions | 4 |
 | **Approximate nearest neighbour index** | A structure that answers which vectors are closest without comparing against all of them, accepting that the answer may be wrong. Shortened to ANN | 29 |
@@ -86,6 +87,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Evaluation gate** | The rule a tune has to pass to be released: the target set moved *and* nothing else did. Two conditions, and the second is the one that gets dropped | 39 |
 | **Evaluator–optimiser** | Produce, judge, revise, until the judge passes or your code gives up. Fixed in shape, not in length | 34 |
 | **Evidence strength** | How much a claim is supported: announcement, demonstration, one study, practitioner report, settled practice — or a derivation, which stands outside the ladder because you can check it yourself | 6 |
+| **Exact-match grader** | A grader whose verdict is string equality after a declared normalisation. Needs no judge, which is what makes it reachable first. Chapter 30 calls exact match *useless* and is right about its own case, grading free prose against a reference — and this chapter's step 6 shows why, with prompt A right thirty times out of thirty and scoring 0.000. It works here only because the answer is one figure, and the declared normalisation is the whole of it | 41 |
 | **Examples** | What a good answer looks like, shown rather than described. Part of the specification | 18 |
 | **Exhaustive search** | Comparing the query against every vector. Exact, and linear in the size of the collection | 29 |
 | **Exponential backoff** | Doubling the wait after each failed attempt, up to a cap, so a struggling system is not hammered | 19 |

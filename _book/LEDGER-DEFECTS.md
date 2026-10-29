@@ -65,6 +65,33 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**64. A program that prints a computed count and then describes it in a hardcoded sentence
+contradicts itself the first time the data moves — and the sentence is where the lesson is.**
+Chapter 41's step 5 groups the replies a strict grader rejects and prints `f"  3. {len(g2)} cases,
+answered with a unit the prompt forbade"`, which is honest. The four lines after it were not:
+*none of these four questions does*, and *the instruction was disobeyed on 4 of 30*, both typed as
+literals from the run I happened to be looking at. On a later run the unit group was three cases,
+so the program printed `3 cases` and `none of these four questions does` in the same paragraph.
+Two further sentences did the same: *three other word-keyed cases came back in words*, and a
+docstring saying *23 of the 30 keys here are digits* when 22 are digits, 7 are words and one is a
+product code — a figure arrived at as 30 minus 7.
+
+Why no gate sees it: the count and the sentence are both inside one string literal block, the
+arithmetic gate checks printed equations and not prose, and the chapter's own `text` block was
+captured from the run where the literal happened to be right. It is entry 63's failure moved
+inside the program: there, prose written against a stale run; here, a sentence written against a
+stale variable, in the one step whose whole subject is reading your own output.
+
+The practice: **a number in a program's own commentary comes from the same expression that
+printed it.** If `len(g2)` is printed, the sentence after it says `{len(g2)}` too, and a sentence
+that cannot be written that way is a sentence about the method and not about the data. Grep every
+lab's print strings for a spelled-out numeral — *one* to *twelve* — and for a bare digit beside a
+word like *cases*, *of 30* or *questions*, and check each against the variable above it. Related:
+a figure derived by subtraction from a set you did not enumerate (30 minus 7) is a guess wearing
+an arithmetic costume; count the thing.
+
+---
+
 **63. A program whose output is not reproducible silently invalidates the prose written against
 it, and thirty-nine deterministic chapters had trained the opposite habit.** Chapter 40 is the
 first chapter that calls a model. Its programs were re-embedded three times during drafting — once

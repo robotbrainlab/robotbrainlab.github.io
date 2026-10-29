@@ -23,10 +23,10 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 |---|---|---|---|
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
-| II · Use | 18–39 | 362 | **Drafting** — 12 of 22 done |
-| III · Apply | 40–50 | 190 | Not started |
+| II · Use | 18–39 | 362 | **Done** — 22 of 22, 2026-10-29 |
+| III · Apply | 40–50 | 190 | **Drafting** — 2 of 11 done |
 | IV · What Next | 51–57 | 136 | Not started |
-| Appendices | A–D | 83 | **A (cheat sheet, 131 items), B (100 questions) and C (glossary, 171 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
+| Appendices | A–D | 83 | **A (cheat sheet, 265 items), B (100 questions) and C (glossary, 268 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
 The estimates above sum to about 1,042 numbered pages. **That is a sum, not a target** — the
 book is as long as the material earns, and 1,500 to 2,000 would be welcome rather than a
@@ -80,15 +80,20 @@ sub-part opener pages sitting after the last written chapter were counted into i
   38   624-650    27   14    193%
   39   651-678    28   22    127%
   40   680-704    25   20    125%
+  41   705-728    24   18    133%
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
-Part II is complete: chapters 18 to 39 come to 475 pages, so 678 printed pages of chapters.
+Part II is complete: chapters 18 to 39 come to 475 pages.
 **Part III has begun** with chapter 40, the first chapter in the book that calls a real model, and
 the labs now run on the corpus in `labs/corpus/` — 40 documents, 8 queries and 320 graded
 judgements, written for the book and dedicated to the public domain. `LEDGER-DEFECTS.md` entry 63
 is what the first non-deterministic chapter cost: prose that quotes a figure a re-run can change
-is false the moment anything re-embeds, and no gate can see it. Chapters 30
+is false the moment anything re-embeds, and no gate can see it. **Chapter 41 puts chapter 20's
+statistics on real replies** — 180 trials, five graders, five verdicts from the same data — and its
+lesson is about the instrument rather than the result: the grader written to be fair to one prompt
+forgave the only instruction the other broke, and the headline score never showed it. 723 printed
+pages of chapters. Chapters 30
 to 33 are the evaluation run of the part, and the first chapters since 17 whose material is a
 method rather than a mechanism. Their reviews find more per chapter than the mechanism chapters'
 did, and almost all of it is the same defect: a claim one notch wider than its demonstration.
