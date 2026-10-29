@@ -237,8 +237,10 @@ The build relies on these.
 - **Labs are isolated and safe.** Each lab starts in its own fresh folder (such as
   `~/sandbox/ch12`), never touches the reader's real folders or settings, and never risks data
   outside its folder.
-- **No account is required to read the book, and none is created by it.** Where a lab needs a
-  model, the reader supplies it; see section 10.
+- **The labs need an OpenAI account and a key.** Decided by the owner on 2026-10-29, who has one
+  and asked for the book to use OpenAI throughout; it replaces the earlier rule that no account
+  was required. The book has one reader, who made the choice, so the cost of the requirement falls
+  on the person who accepted it. Keys come from the environment; see section 10.
 - **The book ships the lab data.** `labs/corpus/` holds about 40 short public-domain documents,
   8 queries with graded (3-point) relevance labels, and one deliberately awkward PDF with a table
   and a scanned page. No lab may say "your own documents": an expected result that depends on the
@@ -249,19 +251,38 @@ The build relies on these.
 - **Expected results must hold for every reader.** Model output is stochastic, so never promise
   exact text: say what shape the output takes, which assertion must pass, or give a range. Show
   one real run and say the reader's numbers will differ.
+- **A hosted model dates a printed output faster than a local one did.** The provider can change
+  what serves a given name, so **pin the model to a dated snapshot** rather than to a family, and
+  print the `model` string the response came back with beside any figure that depends on it. A
+  lab's token counts are then checkable and its timings are explicitly one run on one day.
 - **Pin versions.** A lab that needs a third-party package installs it in a virtual environment
   with a pinned version, and the package is listed in the preface's "What You Need Installed".
 
 ## 10. Which model the labs use
 
-Decided per lab, in this order:
+**OpenAI, throughout, with the key read from an environment variable.** Decided by the owner on
+2026-10-29. This replaces a local-first rule that sent most labs to a small model on the reader's
+own machine and reserved a hosted model for features that do not exist locally.
 
-1. **A small local model** where the lab is about mechanics that any model shows: prompting,
-   variance, embeddings, retrieval, chunking, error analysis, agent loops, injection tests.
-2. **A hosted model, with the key read from an environment variable**, only where the feature
-   being taught does not exist locally: strict structured outputs, prompt-prefix caching,
-   reasoning modes, provider routing. These labs must degrade gracefully — state the cost in
-   tokens before the reader runs them, and describe the expected result qualitatively.
+What the change buys and costs, so that neither is forgotten:
+
+- **It buys one provider for eleven labs.** Every lab speaks one API, so a reader learns one
+  client, one error vocabulary and one usage field, and the labs that need a hosted-only feature
+  (strict structured outputs, prompt-prefix caching, reasoning modes, routing) need no second
+  arrangement.
+- **It costs the two measurements a local server gave away.** A hosted API reports no model-load
+  time, so there is no cold-start figure to show; and it does not split the wait into reading the
+  input and writing the reply. Both are still measurable, from the outside, as **time to first
+  token** and the per-token rate after it — which is what chapter 52 owns and what you would
+  actually measure in production.
+- **It costs money, and the arithmetic is small.** One pass of all eleven labs is about 1.8
+  million tokens, roughly six parts input to one part output. At a small model's price that is
+  well under a dollar; a lab whose cost is dominated by its output tokens says so before the
+  reader runs it.
+
+**Pin the model to a dated snapshot**, never to a family name, and print the `model` field the
+response returned. A name that silently moves is chapter 54's subject and is the one thing a
+hosted lab can get wrong without any error.
 
 No lab, and no part of the build, ever reads or writes a credential file. Keys come from the
 environment and are never printed, logged or committed.

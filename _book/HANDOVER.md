@@ -178,13 +178,46 @@ arrived there anyway without cutting anything. Its recommendation to write Part 
 1. ~~**The GitHub repository does not exist.**~~ **Resolved differently, 2026-10-23.** The
    separate repository was never created. The book moved into the public website repository as
    `_book/` instead, and is pushed. Nothing is outstanding.
-2. **The labs need a model. This is the owner's decision and it is now the oldest one open.**
-   Either install `ollama` with a small model, so every lab runs free and offline and real
-   output goes in the book; or write the labs against a hosted API with the key in an
-   environment variable. Claude's recommendation is both: `ollama` for most labs, a hosted API
-   only for strict structured output, prompt-prefix caching and reasoning modes. **Due before
-   chapter 40** (stage 5, early December), which is the first lab that calls a model.
-3. **`labs/` is empty, and chapter 7 already promises its contents to the reader** — about
+2. ~~**The labs need a model.**~~ **Decided by the owner, 2026-10-29: OpenAI throughout.** The
+   key lives outside the repository, at a path the owner supplied, and is read into the
+   environment as `OPENAI_API_KEY`; nothing in the book or the build names that path. The chat
+   model is pinned to the snapshot `gpt-4o-mini-2024-07-18` and the embedding models are
+   `text-embedding-3-small` and `text-embedding-3-large`, which is also chapter 43's comparison.
+   `BOOK-GUIDE.md` §9 and §10 were amended to match: §9's "no account is required" is gone,
+   because the book has one reader and that reader made the choice, and §10 now records what the
+   decision buys (one API for eleven labs) and costs (no model-load figure, no server-side split
+   of the wait, and about 1.8 million tokens for one pass of Part III). A local runner was
+   installed and used for a first draft of chapter 40 before the decision; that draft was
+   replaced and `ollama` is no longer referenced anywhere in the book.
+
+   **One thing this leaves open.** The preface's "What You Need Installed" section does not exist
+   yet — `markdown/00-preface.md` is still a placeholder — and §9 requires a lab's requirements to
+   be listed there. When the preface is written it must say: Python 3, a virtual environment, no
+   third-party packages for chapter 40, and an OpenAI key in `OPENAI_API_KEY`.
+3. ~~**`labs/` is empty, and chapter 7 already promises its contents to the reader**~~
+   **Built, 2026-10-29.** `labs/corpus/` holds 40 documents, 8 queries, 320 graded judgements and
+   the awkward PDF. Two things about it are worth knowing before a lab is written against it.
+
+   **The documents were written for the book and dedicated to the public domain (CC0), not found.**
+   That reverses the plan recorded here earlier, and `labs/corpus/README.md` gives the three
+   reasons: a provenance claim about forty fetched documents would have been mine to make on the
+   owner's behalf in a public repository; found prose supplies the properties eleven labs need only
+   by luck; and the book's own retailer example keeps Part III continuous with Part II. A CC0
+   dedication satisfies chapter 7's "public-domain documents" literally rather than by
+   redefinition.
+
+   **Every planted property is declared and tested.** `labs/corpus/README.md` lists what was built
+   in — the identifier query, the answer split across two documents, two documents that disagree on
+   a figure, a near-duplicate pair, page furniture, one very long document, twenty distractors, the
+   injection target, and the PDF's misparse — and `labs/corpus/verify.py` checks all 22 claims so a
+   lab cannot report as a finding something the corpus was built to contain, and an edit cannot
+   silently remove a property a later lab needs. Run it before writing any Part III chapter.
+
+   **The PDF's page 1 misaligns rather than merely reorders**: the extraction splices a 9.50
+   surcharge into the middle of a postcode range, so a pipeline gets a wrong figure and no error.
+   Page 2 has no text layer and carries two facts found nowhere else in the corpus.
+
+   *(The original item, for the record: chapter 7 promises)* — about
    forty short public-domain documents, eight queries with a relevance judgement each, and one
    deliberately awkward PDF with a table and a scanned page. Every Part III expected result
    depends on it (`BOOK-GUIDE.md` §9: a lab that depends on the reader's own files holds for
