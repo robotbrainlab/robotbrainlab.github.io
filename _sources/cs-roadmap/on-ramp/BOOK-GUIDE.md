@@ -37,15 +37,15 @@ Everything needed to write any book in this series. A new session starts here:
 
 The on-ramp marks Discrete Mathematics, Programming Languages & Compilers, Theory of Computation, Parallel & Concurrent Computing, and Computer Organization & Architecture as *not necessary at this level*. They have no book.
 
-### Engineering Track
+### Software Engineering Track
 
 | On-ramp topic | Book | The problem you hit | The question it answers | Covers | Pages |
 |---|---|---|---|---|---|
-| Software Engineering | **Linux and Git from Zero** | Every tutorial says "open the terminal", and I don't know what I'm typing. When my code breaks, I can't get the old version back. | How do I use the tools every developer uses every day, and never lose my work? | The shell, filesystem, permissions, processes and services, scripting, packages; Git: commits, branches, merging, remotes, undoing mistakes; open-source workflows | 85–95 |
-| Software Engineering | **Web Applications from Zero** | I use apps every day, but I have no idea what happens after I tap a button. | What happens between tapping a button and seeing the result? | The front end and the back end, what runs in the browser and what runs on the server, how they talk, where the data lives, common stacks | 20–25 |
-| Software Engineering | ***APIs to FastAPI*** (*written before this series*) | My program is useful, but other programs and people can't use it. | How does one program offer its abilities to another over the internet? | What an API is, HTTP and JSON, REST, authentication, building a real API with FastAPI | 145 |
-| Software Engineering | ***The Complete Software Engineering Guide*** (*the big book, written before this series*) | I understand the pieces, but I've never taken a real application from an idea all the way to production. | How does software actually get built, from deciding what to build to a running production system? | Deciding what to build, planning, writing good code, and taking one application from a laptop to production | 1,070 |
+| Application Engineering | **Linux and Git from Zero** | Every tutorial says "open the terminal", and I don't know what I'm typing. When my code breaks, I can't get the old version back. | How do I use the tools every developer uses every day, and never lose my work? | The shell, filesystem, permissions, processes and services, scripting, packages; Git: commits, branches, merging, remotes, undoing mistakes; open-source workflows | 85–95 |
+| Application Engineering | **Web Applications from Zero** | I use apps every day, but I have no idea what happens after I tap a button. | What happens between tapping a button and seeing the result? | The front end and the back end, what runs in the browser and what runs on the server, how they talk, where the data lives, common stacks | 20–25 |
+| Application Engineering | ***APIs to FastAPI*** (*written before this series*) | My program is useful, but other programs and people can't use it. | How does one program offer its abilities to another over the internet? | What an API is, HTTP and JSON, REST, authentication, building a real API with FastAPI | 145 |
 | Infrastructure Engineering | **Infrastructure Engineering from Zero** | It works on my machine but breaks on the server, and I don't even own a server. | How does my code get from my laptop to machines that serve everyone, the same way every time? | DevOps: containers, CI/CD, infrastructure as code, deployment and rollback. Cloud: compute, storage, networking, IAM, managed services, serverless | 95–99 |
+| The whole track | ***The Complete Software Engineering Guide*** (*the big book, written before this series*) | I understand the pieces, but I've never taken a real application from an idea all the way to production. | How does software actually get built, from deciding what to build to a running production system? | Deciding what to build, planning, writing good code, and taking one application from a laptop to production | 1,070 |
 
 Programming is not a book: the on-ramp's programming entry links to the official [Python Tutorial](https://docs.python.org/3/tutorial/).
 

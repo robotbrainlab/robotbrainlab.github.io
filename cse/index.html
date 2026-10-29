@@ -54,7 +54,7 @@
   <a href="#on-ramp" class="mobile-link">On-Ramp</a>
   <a href="#intro" class="mobile-link">Introduction</a>
   <a href="#part1" class="mobile-link">Science</a>
-  <a href="#part3-engineering" class="mobile-link">Engineering</a>
+  <a href="#part3-engineering" class="mobile-link">Software Engineering</a>
   <a href="#connections" class="mobile-link">Closing</a>
   <a href="#resources-section" class="mobile-link">Resources</a>
 </div>
@@ -85,9 +85,9 @@
   <a href="#parallel-computing" class="toc-sub-sub">Parallel &amp; Concurrent Computing</a>
   <a href="#architecture" class="toc-sub-sub">Computer Organization &amp; Architecture</a>
 
-  <a class="toc-part-label" href="#part3-engineering">Part 2 &mdash; Engineering</a>
-  <a href="#building" class="toc-sub">Building</a>
-  <a href="#software-engineering-sub" class="toc-sub-sub">Software Engineering</a>
+  <a class="toc-part-label" href="#part3-engineering">Part 2 &mdash; Software Engineering</a>
+  <a href="#building" class="toc-sub">Development</a>
+  <a href="#software-engineering-sub" class="toc-sub-sub">Application Engineering</a>
   <a href="#infrastructure-engineering-sub" class="toc-sub-sub">Infrastructure Engineering</a>
   <a href="#operating" class="toc-sub">Operating</a>
   <a href="#reliability-engineering" class="toc-sub-sub">Reliability Engineering / SRE</a>
@@ -218,10 +218,10 @@
       <td class="col-topic">Computer Organization &amp; Architecture</td>
       <td class="cell-empty"><em>Not necessary at this level</em></td>
     </tr>
-    <tr class="track-divider"><td colspan="3">Engineering Track</td></tr>
+    <tr class="track-divider"><td colspan="3">Software Engineering Track</td></tr>
     <tr>
-      <td class="col-category" rowspan="2">Building</td>
-      <td class="col-topic">Software Engineering</td>
+      <td class="col-category" rowspan="2">Development</td>
+      <td class="col-topic">Application Engineering</td>
       <td>
         <span class="cell-item">
           <span class="course-target">Linux and Git</span><br>
@@ -232,16 +232,15 @@
         </span>
         <span class="cell-item">
           <span class="course-target">Programming</span><br>
-          <span class="book-title"><a href="../data-intelligence/books/python-roadmap.html" target="_blank" rel="noopener">Python Roadmap</a></span>
+          <span class="book-title"><a href="../data-intelligence/books/python-roadmap.html" target="_blank" rel="noopener">Programming Language From Zero: Python</a></span>
           <span class="book-problem">I have a task or an idea I want a computer to carry out, but I can&rsquo;t tell it what to do yet.</span>
           <span class="book-question">How do I tell a computer exactly what to do, and how does a programming language turn my instructions into action?</span>
         </span>
         <span class="cell-item">
-          <span class="course-target">Complete Software Engineering</span><br>
-          <span class="book-title"><a href="books/complete-software-engineering-guide/The%20Complete%20Software%20Engineering%20Guide.pdf" target="_blank" rel="noopener">The Complete Software Engineering Guide</a></span>
-          <span class="book-problem">I understand the pieces, but I&rsquo;ve never taken a real application from an idea all the way to production.</span>
-          <span class="book-question">How does software actually get built, from deciding what to build to a running production system?</span>
-          <span class="book-problem">Opens with the pre-book <em>How Web Applications Work</em> &mdash; the two sides of an app, the front end, the back end, and one tap followed from start to finish &mdash; then goes deep into backend engineering.</span>
+          <span class="course-target">APIs</span><br>
+          <span class="book-title"><a href="books/apis-to-fastapi/APIs%20to%20FastAPI.pdf" target="_blank" rel="noopener">APIs to FastAPI</a></span>
+          <span class="book-problem">My program is useful, but other programs and people can&rsquo;t use it.</span>
+          <span class="book-question">How does one program offer its abilities to another over the internet?</span>
         </span>
       </td>
     </tr>
@@ -270,6 +269,17 @@
     <tr><td class="col-topic">Performance Engineering</td><td class="cell-empty"><em>Not necessary at this level</em></td></tr>
     <tr><td class="col-topic">Security Engineering</td><td class="cell-empty"><em>Not necessary at this level</em></td></tr>
     <tr><td class="col-topic">Observability Engineering</td><td class="cell-empty"><em>Not necessary at this level</em></td></tr>
+    <tr>
+      <td colspan="3">
+        <span class="cell-item">
+          <span class="course-target">Complete Software Engineering</span><br>
+          <span class="book-title"><a href="books/complete-software-engineering-guide/The%20Complete%20Software%20Engineering%20Guide.pdf" target="_blank" rel="noopener">The Complete Software Engineering Guide</a></span>
+          <span class="book-problem">I understand the pieces, but I&rsquo;ve never taken a real application from an idea all the way to production.</span>
+          <span class="book-question">How does software actually get built, from deciding what to build to a running production system?</span>
+          <span class="book-problem">Opens with the pre-book <em>How Web Applications Work</em> &mdash; the two sides of an app, the front end, the back end, and one tap followed from start to finish &mdash; then goes deep into backend engineering.</span>
+        </span>
+      </td>
+    </tr>
   </tbody>
 </table>
 </div>
@@ -284,22 +294,22 @@
 <div class="reveal" id="intro">
   <h3 class="section-heading">The Shape of the <em>Discipline</em></h3>
   <p class="body-text">
-    Computer Science &amp; Engineering is not a single subject. It is a discipline that spans pure mathematics, theoretical science, systems design, and industrial-scale engineering &mdash; and the way you organize that span matters. This article splits CS&amp;E into two halves: <strong>Science</strong> and <strong>Engineering</strong>. That split is not arbitrary. Science and Engineering answer fundamentally different questions, demand different skills, and fail in different ways when neglected.
+    Computer Science &amp; Engineering is not a single subject. It is a discipline that spans pure mathematics, theoretical science, systems design, and industrial-scale engineering &mdash; and the way you organize that span matters. This article splits CS&amp;E into two halves: <strong>Science</strong> and <strong>Software Engineering</strong>. That split is not arbitrary. Science and Software Engineering answer fundamentally different questions, demand different skills, and fail in different ways when neglected.
   </p>
   <p class="body-text">
     <strong>Science</strong> asks: <em>how does computation work?</em> What makes an algorithm correct? Why does a distributed system fail in the ways it does? What are the theoretical limits of what a computer can solve? These are questions of understanding. Skipping them means you end up building things you cannot debug, optimize, or reason about when they break at 3 AM. You become someone who can follow a tutorial but cannot deviate from one.
   </p>
   <p class="body-text">
-    <strong>Engineering</strong> asks: <em>how do I build and run real systems?</em> Knowing how a B-tree works is Science; designing a database schema that survives production traffic is Engineering. Knowing what a deadlock is belongs to Science; building a deployment pipeline that catches deadlocks before they reach users belongs to Engineering. You need both, and in that order.
+    <strong>Software Engineering</strong> asks: <em>how do I build and run real systems?</em> Knowing how a B-tree works is Science; designing a database schema that survives production traffic is Software Engineering. Knowing what a deadlock is belongs to Science; building a deployment pipeline that catches deadlocks before they reach users belongs to Software Engineering. You need both, and in that order.
   </p>
   <p class="body-text">
     Within Science, there is a further split between <strong>Fundamentals</strong> and <strong>Systems</strong>. Fundamentals covers the abstract core &mdash; computation theory, algorithms, language design &mdash; concepts that do not change regardless of what technology stack you use. Systems takes those ideas and grounds them in real infrastructure: how databases manage transactions, how operating systems schedule processes, how networks route packets. Fundamentals gives you the <em>what</em>; Systems gives you the <em>where it actually runs</em>.
   </p>
   <p class="body-text">
-    Within Engineering, the split is between <strong>Building</strong> and <strong>Operating</strong>. Building is about construction &mdash; writing software, setting up infrastructure, designing cloud architectures, establishing CI/CD pipelines. But building a system is only half the job. Operating is about keeping it alive: ensuring reliability through SRE practices, catching performance regressions before users do, hardening security posture, and maintaining observability so that when something goes wrong, you can actually find out why. A system that cannot be operated is a system that cannot be trusted.
+    Within Software Engineering, the split is between <strong>Development</strong> and <strong>Operating</strong>. Development is about construction &mdash; writing software, setting up infrastructure, designing cloud architectures, establishing CI/CD pipelines. But building a system is only half the job. Operating is about keeping it alive: ensuring reliability through SRE practices, catching performance regressions before users do, hardening security posture, and maintaining observability so that when something goes wrong, you can actually find out why. A system that cannot be operated is a system that cannot be trusted.
   </p>
   <p class="body-text">
-    The progression is deliberate: Science feeds Engineering, and within Engineering, Building feeds Operating. Each layer depends on the one before it. This article walks through all four parts in order, explaining what each topic covers, why it exists, and how it connects to everything else.
+    The progression is deliberate: Science feeds Software Engineering, and within Software Engineering, Development feeds Operating. Each layer depends on the one before it. This article walks through all four parts in order, explaining what each topic covers, why it exists, and how it connects to everything else.
   </p>
 </div>
 
@@ -516,8 +526,8 @@
 
 <div class="part-divider reveal" id="part3-engineering">
   <div class="part-num">Part 2</div>
-  <h2 class="part-title"><em>Engineering</em></h2>
-  <p class="part-subtitle">Constructing software systems, running them in production, and keeping them alive. Engineering splits into two major sub-sections: <strong>Building</strong> (construction) and <strong>Operating</strong> (keeping it alive).</p>
+  <h2 class="part-title"><em>Software Engineering</em></h2>
+  <p class="part-subtitle">Constructing software systems, running them in production, and keeping them alive. Software Engineering splits into two major sub-sections: <strong>Development</strong> (construction) and <strong>Operating</strong> (keeping it alive).</p>
 </div>
 
 <!-- ============================================================ -->
@@ -525,45 +535,45 @@
 <!-- ============================================================ -->
 <div class="reveal" id="building">
   <div class="major-section-kicker">Part 2 &mdash; Sub-section 1 of 2</div>
-  <h2 class="major-section"><em>Building</em></h2>
-  <p class="major-section-desc">Constructing software systems and the infrastructure they run on. Building splits into two sub-disciplines: <strong>Software Engineering</strong> (writing the code) and <strong>Infrastructure Engineering</strong> (the platforms it runs on).</p>
+  <h2 class="major-section"><em>Development</em></h2>
+  <p class="major-section-desc">Constructing software systems and the infrastructure they run on. Development splits into two sub-disciplines: <strong>Application Engineering</strong> (writing the code) and <strong>Infrastructure Engineering</strong> (the platforms it runs on).</p>
 </div>
 
 <div class="reveal" id="building-intro">
-  <h3 class="section-heading">What <em>Building</em> Means</h3>
+  <h3 class="section-heading">What <em>Development</em> Means</h3>
   <p class="body-text">
-    The Building category is where Science turns into practice. Everything in Parts 1&ndash;2 gives you understanding. Building is where you use that understanding to construct real systems that solve real problems. The distinction is important: you can understand B-trees deeply and still write terrible production software if you do not know how to structure a codebase, manage dependencies, write tests, deploy reliably, or operate infrastructure.
+    The Development category is where Science turns into practice. Everything in Parts 1&ndash;2 gives you understanding. Development is where you use that understanding to construct real systems that solve real problems. The distinction is important: you can understand B-trees deeply and still write terrible production software if you do not know how to structure a codebase, manage dependencies, write tests, deploy reliably, or operate infrastructure.
   </p>
   <p class="body-text">
-    Building splits into two sub-disciplines: <strong>Software Engineering</strong> and <strong>Infrastructure Engineering</strong>. Software Engineering is the practice of building software that is maintainable, testable, and scalable over time. Infrastructure Engineering is the practice of building and managing the platforms that software runs on. They are deeply interconnected &mdash; you cannot do one well without understanding the other &mdash; but they require different skills and different modes of thinking.
+    Development splits into two sub-disciplines: <strong>Application Engineering</strong> and <strong>Infrastructure Engineering</strong>. Application Engineering is the practice of building software that is maintainable, testable, and scalable over time. Infrastructure Engineering is the practice of building and managing the platforms that software runs on. They are deeply interconnected &mdash; you cannot do one well without understanding the other &mdash; but they require different skills and different modes of thinking.
   </p>
 </div>
 
 <hr class="content-rule" />
 
-<!-- Building → Software Engineering (first sub-discipline of Building) -->
+<!-- Development → Application Engineering (first sub-discipline of Development) -->
 <div class="reveal" id="software-engineering-sub">
   <div class="sub-discipline-kicker">Sub-discipline 1 of 2</div>
-  <h3 class="sub-discipline">Software Engineering</h3>
+  <h3 class="sub-discipline">Application Engineering</h3>
   <p class="sub-discipline-desc">The discipline of building software that is maintainable, testable, and scalable over time &mdash; design patterns, architecture, testing, version control, and the principles that separate hobby code from professional software.</p>
 </div>
 
 <div class="reveal" id="software-engineering">
-  <h3 class="section-heading"><span class="sh-num">11.</span> Software Engineering</h3>
+  <h3 class="section-heading"><span class="sh-num">11.</span> Application Engineering</h3>
   <p class="body-text">
-    Software Engineering is a discipline, not just &ldquo;writing code.&rdquo; The distinction matters. Anyone can write a script that works once. Software Engineering is the discipline of building systems that are maintainable, testable, and scalable &mdash; systems that can be evolved by teams of people over years without collapsing under their own weight. It covers design patterns, software architecture (monoliths, microservices, event-driven systems), testing strategies (unit, integration, end-to-end), code review practices, version control workflows, dependency management, and the principles that separate hobby code from professional software.
+    Application Engineering is a discipline, not just &ldquo;writing code.&rdquo; The distinction matters. Anyone can write a script that works once. Application Engineering is the discipline of building systems that are maintainable, testable, and scalable &mdash; systems that can be evolved by teams of people over years without collapsing under their own weight. It covers design patterns, software architecture (monoliths, microservices, event-driven systems), testing strategies (unit, integration, end-to-end), code review practices, version control workflows, dependency management, and the principles that separate hobby code from professional software.
   </p>
   <p class="body-text">
     The core challenge of software engineering is managing complexity over time. A small program written by one person can live in their head. A system built by a team, serving millions of users, evolving over years, cannot. Software engineering provides the tools and practices to manage that complexity: abstraction to hide irrelevant details, modularity to isolate changes, testing to catch regressions, architecture to organize the codebase so that teams can work independently, and design principles (SOLID, DRY, separation of concerns) to keep code comprehensible as it grows.
   </p>
   <p class="body-text">
-    This is also where the Science foundation pays off most visibly. Understanding algorithms tells you when a design choice will not scale. Understanding databases tells you how to design schemas that support your access patterns. Understanding distributed systems tells you which consistency guarantees your architecture actually provides. Software Engineering is the integration point where all the theoretical knowledge becomes practical decision-making.
+    This is also where the Science foundation pays off most visibly. Understanding algorithms tells you when a design choice will not scale. Understanding databases tells you how to design schemas that support your access patterns. Understanding distributed systems tells you which consistency guarantees your architecture actually provides. Application Engineering is the integration point where all the theoretical knowledge becomes practical decision-making.
   </p>
 </div>
 
 <hr class="content-rule" />
 
-<!-- Building → Infrastructure Engineering (second sub-discipline of Building) -->
+<!-- Development → Infrastructure Engineering (second sub-discipline of Development) -->
 <div class="reveal" id="infrastructure-engineering-sub">
   <div class="sub-discipline-kicker">Sub-discipline 2 of 2</div>
   <h3 class="sub-discipline">Infrastructure Engineering</h3>
@@ -592,7 +602,7 @@
 <div class="reveal" id="operating">
   <div class="major-section-kicker">Part 2 &mdash; Sub-section 2 of 2</div>
   <h2 class="major-section"><em>Operating</em></h2>
-  <p class="major-section-desc">Keeping systems reliable, performant, secure, and observable in production. Building gets a system running; Operating keeps it alive.</p>
+  <p class="major-section-desc">Keeping systems reliable, performant, secure, and observable in production. Development gets a system running; Operating keeps it alive.</p>
 </div>
 
 <div class="reveal" id="operating-intro">
@@ -616,7 +626,7 @@
     The core idea of SRE is the error budget. Rather than pursuing 100% uptime (which is both impossible and economically irrational), you define an acceptable level of unreliability &mdash; say, 99.9% availability, which allows about 8.7 hours of downtime per year. As long as you are within that budget, you can take risks (deploy new features, run experiments). When you exhaust the budget, you slow down and invest in stability. This framing turns the perpetual tension between &ldquo;ship features&rdquo; and &ldquo;keep it stable&rdquo; into a quantitative, manageable trade-off.
   </p>
   <p class="body-text">
-    Reliability Engineering draws directly on Distributed Systems (understanding failure modes), Operating Systems (understanding resource exhaustion), and Software Engineering (automating operational tasks). It also connects forward to the other Operating disciplines: you cannot maintain reliability without observability (to detect problems), performance engineering (to prevent degradation), and security (to prevent adversarial disruptions). SRE is, in many ways, the orchestrator of the Operating layer.
+    Reliability Engineering draws directly on Distributed Systems (understanding failure modes), Operating Systems (understanding resource exhaustion), and Application Engineering (automating operational tasks). It also connects forward to the other Operating disciplines: you cannot maintain reliability without observability (to detect problems), performance engineering (to prevent degradation), and security (to prevent adversarial disruptions). SRE is, in many ways, the orchestrator of the Operating layer.
   </p>
 </div>
 
@@ -646,7 +656,7 @@
     The fundamental challenge of security is the asymmetry between attacker and defender. An attacker only needs to find one vulnerability. A defender needs to close all of them. This asymmetry means that security engineering is less about clever defenses and more about disciplined, systematic practices: input validation everywhere, least-privilege access by default, encryption as a baseline, regular dependency auditing, and the assumption that any component might be compromised. Threat modeling &mdash; systematically identifying what could go wrong and how likely it is &mdash; provides the framework for deciding where to invest limited security resources.
   </p>
   <p class="body-text">
-    Security connects to every other part of the discipline. Cryptography relies on number theory from Mathematics. Authentication protocols use ideas from Distributed Systems. Network security requires understanding of Computer Networks. Secure software design is a subset of Software Engineering. And security incidents are diagnosed using Observability. Every engineer needs at least a baseline understanding of security, because a system with beautiful architecture and zero security posture is a system waiting to be compromised.
+    Security connects to every other part of the discipline. Cryptography relies on number theory from Mathematics. Authentication protocols use ideas from Distributed Systems. Network security requires understanding of Computer Networks. Secure software design is a subset of Application Engineering. And security incidents are diagnosed using Observability. Every engineer needs at least a baseline understanding of security, because a system with beautiful architecture and zero security posture is a system waiting to be compromised.
   </p>
 </div>
 
@@ -686,13 +696,13 @@
     The Science layer splits into Fundamentals and Systems for a reason. Fundamentals gives you the abstract ideas &mdash; how algorithms work, what computation can and cannot do, how languages translate intent into execution. Systems takes those abstractions and instantiates them in real infrastructure. You need the abstractions first because they are what let you reason about systems from first principles rather than just memorizing configuration options.
   </p>
   <p class="body-text">
-    Engineering depends on Science in the same way that Systems depends on Fundamentals. You can learn to deploy a Kubernetes cluster without understanding operating systems, but when a pod gets OOM-killed and you don&rsquo;t understand virtual memory, you are debugging with a blindfold on. You can write microservices without understanding distributed systems, but when a network partition causes data inconsistency, the CAP theorem is not an academic curiosity &mdash; it is the explanation for why your system is behaving the way it is.
+    Software Engineering depends on Science in the same way that Systems depends on Fundamentals. You can learn to deploy a Kubernetes cluster without understanding operating systems, but when a pod gets OOM-killed and you don&rsquo;t understand virtual memory, you are debugging with a blindfold on. You can write microservices without understanding distributed systems, but when a network partition causes data inconsistency, the CAP theorem is not an academic curiosity &mdash; it is the explanation for why your system is behaving the way it is.
   </p>
   <p class="body-text">
-    Within Engineering, Building feeds Operating. You cannot operate a system you do not understand how to build. SRE practices assume you can write automation. Performance engineering assumes you can modify application code and database queries. Security engineering assumes you understand the software stack deeply enough to identify vulnerabilities. And all of Operating assumes Observability &mdash; you cannot improve what you cannot see.
+    Within Software Engineering, Development feeds Operating. You cannot operate a system you do not understand how to build. SRE practices assume you can write automation. Performance engineering assumes you can modify application code and database queries. Security engineering assumes you understand the software stack deeply enough to identify vulnerabilities. And all of Operating assumes Observability &mdash; you cannot improve what you cannot see.
   </p>
   <p class="body-text">
-    The full chain runs: <strong>Science (Fundamentals &rarr; Systems) &rarr; Engineering (Building &rarr; Operating)</strong>. Each link strengthens every link that follows. The temptation is always to skip ahead &mdash; to jump to Building without the Science, or to Operating without the Building. That works until it does not. And when it stops working, the gap in your foundation is exactly what makes the problem impossible to diagnose.
+    The full chain runs: <strong>Science (Fundamentals &rarr; Systems) &rarr; Software Engineering (Development &rarr; Operating)</strong>. Each link strengthens every link that follows. The temptation is always to skip ahead &mdash; to jump to Development without the Science, or to Operating without the Development. That works until it does not. And when it stops working, the gap in your foundation is exactly what makes the problem impossible to diagnose.
   </p>
   <p class="body-text">
     This is the full landscape of Computer Science and Engineering. It is large, but it is not random. The structure is a map, and the progression is a path. You do not need to master every topic before moving to the next &mdash; but you do need to know the map well enough to understand where you are, what you are standing on, and what you are missing.
@@ -712,7 +722,7 @@
 
 <div class="reveal" id="resources-intro">
   <p class="body-text">
-    Every textbook, course, and practical reference used in this guide is collected on the dedicated CS &amp; Engineering Resources page &mdash; organised in the same Science / Engineering structure you just read, with tables for Books and Courses across Fundamentals, Systems, Building, and Operating. Use it as a quick-reference when you&rsquo;re ready to pick what to study next.
+    Every textbook, course, and practical reference used in this guide is collected on the dedicated CS &amp; Engineering Resources page &mdash; organised in the same Science / Software Engineering structure you just read, with tables for Books and Courses across Fundamentals, Systems, Development, and Operating. Use it as a quick-reference when you&rsquo;re ready to pick what to study next.
   </p>
   <p style="margin-top: 1.4rem;">
     <a href="resources.html" class="resources-outro-link">Browse the full CS &amp; Engineering Resources page &rarr;</a>

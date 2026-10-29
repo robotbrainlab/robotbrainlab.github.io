@@ -186,15 +186,24 @@ per page, nothing pushed).
 - Book links open in a new tab (`target="_blank" rel="noopener"`). Books without a PDF yet carry a
   `<span class="book-status">Coming soon</span>` badge. Topics that are skipped at this level say
   *Not necessary at this level*.
-- The on-ramp's **Programming** entry (Engineering Track → Building → Software Engineering) links to
+- The on-ramp's **Programming** entry (Software Engineering Track → Development → Application Engineering) links to
   `data-intelligence/books/python-roadmap.html`, not to a "from Zero" PDF. It is the one on-ramp
   entry served by a page rather than a book, so it crosses into `data-intelligence/`. Changed
-  2026-10-07; it used to be a "Programming from Zero — Coming soon" placeholder.
-- **Building's order is deliberate** (2026-10-08): Linux and Git → Programming → Web Applications →
-  Complete Software Engineering. Tools first, then programming, then how web apps work, then all of it
-  together.
-- **The on-ramp's Building path is three books** (2026-10-08): Linux and Git → Programming → Complete
-  Software Engineering. Nothing else belongs in that column.
+  2026-10-07; it used to be a "Programming from Zero — Coming soon" placeholder. The link reads
+  **Programming Language From Zero: Python** (2026-10-29) — the topic is the language, Python is the
+  instance — while the page's own title stays *Python Roadmap*, because the D&I guide links to it too.
+- **Application Engineering's order is deliberate** (2026-10-29): Linux and Git → Programming → APIs.
+  Tools first, then the language, then how a program offers its abilities to others.
+- **The Complete Software Engineering Guide belongs to no category and no topic.** It is the last row
+  of the Software Engineering Track, a single `colspan="3"` cell running the full width of the table
+  (2026-10-29). The reason: every other book answers one topic, while the guide is a traversal — one
+  project carried from idea to production, read *after* the pieces. Filing a traversal under a topic
+  made it read like a fourth sibling of Linux and Git.
+  Two earlier attempts failed and are worth not repeating. A labelled row *Across Development* read as
+  a third topic under Development; widening that row to `colspan="2"` still left it inside the
+  Development block, because the category cell beside it says what owns it. Only leaving the category
+  column altogether reads as *across*. Done with existing classes, so no `theme/` change and no
+  cache-version bump.
 - **Web Applications from Zero is no longer published on its own.** Its six chapters are now the pre-book
   *How Web Applications Work* inside the Complete Software Engineering Guide, sitting after the map
   chapter and before Part I (2026-10-08). `cse/books/web-applications/` was deleted;
@@ -215,10 +224,11 @@ per page, nothing pushed).
   ```
   Treat `chapters/*.tex` as source until that Markdown is found or rewritten. **Never run `make clean`** —
   it deletes `chapters/`, and nothing can regenerate it.
-- **APIs to FastAPI is no longer an on-ramp row.** It moved into the Python Roadmap, Phase 1.5, where it
-  replaced the MDN HTTP reading item (2026-10-08). The PDF stays at `cse/books/apis-to-fastapi/`; only the
-  table entry went. Don't re-add the row — the on-ramp reaches the book through Programming → Python
-  Roadmap → 1.5.
+- **APIs to FastAPI is in both places, on purpose** (2026-10-29). It is an on-ramp entry again, under
+  Application Engineering after Programming, *and* it stays in the Python Roadmap at Phase 1.5, where it
+  replaced the MDN HTTP reading item on 2026-10-08. The PDF is at `cse/books/apis-to-fastapi/`. This
+  reverses the 2026-10-08 decision to reach it only through Programming → Python Roadmap → 1.5; the
+  owner wanted it visible as a topic in its own right. Keep both entries in step.
 - **Learning method, agreed 2026-10-08.** The roadmap is kept clean and supporting concepts are learned as
   they come up. A new "from Zero" guide is written only when (a) no good from-zero resource exists at this
   level, and (b) the wall has been hit twice. That is how `APIs to FastAPI` came to exist. Don't try to
