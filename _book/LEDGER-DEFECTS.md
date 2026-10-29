@@ -65,12 +65,41 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**65. When a thing varies along two axes, naming it by one of them identifies nothing — and the
+back matter is where it happens.** Chapter 41 has five graders. They differ in what counts as a
+match (equality, or the value present anywhere in the reply) and in which notation the key may be
+in (as written, or either of `two` and `2`). Those axes are independent, so each one alone names
+two graders — and in this chapter the two it names give *opposite verdicts*, because the trap the
+chapter exists to set is that one grader favours prompt A and the rest favour B.
+
+Three passages in the back matter named a grader by one axis. A Review Answer said *a grader asking
+only whether the value appears anywhere separates the two prompts not at all*, which is true of
+`mentioned` and false of `contains` — `contains` separates them at −0.133 with an interval clearing
+zero, in the other direction. Another said *the same trials, graded by whether the right value
+appears anywhere, give both prompts 1.000*: that is `contains`'s description with `mentioned`'s
+result, and `contains` gives 0.867. A third said the unit failures were what *no strictness setting
+would have shown you*, two lines after the same answer had said a strict grader's list is exactly
+where they were found. Each sentence is defensible as loose prose and each is false as written.
+
+Why review round 1 and round 2 both passed them: every one is locally plausible, every figure in
+them is a real figure from the chapter, and the error is a *reference* failure — the phrase picks
+out the wrong object — which no gate and no count can see. It took a pass whose only job was to
+check repairs, reading the five rows as a set.
+
+The practice: **when a chapter's subject is a family of things that vary along more than one axis,
+state the axes once, in the body, and then use the members' names and never a description.** A
+description is safe only where one axis has been fixed in the same sentence. And **count the axes
+before writing the back matter**: if a Summary or a Review Answer can name a member two ways, one
+of them is wrong somewhere.
+
+---
+
 **64. A program that prints a computed count and then describes it in a hardcoded sentence
 contradicts itself the first time the data moves — and the sentence is where the lesson is.**
-Chapter 41's step 5 groups the replies a strict grader rejects and prints `f"  3. {len(g2)} cases,
-answered with a unit the prompt forbade"`, which is honest. The four lines after it were not:
-*none of these four questions does*, and *the instruction was disobeyed on 4 of 30*, both typed as
-literals from the run I happened to be looking at. On a later run the unit group was three cases,
+Chapter 41's step 5 groups the replies a strict grader rejects and printed the group's size from
+the data — `print(f"  3. {len(g2)} cases, answered with a unit the prompt")` — which is honest. The
+seven print lines after it were not: *none of these four questions does*, and *the instruction was
+disobeyed on 4 of 30*, both typed as literals from the run I happened to be looking at. On a later run the unit group was three cases,
 so the program printed `3 cases` and `none of these four questions does` in the same paragraph.
 Two further sentences did the same: *three other word-keyed cases came back in words*, and a
 docstring saying *23 of the 30 keys here are digits* when 22 are digits, 7 are words and one is a
@@ -83,7 +112,10 @@ inside the program: there, prose written against a stale run; here, a sentence w
 stale variable, in the one step whose whole subject is reading your own output.
 
 The practice: **a number in a program's own commentary comes from the same expression that
-printed it.** If `len(g2)` is printed, the sentence after it says `{len(g2)}` too, and a sentence
+printed it, and so does its noun.** The repair's own first version still wrote `{len(g1)} cases`
+and `{len(g3)} case` — count from the data, noun from the run I was looking at — so `1 cases` and
+`2 case` were both reachable. One helper returning the count and the noun together fixes the
+class; the step now has `cases(rows)`, and every group is printed only if it is non-empty. If `len(g2)` is printed, the sentence after it says `{len(g2)}` too, and a sentence
 that cannot be written that way is a sentence about the method and not about the data. Grep every
 lab's print strings for a spelled-out numeral — *one* to *twelve* — and for a bare digit beside a
 word like *cases*, *of 30* or *questions*, and check each against the variable above it. Related:

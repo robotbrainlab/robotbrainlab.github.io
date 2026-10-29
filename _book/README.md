@@ -80,7 +80,7 @@ sub-part opener pages sitting after the last written chapter were counted into i
   38   624-650    27   14    193%
   39   651-678    28   22    127%
   40   680-704    25   20    125%
-  41   705-728    24   18    133%
+  41   705-729    25   18    139%
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
@@ -92,7 +92,7 @@ is what the first non-deterministic chapter cost: prose that quotes a figure a r
 is false the moment anything re-embeds, and no gate can see it. **Chapter 41 puts chapter 20's
 statistics on real replies** — 180 trials, five graders, five verdicts from the same data — and its
 lesson is about the instrument rather than the result: the grader written to be fair to one prompt
-forgave the only instruction the other broke, and the headline score never showed it. 723 printed
+forgave the only instruction the other broke, and the headline score never showed it. 724 printed
 pages of chapters. Chapters 30
 to 33 are the evaluation run of the part, and the first chapters since 17 whose material is a
 method rather than a mechanism. Their reviews find more per chapter than the mechanism chapters'

@@ -15,12 +15,13 @@ the number you end up with actually measure?
 
 > **Note:** As in chapter 40, the `text` blocks are one real run, and reading them as a promise is
 > the mistake this chapter is about. **What held across three runs on different days is every
-> verdict and the sign of every difference**; the task is extraction at temperature 0, the model
-> agreed with itself on all three trials of almost every case, and two of the five grader rows came
-> out identical every time. **What moved is one case at the margin.** The group of replies that
-> carry a unit the prompt forbade was four cases in the run printed here and three in each later
-> one — a different case each time — which is enough to move the strictest score from 0.700 to
-> 0.733, and on one of those runs two of the middle rows moved by about a case as well. So expect
+> verdict and the sign of every difference**; the task is extraction at temperature 0, and the
+> model agreed with itself on all three trials of almost every case. The `mentioned` and
+> `norm+notation` rows came out identical on every run, which matters because the +0.967 this
+> chapter ends on is one of them. **What moved is one case at the margin.** The group of replies
+> that carry a unit the prompt forbade was four cases in the run printed here and three in each
+> later one — a different case each time — which is enough to move `strict` from 0.700 to 0.733;
+> and on one of the three runs `contains` and `normalised` moved by about a case too. So expect
 > your own figures to differ from these in the last case or two, and treat step 5 as the step that
 > matters: the failures you read are yours, not mine. The two figures of a different kind again are
 > the mean reply lengths in step 4, which carry whatever the model felt like saying; they are
@@ -467,9 +468,10 @@ sentence.
 
 That is worth pausing on, because it is the entire observable effect of the instruction at this
 point. Nothing in that output says either prompt got an answer right. It would be easy to look at
-a thirteen-fold reduction in output and feel that something had improved — and chapter 1 already
-told you that the reply is the dearer half of the exchange, so something *has* — but whether the
-answers are still correct is a separate question that no amount of looking at lengths will settle.
+a reduction of more than tenfold in output and feel that something had improved — and chapter 1
+already told you that the reply is the dearer half of the exchange, so something *has* — but
+whether the answers are still correct is a separate question that no amount of looking at lengths
+will settle.
 
 ## Step 5: Read the Failures Before You Believe the Score
 
@@ -525,8 +527,6 @@ if __name__ == "__main__":
                else "unit" if normalised(reply, want) else "qualifier")
         print(f"    {cid}  key {want!r:9} got {reply!r:14} {tag}")
 
-    print("\n  Three groups, and they are three different defects.\n")
-
     g1 = [u for u in union if not contains(u[2], u[1])]
     g2 = [u for u in union if normalised(u[2], u[1])]
     g3 = [u for u in union
@@ -534,33 +534,52 @@ if __name__ == "__main__":
 
     worded = [1 for cid, p, t, w, r in first
               if p == "B" and w.isalpha()]
-    print(f"  1. {len(g1)} cases, keyed in words, answered in digits.")
-    print("     The model is right. The KEY is wrong, because it")
-    print("     allows one notation and the document uses the other.")
-    print("     It is not that a terse reply always gives digits:")
-    print(f"     {len(worded) - len(g1)} other word-keyed cases"
-          " came back in words.\n")
+    in_words = [1] * (len(worded) - len(g1))
+
+    def cases(rows):
+        """The count and its noun from the same expression.
+
+        Printing len(rows) and then writing 'four' in the sentence
+        under it is how this program contradicted itself on the
+        first run where a group changed size.
+        """
+        return f"{len(rows)} case" + ("" if len(rows) == 1 else "s")
+
+    # The three labels are the three KINDS of defect, not a count.
+    # A group that is empty on your run leaves its number out.
+    present = [g for g in (g1, g3, g2) if g]
+    print(f"\n  {len(present)} groups, each a different defect.\n")
+
+    if g1:
+        print(f"  1. {cases(g1)}, keyed in words, answered in digits.")
+        print("     The model is right. The KEY is wrong, because")
+        print("     it allows one notation and the document uses the")
+        print("     other. It is not that a terse reply always")
+        print(f"     gives digits: {cases(in_words)} came back in")
+        print("     words.\n")
 
     if g3:
-        print(f"  2. {len(g3)} case, keyed {g3[0][1]!r}, "
+        print(f"  2. {cases(g3)}, keyed {g3[0][1]!r}, "
               f"answered {g3[0][2]!r}.")
         print("     The document says 'takes up to 10 working days'.")
         print("     The model quoted the document and the key did")
         print("     not. A second kind of key defect: a dropped")
         print("     qualifier.\n")
 
-    print(f"  3. {len(g2)} cases, answered with a unit the prompt")
-    print("     forbade. Prompt B says 'no units unless the question")
-    print("     asks for them' and none of these questions does.")
-    print(f"     So the instruction was disobeyed on {len(g2)} of")
-    print("     30 - and `normalised` strips a trailing unit, so")
-    print("     the headline score never shows it. The grader")
-    print("     written to be fair to prompt A quietly forgave")
-    print("     prompt B's only real failure.\n")
+    if g2:
+        print(f"  3. {cases(g2)}, answered with a unit the prompt")
+        print("     forbade. Prompt B says 'no units unless the")
+        print("     question asks for them' and none of these")
+        print(f"     questions does. So it was disobeyed on {len(g2)}")
+        print("     of 30 - and `normalised` strips a trailing unit,")
+        print("     so the headline score never shows it. The grader")
+        print("     written to be fair to prompt A quietly forgave")
+        print("     prompt B's only real failure.\n")
 
-    print("  None of the three was found by noticing repeatability.")
-    print("  All three were found by reading the replies, which is")
-    print("  chapter 30's method and the only one that works here.")
+    print("  None of them was found by noticing repeatability.")
+    print("  All of them were found by reading the replies, which")
+    print("  is chapter 30's method and the only one that works")
+    print("  here.")
 ```
 
 ```text
@@ -586,13 +605,14 @@ if __name__ == "__main__":
     c18  key '10'      got 'up to 10'     qualifier
     c20  key 'three'   got '3'            notation
 
-  Three groups, and they are three different defects.
+  3 groups, each a different defect.
 
   1. 4 cases, keyed in words, answered in digits.
-     The model is right. The KEY is wrong, because it
-     allows one notation and the document uses the other.
-     It is not that a terse reply always gives digits:
-     3 other word-keyed cases came back in words.
+     The model is right. The KEY is wrong, because
+     it allows one notation and the document uses the
+     other. It is not that a terse reply always
+     gives digits: 3 cases came back in
+     words.
 
   2. 1 case, keyed '10', answered 'up to 10'.
      The document says 'takes up to 10 working days'.
@@ -601,17 +621,18 @@ if __name__ == "__main__":
      qualifier.
 
   3. 4 cases, answered with a unit the prompt
-     forbade. Prompt B says 'no units unless the question
-     asks for them' and none of these questions does.
-     So the instruction was disobeyed on 4 of
-     30 - and `normalised` strips a trailing unit, so
-     the headline score never shows it. The grader
+     forbade. Prompt B says 'no units unless the
+     question asks for them' and none of these
+     questions does. So it was disobeyed on 4
+     of 30 - and `normalised` strips a trailing unit,
+     so the headline score never shows it. The grader
      written to be fair to prompt A quietly forgave
      prompt B's only real failure.
 
-  None of the three was found by noticing repeatability.
-  All three were found by reading the replies, which is
-  chapter 30's method and the only one that works here.
+  None of them was found by noticing repeatability.
+  All of them were found by reading the replies, which
+  is chapter 30's method and the only one that works
+  here.
 ```
 
 **Nine cases, three defects, and only one of them is about notation.**
@@ -654,7 +675,9 @@ you nothing about any of it.** The interval would have been narrow, because the 
 perfectly consistent. Narrow is not the same as right.
 
 > **Tip:** The cheapest version of this step is the one above: print every reply a strict grader
-> rejects, with the key beside it, and read them. Nine rows on thirty cases. Chapter 30 owns the
+> rejects *for the prompt you are testing*, with the key beside it, and read them. Nine rows here,
+> all of them prompt B's — `strict` rejects all thirty of prompt A's, which is the score and not a
+> list worth reading. Chapter 30 owns the
 > method and calls it error analysis; this is the smallest useful instance of it, run on a
 > measurement rather than on a product.
 
@@ -697,10 +720,11 @@ def mentioned(reply, answer):
     """Is the right value in the reply at all, in either notation?
 
     Symmetric on purpose. The first version mapped a word key to
-    digits and not the other way, and 22 of the 30 keys here are
-    digits - so it would have marked a correct word-form reply
-    wrong on most of the set while being called the grader that
-    asks whether the model knew.
+    digits and not the other way. 22 of the 30 keys here are
+    digits, and five of those have a word form in WORDS at all
+    - 30, 14, 14, 20 and 10 - so a correct word-form reply to
+    any of those five was marked wrong, by the grader being
+    called the one that asks whether the model knew.
     """
     r = reply.lower()
     a = answer.lower()
@@ -833,12 +857,21 @@ if __name__ == "__main__":
   while saying nothing about what was measured.
 ```
 
+**Five graders, and two axes.** They differ in two independent ways, and a grader named by one of
+them alone is not identified. The first axis is what counts as a match: `strict`, `normalised` and
+`norm+notation` want the reply to *be* the answer, while `contains` and `mentioned` accept the
+value anywhere inside it. The second is which notation the key is allowed to be in: `strict`,
+`normalised` and `contains` take the key as written, while `norm+notation` and `mentioned` accept
+either `two` or `2`. So *the grader that wants the value anywhere* names two graders whose verdicts
+are opposite, and so does *the grader that accepts either notation*. From here each one is called
+by its name.
+
 **Read the `wins` column down.** Five graders over the same one hundred and eighty trials, and one
 of them says prompt A is better, with an interval that clears zero. If you had written `contains`
 and stopped, you would have a defensible-looking result pointing the wrong way.
 
-**Then read the `mentioned` row, because that is the verdict.** With the notation rule applied,
-asking only whether the right value appears anywhere, **both prompts score 1.000.** Every reply on
+**Then read the `mentioned` row, because that is the verdict.** Asking only whether the right
+value is present anywhere in either notation, **both prompts score 1.000.** Every reply on
 every case contains the right value in one notation or the other — and read that as the ceiling it
 is, not as proof. Its interval contains zero, so chapter 20's rule makes it *cannot tell*; and what
 it establishes goes only as far as a substring test can, which is not far: `mentioned` would accept
@@ -872,9 +905,10 @@ what the number measures — which in this case is parseability and not capabili
 3. **Change one sentence between the two prompts**, so the difference can be attributed.
 4. **Run every case more than once** and average the trials *within* the case, so one case stays
    one row.
-5. **Read every failure a strict grader rejects, not one grader's list.** Nine here, and they were
-   three different defects: four the key's notation, one the key dropping a qualifier the document
-   has, and four the prompt's own instruction being ignored.
+5. **Read every failure a strict grader rejects for the prompt you are testing**, and not one
+   grader's list. Nine for prompt B here, and they were three different defects: four the key's
+   notation, one the key dropping a qualifier the document has, and four the prompt's own
+   instruction being ignored.
 6. **Expect a failing case to fail every time.** Chapter 20 says most cases are reliably right or
    reliably wrong, so repeatability is not a signal of anything; what diagnoses a failure is
    reading it.
@@ -895,7 +929,7 @@ value — graded by an exact-match grader, so no judge is needed, which is chapt
 sorting a check into code or judgement. The cases are built by a program that **asserts every
 expected answer appears in its own document**, because a case whose answer is not in its source is
 a case about nothing. Two prompts differing in one sentence: B adds *reply with the value only*.
-That one sentence takes the mean reply from about 55 characters to about 4, a factor of 13, and at
+That one sentence takes the mean reply from about 55 characters to about 4, more than tenfold, and at
 that point nothing has been measured about correctness at all. **Three graders disagree about the
 same correct reply**: `strict` wants the reply to be the answer, `contains` wants the value present
 anywhere, `normalised` strips emphasis, a leading *the answer is* and one trailing unit —
@@ -930,7 +964,7 @@ the thing you wanted.**
 
 | Term | Meaning |
 |---|---|
-| **Exact-match grader** | A grader whose verdict is string equality after a declared normalisation. Needs no judge, which is what makes it reachable first. Chapter 30 calls exact match *useless* and is right about its own case, grading free prose against a reference — and this chapter's step 6 shows why, with prompt A right thirty times out of thirty and scoring 0.000. It works here only because the answer is one figure, and the declared normalisation is the whole of it |
+| **Exact-match grader** | A grader whose verdict is string equality after a declared normalisation. Needs no judge, which is what makes it reachable first. Chapter 30 calls exact match *useless* and is right about its own case, grading free prose against a reference — and this chapter's step 6 shows why, with prompt A scoring 0.000 on thirty replies that a substring grader accepts in full. It works here only because the answer is one figure, and the declared normalisation is the whole of it |
 | **Answer normalisation** | The rule saying which two strings count as the same answer: what case, punctuation, emphasis, units and notation are ignored. Not chapter 12's normalisation, which is about a model's internals. Write it down, because a score is a measurement of it as much as of the model |
 
 ### Worth Memorising
@@ -968,14 +1002,14 @@ a paired bootstrap on the **difference**, resampling cases rather than results. 
 that make it defensible rather than merely computed: **I read the failures of every grader before
 looking at the score**, which turned up five cases where the key was wrong and not the prompt, and
 four where prompt B broke its own instruction; and I said what the number measures, which here is
-format rather than accuracy, because a grader asking only whether the value appears anywhere
-separates the two prompts not at all.
+format rather than accuracy, because `mentioned` — which asks only whether the value is present
+anywhere in either notation — separates the two prompts not at all.
 2. Because a tight interval says the effect is consistent, not that it is the effect you named.
 Here the thing being measured is whether a format instruction applied — and a format instruction
 either applies or it does not, so it is perfectly consistent across cases and trials and the
-interval collapses. The same 180 trials, graded by whether the right value appears anywhere, give
-both prompts 1.000 — a ceiling with nothing to discriminate between, so by chapter 20's rule it
-says *cannot tell* rather than that the two are equal. So the 0.967 is parseability. It is real, it is worth having if a program has to read the answer, and calling it
+interval collapses. The same 180 trials, graded by `mentioned` — the value present anywhere in
+either notation — give both prompts 1.000, a ceiling with nothing to discriminate between, so by
+chapter 20's rule it says *cannot tell* rather than that the two are equal. So the 0.967 is parseability. It is real, it is worth having if a program has to read the answer, and calling it
 accuracy is false. **Width measures how reliably you found something, never whether it is the thing
 you wanted.**
 3. The union, which here means the strict grader's nine. Each grader rejects a different set, the
@@ -983,8 +1017,9 @@ loosest rejects fewest, and the loosest is the one it is comfortable to read —
 you find the smallest number of defects your data holds rather than all of them. In this chapter
 the four hold one defect and the nine hold three: four cases where the key allowed only the
 notation the document did not use, one where the key dropped the document's qualifier, and four
-where the prompt's own formatting instruction was broken. The last group is the one no strictness
-setting would have shown you, because the grader strips exactly what it produced.
+where the prompt's own formatting instruction was broken. The last group is the one no *score*
+would have shown you, because the grader chosen for the headline strips exactly what it produced.
+It is visible only in the list of replies a strict grader rejects.
 4. Because the answer is a figure, and a figure can be compared by a program — which is chapter
 31's test for sorting a check into code or judgement: code can decide where the comparison is
 between two things both literally present. What would make a judge necessary is an answer whose
