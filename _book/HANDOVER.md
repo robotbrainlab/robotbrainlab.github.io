@@ -60,41 +60,41 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Parts I, II and III are complete, and Part IV is 3 of 7.** Part I is all 17 chapters, 199
+**Parts I, II and III are complete, and Part IV is 4 of 7.** Part I is all 17 chapters, 199
 printed pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III is the eleven labs
-40 to 50, closed 2026-10-30; chapters 51, 52 and 53 opened Part IV the same day at 27, 21 and 31
-pages. The book is **1,313 printed pages, 53 of 57 chapters written**, and
-`bash tools/check-all.sh` ends `ALL GATES PASS`. **The next chapter to write is 54, Failure: How
-This Breaks, and How I Diagnose It.** Read its `TOC.md` row (line 136) and every
-`LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1.
+40 to 50, closed 2026-10-30; chapters 51 to 54 opened Part IV at 27, 21, 31 and 37 pages. The book
+is **1,351 printed pages, 54 of 57 chapters written**, and `bash tools/check-all.sh` ends
+`ALL GATES PASS`. **The next chapter to write is 55, A System Designed Aloud.** Read its `TOC.md`
+row (line 137) and every `LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1.
 
-Four things are already settled for 54. **Chapter 33 owns the trace** — what it holds and what to
-capture, and the word *observability* — so 54 owns attributing a failure with one and must not
-introduce tracing as new; row 33 of `LEDGER-TAUGHT.md` says so. **Chapter 53 asked for the model
-with its version on every record and credited 54 with why the short name is not a version**, and
-chapter 40's step on the floating name is the measurement that proves it: the provider resolved a
-moving name to a dated one and said which, so a floating name is unsafe because the answer can
-change between two runs with nothing warning you. **Chapter 54 owns re-embedding and index
-migration**, which chapters 43 and 53 both point at and neither does; chapter 43's drift finding
-(two embeddings of one string differing by more than the gap between two printed ranks,
-`LEDGER-DEFECTS.md` entry 67) is the evidence that a re-embed is not a no-op. And **chapter 20
-owns whether a difference is real**, so a provider's update having to pass your regression suite
-is chapter 33's set run chapter 20's way, not a new method.
+**Chapter 55 is unlike anything written so far and the record should say so before it is started.**
+Its `TOC.md` row asks for one whole system designed from a vague requirement, in the order an
+interview expects it, with the reasoning *spoken rather than diagrammed* — what to clarify first,
+the retrieval choice and why, the evaluation plan before the build, cost per request on the back of
+an envelope, the failure modes named, what to measure in week one, and what not to build yet. Four
+things follow. **It owns bank question 100**, which is the design question itself (*design a support
+assistant that answers from a company's own documents; talk me through it*), so the chapter is that
+answer at length. **It is a synthesis and must introduce no term**: every concept in it belongs to an
+earlier chapter, and the `LEDGER-TAUGHT.md` rows to read are therefore nearly all of them — the
+honest shape is a chapter whose Key Terms table is empty or very nearly, which `BOOK-GUIDE.md` §5
+permits for a chapter whose material is principles. **Its figures should be this book's own**, because
+it has them: $0.11 per 1,000 requests at a median 1.31 seconds from 49, the retrieval measures from
+44 and 45, the judge figures from 31 and 46, and the four multipliers from 53. A back-of-envelope
+cost estimate that uses this book's measured baseline is worth more than one that invents a price.
+**And it is 16 pages in the plan**, the shortest Part IV chapter, which is a signal rather than a
+limit: a design spoken aloud in forty-five minutes is short, and the temptation will be to re-teach.
 
-**Read chapters 51, 52 and 53's records before writing 54.** 51's settles the shape of every
-Part IV chapter (`structure-decision:`): no lab, no Review Questions, no *You understand this
-when*, no callouts, and a `## Summary and Key Terms` section. 52's and 53's are the warnings, and
-they are different warnings. **52's is about borrowed figures**: it was the first chapter whose
-figures were all borrowed, and nine of its twenty-four findings were other chapters' numbers
-carried with the answer kept and the variable lost — `LEDGER-DEFECTS.md` entry 92 is the practice,
-open the chapter at the line and read what the number is about. **53's is about fixes**: its
-absolutes check found a real omission, the fix for it left the sentence beside it stating the
-narrow claim the fix refutes, and the fix for *that* introduced an off-by-one pointer. Entry 94 is
-those three generations — **a fix that widens a claim has a sweep of its own, and what you grep
-for is the narrow claim rather than the new words** — with a thousandfold unit error as its
-companion, `$1.8792` written as *a dear call* when a function named `per_1k` computed it. Chapter
-54 cites at least chapters 20, 33, 40, 43, 49, 52 and 53, so it is in 52's position and will make
-fixes, so it is in 53's too.
+**Read chapters 51 to 54's records before writing 55.** 51's settles the shape of every Part IV
+chapter (`structure-decision:`): no lab, no Review Questions, no *You understand this when*, no
+callouts, and a `## Summary and Key Terms` section. The other three are three different warnings and
+55 is exposed to all of them. **52's is about borrowed figures** — it was the first chapter whose
+figures were all borrowed, and nine of its twenty-four findings were other chapters' numbers carried
+with the answer kept and the variable lost; entry 92 is the practice. **53's is about fixes that
+widen a claim** and leave the sentence beside them stating the narrow one; entry 94. **54's is about
+fixes that add evidence** and then describe it with a count written while looking at it rather than
+computed from it; entry 95. Chapter 55 will cite more chapters than any chapter in the book and will
+introduce nothing, so it is 52's position taken to the limit: **every number in it is a quotation,
+and every quotation is a chance to keep an answer and drop its question.**
 
 **Read chapter 51's record before writing 52**, because it settled the shape of every Part IV
 chapter and the reading is arguable. `BOOK-GUIDE.md` §5 says Part IV chapters have none of the

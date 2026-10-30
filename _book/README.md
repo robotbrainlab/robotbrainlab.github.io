@@ -93,15 +93,16 @@ sub-part opener pages sitting after the last written chapter were counted into i
   51  1207-1233   27   36     75%
   52  1234-1254   21   24     88%
   53  1255-1285   31   20    155%
-   A  1286-1313   28    -       -
-   B  1314-1319    6    -       -
+  54  1286-1322   37   26    142%
+   A  1323-1351   29    -       -
+   B  1352-1357    6    -       -
 
-55 chapter(s), 1313 printed pages
+56 chapter(s), 1351 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
 Part II is complete: chapters 18 to 39 come to 475 pages.
-**Part IV is 3 of 7.** Part III is complete: chapters 40 to 50, which began with chapter 40, the first chapter in the book that calls a real model, and
+**Part IV is 4 of 7.** Part III is complete: chapters 40 to 50, which began with chapter 40, the first chapter in the book that calls a real model, and
 the labs now run on the corpus in `labs/corpus/` — 40 documents, 8 queries and 320 graded
 judgements, written for the book and dedicated to the public domain. `LEDGER-DEFECTS.md` entry 63
 is what the first non-deterministic chapter cost: prose that quotes a figure a re-run can change
@@ -134,6 +135,35 @@ everything, twice, under two instructions. And the regression set has two blind 
 is not hypothetical, because a correct refusal became the wrong product's price across both
 versions and every check passed all six times. It took three review passes, 25 findings then 16
 then 8, and `records/46-…` says which were mine.
+
+**Chapter 54 is the chapter the provider wrote half of.** Failure, and its spine is that *nothing in
+my code changed* is almost always true and almost never relevant: the model behind a name, your
+documents, the service under load and your own standard all move, and the only one that announces
+itself is a retired snapshot's 404. Three measurements, and two of them needed no provider to do
+anything. **Of the ninety-five name groups in one account's listing, thirty-nine carry a dated
+snapshot and fifty-six carry none** — both embedding models among them, which is the problem chapter
+43 pointed here. `gpt-4o` answers with the August snapshot while November is listed beside it, so a
+floating name is not the newest; and a listed dated snapshot returns HTTP 404, so **the listing is
+not a statement of what you can call**.
+
+**Then the measurement to take to work: you can run a provider's update today.** `gpt-4o` has had
+three dated snapshots and two still answer, so chapter 41's thirty cases and its grader, unchanged,
+with only the snapshot different. **Three cases of thirty moved and the score difference of −0.100
+ran from −0.200 to +0.000** — it cannot be told from zero, which is chapter 33's reason to report
+cases and never a score movement. And reading them is the chapter: `Three years` became `3 years`,
+`60` became `60 W`, `Seven` became `7`, and **every one of those answers is correct**. So are all
+five of the older snapshot's failures. Both snapshots answer all thirty correctly and the grader
+rejects five and eight on notation alone — which makes a regression a claim about the model and the
+grader together, and makes *a case that passed now fails* a trigger that needs a second clause
+saying somebody reads it.
+
+**The third is the bolded item in its plan.** A half-migrated index lost about forty per cent of its
+nDCG with nothing erroring, and it made no difference which encoder the query path used, because
+**ten of ten results came from the half matching the query's own model** — two embedding spaces do
+not align, so the other half is absent rather than mis-ranked. Its review also corrected the
+chapter's arithmetic twice, and `LEDGER-DEFECTS.md` entry 95 is the second: **a fix that adds
+evidence is a drafting event, and the count describing the new evidence gets written while looking
+at it** rather than computed from it.
 
 **Chapter 53 is the chapter whose subject caught it out twice.** Cost, and its spine is one line
 — `(in - cached) x p_in + cached x p_cached + out x p_out` — which is the arithmetic chapters 34

@@ -71,6 +71,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Cross-encoder** | Query and document passed through one model together, giving one score for the ordered pair. Not precomputable; free to be asymmetric | 26 |
 | **Cross-entropy** | The training objective: the average of `\(-\log p\)`{=latex} over every position, where `\(p\)`{=latex} is the probability given to the token that actually came next. Zero for a perfect prediction, unbounded for a confident mistake | 14 |
 | **Current convention** | How competent engineers work at the moment: true, load-bearing and replaceable. It usually names a technique rather than a reason, and usually has a predecessor you can remember | 6 |
+| **Data retention** | What a provider keeps of what you send, for how long, and what you can delete. The retention period varies by endpoint, so the list of endpoints a zero-retention arrangement excludes is the part to read, and the arrangement itself needs the provider's approval. The one failure in this chapter that cannot be rolled back | 54 |
 | **Dated detail** | A fact with a date on it — a name, a number, a version. It stops being true when somebody ships something or changes a price | 6 |
 | **Dead state** | A grammar state with no legal token. It does not raise — the mask stops meaning anything and the decoder emits whatever was first | 22 |
 | **Declined freedom** | A loop that does not use the freedom its design gives it, so it behaves as the pattern below it at the loop's price. Measured as the share of runs that took the cheapest path available: 63 of 72 searched once with a tool and four unused steps in hand, and nine failures say in their own answer that something was missing | 47 |
@@ -111,10 +112,12 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Forward pass** | One journey through the model — lookup, the stack once, one distribution out. It produces exactly one distribution | 9 |
 | **Foundation model** | A model trained once on general material, then used for many tasks it was not specifically built for | 1 |
 | **Function calling** | The provider's name for the whole five-step convention, also sold as tool calling. The model does step 2 of it and nothing else | 23 |
+| **Gated upgrade** | A provider's new model snapshot treated as a change to your system that you did not make: it does not serve traffic until it has passed the gate your own changes pass. Chapter 39's *evaluation gate* is the instrument; what differs is that the input, its contents and its timing are not yours, that the old snapshot's retirement is a deadline, and that only the gate's second condition — *nothing else moved* — applies, since no target set moved | 54 |
 | **Generalisation theory** | Why a model fitted to one body of text works on text it never saw — the bias–variance trade-off, and what learning theory proves about it | 17 |
 | **Graded relevance** | A relevance judgement on a small scale rather than yes-or-no, so a partial answer and a full one can be told apart | 26 |
 | **Grader** | What decides whether one trial succeeded. Code, then a judge, then a person — in that order, because the order is the cost | 38 |
 | **Gradient** | For each parameter, how much the loss would rise if that parameter rose. The update rule moves every parameter a small step against it. How it is computed is outside this book | 14 |
+| **Gradual rollout** | Serving a change to a share of traffic rather than all of it. Bounds the exposure, and more usefully runs both arms on the same traffic at the same time, which is the interleaving a sequential comparison cannot have. Needs the serving arm recorded per request or it is two populations you cannot separate | 54 |
 | **Greedy decoding** | Always taking the highest-scoring token. What "temperature zero" does in practice, since dividing by zero is not defined | 13 |
 | **Greedy fill** | Keeping any passage that fits in the room remaining. Silently promotes short passages over higher-ranked long ones | 28 |
 | **Grounded** | Every claim the answer makes is supported by a passage that was retrieved. Says nothing about whether the passages were right or the answer useful | 32 |
@@ -123,6 +126,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Hybrid retrieval** | Running lexical and dense retrieval and combining their rankings | 26 |
 | **Idempotency** | Doing an operation twice has the same effect as doing it once. What makes a retry after a timeout safe | 19 |
 | **Identifier query** | A query whose intent is an exact string — a code, a surname, an invoice number, a postcode — rather than a topic. The test is what the query wants: the string itself, or a subject that happens to contain one. Chapter 25 names this as a case dense retrieval is weak on, and it is the one worth listing separately whenever you compare two models | 43 |
+| **Index migration** | Re-embedding a collection because the embedding model changed, or because you chose a new one. The hazard is the half-finished state: if the two widths agree nothing errors, and a query reaches only the half embedded by its own model, because two embedding spaces do not align. Never serve a half-migrated index — build the new one beside the old and switch the query path with it | 54 |
 | **Inductive bias** | What a design assumes about the world before it sees any data | 17 |
 | **Inference** | Running a finished model to get a reply. This is what "using a model" means | 1 |
 | **Initialisation** | What the parameters are set to before training begins, and why the choice matters | 17 |
@@ -242,6 +246,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Retrieval** | Searching your own collection for the passages that bear on a request, so they can be put into the context | 2 |
 | **Retrieval-augmented generation (RAG)** | The arrangement where your code searches your own material, puts what it found into the context, and the model answers out of that. Names the whole arrangement rather than any one part of it | 2 |
 | **Roll-up** | Mapping retrieved chunks back to their documents, letting the best-ranked chunk stand for its document and dropping duplicates. What lets a document-level key score a chunk-level index, and what a user is shown anyway | 45 |
+| **Rollback trigger** | The condition, written before a release, whose occurrence undoes it. A score cannot carry it: at thirty cases a real movement does not clear zero and any movement at all is noise. A named case that passed and now fails, plus a person reading that case before the rollback proceeds | 54 |
 | **Routing** | One call picks a branch from a menu your code wrote; your code runs the branch. The model sees the labels and never the code behind them. Chapter 52's routing is a different thing — choosing between models for one request | 34 |
 | **Rubber-stamping** | Approval given without real attention, usually because the volume is too high for any. It costs what review costs and delivers none of its value | 3 |
 | **Rule of three** | With no failures in `\(n\)`{=latex} tries, the rate can still be about `\(3/n\)`{=latex}. What to use when a bootstrap has no failure to resample | 21 |
@@ -305,6 +310,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Vector** | An ordered list of numbers. Two vectors can be compared only if they have the same number of slots | 8 |
 | **Vector database** | A product that wraps an index like this one and serves it over a network, also called a vector store. The index is the data structure; the database is a deployment choice around it | 29 |
 | **Verdict rule** | The written statement of what counts as a failure, fixed before any labelling and kept beside the labels. What you count as a failure decides which modes you can find: five of this chapter's seventeen failures are answers a customer would act on correctly, and a rule asking only whether the answer was right would not have them. Written down, a second reader can apply it — here two readings of the same eighty agreed on 79. Chapter 33's criteria drift is this rule moving while nobody counts it | 46 |
+| **Versioned artefact** | The prompt, the configuration, the index and the model version released and recorded together under one identifier, written into every trace. Not four histories joined on a timestamp, which fails for a gradual rollout and for an index change, neither of which has a single release moment | 54 |
 | **Vocabulary** | The fixed, numbered list of every entry a model can read or produce — nearly all pieces of text, and a few that are not. Built once, before training, and fixed while you use the model | 9 |
 | **Width** | The number of slots in the vectors moving from layer to layer, the same all the way through. Written `\(d\)`{=latex} in formulas | 9 |
 | **Zero-shot** | A prompt that carries no examples: instructions, output format and the request only | 18 |

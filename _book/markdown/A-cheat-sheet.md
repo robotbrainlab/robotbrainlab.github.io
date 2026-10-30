@@ -404,3 +404,12 @@ written from memory.
 | The multipliers | Duplicated agents 6.03x; agents running to a 20-step limit 13.79x; one loop's limit from 10 to 20, 3.4x the tokens; a reranker about 13 model calls a request | 53 |
 | The grouping decides the number | The same lever on the same traffic: $0.1872 per 1,000 on a first outing, $0.0665 pooled over three trials of the same questions — Chapter 49's factor of 2.8 | 53 |
 | A cost cap, worked | $0.25 per 1,000 allows 257 output tokens on the essay shape, which sends 348 and exceeds it on 22 of 24 requests. Input spans 573 to 671 tokens a request across the two retrieved shapes, so this does not rest on one request the way a latency tail does | 53 |
+| What can be pinned | 39 of 95 name groups in one listing carry a dated snapshot; 56 carry none — an upper bound — with both embedding models among them | 54 |
+| What a floating name answers with | Not the newest. `gpt-4o` → the August snapshot with the November one listed. Of 7 probed: 5 newest, 1 older, 1 refused | 54 |
+| What the model list is not | A statement of what you can call. A listed dated snapshot returns **HTTP 404 `model_not_found`**, naming it | 54 |
+| A provider's update, measured | Same prompt, cases, grader and temperature; only the snapshot changed. **3 of 30 cases moved**, score −0.100 from −0.200 to +0.000 — *cannot tell* — and all 3 of the newer model's answers were correct | 54 |
+| Report which | The cases, by name, never the score movement — Chapter 33's rule, and its majority-of-repeats rule with it. The score is a net; here it was an interval containing three named facts | 54 |
+| A half-migrated index | nDCG 0.909 → 0.551, nothing erroring, **10 of 10 results from the half matching the query's model**. Mean cosine 0.2367 in its own space, 0.0101 in the other | 54 |
+| The migration order | New index beside the old, measure on the same graded key, switch the query path and the index as one change, keep the old one | 54 |
+| A rollback trigger that works | *A case that passed now fails*, **and** somebody reads it before the rollback. Either clause alone is worse than the pair | 54 |
+| The four that move as one artefact | The prompt · the configuration · the index · the model snapshot. Chapter 33's trace carries one of them | 54 |

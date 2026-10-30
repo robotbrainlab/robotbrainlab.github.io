@@ -65,6 +65,30 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**95. A fix that adds evidence is a drafting event, and the count that describes the new evidence is
+written while looking at it.** Chapter 54's review found that the chapter had read the three cases
+that moved between two model snapshots and never asked what the other arm was already failing — all
+five of those turned out to be correct answers in the wrong notation too, which strengthened the
+chapter's own lesson considerably. The fix added a block printing every failing case on both
+snapshots, and then described the newer snapshot as extending the digit notation **to three more
+questions and adding the bare `W`**: four added failures where the block above it shows three. Two
+of the three are digits and the third is the symbol, and neither the difference nor the breakdown is
+printed anywhere — the new block lists five rows for one snapshot and eight for the other, and the
+sentence was written from those two lists rather than from their difference. **So entry 91's rule
+applies hardest to the counts a fix round writes**: a pass that adds evidence is a pass that adds
+claims about it, and the number in the new sentence has to be computed from the data the same way
+the figures in the block were. The tell is a count that describes a comparison where the output
+shows only the two sides.
+
+*Two companions from the same round, both the shape of entry 94.* A program cut from three arms to
+two kept a docstring saying *three dated snapshots* and *left all three snapshots callable* — the
+exact negation of the section two pages earlier where one of the three returns a 404 — and it
+survived the first fix round, because the grep was for the figure and not for the sentence around
+it. And two of six Key Terms had no index entry at all, because each was bolded only inside the Key
+Terms table, which the auto-indexer exempts along with the rest of the Summary: **a term introduced
+only in its own definition table is not introduced**, and the check that finds it is reading the
+built index rather than the Markdown.
+
 **94. A fix that widens a claim leaves every sentence that depended on the narrow one, and the
 widest of those is the one the fix was written next to.** Chapter 53's absolutes check found *the
 only way to get attribution is to record the counts* and it was false: a separate key or project
