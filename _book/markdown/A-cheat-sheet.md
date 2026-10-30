@@ -387,3 +387,12 @@ written from memory.
 | What a list's numbering is worth | 8 of the LLM list's 10 entries changed number between the 2025 and 2026 editions; the largest move is 5 places. Quote the entry, not the number | 51 |
 | Where the caller's identity comes from | The session. Never a parameter the model fills in | 51 |
 | What a guardrail buys | The attacks it knows, and a failure logged instead of served. Chapter 50's payload was 178 characters inside a 1,181-character document. A rule your code states exactly is a different object, and is a limit | 51 |
+| The latency identity | `\(\text{total} \approx \text{ttft} + \text{tpt} \times (\text{tokens} - 1)\)`{=latex} — median relative error 0.6% over 72 recorded requests, one of them out at 11% | 52 |
+| What to report | A middle and a tail, never the mean. On one 24-request arm: median 1.31 s, mean 1.74 s, slowest 11.01 s, and **3 of 24 slower than the mean** | 52 |
+| A budget, worked | A 2.00 s target at the 95th allows ~114 chunks on the essay shape, which sends 356 — a gap no one request closes. Then test it Chapter 20's way: at 24 requests a p95 *is* one request, and the paired difference between any two shapes contains zero, so the budget rules a design out and does not rank the rest | 52 |
+| The first question about any lever | Whether it can fire on your traffic. Two of Chapter 49's three could not | 52 |
+| Why a prefix cache does nothing | A minimum prompt length, and a prefix any leading timestamp destroys. 612 and 637 tokens against 1,024 | 52 |
+| What a response cache needs in its key | The prompt and settings · the model version · the retrieved passages · *the caller's scope* | 52 |
+| A cascade's latency | Both waits in sequence on every escalation. Chapter 49's cost 5.4x the cheap model for the same answers — a point estimate on an interval that does not clear zero at 12 cases | 52 |
+| Where prefill's squared term takes over | About 19,200 tokens, from Chapter 15. *At a thousand tokens* doubling the prompt multiplies prefill by about 2.1 rather than by 4; the factor climbs with the prompt and reaches 3 at the crossover | 52 |
+| A total timeout from the token cap | The floor is `max_tokens / r` at your own measured pace `\(r\)`{=latex}; Chapter 19's crude `max_tokens / 20 + 10` puts headroom above it and is far better than a flat 30. This chapter's own three shapes run at 93 to 127 a second, not 20 | 52 |

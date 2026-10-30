@@ -14,7 +14,9 @@ reviewed: 2026-10-29T05:11:13+05:30
 absolutes: 145
 new-terms: 72
 covers-misses: 0 from `verify-coverage.py`. The completeness review found one of the nine Covers items thin where the gate passed it: *clients* was mentioned only inside a text fence, with no bold, no index entry and no Key Terms row, while *host* and *server* had all three. Written rather than triaged away — the body now defines an **MCP client**, there is a Key Terms row for it and one for **Elicitation**, and the two phrasings "a client per connection" and "a client per server" are reconciled against the specification's own 1:1 wording
-sha256: 155d9c677f829ede69ff038648971ba2c6711afa47f935c6be6b3047c6efdad1
+amended:
+  - 2026-10-30T19:10:47+05:30: Three places said chapter 35 MEASURED tool definitions at 1.4 per cent and tool results at 91.5 per cent of a loop's context. Chapter 35 says of itself that its token counts are plausible and not measured, and chapter 48 is what measured it, at 87.3 per cent over a different denominator. One of the three was inside a spliced program docstring - LEDGER-DEFECTS 88's worst case - so the program and the chapter were corrected together and the splice re-verified. Found while reading 36 as a source for 52.
+sha256: 89b72fb011b0545bca727f4e893c9e6d6a83e44ae4b19318b4109530705c1cc9
 
 ## Before writing
 

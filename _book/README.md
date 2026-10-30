@@ -25,7 +25,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
 | II · Use | 18–39 | 362 | **Done** — 22 of 22, 2026-10-29 |
 | III · Apply | 40–50 | 190 | **Done** — 11 of 11, 2026-10-30 |
-| IV · What Next | 51–57 | 136 | **Drafting** — 1 of 7 done |
+| IV · What Next | 51–57 | 136 | **Drafting** — 2 of 7 done |
 | Appendices | A–D | 83 | **A (cheat sheet, 288 items), B (100 questions) and C (glossary, 274 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
 The estimates above sum to about 1,042 numbered pages. **That is a sum, not a target** — the
@@ -91,10 +91,11 @@ sub-part opener pages sitting after the last written chapter were counted into i
   49  1102-1155   54   16    338%
   50  1156-1205   50   18    278%
   51  1207-1233   27   36     75%
-   A  1234-1260   27    -       -
-   B  1261-1266    6    -       -
+  52  1234-1254   21   24     88%
+   A  1255-1281   27    -       -
+   B  1282-1287    6    -       -
 
-53 chapter(s), 1260 printed pages
+54 chapter(s), 1281 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
@@ -132,6 +133,40 @@ everything, twice, under two instructions. And the regression set has two blind 
 is not hypothetical, because a correct refusal became the wrong product's price across both
 versions and every check passed all six times. It took three review passes, 25 findings then 16
 then 8, and `records/46-…` says which were mine.
+
+**Chapter 52 is the chapter that took its own headline back.** Speed, and its spine is that
+*slow* is four complaints sharing almost no lever: nothing appears for seconds, the words crawl
+once they start, it is usually fine and sometimes awful, or every call is quick and the whole
+thing is slow. The first is prefill and the queue, the second is decode, the third is three
+decisions of your own — a concurrency limit, a retry, a timeout — and the fourth is your
+pipeline. Then the lever menu, held by which number each one moves: **sending less** is the only
+one that touches both waits and the memory without handing you a different model to re-measure;
+**streaming** leaves the total alone, moves the first-token wait down to prefill, and is what
+makes that number measurable at all, since no log holds it; a **response cache** of your own is
+the only lever that removes the call, and its key has to carry the caller's scope or Chapter 51's
+authorisation section is undone. If you serve the model yourself there are four more, and
+**speculative decoding** is the one worth the space: a small model proposes, the large one checks
+them all in one read of its weights, and under the correct acceptance rule the output is a sample
+from the large model's own distribution — so it spends the arithmetic slack that being
+memory-bound leaves you, which is the opposite trade from continuous batching.
+
+The one thing it measures is a latency budget, computed from the requests Chapter 49 recorded and
+left on disk. **The identity `total ≈ ttft + tpt × (tokens − 1)` holds to a median 0.6 per cent
+over 72 of them**, which turns a product target into a cap: a two-second target at the 95th
+allows about 114 chunks on the essay shape, which sends 356. And on one 24-request arm the median
+is 1.31 seconds, the mean 1.74, and **only three of the twenty-four are slower than the mean** —
+so the statistic every dashboard shows describes a request that almost never happens.
+
+Two rounds, 24 findings then 17, and both of the worst were about the same paragraph. The review
+found the chapter concluding that *no* reply length meets a two-second target on one of the
+shapes, off a 95th percentile that is the twenty-third request of twenty-four — ten lines after
+the chapter itself says a tail that thin is an anecdote. The fix was to make the program
+bootstrap it. **The fix-verification pass then found that the fix reasoned the way the book has a
+section forbidding**: it put an interval round each arm and eyeballed the overlap, where Chapter
+20's *Overlapping Intervals Are Not the Test* says the interval goes round the difference. The
+data was paired, so the right test was in the file the program already read, and all three
+differences contain zero. `LEDGER-DEFECTS.md` entries 92 and 93 are what that cost, and **93 is
+the one to read: a repair is held to the standard the chapter is held to.**
 
 **Chapter 51 opens Part IV, and it is the framework chapter 50's lab was the experiment for.**
 Seven earlier chapters point at it by name, and what it owes them is one rule: **a model cannot

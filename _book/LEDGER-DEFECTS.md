@@ -65,6 +65,39 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**93. A repair can reason the way the book has a section forbidding, and reach the right
+conclusion.** Chapter 52's headline budget conclusion rested on one request of twenty-four, and
+the repair was to bootstrap it. The program then printed an interval round each of three arms,
+and the prose observed that they overlap and concluded that the arms cannot be told apart.
+Chapter 20 has a section titled *Overlapping Intervals Are Not the Test*, which says that two
+intervals overlapping is not the question — the question is where B minus A is, and that has an
+interval of its own — and which says of this exact move that **the conclusion happens to be
+right here and the reasoning is wrong**. So the repair for a statistical over-reach was itself a
+statistical over-reach, in a chapter that instructs the reader two sections later to put an
+interval round the *difference*. The data was paired and the right test was computable from the
+file the program already read. **A repair is held to the standard the chapter is held to**, which
+means the book's own rule for the thing you are now doing has to be re-read while you do it —
+not recalled. The tell is a repair that reaches a conclusion you already believed: that is when
+nobody checks the route.
+
+**92. In a chapter whose figures are all borrowed, the citation is the measurement, and a
+borrowed figure has to be re-read rather than recalled.** Chapter 52 owns no measurement of its
+own, and of its twenty-four review findings nine were figures taken from other chapters with the
+answer kept and something else lost. Chapter 15's *doubling the prompt multiplies prefill by 2.1*
+is a figure at one thousand tokens, quoted for the whole range below the crossover where the
+factor climbs to 3. Chapter 35's 91.5 per cent was called a measurement, where that chapter says
+of itself that its counts are plausible and not measured. Chapter 19's timeout floor acquired the
+headroom term. Chapter 47's ratio came from the arm that chapter spends a page saying not to
+quote. Chapter 49's 2.8 factor was explained with the wrong arm flattered, and its −0.06 seconds
+— a difference between two prompt *orderings* measured on the *total* — was cited to support a
+claim about one shape's *first-token wait*, for which that chapter has a different figure. Every
+one of them was faithful to something and wrong about the claim it was carrying. **Before
+quoting another chapter's number, open that chapter at the line and read what the number is
+about**: which quantity, which arm, which unit, and whether its own chapter calls it measured.
+The practice that works is to re-read, in the file; the practice that fails is to remember
+correctly and carry it anyway. And this defect propagates: chapter 36, closed weeks earlier, had
+the same false claim about chapter 35 in three places, one inside a spliced program docstring.
+
 **91. A count over prose you are writing is taken from the rows in front of you, not from the
 thing counted.** Entry 88 is this defect about programs; chapter 51 paid for it three times in
 prose, and every one came from the same movement of the hand. A pass added a fourth channel to a

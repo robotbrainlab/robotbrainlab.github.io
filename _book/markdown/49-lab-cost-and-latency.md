@@ -2255,7 +2255,7 @@ which costs 3.4 times the baseline before the lever and 1.8 times after it, so t
 costs $0.09 per thousand more than the baseline. **And routing has nothing to route to**: the
 cheap and the capable model both answer 12 of 12 — the evidence is twelve cases and not
 thirty-six rows, because the cheap model's three trials are byte-identical on every one — with a
-paired difference of zero and no case where one passes and the other fails. The cascade costs 5.3
+paired difference of zero and no case where one passes and the other fails. The cascade costs 5.4
 times the cheap model by the point estimate, on an interval from +0.00 to +0.97 that does not
 clear zero. Three of twelve cases escalated, **all three of them correct answers**, every one
 because a phrase list built to catch a model declining to answer matched a correct refusal. Two

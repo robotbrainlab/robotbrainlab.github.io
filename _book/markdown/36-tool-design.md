@@ -265,8 +265,8 @@ derivation from a stated assumption rather than a result — and the assumption 
 > a task offers. Collapsing the menu by making the tools vaguer moves that choice somewhere the
 > column cannot see it.
 
-> **Note:** The saving is money and not room. Chapter 35 measured tool definitions at 1.4 per
-> cent of a twenty-step run's context and says it plainly: do not trim the menu to save context,
+> **Note:** The saving is money and not room. Chapter 35's worked run puts tool definitions at
+> 1.4 per cent of a twenty-step run's context and says it plainly: do not trim the menu to save context,
 > because there is no context there to save. What 46 per cent buys is a smaller line on the bill
 > for every call, including the calls that need no tool. The reason to trim is the middle column.
 
@@ -278,17 +278,18 @@ derivation from a stated assumption rather than a result — and the assumption 
 
 ## What a Tool Hands Back
 
-An output is the next call's input. Chapter 35 measured what that means in a loop — tool results
-were 91.5 per cent of a twenty-step run's context, and a result fetched at step 3 was still
-there at step 20 — so the size of an output is a design decision rather than a property of the
+An output is the next call's input. Chapter 35's worked run puts what that means in a loop at
+91.5 per cent of a twenty-step run's context — a plausible figure rather than a measured one,
+which that chapter says of itself — with a result fetched at step 3 still there at step 20 — so the size of an output is a design decision rather than a property of the
 API you wrapped.
 
 ```python
 """One order, three ways a tool could hand it back.
 
-A tool's output is input on the next call, and chapter 35 measured
-what that means in a loop: tool results were 91.5 per cent of a
-twenty-step run's context, and a result fetched at step 3 is still
+A tool's output is input on the next call, and chapter 35's worked
+run puts what that means in a loop at 91.5 per cent of a twenty-step
+run's context - a plausible figure rather than a measured one, which
+that chapter says of itself - with a result fetched at step 3 still
 there at step 20. So the size of an output is a design decision and
 not a detail of the API you happened to wrap.
 
