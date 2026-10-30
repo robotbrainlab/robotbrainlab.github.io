@@ -60,41 +60,38 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Parts I, II and III are complete, and Part IV is 4 of 7.** Part I is all 17 chapters, 199
+**Parts I, II and III are complete, and Part IV is 5 of 7.** Part I is all 17 chapters, 199
 printed pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III is the eleven labs
-40 to 50, closed 2026-10-30; chapters 51 to 54 opened Part IV at 27, 21, 31 and 37 pages. The book
-is **1,351 printed pages, 54 of 57 chapters written**, and `bash tools/check-all.sh` ends
-`ALL GATES PASS`. **The next chapter to write is 55, A System Designed Aloud.** Read its `TOC.md`
-row (line 137) and every `LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1.
+40 to 50, closed 2026-10-30; chapters 51 to 55 opened Part IV at 27, 21, 31, 37 and 17 pages. The
+book is **1,368 printed pages, 55 of 57 chapters written**, and `bash tools/check-all.sh` ends
+`ALL GATES PASS`. **Two chapters are left: 56, What to Learn Next, and 57, What to Skip for Now.**
+Read their `TOC.md` rows (lines 138 and 139) and every `LEDGER-TAUGHT.md` row naming them before
+anything else, per §14 step 1.
 
-**Chapter 55 is unlike anything written so far and the record should say so before it is started.**
-Its `TOC.md` row asks for one whole system designed from a vague requirement, in the order an
-interview expects it, with the reasoning *spoken rather than diagrammed* — what to clarify first,
-the retrieval choice and why, the evaluation plan before the build, cost per request on the back of
-an envelope, the failure modes named, what to measure in week one, and what not to build yet. Four
-things follow. **It owns bank question 100**, which is the design question itself (*design a support
-assistant that answers from a company's own documents; talk me through it*), so the chapter is that
-answer at length. **It is a synthesis and must introduce no term**: every concept in it belongs to an
-earlier chapter, and the `LEDGER-TAUGHT.md` rows to read are therefore nearly all of them — the
-honest shape is a chapter whose Key Terms table is empty or very nearly, which `BOOK-GUIDE.md` §5
-permits for a chapter whose material is principles. **Its figures should be this book's own**, because
-it has them: $0.11 per 1,000 requests at a median 1.31 seconds from 49, the retrieval measures from
-44 and 45, the judge figures from 31 and 46, and the four multipliers from 53. A back-of-envelope
-cost estimate that uses this book's measured baseline is worth more than one that invents a price.
-**And it is 16 pages in the plan**, the shortest Part IV chapter, which is a signal rather than a
-limit: a design spoken aloud in forty-five minutes is short, and the temptation will be to re-teach.
+**They are a pair and they should be written as one piece of thinking in two chapters**, because 57
+is the negation of 56 and the book's credibility rests on the two not overlapping. 56 is 8 pages and
+owns bank question 99 (*what do you not know yet, and how would you go about learning it?*); 57 is 6
+pages and owns no bank question. Four things are settled for them. **Chapter 17 owns what is
+black-boxed** — it is the chapter that says where the theory begins, so 56 points there and does not
+redo it; its own row is the first thing to read. **Chapter 6 owns what changes fast** and the ladder
+of evidence, so 57's *what to postpone* must not re-derive it. **Chapter 7 owns the map**, including
+its one-week and one-day reading plans, and it names 55, 56 and 57 in its own closing table, so check
+what it promises them. And **the regress of prerequisites is 57's**, which the on-ramp decision of
+2026-10-08 in the website's handover states in one line: a new from-zero guide is written only when
+no good resource exists at this level and the wall has been hit twice. That is the book's own
+position on where to stop, and 57 is where it belongs.
 
-**Read chapters 51 to 54's records before writing 55.** 51's settles the shape of every Part IV
-chapter (`structure-decision:`): no lab, no Review Questions, no *You understand this when*, no
-callouts, and a `## Summary and Key Terms` section. The other three are three different warnings and
-55 is exposed to all of them. **52's is about borrowed figures** — it was the first chapter whose
-figures were all borrowed, and nine of its twenty-four findings were other chapters' numbers carried
-with the answer kept and the variable lost; entry 92 is the practice. **53's is about fixes that
-widen a claim** and leave the sentence beside them stating the narrow one; entry 94. **54's is about
-fixes that add evidence** and then describe it with a count written while looking at it rather than
-computed from it; entry 95. Chapter 55 will cite more chapters than any chapter in the book and will
-introduce nothing, so it is 52's position taken to the limit: **every number in it is a quotation,
-and every quotation is a chance to keep an answer and drop its question.**
+**Read chapters 51 to 55's records before writing either.** 51's settles the shape of every Part IV
+chapter (`structure-decision:`). The other four are four different warnings, and 56 and 57 are
+exposed to the last two most. **52's is borrowed figures** (entry 92). **53's is a fix that widens a
+claim and leaves the sentence beside it stating the narrow one** (entry 94). **54's is a fix that
+adds evidence and then describes it with a count written while looking at it** (entry 95). And
+**55's is the one a chapter of pointers will meet**: a source with two figures of the same kind has
+to be quoted by its qualifier rather than by its chapter, and the repair for the wrong one of two is
+to find the quantity you need rather than to swap in its neighbour (entry 96). Chapters 56 and 57
+will be almost entirely cross-references, so 55's record is the closest precedent for how to write a
+chapter that owns nothing: it introduces no term, carries zero index entries, adds nothing to either
+generated appendix, and says so in place of a Key Terms table.
 
 **Read chapter 51's record before writing 52**, because it settled the shape of every Part IV
 chapter and the reading is arguable. `BOOK-GUIDE.md` §5 says Part IV chapters have none of the

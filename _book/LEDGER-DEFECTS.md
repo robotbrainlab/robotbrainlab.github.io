@@ -65,6 +65,37 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**96. A figure stated correctly in one place and wrongly in another, with a whole conclusion resting
+on the wrong one — and the book's own text was the evidence either way.** Chapter 55 quotes chapter
+45's measurement that the average length falls from **161.8 terms a document to 37.7 a chunk**. It
+states it correctly in its retrieval section and then, nine printed pages later, prices a reranker on
+*a chunk averaging about 160 terms* — the document figure — and concludes that the stage costs five
+times the request it improves. On the chunk figure it costs about twice. The chapter therefore
+contained its own refutation, in its own voice, in the same build.
+
+**What makes this a class rather than a slip is where the wrong figure came from.** It was not
+recalled: the chapter had read it, written it down correctly, and then reached for *the number from
+chapter 45 about length* when it needed a chunk size, and that chapter has two. **A source with two
+figures of the same kind is a source you have to quote by its qualifier, not by its chapter**, and
+the review question that finds it is the one entry 92 already asks in a narrower form: which quantity,
+which arm, which unit — to which this adds *which of the two*.
+
+The repair is also the lesson. The replacement figure was not the other one on that line; it was a
+better-sourced number from somewhere else entirely — chapter 49's own records, 8.625 retrieved
+passages in 2,285 characters, so about 265 characters and 66 tokens a passage by chapter 10's rule.
+**When a borrowed figure turns out to be the wrong one of two, look for the quantity you actually
+need rather than swapping in its neighbour**, because the neighbour was never measured for your
+purpose either.
+
+*And two companions, both from the same round.* **Two fixes landed in one sentence and left it
+broken** — a lowercase sentence start saying the same thing twice, which `verify-render`,
+`verify-voice` and `verify-arithmetic` all pass, because none of them reads a sentence. A fix round
+that edits the same paragraph twice has to re-read the paragraph, not the diff. And **a correction
+written into a record was overtaken by the chapter edits of the same round**: the record's count of
+cited chapters was corrected from thirty to 33 while two of the round's own fixes were adding a
+chapter each, making it 35. That is entry 95 arriving inside a record — the count was written while
+the thing it counted was still being changed.
+
 **95. A fix that adds evidence is a drafting event, and the count that describes the new evidence is
 written while looking at it.** Chapter 54's review found that the chapter had read the three cases
 that moved between two model snapshots and never asked what the other arm was already failing — all

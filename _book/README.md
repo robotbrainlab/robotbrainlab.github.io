@@ -94,15 +94,16 @@ sub-part opener pages sitting after the last written chapter were counted into i
   52  1234-1254   21   24     88%
   53  1255-1285   31   20    155%
   54  1286-1322   37   26    142%
-   A  1323-1351   29    -       -
-   B  1352-1357    6    -       -
+  55  1323-1339   17   16    106%
+   A  1340-1368   29    -       -
+   B  1369-1374    6    -       -
 
-56 chapter(s), 1351 printed pages
+57 chapter(s), 1368 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
 Part II is complete: chapters 18 to 39 come to 475 pages.
-**Part IV is 4 of 7.** Part III is complete: chapters 40 to 50, which began with chapter 40, the first chapter in the book that calls a real model, and
+**Part IV is 5 of 7.** Part III is complete: chapters 40 to 50, which began with chapter 40, the first chapter in the book that calls a real model, and
 the labs now run on the corpus in `labs/corpus/` — 40 documents, 8 queries and 320 graded
 judgements, written for the book and dedicated to the public domain. `LEDGER-DEFECTS.md` entry 63
 is what the first non-deterministic chapter cost: prose that quotes a figure a re-run can change
@@ -135,6 +136,33 @@ everything, twice, under two instructions. And the regression set has two blind 
 is not hypothetical, because a correct refusal became the wrong product's price across both
 versions and every check passed all six times. It took three review passes, 25 findings then 16
 then 8, and `records/46-…` says which were mine.
+
+**Chapter 55 is the book's one synthesis, and it owns nothing — which the build proves rather than
+the prose claiming it.** It carries zero index entries, and regenerating the glossary and the cheat
+sheet with it in the book leaves both byte-identical: no term, no measurement, no figure of its own.
+It has no program either, because its subject is what you can say with a whiteboard. It answers the
+question *design a support assistant that answers from a company's own documents; talk me through it*
+in **seven moves**, and its thesis is that the order is the content: the architecture is the third of
+the seven, and the first, second and last are where the conversation is decided — all three being
+refusals. Move two, *say how you would know it worked*, comes before the architecture on purpose, and
+that single reordering is most of what the chapter teaches.
+
+**Three places where this book's own measurements contradict the standard answer.** *We would use
+hybrid search* is what everybody says, and chapter 45 found fusion measurably worse than dense at
+chunk granularity, −0.120 recall and −0.156 nDCG. *Find the biggest failure mode and fix it* is the
+standard move, and chapter 46's seventeen failures cannot support a ranking. And the back-of-envelope
+arithmetic reproduces chapter 49's $0.11 a thousand from its own token counts, turns it into **$19.80
+a month**, and prices the reranker you were about to add at about twice the request it improves — for
+a gain chapter 45 could not tell from zero.
+
+**Its reviews were the sharpest of Part IV, because a chapter of quotations is a chapter of chances
+to misquote.** Sixteen findings then six. The one worth the entry: the chapter states chapter 45's
+measurement correctly in move three — the average length falls from 161.8 terms a document to 37.7 a
+chunk — and then nine printed pages later priced the reranker on the *document* figure, which was the
+whole basis of a five-times conclusion that is really about twice. **`LEDGER-DEFECTS.md` entry 96** is
+that class: a source with two figures of the same kind must be quoted by its qualifier, not by its
+chapter, and when the wrong one of two turns up, the repair is to find the quantity you actually need
+rather than to swap in its neighbour.
 
 **Chapter 54 is the chapter the provider wrote half of.** Failure, and its spine is that *nothing in
 my code changed* is almost always true and almost never relevant: the model behind a name, your
