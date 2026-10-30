@@ -51,56 +51,56 @@ sub-part opener pages sitting after the last written chapter were counted into i
    9    86-97     12   12    100%
   10    98-113    16   20     80%
   11   114-131    18   24     75%
-  12   132-144    13   16     81%
-  13   145-157    13   14     93%
-  14   158-171    14   22     64%
-  15   172-183    12   20     60%
-  16   184-195    12   18     67%
-  17   196-203     8    8    100%
-  18   205-216    12   16     75%
-  19   217-235    19   20     95%
-  20   236-255    20   18    111%
-  21   256-270    15   14    107%
-  22   271-285    15   12    125%
-  23   286-301    16   16    100%
-  24   302-314    13   14     93%
-  25   315-328    14   12    117%
-  26   329-358    30   28    107%
-  27   359-381    23   16    144%
-  28   382-403    22   16    138%
-  29   404-423    20   14    143%
-  30   424-442    19   14    136%
-  31   443-467    25   18    139%
-  32   468-492    25   16    156%
-  33   493-518    26   16    162%
-  34   519-541    23   16    144%
-  35   542-568    27   22    123%
-  36   569-599    31   18    172%
-  37   600-625    26   10    260%
-  38   626-652    27   14    193%
-  39   653-680    28   22    127%
-  40   682-706    25   20    125%
-  41   707-731    25   18    139%
-  42   732-760    29   16    181%
-  43   761-789    29   16    181%
-  44   790-820    31   22    141%
-  45   821-885    65   22    295%
-  46   886-970    85   18    472%
-  47   971-1014   44   12    367%
-  48  1015-1101   87   12    725%
-  49  1102-1155   54   16    338%
-  50  1156-1205   50   18    278%
-  51  1207-1233   27   36     75%
-  52  1234-1254   21   24     88%
-  53  1255-1285   31   20    155%
-  54  1286-1322   37   26    142%
-  55  1323-1339   17   16    106%
-  56  1340-1347    8    8    100%
-  57  1348-1354    7    6    117%
-   A  1355-1383   29    -       -
-   B  1384-1389    6    -       -
+  12   132-145    14   16     88%
+  13   146-158    13   14     93%
+  14   159-172    14   22     64%
+  15   173-184    12   20     60%
+  16   185-196    12   18     67%
+  17   197-204     8    8    100%
+  18   206-217    12   16     75%
+  19   218-236    19   20     95%
+  20   237-256    20   18    111%
+  21   257-271    15   14    107%
+  22   272-286    15   12    125%
+  23   287-302    16   16    100%
+  24   303-315    13   14     93%
+  25   316-329    14   12    117%
+  26   330-359    30   28    107%
+  27   360-382    23   16    144%
+  28   383-404    22   16    138%
+  29   405-424    20   14    143%
+  30   425-443    19   14    136%
+  31   444-469    26   18    144%
+  32   470-494    25   16    156%
+  33   495-520    26   16    162%
+  34   521-543    23   16    144%
+  35   544-570    27   22    123%
+  36   571-601    31   18    172%
+  37   602-627    26   10    260%
+  38   628-654    27   14    193%
+  39   655-682    28   22    127%
+  40   684-708    25   20    125%
+  41   709-733    25   18    139%
+  42   734-762    29   16    181%
+  43   763-791    29   16    181%
+  44   792-822    31   22    141%
+  45   823-887    65   22    295%
+  46   888-972    85   18    472%
+  47   973-1016   44   12    367%
+  48  1017-1103   87   12    725%
+  49  1104-1157   54   16    338%
+  50  1158-1207   50   18    278%
+  51  1209-1235   27   36     75%
+  52  1236-1256   21   24     88%
+  53  1257-1287   31   20    155%
+  54  1288-1324   37   26    142%
+  55  1325-1341   17   16    106%
+  56  1342-1349    8    8    100%
+  57  1350-1357    8    6    133%
+   A  1358-1386   29    -       -
+   B  1387-1392    6    -       -
 
-59 chapter(s), 1383 printed pages
+59 chapter(s), 1386 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
@@ -138,6 +138,25 @@ everything, twice, under two instructions. And the regression set has two blind 
 is not hypothetical, because a correct refusal became the wrong product's price across both
 versions and every check passed all six times. It took three review passes, 25 findings then 16
 then 8, and `records/46-…` says which were mine.
+
+**Four closed chapters were amended on 31 October from outside research**, which is the first
+evidence in this book that did not come from its own labs. The study is in
+`_sources/interview-research/`: 275 coded job postings and 67 first-hand interview accounts. **Only
+the accounts are cited and none of the percentages are**, and the reason is chapter 6's own ladder
+— a set of accounts of what people report is a *practitioner report*, which that chapter says
+supports what people *do* far better than whether it works, while a posting percentage is *dated
+detail*, and the study's own limitations note that its `required` shares are inflated by its coding
+rule. A book that declines to call eight queries a verdict cannot print *required in 57%*.
+
+What the accounts bought: **chapter 57 gained a second instrument** and it disagrees with the
+book's own question bank in two places — evaluation came up in 5 of 54 accounts against this
+book's largest single thread, which separates what is *asked* from what *distinguishes*, and
+managerial or behavioural came up in 21 of 54 where the hundred questions contain none. **Chapters
+12 and 31 closed two gaps the research exposed**: the encoder-only arrangement, which the book had
+used since chapter 24 without naming, and **BLEU** and **ROUGE**, which had zero mentions in 1,383
+pages and whose limit chapter 31 now argues from chapter 41's own grader result rather than from
+received opinion. **Chapter 55** gained the chunking finding. No part and no appendix was added;
+the dated half of the study belongs on the website, where a 2026 snapshot can expire honestly.
 
 **Chapters 56 and 57 close the book, and they were written and reviewed as a pair.** 56, *What to
 Learn Next*, maps chapter 17's thirteen named gaps onto five books: eight are *Deep Learning*

@@ -18,7 +18,8 @@ amended:
   - 2026-10-29T03:44:01+05:30: Name the interview shorthand: LLM-as-a-judge, named where the judge is defined
   - 2026-10-29T03:49:26+05:30: Soften the scope of the LLM-as-a-judge name from any arrangement to wherever a model scores output
   - 2026-10-29T03:51:20+05:30: Fix the section referent in the LLM-as-a-judge sentence: this chapter's first section, not the last one
-sha256: a7a5ce86da25e3e1c4e8858715c6604bacfbfd8859b0bba04952ba901935eb2c
+  - 2026-10-31T02:16:25+05:30: Adds the two standard overlap scores, BLEU and ROUGE, as Key Terms with their directions stated, plus a passage placing them beside the score out of five - and argues their limit from this book's own evidence rather than from received opinion: chapter 41's strictest grader rejected all thirty replies of the prompt it was unfair to, every one of which carried the right value, which is an overlap score's failure with a decimal point on it. From _sources/interview-research/: the question is asked by name and the book had zero mentions in 1,383 pages. Regenerates appendices A and C
+sha256: ccb5b2e812af51180b5715caf893340b655c3ae26c8102424755043e7bb48e75
 
 ## Before writing
 

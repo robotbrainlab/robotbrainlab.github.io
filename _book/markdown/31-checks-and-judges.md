@@ -39,6 +39,37 @@ and no threshold to argue about, and when the count moves you know exactly what 
 > varied — because neither needs a label. What a score cannot have is the comparison against your own two groups, which is most
 > of this chapter.
 
+**There is an older family of scores worth naming, because an interviewer will name it.** Before
+models were asked to judge anything, generated text was scored by how much it overlapped with a
+reference answer somebody had written — counting the runs of words the two had in common. Two of
+them are standard enough to be asked about by name, and the names are the half people remember
+while the shapes are the half worth having.
+
+**BLEU** was built for translation and counts in the direction of what you produced: how many of
+the generated runs of words appear in the reference, with each run credited no more often than the
+reference itself contains it, and a penalty for an output shorter than the reference — which is a
+coarse stand-in for the other direction rather than a measure of it. **ROUGE** was built for
+summarisation and counts the other way, as its name says: how much of the reference the output
+covers. Both are surface overlap, and that is the property that decides what they can be used
+for.
+
+**What is wrong with them here is not that they are crude. It is that they measure agreement with
+one wording.** Chapter 41 is the demonstration and it did not set out to be: its three graders
+scored the same thirty cases three ways, and the strictest — the one that asks whether the reply
+*is* the answer — rejected all thirty replies of the prompt it was unfair to, while every one of
+those replies carried the right value. An overlap score is that failure with a decimal point on
+it: a correct answer in unexpected words scores low, a fluent wrong answer that reuses the
+reference's vocabulary scores high, and the number cannot tell you which of the two you are
+looking at.
+
+So they belong in the same place as the score out of five, and for the same reason: **a number
+that moves for several unrelated causes cannot be acted on.** The useful form of the question is
+not whether they are good — nobody claims they are, for this — but what you would use instead, and
+the answer is the rest of this chapter: a check in code where code can decide, a verdict on one
+named failure where it cannot, and a count rather than a score either way. Where a reference
+wording genuinely *is* the requirement, an exact or normalised match is Chapter 41's instrument and
+is both stricter and easier to explain than an overlap score.
+
 ## Code First, and Not as a Compromise
 
 Before any of that, there is a question most people skip: does this check need a judgement at
@@ -925,6 +956,8 @@ other 16.
 | **Baseline** | What a judge that always says pass would score on your set. Every agreement figure has to be read against it, and on a working application it is high |
 | **Self-agreement** | How often a judge gives the same verdict on the same answer shown twice. Every point of flipping is a point any other figure could have landed elsewhere, and measuring it needs no labels |
 | **Position bias** | A judge preferring an answer for where it was printed rather than for what it says. Measured by showing each pair both ways and counting the flips |
+| **BLEU** | An overlap score built for translation: how many of the generated runs of words appear in a reference answer, each credited no more often than the reference contains it, with a penalty for an output shorter than the reference. Surface overlap, so a correct answer in unexpected words scores low |
+| **ROUGE** | An overlap score built for summarisation, counting the other way, as its name says: how much of the reference the output covers. Surface overlap again, so it shares BLEU's limit — neither can tell a correct paraphrase from a fluent wrong answer that reuses the reference's vocabulary |
 
 ### Worth Memorising
 

@@ -18,7 +18,8 @@ amended:
   - 2026-10-28T12:52:40+05:30: Sharpen pass: the activation was called the feed-forward block's 'one step that is not a matrix multiplication', which is false of the gated three-matrix form the chapter says most models now use - the body reads as the worked block, the Key Terms definition cannot; layer-role findings were asserted 'not a rule that transfers' where one study supports neither transfer nor non-transfer, and the chapter's own Review Answer 6 treats it as open; 'the whole of what depth buys' kept only the gathering half of the two the chapter gives; and 'several times wider than the ends' survived in Summary and Key Terms after the body was narrowed to 2.5-4x
   - 2026-10-29T03:43:55+05:30: Name the interview shorthand: transformer, and decoder-only, named where the stack is complete
   - 2026-10-29T03:51:20+05:30: Reword the transformer sentence: shown producing a next token
-sha256: 4c7c4e75df30eae7ed1787c1fe93b3e6313f5dd75ce4cfa4efb2a04ddf3a78cb
+  - 2026-10-31T02:16:25+05:30: Adds the encoder-only arrangement, which this book has used since chapter 24 and never named: take chapter 11's mask away and the stack produces a representation per position rather than a continuation, which is what an embedding model is. From _sources/interview-research/, which finds the encoder-against-decoder comparison asked in 14 of 54 first-hand accounts while the book had zero mentions of it. The two model families are named once, with chapter 6's dated-detail caveat on the names and not on the arrangement. Also unbolds an ordinary word that filter.lua had auto-indexed as a term ('change', line 19); the remaining 'normalised' entry is left because it is the concept's only index entry
+sha256: 0244668b5ddd4f9b9bfce8046c3fb8a9598ecbfb72ad075b632692571725e531
 
 ## Before writing
 

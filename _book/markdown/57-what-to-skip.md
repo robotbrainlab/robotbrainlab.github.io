@@ -75,9 +75,63 @@ follow-up is always *how do you know*.
 
 **And the practical reading of the table is narrower than it looks.** It says what *this* book's
 author expected a conversation to reach, all but thirteen of it written before the chapters
-existed. It is a judgement
-rather than a survey, exactly as Chapter 7 says of its own reading plans, and the right use of it
-is as a prior rather than as a syllabus.
+existed. It is a judgement rather than a survey, exactly as Chapter 7 says of its own reading
+plans, and the right use of it is as a prior rather than as a syllabus.
+
+### What a Survey Says Instead
+
+A survey does now exist, of a kind, and it disagrees with the table above in two places — which is
+the most useful thing a second instrument can do. Fifty-four first-hand accounts of AI-engineer
+interviews, dated 2025 and 2026, counted by theme:
+
+```text
+  what came up, in 54 accounts
+
+    project deep-dive          22
+    RAG and retrieval          21
+    practical coding           25
+    managerial or behavioural  21
+    DSA                        14
+    LLM theory                 14
+    classical ML               10
+    production                  9
+    agents                      8
+    system design               7
+    evaluation                  5
+
+  the counts overlap: one account reports several themes
+```
+
+**Read it as what it is.** These are self-selected reviews on public sites, which Chapter 6 calls
+a practitioner report and says supports what people *do* far better than whether it works. The
+counts are lower bounds, because a short review omits what it does not mention. And it is one
+market in one year. It is a better instrument than the table above for *what gets asked* and a
+worse one than anything in this book for whether a practice is any good.
+
+**Then the two disagreements, and the first is uncomfortable.** **Evaluation came up in 5 of the
+54.** This book spends seven chapters and four labs on it — Chapters 20 and 30 to 33, plus 41 and
+46 — which is the largest single thread in it. So the emphasis cannot be justified by what is
+*asked*, and it was never meant to be: the hiring-side accounts in the same study rank evaluation
+first among the things that separate a strong candidate from an average one, which is a claim about
+what *distinguishes* rather than about what is said out loud. **Both can be true, and holding both
+is the point of this section.** The most-asked question is not the most-revealing one, which is
+why the second thing an interviewer does is ask how you know.
+
+**And the second disagreement is a hole in the bank rather than a difference of emphasis.**
+Managerial and behavioural questions came up in 21 of the 54 — level with retrieval and just
+behind the project — and **this book's hundred questions contain none of them.** That is not a
+subject this book teaches and it is not going to become one. What the count says is narrower and
+worth acting on: a fifth of what you will be asked is not in here, nobody can prepare it from a
+technical book, and the sentence to carry is that the bank is an acceptance test for *this
+material* rather than for an interview.
+
+**One more thing the survey names**, and it is the cleanest illustration of what this chapter is
+about. Four subjects come up in those accounts that this book does not teach: two of them are now
+a paragraph each, because they are architecture and measurement rather than fashion and the book
+was simply missing them. The other two — classical machine learning, and data-structures
+problems — stay out, and Chapter 17 and the deferral table below say why. **A named refusal is the
+whole of what this chapter has to offer**, and four of them from somebody else's evidence are
+worth more than any number of mine.
 
 ## What to Postpone, and the Trigger for Each
 

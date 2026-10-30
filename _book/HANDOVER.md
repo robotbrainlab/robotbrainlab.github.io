@@ -75,6 +75,17 @@ should be able to say in about sixty seconds — the mechanism, the trade-off, a
 check it — and §14.7's instruction is to write it **last, from the finished chapters, and never
 from memory**. That last clause is now the whole job, because the chapters are finished.
 
+**The research in `_sources/interview-research/` is now part of the brief for Appendix B**, and
+its README states the line the book holds: cite the accounts, never the percentages. Two things in
+it bear directly on the answers. The accounts rank the themes — project deep-dive 22 of 54, RAG 21,
+practical coding 25, behavioural 21, DSA 14, theory 14, classical ML 10, production 9, agents 8,
+design 7, evaluation 5 — which is a weighting for how much care each answer deserves, not a
+licence to add or drop questions. And **the bank has no behavioural question while the accounts put
+behavioural at 21 of 54**; chapter 57 now records that as a hole rather than an omission to fix,
+because the bank's own header explains why a question written after its chapter cannot test
+anything, and adding a hundred-and-first question now would be exactly that. Leave the hundred
+alone.
+
 **Three things to know before starting Appendix B.** Its own header says **questions 1 to 13 are
 the exception and are weaker for it** — they were written after chapters 1 to 7 existed, by
 somebody who had read them, so a question reverse-engineered from an answer cannot test whether

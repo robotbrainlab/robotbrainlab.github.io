@@ -228,6 +228,14 @@ terms to 37.7 rather than any rare term getting rarer. So *we would chunk it* is
 honestly say in five minutes, and the next sentence is that chunk size is a thing to measure against
 the same graded key as everything else.
 
+**And this is the one decision in the move where there is outside evidence about the answers people
+give.** An interviewer who reports running about eighty conversations of this kind found that about
+half of candidates defaulted to a fixed size and about a fifth could not define a chunk at all.
+That is one account and Chapter 6's ladder puts it where such an account goes — it supports what
+people *do* rather than what works. What it is good enough to settle is where the cheap marks are:
+*fixed size, because the alternatives cost measurement I have not done* is a better answer than a
+confident number, and being able to say what a chunk *is* puts you past a fifth of the room.
+
 ## Move Four: The Context, the Prompt and the Answer
 
 Four things here, and the last two are the ones that make the system defensible.

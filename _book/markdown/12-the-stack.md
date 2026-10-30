@@ -16,7 +16,7 @@ after ninety-six of those, and where do the parameters sit?
 Start with the single most useful fact about the design, because it is not what people expect.
 
 A layer does not take a vector and hand back a different vector. It takes a vector, works out
-a **change**, and adds that change to what it was given:
+a *change*, and adds that change to what it was given:
 
 ```text
   out  =  in  +  (something computed from in)
@@ -217,6 +217,22 @@ look only backwards, it is called *decoder-only*. That is the shape of every mod
 has shown producing a next token. An interviewer will use the word for the whole design, and
 what it refers to is what Chapters 11 and 12 have built — not an account of why it works,
 which is on Chapter 17's list.
+
+**And there is a second arrangement, which this book uses without ever having named it.** Take
+Chapter 11's mask away and every position may look in both directions; the stack then has no
+next token to produce, and what it gives you instead is a vector per position computed with the
+whole sequence in view. That is *encoder-only*, and it is what Chapter 24's embedding models
+are — the thing that turns a document into the fixed-width vector this book has been retrieving
+with since Chapter 24. Chapter 26's bi-encoder and cross-encoder are a different question laid
+on top of this one: that is whether you encode two texts separately or together, where this is
+whether a position may look forwards.
+
+> **Note:** The two arrangements have well-known model families attached, one each, and the
+> question is usually asked by naming them rather than by describing them. Those names are
+> Chapter 6's *dated detail* and the arrangement is not, which is why the mask is the thing to
+> hold: *encoder-only* reads the whole sequence and produces representations, *decoder-only*
+> looks backwards and produces continuations, and an encoder-only stack is the right shape for
+> search and classification for the same reason it cannot write you a sentence.
 
 What more layers let the model do is easy to say at the level of mechanism: more layers means
 more separate opportunities to gather from other positions and more separate opportunities to
