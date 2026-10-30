@@ -310,10 +310,14 @@
   {\fontsize{9}{11}\selectfont}
   {}{}{\titlerule*[0.4pc]{.}\contentspage}
 \makeatletter
-\renewcommand{\@pnumwidth}{1.8em}
-\renewcommand{\@tocrmarg}{2.8em}
+% Four digits, bold, 9pt. At 1.8em the contents overfull-boxed on
+% every four-digit folio the moment the book passed a thousand pages,
+% which is two warnings the build gate counts and a figure nobody
+% would think to look for in a preamble.
+\renewcommand{\@pnumwidth}{2.3em}
+\renewcommand{\@tocrmarg}{3.3em}
 \makeatother
-\contentsmargin{1.8em}
+\contentsmargin{2.3em}
 % entries are paragraphs: no paragraph gap between them
 \let\booktableofcontents\tableofcontents
 \renewcommand{\tableofcontents}{\begingroup\setlength{\parskip}{0pt}\booktableofcontents\endgroup}

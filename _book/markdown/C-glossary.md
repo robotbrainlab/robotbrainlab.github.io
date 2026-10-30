@@ -234,6 +234,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Server-sent events** | A long-lived HTTP response carrying one small event per line as the server produces them. How a streamed reply arrives | 19 |
 | **Side effect** | A change to a task the tune was not for. Visible only if you kept a set for the thing you were not changing, and only if that set is big enough to see it | 39 |
 | **Similarity floor** | The cosine between two texts of your own that have nothing to do with each other. Until you have measured it no margin means anything, and it is per model: about 0.05 for both of these two. One pair gives an order of magnitude and not a constant — measure several | 43 |
+| **Singleton mode** | A named failure mode resting on one failure. It is a guess about a kind rather than an established kind, and only more output settles which: of the three singletons after forty answers here, one became a group of five and two did not move | 46 |
 | **Softmax** | Turns a list of scores into positive numbers that sum to 1, preserving their order and turning each gap between scores into a multiple between shares | 8 |
 | **State machine** | What a schema compiles into: a set of states, each with the tokens allowed next. Engines call it an automaton | 22 |
 | **Step** | One pass through the loop: the model decides, something runs, the result comes back | 4 |
@@ -278,6 +279,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Value** | The vector a position hands over when it is attended to, made with `\(W_V\)`{=latex}. What the weights are spent on | 11 |
 | **Vector** | An ordered list of numbers. Two vectors can be compared only if they have the same number of slots | 8 |
 | **Vector database** | A product that wraps an index like this one and serves it over a network, also called a vector store. The index is the data structure; the database is a deployment choice around it | 29 |
+| **Verdict rule** | The written statement of what counts as a failure, fixed before any labelling and kept beside the labels. What you count as a failure decides which modes you can find: five of this chapter's seventeen failures are answers a customer would act on correctly, and a rule asking only whether the answer was right would not have them. Written down, a second reader can apply it — here two readings of the same eighty agreed on 79. Chapter 33's criteria drift is this rule moving while nobody counts it | 46 |
 | **Vocabulary** | The fixed, numbered list of every entry a model can read or produce — nearly all pieces of text, and a few that are not. Built once, before training, and fixed while you use the model | 9 |
 | **Width** | The number of slots in the vectors moving from layer to layer, the same all the way through. Written `\(d\)`{=latex} in formulas | 9 |
 | **Zero-shot** | A prompt that carries no examples: instructions, output format and the request only | 18 |

@@ -325,3 +325,18 @@ written from memory.
 | Diagnosis against verdict | Which half is failing is a question about where a passage was, and eight cases can answer it. Whether a change helped is a question about a mean, and eight cases gave −0.250 to +0.500 | 45 |
 | The durable cost baseline | A token count, not money. 612 in and 75 out a request here, 8.2 to 1, which is 67 per cent of the bill on the input | 45 |
 | Where a retrieval system's time goes | Three quarters in the model and a quarter embedding the query — a network call, not the index. Two calls a request | 45 |
+| Forty outputs against forty failures | Chapter 30's method wants about 40 *failures*. 17 in 80 answers here, so 40 failures is about 190 answers read and 100 is about 470 | 46 |
+| What a taxonomy on 17 failures establishes | The names, not the order. The top two modes tied at 5, and the resampled gap between them ran −0.353 to +0.353 and stayed centred on zero at every size | 46 |
+| When the order arrives | The third mode's gap over the singletons has a low end of −0.118 at 17 failures, 0.000 at 40 and +0.060 at 100. A resample drawn from an exactly equal pair narrows the statement that they are equal and never orders them | 46 |
+| The singleton test | 3 of the first forty's 5 modes rested on one failure; one of the three became a group of five and two did not | 46 |
+| How robust a mode table is | Four arguable labels each change the top of this one: 5,4,4 / 5,4,4 / 5,5,5 / 5,5,4. Two produce an order and the two orders name *different* modes, so not even the direction survives one reading | 46 |
+| Two readings of one set | A second reader applying the same written rule to the same 80 answers agreed on 79. The rule is what makes that possible | 46 |
+| The code/judge split, measured | 3 of my 6 modes had a code part — 4 of 7 including chapter 30's refusal mode, which has no members here, against chapter 31's 7 of 8. The six code checks caught 6 of 17 failures | 46 |
+| Where a check's accuracy lives | In its rule. A length threshold rejected 6 correct answers and 0 failures, and the longest it rejected was 12 characters against the one real stub's 49. A quote compared as it stands fired on 8 (6 failures); trimmed of a trailing stop, on 5 (5 failures) | 46 |
+| The two judge measurements needing no labels | Self-agreement — the same case twice — and the flip count under an arbitrary reordering. Here 78 and 77 of 80, then 29 and 31 of 80 verdicts changed by print order alone | 46 |
+| A judge below its baseline | Baseline 94 per cent (the mode is rare); judge A 44, judge B 64. One sentence moved it 20 points and it still should not ship. That is an instructions problem, not a labels problem | 46 |
+| A catch rate on five labels | 100 per cent with an interval of 100 to 100: nothing missed on five failures, so the resample has nothing to vary and reports no spread. A width of zero is the absence of evidence, not certainty | 46 |
+| A score against a list | 73 of 80 against 74 of 80 is +1 point. The list is 2 fixed and 1 broken | 46 |
+| What a majority verdict throws away | The rate. Three cases moved between 2-of-3 and 3-of-3 failures and all three were reported as no change | 46 |
+| What a verdict without the text throws away | 8 of 80 answers came back different on a re-run of the same version; the verdict saw one of them, and one of the seven it missed was a correct refusal turned into a wrong figure | 46 |
+| The two blind spots of a regression set | Cases that never failed — fixed by keeping the passing cases you have — and modes with no check, which no number of cases fixes. 11 of 17 failures were invisible here | 46 |

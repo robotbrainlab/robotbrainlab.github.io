@@ -65,6 +65,130 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**76. In a lab, a corrected claim lives in six places and two of them are the program — and
+the one that gets missed is the captured output, which is a figure nobody wrote.** Chapter 46's
+second review round returned sixteen findings and **six of them were one shape**: a claim
+corrected in the prose and surviving in the program that prints it. The chapter contradicted
+itself on its own page — the body said the below-baseline lesson is chapter 31's Tip after step
+10 and the program's output two pages earlier said step 4; the body explained a degenerate
+interval directly and the program's output still cited chapter 20's "cannot tell" rule, which
+does not apply to it. A seventh finding was a `.out` file that had not been re-captured after its
+program changed, so a stale line was spliced into the chapter: the program printed *2 passes* and
+the chapter printed *2 pass*.
+
+`BOOK-GUIDE.md` §14.2 said to sweep the body, the Summary, the Key Terms and the Review Answers —
+four places, all prose. **A lab has two more**, and they come first: the `print()` lines that
+narrate the output, and the captured file those lines produce. **Step two is the one that gets
+missed**, because a corrected program is not a corrected chapter until it is run again. §14.2 now
+lists all six and marks the capture.
+
+**And the stopping rule mis-fired on the same round, which is worth as much as the sweep.**
+§14.3 said that errors surviving into round 2 mean the chapter is mis-scoped — narrow it. Not one
+of chapter 46's sixteen was about its subject: three were errors round 1's own rewrite introduced,
+six were the unswept-program shape above, seven were minor or stale, and both round-1 reviewers
+reported nothing outside the declared non-scope. **The rule assumed round 2 finds errors because
+the chapter is too large, and the actual cause was that a forty-passage fix round is a draft
+rather than an edit.** §14.3 now asks for the findings to be sorted before mis-scope is
+concluded, because the two causes have opposite remedies: narrow the chapter, or sweep the fixes.
+Reading a round count as a verdict on scope is how a sound chapter gets cut.
+
+**75. A measurement that is not wired into the decision it was made for is a measurement you
+did not make.** Chapter 46's step 5 measured six code checks against seventeen labelled
+failures and found one of them worthless: `the answer is not a refusal` raised three alarms,
+none of them a failure, because every answer it rejects is a correct refusal of a question the
+corpus cannot answer. The chapter says so in a Warning. Step 7 then built the regression set's
+verdict as *every code check passes* — all six, that one included — so three cases could not
+pass any run of either version, and the pass counts it reported carried a floor nothing in the
+output showed. **In a step whose entire argument is that you read the list and not the score,
+the score had an invisible constant in it.**
+
+The mechanism is worth more than the instance. The verdict was assembled from a *collection*
+(`for _, fn, _ in CODE`) rather than from the subset the measurement endorsed, and a collection
+is the thing you reach for when the code is about plumbing rather than about meaning. Nothing
+broke, no gate fired, and the figures were internally consistent — which is why it survived the
+author and was found by a reviewer asking the dumb question: *you said that check was useless,
+so why is it in the verdict?*
+
+**The rule: when a step measures a thing and a later step consumes it, name the subset in code
+and say in a comment which measurement chose it.** The fix was four lines — a `DROPPED`
+constant, a `VERDICT` list comprehension, a comment naming step 5's figures, and a printed line
+saying how many of the checks the verdict uses and which one it leaves out. The last of those is
+the part that would have caught it earlier, because it puts the decision in the output where a
+reader meets it.
+
+**74. An error analysis of a measurement run has the same blind spot as the run, and for the
+same reason: you read where the check fired.** Chapter 46's step 7 compared two versions of a
+system over eighty cases and three repeats. It reported, at length, the one case the change
+broke — and the breakage was *caught by a check*. Sitting in the same `runs.json`, unreported,
+was a worse regression: a question the corpus cannot answer, which the labelled run refused
+correctly, answered in all three repeats of version 1 with the wrong product's price and in all
+three of version 2 with an irrelevant fact. **Every check in the verdict passed all six times**,
+so it appeared in neither the fixed list nor the broken list, and the author — who two paragraphs
+earlier had written a sentence counting how many of the seventeen failures were invisible to this
+very set — did not look.
+
+That is chapter 30's own warning turned on the author: *read actual outputs, not metrics*. The
+step had metrics. It read the metrics. **The specific habit to break is reading the diff of the
+verdicts rather than the diff of the answers**, and the cheap defence is one line of code: count
+how many answers changed their TEXT between two runs and compare it with how many changed their
+verdict. In this run eight of eighty answers came back different and the verdict moved on one of
+them, which is the whole finding in one comparison and took three lines to compute.
+
+**73. A resampled interval drawn from the observed data cannot say what more data would do, and
+the sentence that forgets this reads like a law.** Chapter 46's taxonomy has two failure modes
+holding five failures each. Chapter 20's resampling put the gap between them at −0.353 to +0.353
+on seventeen failures and ±0.087 on three hundred, always centred on zero, and the chapter said:
+*two modes that are equal do not become ordered by counting more failures.* That sentence is
+about the world. The measurement is not. **The resample draws from those seventeen**, in which
+the two modes are exactly equal, so the interval is centred on zero *by construction*. What the
+column establishes is narrow and still worth having — that on seventeen failures these two are
+indistinguishable, and the width of the indistinguishability is ±0.35. What it cannot establish
+is that they are equal in the application.
+
+Three other sentences in the same chapter failed the same way and each differently, which is why
+this is a class and not an incident. *This corpus and this system fail at a rate forty questions
+cannot be steered far away from* asserted a mechanism from eight failures against nine. *A judge
+that rejects 34 of 80 answers will catch almost any five failures you care to name* is false of a
+random rejecter at that rate — 0.425 to the fifth is about one in seventy — where the true and
+useful statement is the extreme case, that a judge rejecting all eighty catches every failure at
+a precision of 6 per cent. And *fixed by keeping passing cases* needed the scope *the passing
+cases you have*, because a case outside the eighty is outside the set however the set is built.
+
+**The shape they share:** a sentence that generalises from a measurement whose denominator is
+the measurement itself. The test that catches all four is one question asked of every sentence
+that states a rule — *what would have to be true of data I do not have?* — which is
+`BOOK-GUIDE.md` §14.7's question about received wisdom, turned on your own output. All four were
+found by triaging `verify-absolutes.py`'s list, which is what that gate is for: it cannot test an
+absolute, so it forces the list.
+
+**72. Entry 64 has a mechanical remedy, and one pass over the programs is not enough, because
+narration written after the pass is written in the old habit.** Entry 64 is a program that prints
+a computed count and then describes it in a hardcoded sentence, so the two contradict each other
+the first time the data moves. In chapter 46 it was audited for **deliberately, before any
+measurement existed**: every `print()` in all seven programs was read and asked of it whether the
+sentence would still be true if the numbers changed. Nine survived the question and all nine were
+made computed or conditional — a tie described as *the same number*, a stub's length typed as
+*49 characters*, a group described as *one failure and two correct answers*, three refusals
+described as *all three*, a judge described as *WORSE than doing nothing*, a ratio described as
+*four times as often*.
+
+**Then a reviewer found sixteen more, and some of them were in narration written after the
+audit.** Two from the same evening: a block that printed *1 cases and 1 different mechanisms*
+after its data shrank, and a sentence describing three cases moving *from failing twice in three
+to failing three times in three* when one of the three had moved the other way. **The audit is
+not a one-off pass over a finished program; it is a rule that applies to each narrating line as
+it is written**, and the moment that is forgotten is the moment a measurement changes and the
+prose beside it does not.
+
+The rule, stated so it can be applied line by line: **a narrating sentence either computes the
+thing it asserts or branches on it, and a sentence that can do neither does not belong in the
+program.** Two helpers earn their place in any lab that prints counts — one that renders a count
+with its own verb and noun (*none of them is a failure* / *1 of them is* / *3 of them are*), and
+one that chooses a comparative from the sign of a difference. The `print()` lines to look at are
+the ones holding a number word, a comparative (*more*, *worse*, *four times*), or a universal
+(*every*, *all*, *none*, *both*, *each*).
+
+
 **71. A round of fixes can invalidate its own figures, and each fix looks correct when written.**
 Chapter 45 needed four rounds. Rounds 1, 2 and 3 each introduced errors, and twice the cause was
 not carelessness about a single fix but **two fixes in the same round that were never reconciled

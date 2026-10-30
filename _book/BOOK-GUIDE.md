@@ -423,6 +423,24 @@ A fix that needed six places once landed in five, and the survivor was in Key Te
 section no reviewer re-reads, because it is a glossary rather than an argument. Include
 the summary, the key terms and the review answers in every sweep.
 
+**In a Part III lab a corrected claim lives in SIX places, and four of them are prose.**
+Added 2026-10-30, after chapter 46's second round spent six of its sixteen findings on
+exactly this: the prose corrected and the program not, so the chapter contradicted itself
+on its own page. A lab's programs narrate their own output — `print()` lines that state a
+count, a comparative or a universal — and that narration is captured into a `text` block
+that the chapter then discusses. So the sweep is:
+
+1. the program's `print()` lines,
+2. that program's captured `.out` file, **re-run and re-captured**,
+3. the body prose,
+4. the Summary,
+5. the Worth Memorising table,
+6. the Review Answers.
+
+**Step 2 is the one that gets missed**, because a corrected program is not a corrected
+chapter until its output is captured again — and one stale `.out` file spliced into a
+chapter is a figure nobody wrote and nobody can trace.
+
 ### 14.3 The stopping rule
 
 **One review round is the norm.**
@@ -438,6 +456,27 @@ This is why every chapter declares its **non-scope** in its record before it is 
 Without an edge, review never terminates: once a chapter claims to handle *any* case,
 "what about rotary embeddings?" is a correct question and every answer creates the next
 one.
+
+**Before concluding mis-scope, classify round 2's findings — the rule above mis-fires
+otherwise.** Added 2026-10-30, when it mis-fired on chapter 46. The table assumes round 2
+finds errors because the chapter's subject is too large. Sort them instead:
+
+| What round 2 found | What it means |
+|---|---|
+| Findings about the chapter's **subject** — a case it cannot handle, a prerequisite it lacks, a question its own text invites and cannot answer | **Mis-scope.** The table applies. Narrow it |
+| Findings that are **round 1's own fixes, unswept** — a claim corrected in the prose and surviving in a program, a stale captured output, a figure the fix round wrote without querying the data | **The fix round was itself a drafting event.** Apply §14.2's six-place sweep to the fixes and verify once more. Not mis-scope |
+
+Chapter 46's round 2 was sixteen findings: three errors round 1's own rewrite introduced,
+six claims corrected in prose and surviving in a program, and seven minor or stale items.
+**Not one was about its subject**, and both round-1 reviewers reported nothing outside its
+declared non-scope. A chapter that needs a third pass for the second reason is a chapter
+whose fix round was not swept; a chapter that needs one for the first reason is one that
+should have been two chapters.
+
+**The rule that follows, and it is the cheap one:** a fix round that touches more than a
+handful of passages is a draft, not an edit. Sweep it as §14.2 says, re-capture every
+program's output, and expect to verify it — and say so in the record, so the count of
+rounds is read for what caused them rather than as a verdict on the scope.
 
 ### 14.4 Briefing a review agent
 

@@ -24,7 +24,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
 | II · Use | 18–39 | 362 | **Done** — 22 of 22, 2026-10-29 |
-| III · Apply | 40–50 | 190 | **Drafting** — 5 of 11 done |
+| III · Apply | 40–50 | 190 | **Drafting** — 7 of 11 done |
 | IV · What Next | 51–57 | 136 | Not started |
 | Appendices | A–D | 83 | **A (cheat sheet, 288 items), B (100 questions) and C (glossary, 274 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
@@ -85,10 +85,11 @@ sub-part opener pages sitting after the last written chapter were counted into i
   43   761-789    29   16    181%
   44   790-820    31   22    141%
   45   821-885    65   22    295%
-   A   887-907    21    -       -
-   B   908-913     6    -       -
+  46   886-970    85   18    472%
+   A   972-993    22    -       -
+   B   994-999     6    -       -
 
-47 chapter(s), 907 printed pages
+48 chapter(s), 993 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
@@ -114,6 +115,18 @@ retrieval comparisons clear zero, and hybrid against dense is not one of them. I
 rounds also turned up the mechanical cause of a defect this ledger had recorded three times as a
 habit of mind — `LEDGER-DEFECTS.md` entry 69, a batch of edits that writes once at the end and
 discards every edit when one fails to match. 813 printed pages of chapters. Chapters 30
+**Chapter 46 is the one to read if you only read one.** It runs chapters 30, 31 and 33 end to
+end on eighty real answers and the method does not do what it is advertised to: forty outputs
+hold eight failures rather than forty, seventeen failures give the six failure modes' *names* and
+nothing about their *order*, and each of the four arguable labels changes the top of the table on
+its own — two produce an order and the two orders point at different modes. The judge built for
+the largest mode code cannot reach comes out thirty points **below** a judge that passes
+everything, twice, under two instructions. And the regression set has two blind spots: chapter
+33's, to cases that never failed, and one no number of cases fixes, to kinds with no check — which
+is not hypothetical, because a correct refusal became the wrong product's price across both
+versions and every check passed all six times. It took three review passes, 25 findings then 16
+then 8, and `records/46-…` says which were mine.
+
 **Chapter 45 is the capstone lab**: eight programs, the whole pipeline on the shipped corpus, and
 every figure spliced from the programs' own captured output so none was retyped. It needed four
 review rounds, because rounds 1, 2 and 3 each introduced errors — 20 findings, then 11, then 4,

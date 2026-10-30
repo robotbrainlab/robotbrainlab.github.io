@@ -50,7 +50,7 @@ Do not reopen these. Each one was decided with the owner.
 | 22 | **One chapter at a time, never a part at a time** | Context dilution is the main cause of invented content. Writing several chapters in one stretch makes the later ones get written from the pattern of the earlier ones rather than from their sources | A drafting agent per part, which was the plan until 22 Oct 2026 |
 | 20 | **Lab 50 attacks the system before chapter 51 explains security** | Meet the failure, then learn the framework. The lab uses what chapter 36 taught. Moving it after Part IV would break Part IV's "no labs" rule | Moving the lab after chapter 51 |
 
-## 3. State, as of 2026-10-28
+## 3. State, as of 2026-10-30
 
 **Where it lives:** `_book/` inside the website repository
 (`~/LearningLab/towards-intelligence/robotbrainlab.github.io`), branch `main`, **pushed**.
@@ -60,26 +60,25 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Part I is complete: all 17 chapters, 197 printed pages against a 266-page estimate.**
-Its first half (1 to 7) is 70 pages against 98; *Inside the Model* (8 to 17) is 127 against 168. `bash tools/check-all.sh` ends `ALL GATES PASS`.
+**Parts I and II are complete, and Part III is 7 of 11.** Part I is all 17 chapters, 199 printed
+pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III's labs 40 to 46 are closed.
+The book is **993 printed pages over 48 of 57 chapters**, and `bash tools/check-all.sh` ends
+`ALL GATES PASS`. **The next chapter to write is 47, Lab: Workflow Against Agent** — read its
+`TOC.md` row and every `LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1.
+Chapter 34 is the one to read first for it: it owns the five fixed paths and the rule for when an
+agent is warranted, and 47 is that rule measured on one step built both ways.
 
-**Part II is drafting: chapters 18 to 26 closed, 152 printed pages.** The book is
-**365 printed pages** over 26 of 57 chapters. Chapter 26 is the longest at 30 pages.
-
-**Stopped here on 28 Oct 2026, at the reader's request, with everything pushed and the PDF
-delivered.** Nothing is half-finished: chapters 27 to 34 are closed and sealed, the sharpen pass
-over chapters 8-17 is applied and every record amended, and `bash tools/check-all.sh` ends
-`ALL GATES PASS`. **The next chapter to write is 35, Context Engineering**; read its `TOC.md` row
-and every `LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1. Chapter 34 is the
-one to read first: it ends by handing 35 the problem a loop has at step 13 on a fat-stepped run,
-and 35's own opening problem ("works for three steps and then starts forgetting") is the same
-wound.
-
-**The evaluation chapters cost more per chapter than the mechanism ones did, and the records say
-why.** Their reviews found 22, 17 and 15 findings, and in each case several of the FIRST round's
-fixes were themselves wrong — 4, 11 and 7. The pattern is the same every time: a sentence written
-to retire an absolute, written at the speed of a correction rather than of a claim. Entries 52 to
-55 of `LEDGER-DEFECTS.md` are all from this run, and entry 54 is the one to read first.
+**The labs cost more per chapter than anything before them, and the records say why.** Chapter 45
+took four review rounds (20, 11, 4, 1) and chapter 46 took three (25, 16, 8). In both, several of
+each round's own fixes were wrong, and the cause is the same one every time and it is written
+down: **a prose claim about program output written without querying the data first.**
+`LEDGER-DEFECTS.md` entries 70 to 76 are all from these two chapters. **Read 72 and 76 before
+writing another lab** — 72 is the rule that a narrating `print()` line either computes what it
+asserts or branches on it, and 76 is the six places a corrected claim lives in a lab, of which
+the re-captured program output is the one that gets missed. `BOOK-GUIDE.md` §14.2 and §14.3 were
+both amended on 30 October for those two reasons, and §14.3's amendment matters most: its
+stopping rule reads a round count as a verdict on a chapter's scope, and on chapter 46 that was
+wrong — not one of round 2's sixteen findings was about the chapter's subject.
 
 **Three things waiting, none blocking chapter 31.** The sharpen pass should be run again over
 chapters 18 to 30 once Part II is finished, and `LEDGER-DEFECTS.md` entry 44 says why later is
@@ -118,7 +117,7 @@ Three chapters were over-counted that way; `LEDGER-DEFECTS.md` entry 23 has the 
 | `LEDGER-DEFECTS.md` | What the gates cannot catch | 59 entries |
 | `LEDGER-SHORTHAND.md` | What an interviewer calls each concept the book teaches, which chapter names the shorthand, which shorthands wait on an unwritten chapter, and which were checked and left out on purpose | Written 2026-10-29 |
 | `tools/` | The driver, the gate suite, the glossary generator, the build probe | Done |
-| `latex/` | The template, with five changes (section 5) | Builds clean |
+| `latex/` | The template, with six changes (section 5) | Builds clean |
 
 **Measured, not estimated.** Chapters 1 to 17 came in at 74% of their page budget — 197
 printed pages against 266 — and the per-chapter shares are 71, 56, 71, 62, 79, 92, 80, 86, 100,
@@ -231,13 +230,34 @@ arrived there anyway without cutting anything. Its recommendation to write Part 
    deliberately awkward PDF with a table and a scanned page. Every Part III expected result
    depends on it (`BOOK-GUIDE.md` §9: a lab that depends on the reader's own files holds for
    nobody). Build it during stage 4, before the labs need it, not during stage 5.
-4. **Chapter 6's five evidence rungs are not Key Terms.** *Announcement*, *demonstration*,
+4. **`labs/corpus/docs/returns-clearance.md` contradicts itself, and `verify.py` does not test
+   for it.** Found by chapter 46, confirmed independently: section 3 says *"We will issue a return
+   reference beginning `RET-` and a prepaid postage label"* and section 4 says *"Return postage on
+   a clearance item is paid by the customer. **No label is issued.**"* Section 3 is a verbatim
+   copy of `returns-standard.md` section 3, where it is true; `return-postage-labels.md` sides
+   with section 4, so the corpus is two documents to one against its own section 3. It is an
+   undeclared by-product of the near-duplicate pair the README plants for chapters 26 and 44 —
+   the clause that was not changed when the pair was made.
+
+   **Not fixed, on purpose.** `verify.py` asserts the pair "differ on who pays postage" against
+   section 4 only, and 22 of 22 checks pass; the near-duplicate property chapters 26 and 44
+   measure is a Jaccard overlap of 0.81, which editing section 3 would move. Chapters 26, 44 and
+   45 are closed against the corpus as it is. **Chapter 46 reports it as a finding instead**, in
+   its step 2 note on case `d04`: an answer can be wrong because the document is wrong, which is
+   chapter 32's territory and a real thing to have met. Before any later lab leans on
+   `returns-clearance` section 3, decide whether to fix the document and re-measure 26 and 44, or
+   to declare the contradiction in `labs/corpus/README.md`'s planted table and add a `verify.py`
+   row for it. **The second is the cheap one and is probably right**: it is a property the corpus
+   has, and a declared property cannot be reported as a discovery by a later chapter.
+
+5. **Chapter 6's five evidence rungs are not Key Terms.** *Announcement*, *demonstration*,
    *one study* and *settled practice* are named and defined in a table there, and chapters 20
    and 30–33 will use them, but only *practitioner report* is in Key Terms — so Appendix C
    carries one of five. Fixing it is one chapter edit and one `chapter.py reviewed` reseal.
 
-**Nothing on this list blocks chapter 19.** Items 2 and 3 are due before chapter 40, and
-items 1 and 4 are small.
+**Nothing on this list blocks the next chapter.** Items 2 and 3 are resolved; items 4 and 5
+are small, and item 4 is a decision about the shipped corpus to take before a later lab leans on
+that document.
 
 ## 5. The build, and how it differs from the other books
 
@@ -250,7 +270,7 @@ make
 PAGES_MIN=600 PAGES_MAX=1000 make check
 ```
 
-`latex/preamble.tex` has **five changes** from the shared `book-template`. **Never copy the
+`latex/preamble.tex` has **six changes** from the shared `book-template`. **Never copy the
 template's preamble over this one.**
 
 1. `amsmath` and `unicode-math` are loaded, with `\setmathfont{Garamond-Math.otf}`. Garamond-Math
@@ -282,6 +302,12 @@ template's preamble over this one.**
    give 3 index pages and 0 overfull — so keep the shrink. The `\newif` names carry no `@`,
    because this block sits outside `\makeatletter`. See `LEDGER-DEFECTS.md` entry 17, which
    is also where the reason to run `tools/build-probe.sh` instead of grepping `book.log` is.
+6. The contents' page-number column is `2.3em` wide, with `\@tocrmarg` at `3.3em` and
+   `\contentsmargin` at `2.3em`. It was `1.8em`, which fits three digits. **The book passed a
+   thousand pages while chapter 46 was being closed and the contents overfull-boxed on every
+   four-digit folio** — two warnings, which is a `check-all.sh` failure, from a number in a
+   preamble that nobody would think to look at. Widen it again before the book passes ten
+   thousand, which it will not.
 
 **Mathematics is written as raw LaTeX, never as `$…$`.** `tools/convert.sh` disables dollar maths
 on purpose, so a price like $5 stays text. This book is full of prices.
