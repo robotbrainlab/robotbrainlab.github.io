@@ -55,35 +55,40 @@ sub-part opener pages sitting after the last written chapter were counted into i
   13   145-157    13   14     93%
   14   158-171    14   22     64%
   15   172-183    12   20     60%
-  16   184-194    11   18     61%
-  17   195-202     8    8    100%
-  18   204-215    12   16     75%
-  19   216-234    19   20     95%
-  20   235-253    19   18    106%
-  21   254-268    15   14    107%
-  22   269-283    15   12    125%
-  23   284-299    16   16    100%
-  24   300-312    13   14     93%
-  25   313-326    14   12    117%
-  26   327-356    30   28    107%
-  27   357-379    23   16    144%
-  28   380-401    22   16    138%
-  29   402-421    20   14    143%
-  30   422-440    19   14    136%
-  31   441-465    25   18    139%
-  32   466-490    25   16    156%
-  33   491-516    26   16    162%
-  34   517-539    23   16    144%
-  35   540-566    27   22    123%
-  36   567-597    31   18    172%
-  37   598-623    26   10    260%
-  38   624-650    27   14    193%
-  39   651-678    28   22    127%
-  40   680-704    25   20    125%
-  41   705-729    25   18    139%
-  42   730-758    29   16    181%
-  43   759-787    29   16    181%
-  44   788-818    31   22    141%
+  16   184-195    12   18     67%
+  17   196-203     8    8    100%
+  18   205-216    12   16     75%
+  19   217-235    19   20     95%
+  20   236-255    20   18    111%
+  21   256-270    15   14    107%
+  22   271-285    15   12    125%
+  23   286-301    16   16    100%
+  24   302-314    13   14     93%
+  25   315-328    14   12    117%
+  26   329-358    30   28    107%
+  27   359-381    23   16    144%
+  28   382-403    22   16    138%
+  29   404-423    20   14    143%
+  30   424-442    19   14    136%
+  31   443-467    25   18    139%
+  32   468-492    25   16    156%
+  33   493-518    26   16    162%
+  34   519-541    23   16    144%
+  35   542-568    27   22    123%
+  36   569-599    31   18    172%
+  37   600-625    26   10    260%
+  38   626-652    27   14    193%
+  39   653-680    28   22    127%
+  40   682-706    25   20    125%
+  41   707-731    25   18    139%
+  42   732-760    29   16    181%
+  43   761-789    29   16    181%
+  44   790-820    31   22    141%
+  45   821-885    65   22    295%
+   A   887-907    21    -       -
+   B   908-913     6    -       -
+
+47 chapter(s), 907 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
@@ -109,7 +114,30 @@ retrieval comparisons clear zero, and hybrid against dense is not one of them. I
 rounds also turned up the mechanical cause of a defect this ledger had recorded three times as a
 habit of mind — `LEDGER-DEFECTS.md` entry 69, a batch of edits that writes once at the end and
 discards every edit when one fails to match. 813 printed pages of chapters. Chapters 30
-to 33 are the evaluation run of the part, and the first chapters since 17 whose material is a
+**Chapter 45 is the capstone lab**: eight programs, the whole pipeline on the shipped corpus, and
+every figure spliced from the programs' own captured output so none was retyped. It needed four
+review rounds, because rounds 1, 2 and 3 each introduced errors — 20 findings, then 11, then 4,
+then 1 — and `LEDGER-DEFECTS.md` entry 71 is what that cost: a round of fixes can invalidate its
+own figures, and every new error was a prose claim about program output written without querying
+the data first. What it found is worth the trouble: fusion loses to dense at chunk granularity and
+the interval clears zero, which is the row chapter 26 refused and 44 could not call; the reranker
+buys nothing tellable from zero at 105 model calls while the candidate set is the binding ceiling;
+and chapter 28's neighbour expansion would have fixed both retrieval failures for a fifth of what
+a deeper fill needed, because both missing passages sat in the row after one already sent. Its
+closing result is the one to carry: **the diagnosis survived eight queries and the verdict did
+not**, at +0.125 with 95 per cent from −0.250 to +0.500.
+
+**All 44 earlier chapters were independently audited on 2026-10-30** — see `AUDIT-2026-10-30.md`.
+One fresh agent per chapter, given only the chapter and told to find its own plan row in `TOC.md`.
+**None was rated thin, none had content removed, and no arithmetic error was found in any chapter
+that carries arithmetic**; in twenty chapters the agent also ran the programs and confirmed the
+printed output byte for byte. Three real defects came out of it and are fixed: chapter 20's claim
+that repeats never narrow a comparison interval, false and cited for method by ten chapters;
+chapter 16's back matter asserting an accuracy claim its body refuses; and chapter 32's Worth
+Memorising row saying what its own ledger row forbids. The audit's two open patterns are
+unsourced evidence claims and corrections that reach the body and not the back matter.
+
+Chapters 30 to 33 are the evaluation run of the part, and the first chapters since 17 whose material is a
 method rather than a mechanism. Their reviews find more per chapter than the mechanism chapters'
 did, and almost all of it is the same defect: a claim one notch wider than its demonstration.
 **Chapter 38 is where that pattern turned inward**: its review found ten things and every one was

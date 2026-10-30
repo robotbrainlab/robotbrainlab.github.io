@@ -14,6 +14,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Agent** | A system in which the model decides what to do next, repeatedly, rather than your code deciding the sequence | 4 |
 | **Answer key** | Which document each of your queries is actually about. The only input in the procedure that has to come from you | 24 |
 | **Answer normalisation** | The rule saying which two strings count as the same answer: what case, punctuation, emphasis, units and notation are ignored. Not chapter 12's normalisation, which is about a model's internals. Write it down, because a score is a measurement of it as much as of the model | 41 |
+| **Answer passage** | The shortest passage that answers one of your questions, read out of the documents and written down *before* a chunk size is chosen. It is what turns "did retrieval work" into a substring test instead of an opinion | 45 |
 | **Answer relevance** | Whether the answer addresses what was asked. Independent of groundedness, and not a yes or no once the question has parts | 32 |
 | **Approval point** | A step the loop cannot pass without a person, enforced in your code rather than requested in the instructions | 4 |
 | **Approximate nearest neighbour index** | A structure that answers which vectors are closest without comparing against all of them, accepting that the answer may be wrong. Shortened to ANN | 29 |
@@ -221,6 +222,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Resource** | Context and data an MCP server offers for the user or the model to use, as against a function for the model to execute | 36 |
 | **Retrieval** | Searching your own collection for the passages that bear on a request, so they can be put into the context | 2 |
 | **Retrieval-augmented generation (RAG)** | The arrangement where your code searches your own material, puts what it found into the context, and the model answers out of that. Names the whole arrangement rather than any one part of it | 2 |
+| **Roll-up** | Mapping retrieved chunks back to their documents, letting the best-ranked chunk stand for its document and dropping duplicates. What lets a document-level key score a chunk-level index, and what a user is shown anyway | 45 |
 | **Routing** | One call picks a branch from a menu your code wrote; your code runs the branch. The model sees the labels and never the code behind them. Chapter 52's routing is a different thing — choosing between models for one request | 34 |
 | **Rubber-stamping** | Approval given without real attention, usually because the volume is too high for any. It costs what review costs and delivers none of its value | 3 |
 | **Rule of three** | With no failures in `\(n\)`{=latex} tries, the rate can still be about `\(3/n\)`{=latex}. What to use when a bootstrap has no failure to resample | 21 |

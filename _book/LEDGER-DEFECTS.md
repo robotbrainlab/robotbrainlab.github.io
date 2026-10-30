@@ -65,6 +65,57 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**71. A round of fixes can invalidate its own figures, and each fix looks correct when written.**
+Chapter 45 needed four rounds. Rounds 1, 2 and 3 each introduced errors, and twice the cause was
+not carelessness about a single fix but **two fixes in the same round that were never reconciled
+against each other**.
+
+Round 1 corrected the chapter's whole-run request count to "about 145" — right, when it was
+written. The same round restored a measurement that added a second embedding batch and eight more
+query calls, making the true figure 153. Nothing flagged it: the count had been derived from the
+code, and the code then changed underneath it. The same round claimed "the narrowest comparison
+that cleared zero", a superlative the restored comparisons immediately falsified by adding a
+narrower one.
+
+So the rule is not *verify each fix*. It is: **after a round of fixes, re-derive every figure any
+fix in that round could have touched, from the data, before the round is called done.** A fix is a
+change to the state the other fixes were computed against.
+
+**And the mechanism underneath all three rounds was the same, and is worth naming on its own:**
+every new error was a prose claim about program output written without querying the data. "The one
+chunk carrying `hl-2208`" (two have the term, three contain the string, and a sentence three lines
+above said two). "The nine stub chunks are winning ranks" (that query's winners are 25 and 30
+characters; the claim is true of a different query). "The larger budget displaced something that
+had been working" (the fill is by rank and stops, so the smaller run's passages are a prefix of
+the larger's, and the passage in question sat at rank 2 in both). Each took one query against the
+cached data to settle. None was settled before it was written.
+
+Round 4's repairs were each made after querying first, and all four came back clean. The count per
+round was 20, 11, 4, 1. **The discipline is one line: if a sentence asserts something about what a
+program produced, query the program's data before writing the sentence, not after a reviewer
+asks.**
+
+**70. A mechanical check is only as meaningful as its written rule for what counts as the same
+thing — and with no rule, it fails the inputs it should pass.** Chapter 45 ran chapter 28's three
+citation checks on replies a real model produced. Three of nine citations passed. **Five of the
+six failures were the checker's fault**: the passage carried markdown emphasis and a line break
+where the reply had dropped the first and turned the second into a space. The quotes were faithful
+in every way a person would judge faithful. The substring test was correct and useless.
+
+With the rule written down — emphasis markers dropped, runs of whitespace collapsed, applied to
+both sides — eight of nine passed, and the survivor was a real plausible edit, which is the
+failure the check exists to find.
+
+Two things follow. **The rule is part of the check**, not an implementation detail: leave it
+implicit and the verdicts are an accident of how the two texts happened to be stored. And **the
+rule has to be measured for what it forgives** rather than trusted — this one forgives formatting
+and nothing else, which the chapter establishes by trying a changed digit (still fails), a removed
+word (still fails) and a truncation (passes, because a substring test is what it is).
+
+This is chapter 41's answer normalisation arriving somewhere nobody expects it, and the general
+form is that **any comparison of two texts carries a theory of sameness, whether or not anyone
+wrote it down.**
+
 **69. A batch of edits that writes the file once at the end loses every edit in the batch when one
 of them fails to match — and re-running only the edit that raised the error leaves all the others
 silently undone.** This is the mechanical cause behind an entry that has appeared in this ledger

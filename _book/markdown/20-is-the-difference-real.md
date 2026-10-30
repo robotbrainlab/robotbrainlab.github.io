@@ -429,8 +429,59 @@ the work. That is the
 square-root law being unkind in the usual way, and it gives you the rule: **two or three
 repeats, then stop**, unless the within-case variation is itself the thing you are measuring.
 
-Repeats never narrow the interval that matters for a comparison, because they add no new inputs.
-What they do is stop run-to-run noise from masquerading as a difference.
+**And now the question that table does not answer: do repeats narrow the interval on a
+comparison?** The spread above is the spread of one score over repeated runs. The quantity you
+act on is the interval on a *difference*, and whether repeats touch it depends on something the
+first section already measured — how uncertain the model is on each case. So run both shapes.
+
+```python
+# Two prompts over the same cases, with the difference living in
+# different places. In the first, A and B agree on the cases the model is
+# sure about and differ on the eight coins. In the second there are no
+# coins: B is simply right on five cases where A is wrong.
+NOISY = ([0.98]*24 + [0.02]*8 + [0.50]*8,
+         [0.98]*24 + [0.02]*8 + [0.70]*8)
+SURE = ([0.98]*26 + [0.02]*14,
+        [0.98]*26 + [0.02]*9 + [0.98]*5)
+
+def judge(rates, repeats):
+    """One pass over the set, judging each case `repeats` times and
+    averaging, so one case is still one row."""
+    return [sum(1 for _ in range(repeats) if random.random() < q) / repeats
+            for q in rates]
+
+for name, (a_rates, b_rates) in (("8 coins among 40", NOISY),
+                                 ("no coins at all", SURE)):
+    for k in (1, 3, 10):
+        widths = []
+        for s in range(40):
+            random.seed(100 + s)
+            pairs = list(zip(judge(a_rates, k), judge(b_rates, k)))
+            lo, hi = interval(pairs, trials=1_000)
+            widths.append(hi - lo)
+        print(f"  {name:17s} {k:2d} repeat(s)   mean width "
+              f"{statistics.fmean(widths):.3f}")
+```
+
+```text
+  8 coins among 40   1 repeat(s)   mean width 0.201
+  8 coins among 40   3 repeat(s)   mean width 0.135
+  8 coins among 40  10 repeat(s)   mean width 0.081
+  no coins at all    1 repeat(s)   mean width 0.219
+  no coins at all    3 repeat(s)   mean width 0.210
+  no coins at all   10 repeat(s)   mean width 0.198
+```
+
+**So repeats do narrow a comparison, and only to the extent that the judgement of a case is
+noisy.** On the set with eight coins in it the interval goes from 0.201 to 0.081 — a factor of
+nearly two and a half, for ten passes instead of one. On the set with no coins it goes from
+0.219 to 0.198 and stops, because there was nothing to average away: each case already gave the
+same answer every time.
+
+**What repeats cannot do is make the set bigger.** Averaging a case perfectly leaves you with
+forty cases drawn from the world, and the part of the interval that comes from that draw is
+untouched — which is the 0.198 the second block runs into. That floor is what more cases buy
+down and repeats never can.
 
 The practical rule follows from what each one buys:
 

@@ -955,7 +955,7 @@ means neither.
 | Item | Value or formula |
 |---|---|
 | Why two scores per case | One verdict cannot say which stage failed. 62.5 per cent end to end was 75 per cent retrieval and 73 per cent generation given good retrieval |
-| The four cells | Fine; answer there and got it wrong (generation's); answer not there (retrieval's); answer not there and right anyway (a failure, counted as a success) |
+| The four cells | Fine; answer there and got it wrong (finding more passages fixes none of it — Chapter 28's order, trimming and instruction); answer not there (retrieval's); answer not there and right anyway (a failure, counted as a success) |
 | The cell people miss | Right answer, no supporting passage. 3 of 40 here. Nothing can show where it came from, and nothing notices when the document changes |
 | What grounded means | Every claim supported by a retrieved passage. Chapter 28's entailment test applied to every claim, not only the cited ones |
 | Why the unit matters | 3 of 6 claims against 3 of 4 sentences — 25 points, same answer. The coarser unit lets a supported claim vouch for an unsupported one |

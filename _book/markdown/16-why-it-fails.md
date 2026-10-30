@@ -158,7 +158,7 @@ what to put in and in what order, and this is the reason it is a decision at all
 > in an interview is "it has been measured repeatedly, the position of a passage matters, and
 > I would measure it on my own data before designing around a number from a paper."
 
-## Why Thinking Out Loud Works
+## Why Thinking Out Loud Is the Only Scratchpad There Is
 
 This is the one with a genuinely satisfying explanation, and the mechanism follows from Chapter
 9 alone.
@@ -348,9 +348,12 @@ conversation is re-sent every call, and something has to give when it fills — 
 oldest thing, which is often the instruction that mattered. Long inputs are not used evenly: a
 repeatedly measured finding that a passage's position affects how reliably it is used, which
 makes what you put in the context a decision rather than a default. And **intermediate
-reasoning** works because one forward pass runs its layers once however hard the question is,
-and the model has no memory between passes, so emitting the steps as tokens is the only way to carry partial work
-forward — the model's only scratchpad is its own output. That costs output tokens, the dear
+reasoning** is the only way to carry partial work forward, because one forward pass runs its
+layers once however hard the question is and the model has no memory between passes, so emitting
+the steps as tokens is the only place to put a partial result — the model's only scratchpad is
+its own output. **That the working also makes the answer better is a separate and weaker claim**,
+which the mechanism cannot reach and which sits on Chapter 6's ladder as demonstrated and studied
+rather than settled, so how much it buys on your task is a measurement. That costs output tokens, the dear
 half, and the visible trace is generated text rather than a record: the intermediate tokens do
 real work *and* are not an account of how the answer was produced.
 
@@ -387,8 +390,13 @@ more layers for a harder question — and produces one token, and nothing persis
 passes. A problem needing several steps cannot get several steps out
 of one pass, and there is no scratchpad to hold a partial result — except the output. Emitting
 the steps as tokens puts them in the context, where later passes can condition on them, so
-more computation is applied and it is applied to a partly-answered question. The trace is not a
-reliable account because it is generated text, produced the same way as everything else, with
+more computation is applied and it is applied to a partly-answered question. **Then correct the
+question's premise, because that is the part an interviewer is listening for:** the mechanism
+explains why working step by step is *possible* and not why it is *better*. A model may compress
+the same computation into one pass and be right anyway, so the accuracy claim is measured rather
+than derived — demonstrated and studied in particular settings, short of settled practice on
+Chapter 6's ladder — and how much it buys on your task is something you would measure. The trace
+is not a reliable account because it is generated text, produced the same way as everything else, with
 no step consulting what the layers actually did. Both halves matter: the tokens do real work,
 and they are not a description of the cause.
 3. Most likely the instruction is no longer in the request — it was the oldest thing in the conversation,

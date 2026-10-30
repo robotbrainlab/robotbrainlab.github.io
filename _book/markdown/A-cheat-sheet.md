@@ -200,7 +200,7 @@ written from memory.
 | How many cases to label | Enough *failures*, not enough cases. 60 labels bought 12 failures; the catch rate's interval was 12% to 73% | 31 |
 | Position bias, measured | Show each pair both ways and count the flips: 16 of 40 here, a 70%-against-30% swing in the headline | 31 |
 | Why two scores per case | One verdict cannot say which stage failed. 62.5 per cent end to end was 75 per cent retrieval and 73 per cent generation given good retrieval | 32 |
-| The four cells | Fine; answer there and got it wrong (generation's); answer not there (retrieval's); answer not there and right anyway (a failure, counted as a success) | 32 |
+| The four cells | Fine; answer there and got it wrong (finding more passages fixes none of it — Chapter 28's order, trimming and instruction); answer not there (retrieval's); answer not there and right anyway (a failure, counted as a success) | 32 |
 | The cell people miss | Right answer, no supporting passage. 3 of 40 here. Nothing can show where it came from, and nothing notices when the document changes | 32 |
 | What grounded means | Every claim supported by a retrieved passage. Chapter 28's entailment test applied to every claim, not only the cited ones | 32 |
 | Why the unit matters | 3 of 6 claims against 3 of 4 sentences — 25 points, same answer. The coarser unit lets a supported claim vouch for an unsupported one | 32 |
@@ -311,3 +311,17 @@ written from memory.
 | What eight queries bought | Two retrieval verdicts of three. Dense over lexical and fusion over lexical both cleared zero; fusion over dense did not, and neither did the reranking gain | 44 |
 | When a reranker is not ranking | When it returns fewer distinct scores than candidates. Two or three of ten here, so the reported gain was a stable sort preserving the first stage | 44 |
 | Where an interval's width comes from | The queries the two methods disagree on. Two of eight, for fusion against dense on recall | 44 |
+| The first step of a pipeline | Parse, then read the output against the page. The defect you get belongs to the parser as much as to the file: two parsers gave this one page two different wrong answers | 45 |
+| What a scanned page costs | Zero characters and no error. Check whether its facts are anywhere else: one of this page's two was in no other document, and one was in a document that says something adjacent and not the same | 45 |
+| Running Chapter 27's chunk-size check | Write the answer passages down first, then ask whether one chunk holds each whole. Six of eight here; the two that failed were a split answer and a contradiction, neither a chunking defect | 45 |
+| Scoring a chunk index against a document key | Roll up to documents, best rank wins, duplicates dropped — and drop anything the key never judged, which here was the whole PDF. Lifting a document's grade onto each of its chunks instead caps recall@k by the chunking | 45 |
+| When a paired interval cannot clear zero | With `\(t\)`{=latex} of `\(n\)`{=latex} queries tied and no difference of the other sign, the near bound is pinned at zero while `\((t/n)^n \ge 0.025\)`{=latex}. At eight queries that is six ties, so three queries must move. Three of this chapter's comparisons are one-sided: two clear zero with five ties and one is pinned with six. It says nothing about a comparison whose differences have both signs | 45 |
+| The two fixes for a passage that ranked below the fill | A deeper budget, or Chapter 28's neighbour expansion. Both are a raise to the same budget: 2,116 against 412 for the same two answers, because both missing passages sat in the row after one already sent | 45 |
+| What a reranker cannot do | Reach outside its candidate set. The two failures here ranked 11th and 14th against a candidate set of 10, so no reranker at any price could have fixed either | 45 |
+| The choice of first stage | A choice of ceiling. One query's fused candidate set capped any reranking at 0.739 while dense alone scored 0.860 | 45 |
+| Why measure a stage | To be allowed to delete it. The reranker's gain here straddled zero at 105 model calls, so it is not in the pipeline | 45 |
+| What a citation check needs first | A written-down rule for what counts as the same text. Without one, 5 of the 8 true citations failed on markdown emphasis and a line break; with one, 8 of 9 passed and the survivor was a real plausible edit | 45 |
+| What a stored offset survives | A change downstream of it, and one upstream only if the length holds. Keeping the footer broke nothing; keeping the header left 2 of 176 locators valid | 45 |
+| Diagnosis against verdict | Which half is failing is a question about where a passage was, and eight cases can answer it. Whether a change helped is a question about a mean, and eight cases gave −0.250 to +0.500 | 45 |
+| The durable cost baseline | A token count, not money. 612 in and 75 out a request here, 8.2 to 1, which is 67 per cent of the bill on the input | 45 |
+| Where a retrieval system's time goes | Three quarters in the model and a quarter embedding the query — a network call, not the index. Two calls a request | 45 |

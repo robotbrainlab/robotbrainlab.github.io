@@ -312,6 +312,17 @@ So, in order:
    the material earned them is the intended outcome, not a problem to flag. The rule for
    per-chapter budgets in points 1 and 2 applies unchanged to the total.
 
+6. **And the rule covers what goes IN, not only what comes out.** Reaffirmed by the reader on 30
+   October 2026, after chapter 45 broke it: *"Page estimates should never determine that."* The
+   failure to watch for is not padding or cutting — those are points 1 and 2 and they are easy to
+   see. It is deciding **scope** by the page count and then justifying it on other grounds.
+   Chapter 45 came out at 60 pages against a 22-page estimate, and a measurement was dropped from
+   it with the reason given as *"that question belongs to chapter 44"*. The reason was defensible
+   and it was not the reason; the page count was. The owner caught it from the actions rather than
+   the explanation. **So when a scope argument arrives at the same time as a page worry, the page
+   worry is the one to distrust** — write the chapter the material asks for, then report the count
+   as a fact afterwards.
+
 The original figure, kept because it is still the best way to size a chapter before writing it:
 about **240 words per printed page** counting code and tables, so a 16-page chapter is roughly
 3,800 words. Measured here, prose-heavy chapters run nearer 350, so a page budget written at 240

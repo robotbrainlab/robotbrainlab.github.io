@@ -192,8 +192,17 @@ arrived there anyway without cutting anything. Its recommendation to write Part 
 
    **One thing this leaves open.** The preface's "What You Need Installed" section does not exist
    yet — `markdown/00-preface.md` is still a placeholder — and §9 requires a lab's requirements to
-   be listed there. When the preface is written it must say: Python 3, a virtual environment, no
-   third-party packages for chapter 40, and an OpenAI key in `OPENAI_API_KEY`.
+   be listed there. When the preface is written it must say: Python 3, a virtual environment, an
+   OpenAI key in `OPENAI_API_KEY`, and **one third-party package, `pypdf==6.1.3`, for chapter 45
+   alone** — labs 40 to 44 need none, and 45 needs it because it parses a real PDF with a real
+   library rather than the regular expression chapter 27 wrote to make a point. Updated
+   2026-10-30, when chapter 45 became the first lab with a dependency.
+
+   **And the placeholder is printed.** `latex/front/preface.tex` includes
+   `chapters/00-preface.tex` whenever it exists, so the delivered PDF currently opens with
+   *"Placeholder preface, used only to prove the build. Replaced before any chapter is written"* —
+   a sentence that is now false forty-six chapters in. Writing the preface is its own task, with
+   the five sections `front/preface.tex` names, and it moves every page number in the book.
 3. ~~**`labs/` is empty, and chapter 7 already promises its contents to the reader**~~
    **Built, 2026-10-29.** `labs/corpus/` holds 40 documents, 8 queries, 320 graded judgements and
    the awkward PDF. Two things about it are worth knowing before a lab is written against it.
