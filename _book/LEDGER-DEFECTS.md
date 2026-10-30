@@ -65,6 +65,40 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**78. A difference you designed in on a prediction about behaviour is a confound, and the
+prediction being reasonable is what hides it.** Chapter 47 compared a fixed retrieval path
+against an agent loop, and gave the loop a smaller per-search budget — 1,200 characters against
+2,500 — on the reasoning that a loop accumulates several searches' worth and so sees more in
+total. That reasoning is sound and it is also a *prediction about how the loop would behave*,
+which was the thing being measured. The loop searched once on 29 of its 36 runs, so the smaller
+budget bought it nothing to trade: it was a handicap, and the comparison was measuring the
+design and the handicap together. The chapter's step-5 Warning stated as a fact that the two
+designs "differ only in the query". **The test for a difference you have designed in is not
+whether you can justify it; it is whether your justification is a claim your own measurement
+could refute.** Where it is, you need the third arm. Chapter 47 has one — the loop at the fixed
+path's budget — and it cost 36 more runs and turned a 44-point verdict into two comparisons
+that cannot tell. The 44 points were real; what they were *about* was not what the chapter said.
+Chapter 18's change-one-thing rule is usually read as *hold the other things equal*, and the
+harder half is **knowing which things you have not held equal because you expected them not to
+matter.**
+
+**77. A resample tells you what your questions could never have settled, not what more data
+would show, and the difference is a whole paragraph.** Chapter 47 resampled its twelve tasks at
+12, 24, 48, 96 and 192 to read the share of resamples whose interval clears zero, and reported
+it as *how many tasks a comparison needs*: 98 per cent at 192, so the question is "affordable".
+Every row of that table resamples the twelve tasks that exist, so every row assumes the
+difference is the size those twelve measured — and the interval printed three paragraphs above
+said the design difference runs from −50 to +17 points with zero inside it. If the difference is
+really zero, 192 tasks clear zero about five per cent of the time, which is what a 95 per cent
+interval means. **This is entry 73 a second time and in a more tempting form**, because here the
+resample was answering a planning question rather than a scientific one, and a planning answer
+feels like a different kind of claim. It is not. What the table legitimately establishes is the
+negative: at the effects measured, twelve tasks clears zero in 18 and 42 per cent of resamples,
+so neither question was answerable at twelve whatever the truth is. **State the condition in the
+sentence, not in a footnote** — the chapter now carries it in the body, the Summary, Worth
+Memorising, Review Answer 1, the program's own printed heading and the cheat-sheet row, because
+a scoped claim in the prose and an unscoped one in the back matter is entry 76.
+
 **76. In a lab, a corrected claim lives in six places and two of them are the program — and
 the one that gets missed is the captured output, which is a figure nobody wrote.** Chapter 46's
 second review round returned sixteen findings and **six of them were one shape**: a claim

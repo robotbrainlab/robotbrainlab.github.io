@@ -24,7 +24,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
 | II · Use | 18–39 | 362 | **Done** — 22 of 22, 2026-10-29 |
-| III · Apply | 40–50 | 190 | **Drafting** — 7 of 11 done |
+| III · Apply | 40–50 | 190 | **Drafting** — 8 of 11 done |
 | IV · What Next | 51–57 | 136 | Not started |
 | Appendices | A–D | 83 | **A (cheat sheet, 288 items), B (100 questions) and C (glossary, 274 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
@@ -39,7 +39,7 @@ sub-part opener pages sitting after the last written chapter were counted into i
 `LEDGER-DEFECTS.md` entry 23. From the current build:
 
 ```text
-  ch    printed   pp  est  of est
+ch    printed   pp  est  of est
    1     3-12     10   14     71%
    2    13-22     10   18     56%
    3    23-32     10   14     71%
@@ -86,10 +86,11 @@ sub-part opener pages sitting after the last written chapter were counted into i
   44   790-820    31   22    141%
   45   821-885    65   22    295%
   46   886-970    85   18    472%
-   A   972-993    22    -       -
-   B   994-999     6    -       -
+  47   971-1014   44   12    367%
+   A  1016-1038   23    -       -
+   B  1039-1044    6    -       -
 
-48 chapter(s), 993 printed pages
+49 chapter(s), 1038 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
@@ -126,6 +127,24 @@ everything, twice, under two instructions. And the regression set has two blind 
 is not hypothetical, because a correct refusal became the wrong product's price across both
 versions and every check passed all six times. It took three review passes, 25 findings then 16
 then 8, and `records/46-…` says which were mine.
+
+**Chapter 47 is the chapter that caught itself.** It compares one step built as chapter 45's fixed
+retrieval path and as chapter 4's loop, on twelve two-document tasks with three trials each, and
+its completeness review found that the two designs differed in two ways rather than one: the loop
+had been given a smaller per-search budget on my own reasoning that a loop accumulates several
+searches' worth and so sees more in total. It mostly searched once — 29 of 36 runs — so the
+budget was a handicap and not a trade. A third design was built, the same loop at the fixed path's
+budget, and all 108 runs were made again. **The 44-point gap split into 28 points of budget and 17
+of design, and neither half clears zero**, so the only comparison in the chapter with a verdict in
+it is the one that confounds the two things it asks about. The diagnosis survives where the verdict
+does not: 72 of 72 requirements were present in the fixed path's own passages against 63 and 54, so
+retrieval was never the problem; all 72 loop runs ended by answering with 63 of them searching once
+and four steps unspent, which is the opposite of a loop running away; and the agent's *total* input
+tokens are lower than the fixed path's while its cost per success is nearly twice as high.
+`LEDGER-DEFECTS.md` entries 77 and 78 are what it cost — a difference designed in on a prediction
+about behaviour is a confound, and a resample cannot say what more data would show. Its
+fix-verification pass then found entry 76's named example in the chapter written immediately after
+that entry: a captured output file not re-run after its program changed.
 
 **Chapter 45 is the capstone lab**: eight programs, the whole pipeline on the shipped corpus, and
 every figure spliced from the programs' own captured output so none was retyped. It needed four

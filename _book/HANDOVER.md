@@ -60,19 +60,23 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Parts I and II are complete, and Part III is 7 of 11.** Part I is all 17 chapters, 199 printed
-pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III's labs 40 to 46 are closed.
-The book is **993 printed pages over 48 of 57 chapters**, and `bash tools/check-all.sh` ends
-`ALL GATES PASS`. **The next chapter to write is 47, Lab: Workflow Against Agent** — read its
-`TOC.md` row and every `LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1.
-Chapter 34 is the one to read first for it: it owns the five fixed paths and the rule for when an
-agent is warranted, and 47 is that rule measured on one step built both ways.
+**Parts I and II are complete, and Part III is 8 of 11.** Part I is all 17 chapters, 199 printed
+pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III's labs 40 to 47 are closed.
+The book is **1,038 printed pages over 49 of 57 chapters**, and `bash tools/check-all.sh` ends
+`ALL GATES PASS`. **The next chapter to write is 48** — read its `TOC.md` row and every
+`LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1.
 
 **The labs cost more per chapter than anything before them, and the records say why.** Chapter 45
-took four review rounds (20, 11, 4, 1) and chapter 46 took three (25, 16, 8). In both, several of
+took four review rounds (20, 11, 4, 1), chapter 46 took three (25, 16, 8) and chapter 47 two
+(10, 13). In both, several of
 each round's own fixes were wrong, and the cause is the same one every time and it is written
 down: **a prose claim about program output written without querying the data first.**
-`LEDGER-DEFECTS.md` entries 70 to 76 are all from these two chapters. **Read 72 and 76 before
+`LEDGER-DEFECTS.md` entries 70 to 78 are all from these three chapters. **Chapter 47 reproduced
+entry 76 in the chapter written immediately after that entry was written**: `designs.py` was
+edited to loop over three designs and `designs.out` was never re-captured, so the chapter printed
+a three-design program beside two-design output and its record's claim that the sweep had run was
+false. Reading an entry is not the same as having a mechanism, and there is still no mechanism
+here — a lab's captured output is re-run by hand. **Read 72 and 76 before
 writing another lab** — 72 is the rule that a narrating `print()` line either computes what it
 asserts or branches on it, and 76 is the six places a corrected claim lives in a lab, of which
 the re-captured program output is the one that gets missed. `BOOK-GUIDE.md` §14.2 and §14.3 were

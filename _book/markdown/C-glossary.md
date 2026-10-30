@@ -59,6 +59,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Context engineering** | Deciding what occupies the context at each step of a run. Distinct from writing a prompt (Chapter 18), because a prompt is written once and a run's context is rebuilt every step, mostly out of material you did not write | 35 |
 | **Context window** | The maximum number of tokens a model will accept at once. A cost limit rather than a memory, counting the reply as well as the request. The whole conversation is re-sent every call, and something is dropped — or the call refused — when it fills | 16 |
 | **Cosine similarity** | The dot product divided by both lengths, which removes magnitude and keeps direction. Always between −1 and 1 | 8 |
+| **Cost per success** | What a run costs divided by the runs that passed, rather than by the runs you made. The only one of a comparison's cost columns that is a comparison: here the agent sent fewer input tokens in total than the fixed path and the most per answer that was right. A success rate and a token count are two numbers, and neither of them is this one | 47 |
 | **Coupled task** | One whose pieces each need the one before, so the chain is the whole task. Given several agents it pays for all of them and finishes no sooner | 37 |
 | **Criteria drift** | Your own standard moving as you see more output, measured by re-labelling old outputs blind and counting the flips | 33 |
 | **Critical path** | The longest chain of pieces that must happen in order. The shortest a task can take however many agents you have, so pieces divided by it is the most parallelism the work contains | 37 |
@@ -67,6 +68,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Current convention** | How competent engineers work at the moment: true, load-bearing and replaceable. It usually names a technique rather than a reason, and usually has a predecessor you can remember | 6 |
 | **Dated detail** | A fact with a date on it — a name, a number, a version. It stops being true when somebody ships something or changes a price | 6 |
 | **Dead state** | A grammar state with no legal token. It does not raise — the mask stops meaning anything and the decoder emits whatever was first | 22 |
+| **Declined freedom** | A loop that does not use the freedom its design gives it, so it behaves as the pattern below it at the loop's price. Measured as the share of runs that took the cheapest path available: 63 of 72 searched once with a tool and four unused steps in hand, and nine failures say in their own answer that something was missing | 47 |
 | **Decode** | One forward pass per output token. Does almost no arithmetic and is limited by reading every parameter the pass uses out of memory once per token | 15 |
 | **Delta** | One streamed piece: what to add to what you have, not the whole answer again | 19 |
 | **Dense retrieval** | Embedding every document once, embedding the query at search time with the *same* model, and ranking by cosine | 24 |
