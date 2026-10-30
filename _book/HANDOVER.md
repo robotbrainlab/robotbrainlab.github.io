@@ -60,38 +60,40 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Parts I, II and III are complete, and Part IV is 5 of 7.** Part I is all 17 chapters, 199
-printed pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III is the eleven labs
-40 to 50, closed 2026-10-30; chapters 51 to 55 opened Part IV at 27, 21, 31, 37 and 17 pages. The
-book is **1,368 printed pages, 55 of 57 chapters written**, and `bash tools/check-all.sh` ends
-`ALL GATES PASS`. **Two chapters are left: 56, What to Learn Next, and 57, What to Skip for Now.**
-Read their `TOC.md` rows (lines 138 and 139) and every `LEDGER-TAUGHT.md` row naming them before
-anything else, per §14 step 1.
+**All four parts are complete. All 57 chapters are written.** Part I is 17 chapters and 199
+printed pages against a 266-page estimate; Part II is chapters 18 to 39 at 475; Part III is the
+eleven labs 40 to 50; Part IV is 51 to 57 at 27, 21, 31, 37, 17, 8 and 7 pages. The book is
+**1,383 printed pages over 57 chapters plus Appendices A to D**, and `bash tools/check-all.sh`
+ends `ALL GATES PASS`.
 
-**They are a pair and they should be written as one piece of thinking in two chapters**, because 57
-is the negation of 56 and the book's credibility rests on the two not overlapping. 56 is 8 pages and
-owns bank question 99 (*what do you not know yet, and how would you go about learning it?*); 57 is 6
-pages and owns no bank question. Four things are settled for them. **Chapter 17 owns what is
-black-boxed** — it is the chapter that says where the theory begins, so 56 points there and does not
-redo it; its own row is the first thing to read. **Chapter 6 owns what changes fast** and the ladder
-of evidence, so 57's *what to postpone* must not re-derive it. **Chapter 7 owns the map**, including
-its one-week and one-day reading plans, and it names 55, 56 and 57 in its own closing table, so check
-what it promises them. And **the regress of prerequisites is 57's**, which the on-ramp decision of
-2026-10-08 in the website's handover states in one line: a new from-zero guide is written only when
-no good resource exists at this level and the wall has been hit twice. That is the book's own
-position on where to stop, and 57 is where it belongs.
+**What is left is Appendix B, and nothing else in the plan.** Appendices A, C and D are generated
+— `tools/cheatsheet.py` builds A from every Worth Memorising table, `tools/glossary.py` builds C
+from every Key Terms table, and D is LaTeX — and all three are current. **Appendix B is the one
+that is written, and its hundred questions have model answers still to write**, which
+`BOOK-GUIDE.md` §15 calls the acceptance test for the whole book: an answer is what the reader
+should be able to say in about sixty seconds — the mechanism, the trade-off, and how they would
+check it — and §14.7's instruction is to write it **last, from the finished chapters, and never
+from memory**. That last clause is now the whole job, because the chapters are finished.
 
-**Read chapters 51 to 55's records before writing either.** 51's settles the shape of every Part IV
-chapter (`structure-decision:`). The other four are four different warnings, and 56 and 57 are
-exposed to the last two most. **52's is borrowed figures** (entry 92). **53's is a fix that widens a
-claim and leaves the sentence beside it stating the narrow one** (entry 94). **54's is a fix that
-adds evidence and then describes it with a count written while looking at it** (entry 95). And
-**55's is the one a chapter of pointers will meet**: a source with two figures of the same kind has
-to be quoted by its qualifier rather than by its chapter, and the repair for the wrong one of two is
-to find the quantity you need rather than to swap in its neighbour (entry 96). Chapters 56 and 57
-will be almost entirely cross-references, so 55's record is the closest precedent for how to write a
-chapter that owns nothing: it introduces no term, carries zero index entries, adds nothing to either
-generated appendix, and says so in place of a Key Terms table.
+**Three things to know before starting Appendix B.** Its own header says **questions 1 to 13 are
+the exception and are weaker for it** — they were written after chapters 1 to 7 existed, by
+somebody who had read them, so a question reverse-engineered from an answer cannot test whether
+the answer is there; chapter 57's measurement section depends on that fact and quotes it, so do
+not quietly repair it. **Eight chapters carry no question on purpose** (7, 40, 42, 43, 44, 46, 48,
+57) and the header says why; the `BANK` gate in `check-all.sh` checks that every closed chapter's
+record names the questions it owns, so the mapping is already verified both ways. And **the
+answers are where every figure in the book gets quoted one more time**, which makes Appendix B the
+single place most exposed to `LEDGER-DEFECTS.md` entries 90, 92, 95, 96 and 97 at once: a borrowed
+figure keeps its variables, a source with two figures of the same kind is quoted by its qualifier,
+and a count written while looking at output is computed from the data instead.
+
+**Read the records of chapters 51 to 57 before writing any answer**, because between them they
+hold what each Part IV chapter may and may not be cited for, and the Part IV chapters are where
+the bank's last nine questions live. 51's `structure-decision:` settles the shape of a Part IV
+chapter. 52's warning is borrowed figures (entry 92), 53's is a fix that widens a claim (94),
+54's is a fix that adds evidence and miscounts it (95), 55's is a source with two figures of the
+same kind (96), and 56's and 57's is the pair defect (97). An appendix of a hundred answers is
+every one of those five risks, a hundred times.
 
 **Read chapter 51's record before writing 52**, because it settled the shape of every Part IV
 chapter and the reading is arguable. `BOOK-GUIDE.md` §5 says Part IV chapters have none of the

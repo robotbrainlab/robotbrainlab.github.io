@@ -65,6 +65,40 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**97. Two chapters written as a pair can contradict each other without either chapter containing a
+contradiction, and only a review of both can see it.** Chapters 56 and 57 are a declared pair — what
+to learn next, and what to skip — and both records claimed the overlap between them was nothing.
+A single review of both found three things no review of either could have found.
+
+**The one that matters is an instruction conflict.** Chapter 56 puts *Deep Learning* second in a
+reading order with no condition on it and says the order matters more than the list. Chapter 57
+defers the theory behind chapter 17's thirteen — which is exactly that book's content — until the
+reader meets one of the thirteen twice or is about to tune a model. Each chapter is internally
+consistent and each is defensible; together they tell a reader to read a book second and to
+postpone it, and **no sentence in either said which wins**, because each chapter's non-scope
+disclaimed the other's half. The fix is one clause assigning the chapters different jobs: 57 owns
+*when*, 56 owns *what and in what order*, and reading ahead is licensed as a choice.
+
+**The second is duplication at the sentence level**, which a diff finds and a reader finds and no
+gate does: chapter 7's working rule appeared in full, twenty-five identical words, in both
+chapters, and chapter 17's justification for the other architectures in both at twenty-one
+identical words including the same italic. **The book's rule that one chapter owns a claim applies
+to sentences and not only to terms**, and the test is mechanical — an n-gram diff of two chapters
+that cover adjacent ground, which took four lines of Python and should be run on any pair written
+together.
+
+**The third is a gap of the same shape**: chapter 57's threshold for going down a level is
+unactionable for the three of chapter 17's thirteen that chapter 56 says have no book, and neither
+chapter could see it — 57 does not know which three, and 56 does not state the threshold.
+
+*And the companion, which is this entry's own fix round.* The repair for the instruction conflict
+introduced a fresh contradiction into chapter 57 — *Chapter 56's books contain the thirteen*, where
+they contain ten, which that chapter states three rows earlier. **A fix that resolves a
+contradiction between two chapters is written while looking at the other chapter**, which is
+exactly when a claim about the chapter you are standing in goes unchecked. Entry 95's rule applies
+with the subject swapped: the count describing the other chapter has to be computed from it rather
+than recalled from the fix you are making.
+
 **96. A figure stated correctly in one place and wrongly in another, with a whole conclusion resting
 on the wrong one — and the book's own text was the evidence either way.** Chapter 55 quotes chapter
 45's measurement that the average length falls from **161.8 terms a document to 37.7 a chunk**. It

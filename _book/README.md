@@ -95,15 +95,17 @@ sub-part opener pages sitting after the last written chapter were counted into i
   53  1255-1285   31   20    155%
   54  1286-1322   37   26    142%
   55  1323-1339   17   16    106%
-   A  1340-1368   29    -       -
-   B  1369-1374    6    -       -
+  56  1340-1347    8    8    100%
+  57  1348-1354    7    6    117%
+   A  1355-1383   29    -       -
+   B  1384-1389    6    -       -
 
-57 chapter(s), 1368 printed pages
+59 chapter(s), 1383 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
 Part II is complete: chapters 18 to 39 come to 475 pages.
-**Part IV is 5 of 7.** Part III is complete: chapters 40 to 50, which began with chapter 40, the first chapter in the book that calls a real model, and
+**Part IV is complete, and so is the book's chapter plan: all 57 are written.** Part III is complete: chapters 40 to 50, which began with chapter 40, the first chapter in the book that calls a real model, and
 the labs now run on the corpus in `labs/corpus/` — 40 documents, 8 queries and 320 graded
 judgements, written for the book and dedicated to the public domain. `LEDGER-DEFECTS.md` entry 63
 is what the first non-deterministic chapter cost: prose that quotes a figure a re-run can change
@@ -136,6 +138,30 @@ everything, twice, under two instructions. And the regression set has two blind 
 is not hypothetical, because a correct refusal became the wrong product's price across both
 versions and every check passed all six times. It took three review passes, 25 findings then 16
 then 8, and `records/46-…` says which were mine.
+
+**Chapters 56 and 57 close the book, and they were written and reviewed as a pair.** 56, *What to
+Learn Next*, maps chapter 17's thirteen named gaps onto five books: eight are *Deep Learning*
+alone, two the learning-theory text, and **three have no book at all** — two of them open questions
+rather than withheld accounts. Its argument is about the order, and it is not the obvious one: the
+statistics come first, because chapter 20's bootstrap is named in sixteen chapters of this book and
+derived in none of them, so it is the only item on the list that is already a tool in the reader's
+hands. 57, *What to Skip for Now*, measures what a conversation does not reach over the book's own
+hundred questions — **35, 51, 5 and 9 across the four parts**, with the eleven labs of Part III
+carrying five between them — and the finding is that *the work that makes you able to answer is not
+the work you are answering about*. Then six deferrals, each carrying the condition that ends it,
+and a threshold for the regress: **the same wall twice, not once**, because going down too early
+costs weeks and going down too late costs one confused afternoon.
+
+**They were reviewed together, and that is what the entry is about.** A single review of both found
+three things no review of either could find: chapter 7's working rule stated in full, twenty-five
+identical words, in both chapters; chapter 17's justification for the other architectures in both at
+twenty-one; and — the one that mattered — **the two chapters giving opposite instructions about the
+same book with nothing reconciling them**, 56 putting *Deep Learning* second in an unconditional
+order while 57 deferred exactly that material. Each chapter was internally consistent.
+`LEDGER-DEFECTS.md` entry **97** is that class: **two chapters written as a pair can contradict each
+other without either containing a contradiction**, the test for the duplication half is a four-line
+n-gram diff, and the repair for the conflict half introduced a fresh contradiction into 57 while its
+author was looking at 56.
 
 **Chapter 55 is the book's one synthesis, and it owns nothing — which the build proves rather than
 the prose claiming it.** It carries zero index entries, and regenerating the glossary and the cheat
