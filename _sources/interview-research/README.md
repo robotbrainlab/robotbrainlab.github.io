@@ -24,5 +24,6 @@ from this study appears in the book.
 Four chapters were amended from it on 2026-10-31 — 12, 31, 55 and 57 — and each records this file
 in its own `amended:` line.
 
-**The dated half belongs on the website rather than in the book**, where a 2026 snapshot can carry
-its date and expire honestly.
+**The dated half stays here.** It is not in the book, for the reason above, and it is not on the
+website either — that was offered and declined on 2026-10-31. This folder is its home: unpublished
+because `_sources/` is, dated in its own first line, and readable by the one person who needs it.

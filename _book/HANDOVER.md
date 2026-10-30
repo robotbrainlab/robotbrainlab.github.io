@@ -116,8 +116,10 @@ nothing. Leave the hundred alone.
 
 **The research in `_sources/interview-research/`** is folded in as far as the book takes it, and
 its README states the line the book holds: cite the accounts, never the percentages. The dated half
-of it — percentages, tool names, the four-week plan, geography — still has no home; the standing
-recommendation is a page on the website rather than anything in the book.
+of it — percentages, tool names, the four-week plan, geography — stays in `_sources/` and goes
+nowhere else. **A page on the website was offered and the owner declined it on 2026-10-31**: none of
+this work goes on the live site. The file is committed, it carries its date, and its README carries
+the citation line, which is all the home it needs. Do not propose publishing it again.
 
 **One thing about Part IV's shape, for any later edit.** `BOOK-GUIDE.md` §5 says Part IV chapters
 have none of the last four items of the every-chapter list, and the literal reading contradicts
