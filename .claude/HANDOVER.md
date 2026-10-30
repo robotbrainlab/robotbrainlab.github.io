@@ -94,6 +94,7 @@ Notes:
 | `_tools/link-check.py` | Checks every internal link and `#anchor` on the site resolves |
 | `_backup/data-intelligence/index.html` | The old D&I guide page with the pipeline diagram |
 | `_book/` | **The interview-prep book** — a whole separate project living here for safekeeping. Unpublished (leading `_`). See "The interview-prep book" below |
+| `_future-books/` | **Decisions for the two books that come after it** — Python, and Core ML and Deep Learning. Nothing is started; `DECISIONS.md` records why, what was settled and the rules still to write. Unpublished (leading `_`) |
 
 Removed on purpose, so don't recreate them: the Mathematics and D&I on-ramps, the separate `cse/on-ramp.html` page
 (merged into the CS&E guide on 2026-09-27, so each discipline has one guide; the site is for the owner only, so no redirect is kept), and the old `redesign/`
