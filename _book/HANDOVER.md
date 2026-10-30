@@ -60,26 +60,39 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Parts I, II and III are complete.** Part I is all 17 chapters, 199 printed pages against 266;
-Part II is chapters 18 to 39 at 475 pages; Part III is the eleven labs 40 to 50, closed on
-2026-10-30. The book is **1,232 printed pages, 50 of 57 chapters written**, and
-`bash tools/check-all.sh` ends `ALL GATES PASS`. **The next chapter to write is 51, Security: What
-Can Go Wrong, and What Limits the Damage** — the first of Part IV and its largest row at a 36-page
-estimate. Read its `TOC.md` row (line 133) and every `LEDGER-TAUGHT.md` row naming it before
-anything else, per §14 step 1. Two things about it are already settled. **Chapter 50 owns
-prompt injection and attack suite**, so 51 uses both by name and introduces neither — the
-arrangement is in chapter 50's `non-scope:` and `LEDGER-TAUGHT.md` row 50, and it is the same one
-chapter 49 made with 52. And **seven earlier chapters point at 51** — 2, 3, 5, 23, 35, 36 and 40 —
-so the chapter is answering promises that are already in print, which is where to start reading.
-It is also the first chapter since 39 that is not a lab, so it needs the risk-list tables and the
-design rule rather than programs.
+**Parts I, II and III are complete, and Part IV has begun.** Part I is all 17 chapters, 199
+printed pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III is the eleven labs
+40 to 50, closed on 2026-10-30; chapter 51 opened Part IV the same day at 27 pages. The book is
+**1,260 printed pages, 51 of 57 chapters written**, and `bash tools/check-all.sh` ends
+`ALL GATES PASS`. **The next chapter to write is 52, Speed: What Makes This Slow.** Read its
+`TOC.md` row and every `LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1.
+Three things about it are already settled. **Chapter 49 owns prompt-prefix cache and cascade**,
+so 52 uses both by name and introduces neither — the arrangement is `LEDGER-TAUGHT.md` row 15's
+amendment of 2026-10-30. **Chapter 49 also handed it a baseline to measure against**: $0.11 per
+1,000 requests at a median 1.31 seconds, on this book's own system, with three levers priced and
+none of them pulled. And **chapter 15 owns why a model is slow from the inside** — prefill,
+decode, the key-value cache, memory-bound against compute-bound — so 52 owns what you measure in
+production and which lever you pull, and must not re-derive the mechanism.
+
+**Read chapter 51's record before writing 52**, because it settled the shape of every Part IV
+chapter and the reading is arguable. `BOOK-GUIDE.md` §5 says Part IV chapters have none of the
+last four items of the every-chapter list, and the literal reading contradicts itself: the item
+it keeps requires a Key Terms table, and that table lives inside the section the sentence
+removes. The reading taken, under `structure-decision:` in `records/51-security.md`: no lab, no
+Review Questions, no *You understand this when*, no tip/note/warning callouts, and a
+`## Summary and Key Terms` section holding the Summary, Key Terms and Worth Memorising. Follow it
+for 52 to 57 unless the owner overturns it.
 
 **The labs cost more per chapter than anything before them, and the records say why.** Chapter 45
 took four review rounds (20, 11, 4, 1), chapter 46 took three (25, 16, 8), chapter 47 two
-(10, 13), chapter 48 two (23, 13), chapter 49 two (15, 15) and chapter 50 two (20, 15). In every
-one of them several of each round's own fixes were wrong, and the cause is the same every time and
-it is written down: **a prose claim about program output written without querying the data
-first.** `LEDGER-DEFECTS.md` entries 70 to 88 are all from these six chapters. **Entry 85 is the one to
+(10, 13), chapter 48 two (23, 13), chapter 49 two (15, 15), chapter 50 two (20, 15) and chapter
+51 two (30, 13). In every one of them several of each round's own fixes were wrong, and the cause
+is the same every time and it is written down: **a prose claim about program output written
+without querying the data first.** `LEDGER-DEFECTS.md` entries 70 to 91 are all from these seven
+chapters, and **chapter 51 shows the defect survives into a chapter with almost no programs in
+it** — there the borrowed material is another chapter's measurement, and three of its thirteen
+second-round findings were figures carried from chapters 20 and 29 with the answer kept and the
+input changed. **Entry 85 is the one to
 read before fixing anything**: a figure quoted from a summary table is a figure about the wrong
 thing, and it reads perfectly — chapter 49 attributed two arm means to a single request while
 repairing the very sentence those means were wrong for. The mechanism is that the summary table is

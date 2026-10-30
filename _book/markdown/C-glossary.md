@@ -114,6 +114,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Greedy decoding** | Always taking the highest-scoring token. What "temperature zero" does in practice, since dividing by zero is not defined | 13 |
 | **Greedy fill** | Keeping any passage that fits in the room remaining. Silently promotes short passages over higher-ranked long ones | 28 |
 | **Grounded** | Every claim the answer makes is supported by a passage that was retrieved. Says nothing about whether the passages were right or the answer useful | 32 |
+| **Guardrail** | A check placed around a model call to catch bad input or bad output — usually a judgement about natural language rather than a rule your code can state exactly. Worth having and not a boundary: it raises the cost of the attacks it knows and turns a served failure into a logged one | 51 |
 | **Hallucination** | Output that is fluent, plausible and not true. Not a malfunction: no step in the computation checks anything, so a plausible continuation is all the mechanism can produce | 16 |
 | **Hybrid retrieval** | Running lexical and dense retrieval and combining their rankings | 26 |
 | **Idempotency** | Doing an operation twice has the same effect as doing it once. What makes a retry after a timeout safe | 19 |
@@ -122,6 +123,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Inference** | Running a finished model to get a reply. This is what "using a model" means | 1 |
 | **Initialisation** | What the parameters are set to before training begins, and why the choice matters | 17 |
 | **Input tokens** | Everything you send on a call — instructions, attached material and the request. Countable exactly before you send | 10 |
+| **Insecure output handling** | Model output reaching a component that renders it, executes it or builds an instruction from it — a page, a query, a command line, a URL your code fetches. Called improper output handling on the current risk list | 51 |
 | **Instructions** | What to do, what not to do and who to be. Part of the specification, so it changes rarely and is paid for on every call | 18 |
 | **Inter-agent misalignment** | One agent's output not being what the next one needed. The middle of the three failure categories, and Chapter 35's summary problem with no shared context to catch it | 37 |
 | **Intermediate reasoning (chain-of-thought)** | Emitting the steps of a problem as tokens so that later passes can condition on them. The only way to carry partial work forward, because one pass runs its layers once however hard the question is, and nothing persists between passes | 16 |
@@ -191,6 +193,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **pass@k** | The chance at least one of *k* trials succeeds, `\(1-(1-p)^k\)`{=latex}. Rises with *k*. Only a capability when something can tell a good attempt from a bad one | 38 |
 | **pass\^k** | The chance all *k* trials succeed, `\(p^k\)`{=latex}. Falls with *k*, and it is the one to worry about | 38 |
 | **People** | The reviewers and approvers who handle the consequential cases and carry responsibility for them | 2 |
+| **Per-user tool authorisation** | A tool acting with the rights of the caller on whose behalf the request is handled, rather than with the rights of the service. The caller's identity comes from the session, never from the model's proposal | 51 |
 | **Perplexity** | The exponential of the cross-entropy. Reads as the number of equally likely options the model is effectively choosing between; a uniform choice among `\(V\)`{=latex} options has perplexity `\(V\)`{=latex} | 14 |
 | **Position bias** | A judge preferring an answer for where it was printed rather than for what it says. Measured by showing each pair both ways and counting the flips | 31 |
 | **Positional encoding** | How a token's position is put into the arithmetic, since the attention formula carries no notion of order. Added to the embedding before the stack, or applied as a rotation to queries and keys, or added to the scores themselves | 11 |
@@ -234,12 +237,15 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Routing** | One call picks a branch from a menu your code wrote; your code runs the branch. The model sees the labels and never the code behind them. Chapter 52's routing is a different thing — choosing between models for one request | 34 |
 | **Rubber-stamping** | Approval given without real attention, usually because the volume is too high for any. It costs what review costs and delivers none of its value | 3 |
 | **Rule of three** | With no failures in `\(n\)`{=latex} tries, the rate can still be about `\(3/n\)`{=latex}. What to use when a bootstrap has no failure to resample | 21 |
+| **Sandboxing** | Running code the model wrote in a process that cannot reach anything you mind about: no network, no credentials, no production data, discarded after the run. A limit on reach rather than a judgement about the code | 51 |
 | **Scaling laws** | The relationships between model size, data, compute and loss, and their derivation | 17 |
 | **Schema** | The list of claims your code makes about a reply — fields, types, allowed values, ranges — and enforces on every one. A contract you check, not a request you hope was honoured | 21 |
+| **Secret** | A value that grants access by being known — a key, a password, a token. A bearer credential, long-lived unless made otherwise, and bounded only by what it was issued for | 51 |
 | **Self-agreement** | How often a judge gives the same verdict on the same answer shown twice. Every point of flipping is a point any other figure could have landed elsewhere, and measuring it needs no labels | 31 |
 | **Semantic search** | What dense retrieval is usually called. The same thing, in the words people use when they complain about it | 25 |
 | **Semaphore** | A counter that bounds how many jobs run at once. Three words of code, and the difference between concurrency and attacking your own account | 19 |
 | **Server-sent events** | A long-lived HTTP response carrying one small event per line as the server produces them. How a streamed reply arrives | 19 |
+| **Session** | One run of a system that shares a context: a request and its answer, or an agent's loop from the user's message to its last step. The unit the design rule is about | 51 |
 | **Side effect** | A change to a task the tune was not for. Visible only if you kept a set for the thing you were not changing, and only if that set is big enough to see it | 39 |
 | **Similarity floor** | The cosine between two texts of your own that have nothing to do with each other. Until you have measured it no margin means anything, and it is per model: about 0.05 for both of these two. One pair gives an order of magnitude and not a constant — measure several | 43 |
 | **Singleton mode** | A named failure mode resting on one failure. It is a guess about a kind rather than an established kind, and only more output settles which: of the three singletons after forty answers here, one became a group of five and two did not move | 46 |
@@ -255,6 +261,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Subword** | A token that is part of a word rather than a whole one. What makes it possible to represent a word the vocabulary has never seen | 10 |
 | **Supervised fine-tuning (SFT)** | Running the same loop with the same objective on curated request–response pairs. Turns a model that continues text into one that answers | 14 |
 | **Supplied information** | The part of a prompt that is different on every call. The only one of the four parts that is data rather than specification | 18 |
+| **Supply-chain dependency** | Something your system's behaviour depends on that somebody else writes, versions and ships — a tool server, a package, a model. A server you call over a network is one whose version you may not be choosing | 51 |
 | **Synthetic data** | Training examples a model wrote rather than people. Added to real data, never substituted for it, because a generator's blind spots become absences nothing in the data can report | 39 |
 | **System message** | The message holding your instructions and usually the output format. Your specification, set once per conversation and never the thing to drop when the history will not fit — nor are the example turns, if that is where your examples live | 18 |
 | **Task** | An agent's unit, as a case is a single call's: a starting state, a goal, and a condition that can be checked when the run ends. If you cannot write the condition you do not have one | 38 |

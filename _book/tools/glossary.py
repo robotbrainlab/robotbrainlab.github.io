@@ -45,7 +45,14 @@ def chapters():
 def key_terms(path):
     """The rows of this chapter's `### Key Terms` table."""
     text = open(path, encoding="utf-8").read()
-    m = re.search(r"^### Key Terms\s*$(.*?)^###\s", text, re.M | re.S)
+    #  The lookahead matters: the old pattern required ANOTHER `### `
+    #  heading after Key Terms, so a chapter whose Key Terms is its last
+    #  section had every term silently dropped - and nothing caught it,
+    #  because check-all.sh only fails on a STALE glossary and a chapter
+    #  dropped at generation is dropped identically at comparison. Found
+    #  by chapter 51's review; `cheatsheet.py` already did it this way.
+    m = re.search(r"^### Key Terms\s*$(.*?)(?=^#{2,3}\s|\Z)", text,
+                  re.M | re.S)
     if not m:
         return []
     rows = []

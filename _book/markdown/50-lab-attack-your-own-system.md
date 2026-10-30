@@ -1327,10 +1327,12 @@ four of four questions from a retrieved passage and on none from a tool output o
 channel is not a minor factor here — it is the difference between everything and nothing. What I
 cannot do is say why, because the three arms differ in at least four ways at once. The passage sits
 inside the block the instruction tells the model to use, while the title and the note arrive
-labelled as metadata. The positions differ. The payload is a different share of what carries it —
-159 characters inside a 1,162-character document, 159 of a 186-character title, and the whole of a
-note's 159-character value. And the injected note additionally carries Chapter 35's `inferred`
-provenance label, which the other two arms have no equivalent of and which could by
+labelled as metadata. The positions differ. The payload is a different share of what carries it:
+the one that fired is 178 characters inside a 1,181-character document, 178 of a 205-character
+title, and the whole of a 178-character note value — step 2's demonstration above uses the marker
+payload instead, which is nineteen characters shorter, so read its figures as that arm's rather
+than this one's. And the injected note additionally carries Chapter 35's `inferred` provenance
+label, which the other two arms have no equivalent of and which could by
 itself account for its zero. **Four differences and one comparison**, which is the shape Chapter 47
 spent a chapter on. So it stands as a measurement with no mechanism, and the honest form is narrow:
 **on this system, the channel the instruction points at is the channel that worked.**

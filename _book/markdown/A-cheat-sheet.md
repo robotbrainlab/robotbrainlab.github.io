@@ -376,3 +376,14 @@ written from memory.
 | The check for a dropped citation | Four lines: a reply claiming to answer from passages must name one. Prevents nothing, and its 12-of-12 is the same predicate as the detector. It also fires on every correct refusal | 50 |
 | Why a successful injection is invisible | The prose is correct and the citation list is empty. What is missing is not visible in what is there — and Chapter 46's regression set **passes** it, because a universal test over no citations is true | 50 |
 | What an attack suite may assert | Invariants **against the code**, controls, and the coverage of your checks. Never that the model does not comply. A gate over stored evidence cannot test code | 50 |
+
+## Part IV · What Next
+
+| Item | Value or formula | Ch |
+|---|---|---|
+| The design rule | Never combine *untrusted input*, *sensitive access* and *external action* in one session without approval. Remove one of the three, shrink one, or add the approval — and approval is the weakest wherever the action is frequent, because it degrades with volume | 51 |
+| The four fixes | No such tool · do not read the untrusted thing · scope the access to the caller · a person approves. The first two remove a capability, so nothing has to work at the moment of the attack | 51 |
+| The two current lists | *OWASP Top 10 for LLM Applications 2026*, LLM01–LLM10, published early August 2026. *OWASP Top 10 for Agentic Applications* version 2026, ASI01–ASI10, released 9 December 2025 | 51 |
+| What a list's numbering is worth | 8 of the LLM list's 10 entries changed number between the 2025 and 2026 editions; the largest move is 5 places. Quote the entry, not the number | 51 |
+| Where the caller's identity comes from | The session. Never a parameter the model fills in | 51 |
+| What a guardrail buys | The attacks it knows, and a failure logged instead of served. Chapter 50's payload was 178 characters inside a 1,181-character document. A rule your code states exactly is a different object, and is a limit | 51 |

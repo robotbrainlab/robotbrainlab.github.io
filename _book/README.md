@@ -25,7 +25,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
 | II · Use | 18–39 | 362 | **Done** — 22 of 22, 2026-10-29 |
 | III · Apply | 40–50 | 190 | **Done** — 11 of 11, 2026-10-30 |
-| IV · What Next | 51–57 | 136 | **Next** — chapter 51 is the first |
+| IV · What Next | 51–57 | 136 | **Drafting** — 1 of 7 done |
 | Appendices | A–D | 83 | **A (cheat sheet, 288 items), B (100 questions) and C (glossary, 274 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
 The estimates above sum to about 1,042 numbered pages. **That is a sum, not a target** — the
@@ -90,15 +90,16 @@ sub-part opener pages sitting after the last written chapter were counted into i
   48  1015-1101   87   12    725%
   49  1102-1155   54   16    338%
   50  1156-1205   50   18    278%
-   A  1207-1232   26    -       -
-   B  1233-1238    6    -       -
+  51  1207-1233   27   36     75%
+   A  1234-1260   27    -       -
+   B  1261-1266    6    -       -
 
-52 chapter(s), 1232 printed pages
+53 chapter(s), 1260 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
 Part II is complete: chapters 18 to 39 come to 475 pages.
-**Part III is complete: chapters 40 to 50.** It began with chapter 40, the first chapter in the book that calls a real model, and
+**Part IV has begun.** Part III is complete: chapters 40 to 50, which began with chapter 40, the first chapter in the book that calls a real model, and
 the labs now run on the corpus in `labs/corpus/` — 40 documents, 8 queries and 320 graded
 judgements, written for the book and dedicated to the public domain. `LEDGER-DEFECTS.md` entry 63
 is what the first non-deterministic chapter cost: prose that quotes a figure a re-run can change
@@ -131,6 +132,42 @@ everything, twice, under two instructions. And the regression set has two blind 
 is not hypothetical, because a correct refusal became the wrong product's price across both
 versions and every check passed all six times. It took three review passes, 25 findings then 16
 then 8, and `records/46-…` says which were mine.
+
+**Chapter 51 opens Part IV, and it is the framework chapter 50's lab was the experiment for.**
+Seven earlier chapters point at it by name, and what it owes them is one rule: **a model cannot
+reliably tell an instruction from data**, which is not a defect better models close but a
+property of a component with no channel for metadata. From that follow the two jobs the chapter
+actually asks of a reader. Write down every channel by which text neither you nor your code
+composed reaches the model — the request, a retrieved passage, a tool result, a tool
+*description*, a document's own title, a note the agent wrote, a sub-agent's return, a
+compaction summary — because the list is short and nobody has it. Then apply the rule that is
+about combinations rather than components: **never combine untrusted input, sensitive access and
+external action in one session without approval.** Any two are ordinarily survivable; the three
+together give injected text something to ask for and a way to send it, and the four fixes are
+removing one, shrinking one, or adding the approval — which is the weakest wherever the action is
+frequent, because volume turns review into rubber-stamping.
+
+The rest is the decisions, each made once and each checkable: model output as input to whatever
+renders or executes it, where the ordinary escaping and parameterising of web and database work
+is the whole answer; a tool acting with the caller's rights rather than the service's, which is
+the sixth cause chapter 5's lab dramatised and said this chapter owned; sandboxing what the
+model wrote, because a validator reading generated code for safety is a judgement about text
+standing where a limit should be; a third-party tool server as a supply-chain dependency on four
+counts; what a guardrail is worth, which is the attacks it knows and a failure logged rather
+than served; and where a secret lives. It also prints the field's two risk lists and then argues
+that a list is a checklist and never a certificate — eight of the LLM list's ten entries changed
+number in a single edition, and on the day this was written two numberings were in circulation
+on the project's own site.
+
+Two review rounds, 30 findings then 13, and the first found something that reached backwards:
+chapter 50 and `LEDGER-TAUGHT.md` row 50 both gave the successful payload's size as 159
+characters inside 1,162, which is the arm that got zero — the one that fired is 178 inside 1,181
+— so chapter 50 was reopened with `chapter.py amend` to correct it. The second round then found
+three errors in the repairs themselves, all in borrowed material: chapter 29's post-filtering
+arithmetic kept its answer and lost its input, and chapter 20's rule about repeats was stated
+more strongly than chapter 20 states it. `LEDGER-DEFECTS.md` entries 89 to 91 are what that is
+worth, and **90 is the one to read: carrying another chapter's finding is quoting it, and a
+quotation keeps its variables and not only its answer.**
 
 **Chapter 50 closes Part III by attacking the system the part built.** An instruction goes into
 the three places this system reads text it did not write — a retrieved passage, a tool result's

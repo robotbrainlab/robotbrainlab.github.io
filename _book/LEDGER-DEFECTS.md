@@ -65,6 +65,45 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**91. A count over prose you are writing is taken from the rows in front of you, not from the
+thing counted.** Entry 88 is this defect about programs; chapter 51 paid for it three times in
+prose, and every one came from the same movement of the hand. A pass added a fourth channel to a
+list under the words *three of those*. A pass added two parts to a section under *three things*.
+And a table comparing two editions of a risk list was summarised as *four entries moved and one
+was renamed* — written from the five rows chosen to show, where comparing all ten in four lines
+of Python gives **eight moved, two unchanged**, the largest move five places. The mechanism is
+that the number is written while looking at the rows, and the rows are a selection. **Any
+sentence of the form *N of those* is a claim about data, so compute it**, and recompute it after
+any pass that adds or removes one — which is the half that fails, because the pass that adds a
+paragraph is never the pass that was thinking about the count.
+
+**90. Carrying another chapter's finding is quoting it, and a quotation keeps its variables and
+not only its answer.** Chapter 51 carried chapter 29's post-filtering arithmetic as *about the
+number you asked for times the share that survives, so ten requested at a one-per-cent share is
+one*. Chapter 29's figure is about the **fetch**: fetch a hundred where the tenant owns one per
+cent and about one comes back when you asked for ten. The answer survived the move and the input
+did not, so the sentence states that a tenth is one and loses the entire point, which is that
+post-filtering works only when the fetch is large enough. In the same passage it attributed to
+chapter 29 a sentence that chapter does not contain — it calls *the filter* a correctness
+requirement when the property is ownership, not pre-filtering specifically — and the stronger
+version then contradicted the paragraph underneath, which says post-filtering is safe. **Read the
+owning chapter's line and carry its words, not your memory of its conclusion**, and when the
+borrowed claim is numeric, carry what each symbol stood for. A chapter that leans on nine others
+is nine chances to keep an answer and drop its question.
+
+**89. A check run before a review is true of the file as it stood when it ran, and nothing says
+so afterwards.** `CLAUDE.md` requires the index entries to be read one by one before the
+completeness review, because `filter.lua` auto-indexes bold spans of four words or fewer and the
+book's rule is that bold means a new term. Chapter 51 did that read, found seven entries, all
+seven of them Key Terms, and wrote it in the record. A later pass then added three bolded bullet
+labels to one section, the built chapter carried ten, and a reviewer spent a finding on exactly
+the thing the record said had been checked. The record was not lying when it was written and was
+false when it was read. **Re-run every pre-review check after the last pass that touched the
+text**, and date the result rather than asserting it — an undated claim that a check passed is a
+claim about a file that no longer exists. The same shape caught a citation in the same chapter: a
+`Chapter 20` reference broken across a line break was invisible to `tools/citations.py`, so the
+aid reported twenty-six cited chapters and never saw the twenty-seventh.
+
 **88. Splicing a program's output proves the figures and says nothing about the prose that
 describes the program.** Chapter 50 shipped three descriptions of code that did not exist. It said
 the search tool lifted a title out of each document's YAML header; the pipeline had no titles and
