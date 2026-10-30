@@ -369,3 +369,10 @@ written from memory.
 | The baseline this chapter hands on | $0.11 per 1,000 requests; latency **median 1.31 s**, mean 1.74 s over 24 calls because one took 11.01. Quote the median | 49 |
 | What a decline-detector catches | A correct refusal. `cannot` is how both are worded, so every question whose right answer is *no* escalates for ever | 49 |
 | What a timing confound looks like | A result with a tight interval. Interleave the arms and record the sequence — which lets you *see* the drift and does not remove it | 49 |
+| What an injection can ask for | Add, call, or **stop** — only the third has nothing for your code to refuse. And a fourth this lab did not test: **substitute**, which changes a fact and leaves the format intact | 50 |
+| Worked: the grid | 1 cell of 12 fired, on 4 of 4 questions — quote the questions, not the 12 runs. Marker payloads 0 of 72; tool payload 0 of 36, so the registry was never asked | 50 |
+| What an omission attack targets | Whichever of your rules is only an instruction. Go and list them | 50 |
+| What the registry buys, and does not | A name it does not hold is refused, whatever told the model to ask. An authorised name with any argument **runs** — that needs Chapter 23's validator, which a four-line dispatcher drops | 50 |
+| The check for a dropped citation | Four lines: a reply claiming to answer from passages must name one. Prevents nothing, and its 12-of-12 is the same predicate as the detector. It also fires on every correct refusal | 50 |
+| Why a successful injection is invisible | The prose is correct and the citation list is empty. What is missing is not visible in what is there — and Chapter 46's regression set **passes** it, because a universal test over no citations is true | 50 |
+| What an attack suite may assert | Invariants **against the code**, controls, and the coverage of your checks. Never that the model does not comply. A gate over stored evidence cannot test code | 50 |

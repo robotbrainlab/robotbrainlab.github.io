@@ -19,6 +19,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Approval point** | A step the loop cannot pass without a person, enforced in your code rather than requested in the instructions | 4 |
 | **Approximate nearest neighbour index** | A structure that answers which vectors are closest without comparing against all of them, accepting that the answer may be wrong. Shortened to ANN | 29 |
 | **Assistant message** | What the model said earlier in the conversation, sent back to it by your code. The model does not remember saying it | 18 |
+| **Attack suite** | A set of injections run against your own system on every change, asserting what your architecture guarantees and reporting what it does not. Must be safe and cheap enough to run a hundred times a day, or it runs before releases and tells you nothing in between | 50 |
 | **Attention (self-attention)** | The step in which each position takes a weighted blend of information from the others, in amounts computed from the content rather than fixed in advance | 11 |
 | **Attention block** | The half of a layer that moves information between positions — Chapter 11's formula in full. The only part of a model that does | 12 |
 | **Attention head** | One complete set of query, key and value matrices and the weights they produce. A layer runs several in parallel over slices of the width, and a final matrix mixes their outputs | 11 |
@@ -201,6 +202,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Pretraining** | Running the loop on an enormous quantity of general text. Where essentially all of a model's knowledge comes from, and nearly all of the computation | 14 |
 | **Probe** | One group the index looks inside at query time. More probes always mean more work, and never less recall — but once recall is exact, further probes buy nothing | 29 |
 | **Prompt chaining** | Stages in sequence, each call's output the next one's input. Used when the work has nameable stages that are easier asked separately | 34 |
+| **Prompt injection** | An instruction that reaches the model through a channel meant to carry data — a retrieved document, a tool result, a note the agent wrote. Not a trick on the model: a consequence of Chapter 23's mechanism, that nothing in the input marks one part as the instruction. What it asks for decides whether anything in your system can refuse it | 50 |
 | **Prompt template** | A templated message or workflow an MCP server offers to users. Not a tool, and not something the model selects | 36 |
 | **Prompt-prefix cache** | A provider's reuse of the leading tokens of a request that match a request it has already served. Matches a *prefix*, so it is destroyed by anything that changes the first bytes — and it has a minimum prompt length, below which it never fires at all. Discounts the tokens it covers rather than removing them | 49 |
 | **Proposal** | What the model emits — tokens your code reads as a request to run something. Nothing has happened yet | 23 |

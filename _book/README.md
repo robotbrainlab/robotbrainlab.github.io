@@ -24,8 +24,8 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
 | II · Use | 18–39 | 362 | **Done** — 22 of 22, 2026-10-29 |
-| III · Apply | 40–50 | 190 | **Drafting** — 10 of 11 done |
-| IV · What Next | 51–57 | 136 | Not started |
+| III · Apply | 40–50 | 190 | **Done** — 11 of 11, 2026-10-30 |
+| IV · What Next | 51–57 | 136 | **Next** — chapter 51 is the first |
 | Appendices | A–D | 83 | **A (cheat sheet, 288 items), B (100 questions) and C (glossary, 274 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
 The estimates above sum to about 1,042 numbered pages. **That is a sum, not a target** — the
@@ -39,7 +39,7 @@ sub-part opener pages sitting after the last written chapter were counted into i
 `LEDGER-DEFECTS.md` entry 23. From the current build:
 
 ```text
-ch    printed   pp  est  of est
+  ch    printed   pp  est  of est
    1     3-12     10   14     71%
    2    13-22     10   18     56%
    3    23-32     10   14     71%
@@ -89,15 +89,16 @@ ch    printed   pp  est  of est
   47   971-1014   44   12    367%
   48  1015-1101   87   12    725%
   49  1102-1155   54   16    338%
-   A  1157-1181   25    -       -
-   B  1182-1187    6    -       -
+  50  1156-1205   50   18    278%
+   A  1207-1232   26    -       -
+   B  1233-1238    6    -       -
 
-51 chapter(s), 1181 printed pages
+52 chapter(s), 1232 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
 Part II is complete: chapters 18 to 39 come to 475 pages.
-**Part III has begun** with chapter 40, the first chapter in the book that calls a real model, and
+**Part III is complete: chapters 40 to 50.** It began with chapter 40, the first chapter in the book that calls a real model, and
 the labs now run on the corpus in `labs/corpus/` — 40 documents, 8 queries and 320 graded
 judgements, written for the book and dedicated to the public domain. `LEDGER-DEFECTS.md` entry 63
 is what the first non-deterministic chapter cost: prose that quotes a figure a re-run can change
@@ -117,7 +118,8 @@ printed ranks are decided by gaps smaller than the drift between two embeddings 
 retrieval comparisons clear zero, and hybrid against dense is not one of them. Its three review
 rounds also turned up the mechanical cause of a defect this ledger had recorded three times as a
 habit of mind — `LEDGER-DEFECTS.md` entry 69, a batch of edits that writes once at the end and
-discards every edit when one fails to match. 813 printed pages of chapters. Chapters 30
+discards every edit when one fails to match.
+
 **Chapter 46 is the one to read if you only read one.** It runs chapters 30, 31 and 33 end to
 end on eighty real answers and the method does not do what it is advertised to: forty outputs
 hold eight failures rather than forty, seventeen failures give the six failure modes' *names* and
@@ -129,6 +131,32 @@ everything, twice, under two instructions. And the regression set has two blind 
 is not hypothetical, because a correct refusal became the wrong product's price across both
 versions and every check passed all six times. It took three review passes, 25 findings then 16
 then 8, and `records/46-…` says which were mine.
+
+**Chapter 50 closes Part III by attacking the system the part built.** An instruction goes into
+the three places this system reads text it did not write — a retrieved passage, a tool result's
+title and the notes store from chapter 48 — and what varies is what the instruction *asks for*,
+because that is what turned out to matter. **One cell of twelve fired, on four of four questions.**
+Asking for a marker in the reply got nothing in 72 runs across two forms; asking the system to call
+an invented tool got nothing in 36; asking it to *stop* citing its passages worked every time. The
+rule it took away was the one rule in the system with no code behind it, and the reply from a
+successful attack is the finding: correct prose, correct carriers, an empty citation list — **what
+is missing is not visible in what is there.** The fix is four lines, it catches all twelve, and it
+**prevents nothing**: by the time your code sees the reply the citations are gone, so what it buys
+is that the failure is logged rather than served. Chapter 46's regression set, run on that same
+reply, passes it on all five checks.
+
+It took two review passes, 20 findings then 15, and the first of them is the one worth the
+ledger. **The chapter described three channels that did not exist**: a title lifted from a YAML
+header the pipeline had none of, chapter 48's store that was two notes typed by hand with
+`store48.py` unimported, and one injected copy where the code appended to every retrieved chunk.
+Every gate in this book passed, because the assembler proves no figure was transcribed and nothing
+reads a sentence against the function it describes. All three were implemented as written and the
+156-call grid run again; the result did not move. The same pass found the file's "invariant" gate
+could not fail — it asserted on a stored boolean, and a dispatcher that runs anything still passed
+it — and that the chapter's citation check is scored against its own predicate, so its 12 of 12 is
+a definition. `LEDGER-DEFECTS.md` entries 86 to 88 are those three, and 88 is the one to read:
+**splicing a program's output proves the figures and says nothing about the prose describing the
+program.**
 
 **Chapter 49 is the chapter that measures three levers and recommends none of them.** Time to first
 token, time per token, prompt-prefix caching and a cheap-model cascade, priced on this book's own

@@ -60,30 +60,38 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Parts I and II are complete, and Part III is 10 of 11.** Part I is all 17 chapters, 199 printed
-pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III's labs 40 to 49 are closed.
-The book is **1,173 printed pages over 51 of 57 chapters**, and `bash tools/check-all.sh` ends
-`ALL GATES PASS`. **The next chapter to write is 50, Lab: Attack Your Own System** — the last of
-Part III. Read its `TOC.md` row and every `LEDGER-TAUGHT.md` row naming it before anything else,
-per §14 step 1. It needs chapter 48's notes store, which is `~/sandbox/ch48/store.py`, and the
-corpus's own planted injectable document; chapter 51 owns the rule that a model cannot reliably
-tell an instruction from data and is **not written**, so 50 will meet the same ownership problem
-49 did and should resolve it the same way — own what it must to do the work, and say so in its
-non-scope.
+**Parts I, II and III are complete.** Part I is all 17 chapters, 199 printed pages against 266;
+Part II is chapters 18 to 39 at 475 pages; Part III is the eleven labs 40 to 50, closed on
+2026-10-30. The book is **1,232 printed pages, 50 of 57 chapters written**, and
+`bash tools/check-all.sh` ends `ALL GATES PASS`. **The next chapter to write is 51, Security: What
+Can Go Wrong, and What Limits the Damage** — the first of Part IV and its largest row at a 36-page
+estimate. Read its `TOC.md` row (line 133) and every `LEDGER-TAUGHT.md` row naming it before
+anything else, per §14 step 1. Two things about it are already settled. **Chapter 50 owns
+prompt injection and attack suite**, so 51 uses both by name and introduces neither — the
+arrangement is in chapter 50's `non-scope:` and `LEDGER-TAUGHT.md` row 50, and it is the same one
+chapter 49 made with 52. And **seven earlier chapters point at 51** — 2, 3, 5, 23, 35, 36 and 40 —
+so the chapter is answering promises that are already in print, which is where to start reading.
+It is also the first chapter since 39 that is not a lab, so it needs the risk-list tables and the
+design rule rather than programs.
 
 **The labs cost more per chapter than anything before them, and the records say why.** Chapter 45
 took four review rounds (20, 11, 4, 1), chapter 46 took three (25, 16, 8), chapter 47 two
-(10, 13), chapter 48 two (23, 13) and chapter 49 two (15, 15). In both, several of
-each round's own fixes were wrong, and the cause is the same one every time and it is written
-down: **a prose claim about program output written without querying the data first.**
-`LEDGER-DEFECTS.md` entries 70 to 85 are all from these five chapters. **Entry 85 is the one to
+(10, 13), chapter 48 two (23, 13), chapter 49 two (15, 15) and chapter 50 two (20, 15). In every
+one of them several of each round's own fixes were wrong, and the cause is the same every time and
+it is written down: **a prose claim about program output written without querying the data
+first.** `LEDGER-DEFECTS.md` entries 70 to 88 are all from these six chapters. **Entry 85 is the one to
 read before fixing anything**: a figure quoted from a summary table is a figure about the wrong
 thing, and it reads perfectly — chapter 49 attributed two arm means to a single request while
 repairing the very sentence those means were wrong for. The mechanism is that the summary table is
 what is on the page in front of you while you write the prose, so **a claim about one case has to
 be queried from the case by its own identifier**. Entry 84 is its companion: when a review changes
 which evidence supports a claim, the sweep is over the *evidence*, and the back matter is where the
-repudiated evidence survives. **Read 81 before writing
+repudiated evidence survives. **Entry 88 is chapter 50's and it is the widest of them**: splicing a
+program's output proves the figures and says nothing about the prose describing the program, which
+is how that chapter shipped three descriptions of code that did not exist past every gate in the
+suite. Its practice is one line — for every claim about what a program does, name the function and
+read it — and its companion 87 is the question to ask of any assertion: what change would make it
+red. **Read 81 before writing
 another measurement**: a probe can be satisfied by text that is not the fact, and every rule about
 *when* you wrote the probe is silent about it — six of chapter 48's forty probe sets were satisfied
 by the case statement, which every summary restates, and repairing them turned that chapter's

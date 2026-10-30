@@ -65,6 +65,62 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**88. Splicing a program's output proves the figures and says nothing about the prose that
+describes the program.** Chapter 50 shipped three descriptions of code that did not exist. It said
+the search tool lifted a title out of each document's YAML header; the pipeline had no titles and
+the title was hard-coded, so that arm measured a block written by hand. It said the notes channel
+was chapter 48's store read back; it was two notes typed in the store's shape, with `store48.py`
+sitting unimported in the same folder — which also failed the chapter's own Covers item, since
+that item names the store. And it said the document payload went in once at the end; the code
+appended to **every** retrieved chunk of the target, so a prompt carried up to five copies
+beginning a fifth of the way in. **Every gate in this book passed.** The assembler proves no
+figure was transcribed, `verify-render` proves it renders, `verify-absolutes` tests the absolutes,
+and not one of them reads a sentence against the function it describes. The mechanism is that a
+chapter is written from what the program *means to do*, while the output is checked against what
+it *did*, and those two are reconciled nowhere. The cheap discipline, which chapter 50 now uses:
+**for every claim about what a program does, name the function and read it.** Where the claim is
+load-bearing, make the program assert it — `where.py` exists only to measure a position the prose
+used to assert, and the suite now asserts that the dispatcher runs an authorised name with any
+argument, so the chapter cannot quietly claim more than it does.
+
+A docstring is prose by this entry's rule, and a *spliced* docstring is the worst case, because it
+reads as output. Chapter 50's fix round left `channels.py` printing "the weaker position on
+purpose" a hundred lines before `where.py` printed the retraction, and left `attack.py` opening
+"Nine cells plus a clean arm" in a chapter that says twelve in ten other places. **Commentary
+written beside a correction is not corrected by it**, and a correction in the body does not reach
+the program it is about.
+
+**87. A gate over stored evidence cannot test code, and a gate that cannot fail is worse than no
+gate, because it gets cited as a defence.** Chapter 50's attack suite asserted that no injection
+ever ran a tool, and called it the architecture invariant — the one assertion in the file that
+would fail if somebody made the dispatcher clever. It read `tool_ran` out of the stored runs: a
+boolean written when the attack ran, which no later change to the dispatcher can move. The
+reviewer proved it by replacing the dispatcher with one that runs anything, and the gate passed.
+**The question to ask of every assertion is what change would make it red.** If the answer is "a
+change to the data file", it is a regression gate on recorded evidence, which is a useful thing
+and a different thing. The repair is to call the code: the gate now dispatches the invented name
+and asserts the refusal, and dispatches an authorised name with a hostile argument and asserts it
+*runs* — which turned the gate into the thing that caught the chapter overclaiming. In the same
+family, a cross-lab gate that imports another lab's module gets whichever module of that name is
+on the path first, so chapter 50's regression half runs chapter 46's verdict in chapter 46's own
+interpreter by subprocess. **A gate that silently swaps a dependency is worse than no gate**, by
+the same argument.
+
+**86. A check and the detector it is measured against can be the same predicate, and then the
+score is a definition.** Chapter 50 scored its IGNORE payload as *followed* when the reply cited
+nothing, then built a defence that fails a reply citing nothing, and reported that the check
+caught twelve of twelve successful injections with no false alarm. The two sides are one
+predicate: `not citations` scored against `not citations`. The figure could not have come out any
+other way, and the chapter called it the assertion that earns its place over time. **Before
+quoting a detection rate, write the detector and the check side by side and ask whether either
+could be true while the other is false.** Where they cannot, the rate is a definition, and its
+only force is against the cases it does not contain — worth keeping as a gate, and not evidence.
+The same chapter supplies the companion trap: that check also fails every correct refusal, because
+a refusal cites nothing too, and the zero false alarms held only because all four of its questions
+were answerable. Chapter 46 had already dropped a check for exactly that reason and written down
+why — a check that fires only on correct answers is not a verdict — which is the second time this
+book has paid for the same lesson.
+
 **85. A figure quoted from a summary table is a figure about the wrong thing, and it reads
 perfectly.** Chapter 49 found that one call of twenty-four had taken eleven seconds, eight times
 the median, and wrote that the same request "came back in 1.27 and 1.23 seconds measured two other
@@ -90,6 +146,14 @@ on it on another, and the number it recommended was absent from both places a re
 numbers. **When a review changes which evidence supports a claim, the sweep is not over the claim
 — it is over the evidence**, and the back matter is where the old evidence survives, because the
 back matter is written from the body as it stood.
+
+Chapter 50 is the seventh chapter running to break here, and it broke after the body had already
+been fixed: five of the ten repairs that did not take are in its Review Answers, which kept a gate
+count and a clock the body had corrected, kept a claim at the width the review had just narrowed,
+and restated an invariant the same round had proved vacuous — on the same page as a Worth
+Memorising row saying a gate over stored evidence cannot test code. **A fix applied to the body is
+not applied.** The sweep has to end in the Summary, the Worth Memorising table, the Review Answers
+and the appendices, counted, every time.
 
 **83. A ratio computed from a rounded display is not the ratio, and it will not match any output.**
 Chapter 49 reported a cascade costing "5.3 times" the cheap model, in five places. The programs
