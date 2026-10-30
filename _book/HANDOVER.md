@@ -50,7 +50,7 @@ Do not reopen these. Each one was decided with the owner.
 | 22 | **One chapter at a time, never a part at a time** | Context dilution is the main cause of invented content. Writing several chapters in one stretch makes the later ones get written from the pattern of the earlier ones rather than from their sources | A drafting agent per part, which was the plan until 22 Oct 2026 |
 | 20 | **Lab 50 attacks the system before chapter 51 explains security** | Meet the failure, then learn the framework. The lab uses what chapter 36 taught. Moving it after Part IV would break Part IV's "no labs" rule | Moving the lab after chapter 51 |
 
-## 3. State, as of 2026-10-30
+## 3. State, as of 2026-10-31
 
 **Where it lives:** `_book/` inside the website repository
 (`~/LearningLab/towards-intelligence/robotbrainlab.github.io`), branch `main`, **pushed**.
@@ -60,60 +60,72 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**All four parts are complete. All 57 chapters are written.** Part I is 17 chapters and 199
-printed pages against a 266-page estimate; Part II is chapters 18 to 39 at 475; Part III is the
-eleven labs 40 to 50; Part IV is 51 to 57 at 27, 21, 31, 37, 17, 8 and 7 pages. The book is
-**1,383 printed pages over 57 chapters plus Appendices A to D**, and `bash tools/check-all.sh`
-ends `ALL GATES PASS`.
+**The book is complete. All 57 chapters are written and all 100 of Appendix B's model answers
+with them.** Part I is 17 chapters and 199 printed pages against a 266-page estimate; Part II is
+chapters 18 to 39 at 475; Part III is the eleven labs 40 to 50; Part IV is 51 to 57 at 27, 21, 31,
+37, 17, 8 and 7 pages. The book is **1,413 printed pages over 57 chapters plus Appendices A to D**,
+Appendix B being 33 of them, and `bash tools/check-all.sh` ends `ALL GATES PASS`.
 
-**What is left is Appendix B, and nothing else in the plan.** Appendices A, C and D are generated
-— `tools/cheatsheet.py` builds A from every Worth Memorising table, `tools/glossary.py` builds C
-from every Key Terms table, and D is LaTeX — and all three are current. **Appendix B is the one
-that is written, and its hundred questions have model answers still to write**, which
-`BOOK-GUIDE.md` §15 calls the acceptance test for the whole book: an answer is what the reader
-should be able to say in about sixty seconds — the mechanism, the trade-off, and how they would
-check it — and §14.7's instruction is to write it **last, from the finished chapters, and never
-from memory**. That last clause is now the whole job, because the chapters are finished.
+**Nothing in the plan is outstanding.** Appendices A, C and D are generated — `tools/cheatsheet.py`
+builds A from every Worth Memorising table, `tools/glossary.py` builds C from every Key Terms
+table, and D is LaTeX — and all three are current. Appendix B is hand-written and now finished.
 
-**The research in `_sources/interview-research/` is now part of the brief for Appendix B**, and
-its README states the line the book holds: cite the accounts, never the percentages. Two things in
-it bear directly on the answers. The accounts rank the themes — project deep-dive 22 of 54, RAG 21,
-practical coding 25, behavioural 21, DSA 14, theory 14, classical ML 10, production 9, agents 8,
-design 7, evaluation 5 — which is a weighting for how much care each answer deserves, not a
-licence to add or drop questions. And **the bank has no behavioural question while the accounts put
-behavioural at 21 of 54**; chapter 57 now records that as a hole rather than an omission to fix,
-because the bank's own header explains why a question written after its chapter cannot test
-anything, and adding a hundred-and-first question now would be exactly that. Leave the hundred
-alone.
+**How Appendix B's answers were written, on 2026-10-31**, because the method is the only guarantee
+the appendix is worth anything. The answers sit at the end of the file under `## The Answers`, in
+eight `### Answers N–M` subsections, rather than beside their questions, so the question tables stay
+usable for self-testing. **Each answer is 150 to 180 words** — sixty seconds of speech, which is
+decision 17 — and carries the mechanism, the trade-off and how you would check it. **No answer names
+a chapter number**, because an answer is a thing you say out loud. They were written in eight
+working units, each small enough to hold its sources: chapters 1–6, 8–17, 18–23, 24–29, 30–33,
+34–39, the Part III labs, and 51–56, with every chapter's Summary, Key Terms and Worth Memorising
+read immediately before its own questions were answered. Measured: 100 answers, every one between
+155 and 180 words, mean 166, **0 index entries** in the appendix.
 
-**Three things to know before starting Appendix B.** Its own header says **questions 1 to 13 are
-the exception and are weaker for it** — they were written after chapters 1 to 7 existed, by
-somebody who had read them, so a question reverse-engineered from an answer cannot test whether
-the answer is there; chapter 57's measurement section depends on that fact and quotes it, so do
-not quietly repair it. **Eight chapters carry no question on purpose** (7, 40, 42, 43, 44, 46, 48,
-57) and the header says why; the `BANK` gate in `check-all.sh` checks that every closed chapter's
-record names the questions it owns, so the mapping is already verified both ways. And **the
-answers are where every figure in the book gets quoted one more time**, which makes Appendix B the
-single place most exposed to `LEDGER-DEFECTS.md` entries 90, 92, 95, 96 and 97 at once: a borrowed
-figure keeps its variables, a source with two figures of the same kind is quoted by its qualifier,
-and a count written while looking at output is computed from the data instead.
+**What the review of the answers found**, which is the part worth carrying. A mechanical pass
+checked every figure in an answer against the chapter its question points at; two figures were not
+the chapter's own and both were corrected to the chapter's (`dimension 412`, chapter 9's own
+example). Three defects of substance were found by reading, all of them in the answers written
+before the chapters finished — answers 1 to 13:
+- **Answer 4 said *Five* and then *four parts* in the same sentence.** Chapter 2 has five parts
+  closing four gaps; the context is the vehicle and closes none. `LEDGER-DEFECTS.md` **entry 98**
+  is the class: a count restated in apposition is a second claim, and only the first gets checked.
+- **Answer 13 called a measurement on your own traffic *a derivation*.** Chapter 6 defines that
+  rung as following from arithmetic or a mechanism you can check; a measurement is your own study,
+  and what it shares with a derivation is only that it needs nobody else's reporting. **Entry 99**
+  is the class: a rung's name carries authority the rung does not grant.
+- **Answers 77 and 94 inherited a count from a chapter's prose.** Chapter 34 says *four columns*
+  and its summary names three — the fourth is the shape, which its body gives. Chapter 51 says
+  *four fixes* and its prose reads as three — its Worth Memorising names all four. Both answers now
+  name four. **When a chapter's summary states a count and lists fewer, the body has the rest.**
 
-**Read the records of chapters 51 to 57 before writing any answer**, because between them they
-hold what each Part IV chapter may and may not be cited for, and the Part IV chapters are where
-the bank's last nine questions live. 51's `structure-decision:` settles the shape of a Part IV
-chapter. 52's warning is borrowed figures (entry 92), 53's is a fix that widens a claim (94),
-54's is a fix that adds evidence and miscounts it (95), 55's is a source with two figures of the
-same kind (96), and 56's and 57's is the pair defect (97). An appendix of a hundred answers is
-every one of those five risks, a hundred times.
+**Appendix B is where every figure in the book gets quoted one more time**, which makes it the
+single place most exposed to `LEDGER-DEFECTS.md` entries 90, 92, 95, 96, 97, 98 and 99 at once.
+If any answer is ever rewritten, run the figure pass again: for each answer, every number in it
+must appear in the chapter its question is keyed to.
 
-**Read chapter 51's record before writing 52**, because it settled the shape of every Part IV
-chapter and the reading is arguable. `BOOK-GUIDE.md` §5 says Part IV chapters have none of the
-last four items of the every-chapter list, and the literal reading contradicts itself: the item
-it keeps requires a Key Terms table, and that table lives inside the section the sentence
-removes. The reading taken, under `structure-decision:` in `records/51-security.md`: no lab, no
-Review Questions, no *You understand this when*, no tip/note/warning callouts, and a
-`## Summary and Key Terms` section holding the Summary, Key Terms and Worth Memorising. Follow it
-for 52 to 57 unless the owner overturns it.
+**Three things about the bank that must not be quietly repaired.** Its own header says
+**questions 1 to 13 are the exception and are weaker for it** — they were written after chapters 1
+to 7 existed, by somebody who had read them, so a question reverse-engineered from an answer cannot
+test whether the answer is there; chapter 57's measurement section depends on that fact and quotes
+it. **Eight chapters carry no question on purpose** (7, 40, 42, 43, 44, 46, 48, 57) and the header
+says why; the `BANK` gate in `check-all.sh` checks that every closed chapter's record names the
+questions it owns. And **the bank has no behavioural question** while the research in
+`_sources/interview-research/` puts behavioural at 21 of 54 accounts; chapter 57 records that as a
+hole rather than an omission to fix, because a hundred-and-first question written now could test
+nothing. Leave the hundred alone.
+
+**The research in `_sources/interview-research/`** is folded in as far as the book takes it, and
+its README states the line the book holds: cite the accounts, never the percentages. The dated half
+of it — percentages, tool names, the four-week plan, geography — still has no home; the standing
+recommendation is a page on the website rather than anything in the book.
+
+**One thing about Part IV's shape, for any later edit.** `BOOK-GUIDE.md` §5 says Part IV chapters
+have none of the last four items of the every-chapter list, and the literal reading contradicts
+itself: the item it keeps requires a Key Terms table, and that table lives inside the section the
+sentence removes. The reading taken, under `structure-decision:` in `records/51-security.md`: no
+lab, no Review Questions, no *You understand this when*, no tip/note/warning callouts, and a
+`## Summary and Key Terms` section holding the Summary, Key Terms and Worth Memorising. That is
+what chapters 51 to 57 were written to, so any later edit holds to it unless the owner overturns it.
 
 **The labs cost more per chapter than anything before them, and the records say why.** Chapter 45
 took four review rounds (20, 11, 4, 1), chapter 46 took three (25, 16, 8), chapter 47 two

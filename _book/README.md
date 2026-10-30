@@ -25,8 +25,8 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
 | II · Use | 18–39 | 362 | **Done** — 22 of 22, 2026-10-29 |
 | III · Apply | 40–50 | 190 | **Done** — 11 of 11, 2026-10-30 |
-| IV · What Next | 51–57 | 136 | **Drafting** — 2 of 7 done |
-| Appendices | A–D | 83 | **A (cheat sheet, 288 items), B (100 questions) and C (glossary, 274 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
+| IV · What Next | 51–57 | 136 | **Done** — 7 of 7, 2026-10-31 |
+| Appendices | A–D | 83 | **A (cheat sheet, 385 items), B (100 questions with all 100 model answers, 2026-10-31) and C (glossary) in the PDF.** A and C are generated from the chapters and gated; B is hand-written, each answer 150 to 180 words from the chapter read immediately before it. D is the LaTeX index |
 
 The estimates above sum to about 1,042 numbered pages. **That is a sum, not a target** — the
 book is as long as the material earns, and 1,500 to 2,000 would be welcome rather than a

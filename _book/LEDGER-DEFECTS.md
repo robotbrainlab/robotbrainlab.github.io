@@ -65,6 +65,34 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**99. A rung's name carries authority the rung does not grant, and the gates read it as ordinary
+prose.** Appendix B's answer 13 ends on the right advice — run your own cases before repeating a
+vendor's figure — and justified it by calling a result on your own traffic *a derivation I can
+check*. Chapter 6 defines a derivation as a claim following from arithmetic or from a mechanism you
+can check yourself, which is why it sits off the evidence ladder altogether. A measurement on your
+own traffic is not that. It is your own study, and what it shares with a derivation is one
+property: it needs nobody else's reporting. **The answer reached for the rung because that property
+was the one it wanted**, and the rung came with a definition it did not meet.
+
+Nothing can catch this. `verify-boundary` reads subject matter, `verify-voice` reads self-reference,
+and a term used outside its definition is well-formed English about a real concept. The practice:
+**when an answer or a chapter names one of chapter 6's rungs, re-read that rung's row before
+shipping the sentence** — the rungs are a short closed list with written definitions, so the check
+is seconds, and the failure is invisible to a reader who trusts the name.
+
+**98. A count restated in apposition is a second claim, and only the first one gets checked.**
+Appendix B's answer 4 opened *Five, and the useful way to hold them is four gaps, four parts, four
+prices* — then listed five parts. The five was right, from chapter 2's own first sentence. The
+*four parts* was a rhythm that fitted the four gaps beside it, and it contradicted the word three
+words earlier, in one sentence, in the answer whose whole job is to name the parts.
+
+**The mechanism is the apposition.** A figure stated once is checked against the source. A figure
+restated as a parallel phrase is written for the cadence of the phrase, and the eye reads it as a
+restatement of what was already verified rather than as a new claim. Entry 91's rule — a count over
+prose you are writing is taken from the rows in front of you — applies to the *second* statement of
+a count as much as the first. The practice: **a sentence that gives the same quantity twice is two
+claims, and the parallel one is the unchecked half.**
+
 **97. Two chapters written as a pair can contradict each other without either chapter containing a
 contradiction, and only a review of both can see it.** Chapters 56 and 57 are a declared pair — what
 to learn next, and what to skip — and both records claimed the overlap between them was nothing.
