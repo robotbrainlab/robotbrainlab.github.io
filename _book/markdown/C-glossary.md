@@ -37,6 +37,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Byte-pair encoding (BPE)** | Building a vocabulary by starting from the 256 single bytes and repeatedly merging the commonest adjacent pair in a corpus until the vocabulary is the size wanted. Starting from bytes is what makes any text at all representable | 10 |
 | **Candidate set** | The documents the first stage passes to the second. A reranker can only permute it, so it is a ceiling | 26 |
 | **Capability set** | Tasks at the edge of what the system can do, scored well below 1.0 on purpose. At 1.0 it has stopped measuring, and the fix is harder tasks | 38 |
+| **Cascade** | Running a cheap model first and escalating to an expensive one when your code judges the cheap answer unusable. Costs both calls on every escalation, so it is worth building only where the expensive model is measurably better on the cases that escalate | 49 |
 | **Case** | One input plus whatever marks the answer right or wrong. The unit the statistics count — and they count rows, so forty rephrasings of one question are worth nearer one case than forty | 20 |
 | **Causal mask** | Setting every score for a later position to minus infinity before softmax, so it gets exactly zero weight. It makes a position's output depend only on itself and what precedes it, so the arithmetic is the same whether or not the rest of the sentence exists | 11 |
 | **Chat template** | The markup a provider wraps round your text so the model sees a conversation turn. A fixed number of tokens — 7 for this model — charged on every call, and not Chapter 36's prompt template | 40 |
@@ -201,6 +202,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Probe** | One group the index looks inside at query time. More probes always mean more work, and never less recall — but once recall is exact, further probes buy nothing | 29 |
 | **Prompt chaining** | Stages in sequence, each call's output the next one's input. Used when the work has nameable stages that are easier asked separately | 34 |
 | **Prompt template** | A templated message or workflow an MCP server offers to users. Not a tool, and not something the model selects | 36 |
+| **Prompt-prefix cache** | A provider's reuse of the leading tokens of a request that match a request it has already served. Matches a *prefix*, so it is destroyed by anything that changes the first bytes — and it has a minimum prompt length, below which it never fires at all. Discounts the tokens it covers rather than removing them | 49 |
 | **Proposal** | What the model emits — tokens your code reads as a request to run something. Nothing has happened yet | 23 |
 | **Provenance** | A note's two extra fields: where it came from — read, inferred or told — and when it was written. They do not make a note true; they say which notes expire and which were never checked | 35 |
 | **Purposeful tool** | A tool written for a task somebody asks for rather than for an endpoint that exists. Does the joining your code would have done, and costs less in total than the endpoints it replaces even though its description is longer | 36 |

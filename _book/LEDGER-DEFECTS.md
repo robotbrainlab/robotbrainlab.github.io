@@ -65,6 +65,42 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**85. A figure quoted from a summary table is a figure about the wrong thing, and it reads
+perfectly.** Chapter 49 found that one call of twenty-four had taken eleven seconds, eight times
+the median, and wrote that the same request "came back in 1.27 and 1.23 seconds measured two other
+ways". Both numbers are real, both are in the lab's own output, and neither is that request: they
+are the **means of the two arms** — all twenty-four question-first calls, all twenty-four streamed
+calls. The request itself came back in 1.00 and 0.99. The sentence was written by reading the
+printed summary table instead of the row, and **the summary table is the thing on the page in front
+of you when you write the prose.** That is the whole mechanism, and it is why this is the sixth
+chapter in a row whose fix round produced an error of this kind: a repair is written while looking
+at output, and output is aggregated. The rule that follows is narrow and mechanical — **a claim
+about one case is queried from the case**, by its own identifier, never read off a mean that
+happens to be nearby. If the program does not let you ask for one row, that is the defect to fix
+first.
+
+**84. The back matter can disown what the body establishes, and a chapter that repudiates a test
+has to repudiate it everywhere.** Chapter 49 found that its drop-the-early-gaps test was asymmetric
+by construction — dropping ten gaps removes a quarter of a short reply and three per cent of a long
+one — and replaced it with a matched-position comparison giving a figure two thirds the size. The
+body says so at length and tells the reader which figure to carry. **The Summary went on citing the
+repudiated test as corroboration**, and the figure the body said to carry appeared in neither the
+Summary nor the Worth Memorising table. So the chapter argued against a test on one page and leaned
+on it on another, and the number it recommended was absent from both places a reader looks for
+numbers. **When a review changes which evidence supports a claim, the sweep is not over the claim
+— it is over the evidence**, and the back matter is where the old evidence survives, because the
+back matter is written from the body as it stood.
+
+**83. A ratio computed from a rounded display is not the ratio, and it will not match any output.**
+Chapter 49 reported a cascade costing "5.3 times" the cheap model, in five places. The programs
+print 5.41 and 5.4. The 5.3 came from dividing the two displayed figures — $0.58 by $0.11 — which
+are themselves rounded to two decimals for a table. The correct figure comes from the unrounded
+means and nothing in the chapter printed 5.3 at all. **A figure that appears in no program output
+is a figure you computed by hand**, whatever it was computed from, and this book's rule that every
+figure is spliced from a program exists precisely so that there is nothing to divide by hand. The
+test is a grep: if a number in the prose is not in an `.out` file, say why, and the only good
+answer is that a program computed it under a different name.
+
 **82. An exclusion is a property of the data and has to be applied where the data is read, not
 where the decision was made.** Chapter 48 excluded three facts from a measurement and then
 reported one comparison that did not use the exclusion. The selection iterated the full list of

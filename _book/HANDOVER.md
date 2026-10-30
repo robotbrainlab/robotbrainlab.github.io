@@ -60,21 +60,30 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Parts I and II are complete, and Part III is 9 of 11.** Part I is all 17 chapters, 199 printed
-pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III's labs 40 to 48 are closed.
-The book is **1,126 printed pages over 50 of 57 chapters**, and `bash tools/check-all.sh` ends
-`ALL GATES PASS`. **The next chapter to write is 49, Lab: Measure and Reduce Cost and Latency** —
-read its `TOC.md` row and every `LEDGER-TAUGHT.md` row naming it before anything else, per §14
-step 1. Chapter 15 is the one to read first for it (it names time to first token and time per
-token), with 52 for the two measures and 1 for the two-phase wait; chapter 48's own baseline
-figures are in `records/48-…` and its programs in `~/sandbox/ch48`.
+**Parts I and II are complete, and Part III is 10 of 11.** Part I is all 17 chapters, 199 printed
+pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III's labs 40 to 49 are closed.
+The book is **1,173 printed pages over 51 of 57 chapters**, and `bash tools/check-all.sh` ends
+`ALL GATES PASS`. **The next chapter to write is 50, Lab: Attack Your Own System** — the last of
+Part III. Read its `TOC.md` row and every `LEDGER-TAUGHT.md` row naming it before anything else,
+per §14 step 1. It needs chapter 48's notes store, which is `~/sandbox/ch48/store.py`, and the
+corpus's own planted injectable document; chapter 51 owns the rule that a model cannot reliably
+tell an instruction from data and is **not written**, so 50 will meet the same ownership problem
+49 did and should resolve it the same way — own what it must to do the work, and say so in its
+non-scope.
 
 **The labs cost more per chapter than anything before them, and the records say why.** Chapter 45
 took four review rounds (20, 11, 4, 1), chapter 46 took three (25, 16, 8), chapter 47 two
-(10, 13) and chapter 48 two (23, 13). In both, several of
+(10, 13), chapter 48 two (23, 13) and chapter 49 two (15, 15). In both, several of
 each round's own fixes were wrong, and the cause is the same one every time and it is written
 down: **a prose claim about program output written without querying the data first.**
-`LEDGER-DEFECTS.md` entries 70 to 82 are all from these four chapters. **Read 81 before writing
+`LEDGER-DEFECTS.md` entries 70 to 85 are all from these five chapters. **Entry 85 is the one to
+read before fixing anything**: a figure quoted from a summary table is a figure about the wrong
+thing, and it reads perfectly — chapter 49 attributed two arm means to a single request while
+repairing the very sentence those means were wrong for. The mechanism is that the summary table is
+what is on the page in front of you while you write the prose, so **a claim about one case has to
+be queried from the case by its own identifier**. Entry 84 is its companion: when a review changes
+which evidence supports a claim, the sweep is over the *evidence*, and the back matter is where the
+repudiated evidence survives. **Read 81 before writing
 another measurement**: a probe can be satisfied by text that is not the fact, and every rule about
 *when* you wrote the probe is silent about it — six of chapter 48's forty probe sets were satisfied
 by the case statement, which every summary restates, and repairing them turned that chapter's

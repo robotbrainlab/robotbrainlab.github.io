@@ -359,3 +359,13 @@ written from memory.
 | What a substring check on a note misses | A figure that is in the right document on the wrong line | 48 |
 | The third field a note needs | Its scope — a correct note applied outside it gave the wrong answer three times of three | 48 |
 | Before choosing a method | Ask whether the difference is pairable. If the two sides are kinds rather than conditions, it is not | 48 |
+| The first thing to ask of a lever | Whether it applies to your traffic at all. Two of three did not here | 49 |
+| Why prompt caching can do nothing | A minimum prompt length. 612 and 637 tokens against a 1,024 minimum | 49 |
+| What the ordering lever really buys | *Different* requests sharing a prefix — not a request reusing its own earlier self, which is a response cache | 49 |
+| Worked: reordering | 2,432 of 2,458 tokens cached against 0, and $0.19 per 1,000 requests — priced on first-outing traffic, because pricing it against repeats of the same question understates it by a factor of 2.8 | 49 |
+| What a cascade needs before you build it | Evidence the expensive model is better on the cases that escalate. Here both answered 12 of 12 | 49 |
+| A cascade's cost | Both calls on every escalation: 5.4x the cheap model for the same answers, on an interval that does not clear zero at 12 cases | 49 |
+| Time to first token, measured | 0.84 s on the baseline shape, and no effect this could detect from a 4x prompt or a 9x reply — on 8 paired requests, with the point estimate ranging −0.07 to +0.47 across three trials | 49 |
+| The baseline this chapter hands on | $0.11 per 1,000 requests; latency **median 1.31 s**, mean 1.74 s over 24 calls because one took 11.01. Quote the median | 49 |
+| What a decline-detector catches | A correct refusal. `cannot` is how both are worded, so every question whose right answer is *no* escalates for ever | 49 |
+| What a timing confound looks like | A result with a tight interval. Interleave the arms and record the sequence — which lets you *see* the drift and does not remove it | 49 |

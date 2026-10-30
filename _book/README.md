@@ -24,7 +24,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
 | II · Use | 18–39 | 362 | **Done** — 22 of 22, 2026-10-29 |
-| III · Apply | 40–50 | 190 | **Drafting** — 9 of 11 done |
+| III · Apply | 40–50 | 190 | **Drafting** — 10 of 11 done |
 | IV · What Next | 51–57 | 136 | Not started |
 | Appendices | A–D | 83 | **A (cheat sheet, 288 items), B (100 questions) and C (glossary, 274 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
@@ -88,10 +88,11 @@ ch    printed   pp  est  of est
   46   886-970    85   18    472%
   47   971-1014   44   12    367%
   48  1015-1101   87   12    725%
-   A  1103-1126   24    -       -
-   B  1127-1132    6    -       -
+  49  1102-1155   54   16    338%
+   A  1157-1181   25    -       -
+   B  1182-1187    6    -       -
 
-50 chapter(s), 1126 printed pages
+51 chapter(s), 1181 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
@@ -128,6 +129,29 @@ everything, twice, under two instructions. And the regression set has two blind 
 is not hypothetical, because a correct refusal became the wrong product's price across both
 versions and every check passed all six times. It took three review passes, 25 findings then 16
 then 8, and `records/46-…` says which were mine.
+
+**Chapter 49 is the chapter that measures three levers and recommends none of them.** Time to first
+token, time per token, prompt-prefix caching and a cheap-model cascade, priced on this book's own
+system. Every one fails for a reason that is a fact about the traffic rather than about the lever:
+the cache has a minimum prompt length and these requests are under it; the wait at these lengths is
+a queue, so quadrupling the prompt moves nothing an eight-pair comparison can detect; and the model
+sixteen times the price answers the same 12 of 12, so the cascade pays twice for the same answers.
+What it delivers instead is a baseline — **$0.11 per 1,000 requests at a median 1.31 seconds** —
+which `TOC.md` says chapter 53 measures against, and three priced refusals. It also owns bank
+question 90, *how did you reduce cost per request*, and answers it with the measurement rather than
+a story.
+
+Two review passes, 15 findings then 15, and the chapter's own subject turned out to be its biggest
+risk. The timing run's first version put each shape in a block, so the shape and the moment it ran
+were one variable, and it reported a 0.23-second effect with an interval clear of zero that was the
+running order — **a confound in a timing measurement looks like a result with a tight interval.**
+The review then found that step 4's whole narrative was fiction (no reply hedged; the escalation
+rule fires on `cannot` inside correct refusals), that an answer key demanded the opt-in route where
+the documents make account credit the default, that the counts tripled the evidence because the
+cheap model's three trials are byte-identical, and that the caching lever was priced off the very
+arm the chapter spends a page condemning. `LEDGER-DEFECTS.md` entries 83 to 85 are what the fix
+round then cost: a ratio computed from a rounded display, a Summary still leaning on a test the
+body repudiates, and **a figure quoted from a summary table when the claim was about one row.**
 
 **Chapter 48 goes back and measures what chapters 35 and 36 said they had not.** Both were
 unusually honest about their own evidence — chapter 35 labelled its compaction finding a
