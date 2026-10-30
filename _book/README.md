@@ -24,7 +24,7 @@ notes; the book stands alone and never refers to a site, a roadmap or numbered s
 | I · Understand — *Mental Model* | 1–7 | 98 | **Done** — 7 of 7, 2026-10-23 |
 | I · Understand — *Inside the Model* | 8–17 | 168 | **Done** — 10 of 10, 2026-10-28 |
 | II · Use | 18–39 | 362 | **Done** — 22 of 22, 2026-10-29 |
-| III · Apply | 40–50 | 190 | **Drafting** — 8 of 11 done |
+| III · Apply | 40–50 | 190 | **Drafting** — 9 of 11 done |
 | IV · What Next | 51–57 | 136 | Not started |
 | Appendices | A–D | 83 | **A (cheat sheet, 288 items), B (100 questions) and C (glossary, 274 terms) in the PDF.** A and C are generated from the chapters and gated; B's answers come as chapters land. D is the LaTeX index |
 
@@ -87,10 +87,11 @@ ch    printed   pp  est  of est
   45   821-885    65   22    295%
   46   886-970    85   18    472%
   47   971-1014   44   12    367%
-   A  1016-1038   23    -       -
-   B  1039-1044    6    -       -
+  48  1015-1101   87   12    725%
+   A  1103-1126   24    -       -
+   B  1127-1132    6    -       -
 
-49 chapter(s), 1038 printed pages
+50 chapter(s), 1126 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
@@ -127,6 +128,33 @@ everything, twice, under two instructions. And the regression set has two blind 
 is not hypothetical, because a correct refusal became the wrong product's price across both
 versions and every check passed all six times. It took three review passes, 25 findings then 16
 then 8, and `records/46-…` says which were mine.
+
+**Chapter 48 goes back and measures what chapters 35 and 36 said they had not.** Both were
+unusually honest about their own evidence — chapter 35 labelled its compaction finding a
+demonstration on two hand-written summaries and even named its own doubt, and chapter 36 wrote its
+candidate sets into its programs as judgements — so this chapter runs all three claims on one real
+agent over the shipped corpus. **Chapter 35's claim is refused and the doubt it could not test is
+the finding**: the must-keep list is crossed by polarity *and* by whether a fact carries a number,
+and what clears zero is form — not one prose fact survived a single naive summary, 0 of 96
+observations against 53 of 108 for facts with a number — while polarity is +0.15 from −0.257 to
++0.548. Its *advice* survives anyway, in one cell: the warning takes negative-and-prose from 0 to
+35 per cent and moves nothing else by more than eight points. **Provenance shown to the model
+corrected nothing** in eighteen runs, and 3 of 54 runs opened a document in any arm with both
+tools available throughout — so chapter 23's rule about who can refuse holds one level down, about
+a fact instead of a tool call. And **chapter 36's six things for a description came to one line**:
+three of five versions are identical on every column, so the list of ids is the whole effect, and
+its worked defect occurred once in 120 runs because a search returning ids the reader accepts
+makes a resource choosable rather than nameable.
+
+What it cost is on the record. Two review passes, 23 findings then 13, and **the worst of each was
+mine.** The completeness review found that six of forty probe sets were satisfied by the case
+statement alone, which every summary restates — so they scored their fact kept without testing
+anything. The fix-verification pass then found that the repair's own exclusion had been applied in
+one place and not in every place that reads the data, so two ungraded facts entered a mean as
+zeros. Between them those two defects moved one headline from +0.43 to +0.21 and turned the central
+result over. `LEDGER-DEFECTS.md` entries 79 to 82 are what that is worth, and entry 81 is the one
+to read: **a probe can be satisfied by text that is not the fact, and every rule you have about
+*when* you wrote the probe is silent about it.**
 
 **Chapter 47 is the chapter that caught itself.** It compares one step built as chapter 45's fixed
 retrieval path and as chapter 4's loop, on twelve two-document tasks with three trials each, and

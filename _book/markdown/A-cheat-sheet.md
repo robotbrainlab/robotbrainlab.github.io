@@ -348,3 +348,14 @@ written from memory.
 | What separates a retrieval failure from a generation failure | Was the value in the passages that run was given? Across every requirement of every run: 72 of 72, 63 of 72, 54 of 72 | 47 |
 | What a resample can and cannot tell you about sample size | Resample your tasks and read the share that clear zero: here the design question 18 per cent at 12 tasks, 51 at 48, 98 at 192. **Every row assumes the effect is the one you measured**, so it tells you what twelve was never going to settle, not what more tasks would show — **arithmetic to do before the comparison and not after** | 47 |
 | The rule against the measurement | Chapter 34's four columns said *a pattern, not an agent* in a minute on paper. A hundred and eight runs could not confirm it, and found a confound of their own instead | 47 |
+| Measured, where Chapter 35 was plausible | The shape, not the share: 3 of 14 steps carry 45% of the result characters. 87.3% and Chapter 35's 91.5% are different denominators over different-length runs | 48 |
+| Audit a probe before you trust a rate | Run it against the question, the instruction and the case. 6 of 40 here were satisfied by the case alone; the repair took one headline from +0.43 to +0.21 and turned the crossed result over | 48 |
+| What a must-keep list is for | Not catching a careless summariser: telling you which of the facts *you* need are among the ones it dropped | 48 |
+| What six changes to a description came to | One line. Three of five versions identical on every column; the list of ids is the whole of it, and 19 of 24 answers became 24 of 24 on fewer calls | 48 |
+| What a crossed list is for | Facts in 4 cells, so a result cannot be read off the column you picked. Here polarity +0.15 (−0.257 to +0.548) cannot tell and form +0.49 (+0.157 to +0.778) can — and crossing fixes only the confounds you name | 48 |
+| What a summary dropped | Everything in prose: 0 of 96 observations under the naive instruction, against 53 of 108 for facts carrying a number | 48 |
+| What one sentence in the summary prompt buys | One cell: negative-and-prose 0% → 35%, with no other cell moving over 8 points. +0.25 on prose (+0.031 to +0.531), −0.00 on numbers. Needed facts kept by no summary 12 of 17 → 7 | 48 |
+| What showing a model provenance buys | 0 corrections in the 9 runs that hinge on a wrong note, and 0 of its 18 runs opened a document. All 3 document opens in the whole measurement are the arm where the **code** checked | 48 |
+| What a substring check on a note misses | A figure that is in the right document on the wrong line | 48 |
+| The third field a note needs | Its scope — a correct note applied outside it gave the wrong answer three times of three | 48 |
+| Before choosing a method | Ask whether the difference is pairable. If the two sides are kinds rather than conditions, it is not | 48 |

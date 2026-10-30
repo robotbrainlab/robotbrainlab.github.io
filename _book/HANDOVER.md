@@ -60,18 +60,28 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Parts I and II are complete, and Part III is 8 of 11.** Part I is all 17 chapters, 199 printed
-pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III's labs 40 to 47 are closed.
-The book is **1,038 printed pages over 49 of 57 chapters**, and `bash tools/check-all.sh` ends
-`ALL GATES PASS`. **The next chapter to write is 48** — read its `TOC.md` row and every
-`LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1.
+**Parts I and II are complete, and Part III is 9 of 11.** Part I is all 17 chapters, 199 printed
+pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III's labs 40 to 48 are closed.
+The book is **1,126 printed pages over 50 of 57 chapters**, and `bash tools/check-all.sh` ends
+`ALL GATES PASS`. **The next chapter to write is 49, Lab: Measure and Reduce Cost and Latency** —
+read its `TOC.md` row and every `LEDGER-TAUGHT.md` row naming it before anything else, per §14
+step 1. Chapter 15 is the one to read first for it (it names time to first token and time per
+token), with 52 for the two measures and 1 for the two-phase wait; chapter 48's own baseline
+figures are in `records/48-…` and its programs in `~/sandbox/ch48`.
 
 **The labs cost more per chapter than anything before them, and the records say why.** Chapter 45
-took four review rounds (20, 11, 4, 1), chapter 46 took three (25, 16, 8) and chapter 47 two
-(10, 13). In both, several of
+took four review rounds (20, 11, 4, 1), chapter 46 took three (25, 16, 8), chapter 47 two
+(10, 13) and chapter 48 two (23, 13). In both, several of
 each round's own fixes were wrong, and the cause is the same one every time and it is written
 down: **a prose claim about program output written without querying the data first.**
-`LEDGER-DEFECTS.md` entries 70 to 78 are all from these three chapters. **Chapter 47 reproduced
+`LEDGER-DEFECTS.md` entries 70 to 82 are all from these four chapters. **Read 81 before writing
+another measurement**: a probe can be satisfied by text that is not the fact, and every rule about
+*when* you wrote the probe is silent about it — six of chapter 48's forty probe sets were satisfied
+by the case statement, which every summary restates, and repairing them turned that chapter's
+central result over. **82 is the one that is a mechanism rather than a habit**: an exclusion has to
+be applied where the data is read, and a rate function that returns 0.0 on an empty selection
+makes a missing unit indistinguishable from a measured zero. Chapter 48 hit that twice in ten
+lines. **Chapter 47 reproduced
 entry 76 in the chapter written immediately after that entry was written**: `designs.py` was
 edited to loop over three designs and `designs.out` was never re-captured, so the chapter printed
 a three-design program beside two-design output and its record's claim that the sweep had run was

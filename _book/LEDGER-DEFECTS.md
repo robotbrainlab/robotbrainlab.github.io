@@ -65,6 +65,79 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**82. An exclusion is a property of the data and has to be applied where the data is read, not
+where the decision was made.** Chapter 48 excluded three facts from a measurement and then
+reported one comparison that did not use the exclusion. The selection iterated the full list of
+forty rather than the scored list, and the grading table held only the scored facts, so the
+excluded ones came back from the rate function's empty-selection branch as **0.0 keep rates** and
+depressed the mean they should not have been in at all. Nothing errored, nothing was empty, and
+the figure read +0.21 where it is +0.25 — a comparison that gave no verdict where it gives one.
+**Then the block written to report that correction reproduced the same bug ten lines further
+down**, because it read the same grading table for a fact that table excludes. The remedy is not
+care. It is that the function which builds the grading table takes the fact list as an argument,
+so a reading that wants a different set has to say so and gets one; and that an empty selection
+returns nothing rather than a zero, because **a default of 0.0 is indistinguishable from a
+measured zero and that is the whole of how this hides.** The general shape is worth more than the
+instance: when you decide that some units do not count, grep for every place that enumerates
+units, and expect the list to be longer than you think.
+
+**81. A probe can be satisfied by text that is not the fact, and every rule you have about *when*
+you wrote the probe is silent about it.** Chapter 48 checked twenty-four model-written summaries
+against forty facts with substring probes, and wrote a Warning about the risk it could see: do not
+widen a probe after reading a score. That risk is real and it is the smaller one, because it is
+the one a rule about the order of events prevents. Six of the forty probe sets were satisfied by
+the **case statement** — the first line of the record, restated by every summary — so those six
+scored their fact kept without testing anything a summary did. Every one was written in good
+faith before any summary existed, and the loose part was never the fact: `delivered` for a fact
+about when a window *starts*, `arriv` for one about a warehouse booking a parcel in, `credit` for
+one about what credit *does*, `the money` and `rather than` copied out of the case, `40 pound`
+matching inside *128.40 pounds*. **It cost the chapter its largest result and then turned over its central
+one**: needed-against-present was +0.43 with 95 per cent from +0.196 to +0.656, and after
+tightening five sets and excluding three that no summary could drop it is +0.21 from −0.017 to
++0.444. The polarity difference fell from +0.34 to +0.15 and the form difference rose to +0.49,
++0.157 to +0.778, becoming the only one of the two that clears zero — so the loose probes had
+hidden the finding as well as inflating a figure. **A probe that is too wide makes the system look better than it was**, and it inflates
+whichever group holds the loose probes — which, being the group you were hoping to find a
+difference in, is the one you wrote the most hopeful probes for. The test is four lines of code
+and no judgement: **run every probe against the question, the instruction and the prompt's own
+preamble, and fail the ones that hit.** Chapter 48 calls it `case_satisfied()`. The general form is
+that a grader which can be satisfied by a restatement of the input is measuring copying, and the
+more of your input the model is asked to carry forward, the more of your grader is at risk.
+
+**80. A comparison between two kinds of thing has no pairing in it, and reaching for a paired
+method anyway is the most inviting arithmetic error in this book.** Chapter 48 asked three
+questions of one set of measurements. Two of them put the same unit on both sides — the same
+facts under two summary instructions, the same questions under five tool descriptions — and both
+gave verdicts. The third asked whether negative facts are dropped more than positive ones, and a
+fact's polarity is a property of the fact: ten negatives and seven positives are two samples, not
+pairs. The first version of that program sorted both groups and zipped them. It ran, it printed an
+interval, and the interval was 5.2 times narrower by width than the honest one — +0.017 to +0.167
+against −0.292 to +0.483, a verdict instead of a refusal, arrived at by an edit that looked like
+tidying. **The test is whether the pairing exists in the data before you write the code**: can the
+same unit be measured on both sides? Chapter 20 says what pairing buys once you have it, which is
+the shared part cancelling. It does not say that the prior question has an answer you may choose.
+And be exact when you report it, because pairing is rarely the only difference between two
+comparisons — chapter 48's two also differ in the size of the effect and in whether a confound is
+present, which is three reasons for one refusal. Pairing is worth naming first only because it is
+the one you settle before you have any data.
+
+**79. More units are usually cheaper than you think and the cheap ones change the question.**
+Chapter 48's compaction measurement used twelve trials over twenty facts and could not separate
+two explanations. Chapter 20's row says why in advance: units buy the range of inputs, repeats buy
+one unit's own certainty, two or three repeats then stop. Twelve and twenty is that backwards, and
+what makes it a mistake rather than a trade is the price list — a trial is a model call and **a
+fact is a substring test against text already on disk.** The summaries existed; more facts were
+free. So **read a budget rule as a price list and then look up your own prices.** But the
+correction has its own trap and chapter 48 walked into it: writing twenty more facts by what
+looked like the same recipe produced twenty facts that were not what the list is *for*. Half of
+them merely *appeared* in the record rather than being facts the task depends on, which is the
+definition of a must-keep list, so pooling them would have reported a keep rate for a different
+thing. **When you add units to an existing measurement, check the new ones against the definition
+the old ones met, not against the recipe you used to write them.** A recipe reproduces the shape
+and loses the condition. Keeping them and labelling the batch was worth more than deleting them,
+because the gap between the batches is a real question — but it is a different question, and the
+chapter reports it apart rather than pooled.
+
 **78. A difference you designed in on a prediction about behaviour is a confound, and the
 prediction being reasonable is what hides it.** Chapter 47 compared a fixed retrieval path
 against an agent loop, and gave the loop a smaller per-search budget — 1,200 characters against

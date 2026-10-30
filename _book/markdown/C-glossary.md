@@ -167,6 +167,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Next-token distribution** | One probability for every entry in the vocabulary, adding to 1, saying how likely each is to come next. The entire output of one call | 9 |
 | **Normalisation** | Rescaling the stream to a predictable range before each block reads it, so the numbers do not grow out of hand as layer after layer adds to them | 12 |
 | **Normalised discounted cumulative gain** | A DCG divided by the DCG of the best possible ranking of the same documents, making it comparable across queries | 26 |
+| **Note scope** | The condition under which a structured note applies, which Chapter 35's two fields do not record. A note that is true, checked and current can still produce a wrong answer when a later step reads it outside the case it was written for. The same line Chapter 36 asks a tool description for — *when not to use this* — and a statement about the other notes rather than this one | 48 |
 | **Numerical stability** | How quantities behave through long chains of arithmetic, and what keeps them in a usable range. The subject behind Chapter 12's one sentence on normalisation. Not taught in this book | 17 |
 | **Objective design** | Why one expression rather than another is the right thing for a model to minimise. The question Chapter 14 states its preference objective without answering. Not taught in this book | 17 |
 | **OCR** | Recognising characters in an image, for pages that have no text layer at all. Imperfect, and a separate step before parsing can begin | 27 |
@@ -177,6 +178,7 @@ chapter; every other chapter refers to it rather than redefining it.
 | **Output tokens** | Everything that comes back. Priced several times higher than input, one forward pass each, and not knowable in advance | 10 |
 | **Overlap** | Starting each chunk a little before the last one ended, so a passage cut by one boundary survives whole in a neighbour. Costs storage and returns near-duplicates | 27 |
 | **Page furniture** | Headers, footers, page numbers and watermarks: text on the page that is not part of the document | 27 |
+| **Pairable difference** | A difference whose two sides can be measured on the same unit, so that unit's own difficulty cancels — two instructions on the same facts, four descriptions on the same questions. Not a choice of method: a difference between kinds of thing, like a negative fact against a positive one, has no pairing in it to use, and two samples of ten and seven will refuse what seventeen paired measurements settle | 48 |
 | **Paired comparison** | Running both versions on the same cases and keeping the results together, so the part of case-to-case variation the two versions share cancels when you subtract | 20 |
 | **Parallel width** | The most pieces that can be in flight at once, and therefore the number of agents that earn their place. Chapter 9's *width* is a different thing — the size of a model's vectors | 37 |
 | **Parallelisation** | One call per piece, the pieces coming from the input, then one call to combine. Independent, so they can run at once | 34 |
