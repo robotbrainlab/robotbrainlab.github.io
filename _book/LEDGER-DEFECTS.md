@@ -65,6 +65,33 @@ checked — not as a fix to be confirmed.**
 
 ## Earned here
 
+**94. A fix that widens a claim leaves every sentence that depended on the narrow one, and the
+widest of those is the one the fix was written next to.** Chapter 53's absolutes check found *the
+only way to get attribution is to record the counts* and it was false: a separate key or project
+per feature makes the provider's own breakdown the split, and chapter 51 already names the setting.
+The repair added that route, in a new paragraph, fourteen lines under a bolded opening sentence
+that still read *a provider's own breakdown splits a bill by the model and the day and by nothing
+else* — which the new paragraph refutes. The chapter's own Answer now contradicted its own first
+recommendation, and the two were on the same page. **Then the fix for that introduced the next
+defect**: a pointer reading *nine tenths on the reasoning model two sections on*, off by one, and
+inconsistent with the two other phrasings of the same pointer in the chapter and with the four
+cross-references a sibling finding had just repaired. Three generations, each one the repair of
+the last. The mechanism is that a finding names a sentence, and a fix widens the claim that
+sentence makes while every *other* sentence resting on the narrow version reads as settled,
+because it was not what the finding was about. **A fix that widens or adds has a sweep of its own,
+and it is not the fix's own words**: grep the narrow claim, not the new one. Entry 84's rule was
+that a chapter which repudiates a test must repudiate it everywhere; this is the same rule for a
+chapter that learns something, and the place to look first is the sentence nearest the fix.
+
+*And the companion, from the same chapter.* `$1.8792` was written as *a dear call* when the figure
+is dollars per **thousand** requests — computed by a function called `per_1k`, inside a block
+whose printed header says *per 1,000 requests*, and the program's own label printed *a call* too,
+so the error was spliced in as output as well as written in prose. It survived four sites and a
+completeness brief that named the arithmetic. What let it through is that $1.88 is a plausible
+price for one call to an expensive model and $0.0019 looks like nothing, so the magnitude read as
+a confirmation. **A unit lives in the name of the thing that computed it, and a figure whose
+magnitude looks right is the one to check the unit of.**
+
 **93. A repair can reason the way the book has a section forbidding, and reach the right
 conclusion.** Chapter 52's headline budget conclusion rested on one request of twenty-four, and
 the repair was to bootstrap it. The program then printed an interval round each of three arms,

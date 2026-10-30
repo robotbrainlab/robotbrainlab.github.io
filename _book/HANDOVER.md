@@ -60,29 +60,41 @@ the live site — GitHub Pages never publishes a `_`-prefixed folder, and every 
 returns 404. The website repository is public, which the owner decided deliberately. See that
 repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
 
-**Parts I, II and III are complete, and Part IV is 2 of 7.** Part I is all 17 chapters, 199
+**Parts I, II and III are complete, and Part IV is 3 of 7.** Part I is all 17 chapters, 199
 printed pages against 266; Part II is chapters 18 to 39 at 475 pages; Part III is the eleven labs
-40 to 50, closed 2026-10-30; chapters 51 and 52 opened Part IV the same day at 27 and 21 pages.
-The book is **1,281 printed pages, 52 of 57 chapters written**, and `bash tools/check-all.sh`
-ends `ALL GATES PASS`. **The next chapter to write is 53, Cost: What This Costs Me.** Read its
-`TOC.md` row and every `LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1.
-Three things are already settled. **Chapter 49 hands it the baseline it measures against**:
-$0.11 per 1,000 requests at a median 1.31 seconds, on this book's own system. **Chapter 52 owns
-the lever menu and 49 owns prompt-prefix cache and cascade**, so 53 owns the economics and
-re-teaches neither mechanism — the ownership table near line 40 of `LEDGER-TAUGHT.md` was
-corrected on 2026-10-30, having credited both terms to 52. And **chapter 15 owns why a token
-costs what it does**, so 53 owns the bill, reasoning tokens, and the features that multiply
-usage.
+40 to 50, closed 2026-10-30; chapters 51, 52 and 53 opened Part IV the same day at 27, 21 and 31
+pages. The book is **1,313 printed pages, 53 of 57 chapters written**, and
+`bash tools/check-all.sh` ends `ALL GATES PASS`. **The next chapter to write is 54, Failure: How
+This Breaks, and How I Diagnose It.** Read its `TOC.md` row (line 136) and every
+`LEDGER-TAUGHT.md` row naming it before anything else, per §14 step 1.
 
-**Read chapters 51 and 52's records before writing 53.** 51's settles the shape of every Part IV
-chapter (`structure-decision:`): no lab, no Review Questions, no *You understand this when*, no
-callouts, and a `## Summary and Key Terms` section. 52's is the warning: it is the first chapter
-whose figures are **all borrowed**, and nine of its twenty-four review findings were other
-chapters' numbers carried with the answer kept and the variable lost. 53 is in exactly that
-position. `LEDGER-DEFECTS.md` entry 92 is the practice — open the chapter at the line and read
-what the number is about — and entry 93 is the one that cost most: a repair is held to the
-standard the chapter is held to, and 52's first repair reasoned the way chapter 20 has a section
-forbidding.
+Four things are already settled for 54. **Chapter 33 owns the trace** — what it holds and what to
+capture, and the word *observability* — so 54 owns attributing a failure with one and must not
+introduce tracing as new; row 33 of `LEDGER-TAUGHT.md` says so. **Chapter 53 asked for the model
+with its version on every record and credited 54 with why the short name is not a version**, and
+chapter 40's step on the floating name is the measurement that proves it: the provider resolved a
+moving name to a dated one and said which, so a floating name is unsafe because the answer can
+change between two runs with nothing warning you. **Chapter 54 owns re-embedding and index
+migration**, which chapters 43 and 53 both point at and neither does; chapter 43's drift finding
+(two embeddings of one string differing by more than the gap between two printed ranks,
+`LEDGER-DEFECTS.md` entry 67) is the evidence that a re-embed is not a no-op. And **chapter 20
+owns whether a difference is real**, so a provider's update having to pass your regression suite
+is chapter 33's set run chapter 20's way, not a new method.
+
+**Read chapters 51, 52 and 53's records before writing 54.** 51's settles the shape of every
+Part IV chapter (`structure-decision:`): no lab, no Review Questions, no *You understand this
+when*, no callouts, and a `## Summary and Key Terms` section. 52's and 53's are the warnings, and
+they are different warnings. **52's is about borrowed figures**: it was the first chapter whose
+figures were all borrowed, and nine of its twenty-four findings were other chapters' numbers
+carried with the answer kept and the variable lost — `LEDGER-DEFECTS.md` entry 92 is the practice,
+open the chapter at the line and read what the number is about. **53's is about fixes**: its
+absolutes check found a real omission, the fix for it left the sentence beside it stating the
+narrow claim the fix refutes, and the fix for *that* introduced an off-by-one pointer. Entry 94 is
+those three generations — **a fix that widens a claim has a sweep of its own, and what you grep
+for is the narrow claim rather than the new words** — with a thousandfold unit error as its
+companion, `$1.8792` written as *a dear call* when a function named `per_1k` computed it. Chapter
+54 cites at least chapters 20, 33, 40, 43, 49, 52 and 53, so it is in 52's position and will make
+fixes, so it is in 53's too.
 
 **Read chapter 51's record before writing 52**, because it settled the shape of every Part IV
 chapter and the reading is arguable. `BOOK-GUIDE.md` §5 says Part IV chapters have none of the

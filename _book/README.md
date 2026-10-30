@@ -92,15 +92,16 @@ sub-part opener pages sitting after the last written chapter were counted into i
   50  1156-1205   50   18    278%
   51  1207-1233   27   36     75%
   52  1234-1254   21   24     88%
-   A  1255-1281   27    -       -
-   B  1282-1287    6    -       -
+  53  1255-1285   31   20    155%
+   A  1286-1313   28    -       -
+   B  1314-1319    6    -       -
 
-54 chapter(s), 1281 printed pages
+55 chapter(s), 1313 printed pages
 ```
 
 **Part I is complete: chapters 1–17, 199 printed pages against a 266-page estimate (75%).**
 Part II is complete: chapters 18 to 39 come to 475 pages.
-**Part IV has begun.** Part III is complete: chapters 40 to 50, which began with chapter 40, the first chapter in the book that calls a real model, and
+**Part IV is 3 of 7.** Part III is complete: chapters 40 to 50, which began with chapter 40, the first chapter in the book that calls a real model, and
 the labs now run on the corpus in `labs/corpus/` — 40 documents, 8 queries and 320 graded
 judgements, written for the book and dedicated to the public domain. `LEDGER-DEFECTS.md` entry 63
 is what the first non-deterministic chapter cost: prose that quotes a figure a re-run can change
@@ -133,6 +134,31 @@ everything, twice, under two instructions. And the regression set has two blind 
 is not hypothetical, because a correct refusal became the wrong product's price across both
 versions and every check passed all six times. It took three review passes, 25 findings then 16
 then 8, and `records/46-…` says which were mine.
+
+**Chapter 53 is the chapter whose subject caught it out twice.** Cost, and its spine is one line
+— `(in - cached) x p_in + cached x p_cached + out x p_out` — which is the arithmetic chapters 34
+and 37 both counted tokens and handed over, because the cached term is what makes a token count
+rank two designs one way and the bill rank them the other. Reconciled against chapter 49's own
+dollars to the ninth decimal over 144 requests, it says that **output is a tenth of the tokens and
+over a third of the money**, and 68 per cent of it on one of three shapes in the same system. Then
+the chapter's own measurement, and it is the one figure in the book that is a column of a single
+number: asked three arithmetic questions at four effort settings, a reasoning model's **visible
+reply is 10 to 13 tokens in all 72 calls** while the bill multiplies by up to sixteen and 96 per
+cent of the dearest setting's output is never sent to you. A cap set below the working returns an
+empty string with the whole cap billed and a finish reason of `length`. And the cheapest condition
+on a cascade turns out to be the money one — a sixteenfold price gap puts the break-even
+escalation rate at 0.94, which no real rule reaches — so the argument that decides it is the
+quality one, which is what sank chapter 49's.
+
+**What it got wrong is the part worth reading the record for.** The absolutes check found that
+*the only way to get cost attribution is to record the counts* is false, because a key or project
+per feature makes the provider's own breakdown the split; the fix added that route and left the
+chapter's bolded opening sentence stating the narrow claim it refutes, fourteen lines above. The
+fix for *that* introduced an off-by-one pointer. `LEDGER-DEFECTS.md` entry 94 is those three
+generations: **a fix that widens a claim has a sweep of its own, and what you grep for is the
+narrow claim rather than the new words.** Its companion in the same entry is a thousandfold unit
+error — `$1.8792` written as *a dear call* when a function named `per_1k` computed it — which
+survived four sites because $1.88 is a plausible price for one call and $0.0019 looks like nothing.
 
 **Chapter 52 is the chapter that took its own headline back.** Speed, and its spine is that
 *slow* is four complaints sharing almost no lever: nothing appears for seconds, the words crawl
