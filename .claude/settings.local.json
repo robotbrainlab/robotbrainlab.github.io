@@ -2,6 +2,18 @@
   "permissions": {
     "allow": [
       "mcp__Claude_Preview__preview_start"
+    ],
+    "deny": [
+      "Read(**/secrets/**)",
+      "Write(**/secrets/**)",
+      "_Bash(rm -rf **/secrets/**)",
+      "_Bash(cat **/secrets/**)",
+      "_Bash(less **/secrets/**)",
+      "_Bash(head **/secrets/**)",
+      "_Bash(tail **/secrets/**)",
+      "_Bash(cp **/secrets/**)",
+      "_Bash(mv **/secrets/**)",
+      "_Bash(*secrets*)"
     ]
   }
 }
