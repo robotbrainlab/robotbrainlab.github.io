@@ -2,7 +2,7 @@
 
 # AI Engineer Learning Guide
 
-A Depth path through the **Data & Intelligence** side of AI engineering, with Modern AI Engineering alongside it: what to study, in what order, which resources to read and how, what to build, and how to know you are ready to move on.
+A Depth path through the **Data & Intelligence** side of AI engineering, with Modern AI: Research, Science and Engineering alongside it: what to study, in what order, which resources to read and how, what to build, and how to know you are ready to move on.
 
 This guide is the learner's view of the accepted curriculum in [ROADMAP.md](ROADMAP.md). The roadmap is the detailed specification and the [research](research/) explains why it is shaped this way; you do not need either to learn from this guide. If this guide and [ROADMAP.md](ROADMAP.md) ever disagree, the roadmap wins.
 
@@ -45,13 +45,9 @@ This guide is the learner's view of the accepted curriculum in [ROADMAP.md](ROAD
 18. [Choose Your Depth](#18-choose-your-depth)
 - [Checkpoint: Ready to Contribute Research](#checkpoint-ready-to-contribute-research)
 
-**Part 4 — Research**
-
-19. [Contributing Research](#19-contributing-research)
-
 **Alongside the path**
 
-- [Modern AI Engineering](#modern-ai-engineering)
+- [Modern AI: Research, Science and Engineering](#modern-ai-research-science-and-engineering)
   - [Orientation: Contemporary AI Systems](#orientation-contemporary-ai-systems)
   - [Working with Models](#working-with-models)
   - [Embeddings and Semantic Search](#embeddings-and-semantic-search)
@@ -61,6 +57,7 @@ This guide is the learner's view of the accepted curriculum in [ROADMAP.md](ROAD
   - [Adapting Models in Practice](#adapting-models-in-practice)
   - [Securing AI Systems in Practice](#securing-ai-systems-in-practice)
   - [Inference, Cost and Production](#inference-cost-and-production)
+  - [Contributing Research](#contributing-research)
 
 </details>
 
@@ -84,7 +81,7 @@ This guide is the learner's view of the accepted curriculum in [ROADMAP.md](ROAD
 | **Practise and build** | What turns understanding into capability |
 | **You're ready to continue when you can** | Capability, never pages read |
 | **What comes next** | Why the following step follows |
-| **Also open now in Modern AI Engineering** | At the six steps where topics open (1, 7, 9, 11, 15, 16): which ones, which the path depends on, and what to take first |
+| **Also open now in Modern AI: Research, Science and Engineering** | At the six steps where topics open (1, 7, 9, 11, 15, 16): which ones, which the path depends on, and what to take first |
 
 **Concepts first, resources second.** The roadmap decides what you learn and how it is organized; books, papers and guides are how you study it. Where a step names only part of a resource, it says why — and where two sources are used for one subject, it says what each is for.
 
@@ -92,7 +89,7 @@ This guide is the learner's view of the accepted curriculum in [ROADMAP.md](ROAD
 
 **Come back to it.** These pages are meant to stay useful after the first pass. Months later, a step should still tell you what the subject contains, how its ideas fit together, where you learned each one and what it enabled — a map of your own knowledge, not only a route through it.
 
-**Two dimensions, studied together.** The numbered steps follow the roadmap's four depth levels — Fundamentals → Advanced → Mastery → Research — and build durable knowledge and judgment. Alongside them runs **Modern AI Engineering**: a curriculum of current engineering practice — what a capable AI engineer should understand, use and build today — whose topics open as your depth grows. It is not a fifth level and it does not come after Research. You do not have to plan the interleaving yourself: each numbered step says when a topic opens and which topics to take before moving on, and each topic says whether the numbered path depends on it — two do — and which step to return to afterwards. Start with its [Orientation](#orientation-contemporary-ai-systems); [Modern AI Engineering](#modern-ai-engineering) sets out all nine topics together, with where each one is taken and where it returns you.
+**Two dimensions, studied together.** The numbered steps follow the roadmap's three depth levels — Fundamentals → Advanced → Mastery — and build durable knowledge and judgment in subjects whose science is established. Alongside them runs **Modern AI: Research, Science and Engineering**: a curriculum of current engineering practice — what a capable AI engineer should understand, use and build today — whose topics open as your depth grows. It is not a fourth level, and it is where the field's open questions live rather than at the end of the path. You do not have to plan the interleaving yourself: each numbered step says when a topic opens and which topics to take before moving on, and each topic says whether the numbered path depends on it — two do — and which step to return to afterwards. Start with its [Orientation](#orientation-contemporary-ai-systems); [Modern AI: Research, Science and Engineering](#modern-ai-research-science-and-engineering) sets out all ten topics together, with where each one is taken and where it returns you.
 
 **Read good books whole.** When a step introduces a core book, read the whole book, in its own order. Start it at that step and keep reading alongside the steps that follow — you do not need to finish a book before doing a step's practice. Some chapters will show you ideas that a later step asks you to master. That is intended: reading something early is not the same as mastering it, and later steps send you back to *revisit* those chapters and put them to work. Large reference textbooks, papers and specialist material are different: for those, the step names the parts to read.
 
@@ -102,7 +99,7 @@ This guide is the learner's view of the accepted curriculum in [ROADMAP.md](ROAD
 
 **Understanding and building grow together.** Most steps pair a resource that explains *why* something works with one that makes you *build* it. Practice is part of every step, and much of it goes into **one system that you keep extending** from step 3 onwards: by the end you should be able to explain what you built, why, which alternatives you rejected, how you measured it, what failed, and what you would change next.
 
-**Staying current.** Current practice changes faster than durable foundations; [Modern AI Engineering](#modern-ai-engineering) explains how this project keeps it up to date.
+**Staying current.** Current practice changes faster than durable foundations; [Modern AI: Research, Science and Engineering](#modern-ai-research-science-and-engineering) explains how this project keeps it up to date.
 
 **What this guide does not teach.** General computing — software engineering, database design, cloud and infrastructure — belongs to a separate, future Computer Science & Engineering roadmap. Where a step depends on it, it says so.
 
@@ -261,7 +258,7 @@ You will have read about schema design, transactions and database maintenance, b
 
 You can now handle data, but not yet reason about the methods that learn from it. Step 2 gives you the mathematical language those methods are written in — and, with it, the first half of the uncertainty story that steps 4 and 6 complete.
 
-**Also open now in Modern AI Engineering**
+**Also open now in Modern AI: Research, Science and Engineering**
 
 [Orientation: Contemporary AI Systems](#orientation-contemporary-ai-systems) is open from the start and is **recommended in small doses**: a short tour of what today's AI systems are made of, so that the words you will meet everywhere mean something while you work through the early steps. Nothing later depends on it — read it alongside these steps, not instead of them, and come straight back here.
 
@@ -1125,7 +1122,7 @@ Implement and train a small network. Apply transfer learning to an image task.
 
 You understand how deep networks learn representations, and you have used a transformer. Step 8 opens the box: you build a small language model yourself, because using, conditioning and adapting these models well depends on knowing what happens inside.
 
-**Also open now in Modern AI Engineering**
+**Also open now in Modern AI: Research, Science and Engineering**
 
 [Working with Models](#working-with-models) opens now, and it is **required before step 8**: it starts *Hands-On Large Language Models* and *AI Engineering*, the two books that steps 8, 10, 11, 14 and 16 read from. Take it now, work its practice, and return to step 8 — you do not need to finish either book first; the topic says how far to read.
 
@@ -1384,7 +1381,7 @@ Build a hybrid retriever, measure it with ranking metrics, and show that changin
 - explain the recall–latency trade-off of an approximate nearest-neighbour index;
 - diagnose whether a wrong answer came from retrieval or from generation.
 
-**Also open now in Modern AI Engineering**
+**Also open now in Modern AI: Research, Science and Engineering**
 
 [Retrieval-Augmented Systems](#retrieval-augmented-systems) and [Evaluating and Observing AI Applications](#evaluating-and-observing-ai-applications) open now, and both are **recommended** here: your evolving system becomes a retrieval-augmented application that you evaluate and trace, and the search engineering deferred from the embeddings topic is done properly now that you can measure it. Take them together, then return to the checkpoint below and on to step 10; step 11 composes what you build.
 
@@ -1746,7 +1743,7 @@ Use [the agent-loop exercise](materials/agent-loop-exercise.md) for the loop, [t
 - justify rejecting a multi-agent design;
 - decide whether the system is ready to release.
 
-**Also open now in Modern AI Engineering**
+**Also open now in Modern AI: Research, Science and Engineering**
 
 [Agents, Tools and Context](#agents-tools-and-context) opens now and is **recommended** straight away, while these design decisions are fresh; [Adapting Models in Practice](#adapting-models-in-practice) is **recommended** too, and easy to postpone until your system has a task that needs it. Return to step 12 afterwards.
 
@@ -1952,11 +1949,11 @@ Resisting premature resolution, and being able to say what evidence would settle
 
 **Where this fits in AI**
 
-This is the skill that keeps the rest of your knowledge current without making it fashionable. It is why the roadmap teaches durable ideas in the numbered steps and treats Modern AI Engineering as evidence-filtered current practice, and it is what lets you read the next thing that has not been written yet.
+This is the skill that keeps the rest of your knowledge current without making it fashionable. It is why the roadmap teaches durable ideas in the numbered steps and treats Modern AI: Research, Science and Engineering as evidence-filtered current practice, and it is what lets you read the next thing that has not been written yet.
 
 **Study**
 
-No new resource is assigned. You practise on sources you already have: the papers from steps 11, 12 and 15, and the current guides and specifications in Modern AI Engineering.
+No new resource is assigned. You practise on sources you already have: the papers from steps 11, 12 and 15, and the current guides and specifications in Modern AI: Research, Science and Engineering.
 
 **Practise and build**
 
@@ -2222,7 +2219,7 @@ Threat-model your evolving system. Run the attack-and-defence lab. Redesign your
 - evaluate a defence against an adaptive attack;
 - evaluate a fairness claim and justify the metric.
 
-**Also open now in Modern AI Engineering**
+**Also open now in Modern AI: Research, Science and Engineering**
 
 This is the point the deferred [Securing AI Systems in Practice](#securing-ai-systems-in-practice) was waiting for: the current risk lists, attacks and controls, applied to your system. Take it now and return to step 16.
 
@@ -2372,7 +2369,7 @@ Deploy your evolving system. Size its cost and latency. Define the triggers for 
 - design monitoring that would detect a realistic silent failure;
 - decide go or no-go, and rollback, from imperfect evidence — and explain the decision to a non-specialist.
 
-**Also open now in Modern AI Engineering**
+**Also open now in Modern AI: Research, Science and Engineering**
 
 This is the point the deferred [Inference, Cost and Production](#inference-cost-and-production) was waiting for: how contemporary language-model systems are served, paid for and run, applied to your system. It also starts the *LLM Engineer's Handbook*, so take it before you leave Advanced, and return to the checkpoint below.
 
@@ -2416,7 +2413,7 @@ Decide what an ambiguous problem actually needs and what evidence would change y
 
 **What changes after this**
 
-Mastery makes you able to use knowledge that exists. Research — optional, and required of nobody — is about producing knowledge that does not yet exist, to a standard others can check.
+Mastery is where the depth path ends: you can use knowledge that exists, and judge it. Producing knowledge that does not yet exist is a different activity, and it sits in the parallel track as [Contributing Research](#contributing-research) — optional, and required of nobody.
 
 ### 17. Independent Judgment: Design, Diagnosis and Experiment
 
@@ -2552,7 +2549,7 @@ For each area you choose, build or investigate something substantial enough that
 
 **What comes next**
 
-With judgment and depth, one optional path remains. Step 19 is for producing knowledge that does not yet exist — a different activity from everything before it, and required of nobody.
+With judgment and depth, the numbered path is complete. One optional topic remains in the parallel track: [Contributing Research](#contributing-research) is for producing knowledge that does not yet exist — a different activity from everything before it, and required of nobody.
 
 ### Checkpoint: Ready to Contribute Research
 
@@ -2560,148 +2557,23 @@ With judgment and depth, one optional path remains. Step 19 is for producing kno
 
 This checkpoint guards an optional path. Not passing it costs you nothing as an engineer; passing it means you can produce knowledge others can check, rather than only apply knowledge that exists.
 
-You are ready to contribute research when you can evaluate a published claim against its own evidence; design an experiment that could falsify your own hypothesis; identify a genuine gap; and communicate a result so that others can check it.
+You are ready to contribute research when you can evaluate a published claim against its own evidence; design an experiment that could falsify your own hypothesis; identify a genuine gap; and communicate a result so that others can check it. It opens [Contributing Research](#contributing-research) in Modern AI: Research, Science and Engineering.
 
 [⬆ Back to Contents](#contents)
 
 ---
 
-## Part 4 — Research
-
-**In this section:** [19](#19-contributing-research)
-
-Research literacy is for everyone and you practised it in step 13. Contributing research — investigating questions whose answers are not yet known — is optional, and not required of every learner.
-
-**What this stage asks**
-
-*What is not known here, and how could it be found out so that others can check it?* Research is defined by the status of the question, not by difficulty: a hard engineering problem with a known method is not research, and a simple experiment on an open question is.
-
-**What you should be able to do by the end**
-
-Review a literature and identify a genuine gap; design, run and interpret an experiment that could have proved you wrong; and communicate the result so that others can reproduce and check it.
-
-**What this is not**
-
-It is not the final level of AI engineering, and skipping it costs you nothing as an engineer. Depth and currency are different dimensions: Modern AI Engineering runs alongside every stage of this path, including this one.
-
-### 19. Contributing Research
-
-<!-- covers: H2 -->
-
-Research is not "very difficult engineering". It is the activity of answering questions whose answers are not yet known, to a standard that lets other people check them.
-
-**Where you are**
-
-You can read research critically (step 13), design experiments that could refute you (step 17) and work at depth in a few areas (step 18). What changes here is the question: not *which known method fits this problem?* but *what is not known, and how could it be found out defensibly?*
-
-**What you'll learn**
-
-By the end you should be able to review a literature and identify a genuine gap, design and run an experiment that could have proved you wrong, and communicate the result so that others can reproduce and check it.
-
-#### Finding a question
-
-Research begins with a gap that is real rather than merely unfamiliar to you.
-
-##### Systematic literature review
-
-Covering an area methodically, so that what you take as unknown is unknown to the field and not only to you. **Studied in:** the literature of your chosen area, read with the discipline of step 13.
-
-##### Identifying a genuine gap
-
-Distinguishing an open question from an unanswered one, and from one whose answer exists in a neighbouring field. **Studied in:** the literature of your chosen area.
-
-#### Designing the test
-
-The part where a question becomes something that can be answered defensibly.
-
-##### Hypotheses that could be wrong
-
-Stating the claim so that an experiment can refute it. **Studied in:** cross-reference: step 17's experimental capability.
-
-##### Baselines and ablations
-
-Choosing comparisons that isolate the cause of an effect. **Studied in:** the methods sections of the papers you read in steps 11, 12 and 15.
-
-#### Making it checkable
-
-The difference between a result and a contribution.
-
-##### Reproducibility
-
-Seeds, environments, data and code, so the result survives leaving your machine. **Studied in:** cross-reference: step 6's reproducibility practice.
-
-##### Statistical reasoning and interpretation
-
-Reporting uncertainty and interpreting within what the evidence supports. **Studied in:** cross-reference: steps 4 and 12.
-
-#### Communicating and reviewing
-
-Knowledge that others cannot check is not yet a contribution.
-
-##### Scientific writing
-
-Writing so that a reader can follow the argument and find the weakness. **Studied in:** the papers of your area, read as models of the form.
-
-##### Peer review
-
-Reviewing others' work with the checks of step 13, and reading reviews of your own. **Studied in:** cross-reference: step 13.
-
-You start this after research literacy, the experimentation capability from step 17, and depth in at least one area from step 18.
-
-**How these ideas connect**
-
-A contribution is a chain, and it is only as strong as its weakest link: a literature review that finds the real gap, a hypothesis sharp enough to be wrong, an experiment with baselines and ablations that isolate the claimed cause, reproducibility so the result survives leaving your machine, statistics that support the strength of the claim (step 4, step 12), and writing that lets a reader check rather than admire. Peer review is the same chain applied to someone else's work.
-
-**Where this fits in AI**
-
-Research sits at the end of the depth dimension, not at the end of the roadmap: it deepens understanding, while Modern AI Engineering keeps practice current, and most engineers need the second far more than the first. Its value to a non-researcher is indirect but real — knowing how knowledge is actually produced is what makes the claims arriving every week readable.
-
-**Study**
-
-No resources are assigned. The literature of your chosen area is the material, read with the discipline of step 13.
-
-**Open problems to study**
-
-These are studied as open problems, not settled knowledge:
-
-| Open problem | Status |
-| --- | --- |
-| Mechanistic interpretability as assurance | Contested |
-| Alignment, scalable oversight, evaluation awareness | Contested |
-| Generalization and scaling theory | Active research |
-| Continual learning, model editing, verifiable unlearning | Active research / contested |
-| World models, latent and recursive reasoning | Speculative / active research |
-| Discrete diffusion language models | Speculative |
-| Validity of long-horizon agent evaluation | Active research |
-| Neural theorem proving and automated discovery | Active research |
-
-Do not treat a frontier area as required because it is exciting.
-
-**Practise and build**
-
-Carry out one piece of research from question to write-up: find a gap, state a hypothesis, test it with baselines and ablations, and write it up so that others can check it.
-
-**You've arrived when you can**
-
-- review a literature and identify a genuine gap;
-- design, run and interpret an experiment that could have proved you wrong;
-- communicate a result so that others can reproduce and check it.
-
-**Where this leaves you**
-
-The depth dimension ends here, but the roadmap does not stop being useful: Modern AI Engineering continues to change under review, and every unit remains a map of what you know, where you learned it and how it fits together — the reason this guide is written to be returned to, not finished.
-
 [⬆ Back to Contents](#contents)
 
 ---
 
-## Modern AI Engineering
+## Modern AI: Research, Science and Engineering
 
-**In this section:** [Orientation](#orientation-contemporary-ai-systems) · [Working with Models](#working-with-models) · [Embeddings and Semantic Search](#embeddings-and-semantic-search) · [Retrieval-Augmented Systems](#retrieval-augmented-systems) · [Evaluating and Observing AI Applications](#evaluating-and-observing-ai-applications) · [Agents, Tools and Context](#agents-tools-and-context) · [Adapting Models in Practice](#adapting-models-in-practice) · [Securing AI Systems in Practice](#securing-ai-systems-in-practice) · [Inference, Cost and Production](#inference-cost-and-production)
+**In this section:** [Orientation](#orientation-contemporary-ai-systems) · [Working with Models](#working-with-models) · [Embeddings and Semantic Search](#embeddings-and-semantic-search) · [Retrieval-Augmented Systems](#retrieval-augmented-systems) · [Evaluating and Observing AI Applications](#evaluating-and-observing-ai-applications) · [Agents, Tools and Context](#agents-tools-and-context) · [Adapting Models in Practice](#adapting-models-in-practice) · [Securing AI Systems in Practice](#securing-ai-systems-in-practice) · [Inference, Cost and Production](#inference-cost-and-production) · [Contributing Research](#contributing-research)
 
 **What this is**
 
-The numbered path builds depth: how well you understand, implement, design, diagnose and eventually research AI. Modern AI Engineering is the roadmap's second dimension, and it answers a different question: *what should a capable AI engineer understand, use, evaluate and be able to build today?* It teaches current engineering knowledge — how practitioners work with today's models, retrieval, tools, agents, evaluation, security and serving — and you study it alongside the numbered path, not after it. It is not a fifth depth level, and it does not come after Research.
+The numbered path builds depth: how well you understand, implement, design, diagnose and eventually research AI. Modern AI: Research, Science and Engineering is the roadmap's second dimension, and it answers a different question: *what should a capable AI engineer understand, use, evaluate and be able to build today?* It teaches current engineering knowledge — how practitioners work with today's models, retrieval, tools, agents, evaluation, security and serving — and you study it alongside the numbered path, not after it. It is not a fourth depth level. It also carries the field's open problems, which is why research lives here rather than at the end of the depth path.
 
 **How it relates to the numbered path**
 
@@ -2728,6 +2600,7 @@ Topics open as your depth grows — by prerequisite, not by calendar. A topic op
 | After steps 10 and 11 | [Adapting Models in Practice](#adapting-models-in-practice) | Recommended, and easy to postpone | Step 12 |
 | Opens after step 11 | [Securing AI Systems in Practice](#securing-ai-systems-in-practice) | Available, but deferred to step 15 | Step 16 |
 | Opens after step 11 | [Inference, Cost and Production](#inference-cost-and-production) | Required, taken with step 16 — starts the *LLM Engineer's Handbook* | Checkpoint, then step 17 |
+| After the path, at the checkpoint | [Contributing Research](#contributing-research) | Optional, and required of nobody | [Checkpoint: Ready to Contribute Research](#checkpoint-ready-to-contribute-research) |
 
 **What is current, and what lasts**
 
@@ -3795,5 +3668,129 @@ Use, with the design decisions of step 16. You can:
 At [17. Independent Judgment: Design, Diagnosis and Experiment](#17-independent-judgment-design-diagnosis-and-experiment), when you diagnose unfamiliar failures, and after each four-week review: prices and serving practice change quickly.
 
 [⬆ Back to Contents](#contents)
+
+---
+
+### Contributing Research
+
+<!-- covers: H2 -->
+<!-- practice: MP-50, MP-51, MP-52, MP-53, MP-54, MP-55, MP-56, MP-57 -->
+
+Research is not "very difficult engineering". It is the activity of answering questions whose answers are not yet known, to a standard that lets other people check them.
+
+**Opens when**
+
+After step 18, and with research literacy from [13. Reading Research Critically](#13-reading-research-critically) and the experimental capability of [17. Independent Judgment: Design, Diagnosis and Experiment](#17-independent-judgment-design-diagnosis-and-experiment) behind you. Depth in at least one area from [18. Choose Your Depth](#18-choose-your-depth) is what gives you a literature to work in, and the [Checkpoint: Ready to Contribute Research](#checkpoint-ready-to-contribute-research) is its gate.
+
+**How to take it**
+
+Optional, and required of nobody. Skipping it costs you nothing as an engineer. Take it when you want to answer a question the field has not answered, to a standard other people can check. What changes here is the question: not *which known method fits this problem?* but *what is not known, and how could it be found out defensibly?*
+
+**Return to the numbered path**
+
+Return to the [Checkpoint: Ready to Contribute Research](#checkpoint-ready-to-contribute-research), which is where this topic is taken. The numbered path ends there; this track continues alongside whatever you do next.
+
+**What to understand today**
+
+By the end you should be able to review a literature and identify a genuine gap, design and run an experiment that could have proved you wrong, and communicate the result so that others can reproduce and check it.
+
+#### Finding a question
+
+Research begins with a gap that is real rather than merely unfamiliar to you.
+
+##### Systematic literature review
+
+Covering an area methodically, so that what you take as unknown is unknown to the field and not only to you. **Studied in:** the literature of your chosen area, read with the discipline of step 13.
+
+##### Identifying a genuine gap
+
+Distinguishing an open question from an unanswered one, and from one whose answer exists in a neighbouring field. **Studied in:** the literature of your chosen area.
+
+#### Designing the test
+
+The part where a question becomes something that can be answered defensibly.
+
+##### Hypotheses that could be wrong
+
+Stating the claim so that an experiment can refute it. **Studied in:** cross-reference: step 17's experimental capability.
+
+##### Baselines and ablations
+
+Choosing comparisons that isolate the cause of an effect. **Studied in:** the methods sections of the papers you read in steps 11, 12 and 15.
+
+#### Making it checkable
+
+The difference between a result and a contribution.
+
+##### Reproducibility
+
+Seeds, environments, data and code, so the result survives leaving your machine. **Studied in:** cross-reference: step 6's reproducibility practice.
+
+##### Statistical reasoning and interpretation
+
+Reporting uncertainty and interpreting within what the evidence supports. **Studied in:** cross-reference: steps 4 and 12.
+
+#### Communicating and reviewing
+
+Knowledge that others cannot check is not yet a contribution.
+
+##### Scientific writing
+
+Writing so that a reader can follow the argument and find the weakness. **Studied in:** the papers of your area, read as models of the form.
+
+##### Peer review
+
+Reviewing others' work with the checks of step 13, and reading reviews of your own. **Studied in:** cross-reference: step 13.
+
+**How these ideas connect**
+
+A contribution is a chain, and it is only as strong as its weakest link: a literature review that finds the real gap, a hypothesis sharp enough to be wrong, an experiment with baselines and ablations that isolate the claimed cause, reproducibility so the result survives leaving your machine, statistics that support the strength of the claim (step 4, step 12), and writing that lets a reader check rather than admire. Peer review is the same chain applied to someone else's work.
+
+**Where this fits in AI**
+
+Research is not the end of the depth path; it is the part of this track where the field has no answer yet. The three depth levels teach knowledge whose science is established, and this track carries both what practitioners do now and what nobody has settled. Its value to a non-researcher is indirect but real — knowing how knowledge is actually produced is what makes the claims arriving every week readable.
+
+**Study**
+
+No resources are assigned. The literature of your chosen area is the material, read with the discipline of step 13.
+
+**Open problems to study**
+
+These are studied as open problems, not settled knowledge:
+
+| Open problem | Status |
+| --- | --- |
+| Mechanistic interpretability as assurance | Contested |
+| Alignment, scalable oversight, evaluation awareness | Contested |
+| Generalization and scaling theory | Active research |
+| Continual learning, model editing, verifiable unlearning | Active research / contested |
+| World models, latent and recursive reasoning | Speculative / active research |
+| Discrete diffusion language models | Speculative |
+| Validity of long-horizon agent evaluation | Active research |
+| Neural theorem proving and automated discovery | Active research |
+
+Do not treat a frontier area as required because it is exciting.
+
+**Practise and build**
+
+Carry out one piece of research from question to write-up: find a gap, state a hypothesis, test it with baselines and ablations, and write it up so that others can check it.
+
+**How deeply to know it now**
+
+Research. You can:
+
+- review a literature and identify a genuine gap;
+- design, run and interpret an experiment that could have proved you wrong;
+- communicate a result so that others can reproduce and check it.
+
+**What lasts and what changes**
+
+- **Lasting:** how a claim is established — literature review, a falsifiable hypothesis, baselines and ablations, reproducibility, honest statistics, writing a reader can check. Taught in [13. Reading Research Critically](#13-reading-research-critically), [12. Evaluation Science](#12-evaluation-science) and [17. Independent Judgment: Design, Diagnosis and Experiment](#17-independent-judgment-design-diagnosis-and-experiment). These do not change with the models.
+- **Current convention:** which venues and preprint norms apply, and what counts as an adequate replication package.
+- **Likely to change:** every open problem in the table above. That is what makes them open.
+
+**When to revisit**
+
+After each four-week review, which is where a frontier moves — a question is resolved, is reframed, or turns out to have been the wrong question.
 
 </div>

@@ -90,7 +90,7 @@ class Guide:
     preamble: list[Block]
     intro: GuideStep
     parts: list[GuidePart]
-    modern: GuidePart | None = None  # Modern AI Engineering: a parallel curriculum of topics
+    modern: GuidePart | None = None  # Modern AI: Research, Science and Engineering: a parallel curriculum of topics
     _openings: dict[str, tuple[list[int], int | None]] = field(default_factory=dict)
 
     @property
@@ -401,6 +401,20 @@ def read_specification(roadmap: MarkdownDocument, cfg: dict, stages: list[str], 
                 phases[pid].append(item)
                 needs = opens + (BLOCK_ID.findall(later.group(2)) if later else [])
                 order += [(n, item, f"{pid} opens after {n}") for n in needs]
+    # The track also carries a research dimension whose paths are stated in a table, the way
+    # Mastery states its capabilities. Register them so the guide may cover them.
+    research_blocks = list(roadmap.section_blocks(th))
+    for sub in roadmap.subheadings(th, 3):
+        research_blocks += list(roadmap.section_blocks(sub))
+    for b in research_blocks:
+        if b.type != "table":
+            continue
+        for row in table_cells(roadmap, b):
+            m = ROW_ID.match(inline_text(row[0]).strip())
+            if m and m.group(1) not in items:
+                items[m.group(1)] = strip_number(inline_text(row[0]).strip()[len(m.group(1)):].lstrip(". "))
+                stage_of[m.group(1)] = track
+
     anywhere: list[str] = []
     practice_rows: list[tuple[str, list[str]]] = []
     practice = _table_after_label(roadmap, th, cfg["track_resources_label"])
@@ -590,7 +604,7 @@ def check_reading_plan(report: ValidationReport, guide: Guide, spec: Specificati
                  "; ".join(problems[:6]))
 
 
-# ----- one Depth path, and Modern AI Engineering as a parallel curriculum of topics -------------------
+# ----- one Depth path, and Modern AI: Research, Science and Engineering as a parallel curriculum of topics -------------------
 
 
 def section_links(doc: MarkdownDocument, blocks: list[Block]) -> list[str]:
@@ -611,7 +625,7 @@ def check_learner_structure(report: ValidationReport, guide: Guide, spec: Specif
     first = next((i for i, (a, b) in enumerate(zip(actual, expected)) if a != b), min(len(actual), len(expected)))
     report.check(actual == expected, "the Depth path is the accepted sequence of steps and checkpoints",
                  f"differs from the expected sequence at position {first}")
-    report.check("<!-- modern:" not in doc.source, "no per-step Modern AI Engineering markers in the guide",
+    report.check("<!-- modern:" not in doc.source, "no per-step Modern AI: Research, Science and Engineering markers in the guide",
                  "found <!-- modern: --> markers")
 
     topics = guide.stages
@@ -622,8 +636,12 @@ def check_learner_structure(report: ValidationReport, guide: Guide, spec: Specif
         problems.append(f"topics cover phases {phases_covered}, not {sorted(spec.phases)}")
     for s in topics:
         own = {spec.phase_of(c) for c in s.covers}
-        if None in own or len(own) != 1:
-            problems.append(f"'{s.title}' must cover capabilities of exactly one §7 phase: {s.covers}")
+        track_stage = next((spec.stage_of[i] for ids in spec.phases.values() for i in ids), None)
+        research = bool(s.covers) and all(spec.phase_of(c) is None and spec.stage_of.get(c) == track_stage
+                                          for c in s.covers)
+        if not research and (None in own or len(own) != 1):
+            problems.append(f"'{s.title}' must cover capabilities of exactly one §6 phase, or the "
+                            f"track's research dimension: {s.covers}")
     numbered = [s.heading.text for s in topics if re.match(r"^\d", s.heading.text)]
     if numbered:
         problems.append(f"topics are numbered like Depth steps: {numbered}")
@@ -634,7 +652,7 @@ def check_learner_structure(report: ValidationReport, guide: Guide, spec: Specif
     leaked = [s.heading.text for s in seq if any(spec.phase_of(c) for c in s.covers)]
     if leaked:
         problems.append(f"Depth steps deliver Modern capabilities: {leaked}")
-    report.check(not problems, "Modern AI Engineering is a parallel curriculum of topics covering every §7 phase",
+    report.check(not problems, "Modern AI: Research, Science and Engineering is a parallel curriculum of topics covering every §7 phase",
                  "; ".join(problems[:6]))
 
     # Each topic is substantive knowledge, not a pointer back to the Depth path or a project brief.
@@ -704,7 +722,7 @@ def check_learner_structure(report: ValidationReport, guide: Guide, spec: Specif
     allowed_titles = {e.key for e in spec.reading_plan} | {k for _, keys in spec.practice_rows for k in keys}
     foreign = [t for t in titles if not any(a.startswith(t) or t.startswith(a) for a in allowed_titles)
                and "?" not in t]
-    report.check(not foreign, "Modern AI Engineering names only resources Baseline 2 assigns (or consults a register reference)",
+    report.check(not foreign, "Modern AI: Research, Science and Engineering names only resources Baseline 3 assigns (or consults a register reference)",
                  f"unassigned: {foreign}")
 
     counts = {}

@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | **Date** | 2026-09-19 |
-| **Produces** | [LEARNING-GUIDE.md](../LEARNING-GUIDE.md); the reading plan and resource changes accepted as Baseline 2 ([ROADMAP.md §16](../ROADMAP.md#16-maintenance-status)) |
+| **Produces** | [LEARNING-GUIDE.md](../LEARNING-GUIDE.md); the reading plan and resource changes accepted as Baseline 2 ([ROADMAP.md §16](../ROADMAP.md#15-maintenance-status)) |
 | **Revised** | 2026-09-19, final acceptance correction: reading plan (coherent books read whole) and an accurate governance record ([6](#6-governance-record)). 2026-09-19, Model C: a 19-step depth path and Modern AI Engineering as its own sequence ([9](#9-model-c-depth-path-and-modern-ai-engineering)). 2026-09-19, final correction: Modern AI Engineering restored as a substantive parallel curriculum, with learner-facing provenance ([10](#10-modern-ai-engineering-restored-as-a-parallel-curriculum)). 2026-09-20, learner-experience reconciliation: context and concepts before resources, a visible statistics progression, resource hierarchy, and an evolving mental model ([11](#11-learner-experience-reconciliation)) |
 | **Inputs** | [ROADMAP.md](../ROADMAP.md) (Baseline 1, now Baseline 2); [history/roadmap-baseline-v0.md](../history/roadmap-baseline-v0.md); [curriculum proposal](curriculum-proposal.md); [resource coverage audit](../research/2026-09-18-resource-coverage-audit.md); [targeted resource research](../research/2026-09-18-targeted-resource-research.md); [independence audit](../research/2026-09-18-project-wide-independence-audit.md) |
 | **Question** | What is the simplest single learning path that faithfully delivers the accepted curriculum, does each resource sit where its teaching function belongs, and how should each be read? |

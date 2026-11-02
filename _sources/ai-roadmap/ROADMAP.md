@@ -4,16 +4,16 @@
 
 | | |
 | --- | --- |
-| **Baseline** | **2** |
-| **Accepted** | 2026-09-19 |
+| **Baseline** | **3** |
+| **Accepted** | 2026-11-02 |
 | **Scope** | The Data & Intelligence side of AI Engineering: knowledge primarily needed to understand and build intelligent and data-driven systems |
-| **Supersedes** | Baseline 1, preserved verbatim at [history/roadmap-baseline-1.md](history/roadmap-baseline-1.md); Baseline v0 at [history/roadmap-baseline-v0.md](history/roadmap-baseline-v0.md) |
+| **Supersedes** | Baseline 2, preserved verbatim at [history/roadmap-baseline-2.md](history/roadmap-baseline-2.md); Baseline 1 at [history/roadmap-baseline-1.md](history/roadmap-baseline-1.md); Baseline v0 at [history/roadmap-baseline-v0.md](history/roadmap-baseline-v0.md) |
 | **Learner guide** | [LEARNING-GUIDE.md](LEARNING-GUIDE.md) presents this curriculum as one path; this file is the specification |
 | **Design record** | [design/curriculum-proposal.md](design/curriculum-proposal.md) explains why the curriculum is shaped this way; this file states what to learn |
 
 This is the canonical learning roadmap for the Data & Intelligence track of AI Engineering. It tells you what to learn, in what order, to what depth, from which assigned resource portions, and how to show you are ready to move on.
 
-General computing and software-systems knowledge belongs to a **separate, future Computer Science & Engineering roadmap**. Where this roadmap depends on that knowledge, it says so rather than teaching it — see [15](#15-boundary-with-computer-science--engineering).
+General computing and software-systems knowledge belongs to a **separate, future Computer Science & Engineering roadmap**. Where this roadmap depends on that knowledge, it says so rather than teaching it — see [14](#14-boundary-with-computer-science--engineering).
 
 ## Contents
 
@@ -45,23 +45,22 @@ General computing and software-systems knowledge belongs to a **separate, future
    - [F5 AI Systems Engineering and Operations](#f5-ai-systems-engineering-and-operations)
    - [F6 Advanced Retrieval and Ranking](#f6-advanced-retrieval-and-ranking)
 5. [Mastery](#5-mastery)
-6. [Research](#6-research)
 
 **Parallel Track and Beyond the Core**
 
-7. [Modern AI Engineering](#7-modern-ai-engineering)
-8. [Important Extensions](#8-important-extensions)
-9. [Specializations](#9-specializations)
-10. [Research Frontiers](#10-research-frontiers)
+6. [Modern AI: Research, Science and Engineering](#6-modern-ai-research-science-and-engineering)
+7. [Important Extensions](#7-important-extensions)
+8. [Specializations](#8-specializations)
+9. [Research Frontiers](#9-research-frontiers)
 
 **Practice, Progression and Reference**
 
-11. [Practice Path](#11-practice-path)
-12. [Readiness Gates](#12-readiness-gates)
-13. [Dependency Map](#13-dependency-map)
-14. [Resource Map](#14-resource-map)
-15. [Boundary With Computer Science & Engineering](#15-boundary-with-computer-science--engineering)
-16. [Maintenance Status](#16-maintenance-status)
+10. [Practice Path](#10-practice-path)
+11. [Readiness Gates](#11-readiness-gates)
+12. [Dependency Map](#12-dependency-map)
+13. [Resource Map](#13-resource-map)
+14. [Boundary With Computer Science & Engineering](#14-boundary-with-computer-science--engineering)
+15. [Maintenance Status](#15-maintenance-status)
 
 </details>
 
@@ -71,8 +70,8 @@ General computing and software-systems knowledge belongs to a **separate, future
 
 **Two structures run side by side.**
 
-- The **Depth Track** — Fundamentals → Advanced → Mastery → Research — builds increasing depth of understanding and judgment.
-- **Modern AI Engineering** is a **parallel track**, not a fifth stage. It keeps your practice current and opens in phases as prerequisites are met.
+- The **Depth Track** — Fundamentals → Advanced → Mastery — builds increasing depth of understanding and judgment in knowledge whose science is established.
+- **Modern AI: Research, Science and Engineering** is a **parallel track**, not a fourth stage. It keeps your practice current, carries the field's open problems, and opens in phases as prerequisites are met.
 
 **Required, extension and specialization.**
 
@@ -94,7 +93,7 @@ General computing and software-systems knowledge belongs to a **separate, future
 | **Design** | independently design systems or approaches with it |
 | **Research** | investigate unresolved questions |
 
-**Coverage and reading are different.** Each block names the chapters, sections, papers or exercises that give it its capabilities — its **coverage**. Each portion has one home block, for traceability; other blocks cross-reference it without adding reading. **How** a resource is read is set by the reading plan in [14](#14-resource-map). A coherent core book is read whole, in its own order, from the point where it enters the path — so some of its chapters give early exposure to capabilities that are mastered later. **Earlier exposure is not later mastery.** Large reference textbooks, papers, standards and specialization material are read in the portions named.
+**Coverage and reading are different.** Each block names the chapters, sections, papers or exercises that give it its capabilities — its **coverage**. Each portion has one home block, for traceability; other blocks cross-reference it without adding reading. **How** a resource is read is set by the reading plan in [13](#13-resource-map). A coherent core book is read whole, in its own order, from the point where it enters the path — so some of its chapters give early exposure to capabilities that are mastered later. **Earlier exposure is not later mastery.** Large reference textbooks, papers, standards and specialization material are read in the portions named.
 
 **Resource roles.**
 
@@ -130,16 +129,15 @@ General computing and software-systems knowledge belongs to a **separate, future
 flowchart TB
     subgraph DEPTH["DEPTH"]
         direction LR
-        F["Fundamentals"] --> A["Advanced"] --> M["Mastery"] --> R["Research"]
+        F["Fundamentals"] --> A["Advanced"] --> M["Mastery"]
     end
-    MAE["Modern AI Engineering<br/>(parallel track)"]
+    MAE["Modern AI: Research, Science and Engineering<br/>(parallel track)"]
     DEPTH <--> MAE
 ```
 
 - **Fundamentals** — nine blocks: E1–E5 and E7–E10.
 - **Advanced** — six blocks: F1–F6.
 - **Mastery** — three universal capabilities plus selective depth.
-- **Research** — universal research literacy plus an optional contribution path.
 
 > ⚠️ Block IDs are stable. **E6 was retired** before Baseline 1; its necessary language concepts are taught inside E4, E5 and E7. The gap in numbering is deliberate, not missing content.
 
@@ -207,7 +205,7 @@ A model's measured quality holds only while the world that produced its data sta
 | **Practice** | Exercises; then an investigation — report what an unfamiliar dataset contains, what is wrong with it, and what it can and cannot support |
 | **Readiness** | *Implement* a non-trivial aggregation and window query; *diagnose* a data-quality problem from evidence; *justify* a cleaning decision and its effect on conclusions |
 
-*Practical SQL* is read whole ([14](#14-resource-map)), so its schema-design, transaction and database-maintenance chapters are read here as exposure. Mastering them is not required here; they belong to the CS&E roadmap.
+*Practical SQL* is read whole ([13](#13-resource-map)), so its schema-design, transaction and database-maintenance chapters are read here as exposure. Mastering them is not required here; they belong to the CS&E roadmap.
 
 ### E2. Mathematics for Learning Systems
 
@@ -281,7 +279,7 @@ Running and analysing online experiments independently is **Optional Depth** (th
 | **Learn** | The retrieval problem; lexical retrieval and why it stays competitive; dense retrieval; late-interaction retrieval (conceptual); hybrid retrieval and two-stage reranking; IR evaluation including ranking metrics — MAP, nDCG, MRR; approximate nearest-neighbour indexing and the recall–latency trade-off; chunking and document preparation |
 | **Required depth** | **Understand**; **Implement** a hybrid retriever and its evaluation |
 | **Prerequisites** | E5 (embeddings); E3 (statistical and evaluation foundation). Relevant E10 concepts may be studied concurrently — E10 is not a prerequisite |
-| **Assigned resources** | *Speech and Language Processing* — Primary: ch 11 · Planned learner material: ranking-metrics note · **Conditional:** *Natural Language Processing in Action* §10.3.2–10.3.6 for ANN index choice and vector quantization — see [14](#14-resource-map) |
+| **Assigned resources** | *Speech and Language Processing* — Primary: ch 11 · Planned learner material: ranking-metrics note · **Conditional:** *Natural Language Processing in Action* §10.3.2–10.3.6 for ANN index choice and vector quantization — see [13](#13-resource-map) |
 | **Practice** | Build a retriever, measure it with ranking metrics, and show that changing retrieval changes end-to-end quality |
 | **Readiness** | *Explain* why retrieval quality bounds answer quality; *compare* lexical and dense retrieval on one corpus; *evaluate* a ranker with appropriate metrics; *explain* the recall–latency trade-off of an ANN index; *diagnose* whether a wrong answer came from retrieval or generation |
 
@@ -321,7 +319,7 @@ Running and analysing online experiments independently is **Optional Depth** (th
 
 > ⚠️ Advanced blocks do not all depend on one another.
 >
-> F1 is **not** a hard prerequisite of any other Advanced block. Check each block's prerequisites and the [Dependency Map](#13-dependency-map).
+> F1 is **not** a hard prerequisite of any other Advanced block. Check each block's prerequisites and the [Dependency Map](#12-dependency-map).
 
 ### F1. Foundation Model Lifecycle
 
@@ -358,12 +356,12 @@ Running and analysing online experiments independently is **Optional Depth** (th
 | Verification and generate-and-verify | **Design** | — |
 | Failure decomposition across components | **Design** | Mastery G2 |
 | Release judgment for compound systems (framing strand) | **Design** | F5 |
-| Context budget and management — finite and non-uniform context, measuring its effects, choosing what enters it, retrieval, selection and compaction, diagnosing context failures | **Understand → Implement** | Modern AI Engineering; G4; SP6 |
+| Context budget and management — finite and non-uniform context, measuring its effects, choosing what enters it, retrieval, selection and compaction, diagnosing context failures | **Understand → Implement** | Modern AI: Research, Science and Engineering; G4; SP6 |
 | Human checkpoints and approval gates | Understand | EX9 |
 | Trajectory evaluation | Understand + Use | F3; RF7 |
 | Multi-agent orchestration, and the evidence that it is not a default | Understand | SP6 |
-| Agent memory architectures | Understand | SP6; Modern AI Engineering |
-| Tool and agent interoperability standards | Understand (concept) | Modern AI Engineering |
+| Agent memory architectures | Understand | SP6; Modern AI: Research, Science and Engineering |
+| Tool and agent interoperability standards | Understand (concept) | Modern AI: Research, Science and Engineering |
 
 ### F3. Evaluation Science
 
@@ -411,7 +409,7 @@ Fitting generalizability-theory or random-effects models is **Optional Depth** (
 | **Learn** | Reranking architectures; learned sparse retrieval; late interaction beyond the concept; query understanding and rewriting; iterative and agentic search loops; system-level retrieval evaluation; when graph-structured retrieval helps; document parsing as an upstream bottleneck |
 | **Required depth** | **Understand**; **Implement** reranking |
 | **Prerequisites** | E8, F3 |
-| **Assigned resources** | No dedicated resource has been assigned yet. Cross-references, no extra reading: *Speech and Language Processing* ch 11 (E8), *AI Engineering* "Retrieval Optimization" (F2), and *Hands-On Large Language Models* ch 8 — reranking, advanced RAG, RAG evaluation ([7](#7-modern-ai-engineering), Phase 2) |
+| **Assigned resources** | No dedicated resource has been assigned yet. Cross-references, no extra reading: *Speech and Language Processing* ch 11 (E8), *AI Engineering* "Retrieval Optimization" (F2), and *Hands-On Large Language Models* ch 8 — reranking, advanced RAG, RAG evaluation ([6](#6-modern-ai-research-science-and-engineering), Phase 2) |
 | **Practice** | Investigation: measure where a retrieval pipeline loses quality and fix the largest loss |
 | **Readiness** | *Compare* retrieval architectures on evidence; *diagnose* the stage responsible for a retrieval failure; *justify* rejecting a fashionable upgrade on measurement |
 
@@ -438,22 +436,7 @@ G1–G3 are universal at Mastery. G4 is selective by design.
 
 ---
 
-## 6. Research
-
-| Path | Status | You can |
-| --- | --- | --- |
-| **H1. Research Literacy** | **Universal**, taught at Advanced | Locate the primary source behind a claim; distinguish established knowledge, current practice, active research and speculation; check for baselines, ablations and variance; recognize contamination, leakage and selective reporting; hold contested questions as contested |
-| **H2. Research Contribution** | **Optional** | Review literature systematically; identify gaps; form hypotheses; design experiments with baselines and ablations; ensure reproducibility; reason statistically; interpret; write scientifically; take part in peer review |
-
-**Prerequisites.** H1: E3, E10, F3. H2: H1, G3 and specialization depth.
-
-> ⚠️ Research depth is not required of every learner.
-
-[⬆ Back to Contents](#contents)
-
----
-
-## 7. Modern AI Engineering
+## 6. Modern AI: Research, Science and Engineering
 
 The parallel track answers: *what should a capable AI engineer understand and be able to build today?* It opens in phases as prerequisites are met — not by calendar.
 
@@ -466,13 +449,13 @@ The parallel track answers: *what should a capable AI engineer understand and be
 
 **Early access is not early mastery.** Phase 1 may start before E3 is complete. You may prototype early; you may not claim that one prompt beats another, tune a pipeline on measurements, or ship an evaluation harness until E3 and E10 are in place.
 
-**Where you practise.** The track's hands-on resources, and the portions each phase draws on. They teach current tools, which change faster than the Depth Track; the 4-week scan reviews them. *Hands-On Large Language Models* is read whole from Phase 1 and *LLM Engineer's Handbook* whole from Phase 3 ([14](#14-resource-map)); later phases return to the portions named.
+**Where you practise.** The track's hands-on resources, and the portions each phase draws on. They teach current tools, which change faster than the Depth Track; the 4-week scan reviews them. *Hands-On Large Language Models* is read whole from Phase 1 and *LLM Engineer's Handbook* whole from Phase 3 ([13](#13-resource-map)); later phases return to the portions named.
 
 | Phase | Resource | Assigned portions |
 | --- | --- | --- |
 | **Phase 1 — First Contact** | *Hands-On Large Language Models* | Ch 2 (tokens and embeddings), ch 6 (prompt engineering), ch 7 (advanced text generation techniques and tools) |
 | **Phase 2 — Grounded Systems** | *Hands-On Large Language Models* | Ch 8 (semantic search and retrieval-augmented generation) |
-| **Phase 3 — Compound Systems** | Current engineering guides — Modern Practice, not counted in [14](#14-resource-map) | Anthropic "Building effective agents", "Effective context engineering for AI agents", "Writing effective tools for agents" and "Demystifying evals for AI agents" |
+| **Phase 3 — Compound Systems** | Current engineering guides — Modern Practice, not counted in [13](#13-resource-map) | Anthropic "Building effective agents", "Effective context engineering for AI agents", "Writing effective tools for agents" and "Demystifying evals for AI agents" |
 | **Phase 3 — production operation** | *LLM Engineer's Handbook* | Ch 1 (system architecture), chs 9–11 (RAG inference pipeline, deployment, MLOps and LLMOps) and the appendix — read for the architecture; reproducing it on its commercial cloud stack is optional |
 | **Phase 3 — adaptation practice, after F1** | *Hands-On Large Language Models* | Ch 12 (fine-tuning generation models) |
 
@@ -492,11 +475,30 @@ The parallel track answers: *what should a capable AI engineer understand and be
 >
 > A current-practice item enters the Depth Track only through the promotion process in [AGENTS.md](AGENTS.md#promotion-into-the-permanent-curriculum).
 
+### The research dimension
+
+The track carries the field's open questions as well as its current practice. Research is not a
+depth level: it is the part of this track where the answer is not yet known.
+
+| Path | Status | You can |
+| --- | --- | --- |
+| **H1. Research Literacy** | **Universal**, taught at Advanced | Locate the primary source behind a claim; distinguish established knowledge, current practice, active research and speculation; check for baselines, ablations and variance; recognize contamination, leakage and selective reporting; hold contested questions as contested |
+| **H2. Research Contribution** | **Optional** | Review literature systematically; identify gaps; form hypotheses; design experiments with baselines and ablations; ensure reproducibility; reason statistically; interpret; write scientifically; take part in peer review |
+
+**Prerequisites.** H1: E3, E10, F3. H2: H1, G3 and selective depth from [8](#8-specializations) or deeper core work.
+
+The open problems themselves are listed in [9](#9-research-frontiers). They are studied as open
+problems and are never required because they are exciting.
+
+> ⚠️ Research contribution is not required of every learner.
+
+[⬆ Back to Contents](#contents)
+
 [⬆ Back to Contents](#contents)
 
 ---
 
-## 8. Important Extensions
+## 7. Important Extensions
 
 Broadly valuable; not required before normal progression.
 
@@ -516,7 +518,7 @@ Broadly valuable; not required before normal progression.
 
 ---
 
-## 9. Specializations
+## 8. Specializations
 
 | ID | Specialization | Note |
 | --- | --- | --- |
@@ -535,9 +537,9 @@ Broadly valuable; not required before normal progression.
 
 ---
 
-## 10. Research Frontiers
+## 9. Research Frontiers
 
-Studied as open problems, not as settled knowledge.
+The open problems of [6](#6-modern-ai-research-science-and-engineering). Studied as open problems, not as settled knowledge.
 
 | ID | Frontier | Status |
 | --- | --- | --- |
@@ -556,7 +558,7 @@ Studied as open problems, not as settled knowledge.
 
 ---
 
-## 11. Practice Path
+## 10. Practice Path
 
 **In this section:** [Practice forms](#practice-forms) · [One evolving system](#one-evolving-system) · [Planned learner materials](#planned-learner-materials)
 
@@ -617,7 +619,7 @@ Where no adequate teaching resource was found, the curriculum provides its own s
 
 ---
 
-## 12. Readiness Gates
+## 11. Readiness Gates
 
 Competency-based. The per-block criteria in [3](#3-fundamentals) and [4](#4-advanced) add up to these gates.
 
@@ -643,7 +645,7 @@ Competency-based. The per-block criteria in [3](#3-fundamentals) and [4](#4-adva
 - *evaluate* a serving cost-versus-quality trade-off quantitatively;
 - *decide* release and rollback from imperfect evidence and *explain* the decision to a non-specialist.
 
-**Entering Research contribution.** You can *evaluate* a published claim against its own evidence; *design* an experiment that could falsify your own hypothesis; *identify* a genuine gap; *communicate* a result so that others can check it.
+**Entering Research contribution.** This gate opens the research dimension of [6](#6-modern-ai-research-science-and-engineering), not a depth level. You can *evaluate* a published claim against its own evidence; *design* an experiment that could falsify your own hypothesis; *identify* a genuine gap; *communicate* a result so that others can check it.
 
 > ⚠️ No gate is passed by finishing a book.
 
@@ -651,7 +653,7 @@ Competency-based. The per-block criteria in [3](#3-fundamentals) and [4](#4-adva
 
 ---
 
-## 13. Dependency Map
+## 12. Dependency Map
 
 Solid arrows are hard prerequisites. Dotted arrows are recommended orderings only.
 
@@ -705,7 +707,7 @@ flowchart TD
 
 ---
 
-## 14. Resource Map
+## 13. Resource Map
 
 **32 source resources are mandatory.** The table below maps each to the portions that give each block its capabilities (coverage). The **reading plan** that follows says how each is read: coherent core books whole and in order, the rest in the portions named. Cross-references elsewhere in this roadmap add no reading.
 
@@ -749,8 +751,8 @@ flowchart TD
 | [AgentDojo](https://arxiv.org/abs/2406.13352) | Practice | One lab (F4) | Free |
 | [*How To Scale Your Model*, inference chapter](https://jax-ml.github.io/scaling-book/inference/) | Selected Sections | §§1, 2, 4 and problems 1–3 (F5) | Free |
 | [Moslem and Kelleher, routing and cascading survey](https://arxiv.org/abs/2603.04445) | Selected Sections | §§1–3 and cascades (F5) | Free |
-| [*Hands-On Large Language Models*](https://github.com/HandsOnLLM/Hands-On-Large-Language-Models) (Alammar, Grootendorst) | Selected Sections | Chs 2, 6, 7 (Modern AI Engineering, Phase 1) · ch 8 (Phase 2) · ch 12 (Phase 3 adaptation practice) | Paid; notebooks free |
-| [*LLM Engineer's Handbook*](https://github.com/PacktPublishing/LLM-Engineers-Handbook) (Iusztin, Labonne) | Selected Sections | Ch 1, chs 9–11 and the appendix (Modern AI Engineering, Phase 3 production operation) | Paid; code free |
+| [*Hands-On Large Language Models*](https://github.com/HandsOnLLM/Hands-On-Large-Language-Models) (Alammar, Grootendorst) | Selected Sections | Chs 2, 6, 7 (Modern AI: Research, Science and Engineering, Phase 1) · ch 8 (Phase 2) · ch 12 (Phase 3 adaptation practice) | Paid; notebooks free |
+| [*LLM Engineer's Handbook*](https://github.com/PacktPublishing/LLM-Engineers-Handbook) (Iusztin, Labonne) | Selected Sections | Ch 1, chs 9–11 and the appendix (Modern AI: Research, Science and Engineering, Phase 3 production operation) | Paid; code free |
 
 **Reading plan.** How each mandatory resource is read. "Begins" is where a complete book enters the path; its later portions are met as the learner reads on, and later blocks return to them.
 
@@ -798,7 +800,7 @@ Full evidence for every assignment, including verification tiers and URLs, is in
 
 ---
 
-## 15. Boundary With Computer Science & Engineering
+## 14. Boundary With Computer Science & Engineering
 
 The test: *is this primarily needed to understand and build intelligent and data-driven systems, or computing systems in general?*
 
@@ -820,25 +822,25 @@ Where this roadmap depends on CS&E knowledge, it **declares it as a prerequisite
 
 ---
 
-## 16. Maintenance Status
+## 15. Maintenance Status
 
 | | |
 | --- | --- |
-| **Current baseline** | **Baseline 2**, accepted 2026-09-19 |
-| **Previous baselines** | Baseline 1 (accepted 2026-09-18), preserved at [history/roadmap-baseline-1.md](history/roadmap-baseline-1.md); Baseline v0 at [history/roadmap-baseline-v0.md](history/roadmap-baseline-v0.md) |
+| **Current baseline** | **Baseline 3**, accepted 2026-11-02 |
+| **Previous baselines** | Baseline 2 (accepted 2026-09-19), preserved at [history/roadmap-baseline-2.md](history/roadmap-baseline-2.md); Baseline 1 (accepted 2026-09-18) at [history/roadmap-baseline-1.md](history/roadmap-baseline-1.md); Baseline v0 at [history/roadmap-baseline-v0.md](history/roadmap-baseline-v0.md) |
 | **Design record** | [design/curriculum-proposal.md](design/curriculum-proposal.md) (revision 4); [design/learner-guide.md](design/learner-guide.md) (learner guide and resource reconciliation) |
 | **Evidence** | [Landscape](research/2026-09-17-data-intelligence-landscape.md) · [Comparison](research/2026-09-17-roadmap-comparison.md) · [Resource coverage audit](research/2026-09-18-resource-coverage-audit.md) · [Targeted resource research](research/2026-09-18-targeted-resource-research.md) · [Independent capability reconstruction](research/2026-09-18-independent-capability-reconstruction.md) · [Independence audit](research/2026-09-18-project-wide-independence-audit.md) |
 | **Review cadence** | A 4-week Modern AI Scan to observe and a 12-week Curriculum Review to decide, as defined in [AGENTS.md](AGENTS.md) and carried out through [MAINTENANCE.md](MAINTENANCE.md) |
 
-**Changes from Baseline 1.** Recorded in full in [design/learner-guide.md](design/learner-guide.md).
+**Changes from Baseline 2.** Owner-directed, 2026-11-02. Recorded in [design/baseline-3-three-levels.md](design/baseline-3-three-levels.md).
 
-- **Parallel-track resources.** *Hands-On Large Language Models* (previously Optional Depth) and *LLM Engineer's Handbook* (previously Reference) carry the hands-on portions of Modern AI Engineering ([7](#7-modern-ai-engineering)), which had no assigned teaching resource; the [independence audit](research/2026-09-18-project-wide-independence-audit.md) had recommended keeping *Hands-On Large Language Models* ch 8 as the code-level retrieval-augmented source. These assignments were proposed during learner-guide reconciliation on 2026-09-19. They were written into this file before approval and described there as owner-directed, which was not accurate. The owner explicitly approved them in the final acceptance correction on 2026-09-19.
-- **Reading plan.** Coherent core books are read whole and in order from where they enter the path; per-block portions remain as coverage. Approved by the owner on 2026-09-19.
-- **Status wording.** The review-cadence row now points to [MAINTENANCE.md](MAINTENANCE.md).
+- **The Depth Track has three levels, not four.** Fundamentals → Advanced → Mastery. Research is no longer a level of the depth path, because the science the depth path teaches is established and its questions are closed. The old §6 was removed and the later sections renumbered.
+- **The parallel track is renamed** from *Modern AI Engineering* to **Modern AI: Research, Science and Engineering**, and it now carries the research dimension: research literacy (H1, still taught at Advanced), optional research contribution (H2) and the open problems in [9](#9-research-frontiers).
+- **Nothing else changed.** No block, capability, required depth, prerequisite, assigned resource or page range was altered. The Knowledge Depth ladder still ends at Research, because that is a depth a block may require, not a stage of the path. Mastery keeps G1–G4. The nine track topics and their opening points are unchanged.
 
-No capability, required depth, prerequisite or block order changed. The mandatory reading burden changed substantially, which [MAINTENANCE.md](MAINTENANCE.md#6-human-approval-boundary) classifies as significant, so this is a new baseline. Baseline 1 is preserved exactly as accepted on 2026-09-18; the intermediate, unapproved edit was never an accepted baseline.
+Removing a level and renaming a track are significant changes to this file, which [MAINTENANCE.md](MAINTENANCE.md#6-human-approval-boundary) places on the human-approval side, so this is a new baseline. Baseline 2 is preserved exactly as accepted on 2026-09-19.
 
-**Known items carried into maintenance.** None blocks use of Baseline 2.
+**Known items carried into maintenance.** None blocks use of Baseline 3.
 
 - The eleven planned learner materials ([11](#planned-learner-materials)) are produced progressively.
 - F6 has no dedicated assigned resource yet.

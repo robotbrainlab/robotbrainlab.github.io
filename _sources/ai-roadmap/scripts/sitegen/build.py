@@ -406,9 +406,16 @@ class SiteBuilder:
         seq = self.guide.sequence
         if not required:
             return "From the start"
-        text = f"After step {seq[max(required)].number}"
-        if best is not None and best > max(required):
-            text += f" · best at step {seq[best].number}"
+        def numbered(i: int) -> str:
+            # A topic may open at a checkpoint, which carries no number of its own;
+            # name the last numbered step at or before it.
+            while i >= 0 and not seq[i].number:
+                i -= 1
+            return seq[i].number if i >= 0 else ""
+        after = numbered(max(required))
+        text = f"After step {after}" if after else "From the start"
+        if best is not None and best > max(required) and numbered(best):
+            text += f" · best at step {numbered(best)}"
         return text
 
     def stage_models(self, page_rel: str) -> list[dict]:
@@ -416,7 +423,7 @@ class SiteBuilder:
                  "lead": self.lead_html(page_rel, st), "opens": self.opens_text(st)} for st in self.guide.stages]
 
     def build_modern(self) -> Page:
-        """The Modern AI Engineering overview: what it is, how it relates to depth, when topics open."""
+        """The Modern AI: Research, Science and Engineering overview: what it is, how it relates to depth, when topics open."""
         page_rel = self.modern_page
         g = self.guide_source
         m = self.guide.modern
@@ -608,6 +615,7 @@ class SiteBuilder:
             intro=self.blocks_html(g, page_rel, self.guide.intro.blocks, guide=True),
             parts=parts,
             modern_title=self.guide.modern.heading.text,
+            modern_short=self.guide.modern.heading.text.split(":")[0].strip(),
             modern_slug=self.guide.modern.slug,
             modern_href=rel_url(page_rel, self.modern_page),
             modern_lead=self.modern_lead(page_rel),
@@ -645,7 +653,7 @@ class SiteBuilder:
         return entries
 
     def modern_lead(self, page_rel: str) -> Markup:
-        """The first paragraph of the Modern AI Engineering section: what it is."""
+        """The first paragraph of the Modern AI: Research, Science and Engineering section: what it is."""
         lead = self.guide_source.doc.first_plain_paragraph(self.guide.modern.intro)
         return self.blocks_html(self.guide_source, page_rel, [lead]) if lead else Markup("")
 
@@ -682,6 +690,7 @@ class SiteBuilder:
             "depth_label": self.config["guide"]["depth_track_label"],
             "dimensions": self.dimensions_html(page_rel),
             "modern_title": self.guide.modern.heading.text,
+            "modern_short": self.guide.modern.heading.text.split(":")[0].strip(),
             "modern_href": rel_url(page_rel, self.modern_page),
             "modern_lead": self.modern_lead(page_rel),
             "topics": self.stage_models(page_rel),

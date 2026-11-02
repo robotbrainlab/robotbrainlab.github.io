@@ -16,12 +16,12 @@ This file is the repository's constitution. The step-by-step maintenance procedu
 1. [Purpose](#purpose)
 2. [Core Principle](#core-principle)
 3. [Canonical Truth Hierarchy](#canonical-truth-hierarchy)
-4. [The Four Depth Levels](#the-four-depth-levels)
+4. [The Four Depth Levels](#the-three-depth-levels)
    - [Fundamentals](#fundamentals)
    - [Advanced](#advanced)
    - [Mastery](#mastery)
-   - [Research](#research)
-5. [Modern AI Engineering](#modern-ai-engineering)
+   - [Research](#modern-ai-research-science-and-engineering)
+5. [Modern AI: Research, Science and Engineering](#modern-ai-research-science-and-engineering)
 6. [Modern Does Not Mean Important](#modern-does-not-mean-important)
 
 **Classifying Topics**
@@ -94,20 +94,19 @@ This repository maintains a rigorous, continuously updated learning roadmap for 
 
 The roadmap has two complementary structures:
 
-1. **Depth Track** — Fundamentals, Advanced, Mastery, Research.
-2. **Modern AI Engineering Track** — a parallel, continuously maintained track representing important contemporary AI engineering knowledge and practice.
+1. **Depth Track** — Fundamentals, Advanced, Mastery. It teaches knowledge whose science is established.
+2. **Modern AI: Research, Science and Engineering** — a parallel, continuously maintained track carrying contemporary AI engineering knowledge and practice, and the field's open problems.
 
 ```mermaid
 flowchart TB
     subgraph DEPTH["Depth Track"]
         direction LR
-        F["Fundamentals"] --> A["Advanced"] --> M["Mastery"] --> R["Research"]
+        F["Fundamentals"] --> A["Advanced"] --> M["Mastery"]
     end
-    MAE["⚡ Modern AI Engineering Track"]
+    MAE["⚡ Modern AI: Research, Science and Engineering"]
     F <-.-> MAE
     A <-.-> MAE
     M <-.-> MAE
-    R <-.-> MAE
 ```
 
 The goal is to develop both:
@@ -159,6 +158,7 @@ flowchart TD
 | **Evidence** | `research/` | What was found, when, and how confidently |
 | **Design reasoning** | `design/` | Why curriculum and presentation decisions were made |
 | **Maintenance record** | `reviews/` | Scans, curriculum reviews and maintenance state |
+| **Instructions about the repository** | `AGENTS.md`, `MAINTENANCE.md`, `.claude/` | Authoritative for *how to work*. Not authoritative for *what the repository currently contains*: where an instruction file and the repository disagree, the repository wins. Report the drift; do not edit the repository to match the file |
 | **Historical baselines** | `history/` | Earlier canonical curricula, preserved unchanged |
 | **Presentation** | `site/` | Generated from canonical sources; never defines curriculum |
 | **Governance** | this file and [MAINTENANCE.md](MAINTENANCE.md) | How the repository is operated |
@@ -173,9 +173,9 @@ flowchart TD
 
 ---
 
-## The Four Depth Levels
+## The Three Depth Levels
 
-**In this section:** [Fundamentals](#fundamentals) · [Advanced](#advanced) · [Mastery](#mastery) · [Research](#research)
+**In this section:** [Fundamentals](#fundamentals) · [Advanced](#advanced) · [Mastery](#mastery)
 
 The permanent curriculum is organized by depth.
 
@@ -231,33 +231,13 @@ Mastery should combine broad advanced literacy with deeper specialization in sel
 
 > ⚠️ Do not require research-level specialization in every AI domain.
 
-### Research
-
-Research concerns questions for which the answer is not already established.
-
-Expected capabilities include:
-
-- literature review;
-- identifying gaps;
-- hypothesis formation;
-- experimental design;
-- baseline selection;
-- ablation studies;
-- reproducibility;
-- statistical reasoning;
-- interpretation;
-- scientific writing; and
-- peer-review literacy.
-
-> ⚠️ Do not use “Research” as a synonym for “very difficult.”
-
 [⬆ Back to Contents](#contents)
 
 ---
 
-## Modern AI Engineering
+## Modern AI: Research, Science and Engineering
 
-Modern AI Engineering is **not** a fifth depth level. It is a parallel track that answers:
+Modern AI: Research, Science and Engineering is **not** a fourth depth level. It is a parallel track that answers:
 
 > **What should a capable AI engineer understand and be able to work with today?**
 
@@ -275,7 +255,17 @@ It may contain:
 - current safety/security practices; and
 - other developments that materially affect AI engineering.
 
-A topic may exist simultaneously in Modern AI Engineering and one or more permanent depth levels.
+A topic may exist simultaneously in Modern AI: Research, Science and Engineering and one or more permanent depth levels.
+
+**The research dimension.** This track also carries the questions whose answers are not yet
+established. Research is not a depth level; it is the part of this track where the field has no
+answer. Expected capabilities include literature review; identifying gaps; hypothesis formation;
+experimental design; baseline selection; ablation studies; reproducibility; statistical reasoning;
+interpretation; scientific writing; and peer-review literacy.
+
+> ⚠️ Do not use “Research” as a synonym for “very difficult.”
+>
+> Research is defined by the status of the question, not by the difficulty of the work.
 
 [⬆ Back to Contents](#contents)
 
@@ -429,10 +419,9 @@ flowchart TD
     T(["Dynamic Topic"]) --> F["Fundamentals"]
     T --> A["Advanced"]
     T --> M["Mastery"]
-    T --> R["Research"]
 ```
 
-Modern AI Engineering continuously observes developments that may affect any of these layers.
+Modern AI: Research, Science and Engineering continuously observes developments that may affect any of these layers.
 
 > ⚠️ Do not assume an entire topic belongs to a single level.
 
@@ -469,7 +458,7 @@ Do not promote material because it is merely:
 
 ## Promotion Into the Permanent Curriculum
 
-A topic discovered through Modern AI Engineering must **not** automatically enter the permanent curriculum.
+A topic discovered through Modern AI: Research, Science and Engineering must **not** automatically enter the permanent curriculum.
 
 Before promotion, evaluate:
 
@@ -834,7 +823,7 @@ Possible outcomes include:
 
 | Keep | Add or promote | Reduce |
 | --- | --- | --- |
-| No change | Add to Modern AI Engineering | Reduce emphasis |
+| No change | Add to Modern AI: Research, Science and Engineering | Reduce emphasis |
 | Continue watching | Promote to Fundamentals | Mark superseded |
 | Change required depth | Promote to Advanced | Archive |
 | | Promote to Mastery | |
@@ -870,7 +859,7 @@ These may be discovery signals, but not sufficient evidence for curriculum promo
 
 ## Career Relevance
 
-Career relevance matters, especially for Modern AI Engineering. However, career relevance does not mean chasing every tool appearing in job descriptions.
+Career relevance matters, especially for Modern AI: Research, Science and Engineering. However, career relevance does not mean chasing every tool appearing in job descriptions.
 
 **Prioritize capabilities that transfer across implementations.** Examples include:
 

@@ -166,7 +166,7 @@ def ids_absent(report: ValidationReport, page_rel: str, page_html: str, pattern:
     report.check(not found, f"no internal curriculum identifiers: {page_rel}", f"found={found}")
 
 
-FIFTH_LEVEL = re.compile(r"(?<!not a )(?<!not the )\bfifth (?:depth )?(?:stage|level)\b|\b(?:level|stage) 5\b", re.I)
+FIFTH_LEVEL = re.compile(r"(?<!not a )(?<!not the )\b(?:fourth|fifth) (?:depth )?(?:stage|level)\b|\b(?:level|stage) [45]\b", re.I)
 # "Research" as the depth level (capitalized), not "research literacy" or "research contribution".
 AFTER_RESEARCH = re.compile(r"\b[Aa]fter (?:you (?:finish|complete) |completing |finishing )?Research\b(?! literacy| contribution)")
 RETIRED_MARKERS = ("modern-badge", "modern-tag", "modern-dot")
@@ -250,15 +250,15 @@ class _ShapeParser(HTMLParser):
 def parallel_track_presented(report: ValidationReport, page_rel: str, page_html: str, is_home: bool,
                              is_learn: bool, expected_tracks: list[str], expected_groups: list[str], entries: int,
                              modern_page: str, learn_prefix: str) -> None:
-    """Modern AI Engineering is a parallel curriculum beside the Depth path: never a fifth depth
-    level, never placed after Research, never numbered, and never behind Evidence or About."""
+    """The parallel track is a curriculum beside the Depth path: never a fourth depth level,
+    never placed after Research, never numbered, and never behind Evidence or About."""
     text = " ".join(visible_text(page_html, "all").split())
     found = FIFTH_LEVEL.findall(text)
-    report.check(not found, f"Modern AI Engineering is never a fifth depth level: {page_rel}", f"found={found}")
+    report.check(not found, f"Modern AI: Research, Science and Engineering is never a fifth depth level: {page_rel}", f"found={found}")
     late = [m.group(0) for m in AFTER_RESEARCH.finditer(text) if "not" not in text[max(0, m.start() - 24):m.start()]]
-    report.check(not late, f"Modern AI Engineering is never placed after Research: {page_rel}", f"found={late}")
+    report.check(not late, f"Modern AI: Research, Science and Engineering is never placed after Research: {page_rel}", f"found={late}")
     leftover = [c for c in RETIRED_MARKERS if c in page_html]
-    report.check(not leftover, f"no per-step Modern AI Engineering badges, tags or dots: {page_rel}",
+    report.check(not leftover, f"no per-step Modern AI: Research, Science and Engineering badges, tags or dots: {page_rel}",
                  f"found={leftover}")
     shape = _ShapeParser()
     shape.feed(page_html)
@@ -267,7 +267,7 @@ def parallel_track_presented(report: ValidationReport, page_rel: str, page_html:
     if is_home:
         actions = [resolve(h) for h in shape.actions]
         ok = modern_page in actions and actions and all(a.startswith(learn_prefix) for a in actions)
-        report.check(ok, "Home's first actions start learning: the Depth path and Modern AI Engineering, "
+        report.check(ok, "Home's first actions start learning: the Depth path and Modern AI: Research, Science and Engineering, "
                          "with Evidence and About secondary", f"actions={actions}")
     if is_learn:
         tracks = [" ".join(x.split()) for x in shape.tracks]
@@ -281,7 +281,7 @@ def parallel_track_presented(report: ValidationReport, page_rel: str, page_html:
         if len(shape.links) != entries:
             problems.append(f"entries={len(shape.links)} (expected {entries})")
         if modern in shape.numbered_track:
-            problems.append("Modern AI Engineering entries are numbered")
+            problems.append("Modern AI: Research, Science and Engineering entries are numbered")
         if shape.area_navs != 1 or shape.page_tocs:
             problems.append(f"navigation panels: {shape.area_navs} area, {shape.page_tocs} page contents")
         report.check(not problems, f"Learn shows two parallel tracks and one navigation: {page_rel}",

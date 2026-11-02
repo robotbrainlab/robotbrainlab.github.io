@@ -128,7 +128,8 @@ Start from these directions. They are **not** a closed taxonomy; the scan must s
 - security;
 - multimodality;
 - standards and interoperability;
-- important engineering patterns and failure reports.
+- important engineering patterns and failure reports;
+- **active research frontiers** — what researchers are trying to solve, which directions have substantial evidence, which are contested, and which could reshape the field. The track carries the open problems, so the scan must look for them. Frontier findings are recorded, never promoted to practice.
 
 Prefer primary evidence, as ranked in [AGENTS.md — Research Standards](AGENTS.md#research-standards). Record scientific evidence and engineering adoption as separate signals.
 
@@ -154,7 +155,7 @@ A development matters **only** if it changes something meaningful about what eng
 2. Search the period since the last scan (or since `baseline_date` for the first scan) along the directions above and beyond them.
 3. For each candidate, test it against the anti-news-feed rule. Discard what fails.
 4. For each survivor, decide a status on the [AGENTS.md lifecycle](AGENTS.md#topic-maturity) and an action from the table below, and record it in the [current-practice register](reviews/modern-practice-register.md) with its evidence.
-5. Write the report. Update the register — and the learner guide's Modern AI Engineering topics where a taught practice changed status; only Current Practice and Established entries are taught, and the site build enforces this. Update the state file.
+5. Write the report. Update the register — and the learner guide's Modern AI: Research, Science and Engineering topics where a taught practice changed status; only Current Practice, Established and Open problem entries are taught, and the site build enforces this. Update the state file.
 
 | Action | Use when |
 | --- | --- |
@@ -163,9 +164,10 @@ A development matters **only** if it changes something meaningful about what eng
 | **Current Practice** | Established enough to practise now, not yet durable curriculum |
 | **Investigate at 12-week review** | May require a permanent curriculum change |
 | **Superseded** | An existing current-practice item has been replaced |
+| **Open problem** | An unresolved question the track carries as a frontier, not as practice |
 | **Evidence update** | Corrects or refreshes evidence without changing the curriculum |
 
-**What a scan may change.** A scan normally does **not** modify the permanent curriculum. It may update the *current-practice* column of [ROADMAP.md §7 Modern AI Engineering](ROADMAP.md#7-modern-ai-engineering) when the evidence is recorded in the scan report and the change does not touch the Depth Track, any block's required capability, depth or prerequisites, the durable-concept column, or mandatory resources. Any such edit must be listed in the report and in the completion message, and the site must be regenerated per [AGENTS.md — Generated HTML](AGENTS.md#generated-html). Everything else waits for the 12-week review.
+**What a scan may change.** A scan normally does **not** modify the permanent curriculum. It may update the *current-practice* column of [ROADMAP.md §6 Modern AI: Research, Science and Engineering](ROADMAP.md#6-modern-ai-research-science-and-engineering) when the evidence is recorded in the scan report and the change does not touch the Depth Track, any block's required capability, depth or prerequisites, the durable-concept column, or mandatory resources. Any such edit must be listed in the report and in the completion message, and the site must be regenerated per [AGENTS.md — Generated HTML](AGENTS.md#generated-html). Everything else waits for the 12-week review.
 
 ### Scan Report
 
@@ -272,7 +274,7 @@ Label important conclusions Observed, Inference, Judgment or Uncertain, with con
 | Write scan and review reports | Materially changing a block's required depth |
 | Update the state file | Changing major prerequisites |
 | Record watch items and statuses | Promoting an Important Extension into Universal Core |
-| Update the current-practice column of [ROADMAP.md §7](ROADMAP.md#7-modern-ai-engineering), as limited in [Scan Procedure](#scan-procedure) | Removing a required capability |
+| Update the current-practice column of [ROADMAP.md §6](ROADMAP.md#6-modern-ai-research-science-and-engineering), as limited in [Scan Procedure](#scan-procedure) | Removing a required capability |
 | Make [minor changes](#7-minor-changes) | Substantially changing the mandatory resource burden |
 | **Propose** any curriculum change | Any other significant change to [ROADMAP.md](ROADMAP.md) |
 

@@ -43,7 +43,7 @@ The repository builds and maintains a rigorous, evidence-based **Data & Intellig
 | 4 — Governance + Maintenance | Complete — [AGENTS.md](AGENTS.md), [MAINTENANCE.md](MAINTENANCE.md), [reviews/maintenance-state.json](reviews/maintenance-state.json) |
 | 5 — Learner Site Finalization | Complete — learner site Version 1 in `site/` |
 | Learner-experience reconciliation | Complete (2026-09-20) — every unit is a structured mini-chapter: its own generated contents over a two-level concept hierarchy (113 areas, 312 concepts) whose entries link to real sections, plus the narrative that explains itself before it assigns reading: context, conceptual organization, connections, an evolving mental model of AI, resource roles and concept-to-resource maps; stage purposes; statistics made visible as a progression. Presentation only; two reading proposals await approval in [reviews/2026-09-20-learner-experience-review.md](reviews/2026-09-20-learner-experience-review.md) |
-| Modern AI Engineering restored | Complete (2026-09-19) — a substantive parallel curriculum of nine topics beside the 19-step Depth path, traced to the new [current-practice register](reviews/modern-practice-register.md) and the first [4-week scan](reviews/2026-09-19-modern-ai-scan.md); no new baseline. See [design/learner-guide.md §10](design/learner-guide.md#10-modern-ai-engineering-restored-as-a-parallel-curriculum) |
+| Modern AI: Research, Science and Engineering restored | Complete (2026-09-19) — a substantive parallel curriculum of nine topics beside the 18-step Depth path, traced to the new [current-practice register](reviews/modern-practice-register.md) and the first [4-week scan](reviews/2026-09-19-modern-ai-scan.md); no new baseline. See [design/learner-guide.md §10](design/learner-guide.md#10-modern-ai-engineering-restored-as-a-parallel-curriculum) |
 | Final acceptance correction | Complete — **Baseline 2** accepted 2026-09-19: the reading plan and the parallel track's hands-on resources; the learner guide ([LEARNING-GUIDE.md](LEARNING-GUIDE.md)) and site regenerated |
 | Learner-journey orchestration | Complete (2026-09-20) — Depth and Modern presented as one chronological journey: every topic states whether it is required, recommended or available and where the numbered path resumes; the topic table carries the same three facts and is checked against the topics; transitions written from the Depth side at steps 7, 9, 11, 15 and 16; whole books paced with first-reading, continuation and return labelled; two practice instructions disambiguated; step 6 gains the Python engineering its own testing and reproducibility requirements need, from a resource already assigned; planned material given honest fallbacks at steps 4, 6, 11 and 12. Presentation only. See [design/learner-guide.md §12](design/learner-guide.md#12-learner-journey-orchestration) |
 | Journey navigation | Complete (2026-09-21) — the generated site's primary Previous/Next controls now walk the one interleaved journey (Depth steps with each Modern topic where it is taken), each detour link carrying that topic's status and each return saying the numbered path resumes; the whole path on Learn shows the same sequence; *Inference, Cost and Production* declares one status instead of two; the corrupted step-5 practice line is repaired. Two checks added (pager follows the journey; no section label inside a sentence) |
@@ -78,7 +78,7 @@ Construction is finished; there is no further construction step. The project now
 
 Full detail is in [ROADMAP.md](ROADMAP.md). In brief:
 
-- **Depth Track:** Fundamentals → Advanced → Mastery → Research. **Modern AI Engineering** is a parallel track, not a fifth level, entered in four prerequisite-gated phases (0 Orientation, 1 First Contact, 2 Grounded Systems, 3 Compound Systems; adaptation practice opens after F1).
+- **Depth Track:** Fundamentals → Advanced → Mastery. **Modern AI: Research, Science and Engineering** is a parallel track, not a fourth level, entered in four prerequisite-gated phases (0 Orientation, 1 First Contact, 2 Grounded Systems, 3 Compound Systems; adaptation practice opens after F1).
 - **12 Universal Core areas**, taught through:
   - **9 Fundamentals blocks:** E1 Programming and Data Handling · E2 Mathematics · E3 Statistics, Inference and Experimentation · E4 ML Foundations · E5 Deep Learning and Representations · E7 Foundation Model Mechanics · E8 Retrieval · E9 Data for AI · E10 Evaluation and Measurement. **E6 was retired**; IDs are stable for traceability.
   - **6 Advanced blocks:** F1 Foundation Model Lifecycle · F2 Compound AI Systems · F3 Evaluation Science · F4 Trustworthy AI · F5 AI Systems Engineering and Operations · F6 Advanced Retrieval and Ranking.
@@ -123,7 +123,7 @@ Reopen only with new evidence through the review process — not by preference.
 | Decision | Where recorded |
 | --- | --- |
 | Concepts before frameworks; modern does not mean important | [AGENTS.md](AGENTS.md) |
-| Modern AI Engineering is parallel, never a fifth level | [AGENTS.md](AGENTS.md), [ROADMAP.md](ROADMAP.md) |
+| Modern AI: Research, Science and Engineering is parallel, never a fourth level | [AGENTS.md](AGENTS.md), [ROADMAP.md](ROADMAP.md) |
 | Topics can span depth levels; the 19 landscape areas are not 19 curriculum sections | [AGENTS.md](AGENTS.md) |
 | Independent discovery before comparison; the roadmap must be falsifiable | [AGENTS.md — Independent Discovery and Falsification Rule](AGENTS.md#independent-discovery-and-falsification-rule) |
 | Resources support curriculum; they do not define it | [AGENTS.md — Resource Independence Rule](AGENTS.md#resource-independence-rule) |
@@ -143,7 +143,7 @@ Reopen only with new evidence through the review process — not by preference.
 
 ## 6. Resource Status
 
-- **32 source resources are mandatory.** ROADMAP.md maps their portions to capabilities (coverage); its **reading plan** says how each is read. Coherent core books — *Practical SQL*, *Python for Data Analysis*, *Hands-On ML*, *Designing Machine Learning Systems*, *AI Engineering*, *Build a Large Language Model (From Scratch)*, *Hands-On Large Language Models* and the *Python Tutorial* — are read whole, in order; *LLM Engineer's Handbook* is read through whole, with running it optional. Reference textbooks, papers, standards and specialization material are read in named portions. See [ROADMAP.md §14](ROADMAP.md#14-resource-map).
+- **32 source resources are mandatory.** ROADMAP.md maps their portions to capabilities (coverage); its **reading plan** says how each is read. Coherent core books — *Practical SQL*, *Python for Data Analysis*, *Hands-On ML*, *Designing Machine Learning Systems*, *AI Engineering*, *Build a Large Language Model (From Scratch)*, *Hands-On Large Language Models* and the *Python Tutorial* — are read whole, in order; *LLM Engineer's Handbook* is read through whole, with running it optional. Reference textbooks, papers, standards and specialization material are read in named portions. See [ROADMAP.md §14](ROADMAP.md#13-resource-map).
 - **Baseline 2 history.** The two parallel-track books were proposed during learner-guide reconciliation and written into ROADMAP.md before approval, labelled "owner-directed" in error. The owner explicitly approved them, together with the reading plan, in the final acceptance correction on 2026-09-19, which created Baseline 2. Baseline 1 is preserved exactly as accepted at [history/roadmap-baseline-1.md](history/roadmap-baseline-1.md).
 - **Eleven planned learner materials** — exercises, notes, rubrics, simulations, a checklist and a lab — are baseline implementation work, produced progressively before a learner reaches each block. They are not research debt. See [ROADMAP.md §11](ROADMAP.md#planned-learner-materials).
 - **Conditional:** *NLP in Action* §10.3 in E8, for ANN index choice.
@@ -177,7 +177,7 @@ Carried as standing maintenance items ([MAINTENANCE.md §10](MAINTENANCE.md#10-s
 - Whether an adequate F6 resource becomes available.
 - Subsection depth of assigned sections in paid resources, notably *AI Engineering*.
 - Whether *AI Engineering* teaches ANN index choice, which would resolve the conditional E8 source.
-- [ROADMAP.md §16](ROADMAP.md#16-maintenance-status) still says the detailed maintenance procedure is not yet written; [MAINTENANCE.md](MAINTENANCE.md) now exists. A status-wording correction for the first Curriculum Review; the site presents the canonical wording unchanged.
+- [ROADMAP.md §16](ROADMAP.md#15-maintenance-status) still says the detailed maintenance procedure is not yet written; [MAINTENANCE.md](MAINTENANCE.md) now exists. A status-wording correction for the first Curriculum Review; the site presents the canonical wording unchanged.
 
 [⬆ Back to Contents](#contents)
 
@@ -188,7 +188,7 @@ Carried as standing maintenance items ([MAINTENANCE.md §10](MAINTENANCE.md#10-s
 | Path | Responsibility |
 | --- | --- |
 | [ROADMAP.md](ROADMAP.md) | Canonical curriculum, Baseline 2 — the detailed specification |
-| [LEARNING-GUIDE.md](LEARNING-GUIDE.md) | The learner's guide: the 19-step Depth path and the parallel Modern AI Engineering curriculum of nine topics, presenting the accepted curriculum; checked against ROADMAP.md, including its reading plan, on every build |
+| [LEARNING-GUIDE.md](LEARNING-GUIDE.md) | The learner's guide: the 18-step Depth path and the parallel Modern AI: Research, Science and Engineering curriculum of nine topics, presenting the accepted curriculum; checked against ROADMAP.md, including its reading plan, on every build |
 | [AGENTS.md](AGENTS.md) | Constitution and operating rules |
 | [MAINTENANCE.md](MAINTENANCE.md) | Maintenance operating procedure |
 | [PROJECT-STATE.md](PROJECT-STATE.md) | This handoff |

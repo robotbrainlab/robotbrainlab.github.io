@@ -8,7 +8,7 @@
 | **Period covered** | The first scan. It covers developments since the evidence base of Baseline 2 ([landscape](../research/2026-09-17-data-intelligence-landscape.md), executed 2026-09-17, and [targeted resource research](../research/2026-09-18-targeted-resource-research.md), 2026-09-18), and it re-checks the currency of every practice the learner guide now teaches |
 | **Current baseline** | Baseline 2 |
 | **Trigger** | Run by explicit command during the final acceptance correction of Modern AI Engineering, before the scheduled date (2026-10-16), as [MAINTENANCE.md §1](../MAINTENANCE.md#1-normal-maintenance-command) permits |
-| **Outputs** | This report; the [current-practice register](modern-practice-register.md); current-practice edits to [ROADMAP.md §7](../ROADMAP.md#7-modern-ai-engineering); the state file |
+| **Outputs** | This report; the [current-practice register](modern-practice-register.md); current-practice edits to [ROADMAP.md §7](../history/roadmap-baseline-2.md); the state file |
 
 ## Contents
 
@@ -34,7 +34,7 @@
 
 **Two passes over the evidence.**
 
-1. **Classification.** Every contemporary practice in the Baseline 2 evidence base that bears on [ROADMAP.md §7](../ROADMAP.md#7-modern-ai-engineering) — the landscape's Contemporary AI Engineering Map (§E), its subfield tables for foundation models, retrieval, compound systems, evaluation, trustworthy AI and operations (§C7, §C12, §C13, §C15–§C17), and the Modern Practice Reference Layer of the targeted research (§O) — was given a status on the [AGENTS.md lifecycle](../AGENTS.md#topic-maturity). The landscape's maturity labels were mapped as follows: *Established* → Established; *Current practice* → Current Practice; *Emerging*, *Experimental* or *Active research* with practical relevance → Watching; newly found and unassessed → Discovered.
+1. **Classification.** Every contemporary practice in the Baseline 2 evidence base that bears on [ROADMAP.md §7](../history/roadmap-baseline-2.md) — the landscape's Contemporary AI Engineering Map (§E), its subfield tables for foundation models, retrieval, compound systems, evaluation, trustworthy AI and operations (§C7, §C12, §C13, §C15–§C17), and the Modern Practice Reference Layer of the targeted research (§O) — was given a status on the [AGENTS.md lifecycle](../AGENTS.md#topic-maturity). The landscape's maturity labels were mapped as follows: *Established* → Established; *Current practice* → Current Practice; *Emerging*, *Experimental* or *Active research* with practical relevance → Watching; newly found and unassessed → Discovered.
 2. **Currency check.** For each practice the guide now teaches, primary sources were re-read on 2026-09-19 where a recent change was possible: the tool-interoperability specification, observability conventions, security risk lists, agent-to-agent protocols, and the engineering guides and papers the guide cites.
 
 **Anti-news-feed test.** Candidates were kept only if they change what engineers need to understand or build, system architecture, evaluation, reliability, security, efficiency or professional practice. Model releases, framework launches, funding news and leaderboard movement were excluded.
@@ -78,7 +78,7 @@ This is the first scan; there were no earlier watch items. The items now being w
 ## 4. Changes Made
 
 - **Register created:** [reviews/modern-practice-register.md](modern-practice-register.md). It records status and evidence for 49 practices, the four current references the guide asks learners to consult, and questions for the 12-week review.
-- **Current-practice column of [ROADMAP.md §7](../ROADMAP.md#7-modern-ai-engineering)** updated within the limits of [MAINTENANCE.md §4](../MAINTENANCE.md#scan-procedure). No other part of ROADMAP.md changed: not the Depth Track, not any block's capability, depth or prerequisites, not the durable-concept column, not the phases, and not the mandatory resources.
+- **Current-practice column of [ROADMAP.md §7](../history/roadmap-baseline-2.md)** updated within the limits of [MAINTENANCE.md §4](../MAINTENANCE.md#scan-procedure). No other part of ROADMAP.md changed: not the Depth Track, not any block's capability, depth or prerequisites, not the durable-concept column, not the phases, and not the mandatory resources.
 
 | Row | Before | After |
 | --- | --- | --- |

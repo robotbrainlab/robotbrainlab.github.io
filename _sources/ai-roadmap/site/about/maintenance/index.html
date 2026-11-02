@@ -7,9 +7,9 @@
 <meta name="generator" content="AI Engineer Roadmap learner site generator">
 <title>Maintenance Procedure · AI Engineer Roadmap</title>
 <script>(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("air-theme");if(t==="light"||t==="dark"){d.setAttribute("data-theme",t);}}catch(e){}})();</script>
-<link rel="stylesheet" href="../../assets/css/tokens.css?v=ce213ccecc">
-<link rel="stylesheet" href="../../assets/css/site.css?v=ce213ccecc">
-<link rel="stylesheet" href="../../assets/css/print.css?v=ce213ccecc" media="print">
+<link rel="stylesheet" href="../../assets/css/tokens.css?v=5cbea89e99">
+<link rel="stylesheet" href="../../assets/css/site.css?v=5cbea89e99">
+<link rel="stylesheet" href="../../assets/css/print.css?v=5cbea89e99" media="print">
 </head>
 <body class="page-doc kind-governance">
 <div id="page-top"></div>
@@ -101,6 +101,11 @@
       </a>
     </li>
     <li>
+      <a class="area-link" href="../design/baseline-3-three-levels/index.html">
+        <span class="area-link-title"><span>Baseline 3 — Three Depth Levels, and the Track Renamed</span></span>
+      </a>
+    </li>
+    <li>
       <a class="area-link" href="../design/content-fidelity-audit/index.html">
         <span class="area-link-title"><span>Content-Fidelity Audit</span></span>
       </a>
@@ -126,6 +131,11 @@
 <p class="rail-group">History</p>  <ul class="area-list">
     <li>
       <a class="area-link" href="../history/roadmap-baseline-1/index.html">
+        <span class="area-link-title"><span>AI Engineer — Data &amp; Intelligence Roadmap</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="area-link" href="../history/roadmap-baseline-2/index.html">
         <span class="area-link-title"><span>AI Engineer — Data &amp; Intelligence Roadmap</span></span>
       </a>
     </li>
@@ -343,7 +353,8 @@
 <li>security;</li>
 <li>multimodality;</li>
 <li>standards and interoperability;</li>
-<li>important engineering patterns and failure reports.</li>
+<li>important engineering patterns and failure reports;</li>
+<li><strong>active research frontiers</strong> — what researchers are trying to solve, which directions have substantial evidence, which are contested, and which could reshape the field. The track carries the open problems, so the scan must look for them. Frontier findings are recorded, never promoted to practice.</li>
 </ul>
 <p>Prefer primary evidence, as ranked in <a href="../governance/index.html#research-standards">AGENTS.md — Research Standards</a>. Record scientific evidence and engineering adoption as separate signals.</p>
 <h3 id="anti-news-feed-rule">Anti-News-Feed Rule<a class="heading-anchor" href="#anti-news-feed-rule" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
@@ -366,7 +377,7 @@
 <li>Search the period since the last scan (or since <code>baseline_date</code> for the first scan) along the directions above and beyond them.</li>
 <li>For each candidate, test it against the anti-news-feed rule. Discard what fails.</li>
 <li>For each survivor, decide a status on the <a href="../governance/index.html#topic-maturity">AGENTS.md lifecycle</a> and an action from the table below, and record it in the <a href="../../evidence/current-practice/index.html">current-practice register</a> with its evidence.</li>
-<li>Write the report. Update the register — and the learner guide&#x27;s Modern AI Engineering topics where a taught practice changed status; only Current Practice and Established entries are taught, and the site build enforces this. Update the state file.</li>
+<li>Write the report. Update the register — and the learner guide&#x27;s Modern AI: Research, Science and Engineering topics where a taught practice changed status; only Current Practice, Established and Open problem entries are taught, and the site build enforces this. Update the state file.</li>
 </ol>
 <div class="table-wrap" role="region" tabindex="0" aria-label="Table: Scan Procedure"><table class="doc-table table--pair" style="--cols:2">
 <thead>
@@ -397,12 +408,16 @@
 <td>An existing current-practice item has been replaced</td>
 </tr>
 <tr>
+<td><strong>Open problem</strong></td>
+<td>An unresolved question the track carries as a frontier, not as practice</td>
+</tr>
+<tr>
 <td><strong>Evidence update</strong></td>
 <td>Corrects or refreshes evidence without changing the curriculum</td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>What a scan may change.</strong> A scan normally does <strong>not</strong> modify the permanent curriculum. It may update the <em>current-practice</em> column of <a href="../curriculum/index.html#7-modern-ai-engineering" class="xref-link xref-link--curriculum">ROADMAP.md §7 Modern AI Engineering<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a> when the evidence is recorded in the scan report and the change does not touch the Depth Track, any block&#x27;s required capability, depth or prerequisites, the durable-concept column, or mandatory resources. Any such edit must be listed in the report and in the completion message, and the site must be regenerated per <a href="../governance/index.html#generated-html">AGENTS.md — Generated HTML</a>. Everything else waits for the 12-week review.</p>
+<p><strong>What a scan may change.</strong> A scan normally does <strong>not</strong> modify the permanent curriculum. It may update the <em>current-practice</em> column of <a href="../curriculum/index.html#6-modern-ai-research-science-and-engineering" class="xref-link xref-link--curriculum">ROADMAP.md §6 Modern AI: Research, Science and Engineering<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a> when the evidence is recorded in the scan report and the change does not touch the Depth Track, any block&#x27;s required capability, depth or prerequisites, the durable-concept column, or mandatory resources. Any such edit must be listed in the report and in the completion message, and the site must be regenerated per <a href="../governance/index.html#generated-html">AGENTS.md — Generated HTML</a>. Everything else waits for the 12-week review.</p>
 <h3 id="scan-report">Scan Report<a class="heading-anchor" href="#scan-report" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
 <p><strong>Location:</strong> <code>reviews/YYYY-MM-DD-modern-ai-scan.md</code>, dated on completion, following the Markdown conventions in <a href="../governance/index.html#markdown-source-files">AGENTS.md</a>.</p>
 <p><strong>Contents:</strong></p>
@@ -541,7 +556,7 @@
 <td>Promoting an Important Extension into Universal Core</td>
 </tr>
 <tr>
-<td>Update the current-practice column of <a href="../curriculum/index.html#7-modern-ai-engineering" class="xref-link xref-link--curriculum">ROADMAP.md §7<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a>, as limited in <a href="#scan-procedure">Scan Procedure</a></td>
+<td>Update the current-practice column of <a href="../curriculum/index.html#6-modern-ai-research-science-and-engineering" class="xref-link xref-link--curriculum">ROADMAP.md §6<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a>, as limited in <a href="#scan-procedure">Scan Procedure</a></td>
 <td>Removing a required capability</td>
 </tr>
 <tr>
@@ -763,6 +778,6 @@
   </div>
 </footer><div class="scrim" data-scrim data-chrome hidden></div>
 <div class="visually-hidden" aria-live="polite" id="live-region" data-chrome></div>
-<script src="../../assets/js/site.js?v=ce213ccecc" defer></script>
+<script src="../../assets/js/site.js?v=5cbea89e99" defer></script>
 </body>
 </html>

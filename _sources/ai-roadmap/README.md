@@ -20,8 +20,7 @@ These questions evolve at different speeds. Established scientific knowledge cha
    - [1. Fundamentals](#1-fundamentals)
    - [2. Advanced](#2-advanced)
    - [3. Mastery](#3-mastery)
-   - [4. Research](#4-research)
-2. [Modern AI Engineering](#modern-ai-engineering)
+2. [Modern AI: Research, Science and Engineering](#modern-ai-research-science-and-engineering)
 3. [Dynamic Topics](#dynamic-topics)
 4. [Knowledge Lenses](#knowledge-lenses)
 5. [Keeping the Roadmap Current](#keeping-the-roadmap-current)
@@ -44,18 +43,18 @@ These questions evolve at different speeds. Established scientific knowledge cha
 
 ## Learning Structure
 
-**In this section:** [Fundamentals](#1-fundamentals) · [Advanced](#2-advanced) · [Mastery](#3-mastery) · [Research](#4-research)
+**In this section:** [Fundamentals](#1-fundamentals) · [Advanced](#2-advanced) · [Mastery](#3-mastery)
 
-The core learning path progresses through four levels:
+The core learning path progresses through three levels. It teaches knowledge whose science is established:
 
 ```mermaid
 flowchart LR
-    F["🧱 Fundamentals"] --> A["📈 Advanced"] --> M["🎯 Mastery"] --> R["🔬 Research"]
+    F["🧱 Fundamentals"] --> A["📈 Advanced"] --> M["🎯 Mastery"]
 ```
 
 These levels represent increasing depth of understanding rather than simply collections of different topics. A topic may appear across several or all levels.
 
-> **Example:** Retrieval-augmented generation may begin with basic retrieval and generation during Fundamentals, progress into advanced retrieval architectures and evaluation, develop into system design and optimization at Mastery, and eventually lead into open research questions at the Research level.
+> **Example:** Retrieval-augmented generation may begin with basic retrieval and generation during Fundamentals, progress into advanced retrieval architectures and evaluation, develop into system design and optimization at Mastery, and eventually lead into open research questions in the parallel track.
 
 ### 1. Fundamentals
 
@@ -85,48 +84,24 @@ At this level, the goal is to be able to:
 
 Mastery does not require equal specialization in every area of AI. It combines broad advanced understanding with deep expertise in chosen domains.
 
-### 4. Research
+## Modern AI: Research, Science and Engineering
 
-Develop the ability to work on problems where the answer is not already known.
-
-This includes:
-
-- literature review;
-- identifying research gaps;
-- forming hypotheses;
-- designing experiments;
-- establishing baselines;
-- performing ablations;
-- ensuring reproducibility;
-- statistical analysis;
-- interpreting results; and
-- technical and scientific communication.
-
-> Research is not simply “more advanced learning.” It is the transition from **learning existing knowledge** to **contributing new knowledge**.
-
-[⬆ Back to Contents](#contents)
-
----
-
-## Modern AI Engineering
-
-Modern AI Engineering is a **parallel track** rather than a fifth level.
+Modern AI: Research, Science and Engineering is a **parallel track** rather than a fourth level. It carries current engineering practice and the field's open problems.
 
 ```mermaid
 flowchart TB
     subgraph CORE["Core Levels — Depth"]
         direction LR
-        F["Fundamentals"] --> A["Advanced"] --> M["Mastery"] --> R["Research"]
+        F["Fundamentals"] --> A["Advanced"] --> M["Mastery"]
     end
-    MAE["⚡ Modern AI Engineering — Currency"]
+    MAE["⚡ Modern AI: Research, Science and Engineering"]
     F <-.-> MAE
     A <-.-> MAE
     M <-.-> MAE
-    R <-.-> MAE
 ```
 
-- The four core levels provide **depth**.
-- Modern AI Engineering provides **currency**.
+- The three core levels provide **depth**.
+- Modern AI: Research, Science and Engineering provides **currency**, and holds the open problems.
 
 Its purpose is to ensure that the roadmap remains connected to how contemporary AI systems are actually being built.
 
@@ -134,7 +109,18 @@ This track may include areas such as modern model capabilities, retrieval system
 
 The exact contents are intentionally not fixed because this layer is expected to change.
 
-Modern AI Engineering should begin gradually once sufficient prerequisites exist. It does not require completing the entire Fundamentals curriculum first.
+Modern AI: Research, Science and Engineering should begin gradually once sufficient prerequisites exist. It does not require completing the entire Fundamentals curriculum first.
+
+### The research dimension
+
+This track also carries the questions whose answers are not yet known. Research is not a depth
+level: it is defined by the status of the question, not by the difficulty of the work. Expected
+capabilities include literature review; identifying research gaps; forming hypotheses; designing
+experiments; establishing baselines; performing ablations; ensuring reproducibility; statistical
+analysis; interpreting results; and technical and scientific communication.
+
+Research literacy is universal and is taught at Advanced. Research contribution is optional and is
+required of nobody.
 
 [⬆ Back to Contents](#contents)
 
@@ -151,7 +137,7 @@ flowchart TD
     T(["Dynamic Topic"]) --> F["Fundamentals"]
     T --> A["Advanced"]
     T --> M["Mastery"]
-    T --> R["Research"]
+
 ```
 
 Modern developments can change what should be understood at any of these levels. A technique that begins as experimental research may eventually become modern engineering practice and later become established knowledge.
@@ -212,7 +198,7 @@ The purpose is to determine:
 - which current practices have become established;
 - whether existing curriculum material has become outdated;
 - whether topic depth should change;
-- whether new knowledge should enter Fundamentals, Advanced, Mastery, or Research; and
+- whether new knowledge should enter Fundamentals, Advanced or Mastery; and
 - whether previously tracked topics should be deprecated, archived, or considered superseded.
 
 ### In Short
@@ -370,7 +356,7 @@ The objective is to demonstrate both:
 **Baseline 2** of the curriculum was accepted on 2026-09-19 and is canonical in [ROADMAP.md](ROADMAP.md); earlier baselines are preserved in `history/`.
 
 - Governance is established in [AGENTS.md](AGENTS.md), and the maintenance procedure in [MAINTENANCE.md](MAINTENANCE.md).
-- **To learn, start with [LEARNING-GUIDE.md](LEARNING-GUIDE.md)** — a 19-step depth path with a parallel Modern AI Engineering track — or its generated site in `site/`.
+- **To learn, start with [LEARNING-GUIDE.md](LEARNING-GUIDE.md)** — an 18-step depth path with a parallel Modern AI: Research, Science and Engineering track — or its generated site in `site/`.
 - The repository is in maintenance mode.
 
 The roadmap should evolve through deliberate research and review rather than uncontrolled accumulation of topics.

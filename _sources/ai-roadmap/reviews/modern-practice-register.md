@@ -1,15 +1,15 @@
 <div align="justify">
 
-# Modern AI Engineering — Current-Practice Register
+# Modern AI: Research, Science and Engineering — Current-Practice Register
 
 | | |
 | --- | --- |
-| **Role** | Maintenance record: the status of every contemporary practice considered for Modern AI Engineering, and what the learner guide may teach |
-| **Last updated** | 2026-09-19, by the [4-week Modern AI Scan of 2026-09-19](2026-09-19-modern-ai-scan.md) |
+| **Role** | Maintenance record: the status of every contemporary practice considered for Modern AI: Research, Science and Engineering, and what the learner guide may teach |
+| **Last updated** | 2026-11-03, by the [4-week Modern AI Scan of 2026-11-03](2026-11-03-modern-ai-scan.md); the track was renamed and the `Open problem` status added for Baseline 3 on 2026-11-02; earlier practices reviewed by the [4-week Modern AI Scan of 2026-09-19](2026-09-19-modern-ai-scan.md) |
 | **Governed by** | [AGENTS.md — Topic Maturity](../AGENTS.md#topic-maturity) and [MAINTENANCE.md — 4-Week Modern AI Scan](../MAINTENANCE.md#4-4-week-modern-ai-scan) |
-| **Curriculum** | [ROADMAP.md §7](../ROADMAP.md#7-modern-ai-engineering) defines the track; this register records the current state of its practices |
+| **Curriculum** | [ROADMAP.md §6](../ROADMAP.md#6-modern-ai-research-science-and-engineering) defines the track; this register records the current state of its practices |
 
-This register is how the project decides which contemporary practices are taught in [Modern AI Engineering](../LEARNING-GUIDE.md#modern-ai-engineering). It records evidence and status. It does not change the permanent curriculum.
+This register is how the project decides which contemporary practices are taught in [Modern AI: Research, Science and Engineering](../LEARNING-GUIDE.md#modern-ai-research-science-and-engineering). It records evidence and status. It does not change the permanent curriculum.
 
 ## Contents
 
@@ -27,9 +27,9 @@ This register is how the project decides which contemporary practices are taught
 
 ## 1. How to Read This Register
 
-**Status** uses the lifecycle in [AGENTS.md](../AGENTS.md#topic-maturity): `Discovered` · `Watching` · `Current Practice` · `Established` · `Superseded` · `Declined` · `Archived`. Status describes evidence and adoption, not difficulty.
+**Status** uses the lifecycle in [AGENTS.md](../AGENTS.md#topic-maturity): `Discovered` · `Watching` · `Current Practice` · `Established` · `Open problem` · `Superseded` · `Declined` · `Archived`. Status describes evidence and adoption, not difficulty. `Open problem` is a question the field has not settled; it is carried as a frontier, never as practice.
 
-**Taught in** names the Modern AI Engineering topic that teaches the practice. Only `Current Practice` and `Established` practices may be taught. `Watching` and `Discovered` practices are recorded here and are not taught; `—` means the practice is not taught. The site build enforces both rules.
+**Taught in** names the Modern AI: Research, Science and Engineering topic that teaches the practice. Only `Current Practice`, `Established` and `Open problem` entries may be taught — the first two as practice, the third as an open question. `Watching` and `Discovered` practices are recorded here and are not taught; `—` means the practice is not taught. The site build enforces both rules.
 
 **Evidence** names source IDs in the linked reports. Evidence and adoption are separate signals ([AGENTS.md — Evidence Versus Adoption](../AGENTS.md#evidence-versus-adoption)); a vendor source alone is not treated as proof of adoption.
 
@@ -73,11 +73,11 @@ This register is how the project decides which contemporary practices are taught
 | MP-26 | Prompting off-the-shelf models first; fine-tuning for narrow, high-volume tasks | Adaptation | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) G16, D35 | Adapting Models in Practice |
 | MP-27 | Distillation into smaller models | Adaptation | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) D29 | Adapting Models in Practice |
 | MP-28 | Evaluation-gated data flywheels from production traces and feedback; synthetic data accumulated with real data rather than replacing it | Adaptation | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) G14, E18, D38 | Adapting Models in Practice |
-| MP-29 | Reinforcement learning from verifiable rewards offered as a fine-tuning service | Adaptation | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) D26, D27 | — |
+| MP-29 | Reinforcement learning from verifiable rewards offered as a fine-tuning service | Adaptation | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) D26, D27 · [Scan](2026-11-03-modern-ai-scan.md) S21 | — |
 | MP-30 | Limiting any one agent session from combining untrusted input, access to sensitive data or systems, and external action, with human approval where it must | Security | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) T16, T17, T21 | Securing AI Systems in Practice |
 | MP-31 | OWASP Top 10 lists for LLM and agentic applications, and MITRE ATLAS, as threat-modelling checklists | Security | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) T21, T22 · [Scan](2026-09-19-modern-ai-scan.md) S3 | Securing AI Systems in Practice |
 | MP-32 | Guardrail and detection products, which adaptive attacks bypass, so they are never the only defence | Security | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) T15, T16 | Securing AI Systems in Practice |
-| MP-33 | Model-signing and AI supply-chain integrity tooling | Security | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) T19 | — |
+| MP-33 | Model-signing and AI supply-chain integrity tooling | Security | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) T19 · [Scan](2026-11-03-modern-ai-scan.md) S23 | — |
 | MP-34 | Prompt-prefix caching: stable content first, changing content last | Cost | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E24 | Inference, Cost and Production |
 | MP-35 | Routing and cascades between models of different cost | Cost | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E25 | Inference, Cost and Production |
 | MP-36 | Serving engines with continuous batching and paged KV-cache memory | Inference | Established | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E20 | Inference, Cost and Production |
@@ -87,13 +87,32 @@ This register is how the project decides which contemporary practices are taught
 | MP-40 | Durable execution — checkpoint and resume — for long-running agents | Operations | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E3, E26 | — |
 | MP-41 | Using multimodal models — images, documents and audio as inputs | Model use | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) D34 | — |
 | MP-42 | AI coding assistants and coding agents in an engineer's own work, with mixed measured productivity | Professional practice | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E27, E28 | — |
-| MP-43 | Agentic, tool-based search loops in place of vector retrieval | Retrieval | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E10, X7 | — |
-| MP-44 | Graph-structured retrieval (GraphRAG) | Retrieval | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) X13 | — |
+| MP-43 | Agentic, tool-based search loops in place of vector retrieval | Retrieval | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E10, X7 · [Scan](2026-11-03-modern-ai-scan.md) S20 | — |
+| MP-44 | Graph-structured retrieval (GraphRAG) | Retrieval | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) X13 · [Scan](2026-11-03-modern-ai-scan.md) S20 | — |
 | MP-45 | Contextual enrichment of chunks before indexing | Retrieval | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E8 | — |
-| MP-46 | Repository agent-instruction files and skills formats | Context | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E13 | — |
+| MP-46 | Repository agent-instruction files and skills formats | Context | Current Practice | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E13 · [Scan](2026-11-03-modern-ai-scan.md) S4, S5 | — |
 | MP-47 | Computer-use agents operating graphical interfaces | Agents | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E29 | — |
 | MP-48 | Code execution against tool servers to reduce context load | Tools | Watching | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) E4 | — |
-| MP-49 | Scored context-quality criteria as a leading indicator of agent reliability | Context | Discovered | [Scan](2026-09-19-modern-ai-scan.md) S6 | — |
+| MP-49 | Scored context-quality criteria as a leading indicator of agent reliability | Context | Watching | [Scan](2026-09-19-modern-ai-scan.md) S6 · [Scan](2026-11-03-modern-ai-scan.md) S1, S2, S3 | — |
+| MP-50 | Mechanistic interpretability as assurance | Interpretability | Open problem | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) T7, T8, T9 | Contributing Research |
+| MP-51 | Alignment, scalable oversight and evaluation awareness | Alignment | Open problem | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) T11, T12, T13, G12 | Contributing Research |
+| MP-52 | Generalization and scaling theory | Model science | Open problem | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) M8, M9, D3 | Contributing Research |
+| MP-53 | Continual learning, model editing and verifiable unlearning | Adaptation | Open problem | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) D36, A10, T24 | Contributing Research |
+| MP-54 | World models, latent and recursive reasoning | Model science | Open problem | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) D20, D14, D33 | Contributing Research |
+| MP-55 | Discrete diffusion language models | Model science | Open problem | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) D19 | Contributing Research |
+| MP-56 | Validity of long-horizon agent evaluation | Evaluation | Open problem | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) T5, T1 | Contributing Research |
+| MP-57 | Neural theorem proving and automated discovery | Reasoning | Open problem | [Landscape](../research/2026-09-17-data-intelligence-landscape.md) X16, X17 | Contributing Research |
+| MP-58 | Context compaction as a lossy boundary: constraints are dropped before goals, and the summariser decides how much is lost | Context | Watching | [Scan](2026-11-03-modern-ai-scan.md) S1, S2 | — |
+| MP-59 | Provenance destruction at the compaction boundary in harnesses that flatten typed messages into labelled strings | Security | Watching | [Scan](2026-11-03-modern-ai-scan.md) S3 | — |
+| MP-60 | Prompt-injection detection figures do not transfer between benchmarks, and guardrail stacks fall together | Security | Watching | [Scan](2026-11-03-modern-ai-scan.md) S6, S8, S10, S11 | — |
+| MP-61 | Attack success scored at the argument level rather than by which tool was called | Evaluation | Watching | [Scan](2026-11-03-modern-ai-scan.md) S7, S9 | — |
+| MP-62 | The agent harness as a cost variable rather than a capability variable, and silent data loss inside it | System architecture | Watching | [Scan](2026-11-03-modern-ai-scan.md) S12, S13 | — |
+| MP-63 | A stale instruction file overriding the code it describes, and the one-sentence precedence fix | Context | Watching | [Scan](2026-11-03-modern-ai-scan.md) S4, S5 | — |
+| MP-64 | Agent trace integrity: agents can delete their own traces, so logging belongs outside the agent | Observability | Watching | [Scan](2026-11-03-modern-ai-scan.md) S14 | — |
+| MP-65 | Unearned benchmark passes through reference-solution leakage, and unearnable failures from specification-oracle gaps | Evaluation | Watching | [Scan](2026-11-03-modern-ai-scan.md) S15, S16 | — |
+| MP-66 | Tokenization bypassing knowledge editing and unlearning | Adaptation | Watching | [Scan](2026-11-03-modern-ai-scan.md) S17 | — |
+| MP-67 | Perplexity as an inadequate acceptance gate for quantisation | Cost | Watching | [Scan](2026-11-03-modern-ai-scan.md) S18 | — |
+| MP-68 | Tool-server error messages as an interface for a non-human caller | Tools | Watching | [Scan](2026-11-03-modern-ai-scan.md) S19 | — |
 
 [⬆ Back to Contents](#contents)
 
@@ -101,7 +120,7 @@ This register is how the project decides which contemporary practices are taught
 
 ## 3. Current References
 
-Contemporary sources a Modern AI Engineering topic asks the learner to **consult**. Each fills a gap no assigned resource covers, and each belongs to a category that [ROADMAP.md §14](../ROADMAP.md#14-resource-map) already lists as not counted as mandatory. They change quickly and are re-checked at every scan.
+Contemporary sources a Modern AI: Research, Science and Engineering topic asks the learner to **consult**. Each fills a gap no assigned resource covers, and each belongs to a category that [ROADMAP.md §14](../ROADMAP.md#13-resource-map) already lists as not counted as mandatory. They change quickly and are re-checked at every scan.
 
 | Reference | Link | §14 category | Gap it fills | Evidence | Used in |
 | --- | --- | --- | --- | --- | --- |
@@ -120,11 +139,15 @@ Practices that may deserve a permanent-curriculum decision. None is promoted by 
 
 | Practice | Question for the review |
 | --- | --- |
-| MP-41 Multimodal model use | [ROADMAP.md §7](../ROADMAP.md#7-modern-ai-engineering) lists no multimodal practice in any phase, although [AGENTS.md](../AGENTS.md#modern-ai-engineering) names multimodal engineering as Modern scope. Should a phase include it? |
+| MP-41 Multimodal model use | [ROADMAP.md §6](../ROADMAP.md#6-modern-ai-research-science-and-engineering) lists no multimodal practice in any phase, although [AGENTS.md](../AGENTS.md#modern-ai-research-science-and-engineering) names multimodal engineering as Modern scope. Should a phase include it? |
 | MP-42 AI coding assistants and agents | Is using them well part of a Data & Intelligence engineer's capability, given mixed measured productivity? |
 | MP-40 Durable execution | Is checkpoint-and-resume for long-running agents AI-specific enough to teach, or a Computer Science & Engineering concern? |
 | MP-17 Context engineering | The concept is taught in the Depth Track (F2). Has the practice stabilized enough that more of it belongs there? |
 | MP-20 Model Context Protocol | Does one protocol's adoption justify naming it in the Depth Track, or should F2 keep only the concept of standard interfaces? |
+| MP-61, MP-62, MP-65 Evaluation validity | Step 12 teaches construct validity and judge validation. It does not teach auditing your own harness and scorer. Should it? |
+| MP-58, MP-59 Compaction | Compaction is now a measurable and attackable boundary. Has it become durable enough for the Depth Track, or does it stay current practice? |
+| MP-46, MP-63 Instruction files | Now Current Practice with a measured failure mode and a tested fix. Should a topic teach it? |
+| MP-64 Trace integrity | Step 16's observability material assumes the trace is append-only. Does that assumption need correcting? |
 
 [⬆ Back to Contents](#contents)
 

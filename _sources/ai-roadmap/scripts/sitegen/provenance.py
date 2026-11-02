@@ -1,14 +1,14 @@
 """Provenance: why the learner is told what the learner guide tells them.
 
 The guide presents ROADMAP.md, and ROADMAP.md rests on the evidence in research/.
-Modern AI Engineering adds one more link in that chain: its current practices are
+Modern AI: Research, Science and Engineering adds one more link in that chain: its current practices are
 recorded, with status and evidence, in the current-practice register that the
 4-week scan maintains. These checks fail the build when a learner-facing claim
 loses its basis:
 
 - every Modern topic declares, in a hidden ``<!-- practice: ... -->`` marker, the
   register entries it teaches, and the register names the same topic;
-- only Current Practice and Established entries are taught; watched entries are not;
+- only Current Practice, Established and Open problem entries are taught; watched entries are not;
 - every register entry cites evidence that exists in the report it links to;
 - a contemporary source the guide asks the learner to consult is listed in the
   register with the gap it fills;
@@ -190,7 +190,7 @@ def check_provenance(report: ValidationReport, guide: Guide, register: MarkdownD
     outside = guide.doc.source[:guide.doc.source.find("\n## " + guide.modern.heading.text)] if guide.modern else ""
     if PRACTICE.search(outside):
         problems.append("a Depth step declares current-practice entries: dynamic material must stay in Modern")
-    report.check(not problems, "Modern topics teach only Current Practice or Established register entries",
+    report.check(not problems, "Modern topics teach only Current Practice, Established or Open problem register entries",
                  "; ".join(problems[:6]))
 
     problems = []

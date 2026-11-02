@@ -1,5 +1,19 @@
 # Towards Intelligence — session instructions
 
+## This file can be out of date. The repository cannot.
+
+Where this file and the actual state of the repository disagree, **the repository wins**.
+Check what the files and the code actually do before you act on an instruction here. Do not
+change the repository to match this file. Say that this file looks out of date, and ask.
+
+Why this rule exists: measured on 40 projects and 320 runs, coding agents followed a stale
+instruction file over the existing code **90.1%** of the time. One agent reported the conflict in
+79 of 80 runs and followed the file anyway; another rewrote working code to match the file, and
+the project's tests then failed. One sentence giving the code precedence moved code-following
+from 4.2% to 91.4% and the test pass rate from 89.4% to 100%
+([arXiv 2610.30571](https://arxiv.org/abs/2610.30571), verified 2026-11-03; the study tested a
+user-level file, this is a project-level one).
+
 ## First thing in every session
 
 Before doing anything else, ask the user which kind of work this session is (use the
