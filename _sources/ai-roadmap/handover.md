@@ -267,7 +267,38 @@ plus the register, the scan report and the state file.
 
 No task is forced; pick with the owner. Suggested order:
 
-**A. Put the deliberate-failure suite in the repository** *(recommended first)*
+**0. Run the outstanding directed research** *(recommended first, 2026-11-03)*
+`MAINTENANCE.md` §12 carries a one-off investigation with its brief: one open question asking where
+the dominant practice in AI engineering is and how it is distributed, with **no taxonomy supplied**
+and nothing framed as "outside language models". It exists because the register's 68 entries
+contain no tabular, time-series, recommender, media-generation or embodied practice, all 23 sources
+of the 2026-11-03 scan were language-model papers, and every search direction in `MAINTENANCE.md`
+§4 is an LLM-shaped question. It decides whether the Modern AI track is short of topics, and it
+blocks the second book's first chapter (`_book/HANDOVER.md` §9.5).
+
+**0a. Decide what to do with the 2026-11-03 curriculum-review draft** *(it will otherwise be lost)*
+A full 12-week Curriculum Review was run on 2026-11-03, 38 days early, at the owner's instruction,
+to judge the quality of the research rather than to change the curriculum. **It was deliberately
+not saved**: it exists only in that session's scratchpad, it is not in the repository, and it will
+not survive. The state file was **not** updated, so `next_curriculum_review_due` is still
+2026-12-11 and saving the draft now would reset the cadence to 2027-01-26.
+
+Its findings that rest on checkable facts rather than on this period's preprints, recorded here so
+they are not lost with the draft:
+
+| Finding | Evidence |
+| --- | --- |
+| Security is absent from Fundamentals while the track lets a learner build retrieval systems there | E1–E10 contain no security content; "prompt injection" first appears in F4, which opens behind F2 |
+| E7 hard-gates *all* of F4, including fairness, privacy, documentation and regulation | F4's prerequisite line already scopes F2 and F1 to single strands and does not scope E7 |
+| Entitlement-aware retrieval is in neither roadmap | *Permission*, *entitlement*, *access control* appear nowhere in the curriculum; §14 assigns authorisation to the future CS&E roadmap |
+| A refereed, durable addition for E8 | Weller et al., *On the Theoretical Limitations of Embedding-Based Retrieval*, arXiv 2508.21038, ICLR 2026 — read at body level. Top-*k* sets a single vector can return are bounded by its dimension. On its LIMIT set, BM25 scores R@2 85.7 against 3.0 for a 4096-dimension model |
+| Three register rows say more than their sources do | MP-58 ("constraints dropped *before* goals" — the source measures a *rate*, not an order), MP-67 ("inadequate" — the source finds perplexity a reliable aggregate, 2.1% and 4.0% exceptions in 780 comparisons), MP-64 (framed as correcting an assumption the roadmap never makes) |
+| The eleven "planned" learner materials all exist | 13 files in `materials/`, 89–176 lines each, while nine resource lines and §15 still call them planned |
+| *Speech and Language Processing* restructured on 2026-08-19 | Six of seven assignments still resolve; §1.9 and §1.10 sit inside a rebuilt chapter 1 and no draft date is recorded in §13 |
+| `ROADMAP.md:845` and `:497` | A cross-reference labelled `[11]` whose anchor belongs to §10, and a duplicated back-link |
+| F6's resource gap has its first candidate | *AI-Powered Search* (Grainger, Turnbull, Irwin; Manning, Dec 2024, 520 pp, ISBN 9781617296970). Reader profile matches F6's entry state. **Chapter-level TOC could not be retrieved**, so portions cannot be assigned yet |
+
+**A. Put the deliberate-failure suite in the repository**
 Create it under `scripts/` (for example `scripts/failure_tests.py`) with a documented way to run it.
 Each case should mutate one canonical fact or generator behaviour in a throwaway copy and assert the
 build rejects it with a specific message, plus the positive control described in §7.1. Without this,

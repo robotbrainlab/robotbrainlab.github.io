@@ -1,6 +1,7 @@
 # Handover — Modern AI Engineering from Zero
 
-Last updated: 2026-10-28 (chapter 26 closed, sharpen pass over 8-17 applied; stopped at the reader's request).
+Last updated: 2026-11-03 (the book is complete; section 9 added for the second book).
+The state tables in section 3 were stale until 2026-11-03 and are now measured, not estimated.
 
 Read this file first, then `BOOK-GUIDE.md` (the spec), then `TOC.md` (the plan).
 
@@ -200,13 +201,13 @@ Three chapters were over-counted that way; `LEDGER-DEFECTS.md` entry 23 has the 
 | `markdown/22` | Constrained decoding and strict modes | **Done.** Two review passes, record sealed. Earned entry 37, and `check-all.sh` now checks the "0 undefined" its header always promised |
 | `markdown/23` | How a tool call works | **Done.** **Three** review passes, record sealed — a section written to answer the first review had itself only been read once. Earned entry 38, and the first message list in the book that carries a tool message |
 | `markdown/24` | Embeddings, and choosing one | **Done.** Two review passes, record sealed. Earned entry 39 and a real fix to `verify-arithmetic.py`, which had been reporting 540 equations checked while checking 56 |
-| `markdown/19` … `markdown/57` | Chapters 19 to 57 | Not started |
+| `markdown/18` … `markdown/57` | Chapters 18 to 57, and Appendices A–D | **Done.** All 57 chapters closed; records sealed |
 | `markdown/00-preface.md` | A placeholder, so the build runs | Replace before release |
-| `markdown/C-glossary.md` | Appendix C. **Generated** by `tools/glossary.py` from every chapter's Key Terms table | 115 terms, in the PDF |
-| `records/` | One record per chapter, ticked with evidence, hashed last | 18 of 57 |
-| `labs/` | The data every Part III lab runs on | **Empty — see section 4** |
-| `LEDGER-TAUGHT.md` | What each chapter taught, with "Do not" rows | 34 rows |
-| `LEDGER-DEFECTS.md` | What the gates cannot catch | 59 entries |
+| `markdown/C-glossary.md` | Appendix C. **Generated** by `tools/glossary.py` from every chapter's Key Terms table | **311 terms**, in the PDF |
+| `records/` | One record per chapter, ticked with evidence, hashed last | **57 of 57** |
+| `labs/` | The data every Part III lab runs on | **Built.** `labs/corpus/`, 50 files |
+| `LEDGER-TAUGHT.md` | What each chapter taught, with "Do not" rows | **94 rows** |
+| `LEDGER-DEFECTS.md` | What the gates cannot catch | **99 entries** |
 | `LEDGER-SHORTHAND.md` | What an interviewer calls each concept the book teaches, which chapter names the shorthand, which shorthands wait on an unwritten chapter, and which were checked and left out on purpose | Written 2026-10-29 |
 | `tools/` | The driver, the gate suite, the glossary generator, the build probe | Done |
 | `latex/` | The template, with six changes (section 5) | Builds clean |
@@ -459,3 +460,216 @@ that research; they are there because interviews test them.
 5. For each part: a writing agent drafts it, then the main session edits **every** chapter by
    hand, then build and check (`BOOK-GUIDE.md` §14 and §15).
 6. Update `README.md` and this file after each part.
+
+---
+
+## 9. The second book — *Modern AI: Research, Science and Engineering*
+
+Agreed with the owner on 2026-11-03. Nothing is drafted yet. Read this section before proposing
+any scope for it.
+
+### 9.1 The scope rule, which decides everything else
+
+> **The second book carries nothing that Fundamentals, Advanced or Mastery already teaches.**
+
+It is the **Modern AI track and only the Modern AI track** — the section headed *Modern AI:
+Research, Science and Engineering* that sits beside the depth path on the live site. The book is
+named after that track, not after the field.
+
+Three consequences, each of which was proposed during the discussion and rejected:
+
+- **No classical ML, no learning theory, no statistics beyond the track's own needs.** Those are
+  E2, E4, E5 in Fundamentals.
+- **No foundation-model lifecycle science and no evaluation science.** Those are F1 and F3 in
+  Advanced, the second at *Design* depth.
+- **No trustworthy-AI theory and no retrieval science.** Those are F4, E8 and F6.
+
+Whenever a candidate topic turns out to sit in the Depth Track, it is out. The test is one grep of
+`ROADMAP.md`, not a judgement.
+
+### 9.2 What the first book already is, in track terms
+
+**This mapping is unverified and must be checked before it is relied on.** It was derived from
+chapter titles and `TOC.md`'s *Covers* column, not by reading the track's topic pages against the
+chapters. Checking it is the first task in 9.5.
+
+| Track topic | Chapters that appear to cover it |
+| --- | --- |
+| Orientation: Contemporary AI Systems | 1–5 |
+| Working with Models | 18–23 |
+| Embeddings and Semantic Search | 24–25 |
+| Retrieval-Augmented Systems | 26–29 |
+| Evaluating and Observing AI Applications | 30–33 |
+| Agents, Tools and Context | 34–38 |
+| Adapting Models in Practice | 39 |
+| Securing AI Systems in Practice | 51 |
+| Inference, Cost and Production | 15, 52–54 |
+| **Contributing Research** | **none** |
+
+Chapters 8–17 belong to no track topic. They are the model's inference mechanism, and they are in
+the first book because interviews ask for it.
+
+Depth: the first book is *Use* rising to *Implement* — build the thing and measure it. Only one
+track topic page was checked for its stated depth (*Evaluating and Observing* says **Implement**).
+The other nine are unchecked.
+
+### 9.3 What the second book adds
+
+Three things, and nothing else:
+
+1. **Topic 10, Contributing Research.** Absent from the first book entirely. This is the *Research*
+   word in the title: the frontiers in `ROADMAP.md` §9, the frontier questions in
+   `research/2026-09-17-data-intelligence-landscape.md` §F, research literacy and contribution
+   (H1/H2), how to place a claim on an evidence ladder.
+2. **Modern practices with no topic home.** They are in
+   `reviews/modern-practice-register.md` with `—` in the Topic column, so they reached no chapter:
+   multimodal model use, computer-use agents, agentic search loops, graph retrieval, contextual
+   chunk enrichment, durable execution, code execution against tool servers, model signing,
+   repository instruction files, context-quality scoring, and the eleven rows added by the
+   2026-11-03 scan. Some of these will need new track topics first.
+3. **A way to refresh what dates.** The first book's current-practice material is frozen at
+   2026-10-31. Each 12-week cycle should revise the current-practice sections and the frontier
+   statuses rather than let the whole book age at once.
+
+### 9.4 Rules it inherits, and the one it adds
+
+Inherited unchanged, at the owner's explicit instruction: the voice (chapter 1 is the reference),
+the five-step chapter loop, two review passes with fresh agents, evidenced and hashed records, the
+gate suite, one chapter at a time, and the writing-order-is-reading-order rule. The second book
+**continues** the first; it does not restart it.
+
+**The one new gate.** The first book's claims could be checked by recomputation — every number in
+chapters 8 to 44 was recomputed independently by the 2026-10-30 audit. The second book's claims
+cannot be, because they rest on papers that disagree with each other. So:
+
+> **A claim may not be stated above the strength of its source, and the source is quoted.**
+
+A quoted span, not a citation. Chapter 6's evidence ladder is the device; it has to become a gate
+rather than a habit. This is the defect class that recurred three times in two days during the
+2026-11-03 research (register rows MP-58, MP-67 and MP-64 each said more than their source did).
+
+### 9.4a How the old book is reused — the rule that is easy to get wrong
+
+Settled with the owner, 2026-11-03.
+
+> **Reuse the old book as text. Never use it as a source.**
+
+The old book is a **draft to edit**, not an authority to cite. Where the new table of contents has a
+row an existing chapter already teaches, start from that chapter and edit it — that is the whole
+saving, and it is why this is a second edition rather than a rewrite.
+
+But any claim that is **new**, and every claim in a chapter's *Still open* block, is sourced from the
+research with a quoted span. **Not from the old book.** The reason is in §6 of this file and in the
+records: the ten chapters that teach the model (8–17) cite nothing external at all — their inputs
+are `TOC.md`, `BOOK-GUIDE.md` §6, earlier chapters, the two ledgers and the bank. Their arithmetic
+was verified by recomputation, which is real checking, but it is not provenance. A writing agent told
+to "look in the current book first, and look further if that is not enough" will therefore inherit
+unsourced science and defeat §9.4's gate on its first chapter.
+
+**The working order, per table-of-contents row:**
+
+1. The research decides the scope. The scope becomes the table of contents.
+2. For each row, look in the old book. A chapter that already teaches it is the starting draft.
+3. Anything new comes from the research, quoted, with its evidence status marked.
+4. Chapters 8–17 are the ones to watch: reuse their prose freely, and source any claim in them that
+   the new frame makes load-bearing.
+
+### 9.4b The cheap test before committing to any of this
+
+The owner was undecided between a second edition and starting from scratch. The settled answer is a
+second edition — 548,705 words, 1,413 pages and 57 sealed records are not rewritten to arrive at the
+same content plus one part. But the decision was taken on an argument, not on evidence, so test it on
+one chapter first:
+
+**Take chapter 25, *Where Dense Search Fails*, and re-frame it under the new spine.** It is the right
+test because the delta is already known: it teaches dense retrieval's failures as observations, and
+the new frame requires the proved capacity ceiling (arXiv 2508.21038, ICLR 2026) plus the four-label
+block of §9.6. Measure what actually changed.
+
+- About a fifth changes → the second edition is right, and the cost of the whole book is now known.
+- About four fifths changes → from scratch was right after all, decided on evidence rather than by
+  weighing it.
+
+### 9.5 What blocks chapter 1
+
+Two tasks, in this order. **Do not start writing before both are done.**
+
+1. **Verify the 9.2 mapping.** Read all ten topic pages on the live site in full — each one's
+   stated depth, its concept list and its *Where you study each concept* table — and check each
+   against the chapters claimed above. The "second edition rather than a new book" conclusion
+   rests entirely on this mapping and the mapping is currently an assumption.
+2. **Run the open research question in `MAINTENANCE.md`.** It decides whether the track has ten
+   topics or more, which decides the book's contents page. See that file for the brief.
+
+Once both are settled, the first topic to write is **Orientation: Contemporary AI Systems** — the
+track's first unit, which opens with no prerequisites, and writing order is reading order.
+
+### 9.6 What the reader sees — the two visible changes
+
+Settled with the owner, 2026-11-03. Everything in 9.7 exists only to produce these two pages. The
+reader never sees the register, the records or the checks.
+
+**The four parts do not change.** Understand → Use → Apply → What Next, as decisions 6 and 10 set
+them. Security, speed, cost and failure stay in Part IV; "ordinary chapters in Part II" remains the
+rejected alternative. Part IV keeps its four threads and **gains** the frontier material, because
+"What Next" is already where the reader looks outward after building. There is no fifth part.
+
+**1. Every chapter ends with four labels instead of two.** The first three are what the live site's
+topic pages already print under *What lasts and what changes*. The fourth is new, and so is the
+date. It replaces nothing in the existing end-of-chapter furniture — Summary, Key Terms, Worth
+Memorising, Review Questions and *You understand this when* all stay.
+
+> ### What Lasts, What Changes, What Is Open
+>
+> **Lasting.** Retrieval quality is a ceiling on answer quality — the second stage cannot retrieve
+> what the first stage missed. Lexical and dense retrieval fail in different ways, so combining them
+> recovers documents neither finds alone. A ranking is judged with graded relevance, not accuracy.
+>
+> **Current practice** · *confirmed November 2026.* BM25 and dense retrieval fused with reciprocal
+> rank fusion at k = 60, then a cross-encoder reranker over the top candidates.
+>
+> **Likely to change.** Which reranker is cheapest to run. The fusion constant. The embedding model
+> you would pick today.
+>
+> **Still open.** Whether a model judge can replace human relevance judgements. *Contested* — there
+> is credible evidence on both sides, so build your own labelled set rather than trusting a judge's
+> agreement figure.
+
+Only the *current practice* label carries a date, because it is the only one that ages. Lasting
+material needs none; attention arithmetic will not change. Frontier entries carry their status word
+from the landscape's §F vocabulary — *substantial evidence*, *contested*, *active research*,
+*speculative*.
+
+**2. A changes page near the front, one per edition.**
+
+> ### What Changed in This Edition
+>
+> *February 2027.*
+>
+> | Chapter | What changed |
+> | --- | --- |
+> | 26 | Reranking is no longer a separate stage in common practice. Rewritten |
+> | 31 | Judge validity moved from *current practice* to *still open* |
+> | 35 | New: compaction loses constraints that exist nowhere else |
+
+### 9.7 How those two pages get produced
+
+Four additions, none of them visible to the reader. The first three mirror machinery that already
+works for the interview bank.
+
+1. **Each register row names its chapter and section**, not just its track topic. Today
+   `reviews/modern-practice-register.md` ends a row at *Retrieval-Augmented Systems*; it needs
+   `ch 26, "Fusing Two Rankings"`. Without this, a status change in March points at a topic and you
+   search the book by hand.
+2. **Each chapter's record names the register rows it teaches.** The reverse direction, and it is
+   not optional: without it a chapter can teach something the register never recorded, and that
+   content is invisible to every later cycle — it can rot with nothing pointing at it.
+3. **A gate checks the two agree**, exactly as `tools/verify-bank.py` already checks that every
+   closed chapter's record names the bank questions it owns. No row without a chapter, no chapter
+   claiming a row it does not teach.
+4. **The date on each *current practice* block is what the changes page is built from.** A row whose
+   status moved since the last edition produces one line in that table.
+
+The cycle is then mechanical: a scan changes a row's status → the row names the chapter and section
+→ `tools/chapter.py amend` reopens it with a dated reason and a fresh hash → the edition's changes
+page is generated from the rows that moved.

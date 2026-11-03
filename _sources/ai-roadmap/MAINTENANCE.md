@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | **Role** | The operating procedure for keeping the roadmap current. [AGENTS.md](AGENTS.md) is the constitution; this file is how it is carried out |
-| **Current baseline** | Baseline 2, canonical in [ROADMAP.md](ROADMAP.md) |
+| **Current baseline** | Baseline 3, canonical in [ROADMAP.md](ROADMAP.md) |
 | **State file** | [reviews/maintenance-state.json](reviews/maintenance-state.json) |
 | **Outputs** | Dated reports in `reviews/` |
 
@@ -36,6 +36,8 @@ The human does not need to remember the project's history or calendar. The state
 9. [Baseline Versioning](#9-baseline-versioning)
 10. [Standing Maintenance Items](#10-standing-maintenance-items)
 11. [Completion Checklist](#11-completion-checklist)
+12. [Where the Dominant Practice Is](#12-where-the-dominant-practice-is--the-question-the-next-scan-must-answer)
+13. [Staying Current Between Reviews](#13-staying-current-between-reviews)
 
 </details>
 
@@ -54,6 +56,8 @@ Explicit commands are also supported and may be given at any time:
 > **Perform the 12-week Curriculum Review.**
 
 An explicit command runs the named action even if it is not yet due. The state file is updated from the date the action was completed.
+
+The scan's search directions changed on 2026-11-03 ([4](#search-directions)), and the next scan must also answer the question in [12](#12-where-the-dominant-practice-is--the-question-the-next-scan-must-answer). Awareness of releases and tooling is kept outside the cadence, in [13](#13-staying-current-between-reviews).
 
 [⬆ Back to Contents](#contents)
 
@@ -116,22 +120,45 @@ The scan is **lightweight**. It does not require a full independent field recons
 
 ### Search Directions
 
-Start from these directions. They are **not** a closed taxonomy; the scan must stay able to find developments outside them.
+**Changed 2026-11-03.** The directions used to be a list of subjects — model capability, inference
+and serving, retrieval, agents, context, adaptation, evaluation, security, multimodality, standards.
+Every one of those is a language-model subject, so a scan pointed along them could only return
+language-model findings, and twice it did: all 23 sources of the 2026-11-03 scan were language-model
+or agent papers, and the current-practice register holds no row about tabular models, time series,
+recommenders, media generation or embodied systems. The old list carried a note saying it was "not a
+closed taxonomy", and that note lost to the list both times.
 
-- model capability shifts that change what engineers can build;
-- inference and serving practice;
-- retrieval;
-- agent and tool systems;
-- context management;
-- adaptation and post-training;
-- evaluation;
-- security;
-- multimodality;
-- standards and interoperability;
-- important engineering patterns and failure reports;
-- **active research frontiers** — what researchers are trying to solve, which directions have substantial evidence, which are contested, and which could reshape the field. The track carries the open problems, so the scan must look for them. Frontier findings are recorded, never promoted to practice.
+**So the directions now name the kind of change to look for, not the technology it happens in.**
 
-Prefer primary evidence, as ranked in [AGENTS.md — Research Standards](AGENTS.md#research-standards). Record scientific evidence and engineering adoption as separate signals.
+- What can engineers now build that they could not before?
+- What changed in how systems are put together?
+- What changed in how they are measured?
+- What changed in how they fail, or are attacked?
+- What changed in what they cost, or how fast they are?
+- What became a standard, and what was dropped or deprecated?
+- What is newly disputed, and what is now settled?
+- **Active research frontiers** — what researchers are trying to solve, which directions have
+  substantial evidence, which are contested, and which could reshape the field. The track carries
+  the open problems, so the scan must look for them. Frontier findings are recorded, never promoted
+  to practice.
+
+Nothing in that list points at one technology, so a finding about any part of the field can come
+back through it. Language-model work is still found; it simply stops being the only thing the scan
+can see.
+
+**Two rules that go with the change.**
+
+1. **Report where practice is concentrated, as a finding in its own right.** Supply no taxonomy to a
+   searching agent and name no areas — it builds its own structure from the evidence. Never frame
+   any part of the search as "outside language models" or against an existing category: that defines
+   the rest of the field by reference to one part of it and sends the agent hunting for a result
+   instead of measuring one. **The distribution is a finding, not a premise.**
+2. **Every searching agent reports what it searched, what it could not reach, and what its sources
+   over-represent.** A claim about the field's shape is worth exactly as much as the sampling behind
+   it.
+
+Prefer primary evidence, as ranked in [AGENTS.md — Research Standards](AGENTS.md#research-standards).
+Record scientific evidence and engineering adoption as separate signals.
 
 ### Anti-News-Feed Rule
 
@@ -213,6 +240,7 @@ The review applies the [Independent Discovery and Falsification Rule](AGENTS.md#
 - failures and limitations that have become clearer;
 - changes in maturity and durability;
 - learner feedback, if available;
+- the running notes file from [13](#13-staying-current-between-reviews), tested rather than accepted;
 - resource updates — new editions, withdrawn materials, better candidates — where relevant;
 - the [standing maintenance items](#10-standing-maintenance-items).
 
@@ -329,8 +357,8 @@ A change is **not** minor if it alters what a learner must learn, to what depth,
 | Scan or review reports; watch-item or status changes | No change |
 | Current-practice edits within the scan's limits | No change |
 
-- **Current:** Baseline 2, accepted 2026-09-19.
-- **History:** [history/roadmap-baseline-v0.md](history/roadmap-baseline-v0.md) and [history/roadmap-baseline-1.md](history/roadmap-baseline-1.md). Every future outgoing baseline is preserved alongside them.
+- **Current:** Baseline 3, accepted 2026-11-02.
+- **History:** [history/roadmap-baseline-v0.md](history/roadmap-baseline-v0.md), [history/roadmap-baseline-1.md](history/roadmap-baseline-1.md) and [history/roadmap-baseline-2.md](history/roadmap-baseline-2.md). Every future outgoing baseline is preserved alongside them.
 
 > ⚠️ Files in `history/` are immutable. Never overwrite or edit them.
 
@@ -366,6 +394,86 @@ Before reporting any maintenance action as complete:
 - `history/` files are unchanged.
 - If learner-facing canonical content changed, the site was regenerated and checked.
 - The completion message states: the action performed, the report path, state changes, changes made, and proposals awaiting approval.
+
+[⬆ Back to Contents](#contents)
+
+---
+
+## 12. Where the Dominant Practice Is — the question the next scan must answer
+
+**Agreed with the owner, 2026-11-03.** This began as a one-off investigation. It is not one: the
+bias lived in the scan's standing directions, so fixing it once would have fixed nothing. The
+directions in [4](#search-directions) were changed instead, and **the next scan under those
+directions is this investigation.**
+
+What it has to answer, alongside its normal findings:
+
+> **Where is the dominant practice in AI engineering, and how is it distributed across the field?**
+
+### Why it matters beyond the scan
+
+It decides the scope of the second book — whether the Modern AI track has ten topics or more — and
+it is one of the two tasks blocking that book's first chapter. See `_book/HANDOVER.md` §9.5.
+
+Two outcomes, both useful:
+
+- **Substantial practice outside language models.** The track is short of topics and the register
+  needs rows it has never had.
+- **Thin.** Then "Modern AI" in this project honestly means the foundation-model layer, and
+  [ROADMAP.md §6](ROADMAP.md#6-modern-ai-research-science-and-engineering) should say so in one
+  sentence rather than letting the name overclaim.
+
+### The evidence that the bias was real
+
+- The [current-practice register](reviews/modern-practice-register.md) holds 68 entries and **not
+  one** concerns tabular models, time series and forecasting, recommenders, media generation or
+  embodied systems. Multimodal input is the nearest thing, and that is still a language model.
+- All 23 sources of the [2026-11-03 scan](reviews/2026-11-03-modern-ai-scan.md) were language-model
+  or agent papers.
+- All three blind reconstructions run on 2026-11-03 disclosed the same limit unprompted. One wrote
+  that its evidence was "English-language, Western, LLM-centric research. Entirely," and named
+  non-LLM work as the largest structural gap in its report.
+- [The landscape](research/2026-09-17-data-intelligence-landscape.md) §A point 2 says plainly that
+  foundation models reorganised the field **without replacing it**, and two of the twenty frontier
+  questions in its §F are not about language models at all.
+
+[⬆ Back to Contents](#contents)
+
+---
+
+## 13. Staying Current Between Reviews
+
+**Agreed with the owner, 2026-11-03.** The scan was being asked to do two jobs and did neither well.
+
+**The two jobs are different.** Knowing that a lab shipped a tool is **awareness**. Deciding what the
+curriculum teaches is **research**. The [Anti-News-Feed Rule](#anti-news-feed-rule) bars the scan from
+the first, so for two cycles the scan could not report the thing the owner most wanted to know, and
+filled the gap with *Watching* rows instead. A four-week research cycle is also the wrong instrument
+for it: too slow to hear about a release, and too heavy to be worth running for one.
+
+**So awareness is kept separately, as a running notes file, and it is not research.** Follow release
+notes, changelogs and the tools actually in use, as broadly as you like. No report, no register, no
+evidence grading, no cadence.
+
+**The one rule that makes it useful rather than noise:**
+
+> **Watch the tools. Write down the capability.**
+
+A product launching tells you nothing. Several products doing the same new thing tells you a
+capability has become expected, and that is adoption evidence. So a note reads *"several vendors now
+sell X, so it is becoming expected practice"* — never *"company Y shipped Z"*. The product names are
+the evidence; the capability is the finding. This is the shape the landscape's §E already uses, where
+the products sit in a column headed **"Implementation examples (not categories)"** beside the
+capability they evidence.
+
+Two consequences:
+
+- **The notes file is an inbox, not a verdict.** Things land there as they are noticed; the 12-week
+  review is where each one is tested against [5](#5-12-week-curriculum-review)'s procedure or thrown
+  out. It is listed among that review's inputs.
+- **Expect to discard most of it.** The landscape's §E says plainly that engineering importance is
+  not scientific importance, and that several widely adopted practices carry little novelty. Most of
+  this layer changes nothing about what an engineer must understand.
 
 [⬆ Back to Contents](#contents)
 
