@@ -34,7 +34,7 @@ results that survived. `CLAIMS.tsv` and `research/` are empty.
 
 ## What step 3 established
 
-The pilot ran one agent on one area with the brief at `briefs/pilot-01-systems.md`.
+The pilot ran one agent on one area with the brief at `discarded/pilot-01-systems-brief.md`.
 
 **It passed all six tests.** It used 11 of 25 searches and 16 of 25 fetches, stopped because its
 records were complete rather than because the budget ran out, and started **zero** sub-agents. It

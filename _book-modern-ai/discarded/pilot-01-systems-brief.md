@@ -3,7 +3,7 @@
 > **SUPERSEDED.** Run once on 2026-11-06. It passed all six of its tests and revealed four fixes,
 > which are in `TEMPLATE-area-research.md` version 2. **Use the template, not this file.** This one
 > is kept so that the pilot's output can be read against exactly what was asked, which is the whole
-> reason briefs are kept at all. Its result is in `../research/2026-11-06-systems-hardware.md`.
+> reason briefs are kept at all. Its result is in `2026-11-06-systems-hardware.md` (in this folder).
 
 **Written 2026-11-06. Run once.** This is the first brief written to the schema in
 `PROCESS.md` §4.6. Its purpose is as much to **test the brief** as to get the research: the last

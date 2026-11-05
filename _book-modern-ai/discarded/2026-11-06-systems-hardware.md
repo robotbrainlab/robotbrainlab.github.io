@@ -1,6 +1,6 @@
 # Research output — systems, hardware and infrastructure
 
-**Run 2026-11-06.** Brief: `briefs/pilot-01-systems.md`. Pilot run 01.
+**Run 2026-11-06.** Brief: `pilot-01-systems-brief.md` (in this folder). Pilot run 01.
 **Budget used: 11 of 25 searches, 16 of 25 fetches. Zero sub-agents. Stopped on completeness.**
 
 Six subject records, all with the verdict `CHAPTER`. Reproduced as returned, except that my own

@@ -45,6 +45,9 @@
   - [Class F — Private shorthand](#class-f--private-shorthand)
   - [Class G — Instructions with no termination condition](#class-g--instructions-with-no-termination-condition)
   - [Class H — Assessing a thing with an instrument that does not sample it](#class-h--assessing-a-thing-with-an-instrument-that-does-not-sample-it)
+  - [Class I — Doing adjacent work instead of the named deliverable](#class-i--doing-adjacent-work-instead-of-the-named-deliverable)
+  - [Class J — Treating a superseded document as current](#class-j--treating-a-superseded-document-as-current)
+  - [Class K — Continuing to use evidence after it was withdrawn](#class-k--continuing-to-use-evidence-after-it-was-withdrawn)
   - [What follows for the framework](#what-follows-for-the-framework)
 - [12. Additional considerations I identified](#12-additional-considerations-i-identified)
 - [13. What this document does not cover](#13-what-this-document-does-not-cover)
@@ -300,9 +303,11 @@ and which the owner has questioned twice and not yet ruled on:
   because a partition is a decision about what to treat as the same thing. The owner's own
   landscape document demonstrates this: its section B is titled *"Why the Taxonomy Took This
   Form"* and records decisions with the alternatives considered and the reasons.
-- **An open brief collapses onto language models.** Measured three times in one session: a scan
-  whose 23 sources were all language-model papers; a re-run with open rules that still measured
-  only the language-model share; a third with advances-focused rules that stayed narrow.
+- **An open brief collapses onto language models.** Observed three times in one session: a scan
+  whose every source was a language-model paper; a re-run with open rules that still measured only
+  the language-model share; a third with advances-focused rules that stayed narrow. **Those runs
+  are discarded and none of their findings may be cited** — but this is an observation about our
+  own instructions, not a finding about the field, and the brief design exists because of it.
 - **So a fixed set of research areas is a coverage device**, used to force attention somewhere the
   search index does not point. It is not a claim about the field's natural shape.
 - **Consequence:** any percentage computed over a chosen set of areas is a percentage of that
@@ -333,8 +338,10 @@ must never be presented as established facts.
 
 1. **A search summary is not a source.** A paper whose striking result would have been quoted was
    withdrawn by arXiv two days earlier; only fetching the abstract page revealed it.
-2. **A source's own inclusion criteria are part of the finding.** "97.3% of large AI models are
-   language models" measures the criteria for notability, not the field.
+2. **A source's own inclusion criteria are part of the finding.** A figure giving the share of
+   "notable" models of some kind measures the criteria for notability, not the field: a model
+   deployed quietly inside a bank satisfies none of the usual criteria while doing more economic
+   work than one with a press release. Check what the denominator admits before quoting the ratio.
 3. **Every research instruction carries a termination condition and a fixed output shape.** Three
    research agents in this project searched for an hour without converging, because every
    instruction they had rewarded searching more and none said what finished looked like.
@@ -555,18 +562,23 @@ self-contained per topic. Five candidates, with what each costs:
 | **D · Flat by subject, with reading maps** | No parts. Chapters are subjects; maps give several orders through them | Loses the progression that makes the material learnable — the thing §5.2 says does the work |
 | **E · Parts by the five dimensions** | Part per dimension: why it matters, the science, the research, the engineering, reproducing | **Rejected.** The owner's instruction is that the dimensions must *not* become sections (§4.1) |
 
-**[I RECOMMEND]** **C combined with B**, as a proposal and nothing more: a shared foundations part,
-then an area per part, each area carrying its own progression. Two reasons, and the first is
-measured rather than argued:
+**[I RECOMMEND]** **C combined with B** — a shared foundations part, then an area per part, each
+area carrying its own progression. **One of its two reasons has lost its evidence and I am
+recording that rather than quietly keeping the recommendation.**
 
-1. **The shared part is justified by evidence, not taste.** Three independent research areas
-   converged on evaluation, and the job-posting data puts it in **44% of all AI engineering
-   postings and at least 28% of every single area's**. The statistics of comparison, how to read a
-   result, and how to tell whether a difference is real are genuinely common to every area. That is
-   a measured basis for a foundations part, and it is the only one I have.
-2. **An area has to be finishable on its own**, because the book will be produced faster than it
-   can be read (§12.1). An area that is a complete unit is something the owner can work through and
-   finish; an area smeared across four book-wide parts is not.
+1. ~~**The shared part is justified by measurement.**~~ **Withdrawn 2026-11-06.** I had argued that
+   evaluation is common to every area, on job-posting and venue figures from the discarded research.
+   Those figures are out of use, so **there is currently no evidence that any subject is common
+   enough to deserve a shared foundations part.** The fresh research either establishes it or it
+   does not, and candidate C has no basis until then.
+2. **An area has to be finishable on its own.** This one stands, because it rests on a measurement
+   of the *first book* rather than on research: its last fifty chapters appeared in about eight
+   days, so text production is not the constraint and reading is (§12.1). An area that is a complete
+   unit is something the owner can work through and finish; an area smeared across four book-wide
+   parts is not.
+
+**So the honest state is:** B rests on a sound argument, C's justification is gone, and the
+combination is a guess until the research speaks.
 
 **[I RECOMMEND]** that this stays **[OPEN]** until the subjects are known, for the sequencing
 reason at the head of this section. A structure chosen now is a structure chosen from my
@@ -662,16 +674,18 @@ holds them; it does not hold the record of having done them.
 become the *method* of the second: **"Is the Difference Real"** (ch. 20) and **"An Evaluation
 Set"** (ch. 41).
 
-**[I RECOMMEND]** three concrete reproduction labs the research already supplies, as proof the form
-works:
+**[I RECOMMEND]** the three *shapes* a reproduction lab takes. I had listed three concrete
+instances here, drawn from the discarded research; **the instances are withdrawn and the shapes
+are what survives.**
 
-1. Compute an error bar on a 150-case evaluation set with the standard formula, then with the
-   small-sample correction, and measure the gap. Published finding: the standard interval is far
-   too narrow, in exactly the regime of every internal evaluation set.
-2. Score a random number generator on a time-series anomaly benchmark under the point-adjustment
-   protocol. Published figure: 0.969, against 0.216 unadjusted.
-3. Run a tabular foundation model inside and then outside its stated envelope, and find the edge
-   by measurement rather than by reading.
+| Shape | What the reader does | What it teaches |
+|---|---|---|
+| **Re-measure an interval** | Compute the same estimate two ways, one of them the method a paper used, and measure the gap | That a default statistical method can mislead in exactly the regime the reader works in |
+| **Score a null baseline** | Run something that cannot possibly work under a published evaluation protocol, and see what it scores | That a protocol, not a model, can produce a headline number |
+| **Find the envelope's edge** | Run a method inside its stated operating range and then outside it | That a published claim has boundaries its abstract does not state |
+
+Each shape needs a real published claim to attach to. **The fresh research supplies those**, and
+until it does, no lab can be written.
 
 [↑ Back to Table of Contents](#table-of-contents)
 
@@ -756,11 +770,14 @@ it has all three of:
 2. **live research**, so following it teaches how to read the literature;
 3. something **buildable**, so dimension 5 is possible at all.
 
-Worked examples from the research: retrieval passes 1 and 3 and is weak on 2 (its share of the
-literature is flat at about 0.5% of ICML titles over three years), so it is a foundations chapter
-rather than a frontier chapter. Prompt engineering fails 2 outright — 6.1% → 3.7% → 2.2% of ACL
-titles over three years. Evaluation passes all three, and three independent research areas
-converged on it.
+**The worked examples I had here are withdrawn**, because every one of them scored a subject using
+discarded figures. The rule itself needs no examples to be applied: the fresh research reports
+`LIVE RESEARCH` and `BUILDABLE` per subject, which is exactly what tests 2 and 3 need, and the
+`VERDICT` field already asks all three questions.
+
+**What this means in practice:** a subject the field is quietly abandoning fails test 2, and a
+subject nobody can build fails test 3 — and both verdicts come from the research record rather than
+from my judgement.
 
 **[OPEN]** **Breadth against depth.** Three candidate shapes, and this decision determines almost
 everything else:
@@ -771,9 +788,11 @@ everything else:
 | **Equal depth across all areas** | No area reaches interview depth; comprehensive |
 | A map plus **two areas** to the floor | Roughly doubles the lab and reading work |
 
-Supporting evidence for the decision: C++ appears in 70% of perception job postings and 8% of
-structured-prediction postings; SQL in 62% of structured-prediction and 3% of perception. These are
-not one labour market and no employer hires across areas.
+**The evidence I offered for this decision is withdrawn.** It was job-posting data from the
+discarded research, showing that the toolchains of two areas barely overlap. The *argument* — that
+no employer hires across areas, so medium depth everywhere may be worth less than depth in one —
+is a plausible claim about hiring and **it currently has no evidence behind it.** The fresh
+research's skills-and-careers dimension either supports it or does not.
 
 **[OPEN]** **The mathematics boundary.** The first book's rule — teach what the model computes when
 it answers, state how it learned and move on — is calibrated for application engineering and is
@@ -789,11 +808,11 @@ broken by dimension 5. Three candidates:
 whether a claimed improvement is real, and to build the thing that tests it?* This is sharper than
 "go deeper" and still excludes mathematics that only decorates.
 
-**[OPEN]** Which area goes deep, if the shape is asymmetric. The job-market evidence favours
-**systems and infrastructure** (40.7% of its postings accept a bachelor's degree, only 22.8%
-mention a doctorate, and 14.8% have been open over a year, indicating real scarcity) or
-**evaluation** (present in 44% of all AI engineering postings and in at least 28% of every area,
-and tied for the highest advertised pay).
+**[OPEN]** Which area goes deep, if the shape is asymmetric. **I have no candidate.** I previously
+named two, on job-market figures from the discarded research — credential requirements, time-to-fill
+and advertised pay. Those are withdrawn, and I am not going to re-assert the same conclusion
+without them. **This closes only after the fresh research reports its skills-and-careers dimension
+across every area**, and it depends on the breadth-against-depth decision above.
 
 **[OPEN]** Whether the book is for the owner alone or eventually for others. It changes what page
 one may assume.
@@ -820,6 +839,10 @@ class is.
 **Instances.** (1) Mapped the book's chapters onto the curriculum's topics from chapter titles and
 a Covers column, without opening a single topic page — twice, the second time after being corrected
 for the first. (2) Said I had looked at the website when I had read a local Markdown file.
+(1a) Asserted for two days that a landscape document defined nineteen areas with reasons, from a
+one-line summary of it, and built a nine-area carving of my own instead of opening the file. **A
+summary of a taxonomy tells you a taxonomy exists; it does not tell you what the categories are** —
+and having the summary is worse than having nothing, because nothing makes you look.
 (3) Assessed the book's practical content and reported "zero visible evidence" of hands-on work
 without opening `labs/`, which holds a 50-lab course. (4) Stated the owner had no test for whether
 learning was working, when 51 chapters end with `You understand this when …` and a hundred-question
@@ -916,18 +939,79 @@ determine what I have or haven't learned, practiced, or built simply by examinin
 believe you are confusing the purpose of the learning material with the evidence of learning
 outcomes."*
 
-**Why it is wrong, and why this class matters most.** It is the same error the research kept
-catching in published work: a figure stating that 97.3% of large AI models are language models
-measures the criteria for inclusion in the dataset, not the field. I spent several messages
-admiring that discipline and then committed the error.
+**Why it is wrong, and why this class matters most.** It is the same error that published work
+commits whenever a "share of notable X" figure is read as a property of the field rather than of
+the inclusion criteria. I spent several messages admiring that discipline and then committed the
+error myself, on a document that was never designed to hold the evidence I demanded of it.
 
 **The practice.** Before any claim about a population, name the instrument and ask what it samples.
 Where the instrument cannot see the thing, say "I cannot assess this from here" instead of filling
 the gap.
 
+### Class I — Doing adjacent work instead of the named deliverable
+
+**Instance.** The owner asked, in several consecutive messages, for the documentation needed before
+research to be prepared. In between those requests I read a September landscape document, built an
+argument about scope from it, started drafting a candidate area list, and moved files into a
+discarded folder. Each of those was defensible on its own. **None of them was the thing asked for**,
+and the document set was eleven files short the whole time. His words: *"you keep doing things your
+own way and completely ignoring my instructions, even though I have repeated the same requirements
+across multiple requests."*
+
+**Why it is wrong.** An adjacent task that is genuinely useful is the hardest kind of drift to
+notice, because every individual step survives the question *"is this worth doing?"* It fails the
+only question that matters, which is *"is this what was asked for?"*
+
+**The practice.** Before acting, name the deliverable in one sentence and check the action against
+it. When a more interesting question appears mid-task, write it down and finish the deliverable
+first. A request repeated twice means the deliverable has not been produced — not that it needs
+more context.
+
+### Class J — Treating a superseded document as current
+
+**Instance.** I recommended the nineteen areas of a landscape document dated 17 September 2026 as
+the carving for this book, and called them better than my own. Two things were wrong and both were
+checkable in under a minute. It **predates Baseline 3** (accepted 2026-11-02), so it is superseded.
+And it is a reconstruction of the **whole** Data & Intelligence curriculum, so several of its areas
+are Fundamentals material that this book's own scope rule excludes — a rule I had written down two
+days earlier. The owner's reply: *"we have made significant changes, and you have completely failed
+to account for them."*
+
+**Why it is wrong.** A document's date and its purpose are part of its content. Citing one without
+checking either is the same error as citing a number without its denominator.
+
+**The practice.** Before using any document as a basis for a decision: check its date against the
+current baseline, and check what it was built for. Say both in the same sentence as the citation.
+
+### Class K — Continuing to use evidence after it was withdrawn
+
+**Instance.** After being told that the previous research was discarded, I kept arguing from its
+figures — publication counts, growth rates, job-posting shares — in the next message, because they
+were the only evidence I had and they felt too good to drop.
+
+**Why it is wrong.** Evidence gathered under a brief we had not agreed is evidence of unknown
+quality. Keeping it because no replacement exists is how a conclusion outlives its support.
+
+**The practice.** When evidence is withdrawn, **the argument it supported loses its basis and must
+be marked, not re-worded.** This document's §5.3, §7.2 and §10 each now record a recommendation
+whose justification is gone. That is the correct state, and it is better than a confident
+recommendation resting on nothing.
+
 ### What follows for the framework
 
-**[I RECOMMEND]** that classes A, C, D, G and H each become a mechanism rather than an intention.
+**[I RECOMMEND]** that classes A, C, D, G, H, I, J and K each become a mechanism rather than an
+intention. Eight of the eleven can be:
+
+| Class | The mechanism |
+|---|---|
+| A · claiming without reading | A reading obligation per step in `ROADMAP.md`, naming the files |
+| C · deciding what was the owner's | Every statement in this document carries a marker |
+| D · claims above their evidence | `CLAIMS.tsv` plus the adversarial pass (`PROCESS.md` §7) |
+| G · no termination condition | The brief schema (`PROCESS.md` §4.6) |
+| H · wrong instrument | Name the instrument and what it samples, before the claim |
+| I · adjacent work | `ROADMAP.md` names one current step and its deliverable |
+| J · superseded document | Cite a document's date and purpose in the same sentence as its content |
+| K · withdrawn evidence | Mark the argument, never re-word it. §5.3, §7.2 and §10 are the record |
 The first book's own record shows why: its chapter 45 record notes that every figure in the chapter
 is spliced from the program's own captured output by an assembly script — *"0 figures transcribed.
 Defect 68's lesson applied as a mechanism rather than as care."* **That sentence is the design

@@ -34,7 +34,7 @@ will find it again, under a brief we agreed.
 
 Three things from that period are **method, not findings**, and they stand:
 
-1. **The brief works.** `briefs/pilot-01-systems.md` was run once and passed all six of its tests —
+1. **The brief works.** It was run once and passed all six of its tests —
    it stopped on its own at 11 of 25 searches, started no sub-agents, and refused three numbers it
    could not confirm at source. That is a result about the instrument, not about the field.
 2. **Four fixes to the brief**, now in `briefs/TEMPLATE-area-research.md` version 2. The largest is

@@ -1,7 +1,9 @@
 # Area research brief — template
 
-**Version 2, 2026-11-06.** Version 1 was `pilot-01-systems.md`, which was run once and passed all
-six of its tests. This version applies the four fixes that run revealed.
+**Version 2, 2026-11-06.** **This is the only active research brief.** Version 1 is kept at
+`../discarded/pilot-01-systems-brief.md`; it was run once and passed all six of its tests, and this
+version applies the four fixes that run revealed. Its own output is discarded — see
+`../discarded/README.md` — and only its verdict on the instrument carries forward.
 
 ## What changed from version 1, and why
 

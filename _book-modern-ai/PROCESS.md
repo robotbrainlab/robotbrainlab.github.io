@@ -128,9 +128,11 @@ So its contract is: **state the published claim, the procedure, and the decision
 as reproducing.** The lab passes if it runs and yields a verdict. **It does not have to agree with
 the paper.**
 
-Without this, a lab gets quietly tuned until it confirms its source. That is the exact failure the
-research found in published benchmarks: a forecasting benchmark whose competing baselines were
-never tuned, and an anomaly-detection protocol under which a random number generator scores 0.969.
+Without this, a lab gets quietly tuned until it confirms its source — which is the same failure as
+a published benchmark that compares against an untuned baseline, or an evaluation protocol under
+which a random baseline scores well. **The illustrations I had here came from discarded research
+and are withdrawn.** The principle stands on its own: a test whose outcome is fixed in advance is
+not a test.
 
 ### 4.4 Ownership is a checked file
 
@@ -213,7 +215,7 @@ current answers.**
 |---|---|
 | How do I know a difference is real? | These estimators, these sample sizes |
 | What does it cost to serve a model? | These numbers, this hardware |
-| Why is a bandwidth-bound workload not fixed by more FLOPs? | This roofline knee, these formats |
+| How do I adapt a model to my own task? | Today's methods and their costs |
 
 A new subject goes to the question it answers. A dead subject leaves its question standing. The
 chapter survives its own content.
