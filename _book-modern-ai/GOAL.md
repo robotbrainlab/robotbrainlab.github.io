@@ -1,0 +1,981 @@
+<div align="justify">
+
+# Modern AI: Research, Science and Engineering — what we are building, and why
+
+## Table of Contents
+
+- [0. How to read this document](#0-how-to-read-this-document)
+- [1. The ultimate objective](#1-the-ultimate-objective)
+  - [1.1 The career goal](#11-the-career-goal)
+  - [1.2 What that means in practice](#12-what-that-means-in-practice)
+- [2. The purpose of the book](#2-the-purpose-of-the-book)
+  - [2.1 Why a book at all](#21-why-a-book-at-all)
+  - [2.2 The problem the book solves](#22-the-problem-the-book-solves)
+  - [2.3 What the book is not](#23-what-the-book-is-not)
+  - [2.4 Relationship to the first book](#24-relationship-to-the-first-book)
+- [3. The research philosophy](#3-the-research-philosophy)
+  - [3.1 The five questions, per area](#31-the-five-questions-per-area)
+  - [3.2 The five dimensions, per subject](#32-the-five-dimensions-per-subject)
+  - [3.3 Research cannot supply the taxonomy](#33-research-cannot-supply-the-taxonomy)
+  - [3.4 Evidence rules](#34-evidence-rules)
+  - [3.5 Awareness is separate from research](#35-awareness-is-separate-from-research)
+- [4. The learning philosophy](#4-the-learning-philosophy)
+  - [4.1 The parts, and how they join](#41-the-parts-and-how-they-join)
+  - [4.2 Verification is the owner's own responsibility](#42-verification-is-the-owners-own-responsibility)
+  - [4.3 The assumption to make about the reader](#43-the-assumption-to-make-about-the-reader)
+- [5. The expected learning experience](#5-the-expected-learning-experience)
+  - [5.1 The standard](#51-the-standard)
+  - [5.2 The language and the voice](#52-the-language-and-the-voice)
+  - [5.3 Structure — not inherited, and not yet decided](#53-structure--not-inherited-and-not-yet-decided)
+  - [5.4 What I found when I read how the first book achieves this](#54-what-i-found-when-i-read-how-the-first-book-achieves-this)
+  - [5.5 Tracking what changes](#55-tracking-what-changes)
+- [6. Why a research-oriented engineer, and not one of the alternatives](#6-why-a-research-oriented-engineer-and-not-one-of-the-alternatives)
+- [7. The role of practical work](#7-the-role-of-practical-work)
+  - [7.1 What the first book already does](#71-what-the-first-book-already-does)
+  - [7.2 What practical work must do in the new book](#72-what-practical-work-must-do-in-the-new-book)
+- [8. The continuous evolution of the book](#8-the-continuous-evolution-of-the-book)
+- [9. The intended outcome](#9-the-intended-outcome)
+- [10. Scope and the areas](#10-scope-and-the-areas)
+- [11. Lessons from our discussions — what went wrong and why](#11-lessons-from-our-discussions--what-went-wrong-and-why)
+  - [Class A — Claiming without reading](#class-a--claiming-without-reading)
+  - [Class B — Answering a different question than the one asked](#class-b--answering-a-different-question-than-the-one-asked)
+  - [Class C — Deciding what was the owner's to decide](#class-c--deciding-what-was-the-owners-to-decide)
+  - [Class D — Stating a claim above the strength of its evidence](#class-d--stating-a-claim-above-the-strength-of-its-evidence)
+  - [Class E — Rebuilding from the last correction instead of from the evidence](#class-e--rebuilding-from-the-last-correction-instead-of-from-the-evidence)
+  - [Class F — Private shorthand](#class-f--private-shorthand)
+  - [Class G — Instructions with no termination condition](#class-g--instructions-with-no-termination-condition)
+  - [Class H — Assessing a thing with an instrument that does not sample it](#class-h--assessing-a-thing-with-an-instrument-that-does-not-sample-it)
+  - [What follows for the framework](#what-follows-for-the-framework)
+- [12. Additional considerations I identified](#12-additional-considerations-i-identified)
+- [13. What this document does not cover](#13-what-this-document-does-not-cover)
+
+
+**Written 2026-11-05.** This document records the purpose of the second book before any of it is
+designed or written. It exists because several misunderstandings occurred while the purpose was
+only in conversation, and because the next person to work on this — including a future session of
+mine — will act on what is written here.
+
+It describes **no methodology**. How the book gets built is a separate proposal, deliberately kept
+out of this file so that a disagreement about method cannot quietly change the goal.
+
+---
+
+## 0. How to read this document
+
+Every substantive statement carries one of four markers. This is a requirement of the owner's,
+made because I have previously presented my own recommendations as settled decisions.
+
+| Marker | Meaning |
+|---|---|
+| **[STATED]** | The owner said this, in his own words, in conversation. Quoted where the wording matters |
+| **[AGREED]** | Proposed by one of us and explicitly accepted by the other |
+| **[I RECOMMEND]** | My proposal. **Not a decision.** The owner has not ruled on it |
+| **[OPEN]** | A decision that has to be made and has not been |
+
+**Nothing in this document is a decision unless it is marked [STATED] or [AGREED].** An
+[I RECOMMEND] item may be wrong, and several of my recommendations in this project already were.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 1. The ultimate objective
+
+### 1.1 The career goal
+
+**[STATED]** The objective is to become a strong candidate for roles such as **AI Researcher,
+Research Engineer, AI Engineer, Machine Learning Engineer** and related positions.
+
+**[STATED]** The objective is explicitly *not* staying informed:
+
+> "My ultimate objective is not simply to stay informed about AI advancements. I want to
+> systematically build a deep understanding of both the scientific foundations and the latest
+> research and engineering developments across these areas."
+
+**[STATED]** Four capabilities are named as the target, and all four are wanted together:
+
+1. **Theoretical depth** — understanding the science under the practice.
+2. **Research awareness** — following what is being investigated now.
+3. **Experimentation skill** — the ability to reproduce, test and evaluate.
+4. **Hands-on engineering** — the ability to build the thing.
+
+**[STATED]** The identity being aimed at is a **research-oriented engineer**:
+
+> "I am not trying to become someone who only studies or summarizes research. I want to develop
+> into a research-oriented engineer who understands the science, follows the research, and knows
+> how to apply that knowledge through engineering."
+
+### 1.2 What that means in practice
+
+**[I RECOMMEND]** this as the operational definition, because it is testable and the alternatives
+are not:
+
+> A research-oriented engineer, given a new paper claiming an improvement, can say what the claim
+> was measured against, reproduce enough of it to check, and decide whether to put it in a system.
+
+The reason for preferring this definition: it is the one skill that the nine research reports in
+this project all exercised, and it is the only one that transfers when the models change.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 2. The purpose of the book
+
+### 2.1 Why a book at all
+
+**[STATED]** The book replaces scattered material:
+
+> "Rather than relying on scattered resources, research papers, articles, and documentation, I want
+> to maintain one centralized, continuously evolving book that serves as my primary learning
+> resource."
+
+**[STATED]** It must bring together, in one place: established scientific knowledge, theoretical
+foundations, ongoing research, engineering advancements, practical implementations and emerging
+developments.
+
+**[STATED]** It must evolve with the field "without losing the structure and continuity of my
+learning."
+
+### 2.2 The problem the book solves
+
+**[I RECOMMEND]** this statement of the problem, derived from what the owner has said twice about
+losing structure:
+
+A reading list fails in a specific way. A paper read in March and a paper read in September do not
+compose into understanding unless something holds the shape between them. Fifty bookmarks are a
+record of intentions, not a curriculum. A book supplies three things a reading list cannot:
+
+1. **A place.** Each new finding has to be *placed* relative to what is already known.
+2. **A guarantee.** A later addition cannot quietly contradict an earlier one.
+3. **A shape that survives replacement.** The structure outlives its own contents.
+
+### 2.3 What the book is not
+
+**[STATED]** The book is a **learning resource**. It is not a portfolio and not a record of
+completed work:
+
+> "The book is a learning resource, not a portfolio or a record of my completed work. My actual
+> practice, implementations, experiments, and projects are separate from the book."
+
+**[AGREED]** It therefore cannot be used as evidence of what has or has not been learned, built or
+practised. Any assessment that treats the absence of a record in the book as the absence of the
+activity is making an inference the document does not support. (See §11, class H.)
+
+### 2.4 Relationship to the first book
+
+**[STATED]** *Modern AI Engineering from Zero* is an **illustrative example** of the owner's
+thinking and expectations. It does not define the new book's scope, and the new book is not
+restricted to language-model engineering.
+
+#### The independence rule — this settles it
+
+**[STATED]** Reiterated by the owner on 2026-11-06, and it closes every question in this section:
+
+> **"The previous book has no connection to the new book we are going to create in terms of
+> content, scope, structure, or progression."**
+>
+> **"The new book must be a fully independent, self-contained work — not a continuation,
+> extension, or revision of the previous book."**
+
+**[STATED]** Four consequences, in the owner's own words:
+
+1. The new book is **developed entirely from scratch**, independently of the previous book.
+2. Many topics will appear in both, and the owner is **completely comfortable with that overlap**.
+3. **Duplication is not avoided.**
+4. **No topic gets less explanation because it appeared before.** Every topic is approached and
+   developed independently, with the necessary depth and completeness.
+
+**[STATED] — and withdrawn.** An earlier phrase of the owner's, *"continue from where we left
+off"*, was recorded in this document as a settled property of the new book. He asked what I meant
+by it, and then settled it the other way. **It is withdrawn.** All three readings I offered — in
+time, in the reader, in subject — are dead. There is no continuity of any kind.
+
+**[I RECOMMEND]** retiring the phrase from every document in this project, because a phrase that
+once looked like a decision will be read as one again by the next session.
+
+**[STATED]** What the owner *did* ask to carry over, and it is only these two:
+
+- *"100% match the current book's language"* — see §5.2.
+- *"Follow all its rules, including the multiple passes and agent reviews"* — see §5.4.
+
+**[STATED]** "Chapter 1 is the reference for voice" is a rule of the **first** book, recorded in
+its guide and attributed there to the owner on 22 October 2026: *"easy language, simplicity,
+genuinely starting from scratch. Match it."* It is quoted here as evidence of what the owner means
+by the language he wants matched, and for no other purpose.
+
+**[STATED]** The new book **carries nothing already taught in Fundamentals, Advanced or Mastery**.
+It is the Modern AI track and only that track. The owner's words, after I proposed otherwise
+several times: *"For god's sake the book is called 'Modern AI' and you still fumble to understand."*
+
+**[I RECOMMEND]** the reading that makes that rule and self-containment compatible, because they
+look like they collide and they do not:
+
+| | What decides it |
+|---|---|
+| **Scope** — which subjects the book is *about* | The Modern AI track, and only that track. This is the rule above |
+| **Depth** — what the book *explains* in order to teach a subject in its scope | Whatever the subject needs, taught from zero, inline |
+
+A chapter on judging whether a retrieval change is real is in scope. The confidence interval it
+needs is not a Modern AI subject, and the chapter teaches it anyway rather than sending the reader
+away. **This is not my invention — it is the first book's own rule**, and it names the two cases
+where it was load-bearing: comparing two prompts needed sampling variance and a confidence
+interval, and judging retrieval needed ranking metrics. Both were taught from zero, inside the
+chapters that needed them, with the instruction *"Do not send the reader elsewhere."*
+
+So: **the track decides what the book covers. Self-containment decides how much it explains.** A
+prerequisite taught inline does not put that prerequisite in the book's scope, and does not make
+the book a Fundamentals book.
+
+**[OPEN]** Confirmation that this is the right reading, since the owner has not stated it and the
+two rules were settled at different times.
+
+**[STATED]** **No content from the first book is reused in the new one.** Corrected by the owner on
+2026-11-06: *"We are not planning to reuse any content from the first book in the new book."* An
+earlier draft of this document said the first book "may be reused as text", and that was wrong.
+
+So the first book's role in this project is **two things and nothing else**:
+
+| The first book is | The first book is **not** |
+|---|---|
+| Evidence of the **language and voice** to match (§5.2) | A source of text, passages or explanations |
+| Evidence of the **method** that worked (§5.4) | A source of research evidence or claims |
+| | A model for the **structure** — explicitly excluded on 2026-11-06 |
+| | A model for the **scope** or the **progression** — same |
+| | A prerequisite the new book may assume |
+| | A reason to shorten any explanation |
+
+**Note the change.** An earlier version of this table listed the first book's **structure** as the
+third thing to carry over. The owner removed it: there is no connection in structure. The four-part
+shape is therefore not inherited. It is a candidate to be judged on its merits for this book, along
+with the alternatives — see §5.3.
+
+**[STATED]** It must never be used as a research source. A claim does not become true because the
+first book states it.
+
+**[I RECOMMEND]** the practical rule that follows: when the new book covers a subject the first
+book also covered, it is **researched and written from primary sources as if the first book did not
+exist**, and the first book is consulted only to check that the two do not contradict each other.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 3. The research philosophy
+
+### 3.1 The five questions, per area
+
+**[STATED]** Every major area of AI identified by the research must answer five questions:
+
+| # | Question |
+|---|---|
+| 1 | **Ongoing research** — what problems are researchers trying to solve now; latest discoveries; emerging directions; unresolved challenges |
+| 2 | **Engineering developments** — new architectures, techniques, systems, tools, implementations being built or adopted |
+| 3 | **Established scientific knowledge** — theories, principles, methods and findings with strong evidence, and how they underpin the current work |
+| 4 | **Research-to-engineering transition** — how discoveries become practice; what is still experimental and what is now established engineering |
+| 5 | **Skills and career relevance** — what knowledge, skill and experience are needed to understand, reproduce, implement or contribute |
+
+### 3.2 The five dimensions, per subject
+
+**[STATED]** Identifying an area is not enough. Each important subject *inside* an area needs:
+
+| # | Dimension |
+|---|---|
+| 1 | **Why it matters** — what problem it solves, why now, why it is worth research and engineering attention |
+| 2 | **Scientific foundations** — the theories, mathematics, algorithms and established concepts that make it possible, and how they explain why different approaches work |
+| 3 | **Ongoing research** — what is being investigated, what is proposed, what remains unresolved |
+| 4 | **Engineering and implementation** — how to design, build, optimise, evaluate and deploy it; the patterns, frameworks, architectural decisions and trade-offs |
+| 5 | **Research-to-engineering connection** — how to experiment with new approaches, reproduce results, evaluate effectiveness, and adopt what proves out |
+
+**[STATED]** The owner's guidance is explicitly non-binding in detail: this is *"general guidance
+to provide direction and additional context, not as a strict requirement or a narrowly defined
+scope."*
+
+### 3.3 Research cannot supply the taxonomy
+
+**[I RECOMMEND]** this principle, which I arrived at after getting it wrong twice in this project,
+and which the owner has questioned twice and not yet ruled on:
+
+- **A partition of the field is an argument, not a finding.** No amount of searching produces one,
+  because a partition is a decision about what to treat as the same thing. The owner's own
+  landscape document demonstrates this: its section B is titled *"Why the Taxonomy Took This
+  Form"* and records decisions with the alternatives considered and the reasons.
+- **An open brief collapses onto language models.** Measured three times in one session: a scan
+  whose 23 sources were all language-model papers; a re-run with open rules that still measured
+  only the language-model share; a third with advances-focused rules that stayed narrow.
+- **So a fixed set of research areas is a coverage device**, used to force attention somewhere the
+  search index does not point. It is not a claim about the field's natural shape.
+- **Consequence:** any percentage computed over a chosen set of areas is a percentage of that
+  choice, and must be reported that way rather than as a property of the field.
+
+### 3.4 Evidence rules
+
+**[STATED]** The research must prioritise, in the owner's own list:
+
+> New scientific discoveries and technological breakthroughs. Advancements in AI models,
+> architectures, algorithms, and capabilities. Emerging technologies, tools, and frameworks.
+> Significant research papers and their technical contributions. Practical innovations,
+> engineering developments, and real-world applications. Technical challenges, limitations, and
+> opportunities for further innovation.
+
+**[STATED]** It must **not** be a report on incidents, misuse or broader societal concerns. The
+owner's correction: *"Shouldn't our primary focus be on advancements in research, science, and
+technology rather than on how technology is being misused?"*
+
+**[STATED]** Percentages must be evidence-based with the method stated, and subjective estimates
+must never be presented as established facts.
+
+**[AGREED]** A claim may not be stated above the strength of its source, and the source is quoted.
+
+**[AGREED]** Every size claim names what it is a share of. "Growing fast" is not a finding.
+
+**[I RECOMMEND]** three further rules, each paid for by a failure in this project:
+
+1. **A search summary is not a source.** A paper whose striking result would have been quoted was
+   withdrawn by arXiv two days earlier; only fetching the abstract page revealed it.
+2. **A source's own inclusion criteria are part of the finding.** "97.3% of large AI models are
+   language models" measures the criteria for notability, not the field.
+3. **Every research instruction carries a termination condition and a fixed output shape.** Three
+   research agents in this project searched for an hour without converging, because every
+   instruction they had rewarded searching more and none said what finished looked like.
+
+### 3.5 Awareness is separate from research
+
+**[STATED]** The owner wants the rapid expansion of AI tools and services tracked, not only the
+scientific literature, and explicitly not limited to named companies.
+
+**[AGREED]** Awareness and research are different activities on different clocks. The existing
+operating note states the rule: **watch the tools, write down the capability.** A tool release is
+recorded for the capability it proves, not as news.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 4. The learning philosophy
+
+### 4.1 The parts, and how they join
+
+**[STATED]** Scientific foundations, theory, active research, practical engineering, exercises,
+labs and projects are **one process**, not separate disciplines:
+
+> "The book should therefore bridge scientific understanding, active research, and practical
+> engineering, rather than treating them as separate disciplines."
+
+**[STATED]** The learning method is: *"learn by understanding, practicing, implementing, and
+building"* — not by reading and absorbing.
+
+**[I RECOMMEND]** the structural consequence, which is the single most important design statement
+in this document:
+
+> **Dimensions 2, 3 and 4 of §3.2 are one object seen at three distances. They must not become
+> three sections.**
+
+Written as three headings, they reproduce exactly the separation the owner rejects. Worked
+example, from this project: a bound on what a fixed-size embedding can represent is **the
+foundation**; the dispute over where that bound actually sits is **the live research**; and the
+reason every serious retrieval system puts a reranker after the vector search instead of buying a
+larger embedding is **the engineering**. The engineering decision is unintelligible without the
+dispute. One argument, three distances.
+
+**[I RECOMMEND]** that a chapter is therefore organised around **a mechanism or a question**, with
+science, research and engineering braided into answering it.
+
+### 4.2 Verification is the owner's own responsibility
+
+**[STATED]** The owner will verify what he learns, by consulting credible authoritative resources,
+cross-checking explanations, questioning assumptions, and confirming technical accuracy. He will
+not accept the book's contents as correct by default.
+
+**[AGREED]** This answers the concern about independent validation, with one narrow residue, stated
+at its true size: cross-checking cannot catch a **consensus error**, where the available sources
+agree and are all wrong in the same direction. Two documented examples — published optimiser
+speedups that were all optimistic until somebody tuned the baseline, and four years of
+time-series anomaly scores that were uninterpretable while every paper agreed. The remedy is a
+measurement, not another source, and the labs are where that measurement happens.
+
+### 4.3 The assumption to make about the reader
+
+**[STATED]** Any assessment of this approach must assume that the owner **thoroughly reads,
+studies and works through everything** in the book — theory, exercises, labs and recommended
+projects. The book is not something generated and passively read.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 5. The expected learning experience
+
+### 5.1 The standard
+
+**[STATED]** The material must be *"easy to learn from while remaining technically rigorous,
+comprehensive, and useful for practical engineering and interviews."* Explicitly rejected:
+
+- a conventional textbook with unnecessarily complicated explanations;
+- superficial summaries that sacrifice technical depth.
+
+**[STATED]** Language: ASD-STE100 style. Simple, clear, precise. Short sentences. Tables where
+they carry the information better. Essential technical terms explained in plain language.
+Unnecessary jargon avoided.
+
+**[AGREED]** The target: **technically complete, with nothing unexplained and nothing explained
+twice.** Difficulty belongs to the subject, never to the prose.
+
+### 5.2 The language and the voice
+
+**[STATED]** The owner asked for the new book to match the first book's language, and on 2026-11-06
+asked for this to be documented explicitly rather than summarised away: *"These are extremely
+important to me because they played a significant role in making the material easy to understand
+and helping me learn effectively."*
+
+#### The rules, as the first book's guide states them
+
+> - Plain, simple and vivid. Short sentences. Explain things as you would to a friend.
+> - **Chapter 1 is the reference for voice** — easy language, simplicity, genuinely starting from
+>   scratch. Match it. **Do not write up to an imagined expert**, and do not assume a term has
+>   been met before the book gives it.
+> - Idea first, then commands. **Never start a section with a code block.**
+> - Every command and code sample must work. Run it before it goes in the book, and show real
+>   output.
+> - **No filler, no hype, no history lessons** unless they explain something.
+> - British spelling everywhere. Proper names keep their own spelling.
+
+#### What the voice actually does, read off the prose
+
+**[I RECOMMEND]** this characterisation, drawn from chapters 1, 11 and 17 rather than from the
+guide, because a rule list is not a voice and the new book has to be written *in* it. Fourteen
+habits, each with its evidence.
+
+| # | Habit | Evidence from the text |
+|---|---|---|
+| 1 | **The chapter opens with what the reader will be able to do** — a capability, never a topic list | *"By the end you will know what you get, what you choose, what you are charged for, what you wait for, and the one thing you do not control at all."* |
+| 2 | **The problem is in the beginner's own voice**, first person, non-technical, slightly embarrassed | *"Everyone talks about 'using AI' and I picture training something. I have no idea what you actually get, or how."* |
+| 3 | **The short answer comes first**, then the detail | Chapter 1's second section is titled *The Short Answer* and gives the whole thing in three sentences, ending *"That is the whole of it."* |
+| 4 | **Second person, direct, declarative** | *"Your program sends it some text. It sends some text back."* |
+| 5 | **Misconceptions are cleared by negation before anything is built** | *"You do not download a brain. You do not teach it your business. You do not own it."* Then a section titled *Using Is Not Training* |
+| 6 | **Start from the difficulty, not the solution** | Chapter 11, on the hardest mechanism in the book: *"Start with the difficulty rather than the solution."* Then *"That is useless on its own."* |
+| 7 | **One everyday comparison, immediately bounded** | *"in the same way your application might request a currency rate or a map tile"* — followed by a Note saying exactly where the comparison stops holding |
+| 8 | **Tables compare; prose explains.** Never prose doing a table's job | Training against Inference is a table, not three paragraphs |
+| 9 | **One word per concept, forever** | The book says *model* throughout, names the shorthand once — *"that is the word an interviewer will use"* — and never alternates |
+| 10 | **Limits are stated as decisions, not as gaps** | Chapter 17: *"None of them is a gap in the explanation; each is a decision."* |
+| 11 | **Chapters keep their promises out loud** | *"Chapter 9 called a layer a box of the right shape and promised to open it; this opens the half of it that everybody asks about."* |
+| 12 | **The arithmetic is done, not described** | Chapter 11 works the whole attention formula on a five-word sentence with four-dimensional vectors, by hand |
+| 13 | **Interview relevance is named plainly, without interview noise** | *"the difference between a gap you can name and a gap you cannot is the difference between sounding bounded and sounding ignorant"* |
+| 14 | **Density without padding** | The reader *"reads quickly and does not want padding. Density is a feature; filler is not."* |
+
+**[I RECOMMEND]** that habits 1, 2, 3, 5, 6, 7 and 10 are the ones that make the material *easy*,
+and that habits 9, 12 and 14 are the ones that keep it *rigorous*. Dropping any of the first set
+produces a conventional textbook; dropping any of the second produces a summary. The owner has
+rejected both.
+
+#### The chapter-opening form, which is structural rather than stylistic
+
+**[STATED]** Every chapter opens the same way: its own small problem, then the question it raises,
+*"written the way a beginner would say them"* — simple, vivid, non-technical. The book as a whole
+opens with one problem and one question, word for word.
+
+**[I RECOMMEND]** keeping this exactly. It is the mechanism behind habit 1, and it is what stops a
+chapter becoming a survey of its subject: a chapter that cannot state the reader's problem in the
+reader's words does not yet know what it is for.
+
+### 5.3 Structure — not inherited, and not yet decided
+
+**[STATED]** On 2026-11-06 the owner removed structure from what carries over: the new book has
+**no connection to the previous one in structure or progression**, and in the same message, on the
+four parts: *"I am not quite sure."*
+
+**[STATED]** Earlier, while we were discussing the first book's own shape, he said: *"let's keep 4
+parts and they are made for a reason, see book guide."* That is recorded here as **history, not as
+a decision about this book**, because the independence rule came later and is more specific.
+
+**[I RECOMMEND]** treating the four-part shape as **one candidate among several, judged on merit**.
+It is a good candidate — it worked, and the reason it worked is set out below — and it was designed
+for a book about one system, which this is not.
+
+**[I RECOMMEND]** one sequencing point that I think matters more than the choice itself:
+**structure follows the subjects, not the reverse.** The parts of a book are a claim about how its
+material divides, and the material is not known until the research has run. Choosing the parts now
+would mean choosing them from my assumptions about what the research will find — which is the error
+of §11 class C, and it is the error that produced the nine research areas whose carving the owner
+twice questioned. **So this section should stay open until the subjects exist.**
+
+#### The first book's shape, as evidence of what works
+
+| Part | Purpose | Share |
+|---|---|---|
+| **I · Understand** | What the thing is and how it works. Little or no code. **Two halves, both Understand**: *Mental Model* (the system around the model) then *Inside the Model* (the model itself, notation worked by hand) | ~25% |
+| **II · Use** | Become a confident user of every piece of the system | ~35% |
+| **III · Apply** | Labs that build one small system, lab by lab, on data the book ships | ~18% |
+| **IV · What Next** | The four threads — **security, speed, cost, failure** — then one whole system designed aloud, then what to learn next and what to skip | ~13% |
+| Appendices | Cheat sheet, interview bank, glossary, index | ~5% |
+
+#### The decisions that hold it in place
+
+**[STATED]** From the first book's own records:
+
+- **Four parts, and no fifth.** A fifth part was considered and rejected.
+- **Security, speed, cost and failure belong in Part IV**, deliberately. "Ordinary chapters in
+  Part II" is recorded as the rejected alternative. They are *threads across the whole system*,
+  not features you use.
+- **Part I is divided, not split.** Its two halves use a sub-part opener rather than becoming a
+  part of their own, because both answer the same question — *what is this thing and how does it
+  work* — and a reader filing "Attention, Worked by Hand" under Understand, Use, Apply or What
+  Next files it under Understand without hesitating.
+- **Order within Part I is load-bearing:** *"the mechanism means nothing until you know what the
+  model is for."*
+- **Chapters are numbered straight through**, so the parts organise without fragmenting.
+- **Parts I to III each open with a "What to ignore for now" note.** Part IV has none, because its
+  last chapter says what to skip.
+- **Writing order is reading order**, and each part is delivered as its own PDF when finished, so
+  reading starts in week one.
+
+#### Why it works
+
+**[I RECOMMEND]** this reading, because the new book needs the *reason* and not only the shape:
+
+> The four parts are a progression in what the reader can do: **comprehend** (Understand) →
+> **operate** (Use) → **construct** (Apply) → **judge** (What Next). Each stage is useless before
+> the one below it, and each is usable on its own.
+
+And the single best structural decision in it: **the cross-cutting properties come last, as
+threads.** Security, speed, cost and failure are not things you use — they are questions you ask
+of a finished system. Teaching them as Part II chapters would have taught them as features.
+
+#### The open question: what structure does *this* book need
+
+**[OPEN]** The first book's four parts organise **one system** — there is a single thing to
+understand, use, build and judge. This book covers many areas, has no end, and must be
+self-contained per topic. Five candidates, with what each costs:
+
+| Candidate | What it means | What it costs |
+|---|---|---|
+| **A · Four parts over the whole book** | Understand every area, then Use them all, then Apply, then Judge | "Understand all areas" is a very long wait before anything can be built, and Part I becomes most of the book |
+| **B · Four phases inside each area** | Each area is a small complete book: understand → use → apply → judge | Repetition of the pattern; cross-area material has no home |
+| **C · Shared foundations, then one part per area** | A foundations part first, then an area per part, each with its own progression | Needs the foundations to be genuinely shared, or it becomes a dumping ground |
+| **D · Flat by subject, with reading maps** | No parts. Chapters are subjects; maps give several orders through them | Loses the progression that makes the material learnable — the thing §5.2 says does the work |
+| **E · Parts by the five dimensions** | Part per dimension: why it matters, the science, the research, the engineering, reproducing | **Rejected.** The owner's instruction is that the dimensions must *not* become sections (§4.1) |
+
+**[I RECOMMEND]** **C combined with B**, as a proposal and nothing more: a shared foundations part,
+then an area per part, each area carrying its own progression. Two reasons, and the first is
+measured rather than argued:
+
+1. **The shared part is justified by evidence, not taste.** Three independent research areas
+   converged on evaluation, and the job-posting data puts it in **44% of all AI engineering
+   postings and at least 28% of every single area's**. The statistics of comparison, how to read a
+   result, and how to tell whether a difference is real are genuinely common to every area. That is
+   a measured basis for a foundations part, and it is the only one I have.
+2. **An area has to be finishable on its own**, because the book will be produced faster than it
+   can be read (§12.1). An area that is a complete unit is something the owner can work through and
+   finish; an area smeared across four book-wide parts is not.
+
+**[I RECOMMEND]** that this stays **[OPEN]** until the subjects are known, for the sequencing
+reason at the head of this section. A structure chosen now is a structure chosen from my
+assumptions about the research.
+
+### 5.4 What I found when I read how the first book achieves this
+
+**[I RECOMMEND]** recording this, because it is the answer to "how was that approachability
+achieved" and it is not what I expected:
+
+**Readability is not a writing style in that book. It is enforced by machinery.**
+
+| Mechanism | What it guarantees for the reader |
+|---|---|
+| **The maths boundary** (teach what the model computes when it answers; state how it learned and move on) | Nothing appears that does not pay for itself |
+| **`LEDGER-TAUGHT.md`** — a row per finished chapter, with explicit "Do not" rows | A concept is introduced once and never re-explained or silently re-assumed |
+| **`LEDGER-SHORTHAND.md`** — formal name against the word an interviewer actually says | The reader can find the thing under the name they will hear. Written after "RAG" appeared in no chapter while the subject ran across seven |
+| **`LEDGER-DEFECTS.md`** — 99 entries, each a *class* with the instance that produced it and the practice that follows | Each known way of confusing a reader is recorded so it does not recur |
+| **Concept ownership** — eleven concepts touched by several chapters, each owned by exactly one | No duplication, and a reader always knows where a thing is explained |
+| **`> You understand this when …`** — in 51 chapters | The reader has a stated test per chapter |
+| **Worked by hand** — chapter 11 computes attention arithmetically | The reader can verify the claim themselves |
+| **Four parts, fixed by decision** | New material never gets a new home merely because it is new |
+
+### 5.5 Tracking what changes
+
+**[AGREED]** The book needs a visible **"What Changed in This Edition"** page. The owner's words:
+*"Yes this is exactly what I wanted to see."*
+
+**[AGREED]** Without it, the reader cannot distinguish learning something new from relearning
+something revised — which is the central hazard of a book that is revised rather than finished.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 6. Why a research-oriented engineer, and not one of the alternatives
+
+**[STATED]** Not exclusively academic research, and not conventional software engineering.
+
+**[I RECOMMEND]** this account of why the middle position is the right target, from the evidence
+gathered in this project:
+
+| Position | What it tests | Why it is not the target |
+|---|---|---|
+| Academic researcher | Producing new results; publication | Requires depth the owner has not chosen, and most of the roles named do not test it |
+| Conventional software engineer | Building and shipping systems | Does not require judging a research claim, which is what the named roles do test |
+| **Research-oriented engineer** | **Reading the literature, judging a claim, reproducing it, and building on it** | **This is the target** |
+
+**[I RECOMMEND]** the supporting observation: an interview for an application role asks whether
+you know the established answer. A research-engineer interview asks whether you can read a paper,
+judge whether its claim is supported, and reproduce or extend it. Those are different skills, and
+only the first can be learned from settled material. This is why the new book must carry contested
+material and not only established material.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 7. The role of practical work
+
+### 7.1 What the first book already does
+
+**[I RECOMMEND]** recording the measured facts, because I previously assessed this wrongly:
+
+- **Eleven chapters are entirely labs** (40–50), 22,723 lines, six to eight numbered steps each.
+- **The other 39 chapters each carry an embedded lab** with expected results.
+- The labs **build one system incrementally**: call a model → build an evaluation set → a schema
+  and one tool → compare two embedding models → hybrid retrieval → the whole pipeline end to end →
+  error analysis and a judge → workflow against agent → context and tools measured → cost and
+  latency → attack your own system.
+- They use a real API key, with the model **pinned to a dated snapshot** and the returned model
+  string printed beside every figure that depends on it.
+- The book **ships its own lab data**: about 40 documents written for the book and dedicated to
+  the public domain, eight queries, 320 graded relevance judgements, and one deliberately awkward
+  PDF with a misparsing table and a page with no text layer.
+- The lab corpus **declares every property deliberately planted in it**, *"so that no lab can
+  claim to have discovered what was put there for it"*, and declares that its relevance grades are
+  one person's, made in one sitting.
+
+### 7.2 What practical work must do in the new book
+
+**[STATED]** Exercises, experiments, implementations and projects reinforce the material. The book
+holds them; it does not hold the record of having done them.
+
+**[I RECOMMEND]** one change of form, and it is the main one:
+
+> In the first book a lab **constructs** — build hybrid retrieval, measure it. The subjects were
+> settled, so construction was the right exercise. The new book's subjects are contested, so the
+> lab must **reproduce or refute** — does this improvement survive a fair baseline, does this
+> result hold when the protocol changes, is this difference real.
+
+**[I RECOMMEND]** that the two chapters making this possible already exist in the first book and
+become the *method* of the second: **"Is the Difference Real"** (ch. 20) and **"An Evaluation
+Set"** (ch. 41).
+
+**[I RECOMMEND]** three concrete reproduction labs the research already supplies, as proof the form
+works:
+
+1. Compute an error bar on a 150-case evaluation set with the standard formula, then with the
+   small-sample correction, and measure the gap. Published finding: the standard interval is far
+   too narrow, in exactly the regime of every internal evaluation set.
+2. Score a random number generator on a time-series anomaly benchmark under the point-adjustment
+   protocol. Published figure: 0.969, against 0.216 unadjusted.
+3. Run a tabular foundation model inside and then outside its stated envelope, and find the edge
+   by measurement rather than by reading.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 8. The continuous evolution of the book
+
+**[STATED]** The book is added to periodically — the current cadence is every twelve weeks — and
+must incorporate new findings, research directions, engineering practices and emerging
+technologies without losing structure or continuity.
+
+**[AGREED]** A chapter in the first book is a **closed explanation**, because its subject was
+settled enough to finish. A chapter in the second cannot be, which changes what a chapter is:
+
+> **A chapter is a question with a current answer attached, where the question outlives every
+> answer it will carry.**
+
+**[I RECOMMEND]** the three design consequences, which I believe are the most serious unsolved
+problems in this project and which I raised only after reading the first book's machinery
+properly:
+
+1. **The machinery was built for a book that gets finished.** The guide records that a corrected
+   claim in a lab chapter *"lives in SIX places, and four of them are prose"*; every applied fix is
+   a book-wide sweep counted before and after; the records are hashed last so any edit makes them
+   stale. That cost is correct once per chapter for a book with an end. A book revised every twelve
+   weeks across many areas pays it on every revision, forever. **The revision cost, not the writing
+   cost, will decide whether this book survives its third cycle.**
+2. **The interview bank's acceptance rule does not transfer to contested material.** It works in
+   the first book because a question had a right answer that a chapter had to contain. For a
+   frontier subject the honest answer is sometimes "this is disputed, and here is the state of the
+   dispute" — a real answer that the current rule cannot accept.
+3. **"Nothing is drafted until the table of contents is approved" collides with a table of contents
+   that changes every cycle.** Fixed concept ownership is what makes the taught-ledger work. If
+   research reshuffles subjects each cycle, ownership moves, and the ledger that prevents
+   re-teaching is the first thing to break.
+
+**[OPEN]** How each of those three is solved.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 9. The intended outcome
+
+**[STATED]** The owner wants the research process and the book to help him *"identify what matters,
+understand it thoroughly, develop relevant capabilities, and position myself to successfully pursue
+these career opportunities."*
+
+**[I RECOMMEND]** this statement of what "done" means for a cycle, because the goal otherwise has
+no test:
+
+After a cycle, the owner can, for each subject the cycle covered:
+
+1. state what problem the subject solves and why it is receiving attention;
+2. explain the mechanism from the foundations, without notes;
+3. name what is currently disputed and what the dispute turns on;
+4. build a working instance of it;
+5. take a published claim about it and say what it was measured against, then check it;
+6. answer, aloud and in about a minute, the questions a research-engineer interview would ask.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 10. Scope and the areas
+
+**[STATED]** The research covers the full spectrum of modern AI under the theme *Modern AI:
+Research, Science and Engineering*, beginning with a high-level overview that identifies the major
+fields and subfields, their estimated share, their relative dominance, their industry relevance and
+adoption, their growth potential, and the engineering skills and career opportunities for each.
+
+**[STATED]** The scope is not to be narrowed unnecessarily, and the prior restriction to language
+models was wrong.
+
+**[I RECOMMEND]** that the **unit of the book is the subject, not the area.** Research finds
+subjects; subjects get chapters. An area is a container used to ensure coverage.
+
+**[I RECOMMEND]** a selection rule, so that depth has a bound. A subject earns a full chapter when
+it has all three of:
+
+1. a **mechanism** worth understanding, not merely a practice to copy;
+2. **live research**, so following it teaches how to read the literature;
+3. something **buildable**, so dimension 5 is possible at all.
+
+Worked examples from the research: retrieval passes 1 and 3 and is weak on 2 (its share of the
+literature is flat at about 0.5% of ICML titles over three years), so it is a foundations chapter
+rather than a frontier chapter. Prompt engineering fails 2 outright — 6.1% → 3.7% → 2.2% of ACL
+titles over three years. Evaluation passes all three, and three independent research areas
+converged on it.
+
+**[OPEN]** **Breadth against depth.** Three candidate shapes, and this decision determines almost
+everything else:
+
+| Shape | What it costs |
+|---|---|
+| A thin honest map of every area, and **one area taken to the floor** | Narrower coverage; matches how hiring works |
+| **Equal depth across all areas** | No area reaches interview depth; comprehensive |
+| A map plus **two areas** to the floor | Roughly doubles the lab and reading work |
+
+Supporting evidence for the decision: C++ appears in 70% of perception job postings and 8% of
+structured-prediction postings; SQL in 62% of structured-prediction and 3% of perception. These are
+not one labour market and no employer hires across areas.
+
+**[OPEN]** **The mathematics boundary.** The first book's rule — teach what the model computes when
+it answers, state how it learned and move on — is calibrated for application engineering and is
+broken by dimension 5. Three candidates:
+
+| Candidate | Consequence |
+|---|---|
+| Enough to **reproduce** a result: the statistics of comparison, and enough optimisation and learning theory to read a training paper critically | Dimension 5 becomes possible; this is my recommendation |
+| Enough to **produce** new results: full derivations, optimisation theory, learning theory | Needed to contribute original research; considerably slower |
+| **Keep the current boundary** | Fastest; dimension 5 has to be dropped |
+
+**[I RECOMMEND]** the replacement test, if the boundary moves: *does the reader need this to tell
+whether a claimed improvement is real, and to build the thing that tests it?* This is sharper than
+"go deeper" and still excludes mathematics that only decorates.
+
+**[OPEN]** Which area goes deep, if the shape is asymmetric. The job-market evidence favours
+**systems and infrastructure** (40.7% of its postings accept a bachelor's degree, only 22.8%
+mention a doctorate, and 14.8% have been open over a year, indicating real scarcity) or
+**evaluation** (present in 44% of all AI engineering postings and in at least 28% of every area,
+and tied for the highest advertised pay).
+
+**[OPEN]** Whether the book is for the owner alone or eventually for others. It changes what page
+one may assume.
+
+**[OPEN]** Whether the labs become public artefacts. The owner has noted that his practice is
+separate from the book, so this may be out of the book's scope entirely.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 11. Lessons from our discussions — what went wrong and why
+
+**[STATED]** The owner asked for this section explicitly: what misunderstandings, incorrect
+assumptions or flawed criticisms occurred, why they were incorrect, and how to avoid repeating
+them.
+
+Recorded as **classes**, with the instances that produced them and the practice that follows —
+the form the first book's defect ledger uses, because a list of mistakes is not reusable and a
+class is.
+
+### Class A — Claiming without reading
+
+**Instances.** (1) Mapped the book's chapters onto the curriculum's topics from chapter titles and
+a Covers column, without opening a single topic page — twice, the second time after being corrected
+for the first. (2) Said I had looked at the website when I had read a local Markdown file.
+(3) Assessed the book's practical content and reported "zero visible evidence" of hands-on work
+without opening `labs/`, which holds a 50-lab course. (4) Stated the owner had no test for whether
+learning was working, when 51 chapters end with `You understand this when …` and a hundred-question
+interview bank written before the chapters exists as the acceptance standard.
+
+**Why it is wrong.** A structural claim about a document is evidence only if the document was read.
+Titles are not contents. In the owner's words: *"Did you even look at the website"* and *"Why are
+you not even trying to do even the slightest work."*
+
+**The practice.** Before any claim about what a file, directory or document contains or omits, open
+it. If it cannot be opened, say the claim is unverified rather than making it.
+
+### Class B — Answering a different question than the one asked
+
+**Instances.** (1) Asked for a content-level comparison of two books, produced a table of purpose,
+scope, time-relation and provenance. The owner: *"Worst explanation… I want a genuine review of the
+content. How will the above reasons give me a mental model."* (2) Three research briefs asked what
+a person must be able to do, and one asked what goes wrong in deployed systems; all three returned
+incidents, misuse and societal harm instead of technical advances. The cause was the question, not
+the agents.
+
+**Why it is wrong.** Metadata about a thing is not the thing. A brief that asks a question adjacent
+to the real one gets a confident answer to the adjacent question.
+
+**The practice.** Restate the question in the answer's first sentence. For a brief, write down the
+sentence the output should be able to complete, and check the brief asks for that.
+
+### Class C — Deciding what was the owner's to decide
+
+**Instances.** (1) Pre-fixed the research's partition as "modern practice outside language models".
+The owner: *"that is a bad direction. Let the agent or an llm do the research in every direction
+amd also let it say only where the dominant modern practice is. Why we decide by ourselves."*
+(2) Proposed moving security, speed, cost and failure out of Part IV when the book's own decision
+record had already considered and rejected exactly that. (3) Assumed the new book depends on the
+first. The owner: *"Did I ever say, we will depend on the current book?"* (4) Repeatedly proposed
+carrying Depth-Track material into the new book against a stated scope rule.
+
+**Why it is wrong.** A decision presented as an analysis removes the owner's choice without telling
+him a choice was made.
+
+**The practice.** Read the existing decision record before proposing a change to a decision. Mark
+every proposal as a proposal. Where I have fixed something that could have been left open, say so
+and say why.
+
+### Class D — Stating a claim above the strength of its evidence
+
+**Instances.** (1) Told the owner an embedding capacity bound was settled, refereed and durable,
+and recommended adding it to the curriculum and a chapter. A peer-reviewed rebuttal exists; the
+bound as I stated it is contested. (2) Asserted that the first book *is* the Modern AI track when
+my own evidence showed ten chapters belonging to no track topic — I had noticed and dropped the
+fact because it spoiled the mapping.
+
+**Why it is wrong.** Dropping the inconvenient half of one's own evidence is the failure the whole
+project exists to teach against.
+
+**The practice.** State the strength of the source with the claim. When evidence contradicts a
+conclusion I like, report the contradiction in the same sentence as the conclusion.
+
+### Class E — Rebuilding from the last correction instead of from the evidence
+
+**Instance.** Five different answers about the new book's scope within an hour, each constructed
+from the owner's most recent correction rather than from the documents.
+
+**Why it is wrong.** It looks like responsiveness and is the opposite: it means no position was
+ever held for a reason.
+
+**The practice.** After a correction, re-derive the answer from the sources, and say which source
+changed my mind.
+
+### Class F — Private shorthand
+
+**Instance.** Used "MP-08", "tier one", "1A/1B/1C" in explanations. The owner: *"I don't even know
+what is MP"* and *"What language are you speaking?"*
+
+**The practice.** Name things. No internal codes in anything the owner reads.
+
+### Class G — Instructions with no termination condition
+
+**Instance.** Nine research briefs told each agent to measure things itself, verify at source and
+report its own sampling. Every one of those rewards searching more; none said what finished looked
+like. Six converged; three were still launching new sub-agents an hour in, one of them about to
+start four more.
+
+**Why it is wrong.** An instruction set that only rewards thoroughness has no fixed point.
+
+**The practice.** Every brief states its output shape, its budget, and its stopping rule, and
+forbids further delegation beyond a stated depth.
+
+### Class H — Assessing a thing with an instrument that does not sample it
+
+**Instance.** Judged the owner's *approach* by examining the *book*, and reported the absence of a
+record of practice in a learning resource as the absence of practice. The owner: *"How can you
+determine what I have or haven't learned, practiced, or built simply by examining the book? …I
+believe you are confusing the purpose of the learning material with the evidence of learning
+outcomes."*
+
+**Why it is wrong, and why this class matters most.** It is the same error the research kept
+catching in published work: a figure stating that 97.3% of large AI models are language models
+measures the criteria for inclusion in the dataset, not the field. I spent several messages
+admiring that discipline and then committed the error.
+
+**The practice.** Before any claim about a population, name the instrument and ask what it samples.
+Where the instrument cannot see the thing, say "I cannot assess this from here" instead of filling
+the gap.
+
+### What follows for the framework
+
+**[I RECOMMEND]** that classes A, C, D, G and H each become a mechanism rather than an intention.
+The first book's own record shows why: its chapter 45 record notes that every figure in the chapter
+is spliced from the program's own captured output by an assembly script — *"0 figures transcribed.
+Defect 68's lesson applied as a mechanism rather than as care."* **That sentence is the design
+principle of the whole system: convert care into mechanism.** Care does not survive a long project.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 12. Additional considerations I identified
+
+**[I RECOMMEND]** these as things worth deciding that the owner's list did not name.
+
+1. **The book will be produced faster than it can be read.** The first book's last fifty chapters
+   appeared in about eight days. Text generation is no longer the constraint; reading and running
+   is. The new book therefore needs a **reading order and a priority**, not only a structure —
+   otherwise the first cycle produces more than a cycle can absorb.
+2. **The mirror of the taught-ledger is missing.** There is a record of what the book taught.
+   There is no record of what has been run. Given that the owner's practice is deliberately outside
+   the book, this may belong outside the book too — but something has to hold it, or no cycle can
+   know where the last one stopped.
+3. **Superseded material needs a policy, not a deletion.** When a finding is overturned, the
+   honest record is that it *was* believed and is no longer. A book that silently replaces its
+   claims teaches the current answer and hides the lesson about how answers change — which is the
+   specific lesson a research engineer needs.
+4. **The research's own findings need a durable home separate from the book.** Nine research
+   reports in this project produced checkable claims with sources. If those live only in a
+   conversation, the next cycle re-derives them. If they live in the book, the book cannot
+   distinguish a claim it verified from a claim it inherited.
+5. **The shorthand ledger has a harder job in this book.** In the first book, the gap was between a
+   formal name and an interview word. At the frontier, the same technique often has three names
+   across three communities, and a reader who knows one cannot find the other two.
+6. **The first book is finished and the new one must not disturb it.** It is complete as of
+   2026-10-31. Any shared mechanism must be copied rather than refactored, so that improving the
+   second book cannot break the first.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+---
+
+## 13. What this document does not cover
+
+- **Methodology.** The development framework, agent workflows, passes, gates, quality standards and
+  documentation architecture are a separate proposal, by the owner's instruction.
+- **The table of contents.** No subjects are chosen here, and none may be chosen until the research
+  is re-run under a brief agreed after this document.
+- **Any decision marked [OPEN].** Six remain, and §10 holds the three that block the rest.
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+</div>

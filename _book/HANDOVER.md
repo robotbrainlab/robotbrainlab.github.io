@@ -548,31 +548,50 @@ A quoted span, not a citation. Chapter 6's evidence ladder is the device; it has
 rather than a habit. This is the defect class that recurred three times in two days during the
 2026-11-03 research (register rows MP-58, MP-67 and MP-64 each said more than their source did).
 
-### 9.4a How the old book is reused — the rule that is easy to get wrong
+### 9.4a How the old book is reused — SUPERSEDED 2026-11-06
 
-Settled with the owner, 2026-11-03.
+> **No content from this book is reused in the new one. It is not a source, and it is not a draft
+> to edit.**
 
-> **Reuse the old book as text. Never use it as a source.**
+Settled by the owner on 2026-11-06: *"We are not planning to reuse any content from the first book
+in the new book."*
 
-The old book is a **draft to edit**, not an authority to cite. Where the new table of contents has a
-row an existing chapter already teaches, start from that chapter and edit it — that is the whole
-saving, and it is why this is a second edition rather than a rewrite.
+**What the old book is still for**, and it is three things:
 
-But any claim that is **new**, and every claim in a chapter's *Still open* block, is sourced from the
-research with a quoted span. **Not from the old book.** The reason is in §6 of this file and in the
-records: the ten chapters that teach the model (8–17) cite nothing external at all — their inputs
-are `TOC.md`, `BOOK-GUIDE.md` §6, earlier chapters, the two ledgers and the bank. Their arithmetic
-was verified by recomputation, which is real checking, but it is not provenance. A writing agent told
-to "look in the current book first, and look further if that is not enough" will therefore inherit
-unsourced science and defeat §9.4's gate on its first chapter.
+1. **Evidence of the language and voice** the new book must match. Chapter 1 is the voice
+   reference, and `BOOK-GUIDE.md` §7 holds the rules.
+2. **Evidence of the structure** to keep — four parts, made for a reason.
+3. **Evidence of the method** that worked — the five-step loop, the sweep, the ledgers, the gates.
 
-**The working order, per table-of-contents row:**
+**What it is not:** a source of text, passages or explanations; a source of research evidence; a
+prerequisite the new book may assume.
 
-1. The research decides the scope. The scope becomes the table of contents.
-2. For each row, look in the old book. A chapter that already teaches it is the starting draft.
-3. Anything new comes from the research, quoted, with its evidence status marked.
-4. Chapters 8–17 are the ones to watch: reuse their prose freely, and source any claim in them that
-   the new frame makes load-bearing.
+**The working rule:** where the new book covers a subject this book also covered, it is researched
+and written from primary sources **as if this book did not exist**. This book is consulted only to
+check the two do not contradict each other.
+
+**And the new book is a new book, not a second edition.** That framing is withdrawn with the rule
+below.
+
+#### What the rule used to say, and why — kept because the reasoning still holds
+
+Settled 2026-11-03, superseded three days later. The old rule was *"Reuse the old book as text.
+Never use it as a source,"* treating this book as a draft to edit so that the new one was a second
+edition rather than a rewrite.
+
+Its second half was right and survives in a stronger form. The reason it gave is worth keeping:
+**the ten chapters that teach the model (8–17) cite nothing external at all.** Their inputs are
+`TOC.md`, `BOOK-GUIDE.md` §6, earlier chapters, the two ledgers and the bank. Their arithmetic was
+verified by recomputation, which is real checking and is not provenance. So an agent told to "look
+in the current book first, and look further if that is not enough" inherits unsourced science and
+defeats §9.4's gate on its first chapter.
+
+That argument killed the reuse half of the rule too. **Reuse of text and non-use as a source cannot
+coexist in the same project**, because an edited passage carries its original claims with it and
+nobody re-sources what they did not write. The owner's decision removes the contradiction.
+
+**Dependency:** §9.4b's one-chapter test existed to measure whether editing an old chapter was
+cheaper than writing a new one. With no reuse, it measures nothing. Treat it as superseded too.
 
 ### 9.4b The cheap test before committing to any of this
 
