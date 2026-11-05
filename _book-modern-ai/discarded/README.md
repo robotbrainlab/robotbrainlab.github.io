@@ -16,7 +16,7 @@ into the book, or used to rank or choose a research area.**
 | File | What it was |
 |---|---|
 | `2026-11-06-systems-hardware.md` | The pilot run's six subject records. Its area came from a nine-area carving I invented, which is the thing that was wrong |
-| `CLAIMS-seeded-from-pilot.tsv` | 32 claims seeded from that run. `CLAIMS.tsv` is reset and starts empty |
+| `CLAIMS-seeded-from-pilot.tsv` | 32 claims seeded from that run. `../docs/CLAIMS.tsv` is reset and starts empty |
 
 ## What else is discarded, and is not here
 
@@ -37,7 +37,7 @@ Three things from that period are **method, not findings**, and they stand:
 1. **The brief works.** It was run once and passed all six of its tests —
    it stopped on its own at 11 of 25 searches, started no sub-agents, and refused three numbers it
    could not confirm at source. That is a result about the instrument, not about the field.
-2. **Four fixes to the brief**, now in `briefs/TEMPLATE-area-research.md` version 2. The largest is
+2. **Four fixes to the brief**, now in `../docs/briefs/TEMPLATE-area-research.md` version 2. The largest is
    that research output goes to a file rather than into the conversation.
 3. **One finding about area sizing:** the area the pilot was given held more subjects than its cap
    allowed. So areas should be small. This is a fact about the brief's cap, not a claim about AI.

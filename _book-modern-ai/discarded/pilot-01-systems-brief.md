@@ -1,12 +1,12 @@
 # Pilot brief 01 — Systems, hardware and infrastructure
 
 > **SUPERSEDED.** Run once on 2026-11-06. It passed all six of its tests and revealed four fixes,
-> which are in `TEMPLATE-area-research.md` version 2. **Use the template, not this file.** This one
+> which are in `../docs/briefs/TEMPLATE-area-research.md` version 2. **Use the template, not this file.** This one
 > is kept so that the pilot's output can be read against exactly what was asked, which is the whole
 > reason briefs are kept at all. Its result is in `2026-11-06-systems-hardware.md` (in this folder).
 
 **Written 2026-11-06. Run once.** This is the first brief written to the schema in
-`PROCESS.md` §4.6. Its purpose is as much to **test the brief** as to get the research: the last
+`../docs/PROCESS.md` §4.6. Its purpose is as much to **test the brief** as to get the research: the last
 three research rounds failed on the brief rather than on the agents, so this one is run **once, on
 one area**, and read before anything else is launched.
 
@@ -23,7 +23,7 @@ A test-design decision, not a claim about how the field divides. Four reasons:
    is no societal-harm literature to drift into.
 4. **It is bounded.** If the output sprawls, the sprawl will be obvious.
 
-**What this pilot does not decide:** how the field divides. `GOAL.md` §3.3 holds that a partition
+**What this pilot does not decide:** how the field divides. `../docs/GOAL.md` §3.3 holds that a partition
 is an argument rather than a finding, and the real carving is settled when the full research round
 is designed.
 

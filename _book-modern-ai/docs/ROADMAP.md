@@ -29,26 +29,32 @@ Owner's instruction, 2026-11-06: *"We are going to conduct fresh research from s
 disregarding the previous research, as it was conducted before we reached a consensus."*
 
 No figure from the stopped round of 2026-11-05, and none from the pilot run, may be cited or used to
-choose or rank an area. `discarded/README.md` records what was discarded and the three method-only
-results that survived. `CLAIMS.tsv` and `research/` are empty.
+choose or rank an area. `../discarded/README.md` records what was discarded and the three method-only
+results that survived. `CLAIMS.tsv` and `../research/` are empty.
 
 ## What step 3 established
 
-The pilot ran one agent on one area with the brief at `discarded/pilot-01-systems-brief.md`.
+The pilot ran one agent on one area with the brief at `../discarded/pilot-01-systems-brief.md`.
 
 **It passed all six tests.** It used 11 of 25 searches and 16 of 25 fetches, stopped because its
 records were complete rather than because the budget ran out, and started **zero** sub-agents. It
 refused three numbers it had seen in search results because it could not confirm them at source.
 
-**Its content is discarded** and sits in `discarded/`. Only the verdict on the instrument survives:
+**Its content is discarded** and sits in `../discarded/`. Only the verdict on the instrument survives:
 the brief terminates, it keeps an agent honest about its sources, and it does not sprawl.
 
 **Four fixes followed**, and are in `briefs/TEMPLATE-area-research.md` version 2: output goes to a
 file rather than into the conversation; the live-research word limit is raised and enforced; the
 buildable experiment must state its hardware; and the claims vocabulary gains `source-absence`.
 
-**One finding is about the cap rather than the field.** The area the pilot was given held more
-subjects than its cap of six allowed. **So the areas chosen at step 4 should be small.**
+**One thing I previously recorded here is withdrawn.** I wrote that the pilot proved areas should be
+small, because the area it was given held more subjects than its cap allowed. **That is a claim
+about how big an area of AI is, drawn from a discarded run**, and it would have pre-loaded step 4
+with a conclusion the fresh research is supposed to reach.
+
+What survives is a property of the instrument: **a cap forces a choice, and the brief requires the
+agent to report what it skipped and why.** So the research itself will say whether an area was too
+big for its cap, and the cap is calibrated from that rather than asserted now.
 
 ## What step 4 needs
 

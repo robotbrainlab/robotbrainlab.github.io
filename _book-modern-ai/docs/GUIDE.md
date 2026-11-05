@@ -15,9 +15,10 @@ by both · **[I RECOMMEND]** my proposal, not a decision · **[OPEN]** undecided
 is the owner's single centralised learning resource in place of scattered papers, articles and
 documentation.
 
-**[STATED]** It is **fully independent and self-contained**. It has no connection to *Modern AI
-Engineering from Zero* in content, scope, structure or progression. Topics will overlap, and no
-topic gets less explanation because that book covered it.
+**[STATED]** It is **fully independent and self-contained**. It is not a continuation, an extension
+or a revision of any earlier work, and it has no connection to one in content, scope, structure or
+progression. A topic that has been covered elsewhere is developed here from scratch, and **no topic
+gets less explanation because something else covered it.**
 
 **[STATED]** It must make the reader able to **understand the science, follow the research, and
 build the thing** — not to summarise research.
@@ -61,12 +62,13 @@ specification and the question it raises. Nothing is drafted until it is settled
 
 ## 4. The language and the voice
 
-**[STATED]** Match the first book's language. This is not a preference; it is the thing that made
-the material learnable.
+**[STATED]** This is the voice. It is not a preference and it is not decoration: it is what makes
+the material learnable, and it is as binding as anything else in this file.
 
 ### The rules
 
 - Plain, simple and vivid. **Short sentences.** Explain things as you would to a friend.
+- **Easy language. Simplicity. Genuinely start from scratch.**
 - **Do not write up to an imagined expert.** Do not assume a term has been met before the book
   gives it.
 - **Idea first, then commands. Never start a section with a code block.**
@@ -78,9 +80,13 @@ the material learnable.
 
 ### The fourteen habits
 
-**[I RECOMMEND]** These are read off the first book's prose, not off its rule list, because a rule
-list is not a voice. Seven make the material **easy**; three keep it **rigorous**; dropping either
-set produces something the owner has rejected.
+**[AGREED]** A rule list is not a voice. These fourteen are the voice, stated as habits a writer
+either has or does not. Seven make the material **easy**; three keep it **rigorous**; dropping
+either set produces something the owner has rejected — a textbook that performs rigour through
+difficulty, or a summary that trades depth for ease.
+
+**If a habit turns out to be wrong, the review of chapter one is where that is found.** These are
+written to be followed and corrected, not to be derived again from somewhere else.
 
 | # | Habit | Which set |
 |---|---|---|
@@ -160,12 +166,17 @@ evidence that it is *true*.
 exercises and project recommendations are part of the book. **The book is not a record of having
 done them** — the owner's practice lives outside it.
 
-**[I RECOMMEND]** The form changes from the first book, and this is the main change:
+**[I RECOMMEND]** **Two lab forms, and the chapter's subject decides which.**
 
-> In the first book a lab **constructs** — build the thing, measure it. Its subjects were settled,
-> so construction was right. This book's subjects are contested, so a lab **reproduces or refutes**:
-> does this improvement survive a fair baseline, does this result hold when the protocol changes,
-> is this difference real.
+| Form | What the reader does | Use it when |
+|---|---|---|
+| **Construct** | Build the thing, then measure it | The subject is settled enough to build from |
+| **Reproduce or refute** | Take a published claim and test it: does this improvement survive a fair baseline, does this result hold when the protocol changes, is this difference real | The subject's answer is in dispute |
+
+The second form exists because **the book must be able to teach a subject whose answer is not
+settled**, since it covers active research as well as established practice. That is a capability
+requirement. It does **not** predict how many subjects will be contested, or which — that is for
+the research to find.
 
 ### The contract for a reproduction lab
 
@@ -202,17 +213,17 @@ here presumes it.
 
 | Choice | Buys | Costs |
 |---|---|---|
-| Reference **by chapter**, as the first book does — *"Chapter 9 promised to open this"* | A book that reads as one continuous argument | Every re-order is a sweep through the prose |
+| Reference **by chapter**, with a promise — *"Chapter 9 promised to open this"* | A book that reads as one continuous argument | Every re-order is a sweep through the prose |
 | Reference **by concept**, with the location looked up | Re-ordering is nearly free | Less of that one-argument feeling |
 
-**[I RECOMMEND]** by concept, because this book will be re-ordered many times and the first book
-never was. Habit 11 in §4 is the casualty, and it is a real loss.
+**[I RECOMMEND]** by concept, because this book is revised on a cycle and will be re-ordered many
+times. Habit 11 in §4 is the casualty, and it is a real loss.
 
 ## 8. Mathematics
 
 **[OPEN]** How deep the mathematics goes. Three candidates, in `GOAL.md` §10.
 
-**[I RECOMMEND]** the replacement test, if the boundary moves from the first book's:
+**[I RECOMMEND]** one test to decide whether a piece of mathematics belongs:
 
 > **Does the reader need this to tell whether a claimed improvement is real, and to build the thing
 > that tests it?**
@@ -237,8 +248,8 @@ well as to a chapter.
 
 ## 10. Markdown and build conventions
 
-**[I RECOMMEND]** Carried from the first book because its build is proven, with the file naming
-left open until the structure is.
+**[I RECOMMEND]** These are the conventions the build depends on. File naming stays open until the
+structure is settled.
 
 - **One file per chapter.** `markdown/NN-slug.md`.
 - **Headings:** `# Chapter Title` with no "Chapter N". First paragraph is the intro, then `##`
@@ -251,8 +262,9 @@ left open until the structure is.
   the Worth Memorising tables. Never edit a generated file by hand.
 - **The Markdown is the only source of truth.** Never edit generated output.
 
-**[OPEN]** The build toolchain. The first book's — Markdown → pandoc → XeLaTeX → PDF — is proven
-and would be **copied, never shared**, so that improving this book cannot break that one.
+**[OPEN]** The build toolchain. **Markdown → pandoc → XeLaTeX → PDF** is the proposal. Wherever an
+existing script is reused, it is **copied into this project, never shared with another**, so that
+improving this book cannot break anything else.
 
 ## 11. What the book never does
 

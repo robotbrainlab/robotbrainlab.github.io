@@ -14,26 +14,26 @@ code-following from 4.2% to 91.4% ([arXiv 2610.30571](https://arxiv.org/abs/2610
 
 ## First thing in every session
 
-Read `ROADMAP.md`. It says which of the eleven steps we are on and what the next action is.
+Read `docs/ROADMAP.md`. It says which of the eleven steps we are on and what the next action is.
 
 Then read, in this order, only what the current step needs:
 
 | Read | For |
 |---|---|
-| `GOAL.md` | What the book is for, and why. **Every statement is marked** as the owner's words, agreed, my recommendation, or open. Nothing is a decision unless it says so |
-| `PROCESS.md` | How the book gets built: the cycle, the chapter loop, the passes, the agents, the gates, the brief schema |
-| `ROADMAP.md` | The eleven steps, and where we are |
-| `CLAIMS.tsv` | Every load-bearing claim, with its source, its strength and its review date. **Currently empty** — reset 2026-11-06 |
-| `briefs/TEMPLATE-area-research.md` | The research brief. Fill it in; do not rewrite it |
+| `docs/GOAL.md` | What the book is for, and why. **Every statement is marked** as the owner's words, agreed, my recommendation, or open. Nothing is a decision unless it says so |
+| `docs/PROCESS.md` | How the book gets built: the cycle, the chapter loop, the passes, the agents, the gates, the brief schema |
+| `docs/ROADMAP.md` | The eleven steps, and where we are |
+| `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, its strength and its review date. **Currently empty** — reset 2026-11-06 |
+| `docs/briefs/TEMPLATE-area-research.md` | The research brief. Fill it in; do not rewrite it |
 | `research/` | What the research has returned. **Currently empty** |
 | `discarded/` | Pre-consensus research. **Read the README before opening anything in it** |
 
 ## Precedence, when two documents disagree
 
 1. **The repository** beats every document.
-2. **A machine-checked file** (`CLAIMS.tsv`, `OWNERSHIP.tsv`, `records/`) beats prose.
-3. **`GOAL.md`** beats everything else on *what the book is for*.
-4. **`PROCESS.md`** beats everything else on *how it gets built*.
+2. **A machine-checked file** (`docs/CLAIMS.tsv`, `docs/OWNERSHIP.tsv`, `records/`) beats prose.
+3. **`docs/GOAL.md`** beats everything else on *what the book is for*.
+4. **`docs/PROCESS.md`** beats everything else on *how it gets built*.
 
 A rule that appears in two files is a defect. Fix it by deleting one, not by editing both.
 
@@ -42,14 +42,18 @@ A rule that appears in two files is a defect. Fix it by deleting one, not by edi
 - **All research conducted before 2026-11-06 is discarded.** The owner's instruction: it was done
   before we reached a consensus on the goal, the method and the scope. See `discarded/README.md`.
   **No figure from it may be cited, and it may not be used to choose or rank a research area.**
-  Only three things survived, and they are method rather than findings: the brief works, it has four
-  fixes, and areas should be small.
-- **The new book has no connection to *Modern AI Engineering from Zero*** in content, scope,
-  structure or progression. It is independent and self-contained. Only two things carry over: the
-  **language and voice**, and the **method**. Not the four parts. See `GOAL.md` §2.4.
+  Only two things survived, and both are about the instrument rather than about AI: the brief
+  terminates and keeps an agent honest about its sources, and it has four fixes. **"Areas should be
+  small" is withdrawn** — it was a conclusion about how many subjects an area holds, which is a
+  claim about the field drawn from a discarded run. The brief caps subjects per area and requires
+  the agent to report what it skipped; the fresh research calibrates the cap.
+- **The book is fully independent and self-contained.** It is not a continuation, an extension or
+  a revision of any earlier work, and has no connection to one in content, scope, structure or
+  progression. The voice is specified in `docs/GUIDE.md` §4 and the method in `docs/PROCESS.md`; both are
+  stated as rules in their own right, with nothing to consult. See `docs/GOAL.md` §2.4.
 - **Duplication between the two books is fine.** Duplication *within* this book is a defect. These
   are different rules.
-- **No topic gets less explanation because the first book covered it.**
+- **No topic gets less explanation because something else covered it.**
 - **The track decides the scope; self-containment decides the depth.** The book covers Modern AI
   subjects only, and teaches whatever those subjects need from zero, inline.
 - **Never state a claim above the strength of its source**, and quote the source.
@@ -72,6 +76,6 @@ better than prose. No internal codes or shorthand: name things.
 
 ## The eight classes of mistake already made
 
-`GOAL.md` §11 records them, each with its instances and the practice that follows. Read it before
+`docs/GOAL.md` §11 records them, each with its instances and the practice that follows. Read it before
 assessing anything. The shortest summary: **do not claim what you have not read**, and **do not
 assess a thing with an instrument that does not sample it**.

@@ -1,0 +1,86 @@
+# Chapter NN — record
+
+Copy this to `records/NN-slug.md` when a chapter begins.
+
+**Tick a box only with evidence after it** — a command result, a count, a line number. A ticked box
+with nothing after it is a lie the gates can detect, and prose is what gets skipped, so this is a
+checklist a script refuses rather than a habit.
+
+**Fill `sha256` LAST.** Editing one character of the chapter afterwards makes this record stale and
+fails the suite.
+
+```
+chapter:        markdown/NN-slug.md
+question:       the chapter's durable question, one sentence
+sources:        named, with what was read of each
+non-scope:      what this chapter does NOT cover, so review has an edge
+claims:         the CLAIMS.tsv ids this chapter rests on
+begun:
+written:
+reviewed:
+amended:
+absolutes:      count from the absolutes gate, and what was scoped back
+new-terms:      count from the inputs gate, each triaged
+coverage-misses: count, each triaged one by one
+sha256:
+```
+
+## Before writing
+
+- [ ] `LEDGER-TAUGHT.md` read — every row above this chapter, **and every `Do not` row wherever it
+      sits.** The opening paragraph claims nothing false about what came before
+- [ ] `LEDGER-DEFECTS.md` read
+- [ ] The chapter's row in `PLAN.md` read: its question, what it must cover, its page estimate
+      (an estimate, never a target — `GUIDE.md` §9)
+- [ ] **Non-scope declared** in the field above. Without an edge, review never terminates
+- [ ] `OWNERSHIP.tsv` checked: every concept this chapter will own is free, and every concept it
+      leans on has an owner to refer to
+- [ ] Sources read **in full, immediately before writing** — not earlier in the session
+- [ ] `GUIDE.md` §8's mathematics test to hand
+
+## While writing
+
+- [ ] **Every number recomputed** against the thing it describes, in the file, before it was
+      written — say how many
+- [ ] **Every claim has a `CLAIMS.tsv` row**, with its source and strength, and **none is stated
+      above its recorded strength**
+- [ ] **Every absolute tested** against a counter-example *in the book*, not only in this chapter
+- [ ] **Every term built on** was already given to the reader
+- [ ] The chapter holds the anatomy in `GUIDE.md` §5, including its durable question and its
+      `Claims` section
+- [ ] Where a well-known explanation is wrong, the book states the correct rule — and it is flagged
+      in the report
+- [ ] A disputed subject carries `## What is disputed` in the fixed shape, including **what
+      measurement would settle it**
+- [ ] The lab states the hardware it needs, and gives a no-hardware version or says there is none
+
+## After writing
+
+- [ ] Every gate CLEAN on this chapter
+- [ ] `make` → 0 overfull · 0 missing glyphs · 0 undefined
+- [ ] Index entries read one by one against Key Terms **before** review
+- [ ] **Pass 1, completeness review** — launched with the brief in `briefs/`
+- [ ] Each finding **verified before accepting**; each fix **swept book-wide, counted before and
+      after — zero, or it is not done**, back matter first
+- [ ] **Pass 2, adversarial claims** — CLEAN
+- [ ] **Pass 3, lab execution from the chapter text alone** — produced a verdict
+- [ ] **Pass 4, fix verification** — launched, naming every changed passage
+- [ ] `LEDGER-TAUGHT.md` row added; `LEDGER-SHORTHAND.md` updated; `OWNERSHIP.tsv` updated
+- [ ] `LEDGER-DEFECTS.md` updated if a new defect class appeared
+- [ ] `CHANGELOG.md` entry written, marked new / revised / overturned
+- [ ] Acceptance questions answerable from the chapter, **or** answered by a dispute record that
+      says so
+- [ ] Every page looked at
+
+## Reviews
+
+```
+pass-1-completeness:
+pass-2-claims:
+pass-3-lab:
+pass-4-fix-verification:
+```
+
+Record for each: how many findings, how many declined and why, and how many were **false teaching**
+rather than cosmetic. The stopping rule in `PROCESS.md` §6 reads these numbers, and it reads them
+for what caused them rather than as a verdict on the chapter.

@@ -21,7 +21,7 @@ book's own record for chapter 45, explaining how every figure in a 58-page lab c
 this document that could have been written as "be careful about X" is instead written as a script
 that refuses, a file a gate reads, or a brief that cannot be answered the wrong way.
 
-The corollary, also from the first book, and it is the reason the gates are trusted there:
+Three corollaries, and they are the reason a gate can be trusted at all:
 
 1. **A gate nobody reads the output of is worse than no gate.** Three of nine gates in the source
    project were at some point lying to the suite — one failing on an empty folder, one crashing on
@@ -42,7 +42,7 @@ removes one to save time.
 
 | Carried over | What it cost to learn |
 |---|---|
-| **One chapter at a time. Never a part at a time** | Context dilution is the cause of invented content. In the source project, *every* invented example across eighteen chapters traced to writing several chapters in one stretch |
+| **One chapter at a time. Never a part at a time** | Context dilution causes invented content. Writing several chapters in one stretch pushes the first chapter's sources out of working context, and it then gets written from the pattern of the previous chapters rather than from its material |
 | **Sources read in full, immediately before writing** — not earlier in the session | Named in the record, with what was read |
 | **Non-scope declared in the record before writing** | Without an edge, review never terminates. Once a chapter claims to handle any case, "what about X?" is always a correct question and every answer creates the next one |
 | **A completeness review against the sources, side by side** | Two reviews once passed a chapter with a whole section missing |
@@ -56,7 +56,7 @@ removes one to save time.
 | **A taught-ledger with explicit "Do not" rows** | No gate looks at sequence. A chapter can be internally perfect and wrong about where it sits |
 | **A shorthand ledger** — formal name against the word the field actually says | "RAG" appeared in no chapter, no glossary row and no question, while the subject ran across seven chapters |
 | **A defect ledger of *classes*, each with its instance and the practice** | A list of mistakes is not reusable. A class is |
-| **Concept ownership: each concept owned by exactly one chapter** | Eleven concepts in the first book are touched by several chapters |
+| **Concept ownership: each concept owned by exactly one chapter** | Some concepts are naturally touched by several chapters, and without an owner each one re-teaches it slightly differently |
 | **Correctness outranks the source** | *"A source is evidence that something is said, never evidence that it is true"* |
 | **Page budgets never bind, and never decide scope** | The failure is not padding or cutting. It is deciding scope by page count and justifying it on other grounds — which happened, and was caught from the actions rather than the explanation |
 | **`You understand this when …`, one sentence per chapter** | The reader's own test |
@@ -117,11 +117,11 @@ meanwhile.
 
 The acceptance rule then changes from *"the chapter contains the answer"* to **"the chapter
 contains the answer, or the state of the dispute, and says which."** This is the minimum change
-that lets the first book's best idea survive contact with frontier material. It answers difference 3.
+that lets an acceptance standard survive contact with disputed material. It answers difference 3.
 
 ### 4.3 The reproduction lab has a decision rule, not an expected result
 
-**[I RECOMMEND]** The first book's labs promise results that hold for every reader. A reproduction
+**[I RECOMMEND]** An ordinary lab promises a result that holds for every reader. A reproduction
 lab cannot: the point is that the claim might not hold.
 
 So its contract is: **state the published claim, the procedure, and the decision rule — what counts
@@ -147,7 +147,8 @@ file is about the second.
 
 ### 4.5 A lab runner that works from the chapter alone
 
-**[I RECOMMEND]** In the first book the author ran the labs. A separate agent that runs a lab
+**[I RECOMMEND]** A writer who runs their own lab cannot test whether the chapter describes it.
+A separate agent that runs a lab
 **from the printed chapter only**, in a fresh folder, tests the book's actual promise —
 *reproducible from the text alone* — rather than the author's memory of having tested it.
 
@@ -191,7 +192,7 @@ RESEARCH → SELECT → PLAN → WRITE → VERIFY → CLOSE → EXPIRE
 | **Research** | One scout per area, fixed brief schema, delegation depth 0. Output: candidate **subjects**, each a complete unit, plus claims with sources | — |
 | **Select** | Subjects filtered by the three-part test (`GOAL.md` §10): a mechanism worth understanding · live research · something buildable. **Rejections recorded with reasons** | **Owner** |
 | **Plan** | Subjects become chapters. Ownership assigned. Structure chosen *now*, from the subjects that exist — never before (`GOAL.md` §5.3). Acceptance questions written **before** drafting | **Owner** |
-| **Write** | One chapter. Five steps, unchanged from the first book | — |
+| **Write** | One chapter. Five steps, §6 | — |
 | **Verify** | Four passes (§7) | — |
 | **Close** | Record hashed, ledgers updated, claims linked, changelog entry written | — |
 | **Expire** | Claims past `review_by` re-verified. Only affected chapters reopen | — |
@@ -214,8 +215,12 @@ current answers.**
 | Durable question | Today's answer, which will change |
 |---|---|
 | How do I know a difference is real? | These estimators, these sample sizes |
-| What does it cost to serve a model? | These numbers, this hardware |
+| What does it cost to run this, and what drives the cost? | These numbers, this hardware |
 | How do I adapt a model to my own task? | Today's methods and their costs |
+
+**These three are illustrations of the *form*, not a claim about what the book will contain.** Each
+is drawn from a capability the owner's current specification already names, so none presupposes a
+research outcome. **Which questions the book actually carries comes from the research.**
 
 A new subject goes to the question it answers. A dead subject leaves its question standing. The
 chapter survives its own content.
@@ -250,17 +255,17 @@ That is a falsifiable test on the structure, and it runs for free.
 
 #### One trade-off that is not free
 
-The first book binds its chapters tightly. Chapter 11 opens: *"Chapter 9 called a layer a box of
-the right shape and promised to open it."* That is part of why it reads as one argument rather than
-fifty essays. **Those promises are exactly what makes re-ordering expensive.**
+A book can bind its chapters tightly — *"chapter 9 promised to open this, and here it is"* — and
+that is part of what makes a book read as one argument rather than fifty essays. **Those promises
+are exactly what makes re-ordering expensive.**
 
 | Choice | Buys | Costs |
 |---|---|---|
-| Reference by **chapter and promise**, as the first book does | A book that reads as one continuous argument | Every re-order is a sweep through the prose |
+| Reference by **chapter and promise** | A book that reads as one continuous argument | Every re-order is a sweep through the prose |
 | Reference by **concept**, with the location looked up | Re-ordering is nearly free | Less of that one-continuous-argument feeling |
 
 **[I RECOMMEND]** reference by concept, because this book will be re-ordered many times and the
-first book never was. It is a real loss and the owner should decide it knowingly. **[OPEN]**
+is revised on a cycle. It is a real loss and the owner should decide it knowingly. **[OPEN]**
 
 #### What maintenance actually looks like, per cycle
 
@@ -353,7 +358,7 @@ chapter" re-reads everything and finds what pass 1 already found.
 
 ## 9. The gates
 
-**[I RECOMMEND]** Carry over the first book's eleven, and add three that the new mechanisms require.
+**[I RECOMMEND]** Eleven gates on the writing itself, and three that the new mechanisms require.
 
 | Gate | Catches | Status |
 |---|---|---|
@@ -380,7 +385,7 @@ chapter" re-reads everything and finds what pass 1 already found.
 
 ### Per chapter
 
-Everything the first book required, plus three:
+All of these:
 
 - All gates pass; every command run; every page looked at
 - Acceptance questions answerable from the chapter, **or** answered by a dispute record that says so
@@ -389,7 +394,7 @@ Everything the first book required, plus three:
 - **Pass 3 ran the lab from the chapter text and it produced a verdict**
 - **Pass 2 clean: no claim stated above its source strength**
 
-### Per cycle — new, because the first book had no cycles
+### Per cycle
 
 - Every claim past `review_by` re-verified or marked `superseded`
 - Every superseded claim retained, with the date and the reason
@@ -405,11 +410,12 @@ Everything the first book required, plus three:
 comprehensive file; the reasoning against it is in the chat proposal of 2026-11-06 and in short:
 loading one very long file into every agent spends context on irrelevance, and **context dilution
 is the documented cause of invented content in this project**. The single file makes the known
-failure mode more likely. The first book shipped 57 chapters on seven kinds of document.
+failure mode more likely. A book of this size has been shipped on seven kinds of document before,
+so the split is not theoretical.
 
 | File | Job | Change rate | Audience |
 |---|---|---|---|
-| `CLAUDE.md` | Entry point. Short. Reading order and **the precedence rule** | Almost never | Agents |
+| `../CLAUDE.md` | Entry point. Short. Reading order and **the precedence rule** | Almost never | Agents |
 | `GOAL.md` | Why the book exists | Rarely; owner approves | Owner |
 | `GUIDE.md` | The spec: structure, style, maths line, chapter anatomy, lab rules | Rarely | Both |
 | `PROCESS.md` | This file: the cycle, the loop, the passes, brief schemas, stopping rules | When the method changes | Agents |
@@ -423,17 +429,17 @@ failure mode more likely. The first book shipped 57 chapters on seven kinds of d
 
 **Three rules that make multiple files safe**, which is the real answer to the owner's concern:
 
-1. **One file is authoritative per topic**, and `CLAUDE.md` says which. A rule in two files is a
+1. **One file is authoritative per topic**, and `../CLAUDE.md` says which. A rule in two files is a
    defect, and a gate can grep for duplicated rule headings.
 2. **The precedence order is written down.** The repository beats every document; a machine-checked
    file beats prose; `GUIDE.md` beats `PROCESS.md` on anything about the book itself. This is the
-   first book's own rule, which cites measured evidence that agents follow a stale instruction file
-   over the actual code 90.1% of the time.
+   rule stated in `../CLAUDE.md`, which cites measured evidence that agents follow a stale instruction
+   file over the actual code 90.1% of the time.
 3. **Nothing is restated for convenience.** Cross-reference by filename and section.
 
-**[I RECOMMEND]** one more thing, and it is about the first book rather than this one: **copy its
-tooling, do not share it.** That book is finished as of 2026-10-31. A shared script means improving
-this book can break that one.
+**[I RECOMMEND]** one rule about reuse: **copy, never share.** Where a script or mechanism comes
+from another project, it is copied into this one. A shared script means improving this book can
+break something else, and it gives this project an external dependency it does not control.
 
 ---
 

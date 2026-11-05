@@ -1,0 +1,16 @@
+concept	owner_chapter	assigned_on	previous_owner	moved_on	note
+#	EMPTY. One row per concept that more than one chapter touches.
+#
+#	WHY: each concept is explained in exactly one chapter. Every other chapter refers to it
+#	and does not re-teach it. Without an owner, each chapter re-teaches it slightly differently
+#	and the reader cannot tell which version is right.
+#
+#	A gate fails on: two chapters claiming one concept; a chapter teaching a concept it does
+#	not own.
+#
+#	WHEN A SUBJECT MOVES BETWEEN CYCLES: do not delete the row. Set owner_chapter to the new
+#	chapter, record the old one in previous_owner, and date it in moved_on. A concept whose
+#	ownership has moved twice is a signal the carving is wrong.
+#
+#	Duplication BETWEEN this book and any other is permitted and expected. Duplication
+#	WITHIN this book is what this file prevents. They are different rules.

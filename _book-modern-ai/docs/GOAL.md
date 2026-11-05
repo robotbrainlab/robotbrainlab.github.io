@@ -12,7 +12,7 @@
   - [2.1 Why a book at all](#21-why-a-book-at-all)
   - [2.2 The problem the book solves](#22-the-problem-the-book-solves)
   - [2.3 What the book is not](#23-what-the-book-is-not)
-  - [2.4 Relationship to the first book](#24-relationship-to-the-first-book)
+  - [2.4 Independence](#24-independence)
 - [3. The research philosophy](#3-the-research-philosophy)
   - [3.1 The five questions, per area](#31-the-five-questions-per-area)
   - [3.2 The five dimensions, per subject](#32-the-five-dimensions-per-subject)
@@ -27,12 +27,10 @@
   - [5.1 The standard](#51-the-standard)
   - [5.2 The language and the voice](#52-the-language-and-the-voice)
   - [5.3 Structure — not inherited, and not yet decided](#53-structure--not-inherited-and-not-yet-decided)
-  - [5.4 What I found when I read how the first book achieves this](#54-what-i-found-when-i-read-how-the-first-book-achieves-this)
   - [5.5 Tracking what changes](#55-tracking-what-changes)
 - [6. Why a research-oriented engineer, and not one of the alternatives](#6-why-a-research-oriented-engineer-and-not-one-of-the-alternatives)
 - [7. The role of practical work](#7-the-role-of-practical-work)
-  - [7.1 What the first book already does](#71-what-the-first-book-already-does)
-  - [7.2 What practical work must do in the new book](#72-what-practical-work-must-do-in-the-new-book)
+  - [7.1 What practical work must do](#71-what-practical-work-must-do)
 - [8. The continuous evolution of the book](#8-the-continuous-evolution-of-the-book)
 - [9. The intended outcome](#9-the-intended-outcome)
 - [10. Scope and the areas](#10-scope-and-the-areas)
@@ -165,100 +163,28 @@ completed work:
 practised. Any assessment that treats the absence of a record in the book as the absence of the
 activity is making an inference the document does not support. (See §11, class H.)
 
-### 2.4 Relationship to the first book
+### 2.4 Independence
 
-**[STATED]** *Modern AI Engineering from Zero* is an **illustrative example** of the owner's
-thinking and expectations. It does not define the new book's scope, and the new book is not
-restricted to language-model engineering.
-
-#### The independence rule — this settles it
-
-**[STATED]** Reiterated by the owner on 2026-11-06, and it closes every question in this section:
-
-> **"The previous book has no connection to the new book we are going to create in terms of
-> content, scope, structure, or progression."**
->
-> **"The new book must be a fully independent, self-contained work — not a continuation,
-> extension, or revision of the previous book."**
+**[STATED]** The book is **fully independent and self-contained**. It is not a continuation, an
+extension or a revision of any earlier work. It has no connection to one in content, scope,
+structure or progression.
 
 **[STATED]** Four consequences, in the owner's own words:
 
-1. The new book is **developed entirely from scratch**, independently of the previous book.
-2. Many topics will appear in both, and the owner is **completely comfortable with that overlap**.
+1. The book is **developed entirely from scratch**.
+2. Topics will appear here that have been covered elsewhere, and he is **completely comfortable
+   with that overlap**.
 3. **Duplication is not avoided.**
-4. **No topic gets less explanation because it appeared before.** Every topic is approached and
-   developed independently, with the necessary depth and completeness.
+4. **No topic gets less explanation because something else covered it.** Every topic is approached
+   and developed independently, with the necessary depth and completeness.
 
-**[STATED] — and withdrawn.** An earlier phrase of the owner's, *"continue from where we left
-off"*, was recorded in this document as a settled property of the new book. He asked what I meant
-by it, and then settled it the other way. **It is withdrawn.** All three readings I offered — in
-time, in the reader, in subject — are dead. There is no continuity of any kind.
+**[STATED]** Two things were extracted from earlier work before this document was written — a
+**voice** and a **method**. Both are now written down as rules in their own right: the voice in
+`GUIDE.md` §4, the method in `PROCESS.md`. **Nothing points back at the source, and nothing needs
+to.** If a rule turns out to be wrong, the review of chapter one is where that is found.
 
-**[I RECOMMEND]** retiring the phrase from every document in this project, because a phrase that
-once looked like a decision will be read as one again by the next session.
-
-**[STATED]** What the owner *did* ask to carry over, and it is only these two:
-
-- *"100% match the current book's language"* — see §5.2.
-- *"Follow all its rules, including the multiple passes and agent reviews"* — see §5.4.
-
-**[STATED]** "Chapter 1 is the reference for voice" is a rule of the **first** book, recorded in
-its guide and attributed there to the owner on 22 October 2026: *"easy language, simplicity,
-genuinely starting from scratch. Match it."* It is quoted here as evidence of what the owner means
-by the language he wants matched, and for no other purpose.
-
-**[STATED]** The new book **carries nothing already taught in Fundamentals, Advanced or Mastery**.
-It is the Modern AI track and only that track. The owner's words, after I proposed otherwise
-several times: *"For god's sake the book is called 'Modern AI' and you still fumble to understand."*
-
-**[I RECOMMEND]** the reading that makes that rule and self-containment compatible, because they
-look like they collide and they do not:
-
-| | What decides it |
-|---|---|
-| **Scope** — which subjects the book is *about* | The Modern AI track, and only that track. This is the rule above |
-| **Depth** — what the book *explains* in order to teach a subject in its scope | Whatever the subject needs, taught from zero, inline |
-
-A chapter on judging whether a retrieval change is real is in scope. The confidence interval it
-needs is not a Modern AI subject, and the chapter teaches it anyway rather than sending the reader
-away. **This is not my invention — it is the first book's own rule**, and it names the two cases
-where it was load-bearing: comparing two prompts needed sampling variance and a confidence
-interval, and judging retrieval needed ranking metrics. Both were taught from zero, inside the
-chapters that needed them, with the instruction *"Do not send the reader elsewhere."*
-
-So: **the track decides what the book covers. Self-containment decides how much it explains.** A
-prerequisite taught inline does not put that prerequisite in the book's scope, and does not make
-the book a Fundamentals book.
-
-**[OPEN]** Confirmation that this is the right reading, since the owner has not stated it and the
-two rules were settled at different times.
-
-**[STATED]** **No content from the first book is reused in the new one.** Corrected by the owner on
-2026-11-06: *"We are not planning to reuse any content from the first book in the new book."* An
-earlier draft of this document said the first book "may be reused as text", and that was wrong.
-
-So the first book's role in this project is **two things and nothing else**:
-
-| The first book is | The first book is **not** |
-|---|---|
-| Evidence of the **language and voice** to match (§5.2) | A source of text, passages or explanations |
-| Evidence of the **method** that worked (§5.4) | A source of research evidence or claims |
-| | A model for the **structure** — explicitly excluded on 2026-11-06 |
-| | A model for the **scope** or the **progression** — same |
-| | A prerequisite the new book may assume |
-| | A reason to shorten any explanation |
-
-**Note the change.** An earlier version of this table listed the first book's **structure** as the
-third thing to carry over. The owner removed it: there is no connection in structure. The four-part
-shape is therefore not inherited. It is a candidate to be judged on its merits for this book, along
-with the alternatives — see §5.3.
-
-**[STATED]** It must never be used as a research source. A claim does not become true because the
-first book states it.
-
-**[I RECOMMEND]** the practical rule that follows: when the new book covers a subject the first
-book also covered, it is **researched and written from primary sources as if the first book did not
-exist**, and the first book is consulted only to check that the two do not contradict each other.
+**[STATED]** No earlier work is a research source. A claim does not become true because a book
+states it.
 
 [↑ Back to Table of Contents](#table-of-contents)
 
@@ -303,11 +229,16 @@ and which the owner has questioned twice and not yet ruled on:
   because a partition is a decision about what to treat as the same thing. The owner's own
   landscape document demonstrates this: its section B is titled *"Why the Taxonomy Took This
   Form"* and records decisions with the alternatives considered and the reasons.
-- **An open brief collapses onto language models.** Observed three times in one session: a scan
-  whose every source was a language-model paper; a re-run with open rules that still measured only
-  the language-model share; a third with advances-focused rules that stayed narrow. **Those runs
-  are discarded and none of their findings may be cited** — but this is an observation about our
-  own instructions, not a finding about the field, and the brief design exists because of it.
+- **An unconstrained search returns what is most published and most linked, not what matters most.**
+  This is a property of search indexes, not a finding about AI: a research instruction that names no
+  areas will over-sample whatever currently dominates the index, whatever that happens to be. So a
+  brief that says "research modern AI" measures the index.
+
+  **[WITHDRAWN 2026-11-06]** I previously wrote here that an open brief *collapses onto language
+  models*, citing three runs. Those runs are discarded, and naming the outcome was a conclusion
+  from them rather than a property of the method. **The fresh research may concentrate somewhere I
+  would not predict, and the brief design must not presuppose where.** The argument above survives
+  without the prediction.
 - **So a fixed set of research areas is a coverage device**, used to force attention somewhere the
   search index does not point. It is not a claim about the field's natural shape.
 - **Consequence:** any percentage computed over a chosen set of areas is a percentage of that
@@ -430,70 +361,21 @@ twice.** Difficulty belongs to the subject, never to the prose.
 
 ### 5.2 The language and the voice
 
-**[STATED]** The owner asked for the new book to match the first book's language, and on 2026-11-06
-asked for this to be documented explicitly rather than summarised away: *"These are extremely
-important to me because they played a significant role in making the material easy to understand
-and helping me learn effectively."*
+**[STATED]** The voice is not a preference and not decoration. It is what makes the material
+learnable, and it is as binding as any other rule.
 
-#### The rules, as the first book's guide states them
+**It is specified in full in `GUIDE.md` §4** — the rules, and the fourteen habits that make them
+concrete, seven of which make the material easy and three of which keep it rigorous. Dropping
+either set produces something the owner has rejected: a textbook that performs rigour through
+difficulty, or a summary that trades depth for ease.
 
-> - Plain, simple and vivid. Short sentences. Explain things as you would to a friend.
-> - **Chapter 1 is the reference for voice** — easy language, simplicity, genuinely starting from
->   scratch. Match it. **Do not write up to an imagined expert**, and do not assume a term has
->   been met before the book gives it.
-> - Idea first, then commands. **Never start a section with a code block.**
-> - Every command and code sample must work. Run it before it goes in the book, and show real
->   output.
-> - **No filler, no hype, no history lessons** unless they explain something.
-> - British spelling everywhere. Proper names keep their own spelling.
-
-#### What the voice actually does, read off the prose
-
-**[I RECOMMEND]** this characterisation, drawn from chapters 1, 11 and 17 rather than from the
-guide, because a rule list is not a voice and the new book has to be written *in* it. Fourteen
-habits, each with its evidence.
-
-| # | Habit | Evidence from the text |
-|---|---|---|
-| 1 | **The chapter opens with what the reader will be able to do** — a capability, never a topic list | *"By the end you will know what you get, what you choose, what you are charged for, what you wait for, and the one thing you do not control at all."* |
-| 2 | **The problem is in the beginner's own voice**, first person, non-technical, slightly embarrassed | *"Everyone talks about 'using AI' and I picture training something. I have no idea what you actually get, or how."* |
-| 3 | **The short answer comes first**, then the detail | Chapter 1's second section is titled *The Short Answer* and gives the whole thing in three sentences, ending *"That is the whole of it."* |
-| 4 | **Second person, direct, declarative** | *"Your program sends it some text. It sends some text back."* |
-| 5 | **Misconceptions are cleared by negation before anything is built** | *"You do not download a brain. You do not teach it your business. You do not own it."* Then a section titled *Using Is Not Training* |
-| 6 | **Start from the difficulty, not the solution** | Chapter 11, on the hardest mechanism in the book: *"Start with the difficulty rather than the solution."* Then *"That is useless on its own."* |
-| 7 | **One everyday comparison, immediately bounded** | *"in the same way your application might request a currency rate or a map tile"* — followed by a Note saying exactly where the comparison stops holding |
-| 8 | **Tables compare; prose explains.** Never prose doing a table's job | Training against Inference is a table, not three paragraphs |
-| 9 | **One word per concept, forever** | The book says *model* throughout, names the shorthand once — *"that is the word an interviewer will use"* — and never alternates |
-| 10 | **Limits are stated as decisions, not as gaps** | Chapter 17: *"None of them is a gap in the explanation; each is a decision."* |
-| 11 | **Chapters keep their promises out loud** | *"Chapter 9 called a layer a box of the right shape and promised to open it; this opens the half of it that everybody asks about."* |
-| 12 | **The arithmetic is done, not described** | Chapter 11 works the whole attention formula on a five-word sentence with four-dimensional vectors, by hand |
-| 13 | **Interview relevance is named plainly, without interview noise** | *"the difference between a gap you can name and a gap you cannot is the difference between sounding bounded and sounding ignorant"* |
-| 14 | **Density without padding** | The reader *"reads quickly and does not want padding. Density is a feature; filler is not."* |
-
-**[I RECOMMEND]** that habits 1, 2, 3, 5, 6, 7 and 10 are the ones that make the material *easy*,
-and that habits 9, 12 and 14 are the ones that keep it *rigorous*. Dropping any of the first set
-produces a conventional textbook; dropping any of the second produces a summary. The owner has
-rejected both.
-
-#### The chapter-opening form, which is structural rather than stylistic
-
-**[STATED]** Every chapter opens the same way: its own small problem, then the question it raises,
-*"written the way a beginner would say them"* — simple, vivid, non-technical. The book as a whole
-opens with one problem and one question, word for word.
-
-**[I RECOMMEND]** keeping this exactly. It is the mechanism behind habit 1, and it is what stops a
-chapter becoming a survey of its subject: a chapter that cannot state the reader's problem in the
-reader's words does not yet know what it is for.
+It is stated there as rules a writer follows, with nothing to consult and nothing to imitate.
 
 ### 5.3 Structure — not inherited, and not yet decided
 
 **[STATED]** On 2026-11-06 the owner removed structure from what carries over: the new book has
 **no connection to the previous one in structure or progression**, and in the same message, on the
 four parts: *"I am not quite sure."*
-
-**[STATED]** Earlier, while we were discussing the first book's own shape, he said: *"let's keep 4
-parts and they are made for a reason, see book guide."* That is recorded here as **history, not as
-a decision about this book**, because the independence rule came later and is more specific.
 
 **[I RECOMMEND]** treating the four-part shape as **one candidate among several, judged on merit**.
 It is a good candidate — it worked, and the reason it worked is set out below — and it was designed
@@ -506,52 +388,23 @@ would mean choosing them from my assumptions about what the research will find �
 of §11 class C, and it is the error that produced the nine research areas whose carving the owner
 twice questioned. **So this section should stay open until the subjects exist.**
 
-#### The first book's shape, as evidence of what works
+#### What a four-part progression buys, if we choose one
 
-| Part | Purpose | Share |
-|---|---|---|
-| **I · Understand** | What the thing is and how it works. Little or no code. **Two halves, both Understand**: *Mental Model* (the system around the model) then *Inside the Model* (the model itself, notation worked by hand) | ~25% |
-| **II · Use** | Become a confident user of every piece of the system | ~35% |
-| **III · Apply** | Labs that build one small system, lab by lab, on data the book ships | ~18% |
-| **IV · What Next** | The four threads — **security, speed, cost, failure** — then one whole system designed aloud, then what to learn next and what to skip | ~13% |
-| Appendices | Cheat sheet, interview bank, glossary, index | ~5% |
+**[I RECOMMEND]** recording the *reason* a four-stage shape works, separately from any decision to
+use one, because the reason is what the next section has to weigh:
 
-#### The decisions that hold it in place
+> Four parts can be a progression in what the reader can **do**: comprehend, then operate, then
+> construct, then judge. Each stage is useless before the one below it, and each is usable on its
+> own.
 
-**[STATED]** From the first book's own records:
-
-- **Four parts, and no fifth.** A fifth part was considered and rejected.
-- **Security, speed, cost and failure belong in Part IV**, deliberately. "Ordinary chapters in
-  Part II" is recorded as the rejected alternative. They are *threads across the whole system*,
-  not features you use.
-- **Part I is divided, not split.** Its two halves use a sub-part opener rather than becoming a
-  part of their own, because both answer the same question — *what is this thing and how does it
-  work* — and a reader filing "Attention, Worked by Hand" under Understand, Use, Apply or What
-  Next files it under Understand without hesitating.
-- **Order within Part I is load-bearing:** *"the mechanism means nothing until you know what the
-  model is for."*
-- **Chapters are numbered straight through**, so the parts organise without fragmenting.
-- **Parts I to III each open with a "What to ignore for now" note.** Part IV has none, because its
-  last chapter says what to skip.
-- **Writing order is reading order**, and each part is delivered as its own PDF when finished, so
-  reading starts in week one.
-
-#### Why it works
-
-**[I RECOMMEND]** this reading, because the new book needs the *reason* and not only the shape:
-
-> The four parts are a progression in what the reader can do: **comprehend** (Understand) →
-> **operate** (Use) → **construct** (Apply) → **judge** (What Next). Each stage is useless before
-> the one below it, and each is usable on its own.
-
-And the single best structural decision in it: **the cross-cutting properties come last, as
-threads.** Security, speed, cost and failure are not things you use — they are questions you ask
-of a finished system. Teaching them as Part II chapters would have taught them as features.
+And one structural idea worth keeping whatever shape is chosen: **cross-cutting properties belong
+last, as threads.** Security, speed, cost and failure are not things a reader uses — they are
+questions asked of a finished system. Teaching them early teaches them as features.
 
 #### The open question: what structure does *this* book need
 
-**[OPEN]** The first book's four parts organise **one system** — there is a single thing to
-understand, use, build and judge. This book covers many areas, has no end, and must be
+**[OPEN]** A four-part progression organises **one system** — one thing to understand, use,
+build and judge. This book covers many areas, has no end, and must be
 self-contained per topic. Five candidates, with what each costs:
 
 | Candidate | What it means | What it costs |
@@ -571,9 +424,9 @@ recording that rather than quietly keeping the recommendation.**
    Those figures are out of use, so **there is currently no evidence that any subject is common
    enough to deserve a shared foundations part.** The fresh research either establishes it or it
    does not, and candidate C has no basis until then.
-2. **An area has to be finishable on its own.** This one stands, because it rests on a measurement
-   of the *first book* rather than on research: its last fifty chapters appeared in about eight
-   days, so text production is not the constraint and reading is (§12.1). An area that is a complete
+2. **An area has to be finishable on its own.** This one stands, because it rests on how the book
+   gets produced rather than on research: with agent help, text is written far faster than it can be
+   read and worked through (§12.1). An area that is a complete
    unit is something the owner can work through and finish; an area smeared across four book-wide
    parts is not.
 
@@ -583,24 +436,6 @@ combination is a guess until the research speaks.
 **[I RECOMMEND]** that this stays **[OPEN]** until the subjects are known, for the sequencing
 reason at the head of this section. A structure chosen now is a structure chosen from my
 assumptions about the research.
-
-### 5.4 What I found when I read how the first book achieves this
-
-**[I RECOMMEND]** recording this, because it is the answer to "how was that approachability
-achieved" and it is not what I expected:
-
-**Readability is not a writing style in that book. It is enforced by machinery.**
-
-| Mechanism | What it guarantees for the reader |
-|---|---|
-| **The maths boundary** (teach what the model computes when it answers; state how it learned and move on) | Nothing appears that does not pay for itself |
-| **`LEDGER-TAUGHT.md`** — a row per finished chapter, with explicit "Do not" rows | A concept is introduced once and never re-explained or silently re-assumed |
-| **`LEDGER-SHORTHAND.md`** — formal name against the word an interviewer actually says | The reader can find the thing under the name they will hear. Written after "RAG" appeared in no chapter while the subject ran across seven |
-| **`LEDGER-DEFECTS.md`** — 99 entries, each a *class* with the instance that produced it and the practice that follows | Each known way of confusing a reader is recorded so it does not recur |
-| **Concept ownership** — eleven concepts touched by several chapters, each owned by exactly one | No duplication, and a reader always knows where a thing is explained |
-| **`> You understand this when …`** — in 51 chapters | The reader has a stated test per chapter |
-| **Worked by hand** — chapter 11 computes attention arithmetically | The reader can verify the claim themselves |
-| **Four parts, fixed by decision** | New material never gets a new home merely because it is new |
 
 ### 5.5 Tracking what changes
 
@@ -639,40 +474,16 @@ material and not only established material.
 
 ## 7. The role of practical work
 
-### 7.1 What the first book already does
-
-**[I RECOMMEND]** recording the measured facts, because I previously assessed this wrongly:
-
-- **Eleven chapters are entirely labs** (40–50), 22,723 lines, six to eight numbered steps each.
-- **The other 39 chapters each carry an embedded lab** with expected results.
-- The labs **build one system incrementally**: call a model → build an evaluation set → a schema
-  and one tool → compare two embedding models → hybrid retrieval → the whole pipeline end to end →
-  error analysis and a judge → workflow against agent → context and tools measured → cost and
-  latency → attack your own system.
-- They use a real API key, with the model **pinned to a dated snapshot** and the returned model
-  string printed beside every figure that depends on it.
-- The book **ships its own lab data**: about 40 documents written for the book and dedicated to
-  the public domain, eight queries, 320 graded relevance judgements, and one deliberately awkward
-  PDF with a misparsing table and a page with no text layer.
-- The lab corpus **declares every property deliberately planted in it**, *"so that no lab can
-  claim to have discovered what was put there for it"*, and declares that its relevance grades are
-  one person's, made in one sitting.
-
-### 7.2 What practical work must do in the new book
+### 7.1 What practical work must do
 
 **[STATED]** Exercises, experiments, implementations and projects reinforce the material. The book
 holds them; it does not hold the record of having done them.
 
-**[I RECOMMEND]** one change of form, and it is the main one:
-
-> In the first book a lab **constructs** — build hybrid retrieval, measure it. The subjects were
-> settled, so construction was the right exercise. The new book's subjects are contested, so the
-> lab must **reproduce or refute** — does this improvement survive a fair baseline, does this
-> result hold when the protocol changes, is this difference real.
-
-**[I RECOMMEND]** that the two chapters making this possible already exist in the first book and
-become the *method* of the second: **"Is the Difference Real"** (ch. 20) and **"An Evaluation
-Set"** (ch. 41).
+**[I RECOMMEND]** **two lab forms, specified in `GUIDE.md` §6.** A lab either **constructs** —
+build the thing, then measure it — or **reproduces or refutes** a published claim: does this
+improvement survive a fair baseline, does this result hold when the protocol changes, is this
+difference real. The second form exists because the book must be able to teach a subject whose
+answer is not settled. Which form a chapter uses follows from its subject.
 
 **[I RECOMMEND]** the three *shapes* a reproduction lab takes. I had listed three concrete
 instances here, drawn from the discarded research; **the instances are withdrawn and the shapes
@@ -697,25 +508,24 @@ until it does, no lab can be written.
 must incorporate new findings, research directions, engineering practices and emerging
 technologies without losing structure or continuity.
 
-**[AGREED]** A chapter in the first book is a **closed explanation**, because its subject was
-settled enough to finish. A chapter in the second cannot be, which changes what a chapter is:
+**[AGREED]** A chapter whose subject is settled can be a **closed explanation**. A chapter in this
+book cannot be, because the book is revised rather than finished — and that changes what a chapter
+is:
 
 > **A chapter is a question with a current answer attached, where the question outlives every
 > answer it will carry.**
 
-**[I RECOMMEND]** the three design consequences, which I believe are the most serious unsolved
-problems in this project and which I raised only after reading the first book's machinery
-properly:
+**[I RECOMMEND]** three design consequences, which I believe are the most serious unsolved problems
+in this project:
 
-1. **The machinery was built for a book that gets finished.** The guide records that a corrected
-   claim in a lab chapter *"lives in SIX places, and four of them are prose"*; every applied fix is
-   a book-wide sweep counted before and after; the records are hashed last so any edit makes them
-   stale. That cost is correct once per chapter for a book with an end. A book revised every twelve
+1. **The machinery is built for a book that gets finished.** A corrected claim in a lab chapter
+   lives in about six places, four of them prose, because a lab's programs narrate their own
+   output; every applied fix is a book-wide sweep counted before and after; and records are hashed
+   last, so any edit makes one stale. That cost is correct once per chapter for a book with an end. A book revised every twelve
    weeks across many areas pays it on every revision, forever. **The revision cost, not the writing
    cost, will decide whether this book survives its third cycle.**
-2. **The interview bank's acceptance rule does not transfer to contested material.** It works in
-   the first book because a question had a right answer that a chapter had to contain. For a
-   frontier subject the honest answer is sometimes "this is disputed, and here is the state of the
+2. **The acceptance-question rule does not transfer to contested material.** It works when a
+   question has a right answer that a chapter must contain. For a disputed subject the honest answer is sometimes "this is disputed, and here is the state of the
    dispute" — a real answer that the current rule cannot accept.
 3. **"Nothing is drafted until the table of contents is approved" collides with a table of contents
    that changes every cycle.** Fixed concept ownership is what makes the taught-ledger work. If
@@ -794,9 +604,9 @@ no employer hires across areas, so medium depth everywhere may be worth less tha
 is a plausible claim about hiring and **it currently has no evidence behind it.** The fresh
 research's skills-and-careers dimension either supports it or does not.
 
-**[OPEN]** **The mathematics boundary.** The first book's rule — teach what the model computes when
-it answers, state how it learned and move on — is calibrated for application engineering and is
-broken by dimension 5. Three candidates:
+**[OPEN]** **The mathematics boundary.** A boundary calibrated for application engineering — teach
+what a model computes when it answers, state how it learned, and move on — is broken by dimension
+5, which asks the reader to reproduce a result. Three candidates:
 
 | Candidate | Consequence |
 |---|---|
@@ -830,9 +640,8 @@ separate from the book, so this may be out of the book's scope entirely.
 assumptions or flawed criticisms occurred, why they were incorrect, and how to avoid repeating
 them.
 
-Recorded as **classes**, with the instances that produced them and the practice that follows —
-the form the first book's defect ledger uses, because a list of mistakes is not reusable and a
-class is.
+Recorded as **classes**, each with the instances that produced it and the practice that follows,
+because a list of mistakes is not reusable and a class is.
 
 ### Class A — Claiming without reading
 
@@ -891,7 +700,7 @@ and say why.
 
 **Instances.** (1) Told the owner an embedding capacity bound was settled, refereed and durable,
 and recommended adding it to the curriculum and a chapter. A peer-reviewed rebuttal exists; the
-bound as I stated it is contested. (2) Asserted that the first book *is* the Modern AI track when
+bound as I stated it is contested. (2) Asserted that an earlier book *was* the Modern AI track when
 my own evidence showed ten chapters belonging to no track topic — I had noticed and dropped the
 fact because it spoiled the mapping.
 
@@ -1012,10 +821,12 @@ intention. Eight of the eleven can be:
 | I · adjacent work | `ROADMAP.md` names one current step and its deliverable |
 | J · superseded document | Cite a document's date and purpose in the same sentence as its content |
 | K · withdrawn evidence | Mark the argument, never re-word it. §5.3, §7.2 and §10 are the record |
-The first book's own record shows why: its chapter 45 record notes that every figure in the chapter
-is spliced from the program's own captured output by an assembly script — *"0 figures transcribed.
-Defect 68's lesson applied as a mechanism rather than as care."* **That sentence is the design
-principle of the whole system: convert care into mechanism.** Care does not survive a long project.
+**The design principle behind all eight is one sentence: convert care into mechanism.** A rule that
+could be written as *"be careful about X"* is instead written as a script that refuses, a file a
+gate reads, or a brief that cannot be answered the wrong way. The worked example is a figure in a
+chapter: rather than asking a writer to transcribe a program's output carefully, the figure is
+spliced from the program's own captured output, so nothing is transcribed at all. **Care does not
+survive a long project. A mechanism does.**
 
 [↑ Back to Table of Contents](#table-of-contents)
 
@@ -1025,9 +836,8 @@ principle of the whole system: convert care into mechanism.** Care does not surv
 
 **[I RECOMMEND]** these as things worth deciding that the owner's list did not name.
 
-1. **The book will be produced faster than it can be read.** The first book's last fifty chapters
-   appeared in about eight days. Text generation is no longer the constraint; reading and running
-   is. The new book therefore needs a **reading order and a priority**, not only a structure —
+1. **The book will be produced faster than it can be read.** With agent help, chapters are written
+   in days. Text generation is not the constraint; reading and running is. The new book therefore needs a **reading order and a priority**, not only a structure —
    otherwise the first cycle produces more than a cycle can absorb.
 2. **The mirror of the taught-ledger is missing.** There is a record of what the book taught.
    There is no record of what has been run. Given that the owner's practice is deliberately outside
@@ -1037,16 +847,15 @@ principle of the whole system: convert care into mechanism.** Care does not surv
    honest record is that it *was* believed and is no longer. A book that silently replaces its
    claims teaches the current answer and hides the lesson about how answers change — which is the
    specific lesson a research engineer needs.
-4. **The research's own findings need a durable home separate from the book.** Nine research
-   reports in this project produced checkable claims with sources. If those live only in a
-   conversation, the next cycle re-derives them. If they live in the book, the book cannot
+4. **The research's own findings need a durable home separate from the book.** A research round
+   produces checkable claims with sources. If those live only in a conversation, the next cycle
+   re-derives them — and a round's output has already been lost that way once. If they live in the book, the book cannot
    distinguish a claim it verified from a claim it inherited.
-5. **The shorthand ledger has a harder job in this book.** In the first book, the gap was between a
-   formal name and an interview word. At the frontier, the same technique often has three names
+5. **The shorthand ledger has a hard job here.** The usual gap is between a formal name and the
+   word practitioners actually say. At a research frontier, the same technique often has three names
    across three communities, and a reader who knows one cannot find the other two.
-6. **The first book is finished and the new one must not disturb it.** It is complete as of
-   2026-10-31. Any shared mechanism must be copied rather than refactored, so that improving the
-   second book cannot break the first.
+6. **Reuse by copying, never by sharing.** Where a script or mechanism is taken from elsewhere, it
+   is copied into this project, so that improving this book cannot break anything else.
 
 [↑ Back to Table of Contents](#table-of-contents)
 
