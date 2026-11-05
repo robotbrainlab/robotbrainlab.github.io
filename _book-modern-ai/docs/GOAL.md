@@ -27,7 +27,7 @@
   - [5.1 The standard](#51-the-standard)
   - [5.2 The language and the voice](#52-the-language-and-the-voice)
   - [5.3 Structure — not inherited, and not yet decided](#53-structure--not-inherited-and-not-yet-decided)
-  - [5.5 Tracking what changes](#55-tracking-what-changes)
+  - [5.4 Tracking what changes](#54-tracking-what-changes)
 - [6. Why a research-oriented engineer, and not one of the alternatives](#6-why-a-research-oriented-engineer-and-not-one-of-the-alternatives)
 - [7. The role of practical work](#7-the-role-of-practical-work)
   - [7.1 What practical work must do](#71-what-practical-work-must-do)
@@ -114,8 +114,9 @@ are not:
 > A research-oriented engineer, given a new paper claiming an improvement, can say what the claim
 > was measured against, reproduce enough of it to check, and decide whether to put it in a system.
 
-The reason for preferring this definition: it is the one skill that the nine research reports in
-this project all exercised, and it is the only one that transfers when the models change.
+The reason for preferring this definition: it is the only one of the four capabilities in §1.1 that
+**transfers when the models change.** A specific architecture, a specific tool and a specific
+benchmark all expire; the ability to ask what a claim was measured against does not.
 
 [↑ Back to Table of Contents](#table-of-contents)
 
@@ -265,10 +266,21 @@ must never be presented as established facts.
 
 **[AGREED]** Every size claim names what it is a share of. "Growing fast" is not a finding.
 
+**[I RECOMMEND]** a definition, because four separate rules turn on the phrase and none of them
+defined it:
+
+> **A claim is load-bearing when removing it would change what the chapter teaches.**
+
+Three tests, and one is enough: the chapter's conclusion changes if the claim is false; a reader
+would act differently without it; or another claim in the chapter rests on it. A claim that is
+true, interesting and removable without touching the argument is **not** load-bearing — it is
+colour, and it does not need a `CLAIMS.tsv` row.
+
 **[I RECOMMEND]** three further rules, each paid for by a failure in this project:
 
-1. **A search summary is not a source.** A paper whose striking result would have been quoted was
-   withdrawn by arXiv two days earlier; only fetching the abstract page revealed it.
+1. **A search summary is not a source.** A snippet tells you something was said; it does not tell
+   you what the source says **now**. Between indexing and reading, a paper can be revised,
+   corrected, retracted or withdrawn — and the snippet will not know. Fetch the page.
 2. **A source's own inclusion criteria are part of the finding.** A figure giving the share of
    "notable" models of some kind measures the criteria for notability, not the field: a model
    deployed quietly inside a bank satisfies none of the usual criteria while doing more economic
@@ -309,12 +321,17 @@ in this document:
 > **Dimensions 2, 3 and 4 of §3.2 are one object seen at three distances. They must not become
 > three sections.**
 
-Written as three headings, they reproduce exactly the separation the owner rejects. Worked
-example, from this project: a bound on what a fixed-size embedding can represent is **the
-foundation**; the dispute over where that bound actually sits is **the live research**; and the
-reason every serious retrieval system puts a reranker after the vector search instead of buying a
-larger embedding is **the engineering**. The engineering decision is unintelligible without the
-dispute. One argument, three distances.
+Written as three headings, they reproduce exactly the separation the owner rejects.
+
+**The shape of the argument, without an example.** Take any mechanism with a theoretical limit.
+*The foundation* is why the limit exists at all. *The live research* is the dispute about where the
+limit actually sits. *The engineering* is what practitioners build to work around it — and that
+engineering choice is unintelligible without the dispute, because it looks arbitrary until you know
+what is contested. One argument, three distances.
+
+**A worked example belongs here and is not written yet**, deliberately: the one I had used a
+subject the research has not yet established is in scope, and stated an unsourced universal about
+current practice while doing it. The first chapter supplies the example.
 
 **[I RECOMMEND]** that a chapter is therefore organised around **a mechanism or a question**, with
 science, research and engineering braided into answering it.
@@ -327,10 +344,17 @@ not accept the book's contents as correct by default.
 
 **[AGREED]** This answers the concern about independent validation, with one narrow residue, stated
 at its true size: cross-checking cannot catch a **consensus error**, where the available sources
-agree and are all wrong in the same direction. Two documented examples — published optimiser
-speedups that were all optimistic until somebody tuned the baseline, and four years of
-time-series anomaly scores that were uninterpretable while every paper agreed. The remedy is a
-measurement, not another source, and the labs are where that measurement happens.
+agree and are all wrong in the same direction.
+
+**Why that class exists, by argument rather than by example.** Two mechanisms produce it. A
+published comparison is usually run by the people proposing the new thing, so the baseline is the
+one they had time to configure — and if nobody re-runs it against a well-configured baseline, every
+later paper inherits the gap. And an evaluation protocol with a flaw rewards whatever exploits the
+flaw, so a whole literature can agree on numbers that measure the protocol. In both cases every
+source agrees and reading more of them confirms the error.
+
+**The remedy is a measurement, not another source**, and the labs are where that measurement
+happens. `GUIDE.md` §6's reproduction labs exist for exactly this.
 
 ### 4.3 The assumption to make about the reader
 
@@ -437,7 +461,7 @@ combination is a guess until the research speaks.
 reason at the head of this section. A structure chosen now is a structure chosen from my
 assumptions about the research.
 
-### 5.5 Tracking what changes
+### 5.4 Tracking what changes
 
 **[AGREED]** The book needs a visible **"What Changed in This Edition"** page. The owner's words:
 *"Yes this is exactly what I wanted to see."*
@@ -652,10 +676,10 @@ for the first. (2) Said I had looked at the website when I had read a local Mark
 one-line summary of it, and built a nine-area carving of my own instead of opening the file. **A
 summary of a taxonomy tells you a taxonomy exists; it does not tell you what the categories are** —
 and having the summary is worse than having nothing, because nothing makes you look.
-(3) Assessed the book's practical content and reported "zero visible evidence" of hands-on work
-without opening `labs/`, which holds a 50-lab course. (4) Stated the owner had no test for whether
-learning was working, when 51 chapters end with `You understand this when …` and a hundred-question
-interview bank written before the chapters exists as the acceptance standard.
+(3) Assessed a book's practical content and reported "zero visible evidence" of hands-on work
+without opening the directory that held its labs. (4) Stated that the owner had no test for whether
+his learning was working, when his book carried a per-chapter test and an acceptance bank written
+before its chapters — neither of which I had looked for.
 
 **Why it is wrong.** A structural claim about a document is evidence only if the document was read.
 Titles are not contents. In the owner's words: *"Did you even look at the website"* and *"Why are
@@ -698,11 +722,12 @@ and say why.
 
 ### Class D — Stating a claim above the strength of its evidence
 
-**Instances.** (1) Told the owner an embedding capacity bound was settled, refereed and durable,
-and recommended adding it to the curriculum and a chapter. A peer-reviewed rebuttal exists; the
-bound as I stated it is contested. (2) Asserted that an earlier book *was* the Modern AI track when
-my own evidence showed ten chapters belonging to no track topic — I had noticed and dropped the
-fact because it spoiled the mapping.
+**Instances.** (1) Told the owner that a theoretical limit was settled, refereed and durable, and
+recommended building curriculum and a chapter on it. A peer-reviewed rebuttal existed; the limit as
+I stated it was contested. **I had the strength of the claim wrong, not the claim itself** — which
+is the whole of this class. (2) Asserted that an earlier book *was* a particular curriculum track
+when my own evidence showed ten of its chapters belonging to no topic in that track — I had noticed
+and dropped the fact because it spoiled the mapping.
 
 **Why it is wrong.** Dropping the inconvenient half of one's own evidence is the failure the whole
 project exists to teach against.
@@ -802,7 +827,7 @@ were the only evidence I had and they felt too good to drop.
 quality. Keeping it because no replacement exists is how a conclusion outlives its support.
 
 **The practice.** When evidence is withdrawn, **the argument it supported loses its basis and must
-be marked, not re-worded.** This document's §5.3, §7.2 and §10 each now record a recommendation
+be marked, not re-worded.** This document's §5.3, §7.1 and §10 each now record a recommendation
 whose justification is gone. That is the correct state, and it is better than a confident
 recommendation resting on nothing.
 
@@ -820,7 +845,7 @@ intention. Eight of the eleven can be:
 | H · wrong instrument | Name the instrument and what it samples, before the claim |
 | I · adjacent work | `ROADMAP.md` names one current step and its deliverable |
 | J · superseded document | Cite a document's date and purpose in the same sentence as its content |
-| K · withdrawn evidence | Mark the argument, never re-word it. §5.3, §7.2 and §10 are the record |
+| K · withdrawn evidence | Mark the argument, never re-word it. §5.3, §7.1 and §10 are the record |
 **The design principle behind all eight is one sentence: convert care into mechanism.** A rule that
 could be written as *"be careful about X"* is instead written as a script that refuses, a file a
 gate reads, or a brief that cannot be answered the wrong way. The worked example is a figure in a
@@ -867,7 +892,10 @@ survive a long project. A mechanism does.**
   documentation architecture are a separate proposal, by the owner's instruction.
 - **The table of contents.** No subjects are chosen here, and none may be chosen until the research
   is re-run under a brief agreed after this document.
-- **Any decision marked [OPEN].** Six remain, and §10 holds the three that block the rest.
+- **Any decision marked `[OPEN]`.** The count is not stated here on purpose: a hand-maintained
+  count drifts, and this document has already carried a wrong one. **Grep for `[OPEN]`.** The ones
+  that block the rest are in §10 — the book's shape, the mathematics boundary, and which area goes
+  deep if the shape is asymmetric — and all three need the research first.
 
 [↑ Back to Table of Contents](#table-of-contents)
 

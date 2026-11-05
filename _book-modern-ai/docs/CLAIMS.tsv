@@ -1,13 +1,51 @@
-id	claim	source	source_strength	verified_on	class	review_by	state	dependents
-#	EMPTY. Reset 2026-11-06 on the owner's instruction: all previous research is discarded because it
-#	was conducted before we reached a consensus on the goal, the method and the scope.
-#	The 32 rows seeded from the pilot run are in ../discarded/CLAIMS-seeded-from-pilot.tsv and may NOT be cited.
+id	claim	source	source_strength	maturity	maturity_basis	verified_on	class	review_by	state	dependents
+#	EMPTY. Reset 2026-11-06: all research before that date was discarded, because it was
+#	conducted before the goal, the method and the scope were agreed. The rows seeded from the
+#	pilot run are in ../../discarded/CLAIMS-seeded-from-pilot.tsv and may NOT be cited.
 #
-#	The first rows of this file will come from the fresh research, run under an agreed brief.
+#	The first rows come from the fresh research, run under an agreed brief.
 #
-#	source_strength: peer-reviewed | preprint | vendor | own-measurement | source-absence | training-data-unverified
-#	class: durable | convention | volatile
-#	state: verified | contested | superseded | unverified
+#	=== source_strength — how good is the evidence? ===
+#	peer-reviewed              published at a refereed venue
+#	preprint                   not refereed
+#	vendor                     the source sells the thing it describes. Use even for a paper,
+#	                           if its authors sell the product
+#	own-measurement            measured in this project
+#	source-absence             an observation that a source OMITS something — a missing
+#	                           baseline, an unnamed device, an absent denominator. Not a measurement
+#	training-data-unverified   believed, not confirmed at source
 #
-#	source-absence is an observation that a source OMITS something — a missing baseline, an unnamed
-#	device, an absent denominator. It is not a measurement.
+#	=== maturity — is this settled SCIENCE? ===
+#	A separate question from source_strength. A peer-reviewed paper can be single-source;
+#	a preprint can state something long established. This column decides the scope boundary:
+#	settled foundations are not what the book is ABOUT, moving material is.
+#
+#	established     independently replicated, AND used as a premise by work outside the
+#	                originating group
+#	converging      replicated, but the field is still arguing for it
+#	contested       a serious published rebuttal exists
+#	single-source   one group, no independent confirmation
+#	unexamined      nobody has tried to break it
+#
+#	=== maturity_basis — WHICH signal was found ===
+#	Required whenever maturity is set. Without it the assessment is an assertion.
+#	replicated-by:<who>        an independent group obtained it
+#	premise-in:<source>        later work builds on it without re-arguing it
+#	survived:<source>          a published attempt to refute it failed
+#	rebutted-by:<source>       a published rebuttal exists
+#	age-and-use:<years>        old and still in use
+#	cross-community:<fields>   more than one field rests on it
+#	value-drifts               the reported number differs between sources — NOT established
+#	originator-strongest       the largest version is the originating group's — the smaller
+#	                           independent version may be established, the large one is not
+#	provisional                the scout's judgement from what it read. NOT verified.
+#	                           A claim a chapter rests on may not stay provisional
+#
+#	=== class — how long will it hold? ===
+#	durable      expect it to hold in five years
+#	convention   how it is done now
+#	volatile     settings, versions, prices, model names, benchmark figures
+#
+#	=== state — where does it stand in THIS project? ===
+#	verified | contested | superseded | unverified
+#	A superseded row is never deleted: that something WAS believed is the lesson.

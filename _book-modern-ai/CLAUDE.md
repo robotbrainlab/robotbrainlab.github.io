@@ -7,7 +7,8 @@ what the files actually say before you act on an instruction here. Do not change
 match this file. Say that this file looks out of date, and ask.
 
 Why this rule exists: measured on 40 projects and 320 runs, coding agents followed a stale
-instruction file over the existing code **90.1%** of the time. One agent reported the conflict in 79
+instruction file over the existing code **90.1%** of the time — a single preprint, recorded at that
+strength. One agent reported the conflict in 79
 of 80 runs and followed the file anyway. One sentence giving the code precedence moved
 code-following from 4.2% to 91.4% ([arXiv 2610.30571](https://arxiv.org/abs/2610.30571), verified
 2026-11-03).
@@ -23,7 +24,10 @@ Then read, in this order, only what the current step needs:
 | `docs/GOAL.md` | What the book is for, and why. **Every statement is marked** as the owner's words, agreed, my recommendation, or open. Nothing is a decision unless it says so |
 | `docs/PROCESS.md` | How the book gets built: the cycle, the chapter loop, the passes, the agents, the gates, the brief schema |
 | `docs/ROADMAP.md` | The eleven steps, and where we are |
-| `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, its strength and its review date. **Currently empty** — reset 2026-11-06 |
+| `docs/GUIDE.md` | What the book **is**: scope, voice, chapter anatomy, labs, length, conventions |
+| `docs/GATES.md` | What each gate reads, fails on and prints — and the policy for setting a claim's review date |
+| `docs/ACCEPTANCE.md` | The questions each chapter must answer, written **before** any chapter is drafted |
+| `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, its strength, its maturity and its review date. **Currently empty** — reset 2026-11-06 |
 | `docs/briefs/TEMPLATE-area-research.md` | The research brief. Fill it in; do not rewrite it |
 | `research/` | What the research has returned. **Currently empty** |
 | `discarded/` | Pre-consensus research. **Read the README before opening anything in it** |
@@ -33,9 +37,13 @@ Then read, in this order, only what the current step needs:
 1. **The repository** beats every document.
 2. **A machine-checked file** (`docs/CLAIMS.tsv`, `docs/OWNERSHIP.tsv`, `records/`) beats prose.
 3. **`docs/GOAL.md`** beats everything else on *what the book is for*.
-4. **`docs/PROCESS.md`** beats everything else on *how it gets built*.
+4. **`docs/GUIDE.md`** beats everything else on *what the book is* — its scope, voice, chapter
+   anatomy and labs.
+5. **`docs/PROCESS.md`** beats everything else on *how it gets built*.
 
-A rule that appears in two files is a defect. Fix it by deleting one, not by editing both.
+**A rule may be referred to from several files; it may be stated in only one.** A second statement
+is a defect even while the two agree, because they will drift. Cite the owning file and section
+instead.
 
 ## The rules that are easy to break
 
@@ -74,7 +82,7 @@ Plain, controlled English — about 80% ASD-STE100. Short sentences. Active voic
 then what was done and decided, then the explanation. Tables where they carry the information
 better than prose. No internal codes or shorthand: name things.
 
-## The eight classes of mistake already made
+## The eleven classes of mistake already made
 
 `docs/GOAL.md` §11 records them, each with its instances and the practice that follows. Read it before
 assessing anything. The shortest summary: **do not claim what you have not read**, and **do not

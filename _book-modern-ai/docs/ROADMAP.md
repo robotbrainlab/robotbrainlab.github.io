@@ -29,16 +29,27 @@ Owner's instruction, 2026-11-06: *"We are going to conduct fresh research from s
 disregarding the previous research, as it was conducted before we reached a consensus."*
 
 No figure from the stopped round of 2026-11-05, and none from the pilot run, may be cited or used to
-choose or rank an area. `../discarded/README.md` records what was discarded and the three method-only
+choose or rank an area. `../discarded/README.md` records what was discarded and the two method-only
 results that survived. `CLAIMS.tsv` and `../research/` are empty.
 
 ## What step 3 established
 
 The pilot ran one agent on one area with the brief at `../discarded/pilot-01-systems-brief.md`.
 
-**It passed all six tests.** It used 11 of 25 searches and 16 of 25 fetches, stopped because its
-records were complete rather than because the budget ran out, and started **zero** sub-agents. It
-refused three numbers it had seen in search results because it could not confirm them at source.
+**The six tests it was judged against**, listed because a verdict whose criteria are unstated cannot
+be re-derived:
+
+| # | Test | Result |
+|---|---|---|
+| 1 | Did it stop on its own, or have to be stopped? | Stopped on its own, with budget to spare |
+| 2 | Every required field present, inside the word limits? | Fields yes; two limits overrun |
+| 3 | Any incident or commentary content? | None |
+| 4 | Does every number say what it is a share of? | Yes, and it flagged where sources withheld one |
+| 5 | Can the claims rows go into `CLAIMS.tsv` unedited? | Nearly — one vocabulary value was missing |
+| 6 | Is at least one experiment doable without a large lab? | Yes |
+
+It started **zero** sub-agents, and it refused several numbers it had seen in search results
+because it could not confirm them at source.
 
 **Its content is discarded** and sits in `../discarded/`. Only the verdict on the instrument survives:
 the brief terminates, it keeps an agent honest about its sources, and it does not sprawl.
@@ -58,42 +69,44 @@ big for its cap, and the cap is calibrated from that rather than asserted now.
 
 ## What step 4 needs
 
-A list of areas, and the reason for the list.
+A list of areas, and the reason for the list. **It is the owner's decision, and this document does
+not pre-empt it.**
 
-**Where the areas may NOT come from:**
+### Where the areas may not come from
 
-- **The discarded research.** No figure from it may rank or choose an area.
-- **My own judgement.** The nine areas of the stopped round were mine, the owner questioned that
-  carving twice, and they missed several subjects entirely.
-- **`_sources/ai-roadmap/research/2026-09-17-data-intelligence-landscape.md`.** I recommended its
-  nineteen areas on 2026-11-06 and the recommendation is **withdrawn**. Two reasons. It predates
-  Baseline 3, so it is superseded. And it is a baseline reconstruction of the *whole* Data &
-  Intelligence curriculum — its C1 Mathematical Foundations and C4 Statistical and Classical ML are
-  Fundamentals material — so importing it would break this book's own scope rule.
+| Not from | Why |
+|---|---|
+| **The discarded research** | No figure from it may rank or choose an area |
+| **My own judgement** | I carved the stopped round's areas myself, the owner questioned that carving twice, and it missed several subjects entirely |
+| **Any prior taxonomy of the field, however good** | A partition is an argument, not a finding (`GOAL.md` §3.3). One written for a different purpose, or before the current baseline, is worse than none, because its authority is borrowed |
 
-**Where the scope DOES come from: the current specification**, `_sources/ai-roadmap/ROADMAP.md`,
-Baseline 3, accepted 2026-11-02. Read 2026-11-06. This is a reading of the owner's current
-document, not a research finding.
+**[WITHDRAWN 2026-11-06]** This section previously listed a set of named areas, taken from a reading
+of the owner's curriculum specification, with its internal section and block codes. **That was the
+error the whole document warns against**: it handed over a carving of the field one step before the
+owner was asked to choose one, and it used internal codes that `../CLAUDE.md` forbids in anything
+the owner reads. An independent audit found it, and it is removed rather than reworded.
 
-| Section | What it is | In this book's scope? |
+### Where the scope comes from — and this is the open question
+
+The scope rule is that the book covers the Modern AI track and nothing the curriculum's depth
+levels already teach. **That rule cannot be applied from these documents**, because what those
+levels teach is not written down here. An audit found this to be the largest dependency in the set,
+and it sits against the independence rule in `GOAL.md` §2.4: a scope defined by another document's
+category boundaries is a dependency in scope.
+
+**[OPEN]** Three ways to resolve it, for the owner to choose:
+
+| | What it means | Cost |
 |---|---|---|
-| §3 Fundamentals (E1–E10) | Depth Track | **No** — the scope rule excludes it |
-| §4 Advanced (F1–F6) | Depth Track | **No** |
-| §5 Mastery | Depth Track | **No** |
-| **§6 Modern AI: Research, Science and Engineering** | The parallel track — three phases, plus the research dimension H1/H2 | **Yes.** This is the book's name |
-| **§7 Important Extensions (EX1–EX9)** | Broadly valuable, not required before normal progression | **Yes** — not Fundamentals, Advanced or Mastery |
-| **§8 Specializations (SP1–SP10)** | Selective depth | **Yes** — same reason |
-| **§9 Research Frontiers (RF1–RF8)** | The open problems of §6 | **Yes** — §9 says explicitly that these are §6's open problems |
+| **1 · Copy the boundary in** | Read the curriculum once, and write into these documents an explicit, dated list of the **subjects** it excludes — not its category names. The rule becomes self-contained, and the curriculum can change without silently moving the book's scope | An hour or two of reading. The list can go stale, but visibly |
+| **2 · Drop the exclusion** | Scope is whatever the research finds. Overlap with the curriculum is permitted, as it already is with any earlier book | The book may teach things the owner knows. He has said duplication with an earlier *book* is fine; he has not said that about the *curriculum* |
+| **3 · Define scope by a property** | For example, material whose answer has moved recently or is disputed. Self-contained, no external reference | A different rule from the one given, admitting and excluding things the owner may not expect |
 
-**[OPEN] This reading needs the owner's confirmation.** The scope rule as stated names only
-Fundamentals, Advanced and Mastery. Extensions, Specializations and Research Frontiers are separate
-sections of the specification, so on a literal reading they are in scope — and that is where
-vision, embodied AI, time series, ranking and recommendation, symbolic methods, graph learning,
-speech, AI for science, systems depth and human-AI oversight all live. If the intention was to
-exclude them too, the book is an LLM-systems book and §6 alone is its scope.
+**Recommended: 1.** It keeps the stated intent exactly, makes the documents self-sufficient, and
+turns an invisible dependency into a dated list anyone can check.
 
-**Everything after that is for the fresh research to establish**, not for me to assert: which of
-those areas carry real current activity, how they divide, and how small each has to be.
+**Nothing else about the areas is settled here.** Which areas carry real current activity, how they
+divide, and how large each is are for the research to establish.
 
 ## The open decisions, and the step that closes each
 

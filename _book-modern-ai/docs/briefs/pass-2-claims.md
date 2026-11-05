@@ -70,9 +70,31 @@ Comparison results that do not say what they beat, or how it was configured.
 If a section is clean, say so in one line rather than leaving it out.
 ```
 
+**BUDGET**
+
+One reading of the chapter against the claims file. **No web searches, no fetches** — this pass
+compares two files and nothing else. Verifying a claim at its source is the claim verifier's job,
+not yours.
+
+**TARGET**
+
+No number.
+
+**PARTIAL**
+
+If you stop early, name the sections you covered.
+
+**FORBIDDEN**
+
+- **Judging whether a claim is true.** You judge only whether the chapter's wording matches the
+  strength on record. A true claim stated too strongly is a finding; a false claim stated at its
+  recorded strength is not yours.
+- **Fetching a source.**
+- **Rewriting the chapter.**
+
 **STOPPING RULE**
 
-Finish when you have read the whole chapter once against the whole claims file. Do not re-read
+**One pass through the chapter against the whole claims file, then write up.** Do not re-read
 looking for more.
 
 **IF UNSURE, SAY SO RATHER THAN ASSERTING. A WRONG FINDING COSTS MORE THAN A MISSED ONE.**

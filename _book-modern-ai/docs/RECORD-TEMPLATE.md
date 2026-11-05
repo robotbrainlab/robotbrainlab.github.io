@@ -30,13 +30,13 @@ sha256:
 - [ ] `LEDGER-TAUGHT.md` read — every row above this chapter, **and every `Do not` row wherever it
       sits.** The opening paragraph claims nothing false about what came before
 - [ ] `LEDGER-DEFECTS.md` read
-- [ ] The chapter's row in `PLAN.md` read: its question, what it must cover, its page estimate
-      (an estimate, never a target — `GUIDE.md` §9)
+- [ ] The chapter's row in `PLAN.md` read: its durable question, its subject, and what it must
+      cover
 - [ ] **Non-scope declared** in the field above. Without an edge, review never terminates
 - [ ] `OWNERSHIP.tsv` checked: every concept this chapter will own is free, and every concept it
       leans on has an owner to refer to
 - [ ] Sources read **in full, immediately before writing** — not earlier in the session
-- [ ] `GUIDE.md` §8's mathematics test to hand
+- [ ] `GUIDE.md` §8's mathematics test to hand, and `GATES.md` for what each gate will check
 
 ## While writing
 
@@ -56,7 +56,9 @@ sha256:
 
 ## After writing
 
-- [ ] Every gate CLEAN on this chapter
+- [ ] Every gate `CLEAN` or `VACUOUS` on this chapter, **and every `VACUOUS` explained** — a
+      chapter with no arithmetic or no absolutes gets `VACUOUS` from those gates and that is
+      correct, but an unexpected `VACUOUS` means the gate found nothing to read (`GATES.md`)
 - [ ] `make` → 0 overfull · 0 missing glyphs · 0 undefined
 - [ ] Index entries read one by one against Key Terms **before** review
 - [ ] **Pass 1, completeness review** — launched with the brief in `briefs/`
@@ -67,9 +69,11 @@ sha256:
 - [ ] **Pass 4, fix verification** — launched, naming every changed passage
 - [ ] `LEDGER-TAUGHT.md` row added; `LEDGER-SHORTHAND.md` updated; `OWNERSHIP.tsv` updated
 - [ ] `LEDGER-DEFECTS.md` updated if a new defect class appeared
-- [ ] `CHANGELOG.md` entry written, marked new / revised / overturned
-- [ ] Acceptance questions answerable from the chapter, **or** answered by a dispute record that
-      says so
+- [ ] `CHANGELOG.md` **operation rows recorded** — `ADD`, `SPLIT`, `MERGE`, `RETIRE`, with the
+      kind (new / revised / overturned). The page itself is generated from these, never written
+- [ ] Every acceptance question in `ACCEPTANCE.md` keyed to this chapter marked `answered`,
+      `answered-as-disputed` or `cannot` — and **a `cannot` reopens the chapter or moves the
+      question with a reason**
 - [ ] Every page looked at
 
 ## Reviews

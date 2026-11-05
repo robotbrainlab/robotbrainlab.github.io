@@ -30,13 +30,15 @@ in `GOAL.md` §11 class C.
 
 **Changes every cycle. Approved every cycle.**
 
-| Subject | Answers question | Chapter | Verdict | Lab form | Source record |
-|---|---|---|---|---|---|
-| — | *Empty.* | — | — | — | — |
+| Subject | Answers question | Chapter | **Must cover** | Verdict | Lab form | Source record |
+|---|---|---|---|---|---|---|
+| — | *Empty.* | — | — | — | — | — |
 
 `Verdict` is from the research: `CHAPTER`, `FOUNDATIONS-ONLY` or `REJECT`.
 `Lab form` is `construct` or `reproduce` (`GUIDE.md` §6).
 `Source record` is the research file the subject came from.
+**`Must cover`** is what the chapter is required to contain, drawn from the subject record. It is
+what `tools/verify-coverage.py` reads, and it is the only promise a chapter can be found short of.
 
 ---
 

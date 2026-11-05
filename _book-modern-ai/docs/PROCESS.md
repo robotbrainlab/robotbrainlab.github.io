@@ -12,20 +12,23 @@ Markers are the same as `GOAL.md`: **[STATED]** the owner's words · **[AGREED]*
 
 ## 1. The design principle
 
-**[I RECOMMEND]** one sentence to govern everything below. It is not mine — it is from the first
-book's own record for chapter 45, explaining how every figure in a 58-page lab chapter got there:
+**[I RECOMMEND]** one sentence to govern everything below:
 
-> *"0 figures transcribed. Defect 68's lesson applied as a mechanism rather than as care."*
+> **Convert care into mechanism.**
 
-**Convert care into mechanism.** Care does not survive a project that never ends. Every rule in
+The worked example is a figure in a chapter. Asking a writer to transcribe a program's output
+carefully produces an error eventually; splicing the figure from the program's own captured output
+means nothing is transcribed at all, so the error cannot happen. The second costs a few lines of
+script and removes the failure mode instead of guarding against it. Care does not survive a project that never ends. Every rule in
 this document that could have been written as "be careful about X" is instead written as a script
 that refuses, a file a gate reads, or a brief that cannot be answered the wrong way.
 
 Three corollaries, and they are the reason a gate can be trusted at all:
 
-1. **A gate nobody reads the output of is worse than no gate.** Three of nine gates in the source
-   project were at some point lying to the suite — one failing on an empty folder, one crashing on
-   a renamed column, one printing CLEAN over nothing for a whole build.
+1. **A gate nobody reads the output of is worse than no gate**, because it is trusted. The failure
+   modes are ordinary software failures: passing vacuously on an empty directory, crashing on a
+   renamed column, printing a success banner over no output at all. A gate in that state reports
+   health and checks nothing, and the suite it sits in is then less trustworthy than no suite.
 2. **The only way to know a gate works is to break something it should catch and watch it exit 1.**
 3. **A gate that checked nothing says so** — VACUOUS, never CLEAN.
 
@@ -192,7 +195,7 @@ RESEARCH → SELECT → PLAN → WRITE → VERIFY → CLOSE → EXPIRE
 | **Research** | One scout per area, fixed brief schema, delegation depth 0. Output: candidate **subjects**, each a complete unit, plus claims with sources | — |
 | **Select** | Subjects filtered by the three-part test (`GOAL.md` §10): a mechanism worth understanding · live research · something buildable. **Rejections recorded with reasons** | **Owner** |
 | **Plan** | Subjects become chapters. Ownership assigned. Structure chosen *now*, from the subjects that exist — never before (`GOAL.md` §5.3). Acceptance questions written **before** drafting | **Owner** |
-| **Write** | One chapter. Five steps, §6 | — |
+| **Write** | One chapter. Six steps, §6 | — |
 | **Verify** | Four passes (§7) | — |
 | **Close** | Record hashed, ledgers updated, claims linked, changelog entry written | — |
 | **Expire** | Claims past `review_by` re-verified. Only affected chapters reopen | — |
@@ -216,7 +219,7 @@ current answers.**
 |---|---|
 | How do I know a difference is real? | These estimators, these sample sizes |
 | What does it cost to run this, and what drives the cost? | These numbers, this hardware |
-| How do I adapt a model to my own task? | Today's methods and their costs |
+| What breaks when this is put into production? | Today's failure modes and their fixes |
 
 **These three are illustrations of the *form*, not a claim about what the book will contain.** Each
 is drawn from a capability the owner's current specification already names, so none presupposes a
@@ -264,8 +267,8 @@ are exactly what makes re-ordering expensive.**
 | Reference by **chapter and promise** | A book that reads as one continuous argument | Every re-order is a sweep through the prose |
 | Reference by **concept**, with the location looked up | Re-ordering is nearly free | Less of that one-continuous-argument feeling |
 
-**[I RECOMMEND]** reference by concept, because this book will be re-ordered many times and the
-is revised on a cycle. It is a real loss and the owner should decide it knowingly. **[OPEN]**
+**[I RECOMMEND]** reference by concept, because this book is revised on a cycle and will be
+re-ordered many times. It is a real loss and the owner should decide it knowingly. **[OPEN]**
 
 #### What maintenance actually looks like, per cycle
 
@@ -283,16 +286,21 @@ of the claims file, and the only reason a book like this survives its third cycl
 
 ## 6. The chapter loop
 
-**[STATED]** Carried over unchanged. Five steps, in order. Do not reorder, and do not soften
-step 1's timing.
+**Six steps, in order. Do not reorder, and do not soften step 1's timing.**
 
 | # | Step |
 |---|---|
 | 1 | **Read the sources in full, immediately before writing.** Not earlier in the session. Named in the record |
 | 2 | **Write the chapter** |
-| 3 | **Completeness review** — a subagent reads the sources and the chapter side by side |
+| 3 | **Pass 1, completeness review** — a subagent reads the sources and the chapter side by side |
 | 4 | **Apply the findings**, verifying each before accepting it, and sweep each one book-wide, counted |
-| 5 | **Fix-verification** — a second subagent reads **only the changed passages**, named |
+| 5 | **Pass 2, adversarial claims**, then **pass 3, lab execution** from the chapter text alone. Apply and sweep what they find |
+| 6 | **Pass 4, fix-verification** — a subagent reads **only the changed passages**, named |
+
+**Six steps, four passes** (§7). An earlier version of this table had five steps and named only
+passes 1 and 4, which left two of the four outside the loop that may not be reordered. Passes 2 and
+3 sit at step 5 because both read the chapter *after* pass 1's fixes land — running them earlier
+checks text that is about to change.
 
 **The stopping rule.** One review round is the norm. If round 1 finds no false-teaching error, fix
 the rest and ship — no second round. If it does, fix and run one more. If round 2 still finds them,
@@ -338,7 +346,7 @@ chapter" re-reads everything and finds what pass 1 already found.
 |---|---|---|
 | **Scout** | One research area → subject units | No |
 | **Claim verifier** | Re-check one claim at source, adversarially | No |
-| **Writer** | One chapter | No |
+| *(no agent)* | **Writing a chapter is not delegated.** It is the loop in §6, done in the main session with the sources open | — |
 | **Completeness reviewer** | Pass 1 | No |
 | **Adversary** | Pass 2 | No |
 | **Lab runner** | Pass 3 | No |
@@ -358,7 +366,9 @@ chapter" re-reads everything and finds what pass 1 already found.
 
 ## 9. The gates
 
-**[I RECOMMEND]** Eleven gates on the writing itself, and three that the new mechanisms require.
+**Specified in `GATES.md`**, which says for each gate what it reads, what makes it fail and what it
+prints. This table is the index; that file is the specification. **`GATES.md` also holds the policy
+for setting a claim's review date**, which `tools/verify-expiry.py` reads.
 
 | Gate | Catches | Status |
 |---|---|---|
@@ -407,11 +417,10 @@ All of these:
 ## 11. Documentation architecture
 
 **[I RECOMMEND]** A small multi-file structure, not one file. The owner's preference was one
-comprehensive file; the reasoning against it is in the chat proposal of 2026-11-06 and in short:
-loading one very long file into every agent spends context on irrelevance, and **context dilution
-is the documented cause of invented content in this project**. The single file makes the known
-failure mode more likely. A book of this size has been shipped on seven kinds of document before,
-so the split is not theoretical.
+comprehensive file. The reasoning against it: an agent given one very long file spends context on
+what it does not need, and **context dilution is what makes an agent invent content** — so a single
+file makes the known failure mode more likely, not less. A fix-verifier needs the changed passages
+and the finding categories; it does not need the build conventions.
 
 | File | Job | Change rate | Audience |
 |---|---|---|---|
@@ -423,18 +432,25 @@ so the split is not theoretical.
 | `CLAIMS.tsv` | Every load-bearing claim | Continuously | Machine |
 | `OWNERSHIP.tsv` | Concept → owning chapter | Per cycle | Machine |
 | `LEDGER-TAUGHT.md` · `LEDGER-DEFECTS.md` · `LEDGER-SHORTHAND.md` | Carried over | Continuously | Both |
-| `records/NN.md` | Per-chapter evidence | Once, plus amendments | Machine |
+| `GATES.md` | What each gate reads, fails on and prints; and the review-date policy | When a gate changes | Both |
+| `ACCEPTANCE.md` | The questions each chapter must answer, written before any chapter | Per cycle, before drafting | Both |
+| `RECORD-TEMPLATE.md` | The per-chapter record, copied into `records/` | Rarely | Both |
+| `CHANGELOG.md` | "What Changed in This Edition" — generated | Every cycle | Owner |
+| `data/<chapter-slug>/` | Data a lab ships with | Per chapter | Both |
+| `records/NN-slug.md` | Per-chapter evidence | Once, plus amendments | Machine |
 | `briefs/*.md` | Filled briefs, kept so a result can be read against what was asked | Per brief | Both |
 | `CHANGELOG.md` | "What Changed in This Edition" — generated | Every cycle | Owner |
 
 **Three rules that make multiple files safe**, which is the real answer to the owner's concern:
 
-1. **One file is authoritative per topic**, and `../CLAUDE.md` says which. A rule in two files is a
-   defect, and a gate can grep for duplicated rule headings.
+1. **One file is authoritative per topic**, and `../CLAUDE.md` says which. **A rule may be referred
+   to from several files; it may be *stated* in only one.** A second statement is a defect even while
+   the two agree, because they will drift. Where a document needs a rule it does not own, it cites
+   the owner by filename and section.
 2. **The precedence order is written down.** The repository beats every document; a machine-checked
    file beats prose; `GUIDE.md` beats `PROCESS.md` on anything about the book itself. This is the
-   rule stated in `../CLAUDE.md`, which cites measured evidence that agents follow a stale instruction
-   file over the actual code 90.1% of the time.
+   rule stated in `../CLAUDE.md`. The figures it cites come from a single preprint and are recorded
+   at that strength: evidence, not settled fact.
 3. **Nothing is restated for convenience.** Cross-reference by filename and section.
 
 **[I RECOMMEND]** one rule about reuse: **copy, never share.** Where a script or mechanism comes

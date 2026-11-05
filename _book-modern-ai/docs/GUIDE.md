@@ -45,20 +45,47 @@ one may assume.
 
 ## 3. Scope
 
-**[STATED]** The book covers the **Modern AI track and only that track**. It carries nothing
-already taught in Fundamentals, Advanced or Mastery.
+**[AGREED 2026-11-06]** The boundary, and it is a boundary about **state** rather than about time
+or lineage:
 
-**[AGREED]** Scope and depth are different questions:
+> **The book is about what is currently moving in a subject. It is not about the subject's settled
+> foundations.**
+
+**Why it is stated this way.** The owner first proposed drawing the line at the establishment of
+language models and their theory, then asked whether that would affect other areas of AI. It would.
+That line traces one lineage — mathematics, statistics, classical learning, deep learning,
+representations, language models — and it locates anything *on* that lineage precisely while saying
+nothing about anything *off* it. Control theory, classical forecasting, symbolic methods and the
+engineering of accelerators are all unlocated by it, and anything whose foundations are old looks
+excluded for being old, which is the wrong reason.
+
+A boundary about state applies to every area identically, whatever its lineage, and it needs no
+external document to apply.
+
+**[AGREED]** Scope and depth are different questions, and conflating them is the usual error:
 
 | | What decides it |
 |---|---|
-| **Scope** — which subjects the book is *about* | The track |
-| **Depth** — what the book *explains* to teach a subject in scope | Whatever that subject needs, from zero, inline |
+| **Scope** — which subjects the book is *about* | Whether the answer is still moving |
+| **Depth** — what the book *explains* in order to teach a subject in scope | Whatever that subject needs, from zero, inline |
 
-Teaching a prerequisite inline does not bring that prerequisite into scope.
+**Teaching a foundation inline does not make it the book's subject.** A chapter on a current result
+may teach the mathematics under it in full. The foundation is support; the moving part is the
+subject.
 
-**[OPEN]** The exact boundary. `ROADMAP.md` records the reading taken from the current
-specification and the question it raises. Nothing is drafted until it is settled.
+**[AGREED]** The test, per claim, which makes this executable rather than aspirational:
+
+> **Has this answer moved, is it disputed, or is it current practice that could change?** If none
+> of those, it is foundation.
+
+`CLAIMS.tsv`'s `maturity` column is what records the answer, and `briefs/claim-verifier.md` is what
+establishes it. **Without that column the boundary cannot be applied**, which is why the maturity
+assessment is part of the research method and not an optional extra.
+
+**One consequence worth stating.** A settled subject still earns a chapter when the moving subjects
+are unintelligible without it. The research records that case as `FOUNDATIONS-ONLY`: taught as
+established knowledge the reader must know cold, with no dispute section, and present as support
+rather than as the book's own subject.
 
 ## 4. The language and the voice
 
@@ -81,9 +108,13 @@ the material learnable, and it is as binding as anything else in this file.
 ### The fourteen habits
 
 **[AGREED]** A rule list is not a voice. These fourteen are the voice, stated as habits a writer
-either has or does not. Seven make the material **easy**; three keep it **rigorous**; dropping
-either set produces something the owner has rejected — a textbook that performs rigour through
-difficulty, or a summary that trades depth for ease.
+either has or does not.
+
+**The `which set` column says what each one does.** Seven make the material **easy** (1–7), three
+keep it **rigorous** (9, 12, 14), three do **both** (8, 10, 13), and one is **conditional** on an
+open decision (11). Dropping the easy set produces a textbook that performs rigour through
+difficulty; dropping the rigorous set produces a summary that trades depth for ease. The owner has
+rejected both.
 
 **If a habit turns out to be wrong, the review of chapter one is where that is found.** These are
 written to be followed and corrected, not to be derived again from somewhere else.
@@ -100,7 +131,7 @@ written to be followed and corrected, not to be derived again from somewhere els
 | 8 | **Tables compare; prose explains.** Never prose doing a table's job | both |
 | 9 | **One word per concept, forever.** Name the field's shorthand once, then never alternate | rigorous |
 | 10 | **Limits are stated as decisions, not gaps** | both |
-| 11 | Chapters **keep their promises out loud** — but see §7 on the cost of this | — |
+| 11 | Chapters **keep their promises out loud** — *conditional on §7's decision; if references go by concept, this habit is dropped and §7 says why* | neither |
 | 12 | **The arithmetic is done, not described** | rigorous |
 | 13 | Interview and career relevance named plainly, without interview noise | both |
 | 14 | **Density without padding.** Density is a feature; filler is not | rigorous |
@@ -133,8 +164,11 @@ written to be followed and corrected, not to be derived again from somewhere els
    meanwhile.
 7. **`## Build it`** — the lab. See §6.
 8. **`## Summary, Key Terms, and Review Questions`**, with `### Summary`, `### Key Terms` (Term |
-   Meaning), an optional `### Worth Memorising` (numbers, defaults and formulas only), and
-   `### Review Questions` (4–6, numbered).
+   Meaning), an optional `### Worth Memorising` (numbers, defaults and formulas only),
+   `### Review Questions` (4–6, numbered), and **`### Review Answers`**, numbered to match.
+   **The answers are part of the chapter**, because a reader working alone cannot check their own
+   recall without them — and three of the four review passes check the answers against the body,
+   since an answer key is read as settled and is where a correction goes to not happen.
 9. **`> **You understand this when** …`** — one sentence.
 10. **`## Claims`** — every load-bearing claim in the chapter, with its `CLAIMS.tsv` id.
 
@@ -192,8 +226,10 @@ That last line is load-bearing. Without it a lab gets quietly tuned until it con
 - **Isolated and safe.** Its own fresh folder. It never touches anything outside it.
 - **State the hardware** it needs. If it needs more than one accelerator, give a reduced version
   that needs none, or say plainly that there is none.
-- **The book ships its own data** where data is needed. No lab says "your own files": an expected
-  result that depends on the reader's files holds for nobody.
+- **The book ships its own data** where data is needed, in `data/<chapter-slug>/`, which is
+  published beside the book and listed in `PROCESS.md` §11. No lab says "your own files": an
+  expected result that depends on the reader's files holds for nobody. A lab may read `data/` and
+  its own fresh folder, and nothing else.
 - **Declare what was planted.** Where the book builds its own data, it lists every property put
   there deliberately, so no lab can claim to have discovered what was put there for it.
 - **Pin versions**, and pin any model to a dated snapshot. Print the identifier that came back

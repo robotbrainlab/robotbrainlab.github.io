@@ -63,9 +63,31 @@ How long it took, end to end. The chapter claims it is a day's work or less;
 say whether that is true.
 ```
 
+**BUDGET**
+
+One run of the lab end to end, plus at most **one** retry of any single step. No web searches: if
+the chapter does not tell you something, that is the finding.
+
+**TARGET**
+
+One verdict. That is the whole deliverable.
+
+**PARTIAL**
+
+A lab that did not finish is a complete and useful result **provided you say exactly where it
+stopped and why.** Report the gap rather than engineering around it.
+
+**FORBIDDEN**
+
+- **Using knowledge the chapter did not give you** to fill a gap.
+- **Correcting a command silently.** Record the failure, then record what you changed.
+- **Rounding a number to match the chapter's.** Report both.
+- **Reading or writing anything outside the fresh folder and the data the chapter names.**
+- **Touching any credential.** Keys come from the environment; if none is there, stop and say so.
+
 **STOPPING RULE**
 
-Stop when the lab has run to a verdict, **or** when a gap in the chapter stops you and you have
-recorded it. Do not spend more than one attempt working around a gap: record it and move on.
+Stop when the lab has run to a verdict, **or** when a gap stops you and you have recorded it. **One
+attempt at working around a gap, then record it and move on.**
 
 **DELEGATION: ZERO.** Do not start any sub-agent.

@@ -73,10 +73,35 @@ Only if you think the non-scope or a deliberate decision is wrong. Otherwise wri
 What you read in full. What you did not, and why.
 ```
 
+**BUDGET**
+
+One reading of the chapter and one of each source, plus re-reads of specific passages to check a
+finding. **No web searches.** Everything you need is in the files named.
+
+**TARGET**
+
+There is no number. A finding exists because something is wrong, not to reach a count.
+
+**PARTIAL**
+
+If you cannot finish, say which parts of the chapter and which sources you covered, and stop. **A
+partial review that says what it covered is useful; one that implies full coverage is worse than
+none.**
+
+**FORBIDDEN**
+
+- **A finding inside the declared non-scope.** Report it under `Scope doubt` or not at all.
+- **A finding you have not located.** Quote the passage and give its position.
+- **A rewrite.** You report; you do not edit.
+- **A style preference.** Unless it breaks a rule in the chapter's own specification, it is not a
+  finding.
+
 **STOPPING RULE**
 
-Report every finding you have. Do not pad, and do not hunt for a quota. **If the chapter is sound,
-say so in one line** — that is a complete and useful result.
+**One pass through the chapter and its sources, then write up.** That is the fixed point: when you
+have read both once and checked each finding you raised, you are done. Do not re-read hunting for
+more, and do not pad. **If the chapter is sound, say so in one line** — that is a complete and
+useful result.
 
 **IF UNSURE, SAY SO RATHER THAN ASSERTING. A WRONG FINDING COSTS MORE THAN A MISSED ONE.**
 

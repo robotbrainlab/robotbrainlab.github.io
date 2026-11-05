@@ -32,7 +32,7 @@ will find it again, under a brief we agreed.
 
 ## What survived, and why it is not research
 
-Three things from that period are **method, not findings**, and they stand:
+Two things from that period are **method, not findings**, and they stand:
 
 1. **The brief works.** It was run once and passed all six of its tests —
    it stopped on its own at 11 of 25 searches, started no sub-agents, and refused three numbers it

@@ -18,8 +18,18 @@ and reports what pass 1 already found. The list is the brief.
 
 **YOUR JOB**
 
-A chapter was reviewed, findings were applied, and here is every passage that changed. Read **only
-these**, and answer two questions about each:
+A chapter was reviewed, findings were applied, and here is every passage that changed.
+
+**What you read, precisely — this is the part an earlier version of this brief got wrong.** You
+read the listed passages **as your subject**, and you are free to **search the whole chapter for the
+claims those passages contain**. You must do the second: a survival is by definition somewhere the
+fix did not land, so a brief that forbade looking there would forbid the job. What you must **not**
+do is review the unchanged parts of the chapter on their own merits — that is pass 1's work, already
+done, and re-doing it buries your findings in its findings.
+
+So: **the list bounds what you are looking for, not where you may look.**
+
+Answer two questions about each listed passage:
 
 1. **Did the fix land everywhere?** The same claim may appear in several phrasings elsewhere in the
    chapter. Search for every phrasing. **Look in the summary, the key-term table, the "worth
@@ -58,9 +68,30 @@ Errors the fixes introduced. Quote the changed passage and what it now contradic
 Changed passages that are correct and complete. List them, so the count is visible.
 ```
 
+**BUDGET**
+
+One pass over the listed passages, plus a whole-chapter search for each claim they contain. **No
+web searches.**
+
+**TARGET**
+
+No number. Every listed passage gets a verdict: survival, new error, or clean.
+
+**PARTIAL**
+
+If you stop early, name the passages you checked. An unchecked passage is where the survival will be.
+
+**FORBIDDEN**
+
+- **Reviewing unchanged text on its own merits.** That is pass 1's work, already done.
+- **Reporting a finding you cannot locate twice** — the fixed passage and the survivor both.
+- **Rewriting.**
+
 **STOPPING RULE**
 
-Finish when every listed passage has been checked. **Do not look at anything not on the list.**
+Finish when every listed passage has been checked and every claim in them searched for across the
+chapter. **Do not report a defect in an unchanged passage unless it contradicts, or duplicates,
+something on the list.**
 
 **IF UNSURE, SAY SO RATHER THAN ASSERTING. A WRONG FINDING COSTS MORE THAN A MISSED ONE.**
 
