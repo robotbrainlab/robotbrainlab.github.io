@@ -242,8 +242,24 @@ and which the owner has questioned twice and not yet ruled on:
   without the prediction.
 - **So a fixed set of research areas is a coverage device**, used to force attention somewhere the
   search index does not point. It is not a claim about the field's natural shape.
-- **Consequence:** any percentage computed over a chosen set of areas is a percentage of that
-  choice, and must be reported that way rather than as a property of the field.
+- **Consequence:** any percentage computed over a chosen set of areas is a percentage of **that
+  choice**, not a property of the field. Measure one area against two different area lists and its
+  share changes while the area does not.
+
+**[AGREED 2026-11-06] How this reconciles with the overview the owner asked for.** §10 records his
+requirement that the research report each field's estimated share, dominance, adoption and growth.
+Taken literally, "share of the field" is the number the paragraph above forbids. The resolution,
+agreed with him:
+
+| Replaced by | Why it is sound |
+|---|---|
+| **Absolute counts with their sources** | Anyone can recount them |
+| **Ratios against a denominator somebody else defined** — a named index, a named job board | The denominator is not our choice, so it is checkable |
+| **Direct comparisons between areas on one measure** | Both numbers come from the same instrument |
+
+He gets what the requirement was for — which areas are large, which are growing, which are
+shrinking — without anybody inventing a total for AI. `briefs/TEMPLATE-area-research.md` states this
+as an instruction and forbids the share.
 
 ### 3.4 Evidence rules
 
@@ -282,9 +298,10 @@ colour, and it does not need a `CLAIMS.tsv` row.
    you what the source says **now**. Between indexing and reading, a paper can be revised,
    corrected, retracted or withdrawn — and the snippet will not know. Fetch the page.
 2. **A source's own inclusion criteria are part of the finding.** A figure giving the share of
-   "notable" models of some kind measures the criteria for notability, not the field: a model
-   deployed quietly inside a bank satisfies none of the usual criteria while doing more economic
-   work than one with a press release. Check what the denominator admits before quoting the ratio.
+   "notable" items of some kind measures the criteria for notability, not the population: criteria
+   built from citations, benchmark records and press coverage select for visibility, and anything
+   that is consequential without being visible is outside the denominator by construction. **Check
+   what the denominator admits before quoting the ratio.**
 3. **Every research instruction carries a termination condition and a fixed output shape.** Three
    research agents in this project searched for an hour without converging, because every
    instruction they had rewarded searching more and none said what finished looked like.
@@ -346,12 +363,13 @@ not accept the book's contents as correct by default.
 at its true size: cross-checking cannot catch a **consensus error**, where the available sources
 agree and are all wrong in the same direction.
 
-**Why that class exists, by argument rather than by example.** Two mechanisms produce it. A
-published comparison is usually run by the people proposing the new thing, so the baseline is the
-one they had time to configure — and if nobody re-runs it against a well-configured baseline, every
-later paper inherits the gap. And an evaluation protocol with a flaw rewards whatever exploits the
-flaw, so a whole literature can agree on numbers that measure the protocol. In both cases every
-source agrees and reading more of them confirms the error.
+**Why that class is possible, by argument rather than by example.** Two mechanisms can produce it.
+Where a comparison is run by the people proposing the new thing, the baseline is the one they had
+time to configure — and if nobody re-runs it against a well-configured baseline, later work inherits
+the gap. And an evaluation protocol with a flaw rewards whatever exploits the flaw, so agreement
+across a literature can reflect the protocol rather than the thing measured. **How often either
+happens is not claimed here**: the point is only that neither is detectable by reading more
+sources, which is what makes a measurement the remedy.
 
 **The remedy is a measurement, not another source**, and the labs are where that measurement
 happens. `GUIDE.md` §6's reproduction labs exist for exactly this.
@@ -486,11 +504,16 @@ gathered in this project:
 | Conventional software engineer | Building and shipping systems | Does not require judging a research claim, which is what the named roles do test |
 | **Research-oriented engineer** | **Reading the literature, judging a claim, reproducing it, and building on it** | **This is the target** |
 
-**[I RECOMMEND]** the supporting observation: an interview for an application role asks whether
-you know the established answer. A research-engineer interview asks whether you can read a paper,
-judge whether its claim is supported, and reproduce or extend it. Those are different skills, and
-only the first can be learned from settled material. This is why the new book must carry contested
-material and not only established material.
+**[I RECOMMEND]** the supporting observation, **and it is an unverified belief about hiring, not a
+finding**: that an application-role interview tends to ask whether you know the established answer,
+while a research-engineer interview tends to ask whether you can read a paper, judge whether its
+claim is supported, and reproduce or extend it.
+
+**What the research must settle.** `briefs/TEMPLATE-area-research.md` collects a `SKILLS` field per
+subject and a `SKILLS AND CAREERS` field per area, both of which require the evidence to be named.
+Until those come back, the claim above is a hypothesis — and the argument it supports (that the book
+must carry contested material, not only established material) also follows from the owner's own
+stated objective in §1.1, which does not depend on it.
 
 [↑ Back to Table of Contents](#table-of-contents)
 
@@ -513,11 +536,15 @@ answer is not settled. Which form a chapter uses follows from its subject.
 instances here, drawn from the discarded research; **the instances are withdrawn and the shapes
 are what survives.**
 
-| Shape | What the reader does | What it teaches |
+| Shape | What the reader does | What the reader finds out |
 |---|---|---|
-| **Re-measure an interval** | Compute the same estimate two ways, one of them the method a paper used, and measure the gap | That a default statistical method can mislead in exactly the regime the reader works in |
-| **Score a null baseline** | Run something that cannot possibly work under a published evaluation protocol, and see what it scores | That a protocol, not a model, can produce a headline number |
-| **Find the envelope's edge** | Run a method inside its stated operating range and then outside it | That a published claim has boundaries its abstract does not state |
+| **Re-measure an interval** | Compute the same estimate two ways, one of them the method a paper used, and measure the gap | **Whether** the method a paper used misleads in the regime the reader works in, and by how much |
+| **Score a null baseline** | Run something that cannot work under a published evaluation protocol, and see what it scores | **Whether** that protocol can be satisfied without the thing it claims to measure |
+| **Find the envelope's edge** | Run a method inside its stated operating range and then outside it | **Where** its boundaries actually are, against what its abstract states |
+
+**Note the column heading.** It asks rather than asserts. An earlier version stated what each shape
+*teaches* — which presupposed the finding, in a document that exists to specify how findings are
+obtained. **A lab whose conclusion is known in advance is not a lab.**
 
 Each shape needs a real published claim to attach to. **The fresh research supplies those**, and
 until it does, no lab can be written.
@@ -846,12 +873,9 @@ intention. Eight of the eleven can be:
 | I · adjacent work | `ROADMAP.md` names one current step and its deliverable |
 | J · superseded document | Cite a document's date and purpose in the same sentence as its content |
 | K · withdrawn evidence | Mark the argument, never re-word it. §5.3, §7.1 and §10 are the record |
-**The design principle behind all eight is one sentence: convert care into mechanism.** A rule that
-could be written as *"be careful about X"* is instead written as a script that refuses, a file a
-gate reads, or a brief that cannot be answered the wrong way. The worked example is a figure in a
-chapter: rather than asking a writer to transcribe a program's output carefully, the figure is
-spliced from the program's own captured output, so nothing is transcribed at all. **Care does not
-survive a long project. A mechanism does.**
+**The design principle behind all eight is `PROCESS.md` §1's: convert care into mechanism.** It is
+stated there, with its worked example, and not restated here. **Care does not survive a long
+project. A mechanism does.**
 
 [↑ Back to Table of Contents](#table-of-contents)
 
@@ -861,8 +885,11 @@ survive a long project. A mechanism does.**
 
 **[I RECOMMEND]** these as things worth deciding that the owner's list did not name.
 
-1. **The book will be produced faster than it can be read.** With agent help, chapters are written
-   in days. Text generation is not the constraint; reading and running is. The new book therefore needs a **reading order and a priority**, not only a structure —
+1. **The book may be produced faster than it can be read.** Writing text with agent help is
+   plausibly much faster than reading it, working its labs and absorbing it — **but nobody has
+   measured either rate here, so this is a risk to watch rather than a finding.** The first cycle is
+   the measurement: record how long a chapter took to produce and how long it took the owner to work
+   through, and the ratio either justifies this concern or retires it. The new book therefore needs a **reading order and a priority**, not only a structure —
    otherwise the first cycle produces more than a cycle can absorb.
 2. **The mirror of the taught-ledger is missing.** There is a record of what the book taught.
    There is no record of what has been run. Given that the owner's practice is deliberately outside
@@ -877,8 +904,10 @@ survive a long project. A mechanism does.**
    re-derives them — and a round's output has already been lost that way once. If they live in the book, the book cannot
    distinguish a claim it verified from a claim it inherited.
 5. **The shorthand ledger has a hard job here.** The usual gap is between a formal name and the
-   word practitioners actually say. At a research frontier, the same technique often has three names
-   across three communities, and a reader who knows one cannot find the other two.
+   word practitioners actually say. Where a subject is worked on by more than one community, the same technique can carry a
+   different name in each, and a reader who knows one cannot find the others. **Whether that is
+   common is for the research to report** — the ledger's three-name rule exists so the case is
+   handled when it appears, not because it is claimed to be typical.
 6. **Reuse by copying, never by sharing.** Where a script or mechanism is taken from elsewhere, it
    is copied into this project, so that improving this book cannot break anything else.
 

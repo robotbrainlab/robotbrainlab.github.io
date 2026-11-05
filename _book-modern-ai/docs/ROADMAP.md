@@ -54,9 +54,13 @@ because it could not confirm them at source.
 **Its content is discarded** and sits in `../discarded/`. Only the verdict on the instrument survives:
 the brief terminates, it keeps an agent honest about its sources, and it does not sprawl.
 
-**Four fixes followed**, and are in `briefs/TEMPLATE-area-research.md` version 2: output goes to a
-file rather than into the conversation; the live-research word limit is raised and enforced; the
-buildable experiment must state its hardware; and the claims vocabulary gains `source-absence`.
+**Ten fixes have followed**, and are listed in `briefs/TEMPLATE-area-research.md`, now at **version
+3**. Four came from the pilot run — output goes to a file rather than into the conversation, word
+limits are enforced, the buildable experiment states its hardware, and the claims vocabulary gained
+`source-absence`. Six came from an independent audit of the documentation: the brief now collects
+skills and careers and the research-to-engineering transition, produces an area overview, no longer
+lets a hardware rule or a recency rule reject a subject before the owner sees it, and no longer
+assumes every subject has one canonical reference.
 
 **One thing I previously recorded here is withdrawn.** I wrote that the pilot proved areas should be
 small, because the area it was given held more subjects than its cap allowed. **That is a claim
@@ -86,24 +90,20 @@ error the whole document warns against**: it handed over a carving of the field 
 owner was asked to choose one, and it used internal codes that `../CLAUDE.md` forbids in anything
 the owner reads. An independent audit found it, and it is removed rather than reworded.
 
-### Where the scope comes from — and this is the open question
+### Where the scope comes from
 
-The scope rule is that the book covers the Modern AI track and nothing the curriculum's depth
-levels already teach. **That rule cannot be applied from these documents**, because what those
-levels teach is not written down here. An audit found this to be the largest dependency in the set,
-and it sits against the independence rule in `GOAL.md` §2.4: a scope defined by another document's
-category boundaries is a dependency in scope.
+**Settled, and stated in exactly one place: `GUIDE.md` §3.** This document does not restate it, not
+even in short form — a summary of a rule is a second statement of it, and two statements drift.
 
-**[OPEN]** Three ways to resolve it, for the owner to choose:
+What applies it: `CLAIMS.tsv`'s `maturity` column, and `briefs/claim-verifier.md`, which establishes
+that column's value.
 
-| | What it means | Cost |
-|---|---|---|
-| **1 · Copy the boundary in** | Read the curriculum once, and write into these documents an explicit, dated list of the **subjects** it excludes — not its category names. The rule becomes self-contained, and the curriculum can change without silently moving the book's scope | An hour or two of reading. The list can go stale, but visibly |
-| **2 · Drop the exclusion** | Scope is whatever the research finds. Overlap with the curriculum is permitted, as it already is with any earlier book | The book may teach things the owner knows. He has said duplication with an earlier *book* is fine; he has not said that about the *curriculum* |
-| **3 · Define scope by a property** | For example, material whose answer has moved recently or is disputed. Self-contained, no external reference | A different rule from the one given, admitting and excluding things the owner may not expect |
-
-**Recommended: 1.** It keeps the stated intent exactly, makes the documents self-sufficient, and
-turns an invisible dependency into a dated list anyone can check.
+**[RESOLVED 2026-11-06]** This section previously said the scope rule *"cannot be applied from
+these documents"*, named an external curriculum as the largest dependency in the set, and offered
+three ways out. **All of that is withdrawn.** The owner settled the boundary as a property of a
+subject's state rather than as a position in a curriculum, which removed the dependency entirely —
+and leaving the old wording here would have sent the next session to read an external document that
+`GUIDE.md` §3 says is not needed. This file is read first, so a stale blocker here is expensive.
 
 **Nothing else about the areas is settled here.** Which areas carry real current activity, how they
 divide, and how large each is are for the research to establish.

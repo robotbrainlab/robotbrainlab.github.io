@@ -1,6 +1,6 @@
 # Pass 1 — completeness review
 
-Fill in `<CHAPTER>`, `<SOURCES>`, `<NON-SCOPE>`, `<VERIFY>`, `<KNOWN-DELIBERATE>`.
+Fill in `<CHAPTER>`, `<SOURCES>`, `<NON-SCOPE>`, `<VERIFY>`, `<KNOWN-DELIBERATE>`, `<TAUGHT>`.
 
 ---
 
@@ -29,6 +29,15 @@ chapter. You are not editing it and not rewriting it. You are finding defects.
 | **Self-contradiction** | Two passages in the chapter disagree. **Check the summary, the key-term table and the answer key against the body** — they are read as settled and are where contradictions hide |
 | **Out-of-boundary** | The chapter teaches material the mathematics test excludes, without declaring it |
 | **Cross-chapter error** | The chapter re-teaches a concept it does not own, uses a term no earlier chapter gave the reader, or contradicts a `Do not` row |
+
+**WHAT THE READER ALREADY KNOWS**
+
+These are the rows of the taught-ledger above this chapter, including every `Do not` row. **A
+chapter that re-explains one of these, or contradicts one, is a cross-chapter error** — and you
+cannot find that without this list. If you think one of these rows is itself wrong, say so under
+`Scope doubt`.
+
+`<TAUGHT>`
 
 **THIS CHAPTER'S DECLARED NON-SCOPE**
 

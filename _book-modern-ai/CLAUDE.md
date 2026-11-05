@@ -62,7 +62,9 @@ instead.
 - **Duplication between the two books is fine.** Duplication *within* this book is a defect. These
   are different rules.
 - **No topic gets less explanation because something else covered it.**
-- **The track decides the scope; self-containment decides the depth.** The book covers Modern AI
+- **Scope is a property of the subject, not a position in any curriculum.** The book is about what
+  is currently moving; it is not about settled foundations. Stated in full in `docs/GUIDE.md` §3 and
+  nowhere else. The book covers Modern AI
   subjects only, and teaches whatever those subjects need from zero, inline.
 - **Never state a claim above the strength of its source**, and quote the source.
 - **Every size claim names what it is a share of.** "Growing fast" is not a finding.

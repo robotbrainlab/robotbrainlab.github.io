@@ -13,15 +13,17 @@ fix instead of re-discovering the problem.
 | `pass-3-lab.md` | **Lab runner** — run the lab from the chapter text alone | After pass 2 |
 | `pass-4-fix-verification.md` | **Fix verifier** — only the changed passages | Last |
 
-**The writer has no brief here.** Writing a chapter is the five-step loop in `../PROCESS.md` §6, done
+**The writer has no brief here.** Writing a chapter is the six-step loop in `../PROCESS.md` §6, done
 in the main session with the sources open, not delegated.
 
-## Two rules that apply to every brief
+## The schema every brief follows
 
-1. **Delegation depth is zero.** No agent starts another agent. An agent that may spawn agents has
-   no budget, and a brief without a fixed point does not terminate.
-2. **Every brief states its output shape and its stopping rule.** An instruction set that only
-   rewards thoroughness has no fixed point.
+**`../PROCESS.md` §4.6 owns the schema.** Every file here carries its slots. Two are the same in
+every brief and are repeated because they fail silently:
+
+1. **Delegation depth is zero.** An agent that may spawn agents has no budget.
+2. **The stopping rule has a fixed point** — a condition that becomes true and stays true.
+   "Report everything you find" is not one.
 
 ## The sentence that goes in every review brief
 

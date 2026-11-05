@@ -174,9 +174,8 @@ written to be followed and corrected, not to be derived again from somewhere els
 
 ### The rule that governs the body
 
-**[STATED]** The five dimensions — why it matters, the scientific foundations, the ongoing
-research, the engineering, and the research-to-engineering connection — must **not** become five
-sections. The owner's instruction is that they are bridged, not treated as separate disciplines.
+**[STATED]** The five dimensions must **not** become five sections. **`GOAL.md` §4.1 owns that rule**
+and gives the owner's reasoning; what follows is its consequence for the anatomy above.
 
 **[I RECOMMEND]** The operative form: **dimensions 2, 3 and 4 are one object seen at three
 distances.** A chapter is organised around a mechanism or a question, and the science, the dispute
@@ -267,8 +266,9 @@ times. Habit 11 in §4 is the casualty, and it is a real loss.
 That is sharper than "go deeper". It admits the statistics of comparison and enough optimisation
 theory to read a training paper, and it still excludes mathematics that only decorates.
 
-**[I RECOMMEND]** Mathematics is written as raw LaTeX, never as `$…$`, so that a price like $5
-stays text.
+**[I RECOMMEND]** Mathematics is written as raw LaTeX, never as `$…$`, so that a price like $5 stays
+text. **Inline** mathematics uses `\(` and `\)`; **display** mathematics uses `\[` and `\]`, in a
+fenced block. Simple inequalities and units in running prose stay as plain characters: ≤, ≥, ×, ≈.
 
 ## 9. Length
 
@@ -287,6 +287,18 @@ well as to a chapter.
 **[I RECOMMEND]** These are the conventions the build depends on. File naming stays open until the
 structure is settled.
 
+**The layout, relative to the book's own root** — which is the directory containing `docs/`:
+
+```
+docs/        the planning documents. Never built, never published with the book
+markdown/    the chapters, one file each. The only source of truth
+data/        data a lab ships with, one directory per chapter
+records/     one evidence record per chapter
+research/    what the research returned, one file per area per cycle
+tools/       the gates, the driver, the generators
+latex/       generated. Never edited
+```
+
 - **One file per chapter.** `markdown/NN-slug.md`.
 - **Headings:** `# Chapter Title` with no "Chapter N". First paragraph is the intro, then `##`
   sections and `###` subsections.
@@ -296,6 +308,10 @@ structure is settled.
   blocks, at most 64 characters wide, every line the same width.
 - **Generated appendices.** The glossary comes from the Key Terms tables and the cheat sheet from
   the Worth Memorising tables. Never edit a generated file by hand.
+- **The index is generated too**, from the Key Terms tables: one entry per term, pointing at the
+  chapter that owns it. **It is not hand-curated**, because a hand-curated index drifts from the
+  glossary and the two then disagree about what a term is. The record's instruction to read index
+  entries one by one is a check that no entry is a phrase bolded for emphasis rather than a term.
 - **The Markdown is the only source of truth.** Never edit generated output.
 
 **[OPEN]** The build toolchain. **Markdown → pandoc → XeLaTeX → PDF** is the proposal. Wherever an

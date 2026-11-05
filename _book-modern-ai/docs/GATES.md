@@ -11,6 +11,11 @@ describe them. Each entry below says what the gate reads, what makes it fail, an
    suite fails, find out **which** gate and why — every time.
 2. **Prove a gate by breaking something it should catch and watching it exit non-zero.** A gate
    that has never failed has never been tested. Record the proof in the gate's own docstring.
+   **Exception, and it is the only one: a list-only gate** — one whose entry says *"Fails on:
+   nothing"* — cannot be proved this way. Gates 6, 7 and 14 are list-only. Prove each instead by
+   **planting something it should list and confirming it appears in the output**, and record that
+   proof in the same place. A list-only gate whose list is never read is the failure mode here, so
+   its proof is about the list, not the exit code.
 3. **A gate that checked nothing prints `VACUOUS`, never `CLEAN`**, and does not count as a pass.
    A chapter with no equations gets `VACUOUS` from the arithmetic gate, and that is correct.
 
@@ -19,10 +24,19 @@ describe them. Each entry below says what the gate reads, what makes it fail, an
 | Exit | Means |
 |---|---|
 | `0` with `CLEAN` | Checked something, found nothing wrong |
-| `0` with `VACUOUS` | Had nothing to check. **Not a pass — the suite reports it separately** |
+| `0` with `VACUOUS` | Had nothing to check. **Does not block the suite, and is reported separately** |
 | `1` with `FAIL` | Found something. Prints every instance with file and line |
 
 A gate never prints a summary without the instances. A count with no list cannot be acted on.
+
+**What `ALL GATES PASS` means, exactly.** The suite prints it when **no gate exited non-zero**. It
+then prints a `VACUOUS:` line naming every gate that had nothing to read, because a `VACUOUS` is
+sometimes correct — a chapter with no arithmetic — and sometimes a symptom that the gate could not
+find its input. **Reading that line is part of closing a chapter**, and the record asks for every
+`VACUOUS` to be explained.
+
+So: `VACUOUS` does not block the suite and does not satisfy a check. A chapter closes with every
+gate either `CLEAN`, or `VACUOUS` with a reason given in the record.
 
 ---
 
@@ -34,13 +48,17 @@ research that fed it, a website, a roadmap, a curriculum, a learning path, numbe
 or an agent. Also any first-person reference to the writing process.
 **How:** a pattern list, in `tools/voice-patterns.txt`, one regex per line with a comment saying
 what defect it was added for. The list is the gate; adding a pattern is how the gate learns.
+**Seeded, when the gate is built, from the prohibitions in `GUIDE.md` §11** — one pattern per
+prohibition, which is where the first entries come from rather than from invention. Thereafter a
+pattern is added only when something gets past the gate, and the comment names what.
 **Why it is worded this way:** the book is independent and self-contained, so it has no origins to
 disclose — and a chapter that mentions the apparatus breaks the reader's footing. *Prove it* by
 inserting "as the research found" into a chapter.
 
 ## 2 · `tools/verify-boundary.py` — no mathematics outside the declared line
 
-**Reads:** every chapter, plus `tools/boundary-exemptions.tsv`.
+**Reads:** every chapter, plus `tools/boundary-exemptions.tsv`, whose columns are
+`chapter`, `passage` (a quoted span), `reason`, `approved_on`.
 **Fails on:** a derivation, proof, or theoretical development whose subject is not on the declared
 list, and which carries no exemption row.
 **How:** the declared line lives in `GUIDE.md` §8 as a test, not a list, so this gate cannot decide
@@ -49,15 +67,25 @@ that", "we can show", a proof environment — and requires each to carry either 
 justification in the record or an exemption row giving the reason.
 **Honest limitation:** this is a hint gate. It cannot judge whether a derivation earns its place.
 It makes the list, and a human triages it one by one.
-**Blocked until:** the mathematics boundary is decided. Until then it runs in list-only mode and
-prints `VACUOUS` rather than passing.
+**Until the mathematics boundary is decided** this gate runs **list-only**: it prints every passage
+that looks like a derivation and exits 0, exactly as gates 6 and 7 do. It does not print `VACUOUS`
+unless the chapter contains no mathematics at all, and it never blocks the suite. The list is
+triaged by hand and the triage recorded.
 
 ## 3 · `tools/verify-render.py` — the Markdown renders as written
 
 **Reads:** every chapter.
 **Fails on:** a list that will run together into one paragraph; a table with a row of the wrong
-width; an unclosed fence; a heading level skipped; a `text` block line wider than 64 characters; a
-callout not in the three permitted forms.
+width; an unclosed fence; a heading level skipped; a callout not in the three permitted forms; and
+**in a hand-drawn diagram only**, a line wider than 64 characters or a line of a different width
+from its neighbours.
+**Not checked:** the width of **captured program output**. `GUIDE.md` §10 applies the 64-character
+limit to diagrams the author draws, not to what a program prints — and a captured output block may
+never be edited by hand (`LEDGER-DEFECTS.md` entry 6), so failing it would leave no permitted
+remedy. A program whose output is too wide is fixed **in the program**, by printing narrower.
+**How it tells them apart:** a captured block carries the marker `<!-- captured -->` immediately
+before it. Writing that marker by hand on a block a program did not produce is a defect no gate can
+catch, and it is `LEDGER-DEFECTS.md`'s own territory.
 **Why:** a chapter once shipped with its review questions run into a single paragraph, and every
 other check passed it. Rendering is not correctness and nothing else looks at it.
 
@@ -110,8 +138,11 @@ owns.
 chapter for field vocabulary not yet in the set. **It reads prose, not only backticked spans** — a
 chapter once used two terms the book had never introduced, and every gate passed it because none of
 them was in code font.
-**Honest limitation:** the field-vocabulary list is hand-maintained in
-`tools/field-terms.txt`. A term not on that list cannot be caught.
+**Honest limitation:** the field-vocabulary list is hand-maintained in `tools/field-terms.txt`, and
+a term not on it cannot be caught. **It is seeded from the research**: every term appearing in a
+`NAME` field of a subject record, plus every term in a `CLAIMS.tsv` claim, goes in when the plan is
+approved. That is a real source rather than a guess, and it is why this gate cannot be built before
+step 8.
 
 ## 9 · `tools/verify-outline.py` — the document outline nests correctly
 
@@ -173,8 +204,15 @@ which is rule 1.
 
 ## Setting a review date
 
-**`tools/verify-expiry.py` needs a policy, and this is it.** `review_by` is set when the row is written,
-from `class`:
+**`tools/verify-expiry.py` needs a policy, and this is it.**
+
+**These intervals are a starting policy, not a measurement.** Nobody has measured how fast a
+convention turns over, and the numbers below are chosen to be defensible and adjustable rather than
+derived. **The cycle that uses them reports how many claims it re-checked and how many had actually
+changed** — and that is the evidence to tune them with. If almost nothing had changed, the interval
+is too short; if most things had, it is too long.
+
+`review_by` is set when the row is written, from `class`:
 
 | `class` | `review_by` | Why |
 |---|---|---|
@@ -191,3 +229,9 @@ from `class`:
 
 **Nothing lengthens a review date.** A date is shortened by evidence of fragility and never
 extended by confidence.
+
+**One interaction worth knowing.** A `volatile` claim comes due every three months, and a cycle runs
+on roughly twelve weeks — so nearly every volatile claim is due at nearly every cycle. **That is
+intended**: a model name, a price or a benchmark figure is stale almost immediately, and a cycle
+that did not re-check them would publish numbers it knows are old. The cost is bounded because
+re-checking a volatile claim is one fetch, and the alternative is a book full of expired figures.

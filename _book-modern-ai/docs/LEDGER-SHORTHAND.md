@@ -12,7 +12,12 @@ clear name: one sentence in the body, and the shorthand carried in that chapter'
 Every later chapter may then use the shorthand, and **must not re-explain it**.
 
 **A chapter must never use a shorthand earlier than the chapter that names it.** The inputs gate
-checks this by reading the Key Terms tables.
+checks this **for shorthand that has a Key Terms row**, by reading those tables.
+
+**It cannot check a `body`-only shorthand**, because there is no row for it to read. Those are
+caught by the completeness review instead, which is given this file's rows for the chapters above
+the one under review. **So a `body` entry costs a machine check and gains a human one** — use it
+only where the two reasons below genuinely apply.
 
 ## Where a shorthand does not get a Key Terms row
 

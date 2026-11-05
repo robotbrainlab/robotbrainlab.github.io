@@ -28,8 +28,22 @@ only things carried from that run — all of them about the instrument, none abo
 Replace `<AREA>`, `<SCOPE>`, `<EXCLUDED>`, `<OUTFILE>` and `<CAP>`. Change nothing else. If a
 change seems necessary, change this template and add a row above, so the next run inherits the fix.
 
+**`<OUTFILE>`** is `../research/YYYY-MM-DD-<area-slug>.md`, relative to `docs/briefs/` — one file
+per area per run, dated so two runs over the same area never collide. The slug is lower-case with
+hyphens.
+
+**`<SCOPE>`** is three to six lines naming the subjects this area is responsible for. Take them
+from the area list approved at step 4 of `../ROADMAP.md`; do not invent them here.
+
+**`<EXCLUDED>`** names the subjects a *neighbouring* area owns, so two scouts do not both cover
+them. **Every area's `<EXCLUDED>` is written at the same time as every other's**, in one sitting,
+from the approved list — writing them one at a time is how two areas end up both claiming a subject
+or neither claiming it. If a scout reports in `Sampling` that the scope looks mis-drawn, that is a
+finding about the list and goes back to step 4.
+
 **On `<CAP>`:** it bounds what one run can report, so it cannot be calibrated by the run it bounds.
-Set it at **6 for a first pass over an area**. The brief requires the agent to name what it skipped
+**6 is an arbitrary starting value, chosen so a run fits the budget — it is not a finding about how
+many subjects an area holds, and must not become one.** The brief requires the agent to name what it skipped
 and why; if it reports skipped subjects, run the area again with a higher cap. **Do not raise the
 cap in place of a second run** — a larger cap buys thinner records, which `PARTIAL` forbids.
 
@@ -59,7 +73,7 @@ Out of scope, because another area owns it: `<EXCLUDED>`
 
 1. `## Sampling` — your coverage report, in full, as specified at the end.
 2. `## Subjects found` — one line per subject: its name, its verdict, and nothing more.
-3. `## Overview headline` — four lines: share, dominance, adoption, growth, each with its basis in
+3. `## Overview headline` — four lines: size, dominance, adoption, growth, each with its basis in
    under fifteen words.
 4. `## Written to` — the file path and the number of records in it.
 
@@ -73,10 +87,28 @@ One per run, about this area as a whole. **Every number states what it is a shar
 arrived at it.** Where you cannot measure something, say so — an honest absence is worth more than
 an invented estimate, and an estimate presented as a fact is the thing this brief most forbids.
 
+**Before the fields: why there is no "share of AI" here.**
+
+A percentage needs a total, and the only total available would be the set of areas somebody chose
+to look at. Measure one area twice against two different lists and its share changes while the area
+does not — so the number describes the list, not the field. It is therefore not checkable, and this
+project does not publish numbers whose denominator is a decision.
+
+| Do give | Why it is sound |
+|---|---|
+| **An absolute count with its source** — "2,259 entries in this index in this month, counted from this URL" | Anyone can recount it |
+| **A ratio against an external denominator** — "5.4% of everything in this index that month" | The index is not our choice. Someone else defined it |
+| **A comparison on one measure** — "this published more than that last month, 3,940 against 3,346" | Both numbers come from the same instrument |
+
+| Do not give | Why |
+|---|---|
+| "This area is 10% of AI" | Nobody can define the whole of AI, so nobody can check the denominator |
+| "A large share of the field" | Same problem, without even the arithmetic |
+
 | Field | Content | Limit |
 |---|---|---|
 | `WHAT THIS AREA IS` | The boundary in your own words, and what sits just outside it | 100 words |
-| `SHARE` | How large this area is relative to the whole field, **with the denominator named and the method stated**. If you count something yourself, say exactly what you counted. If you cannot measure it, say that and say why | 150 words |
+| `SIZE` | **Do not give a share of "all of AI".** See the box above for why. Give instead: absolute counts with their sources; and ratios **only** against a denominator somebody else defined, named exactly | 150 words |
 | `DOMINANCE` | Whether activity here is concentrated or spread — across institutions, vendors, venues or countries — with what you counted | 120 words |
 | `INDUSTRY ADOPTION` | What is actually deployed, as opposed to published. Name the evidence | 120 words |
 | `GROWTH` | Whether this is growing, steady or shrinking, **against a stated baseline and period**. "Growing fast" with no comparison is not an answer | 120 words |
@@ -203,6 +235,8 @@ overview.
   technical advances. If a legal or physical constraint limits what an engineer may build, state
   the constraint in one sentence and move on.
 - **A number without what it is a share of.** "Growing fast" is not a finding.
+- **A share of "the whole field" or "all of AI".** See the box above the overview fields. Give a
+  count, or a ratio against a denominator somebody else defined.
 - **An estimate presented as a fact.** Say which numbers you measured, which you took from a
   source, and which you are guessing. A guess, labelled, is allowed; a guess presented as a
   measurement is not.
