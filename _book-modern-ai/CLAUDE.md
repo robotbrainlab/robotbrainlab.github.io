@@ -23,9 +23,10 @@ Then read, in this order, only what the current step needs:
 | `GOAL.md` | What the book is for, and why. **Every statement is marked** as the owner's words, agreed, my recommendation, or open. Nothing is a decision unless it says so |
 | `PROCESS.md` | How the book gets built: the cycle, the chapter loop, the passes, the agents, the gates, the brief schema |
 | `ROADMAP.md` | The eleven steps, and where we are |
-| `CLAIMS.tsv` | Every load-bearing claim, with its source, its strength and its review date |
+| `CLAIMS.tsv` | Every load-bearing claim, with its source, its strength and its review date. **Currently empty** — reset 2026-11-06 |
 | `briefs/TEMPLATE-area-research.md` | The research brief. Fill it in; do not rewrite it |
-| `research/` | What the research has returned so far |
+| `research/` | What the research has returned. **Currently empty** |
+| `discarded/` | Pre-consensus research. **Read the README before opening anything in it** |
 
 ## Precedence, when two documents disagree
 
@@ -38,6 +39,11 @@ A rule that appears in two files is a defect. Fix it by deleting one, not by edi
 
 ## The rules that are easy to break
 
+- **All research conducted before 2026-11-06 is discarded.** The owner's instruction: it was done
+  before we reached a consensus on the goal, the method and the scope. See `discarded/README.md`.
+  **No figure from it may be cited, and it may not be used to choose or rank a research area.**
+  Only three things survived, and they are method rather than findings: the brief works, it has four
+  fixes, and areas should be small.
 - **The new book has no connection to *Modern AI Engineering from Zero*** in content, scope,
   structure or progression. It is independent and self-contained. Only two things carry over: the
   **language and voice**, and the **method**. Not the four parts. See `GOAL.md` §2.4.

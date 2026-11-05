@@ -1,38 +1,13 @@
 id	claim	source	source_strength	verified_on	class	review_by	state	dependents
-#	Seeded 2026-11-06 from research/2026-11-06-systems-hardware.md (pilot run 01).
+#	EMPTY. Reset 2026-11-06 on the owner's instruction: all previous research is discarded because it
+#	was conducted before we reached a consensus on the goal, the method and the scope.
+#	The 32 rows seeded from the pilot run are in discarded/CLAIMS-seeded-from-pilot.tsv and may NOT be cited.
+#
+#	The first rows of this file will come from the fresh research, run under an agreed brief.
+#
 #	source_strength: peer-reviewed | preprint | vendor | own-measurement | source-absence | training-data-unverified
 #	class: durable | convention | volatile
 #	state: verified | contested | superseded | unverified
-#	source-absence is an observation that a source OMITS something. It is not a measurement. Added after pilot 01 conflated the two.
-SYS-001	A 2026 review of LLM accelerators concludes the binding constraint is memory, not arithmetic, and that decode is bandwidth-bound	https://arxiv.org/abs/2608.28048	preprint	2026-11-06	durable	2027-11-06	verified
-SYS-002	AMMA reports 15.5x lower attention latency and 6.9x lower energy than an H100 for 1M-context decode attention	https://arxiv.org/abs/2604.26103	peer-reviewed	2026-11-06	volatile	2027-02-06	verified
-SYS-003	AMMA's paper does not state how its H100 baseline was tuned	https://arxiv.org/abs/2604.26103	source-absence	2026-11-06	durable	2027-11-06	verified
-SYS-004	Replacing GPU compute dies with HBM-PNM cubes roughly doubles available memory bandwidth in AMMA's design	https://arxiv.org/abs/2604.26103	peer-reviewed	2026-11-06	volatile	2027-02-06	verified
-SYS-005	Performance is bounded by min(peak FLOP/s, arithmetic intensity x peak bandwidth) - the roofline model	Williams, Waterman, Patterson, CACM 2009	training-data-unverified		durable	2027-11-06	unverified
-SYS-006	A July 2026 preprint reports GPU collective overhead within 7% of an absolute speed-of-light lower bound for small and medium messages	https://arxiv.org/abs/2607.16100	preprint	2026-11-06	volatile	2027-02-06	verified
-SYS-007	That paper's abstract states no absolute latency, GPU model or NVSwitch generation	https://arxiv.org/abs/2607.16100	source-absence	2026-11-06	durable	2027-11-06	verified
-SYS-008	On 2026-04-07 the UALink Consortium ratified Common Spec 2.0 with in-network compute, DL/PL 2.0 at 200G signalling, Manageability 1.0 and Chiplet 1.0 compatible with UCIe 3.0	https://convergedigest.com/ualink-2-0-adds-in-network-compute-chiplet-support-and-200g-performance/	vendor	2026-11-06	convention	2027-05-06	verified
-SYS-009	No independent measurement of UALink exists in any source reached; every published figure originates with the consortium	https://ualinkconsortium.org	source-absence	2026-11-06	volatile	2027-02-06	verified
-SYS-010	Small collectives sit on the critical path of LLM decode, making the latency floor rather than peak bandwidth the user-visible number	https://arxiv.org/abs/2607.16100	preprint	2026-11-06	durable	2027-11-06	verified
-SYS-011	Ring all-reduce has a bandwidth-optimal cost of 2(N-1)/N x S/beta while trees are latency-optimal, which is why libraries switch algorithm by message size	Thakur and Rabenseifner on MPI collective algorithms	training-data-unverified		durable	2027-11-06	unverified
-SYS-012	NVIDIA reports pretraining a 12B model on 10T tokens in NVFP4 with loss and downstream accuracy comparable to an FP8 baseline	https://arxiv.org/abs/2509.25149	vendor	2026-11-06	volatile	2027-02-06	verified
-SYS-013	Stable 4-bit pretraining required random Hadamard transforms, two-dimensional quantisation, stochastic rounding and selected higher-precision layers - the format alone is not enough	https://arxiv.org/abs/2509.25149	vendor	2026-11-06	durable	2027-11-06	verified
-SYS-014	The NVFP4 paper's abstract page gives neither the benchmark scores nor the names of the layers held at higher precision	https://arxiv.org/abs/2509.25149	source-absence	2026-11-06	durable	2027-11-06	verified
-SYS-015	NVFP4's small group size provably neutralises traditional outlier-mitigation techniques, and MXFP4's power-of-two scales induce high error	https://arxiv.org/abs/2509.23202	preprint	2026-11-06	durable	2027-11-06	verified
-SYS-016	MR-GPTQ kernels reach up to 3.6x layer-wise and 2.2x end-to-end on a B200 and 6x / 4x on an RTX 5090, against an FP16 baseline whose tuning the abstract does not state	https://arxiv.org/abs/2509.23202	preprint	2026-11-06	volatile	2027-02-06	verified
-SYS-017	FP4 is not an automatic upgrade over INT4; format-specialised methods are what open the trade-off	https://arxiv.org/abs/2509.23202	preprint	2026-11-06	durable	2027-11-06	verified
-SYS-018	An LLM agent generating low-level GPU kernel code was a 0.40x geomean regression against PyTorch on 59 KernelBench problems; a CUTLASS-backed DSL raised it to 1.27x and speed-of-light guidance to 1.56x	https://arxiv.org/abs/2603.29010	preprint	2026-11-06	volatile	2027-02-06	verified
-SYS-019	That paper's abstract does not state whether the PyTorch baseline was eager or compiled, nor which GPU was used	https://arxiv.org/abs/2603.29010	source-absence	2026-11-06	durable	2027-11-06	verified
-SYS-020	Speed-of-light bound analysis exposed kernels that appeared fast but did not perform the intended computation	https://arxiv.org/abs/2603.29010	preprint	2026-11-06	durable	2027-11-06	verified
-SYS-021	Targeting Blackwell requires satisfying layout and alignment requirements for tcgen05.mma, a restricted set of supported MMA tile shapes, and explicit warp-specialisation scheduling choices	https://docs.nvidia.com/cutlass/4.7.0/media/docs/cpp/blackwell.html	vendor	2026-11-06	convention	2027-05-06	verified
-SYS-022	Standard synthetic GEMM stress tests miss more than 60% of SDC-defective GPUs in a production LLM training fleet	https://www.usenix.org/conference/osdi26/presentation/zheng	peer-reviewed	2026-11-06	durable	2027-11-06	verified
-SYS-023	Silent data corruptions are aging-dependent, unit-specific and data-dependent, and are caught by neither ECC nor thermal protection; effective diagnosis requires replay with the exact model, checkpoint, workload and data	https://www.usenix.org/conference/osdi26/presentation/zheng	peer-reviewed	2026-11-06	durable	2027-11-06	verified
-SYS-024	Deterministic training cost within 0.01% of step time in production while cutting normalised debug time by 70%; the tool mitigated 40 production incidents	https://www.usenix.org/conference/osdi26/presentation/zheng	peer-reviewed	2026-11-06	volatile	2027-02-06	verified
-SYS-025	Meta reported hardware failures roughly every 2.78 hours on 16,000-GPU runs with about 1.4% attributed to GPU silent data corruption - cited second-hand inside the OSDI paper and not verified at its own source	https://www.usenix.org/conference/osdi26/presentation/zheng	peer-reviewed	2026-11-06	volatile	2027-02-06	contested
-SYS-026	Piper reports 2-3.5x higher MFU than X-MoE and an all-to-all at 1.2-9x vendor bandwidth; absolute MFU, accelerator count and machine are not in the abstract	https://arxiv.org/abs/2605.05049	preprint	2026-11-06	volatile	2027-02-06	verified
-SYS-027	Goodput - the request rate sustainable while meeting both time-to-first-token and inter-token-latency targets - rather than peak tokens per second, is disaggregation's objective	https://vllm.ai/blog/2026-09-29-disaggregated-serving-guide	vendor	2026-11-06	durable	2027-11-06	verified
-SYS-028	On two L40S GPUs with Qwen2.5-7B at 0.4 req/s, p99 inter-token latency was 169ms collocated vs 29ms disaggregated, while median time-to-first-token was 0.7s collocated vs 2.2s disaggregated; the post states its collocated baseline was not the strongest configuration	https://vllm.ai/blog/2026-09-29-disaggregated-serving-guide	vendor	2026-11-06	volatile	2027-02-06	verified
-SYS-029	On one 8-GPU MI300X node with Qwen3-235B-A22B-FP8 at 8 req/s, 73 of 100 requests met a 1s TTFT and 50ms ITL target disaggregated vs 30 of 100 collocated - about 2.4x goodput on the same hardware	https://vllm.ai/blog/2026-09-29-disaggregated-serving-guide	vendor	2026-11-06	volatile	2027-02-06	verified
-SYS-030	Llama-3.1-70B in BF16 holds 320 KiB of KV cache per token, so a 10k-token prompt is about 3 GB, about 65ms to transfer at 400 Gb/s before overhead, paid entirely in time-to-first-token	https://vllm.ai/blog/2026-09-29-disaggregated-serving-guide	vendor	2026-11-06	durable	2027-11-06	verified
-SYS-031	H-Spec removes the drafter-side KV cache by reusing target KV in place, reporting 5.0-13.3% higher mean accepted length and 5.3-12.6% lower batch-1 inter-token latency over an unnamed best baseline	https://arxiv.org/abs/2609.24197	preprint	2026-11-06	volatile	2027-02-06	verified
-SYS-032	A paged-attention kernel written entirely in Triton was raised from 19.7% to 105.9% of an unnamed state of the art on NVIDIA and AMD GPUs	https://arxiv.org/abs/2511.11581	preprint	2026-11-06	volatile	2027-02-06	contested
+#
+#	source-absence is an observation that a source OMITS something — a missing baseline, an unnamed
+#	device, an absent denominator. It is not a measurement.
