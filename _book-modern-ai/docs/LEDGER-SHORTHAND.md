@@ -30,9 +30,11 @@ A glossary is generated from the Key Terms tables and is therefore organised by 
 vocabulary. This file is organised by **the reader's** vocabulary — the words they will meet
 outside the book — and it is the only place that mapping is visible as a whole.
 
-**At a research frontier this file has a harder job than usual:** the same technique often carries
-three names across three communities, and a reader who knows one cannot find the other two. Where
-that happens, list every name and say which community uses which.
+**Where a subject is worked on by more than one community it may carry a different name in each**,
+and a reader who knows one cannot find the others. **Whether that is common is for the research to
+report** — this file's multi-name rule exists so the case is handled when it appears, not because it
+is claimed to be typical. Where it does appear, list every name and say which community uses which.
+
 
 ## The columns
 

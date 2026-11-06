@@ -133,7 +133,7 @@ written to be followed and corrected, not to be derived again from somewhere els
 | 10 | **Limits are stated as decisions, not gaps** | both |
 | 11 | Chapters **keep their promises out loud** — *conditional on §7's decision; if references go by concept, this habit is dropped and §7 says why* | neither |
 | 12 | **The arithmetic is done, not described** | rigorous |
-| 13 | Interview and career relevance named plainly, without interview noise | both |
+| 13 | Where a subject's **practical stakes** are known, name them plainly and without inflation — what it is used for, what it costs to get wrong | both |
 | 14 | **Density without padding.** Density is a feature; filler is not | rigorous |
 
 ### Terms
@@ -284,8 +284,11 @@ well as to a chapter.
 
 ## 10. Markdown and build conventions
 
-**[I RECOMMEND]** These are the conventions the build depends on. File naming stays open until the
-structure is settled.
+**[I RECOMMEND]** These are the conventions the build depends on.
+
+**One thing genuinely stays open**: how chapters are grouped, and therefore whether a chapter's
+number means anything beyond reading order. The **file naming does not** — it is fixed below, and
+numbering straight through in reading order works whatever the grouping turns out to be.
 
 **The layout, relative to the book's own root** — which is the directory containing `docs/`:
 

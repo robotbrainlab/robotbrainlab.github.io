@@ -11,11 +11,16 @@ describe them. Each entry below says what the gate reads, what makes it fail, an
    suite fails, find out **which** gate and why — every time.
 2. **Prove a gate by breaking something it should catch and watching it exit non-zero.** A gate
    that has never failed has never been tested. Record the proof in the gate's own docstring.
-   **Exception, and it is the only one: a list-only gate** — one whose entry says *"Fails on:
-   nothing"* — cannot be proved this way. Gates 6, 7 and 14 are list-only. Prove each instead by
-   **planting something it should list and confirming it appears in the output**, and record that
-   proof in the same place. A list-only gate whose list is never read is the failure mode here, so
-   its proof is about the list, not the exit code.
+   **Exception: a list-only gate cannot be proved this way.** A list-only gate never exits
+   non-zero — it reports and the human triages. **Which gates those are is decided by their own
+   entries below, not by a list here**, because a list here would go stale when a gate changed:
+   a gate is list-only exactly when its entry says it fails on nothing. At present that is gates 6
+   and 7, and gate 2 while the mathematics boundary is open.
+   **Prove a list-only gate by planting something it should list and confirming it appears in the
+   output**, and record that proof in the gate's docstring. Its failure mode is a list nobody reads,
+   so its proof is about the list and not the exit code.
+   **Gate 14 is not list-only**: it reports between cycle boundaries and exits non-zero at one, so
+   it is proved the ordinary way — plant an expired claim and run it at a boundary.
 3. **A gate that checked nothing prints `VACUOUS`, never `CLEAN`**, and does not count as a pass.
    A chapter with no equations gets `VACUOUS` from the arithmetic gate, and that is correct.
 
@@ -218,7 +223,7 @@ is too short; if most things had, it is too long.
 |---|---|---|
 | `durable` | **+24 months** | Expected to hold for five years. Checking yearly spends the cycle on things that will not have moved |
 | `convention` | **+12 months** | How it is done now. Practice turns over on roughly this scale |
-| `volatile` | **+3 months** | Settings, versions, prices, model names, benchmark figures. These are stale almost immediately |
+| `volatile` | **+3 months** | Settings, versions, prices, model names, benchmark figures — the things a vendor or a leaderboard can change without notice |
 
 **Two overrides, both shortening:**
 
@@ -232,6 +237,6 @@ extended by confidence.
 
 **One interaction worth knowing.** A `volatile` claim comes due every three months, and a cycle runs
 on roughly twelve weeks — so nearly every volatile claim is due at nearly every cycle. **That is
-intended**: a model name, a price or a benchmark figure is stale almost immediately, and a cycle
-that did not re-check them would publish numbers it knows are old. The cost is bounded because
-re-checking a volatile claim is one fetch, and the alternative is a book full of expired figures.
+intended.** Nobody owns a version number or a price, so neither can be assumed to hold; a cycle
+that did not re-check them would publish figures it had no reason to believe. The cost is bounded
+because re-checking one is a single fetch.

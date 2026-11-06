@@ -11,7 +11,7 @@ and keeping them apart is the point of the file.
 
 **Changes rarely. Approved once, then revised only by a `NEW QUESTION` or `RECARVE` operation.**
 
-The spine is a set of **durable questions** (`PROCESS.md` §5.1). A question is the book's unit of
+The spine is a set of **durable questions** (`PROCESS.md` §5.2). A question is the book's unit of
 structure because it outlives every answer it will carry: a new subject goes to the question it
 answers, and a subject that dies leaves its question standing.
 

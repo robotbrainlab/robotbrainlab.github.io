@@ -4,11 +4,12 @@ Fill in `<CHAPTER>` and `<CHANGED-PASSAGES>`.
 
 **What this pass is for, and why it is not optional.** The recurring defect in a long document is
 not writing a passage badly. **It is correcting a claim where you are looking and leaving it where
-you are not.** This pass exists only to catch that, and it catches survivals in nearly every
-chapter it is run on.
+you are not.** Nothing in the act of fixing one passage surfaces the others, so no amount of care
+during a fix finds them — which is why this is a separate pass with a separate reader.
 
-**Why it reads only the changed passages.** An agent told "look at the chapter" re-reads everything
-and reports what pass 1 already found. The list is the brief.
+**Why it reads for the listed passages and not the whole chapter.** An agent told "look at the
+chapter" re-reads everything and reports what the earlier passes already found, burying the
+survivals in a second copy of their findings. The list is the brief.
 
 ---
 
@@ -16,28 +17,32 @@ and reports what pass 1 already found. The list is the brief.
 
 ---
 
+**QUESTION**
+
+Did each fix land everywhere the claim appears, and did any fix break something that was correct?
+
 **YOUR JOB**
 
-A chapter was reviewed, findings were applied, and here is every passage that changed.
+A chapter was reviewed by three earlier passes, their findings were applied, and here is every
+passage that changed as a result.
 
-**What you read, precisely — this is the part an earlier version of this brief got wrong.** You
-read the listed passages **as your subject**, and you are free to **search the whole chapter for the
-claims those passages contain**. You must do the second: a survival is by definition somewhere the
-fix did not land, so a brief that forbade looking there would forbid the job. What you must **not**
-do is review the unchanged parts of the chapter on their own merits — that is pass 1's work, already
-done, and re-doing it buries your findings in its findings.
+**What you read, precisely.** You read the listed passages **as your subject**, and you **must**
+search the whole chapter for the claims those passages contain — a survival is by definition
+somewhere the fix did not land, so a brief that kept you out of the rest of the chapter would
+forbid the job. What you must **not** do is review unchanged text on its own merits. That was the
+earlier passes' work, it is done, and repeating it hides your findings inside theirs.
 
-So: **the list bounds what you are looking for, not where you may look.**
+**The list bounds what you are looking for, not where you may look.**
 
 Answer two questions about each listed passage:
 
-1. **Did the fix land everywhere?** The same claim may appear in several phrasings elsewhere in the
-   chapter. Search for every phrasing. **Look in the summary, the key-term table, the "worth
-   memorising" table and the answer key first** — those read as settled because they look like a
-   glossary rather than an argument, so they are where a fix goes to not happen.
-2. **Did the fix introduce a new error?** A fix round that touches more than a handful of passages
-   is a drafting event, and drafting introduces errors at the usual rate. Check each changed
-   passage for a new contradiction with text that did not change.
+1. **Did the fix land everywhere?** One claim appears in several phrasings. Search for all of them.
+   **Look in the summary, the key-term table, the "worth memorising" table and the review answers
+   first** — those read as settled because they look like a glossary rather than an argument, so
+   they are where a fix goes to not happen.
+2. **Did the fix break something?** A fix round that touches many passages is writing many new
+   sentences, and new sentences carry errors whether or not they are called fixes. Check each
+   changed passage against text that did **not** change.
 
 **THE CHANGED PASSAGES**
 
@@ -45,27 +50,32 @@ Answer two questions about each listed passage:
 
 **ALSO CHECK, for each change**
 
-- **Arithmetic.** If a number changed, every number derived from it must have changed too. A total
+- **Arithmetic.** If a number changed, everything derived from it must have changed too. A total
   that no longer equals its parts is the commonest survival.
-- **Captured program output.** If a lab's prose changed, its program and its captured output must
-  have changed with it. A chapter that contradicts its own printed output on the same page is the
-  single most embarrassing defect available.
-- **Superlatives and quantifiers.** A fix that restores a comparison can falsify a *"the narrowest"*
-  or *"in every case"* written before the restoration.
+- **Captured program output.** If a lab's prose changed, the program and its captured output must
+  have changed with it. **A captured block is never edited by hand** — if it disagrees with the
+  prose, the program is what gets fixed, and that is a finding either way.
+- **Superlatives and quantifiers.** A fix that restores a comparison can falsify an *"the
+  narrowest"* or an *"in every case"* written before the restoration.
 - **Cross-references.** If a passage moved, anything pointing at it is now wrong.
 
 **OUTPUT**
 
 ```
 ## Survivals
-The old claim still present somewhere else. Quote both the fixed passage and the
-survivor, and give the survivor's location.
+The old claim still present somewhere else. Quote BOTH the fixed passage and the
+survivor, and give the survivor's location. A survival you can only show once is
+not a survival — it is a single passage, and belongs below or nowhere.
 
 ## New errors
-Errors the fixes introduced. Quote the changed passage and what it now contradicts.
+Something now wrong that was not wrong before. Quote the changed passage, and
+quote what it contradicts or what it got wrong. One location is enough here.
 
 ## Clean
-Changed passages that are correct and complete. List them, so the count is visible.
+Changed passages that are correct and complete, listed, so the count is visible.
+
+## Coverage
+Which listed passages you checked. Any you did not, and why.
 ```
 
 **BUDGET**
@@ -75,23 +85,24 @@ web searches.**
 
 **TARGET**
 
-No number. Every listed passage gets a verdict: survival, new error, or clean.
+No number. Every listed passage gets one of the three verdicts above.
 
 **PARTIAL**
 
-If you stop early, name the passages you checked. An unchecked passage is where the survival will be.
+If you stop early, name the passages you checked and those you did not. **An unchecked passage is
+where the survival will be**, so the list matters more than the findings.
 
 **FORBIDDEN**
 
-- **Reviewing unchanged text on its own merits.** That is pass 1's work, already done.
-- **Reporting a finding you cannot locate twice** — the fixed passage and the survivor both.
-- **Rewriting.**
+- **Reviewing unchanged text on its own merits.** The earlier passes did that.
+- **Reporting a survival you can show in only one place.** Two locations, or it is not one.
+- **Rewriting.** You report; you do not edit.
 
 **STOPPING RULE**
 
 Finish when every listed passage has been checked and every claim in them searched for across the
-chapter. **Do not report a defect in an unchanged passage unless it contradicts, or duplicates,
-something on the list.**
+chapter. **Do not report a defect in unchanged text unless it contradicts, or duplicates, something
+on the list.**
 
 **IF UNSURE, SAY SO RATHER THAN ASSERTING. A WRONG FINDING COSTS MORE THAN A MISSED ONE.**
 

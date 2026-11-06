@@ -42,13 +42,13 @@ removes one to save time.
 | Carried over | What it cost to learn |
 |---|---|
 | **One chapter at a time. Never a part at a time** | Context dilution causes invented content. Writing several chapters in one stretch pushes the first chapter's sources out of working context, and it then gets written from the pattern of the previous chapters rather than from its material |
-| **Sources read in full, immediately before writing** — not earlier in the session | Named in the record, with what was read |
+| **Sources read in full, immediately before writing** — not earlier in the session | Reading earlier in the session means the sources are out of working context by the time the chapter is written, and the chapter then gets written from memory of them. Named in the record, with what was read |
 | **Non-scope declared in the record before writing** | Without an edge, review never terminates. Once a chapter claims to handle any case, "what about X?" is always a correct question and every answer creates the next one |
 | **A completeness review against the sources, side by side** | A reviewer checks what is present against the sources; nothing in that act surfaces what is absent from both |
 | **A fix-verification pass reading only the named changed passages** | The recurring defect is not writing badly — it is fixing a claim where you are looking and missing it where you are not. A reviewer reading only the changed passages finds survivals a full re-read buries in its own findings |
 | **Every fix is a sweep, counted before and after, back matter first** | A summary, a key-term row and an answer key are read as settled because they look like a glossary rather than an argument, so they are where a fix goes to not happen rather than an argument |
 | **In a lab, a corrected claim lives in six places and four are prose** | Programs narrate their own output, and that narration is captured into the chapter |
-| **A staged driver that refuses, not a checklist** | *"Prose is what gets skipped"* |
+| **A staged driver that refuses, not a checklist** | A checklist in prose is read once and skipped thereafter. A program that will not advance until the current stage's evidence is present cannot be skipped — see §6.1 |
 | **The record carries the chapter's hash, written last** | Editing one character afterwards makes the record stale and fails the suite |
 | **`amend` for a closed chapter that must change** | The quickest way past a stale hash is to re-hash by hand, which turns the record from evidence into decoration and leaves no trace that a published chapter moved |
 | **The stopping rule, with round-2 classification** | Round 2 findings about the *subject* mean the chapter is mis-scoped. Round 2 findings that are round 1's own unswept fixes mean the fix round was itself a drafting event. Conflating them mis-fires, and sends a sound chapter back to be narrowed |
@@ -176,37 +176,44 @@ SAMPLING        what to report about your own coverage
 **[I RECOMMEND]**
 
 ```
-RESEARCH → CONFIRM → SELECT → PLAN → WRITE → VERIFY → CLOSE → EXPIRE
+EXPIRE → RESEARCH → CONFIRM → SELECT → PLAN → WRITE → VERIFY → CLOSE
 ```
 
 | Stage | What happens | Approved by |
 |---|---|---|
+| **Expire** | Every claim past its `review_by` is re-verified by `briefs/claim-verifier.md` and becomes `verified`, `contested` or `superseded`. **A superseded claim names its dependent chapters, and only those reopen.** `tools/verify-expiry.py` must be clean before the next stage begins | — |
 | **Research** | One scout per area, fixed brief schema, delegation depth 0. Output: candidate **subjects**, each a complete unit, plus claims with sources | — |
-| **Confirm** | Every scout claim becomes a `CLAIMS.tsv` row (§5.2). **Then `briefs/claim-verifier.md` runs on each claim whose maturity is `provisional` and which a candidate chapter would rest on** — because `CLAIMS.tsv` forbids a chapter resting on a provisional maturity, and nothing else in the cycle would discharge that | — |
+| **Confirm** | Every scout claim becomes a `CLAIMS.tsv` row (§5.1). **Then `briefs/claim-verifier.md` runs on each claim whose `maturity_basis` is `provisional` and which a candidate chapter would rest on** — because a chapter may not rest on an unestablished maturity, and nothing else in the cycle discharges that | — |
 | **Select** | Subjects filtered by the three-part test (`GOAL.md` §10): a mechanism worth understanding · live research · something buildable. **Rejections recorded with reasons** | **Owner** |
 | **Plan** | Subjects become chapters. Ownership assigned. Structure chosen *now*, from the subjects that exist — never before (`GOAL.md` §5.3). Acceptance questions written **before** drafting | **Owner** |
 | **Write** | One chapter. Six steps, §6 | — |
 | **Verify** | Four passes (§7) | — |
-| **Close** | Record hashed, ledgers updated, claims linked, changelog entry written | — |
-| **Expire** | Claims past `review_by` re-verified. Only affected chapters reopen | — |
+| **Close** | Record hashed, ledgers updated, claims' `dependents` filled, operation rows written for the changelog | — |
+
+**EXPIRE is first, and that is the fix for a circularity.** An earlier version put it last and
+defined the cycle boundary as the moment SELECT was approved — so the expiry gate demanded that
+stale claims be re-verified at a point before the stage that re-verifies them. Running it first
+also means **no cycle is ever researched on top of claims known to be stale**, which is the
+property that matters.
+
+**A cycle boundary is the moment EXPIRE completes.** `tools/verify-expiry.py` needs a definition and
+this is it: CLOSE writes a dated `cycle-boundary` line into `CHANGELOG.md` when the following
+EXPIRE finishes clean, and the gate reads the last such line. Between boundaries the gate only
+reports; at a boundary it fails on any claim past its review date.
 
 **The key property:** EXPIRE replaces the full rescan. A cycle's size is set by what has actually
 gone stale, not by the calendar.
 
-**A cycle boundary is the moment SELECT is approved.** `tools/verify-expiry.py` needs this and
-nothing previously defined it: the boundary is recorded as a dated line in `CHANGELOG.md`, and the
-gate reads that line. Between boundaries the gate only reports; at a boundary it fails on any claim
-past its review date.
-
-### 5.2 From a scout's claim to a claims row
+### 5.1 From a scout's claim to a claims row
 
 The scout returns six fields. `CLAIMS.tsv` has eleven. **This is the transformation, and it happens
 at CONFIRM**, not by a scout and not by a writer:
 
 | Column | Where it comes from |
 |---|---|
-| `claim` `source` `source_strength` `maturity` `maturity_basis` `class` | The scout's row, unchanged |
-| `id` | Assigned here: the area's slug in upper case, a hyphen, and a zero-padded counter — `SYS-001`. Never reused, never renumbered |
+| `claim` `source` `maturity` `maturity_basis` `class` | The scout's row, unchanged |
+| `source_strength` | The scout's `strength` field, renamed to the file's column name. **Same vocabulary, different column name** — the scout's brief calls it `strength` because the row it writes has no other kind |
+| `id` | Assigned here: **the area's number, a hyphen, and a zero-padded counter** — `A03-001`. A number rather than a slug, because a slug can itself contain a hyphen and then the id cannot be parsed. The area's number comes from the approved list at step 4. Never reused, never renumbered |
 | `verified_on` | **The date the claim verifier ran**, not the date the scout read it. A row the verifier has not touched leaves this empty, which is what marks it unconfirmed |
 | `review_by` | Computed from `class` and `maturity` by the policy in `GATES.md` |
 | `state` | `unverified` on arrival. Becomes `verified`, `contested` or `superseded` only through the claim verifier |
@@ -216,7 +223,8 @@ at CONFIRM**, not by a scout and not by a writer:
 may not rest on it. And `dependents` is written from the chapter, never from the plan — a chapter
 that does not name a claim does not depend on it, whatever the plan intended.
 
-### 5.1 What happens when a cycle comes back a different shape
+### 5.2 What happens when a cycle comes back a different shape
+
 
 The owner asked this on 2026-11-06 and the framework had no answer. This section is the answer.
 
@@ -256,8 +264,8 @@ Every one writes a changelog row.
 | An area that turns out not to be an area | **RECARVE** | Expensive. No mechanism makes it cheap | **Owner** |
 
 **Nothing is deleted.** A retired subject keeps its chapter with a dated note. This is not
-tidiness: it is the lesson a research engineer most needs — that something was believed, by careful
-people, and then was not.
+tidiness, and §4.1 above owns the rule and its reason. The consequence for an **operation**, which
+is what this section is about: `RETIRE` changes a chapter's standing and never removes it.
 
 #### The test on the carving itself
 
@@ -314,6 +322,24 @@ the rest and ship — no second round. If it does, fix and run one more. If roun
 findings that are round 1's own unswept fixes mean the fix round was a drafting event, so sweep and
 verify once more. A third round being contemplated means something structural is wrong — stop and
 ask.
+
+### 6.1 The driver
+
+**`tools/chapter.py` is the loop, as a program.** A checklist in prose is read once and skipped
+thereafter; a program that refuses to advance cannot be skipped. Four stages, and each refuses:
+
+| Command | Refuses when |
+|---|---|
+| `chapter.py begin NN-slug` | The chapter file already exists, or the record's `question`, `sources` or `non-scope` fields are empty. **It creates the record from `RECORD-TEMPLATE.md`**, so a chapter cannot start without one |
+| `chapter.py written NN-slug` | Any box in the *Before writing* or *While writing* sections is unticked, or is ticked with nothing after it |
+| `chapter.py reviewed NN-slug` | Any of the four pass verdicts is missing. **On success it writes the `sha256` last**, so any later edit makes the record stale and fails the record gate |
+| `chapter.py amend NN-slug "reason"` | The record is not closed, no reason is given, or the chapter has not actually changed. It appends a dated line to `amended:` and re-hashes |
+
+**`amend` exists because the obvious way to change a closed chapter is dishonest.** The record
+carries the chapter's hash, so an edit makes it stale — and the quickest way past that is to
+re-hash by hand, which turns the record from evidence into decoration and leaves no trace that a
+published chapter moved. `amend` is the honest path, and the record gate checks every amendment is
+dated, reasoned, and not earlier than the review it follows.
 
 ---
 
@@ -471,14 +497,21 @@ break something else, and it gives this project an external dependency it does n
 
 **[OPEN]** Everything in this file, pending the owner's review.
 
-**[OPEN]** From `GOAL.md`, and none of these block the research:
+**[OPEN]** Decisions held elsewhere. **This list is a pointer, not a second copy** — each item is
+marked `[OPEN]` in the file that owns it, and that file is where its options live:
 
-- The book's shape — breadth against depth (§10)
-- The mathematics boundary (§10)
-- Which area goes deep, if the shape is asymmetric (§10)
-- The structure and whether four parts fit (§5.3) — **and this one must wait for the subjects**
-- Whether the book is for the owner alone (§10)
-- Confirmation of the scope-versus-depth reading (§2.4)
+| Open decision | Owned by |
+|---|---|
+| The book's shape — breadth against depth | `GOAL.md` §10 |
+| How deep the mathematics goes | `GOAL.md` §10, with the test in `GUIDE.md` §8 |
+| Which area goes deep, if the shape is asymmetric | `GOAL.md` §10 |
+| The structure, and whether a four-part progression fits | `GOAL.md` §5.3. **Must wait for the subjects** |
+| Reference by chapter, or by concept | `GUIDE.md` §7 |
+| Whether the book is for the owner alone | `GOAL.md` §10 |
+
+**None of these blocks the research.** Scope versus depth is **not** on this list: it is settled,
+in `GUIDE.md` §3, marked `[AGREED]` and dated. An earlier version of this section listed it as open
+and pointed at `GOAL.md` §2.4, which is about independence and says nothing about scope.
 
 **[OPEN]** The three problems in `GOAL.md` §8 that §4 attacks but does not finish: the revision
 cost over many cycles, the acceptance rule for contested material, and ownership moving between

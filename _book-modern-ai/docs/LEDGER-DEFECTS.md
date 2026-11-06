@@ -45,33 +45,33 @@ open.
 **5. A fix applied where you are looking survives where you are not.** A claim in a long document
 appears in several phrasings, and the writer applying a fix sees the one the finding quoted. The
 defect is structural, not careless: nothing in the act of fixing one passage surfaces the others.
-*Practice:* every fix is a sweep — grep the whole book for every phrasing, count before, count
-after, zero or it is not done. **Sweep the back matter first**: summaries, key-term tables and
-answer keys read as settled because they look like a glossary rather than an argument, so they are
-where a fix goes to not happen.
+*Practice:* the counted sweep, which `PROCESS.md` §2 states — including which sections to sweep
+first, and why those. **Searching is not enough on its own**: a phrasing you did not think of has no
+string to search for, so the sweep is followed by reading the sections the sweep touched.
 
-**6. In a lab, one claim lives in about six places and four of them are prose.** A lab's programs
-narrate their own output — printed lines stating a count, a comparison or a universal — and that
-narration is captured into the chapter. So a single claim exists in the body, the program, the
-captured output, the summary, a key-term row and an answer. Correcting the prose and not the
-program makes the chapter contradict itself on its own page.
-*Practice:* after any lab fix, re-run the program and re-capture its output. Never edit a captured
-output block by hand.
+**6. A lab's programs narrate their own output, so a claim exists in code as well as in prose.**
+Printed lines state counts, comparisons and universals, and that narration is captured into the
+chapter. Correcting the prose and not the program makes the chapter contradict itself on its own
+page. **How many places a claim occupies is `PROCESS.md` §2's figure**; the defect here is the
+category, which is that some of them are not prose at all.
+*Practice:* after any lab fix, re-run the program and re-capture its output. **Never edit a captured
+output block by hand** — fix the program, which is also why `GATES.md` gate 3 does not police the
+width of captured output.
 
 **7. A fix round is a drafting event, not an edit.** Writing new sentences introduces errors at
 some rate. A fix round that touches many passages is writing many new sentences, so it introduces
 errors at that same rate — and nobody expects it to, because it is called a fix.
-*Practice:* classify a second round's findings before concluding the chapter is mis-scoped.
-Findings about the *subject* mean mis-scope. Findings that are the previous round's own unswept
-fixes mean the fix round needs sweeping and verifying again.
+*Practice:* treat a fix round as a draft — sweep it and verify it. **The rule for reading a second
+round's findings is `PROCESS.md` §6's stopping rule**, which distinguishes a mis-scoped chapter from
+an unswept fix round; this entry exists because the two look identical from inside the round.
 
 **8. A gate can lie to the suite and nothing will say so.** A gate is ordinary software and fails
 in ordinary ways: crashing on a renamed column, passing vacuously on an empty directory, printing a
 success banner over no output. In each case it reports health and checks nothing — **worse than no
 gate, because it is trusted.**
-*Practice:* three rules. When the suite fails, find out **which** gate and why, every time. Prove a
-new gate by breaking something it should catch and watching it exit non-zero. A gate that checked
-nothing prints `VACUOUS`, never `CLEAN`.
+*Practice:* **`GATES.md`'s three rules about the gates themselves**, which that file owns and this
+entry does not restate. The reason they belong in a defect ledger at all: a gate in this state is
+invisible to every other check, so nothing but reading its output catches it.
 
 ---
 

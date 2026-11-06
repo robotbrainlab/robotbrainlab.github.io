@@ -83,9 +83,10 @@ Out of scope, because another area owns it: `<EXCLUDED>`
 
 ## Part one of the file — `## Overview`
 
-One per run, about this area as a whole. **Every number states what it is a share of and how you
-arrived at it.** Where you cannot measure something, say so — an honest absence is worth more than
-an invented estimate, and an estimate presented as a fact is the thing this brief most forbids.
+One per run, about this area as a whole. **Every number states where it came from and, where it is a
+ratio, what it is a ratio of.** Where you cannot measure something, say so — an honest absence is
+worth more than an invented estimate, and an estimate presented as a fact is the thing this brief
+most forbids.
 
 **Before the fields: why there is no "share of AI" here.**
 
@@ -96,9 +97,13 @@ project does not publish numbers whose denominator is a decision.
 
 | Do give | Why it is sound |
 |---|---|
-| **An absolute count with its source** — "2,259 entries in this index in this month, counted from this URL" | Anyone can recount it |
-| **A ratio against an external denominator** — "5.4% of everything in this index that month" | The index is not our choice. Someone else defined it |
-| **A comparison on one measure** — "this published more than that last month, 3,940 against 3,346" | Both numbers come from the same instrument |
+| **An absolute count with its source** — *"⟨count⟩ entries in ⟨named index⟩ in ⟨month⟩, counted from ⟨url⟩"* | Anyone can recount it |
+| **A ratio against an external denominator** — *"⟨count⟩ of ⟨total⟩ in ⟨named index⟩ that month, which is ⟨percent⟩"* | The index is not our choice. Someone else defined it, so the denominator is checkable |
+| **A comparison on one measure** — *"⟨this⟩ against ⟨that⟩, both from ⟨same instrument⟩, same period"* | Both numbers come from one instrument, so the comparison holds even if the instrument is partial |
+
+**The placeholders above are placeholders.** No figure in this brief is a finding, and none should
+be copied into a record. Every number in your output comes from something you counted or fetched in
+this run.
 
 | Do not give | Why |
 |---|---|

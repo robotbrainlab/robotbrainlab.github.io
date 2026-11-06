@@ -227,9 +227,9 @@ scope."*
 and which the owner has questioned twice and not yet ruled on:
 
 - **A partition of the field is an argument, not a finding.** No amount of searching produces one,
-  because a partition is a decision about what to treat as the same thing. The owner's own
-  landscape document demonstrates this: its section B is titled *"Why the Taxonomy Took This
-  Form"* and records decisions with the alternatives considered and the reasons.
+  because a partition is a decision about what to treat as the same thing — and a decision has
+  alternatives and reasons, which is what an argument is and what a measurement is not. **The test:
+  a finding can be wrong. A partition can only be worse or better for a purpose.**
 - **An unconstrained search returns what is most published and most linked, not what matters most.**
   This is a property of search indexes, not a finding about AI: a research instruction that names no
   areas will over-sample whatever currently dominates the index, whatever that happens to be. So a
@@ -311,9 +311,14 @@ colour, and it does not need a `CLAIMS.tsv` row.
 **[STATED]** The owner wants the rapid expansion of AI tools and services tracked, not only the
 scientific literature, and explicitly not limited to named companies.
 
-**[AGREED]** Awareness and research are different activities on different clocks. The existing
-operating note states the rule: **watch the tools, write down the capability.** A tool release is
-recorded for the capability it proves, not as news.
+**[AGREED]** Awareness and research are different activities on different clocks, and the rule that
+keeps them apart is: **watch the tools, write down the capability.** A tool release is recorded for
+what it proves is now possible, never as news — because a product name is `volatile` and will be
+wrong within a cycle, while the capability it demonstrates may be `durable`.
+
+**Where this lands in the method:** the research brief's `TRANSITION` field, which asks what is
+still experimental, what is becoming practice and what is established engineering. A tool release
+is evidence for the middle column and rarely for the third.
 
 [↑ Back to Table of Contents](#table-of-contents)
 
@@ -832,7 +837,8 @@ more context.
 
 **Instance.** I recommended the nineteen areas of a landscape document dated 17 September 2026 as
 the carving for this book, and called them better than my own. Two things were wrong and both were
-checkable in under a minute. It **predates Baseline 3** (accepted 2026-11-02), so it is superseded.
+checkable in under a minute. It **predated the current version of the curriculum it described**,
+which had been accepted six weeks later, so it was superseded.
 And it is a reconstruction of the **whole** Data & Intelligence curriculum, so several of its areas
 are Fundamentals material that this book's own scope rule excludes — a rule I had written down two
 days earlier. The owner's reply: *"we have made significant changes, and you have completely failed

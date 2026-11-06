@@ -21,7 +21,10 @@ starting point: read it first, act on the current step, then update it.
 | 10 | Build the machinery | Claude | Scripts and gates, each proved by breaking something | Not started |
 | 11 | Write chapter one, then the rest | Claude | Chapters | Not started |
 
-**Step 10 can run at the same time as step 5.** It does not depend on the subjects.
+**Most of step 10 can run at the same time as step 5**, because most gates do not depend on the
+subjects. **Two do** and must wait: the inputs gate's vocabulary list is seeded from the research
+(`GATES.md` gate 8), and the boundary gate needs the mathematics decision from step 7
+(`GATES.md` gate 2).
 
 ## ALL PRE-CONSENSUS RESEARCH IS DISCARDED
 
@@ -110,19 +113,21 @@ divide, and how large each is are for the research to establish.
 
 ## The open decisions, and the step that closes each
 
-| Open question | Closes at step |
-|---|---|
-| Is the method right? | 2 |
-| Which areas do we research? | **4** |
-| Breadth, or depth in one area? | 7 |
-| How deep does the mathematics go? | 7 |
-| What structure, and do four parts fit? | 7 |
-| Which area goes deep, if any? | 7 |
-| Reference by chapter, or by concept? | 7 |
-| Is the book for the owner alone? | 8 |
-| Is the scope-versus-depth reading right? | Any time — one line from the owner |
+| Open question | Closes at step | Needs the subjects first? |
+|---|---|---|
+| Is the method right? | 2 | No |
+| Which areas do we research? | **4** | No |
+| Breadth, or depth in one area? | 7 | **Yes** |
+| How deep does the mathematics go? | 7 | **Yes** |
+| What structure, and do four parts fit? | 7 | **Yes** |
+| Which area goes deep, if any? | 7 | **Yes** |
+| Reference by chapter, or by concept? | 7 | No — decidable now, and cheap to decide early |
+| Is the book for the owner alone? | 8 | No |
 
-**Four of these cannot be answered now.** They need the subjects, and the subjects come from the
-research. That is why they are marked open rather than asked.
+**Four need the subjects**, and the subjects come from the research — which is why they are marked
+open rather than put to the owner. **Three do not**, and could be settled at any time.
+
+**Scope versus depth is no longer on this list.** It is settled in `GUIDE.md` §3, dated and marked
+agreed. An earlier version of this table listed it as open.
 
 ## Nothing after step 3 may start until step 4 is decided

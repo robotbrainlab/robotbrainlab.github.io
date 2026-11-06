@@ -3,77 +3,74 @@
 ## This file can be out of date. The repository cannot.
 
 Where this file and the actual state of the repository disagree, **the repository wins**. Check
-what the files actually say before you act on an instruction here. Do not change the repository to
+what the files actually say before acting on an instruction here. Do not change the repository to
 match this file. Say that this file looks out of date, and ask.
 
-Why this rule exists: measured on 40 projects and 320 runs, coding agents followed a stale
-instruction file over the existing code **90.1%** of the time — a single preprint, recorded at that
-strength. One agent reported the conflict in 79
-of 80 runs and followed the file anyway. One sentence giving the code precedence moved
-code-following from 4.2% to 91.4% ([arXiv 2610.30571](https://arxiv.org/abs/2610.30571), verified
-2026-11-03).
+Why the rule exists: a preprint reports that coding agents followed a stale instruction file over
+the existing code **90.1%** of the time across 40 projects and 320 runs; that one agent reported the
+conflict in 79 of 80 runs and followed the file anyway; and that one sentence giving the code
+precedence moved code-following from 4.2% to 91.4%
+([arXiv 2610.30571](https://arxiv.org/abs/2610.30571), read 2026-11-03). **A single preprint, so
+recorded at that strength** — but the rule costs nothing and the failure it prevents is expensive.
 
 ## First thing in every session
 
-Read `docs/ROADMAP.md`. It says which of the eleven steps we are on and what the next action is.
-
-Then read, in this order, only what the current step needs:
+**Read `docs/ROADMAP.md`.** It says which of the eleven steps we are on and what the next action is.
+Then read only what that step needs:
 
 | Read | For |
 |---|---|
-| `docs/GOAL.md` | What the book is for, and why. **Every statement is marked** as the owner's words, agreed, my recommendation, or open. Nothing is a decision unless it says so |
-| `docs/PROCESS.md` | How the book gets built: the cycle, the chapter loop, the passes, the agents, the gates, the brief schema |
-| `docs/ROADMAP.md` | The eleven steps, and where we are |
+| `docs/GOAL.md` | What the book is for, and why. **Every statement is marked** as the owner's words, agreed, my recommendation, or open. Nothing is a decision unless it says so. §11 holds the eleven classes of mistake already made |
 | `docs/GUIDE.md` | What the book **is**: scope, voice, chapter anatomy, labs, length, conventions |
-| `docs/GATES.md` | What each gate reads, fails on and prints — and the policy for setting a claim's review date |
+| `docs/PROCESS.md` | How it gets built: the cycle, the chapter loop, the four passes, the agents, the brief schema |
+| `docs/GATES.md` | What each gate reads, fails on and prints — and the policy for a claim's review date |
 | `docs/ACCEPTANCE.md` | The questions each chapter must answer, written **before** any chapter is drafted |
-| `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, its strength, its maturity and its review date. **Currently empty** — reset 2026-11-06 |
-| `docs/briefs/TEMPLATE-area-research.md` | The research brief. Fill it in; do not rewrite it |
-| `research/` | What the research has returned. **Currently empty** |
-| `discarded/` | Pre-consensus research. **Read the README before opening anything in it** |
+| `docs/PLAN.md` | The spine and this cycle's subjects. **Empty, and says why** |
+| `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, strength, maturity and review date. **Empty** |
+| `docs/briefs/` | One brief per agent role. Fill one in; do not rewrite it |
+| `research/` `records/` `data/` | What the research returned, the per-chapter records, the labs' data. **All empty** |
+| `discarded/` | Pre-consensus research. **Read its README before opening anything in it** |
 
 ## Precedence, when two documents disagree
 
 1. **The repository** beats every document.
-2. **A machine-checked file** (`docs/CLAIMS.tsv`, `docs/OWNERSHIP.tsv`, `records/`) beats prose.
+2. **A machine-checked file** — `docs/CLAIMS.tsv`, `docs/OWNERSHIP.tsv`, `records/` — beats prose
+   about its own contents.
 3. **`docs/GOAL.md`** beats everything else on *what the book is for*.
-4. **`docs/GUIDE.md`** beats everything else on *what the book is* — its scope, voice, chapter
-   anatomy and labs.
+4. **`docs/GUIDE.md`** beats everything else on *what the book is* — scope, voice, anatomy, labs.
 5. **`docs/PROCESS.md`** beats everything else on *how it gets built*.
+6. **`docs/GATES.md`** beats everything else on *what a check does*.
 
-**A rule may be referred to from several files; it may be stated in only one.** A second statement
-is a defect even while the two agree, because they will drift. Cite the owning file and section
-instead.
+**A rule may be cited from several files; it may be stated in only one.** A second statement is a
+defect while the two still agree, because they will drift. Cite the owning file and section.
 
 ## The rules that are easy to break
 
-- **All research conducted before 2026-11-06 is discarded.** The owner's instruction: it was done
-  before we reached a consensus on the goal, the method and the scope. See `discarded/README.md`.
-  **No figure from it may be cited, and it may not be used to choose or rank a research area.**
-  Only two things survived, and both are about the instrument rather than about AI: the brief
-  terminates and keeps an agent honest about its sources, and it has four fixes. **"Areas should be
-  small" is withdrawn** — it was a conclusion about how many subjects an area holds, which is a
-  claim about the field drawn from a discarded run. The brief caps subjects per area and requires
-  the agent to report what it skipped; the fresh research calibrates the cap.
-- **The book is fully independent and self-contained.** It is not a continuation, an extension or
-  a revision of any earlier work, and has no connection to one in content, scope, structure or
-  progression. The voice is specified in `docs/GUIDE.md` §4 and the method in `docs/PROCESS.md`; both are
-  stated as rules in their own right, with nothing to consult. See `docs/GOAL.md` §2.4.
-- **Duplication between the two books is fine.** Duplication *within* this book is a defect. These
-  are different rules.
+- **All research conducted before 2026-11-06 is discarded.** The owner's instruction: it predates
+  the agreement on goal, method and scope. See `discarded/README.md`. **No figure from it may be
+  cited, and it may not be used to choose or rank a research area.** Two things survived, both
+  about the instrument rather than about AI: the brief terminates, and it keeps an agent honest
+  about its sources. **"Areas should be small" is withdrawn** — it was a claim about the field drawn
+  from a discarded run.
+- **The book is fully independent and self-contained.** Not a continuation, extension or revision of
+  any earlier work, and no connection to one in content, scope, structure or progression. The voice
+  is specified in `docs/GUIDE.md` §4, the method in `docs/PROCESS.md`; both stand as rules in their
+  own right, with nothing to consult. See `docs/GOAL.md` §2.4.
+- **Duplication with anything outside this book is fine and expected. Duplication *within* this book
+  is a defect** — one concept, one owning chapter (`docs/OWNERSHIP.tsv`). Two different rules.
 - **No topic gets less explanation because something else covered it.**
-- **Scope is a property of the subject, not a position in any curriculum.** The book is about what
-  is currently moving; it is not about settled foundations. Stated in full in `docs/GUIDE.md` §3 and
-  nowhere else. The book covers Modern AI
-  subjects only, and teaches whatever those subjects need from zero, inline.
+- **Scope is a property of the subject, not a position in any curriculum.** Stated in full in
+  `docs/GUIDE.md` §3 and nowhere else — including not in short form here.
 - **Never state a claim above the strength of its source**, and quote the source.
-- **Every size claim names what it is a share of.** "Growing fast" is not a finding.
-- **A search summary is not a source.** Fetch the page.
-- **Every brief has a stopping rule and an output shape.** No agent delegates; depth is zero.
-- **Research output goes to a file**, never into the conversation. Agents return a summary only.
+- **Give a count with its source, or a ratio against a denominator somebody else defined.** Never a
+  share of "the field": nobody can define that denominator, so nobody can check it.
+- **A search summary is not a source.** Fetch the page — it may have been revised, corrected,
+  retracted or withdrawn since it was indexed.
+- **Every brief has an output shape and a stopping rule with a fixed point.** No agent delegates.
+- **Research output goes to a file**, never into the conversation. An agent returns a summary only.
 - **Structure follows the subjects.** Do not choose the parts before the research names them.
 - **Page estimates never decide scope.**
-- **Nothing is drafted until the table of contents is approved.**
+- **Nothing is drafted until `docs/PLAN.md` is approved.**
 - **One chapter at a time. Never a part at a time.**
 - **The repository is public.** Scan for secrets before every commit. Never push as the
   `dlakshmizlk` account.
@@ -82,10 +79,14 @@ instead.
 
 Plain, controlled English — about 80% ASD-STE100. Short sentences. Active voice. The answer first,
 then what was done and decided, then the explanation. Tables where they carry the information
-better than prose. No internal codes or shorthand: name things.
+better than prose. **No internal codes or shorthand: name things.**
 
-## The eleven classes of mistake already made
+## Before claiming anything about a file
 
-`docs/GOAL.md` §11 records them, each with its instances and the practice that follows. Read it before
-assessing anything. The shortest summary: **do not claim what you have not read**, and **do not
-assess a thing with an instrument that does not sample it**.
+**Open it.** `docs/GOAL.md` §11 records eleven classes of mistake made on this project, and the
+largest is claiming what was not read. The two shortest rules from it:
+
+- **Do not claim what you have not read.** A summary of a document tells you only that the document
+  exists.
+- **Do not assess a thing with an instrument that does not sample it.** Name the instrument and
+  what it samples, before the claim.

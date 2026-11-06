@@ -1,6 +1,17 @@
 # Pass 1 — completeness review
 
-Fill in `<CHAPTER>`, `<SOURCES>`, `<NON-SCOPE>`, `<VERIFY>`, `<KNOWN-DELIBERATE>`, `<TAUGHT>`.
+Fill in the placeholders. **Where each comes from, because a brief whose fill-ins are guessed is a
+brief that asks a different question each time:**
+
+| Placeholder | Source |
+|---|---|
+| `<CHAPTER>` | The chapter's path |
+| `<SOURCES>` | The record's `sources:` field, verbatim |
+| `<NON-SCOPE>` | The record's `non-scope:` field, verbatim |
+| `<TAUGHT>` | Every `../LEDGER-TAUGHT.md` row above this chapter, and **every `Do not` row wherever it sits** |
+| `<VERIFY>` | **Every claim the chapter's own argument turns on** — its `## Claims` section, plus any figure the chapter computed itself. Not a selection: all of them |
+| `<KNOWN-DELIBERATE>` | Anything in the record's `absolutes:` or `coverage-misses:` fields that was triaged and deliberately left, with the reason given there |
+| `<VOICE>` | `../GUIDE.md` §4 — the rules and the fourteen habits, pasted in full |
 
 ---
 
@@ -39,6 +50,10 @@ cannot find that without this list. If you think one of these rows is itself wro
 
 `<TAUGHT>`
 
+**THE VOICE THIS CHAPTER MUST BE IN**
+
+`<VOICE>`
+
 **THIS CHAPTER'S DECLARED NON-SCOPE**
 
 `<NON-SCOPE>`
@@ -67,6 +82,8 @@ so under `Scope doubt`.
 - **The capability promise.** The opening says what the reader will be able to do. Can they?
 - **Whether the explanation teaches**, which no check can test. Read it once as a reader, with
   nothing else open, and say where you lost the thread.
+- **The voice.** `<VOICE>` is the specification. A departure from it is a finding; a preference of
+  yours that the specification does not share is not. Quote the rule or habit you are applying.
 
 **OUTPUT**
 
