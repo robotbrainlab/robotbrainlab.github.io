@@ -22,7 +22,7 @@ approvals matter. **If a decision waits more than seven days I act on my recomme
 | 1 | Agree the goal | Owner | `GOAL.md` | **Done** |
 | 2 | Agree the method | Owner | `PROCESS.md`, `GUIDE.md`, `GATES.md` | **Partly approved.** Eight topics were settled on 2026-11-06 — grep `[AGREED 2026-11-06]` for them. The rest stay marked `[I RECOMMEND]` and are ruled on as they come up in practice |
 | 3 | Write the research brief | Claude | A brief with a capped output, a counted budget and a stopping rule with a fixed point | **Written** — `briefs/TEMPLATE-area-research.md`. **That it terminates is designed, not demonstrated**: no run has exercised it, so step 5's first area is also the test of the brief |
-| 4 | **Establish the research areas** | Claude proposes · **Owner rules** | A candidate list from a framing run, each boundary with its source — then approved, redrawn or rejected, with the reasons recorded | **Next** |
+| 4 | **Establish the research areas** | Claude proposes · **Owner rules** | Two framing runs record what the field files; a consolidation run turns that into one candidate list; the owner approves, redraws or rejects, with the reasons recorded | **Next** |
 | 5 | Run the research | Claude | One file per area in `../research/` | Not started |
 | 6 | Select the subjects | Claude sorts · **Owner rules** | What passed the three tests, and every rejection with the test it failed and why. He rules on both | Not started |
 | 7 | Decide the book's shape | **Owner** | The four open questions that need the subjects, plus the one that does not have to wait but closes here | Not started |
@@ -46,11 +46,21 @@ restate it.
    currently files its own work under — each with a fetched source, **the level of that source's own
    hierarchy it was taken from**, what it excludes, and what the run could not reach. **They propose
    a list; they decide nothing.**
-2. **The owner rules on that list** — approves it, redraws the boundaries, or rejects it — with the
+2. **A consolidation run**, `briefs/TEMPLATE-area-consolidate.md`, once. The framing runs report
+   faithfully, which means they report application domains, session formats, audience labels and
+   vendors' product names too — because those are what venues route submissions by. This run gives
+   every reported category one verdict, merges the same area reported under different names, and
+   picks one level of resolution. **It may reject a category for not being an area. It may never
+   reject one for being unimportant** — that is the owner's, and every rejection and merge is listed
+   with its reason so he can reverse either.
+
+   **It needs the owner's definition of an area before it can run**, because every rejection it
+   makes is an application of that rule. The draft is in the brief and is marked as mine.
+3. **The owner rules on that list** — approves it, redraws the boundaries, or rejects it — with the
    evidence for each boundary in front of him, and the two runs' disagreements beside it. **The
    reasons are recorded with the list**, because a later cycle has to be able to ask whether a
    boundary still makes sense.
-3. **Somebody turns the approved categories into each scout's `<SCOPE>` and `<EXCLUDED>`**, and
+4. **Somebody turns the approved categories into each scout's `<SCOPE>` and `<EXCLUDED>`**, and
    **that somebody is the owner**, in the same sitting as the approval. A framing run reports what
    work is *filed* in a category; a scout needs the *subjects* it is responsible for. Whoever
    converts one into the other is choosing what the scouts look for, so it is not a clerical step

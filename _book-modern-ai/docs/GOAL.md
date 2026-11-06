@@ -268,6 +268,7 @@ or roadmap built for another purpose, so it carries no authority it did not earn
 | Who | Does what |
 |---|---|
 | **Two framing runs** (`briefs/TEMPLATE-area-frame.md`) | Each reports the categories the field currently files its work under, each with a fetched source, the level of the source's own hierarchy it was taken from, its exclusions, and what the run could not reach. **Two runs, so a division that is an artefact of whichever sources one run opened shows up as a disagreement. They propose; they do not decide** |
+| **A consolidation run** (`briefs/TEMPLATE-area-consolidate.md`) | Turns those records into one candidate list: every category gets a verdict, duplicates are merged, one level of resolution is picked. **It may reject a category for not being an area; never for being unimportant.** Every rejection and merge is listed with its reason |
 | **The owner** | Approves, redraws or rejects the proposed list, **with the evidence for each boundary in front of him**, and the reasons are recorded with it |
 | **One scout per approved area** (`briefs/TEMPLATE-area-research.md`) | The subjects inside it |
 

@@ -286,10 +286,6 @@ a level deeper on several sources — **so these two differ in resolution, not i
 | 1 | Visualization or interpretation of learned representations | academic | cd |
 | 1 | Voice | both | c |
 | 1 | Voice & Realtime AI | applied | d |
-| — | Blocked pages, and the search run for another route to each | both | d |
-| — | Level choices that kept names out of the list | ? | d |
-| — | Project files visible in this run's context | academic | d |
-| — | Sources considered and rejected | ? | d |
 
 ## Where each category's full record is
 
