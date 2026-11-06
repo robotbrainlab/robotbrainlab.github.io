@@ -5,7 +5,8 @@
 file wins.
 
 **Status: proposal.** Markers as elsewhere: **[STATED]** the owner's words · **[AGREED]** accepted
-by both · **[I RECOMMEND]** my proposal, not a decision · **[OPEN]** undecided.
+by both · **[I RECOMMEND]** my proposal, not a decision · **[OPEN]** undecided · **[DEFAULTED]**
+mine, acted on because the decision was waiting (`GOAL.md` §0, `PROCESS.md` §2.1).
 
 ---
 

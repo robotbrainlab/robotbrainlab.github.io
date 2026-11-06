@@ -71,8 +71,10 @@ made because I have previously presented my own recommendations as settled decis
 | **[AGREED]** | Proposed by one of us and explicitly accepted by the other |
 | **[I RECOMMEND]** | My proposal. **Not a decision.** The owner has not ruled on it |
 | **[OPEN]** | A decision that has to be made and has not been |
+| **[DEFAULTED]** | My recommendation, **acted on because the decision was waiting and the wait elapsed** (`PROCESS.md` §2.1). Carries the date and what was done under it. **Reversible on request**, and it is not an agreement |
 
-**Nothing in this document is a decision unless it is marked [STATED] or [AGREED].** An
+**Nothing in this document is a decision unless it is marked [STATED] or [AGREED].** A
+**[DEFAULTED]** item is mine, acted on to keep the work moving, and the owner has not ruled on it. An
 [I RECOMMEND] item may be wrong, and several of my recommendations in this project already were.
 
 [↑ Back to Table of Contents](#table-of-contents)

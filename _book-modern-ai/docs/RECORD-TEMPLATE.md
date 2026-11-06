@@ -15,6 +15,9 @@ question:       the chapter's durable question, one sentence
 sources:        named, with what was read of each
 non-scope:      what this chapter does NOT cover, so review has an edge
 claims:         the CLAIMS.tsv ids this chapter rests on
+owner-verifies: at most three of those ids — the ones this chapter's argument most
+                turns on. The owner verifies these himself and may swap any of
+                them; the agent takes the rest (PROCESS.md 5.3)
 begun:
 written:
 reviewed:
@@ -46,6 +49,8 @@ sha256:
       written — say how many
 - [ ] **Every claim has a `CLAIMS.tsv` row**, with its source and strength, and **none is stated
       above its recorded strength**
+- [ ] **`owner-verifies` names at most three ids**, and each was verified by the owner rather than
+      by the agent — say which, or say he swapped one and for what
 - [ ] **Every absolute tested** against a counter-example **in this chapter**, and against any
       `Do not` row in `LEDGER-TAUGHT.md` that bears on it. **Not against the whole book** — that
       obligation grows with the book while being charged to one chapter, which is how it comes to be

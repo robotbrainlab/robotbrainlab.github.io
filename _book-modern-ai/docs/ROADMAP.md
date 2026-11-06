@@ -3,6 +3,12 @@
 Eleven steps, from planning to a written book. **This file is the session's starting point:** read
 it first, act on the current step, then update it.
 
+**Five approval points per cycle** — areas, subjects, shape, plan, structural changes — and all five
+stay for the first cycle. **[AGREED 2026-11-06]** They are reviewed after cycle 1 and not before,
+because nobody has run one of these cycles yet and cutting a gate now would be guessing at which
+approvals matter. **If a decision waits more than seven days I act on my recommendation and mark it
+`[DEFAULTED]`** (`PROCESS.md` §2.1) — four things never default, and that section lists them.
+
 ## Current position
 
 **Step 4 is next. A framing run proposes the areas; the owner rules on them.**
@@ -14,7 +20,7 @@ it first, act on the current step, then update it.
 | 3 | Write the research brief | Claude | A brief with a capped output, a counted budget and a stopping rule with a fixed point | **Written** — `briefs/TEMPLATE-area-research.md`. **That it terminates is designed, not demonstrated**: no run has exercised it, so step 5's first area is also the test of the brief |
 | 4 | **Establish the research areas** | Claude proposes · **Owner rules** | A candidate list from a framing run, each boundary with its source — then approved, redrawn or rejected, with the reasons recorded | **Next** |
 | 5 | Run the research | Claude | One file per area in `../research/` | Not started |
-| 6 | Select the subjects | **Owner** | The subjects that get chapters, and the rejections with reasons | Not started |
+| 6 | Select the subjects | Claude sorts · **Owner rules** | What passed the three tests, and every rejection with the test it failed and why. He rules on both | Not started |
 | 7 | Decide the book's shape | **Owner** | The four open questions that need the subjects, plus the one that does not have to wait but closes here | Not started |
 | 8 | Write the table of contents | **Owner approves** | `PLAN.md` | Not started |
 | 9 | Write the acceptance questions | Claude | `ACCEPTANCE.md`, filled | Not started |

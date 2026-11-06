@@ -68,7 +68,7 @@ something **buildable**.
 | Step | What happens | Who approves |
 |---|---|---|
 | 1 | The research returns subject records, one file per area | — |
-| 2 | Each subject is scored against the three tests. Rejections are recorded above with reasons | **Owner** |
+| 2 | **Claude scores every subject against the three tests and presents what passed plus every rejection, with the test it failed and the record's own words.** The owner rules on both, and may overturn any rejection without reading the unfiltered records (`PROCESS.md` §5) | **Owner** |
 | 3 | The surviving subjects are grouped by the question each answers. **New questions are proposed here, and a new question is a structural change** | **Owner** |
 | 4 | Questions become chapters, in an order. Concept ownership is assigned in `OWNERSHIP.tsv` | **Owner** |
 | 5 | Acceptance questions are written for each chapter, **before any chapter is drafted** | — |

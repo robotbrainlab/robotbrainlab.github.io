@@ -20,7 +20,7 @@ Then read only what that step needs:
 
 | Read | For |
 |---|---|
-| `docs/GOAL.md` | What the book is for, and why. **Every statement is marked** as the owner's words, agreed, my recommendation, or open. Nothing is a decision unless it says so. §11 holds the eleven classes of mistake already made |
+| `docs/GOAL.md` | What the book is for, and why. **Every statement is marked** as the owner's words, agreed, my recommendation, open, or **defaulted** — mine, acted on because the decision was waiting. Nothing is a decision unless it says so. §11 holds the eleven classes of mistake already made |
 | `docs/GUIDE.md` | What the book **is**: scope, voice, chapter anatomy, labs, length, conventions |
 | `docs/PROCESS.md` | How it gets built: the cycle, the chapter loop, the four passes, the agents, the brief schema |
 | `docs/GATES.md` | What each gate reads, fails on and prints — and the policy for a claim's review date |
@@ -82,6 +82,9 @@ statement of it.
   (`docs/GOAL.md` §5.3).
 - **Page estimates never decide scope** (`docs/GUIDE.md` §9).
 - **Nothing is drafted until `docs/PLAN.md` is approved** (`docs/ROADMAP.md`, step 8).
+- **A decision waiting more than seven days is acted on and marked `[DEFAULTED]`** — but **never
+  push, never spend money, never discard finished work, and never override something the owner
+  reserved** (`docs/PROCESS.md` §2.1).
 - **One chapter at a time. Never a part at a time** (`docs/PROCESS.md` §2).
 - **The repository is public.** Scan for secrets before every commit. **Push only to the
   `github-robotbrainlab` remote**, which is the `robotbrainlab` account; never as the

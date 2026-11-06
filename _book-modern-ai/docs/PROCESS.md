@@ -6,7 +6,8 @@ that a disagreement about method cannot quietly change the goal.
 
 **Status: proposal.** The owner approved *writing this down*. He has not approved its contents.
 Markers are the same as `GOAL.md`: **[STATED]** the owner's words · **[AGREED]** accepted by both ·
-**[I RECOMMEND]** my proposal, not a decision · **[OPEN]** undecided.
+**[I RECOMMEND]** my proposal, not a decision · **[OPEN]** undecided · **[DEFAULTED]** mine, acted
+on because the decision was waiting (§2.1).
 
 ---
 
@@ -63,6 +64,35 @@ occasion, because a story invites the reply that it will not happen here.
 | **The book ships its own lab data** (`GUIDE.md` §6) | An expected result that depends on the reader's own files holds for nobody, so the lab cannot be checked by anyone |
 | **Labs isolated: own folder, no credential files, keys from the environment** | The repository is public |
 | **Claude writes. The owner reads and works through everything** | The owner's decision. It is settled: do not propose that he writes it |
+
+### 2.1 What happens when a decision is waiting
+
+**[AGREED 2026-11-06]** Every step after 4 gates on the owner's approval, and the project audit named
+the likeliest death as **steps 4 to 11 never closing** — not the machinery failing. So the work does
+not stop when he is busy.
+
+**After seven days with a decision waiting, I act on my recommendation.** The decision is recorded
+**[DEFAULTED]** with its date and what was done under it (`GOAL.md` §0). It is **not** an agreement,
+it is **reversible on request**, and the record names everything built on it so a reversal knows
+what it touches.
+
+**Four things never default, whatever the wait.** Each is either hard to reverse or not mine to do:
+
+| Never defaults | Why |
+|---|---|
+| **Pushing anything to the repository** | It is public, and publishing cannot be taken back |
+| **Spending money** | A lab may cost a few pounds (`GUIDE.md` §6). Spending the owner's money unasked is not a default, it is a liberty |
+| **A `RECARVE`, or anything that discards completed work** | Expensive and hard to undo. §5.2 says no mechanism makes it cheap |
+| **Anything the owner has reserved** in writing | His reservation outranks this rule |
+
+**Seven days is a starting figure, not a measurement.** A twelve-week cycle can absorb a week's
+wait; whether it can absorb more is unknown. If a defaulted decision is reversed more than once, the
+wait is too short and this number is what changes.
+
+**The honest cost.** A defaulted decision is one he did not make, in a project whose markers exist
+because I have made decisions that were his. **This rule is a licence to repeat that failure on
+purpose, bounded by a clock.** It is here because a project that stalls indefinitely teaches him
+nothing, and a reversible wrong turn is cheaper than a stop.
 
 ---
 
@@ -198,7 +228,7 @@ EXPIRE → RESEARCH → CONFIRM → SELECT → PLAN → WRITE → VERIFY → CLO
 | **Expire** | Every claim past its `review_by` is re-verified and becomes `verified`, `contested` or `superseded`. **A superseded claim names its dependent chapters, and only those reopen.** `tools/verify-expiry.py` must be clean before the next stage begins. **Who re-verifies depends on the claim — §5.3** | Owner, for load-bearing claims |
 | **Research** | One scout per area, fixed brief schema, delegation depth 0. Output: candidate **subjects**, each a complete unit, plus claims with sources | — |
 | **Confirm** | Every scout claim becomes a `CLAIMS.tsv` row (§5.1). **Then `briefs/claim-verifier.md` runs on each claim whose `maturity_basis` is `provisional` and which a candidate chapter would rest on** — because a chapter may not rest on an unestablished maturity, and nothing else in the cycle discharges that | — |
-| **Select** | Subjects filtered by the three-part test (`GOAL.md` §10): a mechanism worth understanding · live research · something buildable. **All three for a chapter**; a subject failing the first or third that a practitioner is expected to know gets a `SHORT-ENTRY`. **Rejections recorded with reasons** | **Owner** |
+| **Select** | **I sort first, he rules.** Every subject is scored against the three tests (`GOAL.md` §10) and he receives **what passed, and every rejection with the test it failed and the record's own words for why** — not forty raw records of thirty-one fields each. **Tests 2 and 3 are mechanical**: the research reports `LIVE RESEARCH` and `BUILDABLE` directly. **Test 1 is judgement**, so my reading of it is stated with the quote it rests on, and he can overturn any rejection without reading the rest | **Owner** |
 | **Plan** | Subjects become chapters. Ownership assigned. Structure chosen *now*, from the subjects that exist — never before (`GOAL.md` §5.3). Acceptance questions written **before** drafting | **Owner** |
 | **Write** | One chapter. Six steps, §6 | — |
 | **Verify** | Four passes (§7). **Pass 3 re-runs the chapter's lab, so a lab that costs money costs it again here** — `briefs/pass-3-lab.md` carries a spend limit and takes the chapter's smaller run where one exists | — |
@@ -319,14 +349,18 @@ engineer, almost word for word.** It was the project's own target skill, delegat
 
 | Claim | Verified by | Why |
 |---|---|---|
-| **Load-bearing** — a chapter listed in `dependents` would teach something different if it fell | **The owner** | Reading a well-argued verdict about a claim is not the same as reaching one. This is the activity §1.2 names, and it is the reason the book exists |
-| **Everything else**, and every `volatile` row at EXPIRE | `briefs/claim-verifier.md` | A version number or a price is a single fetch and teaches nothing. Spending the owner's attention there buys nothing |
+| **At most three per chapter** — the claims the chapter's argument most turns on, **named in the record** | **The owner** | Reading a well-argued verdict about a claim is not the same as reaching one. This is the activity §1.2 names, and it is the reason the book exists |
+| **Every other load-bearing claim**, and every `volatile` row at EXPIRE | `briefs/claim-verifier.md` | The brief budgets ten fetches and four searches per claim. Five claims a chapter is an evening before he has read anything new, and the third claim teaches much less than the first |
 | **Any claim the owner asks it to** | `briefs/claim-verifier.md` | A second opinion he can check against his own is useful; a substitute for his own is not |
 
-**This does not touch `PROCESS.md` §2's settled rule that Claude writes and the owner reads.
-Verifying is not writing.** The brief stays exactly as it is, because the owner uses it too: it is
-the written-down method for the job, and following it is how the job is learned rather than
-improvised.
+**The three are named in the record, and he may swap any of them.** The writer picks the three a
+chapter would teach something different without; if he wants a different one, he says so and the
+agent takes the one he dropped. **Three is a cap, not a quota** — a chapter resting on one claim has
+one.
+
+**This does not touch §2's settled rule that Claude writes and the owner reads. Verifying is not
+writing.** The brief stays exactly as it is, because the owner uses it too: it is the written-down
+method for the job, and following it is how the job is learned rather than improvised.
 
 ---
 
