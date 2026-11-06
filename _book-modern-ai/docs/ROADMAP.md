@@ -62,7 +62,7 @@ summary of a rule is a second statement of it, and two statements drift.
 | Which areas do we research? | **4** | No |
 | Breadth, or depth in one area? | 7 | **Yes** |
 | How deep does the mathematics go? | 7 | **Yes** |
-| What structure, and does a four-part progression fit? | 7 | **Yes** |
+| What structure, and whether the book has parts at all | 7 | **Yes** |
 | Which area goes deep, if any? | 7 | **Yes** |
 | Reference by chapter, or by concept? | 7 | No — decidable now, and cheap to decide early |
 | Is the book for the owner alone? | 8 | No |

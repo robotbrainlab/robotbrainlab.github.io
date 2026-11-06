@@ -26,7 +26,7 @@
 - [5. The expected learning experience](#5-the-expected-learning-experience)
   - [5.1 The standard](#51-the-standard)
   - [5.2 The language and the voice](#52-the-language-and-the-voice)
-  - [5.3 Structure — not inherited, and not yet decided](#53-structure--not-inherited-and-not-yet-decided)
+  - [5.3 Structure — not yet decided](#53-structure--not-yet-decided)
   - [5.4 Tracking what changes](#54-tracking-what-changes)
 - [6. Why a research-oriented engineer, and not one of the alternatives](#6-why-a-research-oriented-engineer-and-not-one-of-the-alternatives)
 - [7. The role of practical work](#7-the-role-of-practical-work)
@@ -347,9 +347,10 @@ limit actually sits. *The engineering* is what practitioners build to work aroun
 engineering choice is unintelligible without the dispute, because it looks arbitrary until you know
 what is contested. One argument, three distances.
 
-**A worked example belongs here and is not written yet**, deliberately: the one I had used a
-subject the research has not yet established is in scope, and stated an unsourced universal about
-current practice while doing it. The first chapter supplies the example.
+**A worked example belongs here and is deliberately not written yet.** An example needs a real
+mechanism with a real dispute attached. Writing one now would mean picking a subject before the
+research has established that it is in scope, and saying something about current practice with no
+source behind it. **The first chapter supplies the example**, and it will be a real one.
 
 **[I RECOMMEND]** that a chapter is therefore organised around **a mechanism or a question**, with
 science, research and engineering braided into answering it.
@@ -414,48 +415,42 @@ difficulty, or a summary that trades depth for ease.
 
 It is stated there as rules a writer follows, with nothing to consult and nothing to imitate.
 
-### 5.3 Structure — not inherited, and not yet decided
+### 5.3 Structure — not yet decided
 
-**[STATED]** On 2026-11-06 the owner removed structure from what carries over: the new book has
-**no connection to the previous one in structure or progression**, and in the same message, on the
-four parts: *"I am not quite sure."*
+**[STATED]** The book has **no connection to any earlier work in structure or progression**
+(§2.4). Whatever shape it takes is chosen here, on its merits, for this book.
 
-**[I RECOMMEND]** treating the four-part shape as **one candidate among several, judged on merit**.
-It is a good candidate — it worked, and the reason it worked is set out below — and it was designed
-for a book about one system, which this is not.
+**[I RECOMMEND]** one sequencing point that matters more than the choice itself: **structure
+follows the subjects, not the reverse.** The parts of a book are a claim about how its material
+divides, and the material is not known until the research has run. Choosing the parts now would
+mean choosing them from my assumptions about what the research will find — which is §11 class C.
+**So this section stays open until the subjects exist.**
 
-**[I RECOMMEND]** one sequencing point that I think matters more than the choice itself:
-**structure follows the subjects, not the reverse.** The parts of a book are a claim about how its
-material divides, and the material is not known until the research has run. Choosing the parts now
-would mean choosing them from my assumptions about what the research will find — which is the error
-of §11 class C, and it is the error that produced the nine research areas whose carving the owner
-twice questioned. **So this section should stay open until the subjects exist.**
+#### What a progression buys, and what a part is for
 
-#### What a four-part progression buys, if we choose one
+**[I RECOMMEND]** recording what any grouping has to earn, separately from the choice of one,
+because this is what the candidates below are weighed against:
 
-**[I RECOMMEND]** recording the *reason* a four-stage shape works, separately from any decision to
-use one, because the reason is what the next section has to weigh:
-
-> Four parts can be a progression in what the reader can **do**: comprehend, then operate, then
-> construct, then judge. Each stage is useless before the one below it, and each is usable on its
-> own.
+> **A part is worth having when it is a progression in what the reader can *do*** — comprehend,
+> then operate, then construct, then judge. Each stage is useless before the one below it, and each
+> is usable on its own. A grouping that is only a filing system for related chapters earns nothing:
+> a reading order would do the same work for free.
 
 And one structural idea worth keeping whatever shape is chosen: **cross-cutting properties belong
 last, as threads.** Security, speed, cost and failure are not things a reader uses — they are
 questions asked of a finished system. Teaching them early teaches them as features.
 
-#### The open question: what structure does *this* book need
+#### The candidates
 
-**[OPEN]** A four-part progression organises **one system** — one thing to understand, use,
-build and judge. This book covers many areas, has no end, and must be
-self-contained per topic. Five candidates, with what each costs:
+**[OPEN]** The book covers many areas, has no end, and must be self-contained per topic. Five
+candidates, with what each costs:
 
 | Candidate | What it means | What it costs |
 |---|---|---|
-| **A · Four parts over the whole book** | Understand every area, then Use them all, then Apply, then Judge | "Understand all areas" is a very long wait before anything can be built, and Part I becomes most of the book |
-| **B · Four phases inside each area** | Each area is a small complete book: understand → use → apply → judge | Repetition of the pattern; cross-area material has no home |
+| **A · One progression over the whole book** | Comprehend every area, then operate them all, then construct, then judge | "Comprehend all areas" is a very long wait before anything can be built, and the first part becomes most of the book |
+| **B · The progression inside each area** | Each area is a small complete book: comprehend → operate → construct → judge | The pattern repeats; cross-area material has no home |
 | **C · Shared foundations, then one part per area** | A foundations part first, then an area per part, each with its own progression | Needs the foundations to be genuinely shared, or it becomes a dumping ground |
-| **D · Flat by subject, with reading maps** | No parts. Chapters are subjects; maps give several orders through them | Loses the progression that makes the material learnable — the thing §5.2 says does the work |
+| **D · Flat by subject, with reading maps** | No parts. Chapters are subjects; maps give several orders through them | Loses the progression that makes the material learnable — the thing §5.1's standard rests on |
 | **E · Parts by the five dimensions** | Part per dimension: why it matters, the science, the research, the engineering, reproducing | **Rejected.** The owner's instruction is that the dimensions must *not* become sections (§4.1) |
 
 **[I RECOMMEND]** **C combined with B** — a shared foundations part, then an area per part, each
@@ -468,16 +463,15 @@ marked rather than hidden.**
    adopt if the research does find one.
 2. **An area has to be finishable on its own.** This one stands, because it rests on how the book
    gets produced rather than on research: with agent help, text is written far faster than it can be
-   read and worked through (§12.1). An area that is a complete
-   unit is something the owner can work through and finish; an area smeared across four book-wide
-   parts is not.
+   read and worked through (§12.1). An area that is a complete unit is something the owner can work
+   through and finish; an area smeared across the whole book is not.
 
-**So the honest state is:** B rests on a sound argument, C's justification is gone, and the
-combination is a guess until the research speaks.
+**So the honest state is:** B rests on a sound argument, C rests on nothing yet, and the combination
+is a guess until the research speaks.
 
 **[I RECOMMEND]** that this stays **[OPEN]** until the subjects are known, for the sequencing
-reason at the head of this section. A structure chosen now is a structure chosen from my
-assumptions about the research.
+reason at the head of this section. **A structure chosen now is a structure chosen from my
+assumptions about the research.**
 
 ### 5.4 Tracking what changes
 
@@ -495,8 +489,8 @@ something revised — which is the central hazard of a book that is revised rath
 
 **[STATED]** Not exclusively academic research, and not conventional software engineering.
 
-**[I RECOMMEND]** this account of why the middle position is the right target, from the evidence
-gathered in this project:
+**[I RECOMMEND]** this account of why the middle position is the right target. **It argues from the
+owner's stated objective in §1.1, not from evidence about the job market:**
 
 | Position | What it tests | Why it is not the target |
 |---|---|---|
@@ -567,15 +561,17 @@ is:
 **[I RECOMMEND]** three design consequences, which I believe are the most serious unsolved problems
 in this project:
 
-1. **The machinery is built for a book that gets finished.** A corrected claim in a lab chapter
-   lives in about six places, four of them prose, because a lab's programs narrate their own
-   output; every applied fix is a book-wide sweep counted before and after; and records are hashed
-   last, so any edit makes one stale. That cost is correct once per chapter for a book with an end. A book revised every twelve
-   weeks across many areas pays it on every revision, forever. **The revision cost, not the writing
-   cost, will decide whether this book survives its third cycle.**
-2. **The acceptance-question rule does not transfer to contested material.** It works when a
-   question has a right answer that a chapter must contain. For a disputed subject the honest answer is sometimes "this is disputed, and here is the state of the
-   dispute" — a real answer that the current rule cannot accept.
+1. **Quality machinery costs per revision, not per chapter.** Checking a chapter properly is
+   expensive: a corrected claim in a lab chapter lives in about six places, four of them prose,
+   because a lab's programs narrate their own output; every applied fix is a book-wide sweep counted
+   before and after; and a record is hashed last, so any edit makes one stale. **That price is paid
+   once in a book with an end.** A book revised every twelve weeks across many areas pays it every
+   cycle, forever. **The revision cost, not the writing cost, will decide whether this book survives
+   its third cycle.**
+2. **An acceptance question needs a right answer, and contested material has none.** The rule works
+   when a question has an answer a chapter must contain. For a disputed subject the honest answer is
+   sometimes *"this is disputed, and here is the state of the dispute"* — a real answer that a rule
+   demanding *the* answer cannot accept.
 3. **"Nothing is drafted until the table of contents is approved" collides with a table of contents
    that changes every cycle.** Fixed concept ownership is what makes the taught-ledger work. If
    research reshuffles subjects each cycle, ownership moves, and the ledger that prevents
@@ -731,10 +727,11 @@ sentence the output should be able to complete, and check the brief asks for tha
 **Instances.** (1) Pre-fixed the research's partition as "modern practice outside language models".
 The owner: *"that is a bad direction. Let the agent or an llm do the research in every direction
 amd also let it say only where the dominant modern practice is. Why we decide by ourselves."*
-(2) Proposed moving security, speed, cost and failure out of Part IV when the book's own decision
-record had already considered and rejected exactly that. (3) Assumed the new book depends on the
-first. The owner: *"Did I ever say, we will depend on the current book?"* (4) Repeatedly proposed
-carrying Depth-Track material into the new book against a stated scope rule.
+(2) Proposed moving a set of cross-cutting topics out of the part that held them, when a decision
+record already in front of me had considered and rejected exactly that. (3) Assumed this book would
+build on another piece of work, when nothing had said it would — the owner had to ask whether he had
+ever said so. (4) Repeatedly proposed carrying material into the book that a stated scope rule
+excluded, naming it in vocabulary the owner had not been given (which is also class F below).
 
 **Why it is wrong.** A decision presented as an analysis removes the owner's choice without telling
 him a choice was made.
@@ -760,8 +757,8 @@ conclusion I like, report the contradiction in the same sentence as the conclusi
 
 ### Class E — Rebuilding from the last correction instead of from the evidence
 
-**Instance.** Five different answers about the new book's scope within an hour, each constructed
-from the owner's most recent correction rather than from the documents.
+**Instance.** Five different answers about this book's scope within an hour, each constructed from
+the owner's most recent correction rather than from the documents.
 
 **Why it is wrong.** It looks like responsiveness and is the opposite: it means no position was
 ever held for a reason.
@@ -885,8 +882,9 @@ project. A mechanism does.**
    plausibly much faster than reading it, working its labs and absorbing it — **but nobody has
    measured either rate here, so this is a risk to watch rather than a finding.** The first cycle is
    the measurement: record how long a chapter took to produce and how long it took the owner to work
-   through, and the ratio either justifies this concern or retires it. The new book therefore needs a **reading order and a priority**, not only a structure —
-   otherwise the first cycle produces more than a cycle can absorb.
+   through, and the ratio either justifies this concern or retires it. The book therefore needs a
+   **reading order and a priority**, not only a structure — otherwise the first cycle produces more
+   than a cycle can absorb.
 2. **The mirror of the taught-ledger is missing.** There is a record of what the book taught.
    There is no record of what has been run. Given that the owner's practice is deliberately outside
    the book, this may belong outside the book too — but something has to hold it, or no cycle can
@@ -896,13 +894,14 @@ project. A mechanism does.**
    claims teaches the current answer and hides the lesson about how answers change — which is the
    specific lesson a research engineer needs.
 4. **The research's own findings need a durable home separate from the book.** A research round
-   produces checkable claims with sources. If those live only in a conversation, the next cycle
-   re-derives them — and a round's output has already been lost that way once. If they live in the book, the book cannot
-   distinguish a claim it verified from a claim it inherited.
+   produces checkable claims with sources. **If those live only in a conversation, the next cycle
+   re-derives them** — a conversation is the one place a result cannot be re-read or re-checked. If
+   instead they live in the book, the book cannot distinguish a claim it verified from a claim it
+   was handed. `CLAIMS.tsv` is their home, and `research/` keeps the run each row came from.
 5. **The shorthand ledger has a hard job here.** The usual gap is between a formal name and the
    word practitioners actually say. Where a subject is worked on by more than one community, the same technique can carry a
    different name in each, and a reader who knows one cannot find the others. **Whether that is
-   common is for the research to report** — the ledger's three-name rule exists so the case is
+   common is for the research to report** — the ledger's multi-name rule exists so the case is
    handled when it appears, not because it is claimed to be typical.
 6. **Reuse by copying, never by sharing.** Where a script or mechanism is taken from elsewhere, it
    is copied into this project, so that improving this book cannot break anything else.
@@ -916,7 +915,7 @@ project. A mechanism does.**
 - **Methodology.** The development framework, agent workflows, passes, gates, quality standards and
   documentation architecture are a separate proposal, by the owner's instruction.
 - **The table of contents.** No subjects are chosen here, and none may be chosen until the research
-  is re-run under a brief agreed after this document.
+  has run and the owner has selected from what it returned (`ROADMAP.md` steps 5 and 6).
 - **Any decision marked `[OPEN]`.** The count is not stated here on purpose: a hand-maintained
   count drifts, and this document has already carried a wrong one. **Grep for `[OPEN]`.** The ones
   that block the rest are in §10 — the book's shape, the mathematics boundary, and which area goes

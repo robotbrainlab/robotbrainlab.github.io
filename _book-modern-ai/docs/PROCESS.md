@@ -66,17 +66,18 @@ occasion, because a story invites the reply that it will not happen here.
 
 ---
 
-## 3. What must change, and why
+## 3. The four properties the machinery has to handle
 
-**[I RECOMMEND]** Four structural differences between a book that gets finished and one that does
-not. Every new mechanism in §4 answers one of them.
+**[I RECOMMEND]** Four properties of this book that an ordinary book does not have. **Machinery
+built for a book that gets finished fails on each of them**, so each of the mechanisms in §4
+answers one.
 
-| # | Difference | Consequence |
+| # | Property | Consequence |
 |---|---|---|
-| 1 | **It is never finished** | Revision, not writing, becomes the dominant cost. The inherited machinery pays full price on every revision, forever |
+| 1 | **It is never finished** | Revision, not writing, becomes the dominant cost. A per-chapter cost that is paid once in a finished book is paid on every revision here, forever |
 | 2 | **The subjects change each cycle** | Concept ownership cannot be fixed before drafting, which is what makes the taught-ledger work |
 | 3 | **Some of the material will be contested** | "The chapter contains the answer" is then an impossible standard, because no settled answer exists to contain. How much is contested is for the research to say |
-| 4 | **The content is dated** | A claim has a shelf life, and nothing in the inherited machinery carries it |
+| 4 | **The content is dated** | A claim has a shelf life, so something has to carry it. Nothing in a chapter does |
 
 ---
 
@@ -93,7 +94,7 @@ Eleven columns. The ones worth naming here, because the rest of this file refers
 `maturity` (is the science settled), `class` (how long it will hold), `review_by` (when to look
 again), `state` (where it stands in this project) and `dependents` (the chapters that rest on it).
 
-What it buys, and this is the answer to difference 1:
+What it buys, and this is the answer to property 1:
 
 - **Revision becomes cheap.** You re-verify *claims*, not chapters. An overturned claim names
   exactly which chapters reopen. Today, finding that costs a full rescan.
@@ -102,7 +103,7 @@ What it buys, and this is the answer to difference 1:
   and **pass 2 reads the prose**, because whether a sentence overstates its source is judgement and
   no gate can do it (`GATES.md` gate 12).
 - **The cadence stops being arbitrary.** The book reports what is past its `review_by`. There is no
-  twelve-week full rescan; there is a rescan of what expired. This is the answer to difference 4.
+  twelve-week full rescan; there is a rescan of what expired. This is the answer to property 4.
 - **Superseded claims are kept, never deleted.** The honest record is that something *was*
   believed. It is also the lesson a research engineer most needs.
 
@@ -114,7 +115,7 @@ to do meanwhile. What belongs in this file is the consequence for acceptance.
 
 The acceptance rule changes from *"the chapter contains the answer"* to **"the chapter
 contains the answer, or the state of the dispute, and says which."** This is the minimum change
-that lets an acceptance standard survive contact with disputed material. It answers difference 3.
+that lets an acceptance standard survive contact with disputed material. It answers property 3.
 
 ### 4.3 The reproduction lab has a decision rule, not an expected result
 
@@ -129,7 +130,7 @@ fixed in advance is not a test.**
 
 **[I RECOMMEND]** `OWNERSHIP.tsv`: concept → owning chapter → date assigned → previous owner if
 moved. A gate fails on two chapters claiming one concept, or on a chapter teaching a concept it
-does not own. This answers difference 2: the subject list can change each cycle without the
+does not own. This answers property 2: the subject list can change each cycle without the
 taught-ledger breaking.
 
 **Note the distinction, because it is easy to collapse** (`GOAL.md` §2.4): duplication between this
@@ -225,16 +226,16 @@ that does not name a claim does not depend on it, whatever the plan intended.
 
 ### 5.2 What happens when a cycle comes back a different shape
 
+A cycle can return more subjects than expected, fewer, or ones that do not fit where the last cycle
+put them. **The structure has to absorb that without being rebuilt**, and what makes that possible
+is which layer the structure rests on.
 
-The owner asked this on 2026-11-06 and the framework had no answer. This section is the answer.
+**Subjects are the fast layer.** §5 above turns subjects into chapters, so a structure resting on
+subjects is threatened by every cycle: each new subject is a candidate chapter and each dead one
+leaves a hole. `GOAL.md` §8 gives the way out — *"a chapter is a question with a current answer
+attached, where the question outlives every answer it will carry."*
 
-**First, an error in the earlier design.** `GOAL.md` §8 says *"a chapter is a question with a
-current answer attached, where the question outlives every answer it will carry."* Then §5 above
-built the structure out of **subjects**. Subjects are the fast layer. A structure resting on them is
-threatened by every cycle.
-
-**[I RECOMMEND] the correction: the book's spine is a set of durable questions. Subjects are the
-current answers.**
+**[I RECOMMEND] the book's spine is a set of durable questions. Subjects are the current answers.**
 
 | Durable question | Today's answer, which will change |
 |---|---|
@@ -343,13 +344,15 @@ dated, reasoned, and not earlier than the review it follows.
 
 ## 7. The verification passes
 
-**[I RECOMMEND]** Four. Two are inherited; two are new.
+**[I RECOMMEND]** Four, each reading something the others do not. **Passes 2 and 3 exist because
+of §3's properties 3 and 4**: a book carrying contested and dated material needs a reader checking
+claims against their recorded strength, and a reader proving a lab runs from the text alone.
 
 | Pass | Reads | Finds |
 |---|---|---|
 | **1 · Completeness** | Sources and chapter, both in full | Omission · alteration · false claim · self-contradiction · out-of-boundary theory · cross-chapter error |
-| **2 · Adversarial claims** *(new)* | The chapter against `CLAIMS.tsv` | Any claim stated above its recorded source strength |
-| **3 · Lab execution** *(new)* | The chapter text only, in a fresh folder | Anything that does not run; anything that runs and disagrees |
+| **2 · Adversarial claims** | The chapter against `CLAIMS.tsv` | Any claim stated above its recorded source strength |
+| **3 · Lab execution** | The chapter text only, in a fresh folder | Anything that does not run; anything that runs and disagrees |
 | **4 · Fix-verification** | **Only the named changed passages** | Survivals, and errors the fixes introduced |
 
 **Every review brief includes**, because the briefs that work are long and specific:
@@ -400,22 +403,26 @@ chapter" re-reads everything and finds what pass 1 already found.
 prints. This table is the index; that file is the specification. **`GATES.md` also holds the policy
 for setting a claim's review date**, which `tools/verify-expiry.py` reads.
 
-| Gate | Catches | Status |
-|---|---|---|
-| Voice | Any sentence revealing the book's origins | Carried over |
-| Boundary | Theory outside the declared maths line | Carried over |
-| Render | Markdown that renders wrong on the page | Carried over |
-| Arithmetic | Every printed equation, evaluated — chains too | Carried over |
-| Record | Checklist complete, evidenced, fresh, in order | Carried over |
-| Coverage | Plan → chapter: what was promised and is missing | Carried over |
-| Absolutes | Lists every absolute for testing | Carried over |
-| Inputs | Terms used before the book gives them | Carried over |
-| Outline | The PDF outline nests correctly | Carried over |
-| Glossary · cheat sheet | Generated appendices match their source tables | Carried over |
-| Acceptance bank | Each record names the questions it owns | Carried over |
-| **Claims** | Every load-bearing claim in a chapter has a `CLAIMS.tsv` row, and no claim is stated above its recorded strength | **New** |
-| **Ownership** | No concept claimed by two chapters; no chapter teaching one it does not own | **New** |
-| **Expiry** | Lists every claim past its `review_by` | **New** |
+| Gate | Catches |
+|---|---|
+| Voice | Any sentence revealing the book's own making |
+| Boundary | Theory outside the declared maths line |
+| Render | Markdown that renders wrong on the page |
+| Arithmetic | Every printed equation, evaluated — chains too |
+| Record | Checklist complete, evidenced, fresh, in order |
+| Coverage | Plan → chapter: what was promised and is missing |
+| Absolutes | Lists every absolute for testing |
+| Inputs | Terms used before the book gives them |
+| Outline | The PDF outline nests correctly |
+| Glossary · cheat sheet | Generated appendices match their source tables |
+| Acceptance bank | Each record names the questions it owns |
+| Claims | Every load-bearing claim in a chapter has a `CLAIMS.tsv` row, and no claim is stated above its recorded strength |
+| Ownership | No concept claimed by two chapters; no chapter teaching one it does not own |
+| Expiry | Lists every claim past its `review_by` |
+
+**Three cannot be built yet, and `GATES.md` says so in each one's own entry** rather than here: the
+boundary gate waits on the mathematics decision, the inputs gate on vocabulary the research seeds,
+and the outline gate on the build toolchain.
 
 ---
 
@@ -425,16 +432,13 @@ for setting a claim's review date**, which `tools/verify-expiry.py` reads.
 
 ### Per chapter
 
-**`GUIDE.md` §12 owns this list.** `RECORD-TEMPLATE.md` turns it into checkboxes, which is applying
-it rather than restating it. The three this file adds, because they are properties of the process
-rather than of the book:
+**`GUIDE.md` §12 owns this list** and this file does not restate it. `RECORD-TEMPLATE.md` turns it
+into checkboxes, which is applying it rather than copying it. **Three criteria belong here instead**,
+because they are properties of the process rather than of the book:
 
-- All gates pass; every command run; every page looked at
-- Acceptance questions answerable from the chapter, **or** answered by a dispute record that says so
-- `You understand this when …` present
 - **Every load-bearing claim has a `CLAIMS.tsv` row with its source and strength**
-- **Pass 3 ran the lab from the chapter text and it produced a verdict**
 - **Pass 2 clean: no claim stated above its source strength**
+- **Pass 3 ran the lab from the chapter text alone and it produced a verdict**
 
 ### Per cycle
 
@@ -463,7 +467,7 @@ and the finding categories; it does not need the build conventions.
 | `PLAN.md` | A stable spine plus this cycle's subjects, clearly separated | Every cycle; owner approves | Owner |
 | `CLAIMS.tsv` | Every load-bearing claim | Continuously | Machine |
 | `OWNERSHIP.tsv` | Concept → owning chapter | Per cycle | Machine |
-| `LEDGER-TAUGHT.md` · `LEDGER-DEFECTS.md` · `LEDGER-SHORTHAND.md` | Carried over | Continuously | Both |
+| `LEDGER-TAUGHT.md` · `LEDGER-DEFECTS.md` · `LEDGER-SHORTHAND.md` | What the reader has been given · what the gates cannot catch · the field's own words | Continuously | Both |
 | `ROADMAP.md` | Which of the eleven steps we are on, and what is next. **Read first** | Every step | Owner |
 | `GATES.md` | What each gate reads, fails on and prints; and the review-date policy | When a gate changes | Both |
 | `ACCEPTANCE.md` | The questions each chapter must answer, written before any chapter | Per cycle, before drafting | Both |
@@ -503,7 +507,7 @@ marked `[OPEN]` in the file that owns it, and that file is where its options liv
 | The book's shape — breadth against depth | `GOAL.md` §10 |
 | How deep the mathematics goes | `GOAL.md` §10, with the test in `GUIDE.md` §8 |
 | Which area goes deep, if the shape is asymmetric | `GOAL.md` §10 |
-| The structure, and whether a four-part progression fits | `GOAL.md` §5.3. **Must wait for the subjects** |
+| The structure — which of the candidates the book takes | `GOAL.md` §5.3. **Must wait for the subjects** |
 | Reference by chapter, or by concept | `GUIDE.md` §7 |
 | Whether the book is for the owner alone | `GOAL.md` §10 |
 

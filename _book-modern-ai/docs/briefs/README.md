@@ -1,8 +1,9 @@
 # The briefs
 
 One file per agent role. **Fill the placeholders in; do not rewrite the brief.** If a brief needs
-changing, change it here and record what changed and why at the top, so the next run inherits the
-fix instead of re-discovering the problem.
+changing, change the file itself, so the next run inherits the fix instead of re-discovering the
+problem — and **say in the commit what the change fixes.** The history belongs in the history, not
+in a growing block at the top of a brief an agent has to read past.
 
 | Brief | Role | When it runs |
 |---|---|---|

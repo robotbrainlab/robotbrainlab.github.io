@@ -6,7 +6,7 @@ needed, change this file and say in the commit what the change fixes, so the nex
 ## How to fill this in
 
 Replace `<AREA>`, `<SCOPE>`, `<EXCLUDED>`, `<OUTFILE>` and `<CAP>`. Change nothing else. If a
-change seems necessary, change this template and add a row above, so the next run inherits the fix.
+change seems necessary, change this template itself — `README.md` says how it is recorded.
 
 **`<OUTFILE>`** is `../research/YYYY-MM-DD-<area-slug>.md`, relative to `docs/briefs/` — one file
 per area per run, dated so two runs over the same area never collide. The slug is lower-case with

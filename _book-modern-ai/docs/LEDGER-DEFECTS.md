@@ -2,8 +2,10 @@
 
 Stated plainly, because overselling the checks would defeat their purpose.
 
-**An entry is a *class*, not an incident.** It has three parts: what the class is, the instance that
-produced it, and the practice that follows. A list of mistakes is not reusable; a class is.
+**An entry is a *class*, not an incident.** It has two parts: **what the class is, stated as the
+argument for why the defect happens**, and the practice that follows. A list of mistakes is not
+reusable; a class is. Where a class was earned by something that happened here, name the incident
+too — but **an entry that can only be stated as "X happened once" is not yet a class.**
 
 **Add an entry whenever a defect gets past every gate.** That is the only trigger. A defect a gate
 caught does not belong here — it belongs in the gate.
@@ -12,9 +14,9 @@ caught does not belong here — it belongs in the gate.
 worth more than one imported from elsewhere, because an imported entry carries a story nobody in
 this project paid for and invites the reaction *"that will not happen to us."*
 
-**The eight entries below are stated as arguments, not as incidents**, so that each one holds
-because of how writing and reviewing work rather than because of something that once happened. An
-entry that can only be stated as *"X happened once"* is not yet a class.
+**The eight entries below are stated as arguments**, so that each one holds because of how writing
+and reviewing work rather than because of something that once happened. None of them has an
+incident attached, and that is deliberate: this project has not yet produced one.
 
 ---
 

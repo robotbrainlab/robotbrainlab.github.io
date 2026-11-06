@@ -94,8 +94,9 @@ remedy. A program whose output is too wide is fixed **in the program**, by print
 **How it tells them apart:** a captured block carries the marker `<!-- captured -->` immediately
 before it. Writing that marker by hand on a block a program did not produce is a defect no gate can
 catch, and it is `LEDGER-DEFECTS.md`'s own territory.
-**Why:** a chapter once shipped with its review questions run into a single paragraph, and every
-other check passed it. Rendering is not correctness and nothing else looks at it.
+**Why:** **rendering is not correctness, and no other gate looks at it.** Every other check reads
+the Markdown for what it says; none of them asks what the page will show. A list that runs together
+into one paragraph, or a table row short of a cell, is still perfectly valid Markdown.
 
 ## 4 · `tools/verify-arithmetic.py` — every printed equation holds
 
@@ -143,9 +144,9 @@ record can show it was triaged and what was scoped back.
 **Fails on:** a term used in chapter N whose owning chapter is later than N, or which no chapter
 owns.
 **How:** builds the given-terms set from the Key Terms tables in reading order, then scans each
-chapter for field vocabulary not yet in the set. **It reads prose, not only backticked spans** — a
-chapter once used two terms the book had never introduced, and every gate passed it because none of
-them was in code font.
+chapter for field vocabulary not yet in the set. **It reads prose, not only backticked spans**,
+because a term's first appearance is usually a plain word in a sentence. A gate that read only code
+font would pass every undefined term that was never typed as code — which is most of them.
 **Honest limitation:** the field-vocabulary list is hand-maintained in `tools/field-terms.txt`, and
 a term not on it cannot be caught. **It is seeded from the research**: every term appearing in a
 `NAME` field of a subject record, plus every term in a `CLAIMS.tsv` claim, goes in when the plan is
