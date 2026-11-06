@@ -529,13 +529,48 @@ book:
 
 ## 11. Documentation architecture
 
-**[I RECOMMEND]** A small multi-file structure, not one file. The owner's preference was one
-comprehensive file. The reasoning against it: an agent given one very long file spends its
-attention on what it does not need. A fix-verifier needs the changed passages and the finding
-categories; it does not need the build conventions, and reading them crowds out the part that
-matters. **The stronger form of this — that a diluted context is what makes an agent invent
-content — is an unmeasured belief (§2)**, so the argument here rests on relevance instead, which is
-checkable: open any brief and count how much of a single combined file it would have to ignore.
+**[AGREED 2026-11-06] Nineteen prose documents now, and three of them merge into one later. The
+owner's original preference was one comprehensive file, I overrode it, and the override was partly
+wrong.**
+
+**My argument was relevance:** an agent given one very long file spends its attention on what it
+does not need. A fix-verifier needs the changed passages and the finding categories, not the build
+conventions. That part still holds, and it is checkable — open any brief and count how much of a
+combined file it would have to ignore. **The stronger form, that a diluted context is what makes an
+agent invent content, is an unmeasured belief (§2)** and cannot carry a structural decision.
+
+**What a day of evidence showed.** The decisions recorded on 2026-11-06 each took **four to seven
+files to write down.** (**No count is given here**, because writing one down adds a decision and
+makes it wrong — which happened on the first attempt. **Grep for `[AGREED 2026-11-06]`**, the same
+rule `GOAL.md` §13 applies to open questions.) Three independent audits found roughly seventy defects, and the
+large majority were **cross-file disagreements** — this file describing a gate `GATES.md` specified
+differently, `GUIDE.md` citing a marker `GOAL.md` did not carry, two files giving different counts
+of one thing. **That drift is caused by the split**, not by carelessness around it.
+
+**Where it clustered: one seam.** Almost every boundary defect sat between `GUIDE.md` (what the book
+*is*) and this file (how it gets *made*), with `GATES.md` inside the same seam. The acceptance
+criteria, the lab forms, the dispute shape and the gate descriptions each produced a finding because
+that boundary is genuinely blurry.
+
+**The decision.** `GUIDE.md`, `PROCESS.md` and `GATES.md` **merge into one specification**, about
+1,380 lines. The precedence rule between them becomes unnecessary, and so does the one-statement
+rule's hardest case.
+
+**The trigger, because a decision with no trigger means no.** The merge happens **once step 7
+closes** — when the structure, the mathematics boundary, breadth against depth and which area goes
+deep are all settled. Those four are what will move these documents next, and **a merge is a
+drafting event**: today measured that such events introduce defects at a real rate, so doing one
+while the text is still moving weekly is the worst available moment.
+
+**What stays separate, and why each separation does work:**
+
+| Stays separate | Why |
+|---|---|
+| `briefs/*.md` | An agent may not read project files, so a brief is copied out and handed over whole |
+| `CLAIMS.tsv`, `OWNERSHIP.tsv`, `practice/DRILL.tsv` | Machine-read |
+| `GOAL.md` | Separating *why* from *how* is what let the owner reject my step-4 conclusion without touching anything else |
+| `ROADMAP.md`, `PLAN.md` | Change every step and every cycle; the specification changes rarely |
+| The ledgers, `ACCEPTANCE.md`, `RECORD-TEMPLATE.md`, `CHANGELOG.md` | Each is written to or read at a different moment |
 
 | File | Job | Change rate | Audience |
 |---|---|---|---|

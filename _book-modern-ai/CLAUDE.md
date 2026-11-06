@@ -41,6 +41,10 @@ Then read only what that step needs:
 5. **`docs/PROCESS.md`** beats everything else on *how it gets built*.
 6. **`docs/GATES.md`** beats everything else on *what a check does*.
 
+**Rules 4 to 6 disappear when those three files merge** into one specification after step 7
+(`docs/PROCESS.md` §11). Most of the drift three audits found sat exactly on the boundaries this
+ordering exists to arbitrate.
+
 **A rule may be cited from several files; it may be stated in only one.** A second statement is a
 defect while the two still agree, because they will drift. Cite the owning file and section.
 

@@ -3,6 +3,10 @@
 Eleven steps, from planning to a written book. **This file is the session's starting point:** read
 it first, act on the current step, then update it.
 
+**One structural action is pending, with a trigger.** `GUIDE.md`, `PROCESS.md` and `GATES.md` merge
+into one specification **once step 7 closes** — those four decisions are what will move them next,
+and a merge is a drafting event best done when the text has stopped changing (`PROCESS.md` §11).
+
 **Five approval points per cycle** — areas, subjects, shape, plan, structural changes — and all five
 stay for the first cycle. **[AGREED 2026-11-06]** They are reviewed after cycle 1 and not before,
 because nobody has run one of these cycles yet and cutting a gate now would be guessing at which
@@ -16,7 +20,7 @@ approvals matter. **If a decision waits more than seven days I act on my recomme
 | # | Step | Who decides | Deliverable | State |
 |---|---|---|---|---|
 | 1 | Agree the goal | Owner | `GOAL.md` | **Done** |
-| 2 | Agree the method | Owner | `PROCESS.md`, `GUIDE.md`, `GATES.md` | Written. **Contents not yet approved** |
+| 2 | Agree the method | Owner | `PROCESS.md`, `GUIDE.md`, `GATES.md` | **Partly approved.** Eight topics were settled on 2026-11-06 — grep `[AGREED 2026-11-06]` for them. The rest stay marked `[I RECOMMEND]` and are ruled on as they come up in practice |
 | 3 | Write the research brief | Claude | A brief with a capped output, a counted budget and a stopping rule with a fixed point | **Written** — `briefs/TEMPLATE-area-research.md`. **That it terminates is designed, not demonstrated**: no run has exercised it, so step 5's first area is also the test of the brief |
 | 4 | **Establish the research areas** | Claude proposes · **Owner rules** | A candidate list from a framing run, each boundary with its source — then approved, redrawn or rejected, with the reasons recorded | **Next** |
 | 5 | Run the research | Claude | One file per area in `../research/` | Not started |
