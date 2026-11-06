@@ -199,9 +199,30 @@ are a better result than six thin ones.
 **If this area holds more subjects than the cap allows, that is information and not a failure.**
 Name the ones you skipped in `Sampling`, and say why you kept the ones you kept.
 
+**At least one candidate must not come from recent activity.** Look deliberately for a subject in
+this area whose answer has **stopped** moving and which the moving subjects are unintelligible
+without — the thing a reader has to know cold before any of the current work parses. `BUILDABLE` and
+the mechanism test still apply to it; the live-research test is the one it is expected to fail, and
+`FOUNDATIONS-ONLY` is the verdict that exists for it. **If you look and there is no such subject,
+say so in `Sampling` and say where you looked.**
+
+**Why this is here.** The first run of this brief drew every candidate from one year's conference
+programme and returned `CHAPTER` six times out of six. It diagnosed the reason itself: a subject
+taken from a current programme has already passed the "is it still moving" test by being there. **A
+stage whose four verdicts always return the same one is not selecting anything.**
+
 **BUDGET**
 
 30 web searches and 30 page fetches. Count them. Report the counts.
+
+**At least 10 searches must be spent, and they are not interchangeable with fetches.** A fetch goes
+deeper into an index you already have; a search is the only thing that finds an index you do not.
+The first run of this brief spent **3 searches of 30** and stopped when its fetches ran out — and
+nine of its fourteen content sources were then abstracts from a single venue's proceedings, so its
+account of what is live in the area was an account of what one programme committee accepted in one
+month. It said so itself. **Spend the searches on reaching different kinds of source** — a second
+venue, a journal, a standards or benchmark body, a non-English venue, an index whose denominator
+somebody else defined — and say in `Sampling` what each search was for.
 
 **DELEGATION**
 
@@ -275,3 +296,13 @@ around and written into a chapter before anybody tests it.
   and why you kept the ones you kept.
 - **Anything in the scope above that you think is mis-drawn** — a subject that does not belong
   here, or one you expected and could not place.
+
+  **Report it; do not act on it.** If something excluded above looks to you like this area's biggest
+  subject, say exactly that here, with what you counted — and **leave it out of the records.** The
+  scope came from an area list the owner ruled on, and redrawing an area boundary is his
+  (`../GOAL.md` §3.3). A scout that includes a subject its scope excluded has decided which areas
+  the book has, and the decision is invisible once the record is written. **The first run of this
+  brief did exactly this**: it found that an excluded subject was the largest cluster at the field's
+  own venue, said so, and wrote the record anyway — so one of its six chapter candidates rested on
+  its own re-drawing of the boundary. Reporting it is what changes the list, and it works: that
+  finding stands, and three others with it.

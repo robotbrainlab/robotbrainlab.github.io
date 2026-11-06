@@ -310,6 +310,71 @@ receive `AREA`.
 
 ---
 
+### V18 · The scout brief has no search floor, and the run stopped after three searches of thirty
+
+**It terminated.** `ROADMAP.md` step 3 says of this brief: "That it terminates is designed, not
+demonstrated." It is now demonstrated — the stopping rule fired at 24 of 30 fetches and the run
+wrote up without starting a seventh record, exactly as instructed.
+
+**But it stopped with 27 of its 30 searches unspent.** The stopping rule is 24 searches **or** 24
+fetches, and fetches hit first. **This is the same defect the framing brief was given a floor to
+prevent** — its first two runs spent 2 and 4 searches of 25, which is why `<SEARCH-FLOOR>` exists
+and is set to 10. **The scout brief never received that fix.**
+
+The consequence is visible in the output and the run states it plainly: **nine of its fourteen
+content sources are abstracts from one venue's 2026 proceedings**, because it fetched deeply into
+one index instead of searching for others. In its own words, "my picture of 'live research' is a
+picture of what that programme committee accepted in January 2026." It also notes what that frame
+omits: nothing from the three architecture venues "which is where hardware-proper work would be",
+no journal, no non-US venue.
+
+**Fixed**: the brief now carries a search floor, by the same argument as the framing brief's.
+
+### V19 · All six verdicts came out `CHAPTER`, so the selection machinery was never exercised — and the run diagnosed why
+
+The brief has four verdicts, and they are how subjects are selected: `CHAPTER`,
+`FOUNDATIONS-ONLY`, `SHORT-ENTRY`, `REJECT`. **Six of six came out `CHAPTER`.** So three of the four
+verdicts have still never been issued, and the discrimination the whole stage exists for did not
+happen.
+
+**The run found the cause itself**, under what the scope might have wrong: "all six verdicts came out
+`CHAPTER`, and that is partly a selection effect — I picked subjects from a 2026 proceedings list,
+which nearly guarantees the live-research test passes."
+
+**That is a coupling between the sampling frame and the test.** Verdict question 2 asks whether the
+answer is still moving. Draw the candidate subjects from a current conference programme and the
+sampling frame has already answered it. `FOUNDATIONS-ONLY` is defined for a settled subject that
+moving subjects are unintelligible without — **and nothing in the brief tells a scout to go looking
+for one.** The run even named two it would have found: "ring all-reduce bandwidth optimality, say,
+or pipeline bubble scheduling alone".
+
+**Fixed, and marked as mine**: the brief now requires at least one candidate not drawn from recent
+activity. This is my judgement about how to make the existing verdict set usable, not a decision
+about the book.
+
+### V20 · The scout overrode an area boundary, and one of its six chapters exists because of it
+
+The scope it was given put serving tooling out of bounds, taken from the consolidated record's own
+`EXCLUDES` field. The run found that inference scheduling and cache management is **the largest
+single cluster at the field's dedicated venue — about 37 of the 118 titles it read** — judged the
+exclusion mis-drawn, and **included the subject anyway**, declaring it in `Sampling`.
+
+Its finding is almost certainly right, and reporting it is exactly what the method wants: the brief
+says a mis-drawn scope "is a finding about the list and goes back to step 4". **But the brief does
+not say whether a scout may act on its own finding, and this one did.** One of six chapter
+candidates in this run is there because an agent re-drew an area boundary — which `GOAL.md` §3.3
+reserves to the owner.
+
+Its other three scope findings are worth keeping whatever is decided: **energy and power appear
+repeatedly in 2026 titles and are named nowhere in the area list**; accelerator architecture is in
+scope but its work lives at venues this run did not sample; and mixture-of-experts work splits
+across the boundary, the architecture belonging to a method area and the serving cost to this one.
+
+**Fixed**: the brief now says to report the subject under its scope finding and leave it out of the
+records, so the owner rules rather than inherits.
+
+---
+
 ## What held, checked the same way
 
 An honest account has to say what the instruments got right, or the findings above read as a verdict
@@ -337,6 +402,22 @@ own rule for cutting it — and the fix made after them held today, twice.
 **The disclosure rules worked where the isolation rules did not.** Two of the three runs named the
 project files injected into their context and said what each contained. That is how V5 is known at
 all.
+
+**The scout run was checked the same way, and most of it held.**
+
+| Rule | Held? | How it was checked |
+|---|---|---|
+| It terminates | **Yes** | The stopping rule fired at 24 of 30 fetches; it wrote up and started no seventh record. This had never been shown |
+| Every field present, every word limit kept | **Yes** | All six records carry all ten required fields; the overview carries all six of its own |
+| **Judge buildability against that machine and nothing else** | **Yes, and well** | Every record separates what the published result needs from a smaller experiment that teaches the mechanism, and each ends with a `HARDWARE:` line. Two decline to price what they did not verify — "I decline to price 256 GPU-days rather than invent a rate I did not verify." One says a shrunken version would not be the experiment at all, "because the phenomenon is a property of scale", which is the honest answer the brief asks for |
+| Claims vocabulary exact | **Yes** | Every `strength`, `maturity`, `basis` and `class` value is from the brief's lists. **No row writes `provisional` as a maturity**, which the brief singles out as the easy mistake |
+| A vendor source is marked vendor even when refereed | **Yes** | Two refereed papers are marked `vendor` because their authors sell what they measure, exactly as instructed |
+| A benchmark result without its baseline is `source-absence` | **Yes** | Six such rows, each naming what the abstract omits |
+| Say which numbers rest on training data | **Yes** | Three rows carry `training-data-unverified` with "(not fetched this session)" in place of a URL, and `Sampling` lists fourteen further unconfirmed items by name |
+| **A number must be checkable at its source** | **Yes — checked** | Its growth figure for one index's October output was opened and read: the page says "Total of 508 entries", which is the figure given. An absolute count with its source, as the brief requires, and it is correct |
+| No search floor | **No** | V18 |
+| The verdicts discriminate | **No** | V19 |
+| Scope is the owner's | **No** | V20 |
 
 ---
 
