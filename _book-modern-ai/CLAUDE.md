@@ -29,7 +29,6 @@ Then read only what that step needs:
 | `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, strength, maturity and review date. **Empty** |
 | `docs/briefs/` | One brief per agent role. Fill one in; do not rewrite it |
 | `research/` `records/` `data/` | What the research returned, the per-chapter records, the labs' data. **All empty** |
-| `discarded/` | Pre-consensus research. **Read its README before opening anything in it** |
 
 ## Precedence, when two documents disagree
 
@@ -46,12 +45,6 @@ defect while the two still agree, because they will drift. Cite the owning file 
 
 ## The rules that are easy to break
 
-- **All research conducted before 2026-11-06 is discarded.** The owner's instruction: it predates
-  the agreement on goal, method and scope. See `discarded/README.md`. **No figure from it may be
-  cited, and it may not be used to choose or rank a research area.** Two things survived, both
-  about the instrument rather than about AI: the brief terminates, and it keeps an agent honest
-  about its sources. **"Areas should be small" is withdrawn** — it was a claim about the field drawn
-  from a discarded run.
 - **The book is fully independent and self-contained.** Not a continuation, extension or revision of
   any earlier work, and no connection to one in content, scope, structure or progression. The voice
   is specified in `docs/GUIDE.md` §4, the method in `docs/PROCESS.md`; both stand as rules in their

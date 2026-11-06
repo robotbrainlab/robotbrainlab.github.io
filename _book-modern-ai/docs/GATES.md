@@ -1,6 +1,7 @@
 # The gates
 
-Fourteen checks. `bash tools/check-all.sh` runs them and must end `ALL GATES PASS`.
+Fourteen checks, run by `bash tools/check-all.sh`, which must end `ALL GATES PASS`. **Fourteen
+entries, fifteen scripts** — entry 10 is two generators checked the same way.
 
 **This file is the specification.** `PROCESS.md` §9 lists the gates and points here; it does not
 describe them. Each entry below says what the gate reads, what makes it fail, and what it prints.
@@ -21,8 +22,9 @@ describe them. Each entry below says what the gate reads, what makes it fail, an
    so its proof is about the list and not the exit code.
    **Gate 14 is not list-only**: it reports between cycle boundaries and exits non-zero at one, so
    it is proved the ordinary way — plant an expired claim and run it at a boundary.
-3. **A gate that checked nothing prints `VACUOUS`, never `CLEAN`**, and does not count as a pass.
-   A chapter with no equations gets `VACUOUS` from the arithmetic gate, and that is correct.
+3. **A gate that checked nothing prints `VACUOUS`, never `CLEAN`.** A chapter with no equations
+   gets `VACUOUS` from the arithmetic gate, and that is correct. It does not block the suite and it
+   does not satisfy a check — see the exit convention below for exactly what that means.
 
 ## Exit convention
 
@@ -64,12 +66,12 @@ inserting "as the research found" into a chapter.
 
 **Reads:** every chapter, plus `tools/boundary-exemptions.tsv`, whose columns are
 `chapter`, `passage` (a quoted span), `reason`, `approved_on`.
-**Fails on:** a derivation, proof, or theoretical development whose subject is not on the declared
-list, and which carries no exemption row.
-**How:** the declared line lives in `GUIDE.md` §8 as a test, not a list, so this gate cannot decide
-alone. It flags every passage that **looks like** a derivation — display mathematics, "it follows
-that", "we can show", a proof environment — and requires each to carry either a `GUIDE.md` §8
-justification in the record or an exemption row giving the reason.
+**Fails on:** a passage that looks like a derivation and carries neither a justification in the
+record nor an exemption row.
+**How:** `GUIDE.md` §8 gives a **test**, not a list, so this gate cannot decide on its own and does
+not try. It flags every passage that looks like a derivation — display mathematics, "it follows
+that", "we can show", a proof environment — and each flagged passage must then carry either a
+record entry applying §8's test to it, or a row in the exemptions file giving a reason.
 **Honest limitation:** this is a hint gate. It cannot judge whether a derivation earns its place.
 It makes the list, and a human triages it one by one.
 **Until the mathematics boundary is decided** this gate runs **list-only**: it prints every passage
@@ -80,8 +82,9 @@ triaged by hand and the triage recorded.
 ## 3 · `tools/verify-render.py` — the Markdown renders as written
 
 **Reads:** every chapter.
-**Fails on:** a list that will run together into one paragraph; a table with a row of the wrong
-width; an unclosed fence; a heading level skipped; a callout not in the three permitted forms; and
+**Fails on:** a list that will run together into one paragraph; a table row with the wrong number
+of cells for its header; an unclosed fence; a heading level skipped; a callout not in the three
+permitted forms; and
 **in a hand-drawn diagram only**, a line wider than 64 characters or a line of a different width
 from its neighbours.
 **Not checked:** the width of **captured program output**. `GUIDE.md` §10 applies the 64-character
@@ -111,9 +114,9 @@ the printed precision.
 a `sha256` that does not match the chapter; stages dated out of order; an amendment that is
 undated, unreasoned, or earlier than the review it follows.
 **Why the hash is last:** editing one character of a closed chapter makes its record stale, so a
-published chapter cannot move without leaving a trace. **`amend` is the only honest way to change a
-closed chapter** — it refuses unless the record is closed, refuses without a reason, refuses if the
-chapter has not changed, appends a dated line, and only then rewrites the hash.
+published chapter cannot move without leaving a trace. **The honest way to change a closed chapter
+is `amend`**, whose refusals are specified in `PROCESS.md` §6.1. What this gate adds is the check
+that every amendment is dated, reasoned, and not earlier than the review it follows.
 **`VACUOUS` when:** no records exist yet.
 
 ## 6 · `tools/verify-coverage.py` — what the plan promised and the chapter lacks
@@ -151,7 +154,11 @@ step 8.
 
 ## 9 · `tools/verify-outline.py` — the document outline nests correctly
 
-**Reads:** the built PDF.
+**Blocked until the build toolchain is decided** (`GUIDE.md` §10, `[OPEN]`). It is the one gate that
+reads the output rather than the source, so unlike gate 2 it has nothing to run in list-only mode:
+until there is a build, it prints `VACUOUS`.
+
+**Reads:** the built document.
 **Fails on:** front matter missing from the outline; a chapter orphaned above its part; a
 sub-section nested under the wrong parent; the back matter nested under the last chapter.
 **Why:** every other gate reads Markdown. **None of them opens the output.**
@@ -171,7 +178,7 @@ naming a question that does not exist; a question owned by two chapters; a writt
 question and no deliberate-exemption row.
 **See:** `ACCEPTANCE.md` for what a question is and how one is answered.
 
-## 12 · `tools/verify-claims.py` — no claim stated above its evidence · **NEW**
+## 12 · `tools/verify-claims.py` — no claim stated above its evidence
 
 **Reads:** `CLAIMS.tsv`, every chapter, and each chapter's `## Claims` section.
 **Fails on:**
@@ -186,7 +193,7 @@ question and no deliberate-exemption row.
 and it is pass 2's job (`briefs/pass-2-claims.md`). This gate checks the bookkeeping; the pass reads
 the prose.
 
-## 13 · `tools/verify-ownership.py` — one concept, one owner · **NEW**
+## 13 · `tools/verify-ownership.py` — one concept, one owner
 
 **Reads:** `OWNERSHIP.tsv` and every chapter's `Key Terms` table.
 **Fails on:** two chapters claiming one concept; a chapter with a `Key Terms` row for a concept
@@ -195,12 +202,14 @@ ownership has moved with no `moved_on` date.
 **Prints as a warning, not a failure:** any concept whose ownership has moved twice. That is a
 signal the carving is wrong, and it belongs in the cycle's operation counts.
 
-## 14 · `tools/verify-expiry.py` — what has gone stale · **NEW**
+## 14 · `tools/verify-expiry.py` — what has gone stale
 
 **Reads:** `CLAIMS.tsv`.
 **Fails on:** nothing during a cycle. **Exits 1 only at a cycle boundary**, when a claim is past its
 `review_by` and has not been re-verified.
-**Prints always:** every claim within thirty days of expiry, so a cycle can be planned.
+**Prints always:** every claim within thirty days of expiry, so a cycle can be planned. **Thirty
+days is an operational choice**, not a derived figure — long enough to schedule a cycle, short
+enough that the list stays readable.
 **Why it is not a per-chapter gate:** staleness is a property of time, not of the chapter being
 written. Failing a chapter because an unrelated claim expired would make the suite untrustworthy,
 which is rule 1.
@@ -229,8 +238,9 @@ is too short; if most things had, it is too long.
 
 - A claim with `maturity` of `single-source` or `unexamined` gets **+6 months regardless of class**.
   It has not been independently confirmed, so its durability is unknown whatever its subject.
-- A claim a chapter's central argument rests on gets the **shorter of its class date and 12 months**.
-  If the book's argument fails when the claim fails, the claim is checked more often.
+- A **load-bearing** claim (`GOAL.md` §3.4 defines the term) gets the **shorter of its class date
+  and 12 months**. If removing the claim would change what the chapter teaches, it is checked more
+  often.
 
 **Nothing lengthens a review date.** A date is shortened by evidence of fragility and never
 extended by confidence.

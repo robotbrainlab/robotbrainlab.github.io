@@ -30,39 +30,39 @@ themselves are `GATES.md`'s** and are not repeated here.
 
 ---
 
-## 2. What is carried over, and what each thing cost
+## 2. The rules, and why each exists
 
-**[STATED]** The owner asked that the new book *"follow all its rules, including the multiple
-passes and agent reviews."* **[STATED]** Nothing else carries over: not the content, the scope, the
-structure or the progression (`GOAL.md` §2.4).
+**[STATED]** The owner asked for **multiple review passes and agent reviews**, and for the method to
+be followed rather than improvised. Everything else about the book is independent (`GOAL.md` §2.4).
 
-Each rule below exists because something failed without it. The cost is recorded so that nobody
-removes one to save time.
+**Each rule has a reason, and the reason is stated so nobody removes the rule to save time.** A
+reason is given as a mechanism — *this is how the defect happens* — rather than as a story about an
+occasion, because a story invites the reply that it will not happen here.
 
-| Carried over | What it cost to learn |
+| Rule | Why it exists |
 |---|---|
 | **One chapter at a time. Never a part at a time** | Context dilution causes invented content. Writing several chapters in one stretch pushes the first chapter's sources out of working context, and it then gets written from the pattern of the previous chapters rather than from its material |
 | **Sources read in full, immediately before writing** — not earlier in the session | Reading earlier in the session means the sources are out of working context by the time the chapter is written, and the chapter then gets written from memory of them. Named in the record, with what was read |
 | **Non-scope declared in the record before writing** | Without an edge, review never terminates. Once a chapter claims to handle any case, "what about X?" is always a correct question and every answer creates the next one |
 | **A completeness review against the sources, side by side** | A reviewer checks what is present against the sources; nothing in that act surfaces what is absent from both |
 | **A fix-verification pass reading only the named changed passages** | The recurring defect is not writing badly — it is fixing a claim where you are looking and missing it where you are not. A reviewer reading only the changed passages finds survivals a full re-read buries in its own findings |
-| **Every fix is a sweep, counted before and after, back matter first** | A summary, a key-term row and an answer key are read as settled because they look like a glossary rather than an argument, so they are where a fix goes to not happen rather than an argument |
-| **In a lab, a corrected claim lives in six places and four are prose** | Programs narrate their own output, and that narration is captured into the chapter |
+| **Every fix is a sweep, counted before and after, back matter first** | One claim appears in several phrasings, and the writer applying a fix sees the one the finding quoted. The back matter goes first because a summary, a key-term row and an answer key are read as settled — they look like a glossary rather than an argument — so they are where a fix goes to not happen |
+| **In a lab, one claim lives in the prose *and* in the code** | A lab's programs print counts, comparisons and universals, and that printed output is captured into the chapter. So the same claim can exist in the body, the program, the captured block, the summary, a key-term row and an answer — **six places on that list, four of them prose** — and fixing the prose alone makes the chapter contradict its own printed output |
 | **A staged driver that refuses, not a checklist** | A checklist in prose is read once and skipped thereafter. A program that will not advance until the current stage's evidence is present cannot be skipped — see §6.1 |
 | **The record carries the chapter's hash, written last** | Editing one character afterwards makes the record stale and fails the suite |
 | **`amend` for a closed chapter that must change** | The quickest way past a stale hash is to re-hash by hand, which turns the record from evidence into decoration and leaves no trace that a published chapter moved |
 | **The stopping rule, with round-2 classification** | Round 2 findings about the *subject* mean the chapter is mis-scoped. Round 2 findings that are round 1's own unswept fixes mean the fix round was itself a drafting event. Conflating them mis-fires, and sends a sound chapter back to be narrowed |
 | **A taught-ledger with explicit "Do not" rows** | No gate looks at sequence. A chapter can be internally perfect and wrong about where it sits |
-| **A shorthand ledger** — formal name against the word the field actually says | A reader searching for the word they will actually hear finds nothing, while the subject runs across seven chapters under a different name |
+| **A shorthand ledger** — the clear name against the word the field actually says | A book naturally uses its own vocabulary throughout. A reader who searches it for the word they have heard elsewhere then finds nothing, even where the subject is covered at length |
 | **A defect ledger of *classes*, each with its instance and the practice** | A list of mistakes is not reusable. A class is |
 | **Concept ownership: each concept owned by exactly one chapter** | Some concepts are naturally touched by several chapters, and without an owner each one re-teaches it slightly differently |
-| **Correctness outranks the source** | *"A source is evidence that something is said, never evidence that it is true"* |
-| **Page budgets never bind, and never decide scope** | The failure is not padding or cutting. It is deciding scope by page count and justifying it on other grounds — which happened, and was caught from the actions rather than the explanation |
+| **Correctness outranks the source** (`GUIDE.md` §5 owns the rule) | Received explanations in any technical field include confident wrong ones. A book that follows its sources faithfully will reproduce them, and the reader has no way to tell |
+| **Page budgets never bind, and never decide scope** (`GUIDE.md` §9) | Padding and cutting are visible and easy to resist. The failure that is not visible is deciding **scope** by the page count and then justifying the decision on other grounds — which can only be caught by looking at what was dropped, not at the reason given |
 | **`You understand this when …`, one sentence per chapter** | The reader's own test |
-| **An acceptance bank written before the chapters exist** | A standard the chapter must meet, not a summary of what it happens to contain |
-| **The book ships its own lab data** | *"An expected result that depends on the reader's files holds for nobody"* |
+| **An acceptance bank written before the chapters exist** (`ACCEPTANCE.md`) | A question written after a chapter can only ask about what the chapter contains, so it cannot detect an omission. Written first, it is a standard the chapter must meet |
+| **The book ships its own lab data** (`GUIDE.md` §6) | An expected result that depends on the reader's own files holds for nobody, so the lab cannot be checked by anyone |
 | **Labs isolated: own folder, no credential files, keys from the environment** | The repository is public |
-| **Claude writes. The owner reads and works through** | Decided, and argued about once already |
+| **Claude writes. The owner reads and works through everything** | The owner's decision. It is settled: do not propose that he writes it |
 
 ---
 
@@ -75,7 +75,7 @@ not. Every new mechanism in §4 answers one of them.
 |---|---|---|
 | 1 | **It is never finished** | Revision, not writing, becomes the dominant cost. The inherited machinery pays full price on every revision, forever |
 | 2 | **The subjects change each cycle** | Concept ownership cannot be fixed before drafting, which is what makes the taught-ledger work |
-| 3 | **The material is contested** | "The chapter contains the answer" is sometimes an impossible standard, because no settled answer exists |
+| 3 | **Some of the material will be contested** | "The chapter contains the answer" is then an impossible standard, because no settled answer exists to contain. How much is contested is for the research to say |
 | 4 | **The content is dated** | A claim has a shelf life, and nothing in the inherited machinery carries it |
 
 ---
@@ -86,10 +86,8 @@ not. Every new mechanism in §4 answers one of them.
 
 **[I RECOMMEND]** `CLAIMS.tsv`, one row per load-bearing claim. This is the central change.
 
-**The schema is in `CLAIMS.tsv`'s own header and comment block, and nowhere else.** It is not
-repeated here: an earlier version of this section carried a copy, the copy lost two columns when the
-file gained them, and the two it lost were the ones the scope boundary runs on. That is the drift
-`../CLAUDE.md` warns about, caught in this document.
+**The schema is in `CLAIMS.tsv`'s own header and comment block, and nowhere else.** A copy here
+would drift from the file the moment a column changed, and the copy is what a reader would trust.
 
 Eleven columns. The ones worth naming here, because the rest of this file refers to them:
 `maturity` (is the science settled), `class` (how long it will hold), `review_by` (when to look
@@ -99,8 +97,10 @@ What it buys, and this is the answer to difference 1:
 
 - **Revision becomes cheap.** You re-verify *claims*, not chapters. An overturned claim names
   exactly which chapters reopen. Today, finding that costs a full rescan.
-- **"Never state above the source" becomes a gate** rather than an intention. A chapter asserting
-  something the file records as `contested` fails.
+- **"Never state above the source" becomes checkable** rather than aspirational, in two parts: a
+  gate checks the bookkeeping — a `contested` claim whose chapter carries no dispute section fails —
+  and **pass 2 reads the prose**, because whether a sentence overstates its source is judgement and
+  no gate can do it (`GATES.md` gate 12).
 - **The cadence stops being arbitrary.** The book reports what is past its `review_by`. There is no
   twelve-week full rescan; there is a rescan of what expired. This is the answer to difference 4.
 - **Superseded claims are kept, never deleted.** The honest record is that something *was*
@@ -108,11 +108,11 @@ What it buys, and this is the answer to difference 1:
 
 ### 4.2 The dispute is a content type
 
-**[I RECOMMEND]** A fixed shape, so contested material has somewhere to go: the claim, who holds
-it, the counter-claim, who holds that, **what measurement would settle it**, and what to do
-meanwhile.
+**[I RECOMMEND]** Contested material needs a place in a chapter, and **`GUIDE.md` §5 owns its
+shape** — the claim, the counter-claim, who holds each, what measurement would settle it, and what
+to do meanwhile. What belongs in this file is the consequence for acceptance.
 
-The acceptance rule then changes from *"the chapter contains the answer"* to **"the chapter
+The acceptance rule changes from *"the chapter contains the answer"* to **"the chapter
 contains the answer, or the state of the dispute, and says which."** This is the minimum change
 that lets an acceptance standard survive contact with disputed material. It answers difference 3.
 
@@ -122,9 +122,8 @@ that lets an acceptance standard survive contact with disputed material. It answ
 line that belongs here, because it is about the method rather than the book: a reproduction lab
 **passes if it runs and yields a verdict, whatever the verdict is.**
 
-Without this, a lab gets quietly tuned until it confirms its source. **The illustrations that were
-here came from discarded research and are withdrawn — including the paraphrases of them.** The
-principle stands on its own: **a test whose outcome is fixed in advance is not a test.**
+Without this, a lab gets quietly tuned until it confirms its source. **A test whose outcome is
+fixed in advance is not a test.**
 
 ### 4.4 Ownership is a checked file
 
@@ -133,29 +132,32 @@ moved. A gate fails on two chapters claiming one concept, or on a chapter teachi
 does not own. This answers difference 2: the subject list can change each cycle without the
 taught-ledger breaking.
 
-**Note the distinction, because it is easy to collapse** (`GOAL.md` §2.4): duplication *between*
-the old book and this one is fine and expected. Duplication *within* this book is a defect. This
-file is about the second.
+**Note the distinction, because it is easy to collapse** (`GOAL.md` §2.4): duplication between this
+book and **anything outside it** is fine and expected. Duplication **within** this book is a
+defect. This file is about the second.
 
 ### 4.5 A lab runner that works from the chapter alone
 
-**[I RECOMMEND]** A writer who runs their own lab cannot test whether the chapter describes it.
-A separate agent that runs a lab
-**from the printed chapter only**, in a fresh folder, tests the book's actual promise —
-*reproducible from the text alone* — rather than the author's memory of having tested it.
+**[I RECOMMEND]** A writer who runs their own lab cannot test whether the chapter describes it,
+because they know what they meant. **A separate agent, running the lab from the printed chapter
+only, in a fresh folder, tests the book's actual promise** — reproducible from the text alone —
+rather than the author's memory of having tested it. `briefs/pass-3-lab.md` is the brief.
 
 ### 4.6 Every brief has a schema
 
-**[I RECOMMEND]** Written once, not re-invented per brief. This is the fix for the failure of
-2026-11-05, when three research agents ran for an hour without converging; one was launching four
-more sub-agents when it was stopped.
+**[I RECOMMEND]** Written once, not re-invented per brief.
+
+**Why a brief needs a schema at all.** An instruction that only rewards thoroughness has no fixed
+point: the agent can always search more, and will. A brief without a stated stopping condition and
+a capped output therefore does not terminate — and one that may start further agents has no budget
+at all, because each new agent brings its own.
 
 ```
 QUESTION        one sentence. The output must answer exactly this
 OUTPUT          named sections, in order. Nothing else is returned
 UNIT            what one complete item of output looks like, field by field
 TARGET          how many units. A cap, not a goal
-BUDGET          searches, fetches, wall-clock
+BUDGET          counted: searches, fetches, or runs. Whatever the agent can exhaust
 DELEGATION      depth allowed. Default: 0
 STOPPING RULE   when to write up
 PARTIAL         what to do when the budget runs out before the target
@@ -190,11 +192,9 @@ EXPIRE → RESEARCH → CONFIRM → SELECT → PLAN → WRITE → VERIFY → CLO
 | **Verify** | Four passes (§7) | — |
 | **Close** | Record hashed, ledgers updated, claims' `dependents` filled, operation rows written for the changelog | — |
 
-**EXPIRE is first, and that is the fix for a circularity.** An earlier version put it last and
-defined the cycle boundary as the moment SELECT was approved — so the expiry gate demanded that
-stale claims be re-verified at a point before the stage that re-verifies them. Running it first
-also means **no cycle is ever researched on top of claims known to be stale**, which is the
-property that matters.
+**EXPIRE is first, and the order matters.** Put it last and the cycle eats itself: the expiry check
+would demand that stale claims be re-verified at a point before the stage that re-verifies them.
+First, it also guarantees **no cycle is researched on top of claims known to be stale.**
 
 **A cycle boundary is the moment EXPIRE completes.** `tools/verify-expiry.py` needs a definition and
 this is it: CLOSE writes a dated `cycle-boundary` line into `CHANGELOG.md` when the following
@@ -311,10 +311,8 @@ of the claims file, and the only reason a book like this survives its third cycl
 | 5 | **Pass 2, adversarial claims**, then **pass 3, lab execution** from the chapter text alone. Apply and sweep what they find |
 | 6 | **Pass 4, fix-verification** — a subagent reads **only the changed passages**, named |
 
-**Six steps, four passes** (§7). An earlier version of this table had five steps and named only
-passes 1 and 4, which left two of the four outside the loop that may not be reordered. Passes 2 and
-3 sit at step 5 because both read the chapter *after* pass 1's fixes land — running them earlier
-checks text that is about to change.
+**Six steps, four passes** (§7). Passes 2 and 3 sit at step 5 because both read the chapter *after*
+pass 1's fixes land — running them earlier checks text that is about to change.
 
 **The stopping rule.** One review round is the norm. If round 1 finds no false-teaching error, fix
 the rest and ship — no second round. If it does, fix and run one more. If round 2 still finds them,
@@ -509,9 +507,8 @@ marked `[OPEN]` in the file that owns it, and that file is where its options liv
 | Reference by chapter, or by concept | `GUIDE.md` §7 |
 | Whether the book is for the owner alone | `GOAL.md` §10 |
 
-**None of these blocks the research.** Scope versus depth is **not** on this list: it is settled,
-in `GUIDE.md` §3, marked `[AGREED]` and dated. An earlier version of this section listed it as open
-and pointed at `GOAL.md` §2.4, which is about independence and says nothing about scope.
+**None of these blocks the research.** Scope versus depth is **not** open: it is settled in
+`GUIDE.md` §3.
 
 **[OPEN]** The three problems in `GOAL.md` §8 that §4 attacks but does not finish: the revision
 cost over many cycles, the acceptance rule for contested material, and ownership moving between

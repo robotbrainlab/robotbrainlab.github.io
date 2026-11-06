@@ -45,14 +45,13 @@
   - [Class H — Assessing a thing with an instrument that does not sample it](#class-h--assessing-a-thing-with-an-instrument-that-does-not-sample-it)
   - [Class I — Doing adjacent work instead of the named deliverable](#class-i--doing-adjacent-work-instead-of-the-named-deliverable)
   - [Class J — Treating a superseded document as current](#class-j--treating-a-superseded-document-as-current)
-  - [Class K — Continuing to use evidence after it was withdrawn](#class-k--continuing-to-use-evidence-after-it-was-withdrawn)
+  - [Class K — Continuing to use evidence after it stopped counting](#class-k--continuing-to-use-evidence-after-it-stopped-counting)
   - [What follows for the framework](#what-follows-for-the-framework)
 - [12. Additional considerations I identified](#12-additional-considerations-i-identified)
 - [13. What this document does not cover](#13-what-this-document-does-not-cover)
 
 
-**Written 2026-11-05.** This document records the purpose of the second book before any of it is
-designed or written. It exists because several misunderstandings occurred while the purpose was
+This document records the purpose of the book before any of it is designed or written. It exists because several misunderstandings occurred while the purpose was
 only in conversation, and because the next person to work on this — including a future session of
 mine — will act on what is written here.
 
@@ -235,11 +234,8 @@ and which the owner has questioned twice and not yet ruled on:
   areas will over-sample whatever currently dominates the index, whatever that happens to be. So a
   brief that says "research modern AI" measures the index.
 
-  **[WITHDRAWN 2026-11-06]** I previously wrote here that an open brief *collapses onto language
-  models*, citing three runs. Those runs are discarded, and naming the outcome was a conclusion
-  from them rather than a property of the method. **The fresh research may concentrate somewhere I
-  would not predict, and the brief design must not presuppose where.** The argument above survives
-  without the prediction.
+  **A brief must not name the concentration it expects to find.** Where the index points is not
+  knowable in advance, and an instrument built to expect one answer finds that answer.
 - **So a fixed set of research areas is a coverage device**, used to force attention somewhere the
   search index does not point. It is not a claim about the field's natural shape.
 - **Consequence:** any percentage computed over a chosen set of areas is a percentage of **that
@@ -463,14 +459,13 @@ self-contained per topic. Five candidates, with what each costs:
 | **E · Parts by the five dimensions** | Part per dimension: why it matters, the science, the research, the engineering, reproducing | **Rejected.** The owner's instruction is that the dimensions must *not* become sections (§4.1) |
 
 **[I RECOMMEND]** **C combined with B** — a shared foundations part, then an area per part, each
-area carrying its own progression. **One of its two reasons has lost its evidence and I am
-recording that rather than quietly keeping the recommendation.**
+area carrying its own progression. **Its two halves do not stand equally, and the weaker one is
+marked rather than hidden.**
 
-1. ~~**The shared part is justified by measurement.**~~ **Withdrawn 2026-11-06.** I had argued that
-   evaluation is common to every area, on job-posting and venue figures from the discarded research.
-   Those figures are out of use, so **there is currently no evidence that any subject is common
-   enough to deserve a shared foundations part.** The fresh research either establishes it or it
-   does not, and candidate C has no basis until then.
+1. **The shared part rests on nothing yet.** It would need some subject to be common to every area,
+   and **nothing here establishes that one is.** The research either finds such a subject or it does
+   not; until then candidate C has no basis, and it stays on the list only because it is cheap to
+   adopt if the research does find one.
 2. **An area has to be finishable on its own.** This one stands, because it rests on how the book
    gets produced rather than on research: with agent help, text is written far faster than it can be
    read and worked through (§12.1). An area that is a complete
@@ -537,9 +532,8 @@ improvement survive a fair baseline, does this result hold when the protocol cha
 difference real. The second form exists because the book must be able to teach a subject whose
 answer is not settled. Which form a chapter uses follows from its subject.
 
-**[I RECOMMEND]** the three *shapes* a reproduction lab takes. I had listed three concrete
-instances here, drawn from the discarded research; **the instances are withdrawn and the shapes
-are what survives.**
+**[I RECOMMEND]** three *shapes* a reproduction lab takes. These are shapes, not labs: **each needs
+a real published claim to attach to**, and the research is what supplies those.
 
 | Shape | What the reader does | What the reader finds out |
 |---|---|---|
@@ -547,12 +541,11 @@ are what survives.**
 | **Score a null baseline** | Run something that cannot work under a published evaluation protocol, and see what it scores | **Whether** that protocol can be satisfied without the thing it claims to measure |
 | **Find the envelope's edge** | Run a method inside its stated operating range and then outside it | **Where** its boundaries actually are, against what its abstract states |
 
-**Note the column heading.** It asks rather than asserts. An earlier version stated what each shape
-*teaches* — which presupposed the finding, in a document that exists to specify how findings are
-obtained. **A lab whose conclusion is known in advance is not a lab.**
+**Note the column heading: it asks rather than asserts.** A column saying what each shape *teaches*
+would state the finding before the lab had run, in a document whose purpose is to specify how
+findings are obtained. **A lab whose conclusion is known in advance is not a lab.**
 
-Each shape needs a real published claim to attach to. **The fresh research supplies those**, and
-until it does, no lab can be written.
+Until the research supplies the claims, no lab of this form can be written.
 
 [↑ Back to Table of Contents](#table-of-contents)
 
@@ -636,10 +629,9 @@ it has all three of:
 2. **live research**, so following it teaches how to read the literature;
 3. something **buildable**, so dimension 5 is possible at all.
 
-**The worked examples I had here are withdrawn**, because every one of them scored a subject using
-discarded figures. The rule itself needs no examples to be applied: the fresh research reports
-`LIVE RESEARCH` and `BUILDABLE` per subject, which is exactly what tests 2 and 3 need, and the
-`VERDICT` field already asks all three questions.
+**The rule needs no worked examples to be applied.** The research reports `LIVE RESEARCH` and
+`BUILDABLE` for each subject, which is exactly what tests 2 and 3 ask for, and its `VERDICT` field
+puts all three questions directly.
 
 **What this means in practice:** a subject the field is quietly abandoning fails test 2, and a
 subject nobody can build fails test 3 — and both verdicts come from the research record rather than
@@ -654,11 +646,10 @@ everything else:
 | **Equal depth across all areas** | No area reaches interview depth; comprehensive |
 | A map plus **two areas** to the floor | Roughly doubles the lab and reading work |
 
-**The evidence I offered for this decision is withdrawn.** It was job-posting data from the
-discarded research, showing that the toolchains of two areas barely overlap. The *argument* — that
-no employer hires across areas, so medium depth everywhere may be worth less than depth in one —
-is a plausible claim about hiring and **it currently has no evidence behind it.** The fresh
-research's skills-and-careers dimension either supports it or does not.
+**This decision has no evidence behind it yet.** The argument for depth is that if no employer
+hires across areas, medium depth everywhere may be worth less than depth in one. That is a
+plausible claim about hiring, and **whether it holds is not known here** — the research's
+skills-and-careers dimension is what would establish it.
 
 **[OPEN]** **The mathematics boundary.** A boundary calibrated for application engineering — teach
 what a model computes when it answers, state how it learned, and move on — is broken by dimension
@@ -674,11 +665,11 @@ what a model computes when it answers, state how it learned, and move on — is 
 whether a claimed improvement is real, and to build the thing that tests it?* This is sharper than
 "go deeper" and still excludes mathematics that only decorates.
 
-**[OPEN]** Which area goes deep, if the shape is asymmetric. **I have no candidate.** I previously
-named two, on job-market figures from the discarded research — credential requirements, time-to-fill
-and advertised pay. Those are withdrawn, and I am not going to re-assert the same conclusion
-without them. **This closes only after the fresh research reports its skills-and-careers dimension
-across every area**, and it depends on the breadth-against-depth decision above.
+**[OPEN]** Which area goes deep, if the shape is asymmetric. **There is no candidate**, and naming
+one would mean choosing it from assumption — the question is precisely which area repays depth, so
+an answer that does not come from evidence answers nothing. **This closes only after the research
+reports its skills-and-careers dimension across every area**, and it depends on the
+breadth-against-depth decision above.
 
 **[OPEN]** Whether the book is for the owner alone or eventually for others. It changes what page
 one may assume.
@@ -701,17 +692,17 @@ because a list of mistakes is not reusable and a class is.
 
 ### Class A — Claiming without reading
 
-**Instances.** (1) Mapped the book's chapters onto the curriculum's topics from chapter titles and
-a Covers column, without opening a single topic page — twice, the second time after being corrected
-for the first. (2) Said I had looked at the website when I had read a local Markdown file.
-(1a) Asserted for two days that a landscape document defined nineteen areas with reasons, from a
-one-line summary of it, and built a nine-area carving of my own instead of opening the file. **A
-summary of a taxonomy tells you a taxonomy exists; it does not tell you what the categories are** —
-and having the summary is worse than having nothing, because nothing makes you look.
-(3) Assessed a book's practical content and reported "zero visible evidence" of hands-on work
-without opening the directory that held its labs. (4) Stated that the owner had no test for whether
-his learning was working, when his book carried a per-chapter test and an acceptance bank written
-before its chapters — neither of which I had looked for.
+**Instances.** (1) Mapped one document's chapters onto another document's topics from chapter
+titles and a summary column, without opening a single topic page — twice, the second time after
+being corrected for the first. (2) Said I had looked at a website when I had read a local Markdown
+file. (3) Asserted for two days that a document defined a set of areas with reasons, from a one-line
+summary of it, and built a carving of my own instead of opening the file. **A summary of a taxonomy
+tells you a taxonomy exists; it does not tell you what the categories are** — and having the summary
+is worse than having nothing, because nothing makes you look.
+(4) Assessed a book's practical content and reported "zero visible evidence" of hands-on work
+without opening the directory that held its labs. (5) Stated that the owner had no test for whether
+his learning was working, when a document of his carried a per-chapter test and an acceptance bank
+written before its chapters — neither of which I had looked for.
 
 **Why it is wrong.** A structural claim about a document is evidence only if the document was read.
 Titles are not contents. In the owner's words: *"Did you even look at the website"* and *"Why are
@@ -757,9 +748,9 @@ and say why.
 **Instances.** (1) Told the owner that a theoretical limit was settled, refereed and durable, and
 recommended building curriculum and a chapter on it. A peer-reviewed rebuttal existed; the limit as
 I stated it was contested. **I had the strength of the claim wrong, not the claim itself** — which
-is the whole of this class. (2) Asserted that an earlier book *was* a particular curriculum track
-when my own evidence showed ten of its chapters belonging to no topic in that track — I had noticed
-and dropped the fact because it spoiled the mapping.
+is the whole of this class. (2) Asserted that one document *was* a particular kind of thing when my
+own evidence showed ten of its sections belonging to no category of that kind — I had noticed the
+fact and dropped it, because it spoiled the mapping.
 
 **Why it is wrong.** Dropping the inconvenient half of one's own evidence is the failure the whole
 project exists to teach against.
@@ -817,9 +808,9 @@ the gap.
 ### Class I — Doing adjacent work instead of the named deliverable
 
 **Instance.** The owner asked, in several consecutive messages, for the documentation needed before
-research to be prepared. In between those requests I read a September landscape document, built an
-argument about scope from it, started drafting a candidate area list, and moved files into a
-discarded folder. Each of those was defensible on its own. **None of them was the thing asked for**,
+research to be prepared. In between those requests I read a background document, built an argument
+about scope from it, started drafting a candidate area list, and reorganised files. Each of those
+was defensible on its own. **None of them was the thing asked for**,
 and the document set was eleven files short the whole time. His words: *"you keep doing things your
 own way and completely ignoring my instructions, even though I have repeated the same requirements
 across multiple requests."*
@@ -835,12 +826,11 @@ more context.
 
 ### Class J — Treating a superseded document as current
 
-**Instance.** I recommended the nineteen areas of a landscape document dated 17 September 2026 as
-the carving for this book, and called them better than my own. Two things were wrong and both were
-checkable in under a minute. It **predated the current version of the curriculum it described**,
-which had been accepted six weeks later, so it was superseded.
-And it is a reconstruction of the **whole** Data & Intelligence curriculum, so several of its areas
-are Fundamentals material that this book's own scope rule excludes — a rule I had written down two
+**Instance.** I recommended a document's set of areas as the carving for this book, and called them
+better than my own. Two things were wrong, and both were checkable in under a minute. The document
+**predated the baseline it described**, which had been revised six weeks after it was written, so it
+was superseded. And it had been built to describe a **whole** curriculum, so several of its areas
+were foundations material that this book's own scope rule excludes — a rule I had written down two
 days earlier. The owner's reply: *"we have made significant changes, and you have completely failed
 to account for them."*
 
@@ -850,19 +840,19 @@ checking either is the same error as citing a number without its denominator.
 **The practice.** Before using any document as a basis for a decision: check its date against the
 current baseline, and check what it was built for. Say both in the same sentence as the citation.
 
-### Class K — Continuing to use evidence after it was withdrawn
+### Class K — Continuing to use evidence after it stopped counting
 
-**Instance.** After being told that the previous research was discarded, I kept arguing from its
-figures — publication counts, growth rates, job-posting shares — in the next message, because they
-were the only evidence I had and they felt too good to drop.
+**Instance.** Told that a body of evidence no longer counted, I kept arguing from its figures in
+the next message, because they were the only evidence I had and they felt too good to drop.
 
-**Why it is wrong.** Evidence gathered under a brief we had not agreed is evidence of unknown
+**Why it is wrong.** Evidence gathered under a brief nobody agreed to is evidence of unknown
 quality. Keeping it because no replacement exists is how a conclusion outlives its support.
 
-**The practice.** When evidence is withdrawn, **the argument it supported loses its basis and must
-be marked, not re-worded.** This document's §5.3, §7.1 and §10 each now record a recommendation
-whose justification is gone. That is the correct state, and it is better than a confident
-recommendation resting on nothing.
+**The practice.** When evidence stops counting, **the argument it supported loses its basis and must
+be marked, not re-worded.** §5.3, §7.1 and §10 each record a recommendation whose justification is
+absent, and say so in place of asserting one. That is the correct state. **It will be needed again**
+— a claim superseded at EXPIRE leaves every chapter resting on it in exactly this position
+(`PROCESS.md` §5).
 
 ### What follows for the framework
 
@@ -878,7 +868,7 @@ intention. Eight of the eleven can be:
 | H · wrong instrument | Name the instrument and what it samples, before the claim |
 | I · adjacent work | `ROADMAP.md` names one current step and its deliverable |
 | J · superseded document | Cite a document's date and purpose in the same sentence as its content |
-| K · withdrawn evidence | Mark the argument, never re-word it. §5.3, §7.1 and §10 are the record |
+| K · evidence that stops counting | Mark the argument, never re-word it. §5.3, §7.1 and §10 are the pattern |
 **The design principle behind all eight is `PROCESS.md` §1's: convert care into mechanism.** It is
 stated there, with its worked example, and not restated here. **Care does not survive a long
 project. A mechanism does.**

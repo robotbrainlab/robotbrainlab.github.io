@@ -1,27 +1,7 @@
-# Area research brief — template
+# Area research brief
 
-**Version 3, 2026-11-06.** **This is the only active research brief.**
-
-## What changed in version 3, and why
-
-An independent audit of the documentation found that version 2 **did not collect two of the five
-things the owner requires per area**, and that three of its required fields silently rejected
-subjects before the owner could see them. Six fixes:
-
-| # | Fix | Why |
-|---|---|---|
-| 1 | **New `## Overview` output section** — the area's share, dominance, industry adoption and growth, with the method for each | `../GOAL.md` §10 requires the research to begin with this, and version 2 had no area-level output at all |
-| 2 | **New `SKILLS` field** per subject | `../GOAL.md` §3.1 question 5 requires it, and §10 says two blocking decisions *close only* on this evidence. Version 2 did not ask for it |
-| 3 | **New `TRANSITION` field** per subject | `../GOAL.md` §3.1 question 4 requires it: what is still experimental and what is now established practice |
-| 4 | **`BUILDABLE` no longer rejects cluster-scale work.** It asks what reproducing the central result actually takes, and then for the smallest experiment that teaches the mechanism — or a plain statement that none exists | Version 2 demanded one engineer, one day, no accelerator. Any area whose live work needs a cluster failed the buildable test and was rejected **before the owner saw it** — a scope narrowing by the instrument, against the owner's stated instruction that the scope is not to be narrowed unnecessarily |
-| 5 | **`LIVE RESEARCH` accepts "no recent activity" as an answer**, with what was searched, instead of voiding the record | Version 2 required two dated items from twelve months and voided any record missing a field. A foundational but quiet subject could not be reported at all. **An absence of recent work is evidence, not a failure to collect it** |
-| 6 | **`FOUNDATIONS` no longer assumes a single canonical reference exists** | It often does not, and demanding one invites invention |
-
-Also: `FOUNDATIONS-ONLY` is now defined; the stale instruction about this repository is corrected.
-
-**Version 1** is at `../../discarded/pilot-01-systems-brief.md`. It was run once as an instrument
-test and its output is discarded. The four changes version 2 made to it, and the six above, are the
-only things carried from that run — all of them about the instrument, none about any field.
+**The research brief.** Fill in the placeholders and run it. Do not rewrite it: if a change is
+needed, change this file and say in the commit what the change fixes, so the next run inherits it.
 
 ## How to fill this in
 

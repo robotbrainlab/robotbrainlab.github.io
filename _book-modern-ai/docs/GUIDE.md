@@ -29,9 +29,12 @@ every answer it will carry.** This is the single most consequential sentence in 
 
 ## 2. The reader
 
-**[STATED]** One reader: the owner. He reads the whole book, works every exercise and lab, and
-builds the recommended projects. He verifies what he learns against authoritative sources and does
-not take the book's word for anything.
+**[STATED]** The reader works through everything: the explanations, the exercises, the labs and the
+recommended projects. He verifies what he learns against authoritative sources and does not take
+the book's word for anything.
+
+**[STATED]** The owner is the reader the book is written for. **Whether he is the only one is
+`[OPEN]` below** — who it is written for and who may read it are different questions.
 
 **[I RECOMMEND]** what the book may assume, as a proposal:
 
@@ -53,11 +56,14 @@ or lineage:
 
 **Why it is stated this way.** The owner first proposed drawing the line at the establishment of
 language models and their theory, then asked whether that would affect other areas of AI. It would.
-That line traces one lineage — mathematics, statistics, classical learning, deep learning,
-representations, language models — and it locates anything *on* that lineage precisely while saying
-nothing about anything *off* it. Control theory, classical forecasting, symbolic methods and the
-engineering of accelerators are all unlocated by it, and anything whose foundations are old looks
-excluded for being old, which is the wrong reason.
+A boundary drawn at a point in one developmental lineage locates anything *on* that lineage
+precisely and says nothing about anything *off* it. **Three kinds of thing fall through:** an
+engineering discipline the lineage never touched, a method whose foundations predate the whole
+lineage, and a subject whose own history crosses the line several times. And anything old looks
+excluded **for being old**, which is the wrong reason to exclude a live subject.
+
+**None of that names what this field contains** — the research does that. It names the shapes of
+thing a lineage boundary cannot place.
 
 A boundary about state applies to every area identically, whatever its lineage, and it needs no
 external document to apply.
@@ -131,7 +137,7 @@ written to be followed and corrected, not to be derived again from somewhere els
 | 8 | **Tables compare; prose explains.** Never prose doing a table's job | both |
 | 9 | **One word per concept, forever.** Name the field's shorthand once, then never alternate | rigorous |
 | 10 | **Limits are stated as decisions, not gaps** | both |
-| 11 | Chapters **keep their promises out loud** — *conditional on §7's decision; if references go by concept, this habit is dropped and §7 says why* | neither |
+| 11 | Chapters **keep their promises out loud** — *conditional on §7's decision; if references go by concept this habit is dropped, and §7 says what that costs* | conditional |
 | 12 | **The arithmetic is done, not described** | rigorous |
 | 13 | Where a subject's **practical stakes** are known, name them plainly and without inflation — what it is used for, what it costs to get wrong | both |
 | 14 | **Density without padding.** Density is a feature; filler is not | rigorous |
@@ -143,8 +149,9 @@ written to be followed and corrected, not to be derived again from somewhere els
 - Bolding a phrase for emphasis is house style and is **not** a term. Only the Key Terms table
   decides.
 - Library and command names go in code font, not bold, and not in the glossary.
-- **The field's own shorthand is named once**, by the chapter that owns the concept, and recorded in
-  `LEDGER-SHORTHAND.md`. Every later chapter may use it and must not re-explain it.
+- **The field's own shorthand** is handled by `LEDGER-SHORTHAND.md`, which owns the rule for where
+  it is named and which chapter may use it. What belongs here is only the voice habit: **one word
+  per concept, and never alternate between two.**
 
 ## 5. What a chapter is
 
@@ -185,8 +192,13 @@ without the dispute.
 ### Every claim carries its evidence
 
 **[AGREED]** A claim may not be stated above the strength of its source, and the source is quoted.
-Every size claim names what it is a share of. A claim recorded as `contested` in `CLAIMS.tsv` may
-not be stated as settled.
+A claim recorded as `contested` in `CLAIMS.tsv` may not be stated as settled, and one recorded as
+`superseded` may not be stated as current.
+
+**[AGREED]** **A number appears as a count with its source, or as a ratio against a denominator
+somebody else defined.** Never as a share of "the field": nobody can define that denominator, so no
+reader can check it. `briefs/TEMPLATE-area-research.md` states the rule for the research; this is
+the same rule for the book.
 
 **[I RECOMMEND]** **Correctness outranks the source.** Where a well-known explanation is wrong, the
 book states the correct rule and flags the correction, because that is the reader's only way to
@@ -223,8 +235,9 @@ That last line is load-bearing. Without it a lab gets quietly tuned until it con
 ### Rules for every lab
 
 - **Isolated and safe.** Its own fresh folder. It never touches anything outside it.
-- **State the hardware** it needs. If it needs more than one accelerator, give a reduced version
-  that needs none, or say plainly that there is none.
+- **State what it needs to run** — hardware, time, and cost where that is material. Where the full
+  experiment needs more than the reader is likely to have, give a reduced version that fits, **or
+  say plainly that there is none.** Do not shrink an experiment until it no longer shows the thing.
 - **The book ships its own data** where data is needed, in `data/<chapter-slug>/`, which is
   published beside the book and listed in `PROCESS.md` §11. No lab says "your own files": an
   expected result that depends on the reader's files holds for nobody. A lab may read `data/` and
@@ -263,8 +276,10 @@ times. Habit 11 in §4 is the casualty, and it is a real loss.
 > **Does the reader need this to tell whether a claimed improvement is real, and to build the thing
 > that tests it?**
 
-That is sharper than "go deeper". It admits the statistics of comparison and enough optimisation
-theory to read a training paper, and it still excludes mathematics that only decorates.
+That is sharper than "go deeper". It admits the statistics of comparison, and enough of whatever
+theory a subject's own papers assume that the reader can follow one critically — **which theory
+that is depends on the subject, and the research says.** It still excludes mathematics that only
+decorates.
 
 **[I RECOMMEND]** Mathematics is written as raw LaTeX, never as `$…$`, so that a price like $5 stays
 text. **Inline** mathematics uses `\(` and `\)`; **display** mathematics uses `\[` and `\]`, in a
@@ -307,8 +322,12 @@ latex/       generated. Never edited
   sections and `###` subsections.
 - **Callouts:** `> **Tip:** …`, `> **Note:** …`, `> **Warning:** …`. A `Note:` marks anything that
   will date.
-- **Code blocks** always carry a language tag. `text` for output. Box-drawing diagrams in `text`
+- **Code blocks** always carry a language tag. `text` for output. Hand-drawn diagrams go in `text`
   blocks, at most 64 characters wide, every line the same width.
+- **A block holding a program's captured output carries `<!-- captured -->` on the line before it.**
+  This is how the render check knows not to police its width — a captured block may never be edited
+  by hand, so a wide one is fixed in the program. **Writing that marker on a block no program
+  produced defeats the check**, and no gate can detect it.
 - **Generated appendices.** The glossary comes from the Key Terms tables and the cheat sheet from
   the Worth Memorising tables. Never edit a generated file by hand.
 - **The index is generated too**, from the Key Terms tables: one entry per term, pointing at the
@@ -330,15 +349,15 @@ improving this book cannot break anything else.
 - Never organises by vendor, product, framework or model name. Always by capability.
 - Never states a claim above the strength of its source.
 - Never presents a subjective estimate as an established fact.
-- Never gives a number without saying what it is a share of.
-- Never deletes a superseded claim. It stays, with the date and the reason, because that something
-  *was* believed is the lesson a research engineer most needs.
+- Never gives a number without its source, or a ratio without a denominator a reader can check.
+- Never deletes a superseded claim — **`PROCESS.md` §4.1 owns that rule**, and the book's side of it
+  is that such a claim appears dated and labelled, never silently replaced.
 
 ## 12. Acceptance — a chapter is not done until
 
 **[I RECOMMEND]**
 
-- All gates pass.
+- Every gate `CLEAN`, or `VACUOUS` with a reason given in the record (`GATES.md`).
 - Every command and code sample has been run.
 - Its acceptance questions can be answered from it — **or** answered by a dispute record that says
   so (§5 part 6).
