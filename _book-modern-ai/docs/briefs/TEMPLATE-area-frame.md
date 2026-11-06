@@ -11,8 +11,8 @@ under**, so the boundaries come from evidence with a source rather than from any
 
 ## How to fill this in
 
-Replace `<FIELD>`, `<OUTFILE>`, `<CAP>`, `<RUN-ID>` and `<FLOOR>`. **Change nothing else, and add no
-examples.** If a change is needed, change this file and say in the commit what it fixes.
+Replace `<FIELD>`, `<OUTFILE>`, `<RUN-ID>`, `<FLOOR>` and `<SEARCH-FLOOR>`. **Change nothing else,
+and add no examples.** If a change is needed, change this file and say in the commit what it fixes.
 
 - **`<FIELD>`** is the field being divided, in the exact words the agent will be given. **It is the
   single input that most determines the answer**, because different wordings return different
@@ -23,10 +23,18 @@ examples.** If a change is needed, change this file and say in the commit what i
   `frames/` subdirectory keeps these out of the scouts' namespace, where a dated filename is read as
   an area slug (`../../research/README.md`).
 - **`<RUN-ID>`** is `a` for the first run, `b` for the second. **Run this brief twice.**
-- **`<CAP>`** is the maximum number of candidate areas to report.
-- **`<FLOOR>`** is the minimum number of sources that must be fetched. **Four is the starting
-  value.** Without a floor, a run that opens two listings, fills every field and stops has obeyed
-  the brief exactly — and a thin list looks identical to a thorough one.
+- **There is no cap on candidate areas.** The first two runs each had one, each hit it, and **each
+  invented its own rule for cutting the list down** — an attestation threshold in one, a tiebreak in
+  the other. Neither was asked for, and one of them reported that a different tiebreak over the same
+  sources would have produced a different list. **A cutting rule is a decision about how the field
+  divides, which is the owner's.** So the run reports every category its sources name, and he cuts.
+- **`<FLOOR>`** is the minimum number of sources that must be fetched. **Five is the starting
+  value**, raised from four because four was reachable without searching. Without a floor, a run
+  that opens two listings, fills every field and stops has obeyed the brief exactly — and a thin
+  list looks identical to a thorough one.
+- **`<SEARCH-FLOOR>`** is the minimum number of searches that must be spent. **Ten is the starting
+  value.** The first two runs used two and four of twenty-five: each hit a blocked page, recorded
+  the loss, and stopped rather than looking for another route to the same taxonomy.
 
 **Where to run it.** **In a fresh session outside this repository**, with no project file in its
 context. Telling an agent to ignore files already attached to it does not work: it cannot unread
@@ -121,21 +129,38 @@ SIZE SIGNAL     an absolute count with its source, or a ratio against a denomina
                 check it. Write "none available" rather than estimating
 SOURCE DISAGREES  where another source splits, merges or omits this category
                 differently. "none found" is a complete answer
+ATTESTED BY     how many of your sources name this category, and which ones.
+                A count, for the owner to cut on. NOT a score: you may not
+                order by it, drop anything for a low one, or comment on it
 ```
 
 **TARGET**
 
-At most `<CAP>` candidate areas, from at least `<FLOOR>` fetched sources of at least three different
-kinds. **A cap, not a goal.** Report fewer complete units rather than more incomplete ones.
+**Every category your sources name, with no exceptions and no selection rule of your own.** From at
+least `<FLOOR>` fetched sources of at least three different kinds, having spent at least
+`<SEARCH-FLOOR>` searches.
 
-**Say whether you hit the cap**, and if so which categories you left out and on what basis — that is
-a finding about the cap, not a tidy-up. **Say if you could not reach the floor**, and what you
-reached instead.
+**You may not filter the list.** Not by how many sources attest a category, not by a tiebreak, not
+by your sense of what belongs together, not to keep the list a readable length. **If your sources
+name forty categories, report forty.** A long list with source counts is exactly what the owner
+needs in order to cut it himself; a short list cut by your rule tells him nothing about what you
+removed.
+
+**Each unit carries `ATTESTED BY`** — how many of your sources name this category, and which. That
+number is what he cuts on. **It is not a score and you may not order by it.**
+
+**Say if you could not reach either floor**, and what you reached instead.
 
 **BUDGET**
 
-25 searches, 25 fetches. Spend them on reaching the category listings themselves rather than on
-reading about them.
+25 searches, 25 fetches, and **at least `<SEARCH-FLOOR>` searches must be spent.** Spend them on
+reaching the category listings themselves rather than on reading about them.
+
+**A page you cannot reach is not a lost source until you have searched for another route to it.**
+When a fetch returns 403, redirects away, or renders without the list, **search for the same
+taxonomy elsewhere** — a mirror the body itself publishes, a different page of the same site, the
+listing quoted in full by the organisation that owns it. Only after that does it become a loss, and
+then you report both the block and the search that failed.
 
 **WHAT THIS RUN COULD NOT SEE**
 
@@ -170,6 +195,11 @@ missed is worth more than a longer list.**
   Not in the list, not in the summary, not in passing. An ordering is an argument disguised as a
   report.
 - **Ordering the list by anything but the alphabet.**
+- **Any selection rule of your own** — a threshold, a tiebreak, a minimum source count, a judgement
+  that two categories are "really" one beyond the merge rule above, or any cut made to keep the list
+  short. **Report everything your sources name.** Deciding which categories survive is the owner's
+  job and the single thing this run must not do for him.
+- **Abandoning a blocked source without searching for another route to it.**
 - **A number without what it is a ratio of**, and any share of the whole subject.
 - **Resolving a disagreement between sources** by picking the one you find more convincing.
 - **Splitting a source's category on your own judgement.** Only another source may split it.
@@ -183,9 +213,12 @@ you had not opened. **A short list with an honest coverage section is a complete
 
 **STOPPING RULE**
 
-Stop when every candidate area has `NAME`, `LEVEL`, `SOURCES`, `INCLUDES` and `EXCLUDES` filled from
-a named source, the remaining fields filled or honestly marked `none found` / `none available`, and
-the floor reached or its shortfall reported — **or** when the budget is spent. Do not keep searching
+Stop when **both floors are reached** — `<FLOOR>` fetched sources and `<SEARCH-FLOOR>` searches
+spent — **and** every category your sources name has `NAME`, `LEVEL`, `SOURCES`, `INCLUDES`,
+`EXCLUDES` and `ATTESTED BY` filled, with the remaining fields filled or honestly marked
+`none found` / `none available` — **or** when the budget is spent. **Reaching the source floor is
+not a reason to stop searching**: the first two runs stopped there and lost three taxonomies between
+them that a search might have reached. Do not keep searching
 for a better carving: there is no better carving to find, only more sources, and the coverage section
 is where that is reported.
 
