@@ -1,7 +1,10 @@
 # The gates
 
 Fourteen checks, run by `bash tools/check-all.sh`, which must end `ALL GATES PASS`. **Fourteen
-entries, fifteen scripts** — entry 10 is two generators checked the same way.
+entries, sixteen scripts** — entry 10 is three generators checked the same way.
+
+**None of this is built yet.** `ROADMAP.md` step 10 builds it, and the present tense below is the
+specification each script is written against, not a report that it runs.
 
 **This file is the specification.** `PROCESS.md` §9 lists the gates and points here; it does not
 describe them. Each entry below says what the gate reads, what makes it fail, and what it prints.
@@ -55,8 +58,9 @@ research that fed it, a website, a roadmap, a curriculum, a learning path, numbe
 or an agent. Also any first-person reference to the writing process.
 **How:** a pattern list, in `tools/voice-patterns.txt`, one regex per line with a comment saying
 what defect it was added for. The list is the gate; adding a pattern is how the gate learns.
-**Seeded, when the gate is built, from the prohibitions in `GUIDE.md` §11** — one pattern per
-prohibition, which is where the first entries come from rather than from invention. Thereafter a
+**Seeded, when the gate is built, from `GUIDE.md` §11's first prohibition and §12's last line** —
+the two that concern self-reference, which is all this gate can express as a pattern. §11's other
+prohibitions are gate 12's and pass 2's, and none of them is a regex. Thereafter a
 pattern is added only when something gets past the gate, and the comment names what.
 **Why it is worded this way:** the book is independent and self-contained, so it has no origins to
 disclose — and a chapter that mentions the apparatus breaks the reader's footing. *Prove it* by
@@ -164,12 +168,12 @@ until there is a build, it prints `VACUOUS`.
 sub-section nested under the wrong parent; the back matter nested under the last chapter.
 **Why:** every other gate reads Markdown. **None of them opens the output.**
 
-## 10 · `tools/glossary.py --check` and `tools/cheatsheet.py --check` — generated appendices are current
+## 10 · `tools/glossary.py --check`, `tools/cheatsheet.py --check` and `tools/changelog.py --check` — generated pages are current
 
-**Reads:** every `Key Terms` and `Worth Memorising` table, and the generated appendices.
-**Fails on:** any difference. The appendices are generated and go stale the moment a chapter
-changes.
-**Why:** writing a glossary at the end means writing it from memory.
+**Reads:** every `Key Terms` and `Worth Memorising` table, every chapter record's operation rows, and the three generated pages — the glossary, the cheat sheet and `CHANGELOG.md`.
+**Fails on:** any difference. All three are generated and go stale the moment a chapter changes.
+**Why:** writing a glossary at the end means writing it from memory, and a hand-written changelog
+records what the writer remembers changing.
 
 ## 11 · `tools/verify-bank.py` — every acceptance question has an owner
 
@@ -205,7 +209,8 @@ signal the carving is wrong, and it belongs in the cycle's operation counts.
 
 ## 14 · `tools/verify-expiry.py` — what has gone stale
 
-**Reads:** `CLAIMS.tsv`.
+**Reads:** `CLAIMS.tsv`, **and `CHANGELOG.md` for the last `cycle-boundary` line** — nothing else
+defines where a cycle begins, and this gate behaves differently at a boundary.
 **Fails on:** nothing during a cycle. **Exits 1 only at a cycle boundary**, when a claim is past its
 `review_by` and has not been re-verified.
 **Prints always:** every claim within thirty days of expiry, so a cycle can be planned. **Thirty

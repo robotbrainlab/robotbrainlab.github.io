@@ -52,14 +52,17 @@ sha256:
       in the report
 - [ ] A disputed subject carries `## What is disputed` in the fixed shape, including **what
       measurement would settle it**
-- [ ] The lab states the hardware it needs, and gives a no-hardware version or says there is none
+- [ ] The lab states the hardware it needs, and gives the reduced version `GUIDE.md` §6 requires —
+      or says plainly that there is none
 
 ## After writing
 
 - [ ] Every gate `CLEAN` or `VACUOUS` on this chapter, **and every `VACUOUS` explained** — a
       chapter with no arithmetic or no absolutes gets `VACUOUS` from those gates and that is
       correct, but an unexpected `VACUOUS` means the gate found nothing to read (`GATES.md`)
-- [ ] `make` → 0 overfull · 0 missing glyphs · 0 undefined
+- [ ] **The book builds clean** — 0 overfull lines, 0 missing glyphs, 0 undefined references. Write
+      the command and its counts. **While the build toolchain is `[OPEN]` (`GUIDE.md` §10) there is
+      nothing to run: write `no build yet` and move on**
 - [ ] Index entries read one by one against Key Terms **before** review
 - [ ] **Pass 1, completeness review** — launched with the brief in `briefs/`
 - [ ] Each finding **verified before accepting**; each fix **swept book-wide, counted before and
@@ -69,8 +72,11 @@ sha256:
 - [ ] **Pass 4, fix verification** — launched, naming every changed passage
 - [ ] `LEDGER-TAUGHT.md` row added; `LEDGER-SHORTHAND.md` updated; `OWNERSHIP.tsv` updated
 - [ ] `LEDGER-DEFECTS.md` updated if a new defect class appeared
-- [ ] `CHANGELOG.md` **operation rows recorded** — `ADD`, `SPLIT`, `MERGE`, `RETIRE`, with the
-      kind (new / revised / overturned). The page itself is generated from these, never written
+- [ ] `CHANGELOG.md` **operation rows recorded** — every operation this chapter needed, from the six
+      in `PROCESS.md` §5.2, with the kind (new / revised / overturned). `ADD`, `SPLIT`, `MERGE` and
+      `RETIRE` are decided here; a `NEW QUESTION` or `RECARVE` is the owner's and its row is written
+      at PLAN, so record `none` rather than leaving the field empty. The page is generated from
+      these rows, never written
 - [ ] Every acceptance question in `ACCEPTANCE.md` keyed to this chapter marked `answered`,
       `answered-as-disputed` or `cannot` — and **a `cannot` reopens the chapter or moves the
       question with a reason**

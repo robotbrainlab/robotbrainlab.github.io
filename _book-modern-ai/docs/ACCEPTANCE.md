@@ -30,8 +30,8 @@ answer out loud in about a minute.** Not a quiz item, not a definition prompt, n
 ## The acceptance rule
 
 > **A chapter is not finished until each of its questions can be answered from the chapter
-> alone — or until a question is answered by a dispute record that says the answer is not
-> settled, and says so explicitly.**
+> alone — or until a question is answered by the chapter's `## What is disputed` section, which
+> says explicitly that the answer is not settled.**
 
 That second clause is the change this book needs and a settled-subject book does not. For a
 disputed subject the honest answer is *"this is contested, here is the state of the dispute, and

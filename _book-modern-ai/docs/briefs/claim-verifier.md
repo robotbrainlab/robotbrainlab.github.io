@@ -38,7 +38,8 @@ settled?
 3. **Check whether the source has changed.** A new version, an erratum, a retraction notice, a
    withdrawal. **Say the version and the date of what you read.**
 4. **Look for a direct rebuttal.** Has anyone published a result contradicting this? A claim with a
-   published rebuttal is `contested`, whatever its original source says.
+   published rebuttal gets `state = contested` and `maturity = disputed`, whatever its original
+   source says. **The two columns are different questions** — see `../CLAIMS.tsv`.
 5. **Judge the recorded strength.** A paper whose authors sell the thing it measures is `vendor`,
    not `preprint`, however it is published.
 6. **Establish its maturity. This is the expensive half of the job and the reason this pass
@@ -80,7 +81,7 @@ the recorded one.
 Any published result contradicting it, with its source. "None found" if none.
 
 ## Maturity
-One of: established · converging · contested · single-source · unexamined.
+One of: established · converging · disputed · single-source · unexamined.
 Then the basis, in CLAIMS.tsv's exact vocabulary: which signal you found, and
 where. A maturity with no basis will be rejected.
 

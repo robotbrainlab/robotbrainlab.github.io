@@ -461,13 +461,16 @@ marked rather than hidden.**
    and **nothing here establishes that one is.** The research either finds such a subject or it does
    not; until then candidate C has no basis, and it stays on the list only because it is cheap to
    adopt if the research does find one.
-2. **An area has to be finishable on its own.** This one stands, because it rests on how the book
-   gets produced rather than on research: with agent help, text is written far faster than it can be
-   read and worked through (§12.1). An area that is a complete unit is something the owner can work
-   through and finish; an area smeared across the whole book is not.
+2. **An area has to be finishable on its own.** This one does not depend on the research, but it
+   does rest on an unmeasured belief, so it is marked: **if text is produced faster than it can be
+   worked through — likely, but nobody here has measured it (§12, item 1)** — then an area that is a
+   complete unit is something the owner can finish, while an area smeared across the whole book is
+   not. If the rates turn out comparable, this reason weakens and B is left standing on nothing
+   either.
 
-**So the honest state is:** B rests on a sound argument, C rests on nothing yet, and the combination
-is a guess until the research speaks.
+**So the honest state is:** both halves rest on something unestablished — C on a shared subject the
+research has not found, B on a production rate nobody has measured — so the combination is a guess
+until the research speaks and the first cycle is timed.
 
 **[I RECOMMEND]** that this stays **[OPEN]** until the subjects are known, for the sequencing
 reason at the head of this section. **A structure chosen now is a structure chosen from my
@@ -808,7 +811,7 @@ the gap.
 research to be prepared. In between those requests I read a background document, built an argument
 about scope from it, started drafting a candidate area list, and reorganised files. Each of those
 was defensible on its own. **None of them was the thing asked for**,
-and the document set was eleven files short the whole time. His words: *"you keep doing things your
+and the documents he had asked for did not exist the whole time. His words: *"you keep doing things your
 own way and completely ignoring my instructions, even though I have repeated the same requirements
 across multiple requests."*
 
@@ -916,8 +919,8 @@ project. A mechanism does.**
   documentation architecture are a separate proposal, by the owner's instruction.
 - **The table of contents.** No subjects are chosen here, and none may be chosen until the research
   has run and the owner has selected from what it returned (`ROADMAP.md` steps 5 and 6).
-- **Any decision marked `[OPEN]`.** The count is not stated here on purpose: a hand-maintained
-  count drifts, and this document has already carried a wrong one. **Grep for `[OPEN]`.** The ones
+- **Any decision marked `[OPEN]`.** The count is not stated here on purpose — a hand-maintained
+  count drifts out of step with the markers it counts. **Grep for `[OPEN]`.** The ones
   that block the rest are in §10 — the book's shape, the mathematics boundary, and which area goes
   deep if the shape is asymmetric — and all three need the research first.
 

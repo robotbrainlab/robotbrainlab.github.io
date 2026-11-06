@@ -181,8 +181,12 @@ written to be followed and corrected, not to be derived again from somewhere els
 
 ### The rule that governs the body
 
-**[STATED]** The five dimensions must **not** become five sections. **`GOAL.md` §4.1 owns that rule**
-and gives the owner's reasoning; what follows is its consequence for the anatomy above.
+**[STATED]** The owner's rule is that the book **bridges** scientific understanding, active research
+and practical engineering "rather than treating them as separate disciplines." **`GOAL.md` §4.1 owns
+it** and quotes him.
+
+**[I RECOMMEND]**, as `GOAL.md` §4.1 also does and at that strength: dimensions 2, 3 and 4 must not
+become three sections. What follows is its consequence for the anatomy above.
 
 **[I RECOMMEND]** The operative form: **dimensions 2, 3 and 4 are one object seen at three
 distances.** A chapter is organised around a mechanism or a question, and the science, the dispute
@@ -344,8 +348,9 @@ improving this book cannot break anything else.
 
 **[STATED]**
 
-- Never mentions a website, a roadmap, a learning path, numbered steps or tracks. Every chapter
-  stands alone.
+- **Never refers to anything outside itself that organises learning** — a website, a course, a
+  curriculum, a learning path, a numbered step or a named track — and never to its own planning
+  documents, research or machinery. Every chapter stands alone.
 - Never organises by vendor, product, framework or model name. Always by capability.
 - Never states a claim above the strength of its source.
 - Never presents a subjective estimate as an established fact.
@@ -359,8 +364,8 @@ improving this book cannot break anything else.
 
 - Every gate `CLEAN`, or `VACUOUS` with a reason given in the record (`GATES.md`).
 - Every command and code sample has been run.
-- Its acceptance questions can be answered from it — **or** answered by a dispute record that says
-  so (§5 part 6).
+- Its acceptance questions can be answered from it — **or** answered by its `## What is disputed`
+  section, which says plainly that the answer is not settled (§5 part 6).
 - Every load-bearing claim has a `CLAIMS.tsv` row with its source and strength, and none is stated
   above it.
 - The lab has been run **from the chapter text alone**, in a fresh folder, and produced a verdict.
@@ -368,4 +373,4 @@ improving this book cannot break anything else.
 - `LEDGER-TAUGHT.md` has its row. `LEDGER-SHORTHAND.md` has any shorthand this chapter names.
 - `OWNERSHIP.tsv` records every concept the chapter owns, with no collision.
 - Every page has been looked at.
-- Nothing refers to a website, a roadmap, numbered steps or tracks.
+- Nothing refers to any outside scheme that organises learning, or to the book's own making (§11).

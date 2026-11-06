@@ -42,9 +42,11 @@ boundary, in this file, in this exact form:
 cycle-boundary: N  YYYY-MM-DD
 ```
 
-`N` is the cycle number, zero-padded to two digits. The date is the day EXPIRE completed clean. The
-line is written at CLOSE, when the following EXPIRE finishes, and **the gate reads the last one**.
-Nothing else in this file may begin `cycle-boundary:`.
+`N` is the cycle number, zero-padded to two digits — **the cycle the boundary opens.** The date is
+the day EXPIRE completed clean. **EXPIRE writes the line itself, as its last act**, because the
+boundary is the moment EXPIRE completes and no later stage can record an event that precedes it
+(`PROCESS.md` §5). **The gate reads the last such line.** Nothing else in this file may begin
+`cycle-boundary:`.
 
 ### Boundaries
 

@@ -41,7 +41,7 @@ occasion, because a story invites the reply that it will not happen here.
 
 | Rule | Why it exists |
 |---|---|
-| **One chapter at a time. Never a part at a time** | Context dilution causes invented content. Writing several chapters in one stretch pushes the first chapter's sources out of working context, and it then gets written from the pattern of the previous chapters rather than from its material |
+| **One chapter at a time. Never a part at a time** | Writing several chapters in one stretch pushes the first chapter's sources out of working context, and it then gets written from the pattern of the previous chapters rather than from its material. **That a diluted context is what makes an agent invent content is a belief about how agents fail, with no measurement behind it here** — but the rule costs one chapter of parallelism, and the failure it guards against is a chapter written from nothing |
 | **Sources read in full, immediately before writing** — not earlier in the session | Reading earlier in the session means the sources are out of working context by the time the chapter is written, and the chapter then gets written from memory of them. Named in the record, with what was read |
 | **Non-scope declared in the record before writing** | Without an edge, review never terminates. Once a chapter claims to handle any case, "what about X?" is always a correct question and every answer creates the next one |
 | **A completeness review against the sources, side by side** | A reviewer checks what is present against the sources; nothing in that act surfaces what is absent from both |
@@ -52,7 +52,7 @@ occasion, because a story invites the reply that it will not happen here.
 | **The record carries the chapter's hash, written last** | Editing one character afterwards makes the record stale and fails the suite |
 | **`amend` for a closed chapter that must change** | The quickest way past a stale hash is to re-hash by hand, which turns the record from evidence into decoration and leaves no trace that a published chapter moved |
 | **The stopping rule, with round-2 classification** | Round 2 findings about the *subject* mean the chapter is mis-scoped. Round 2 findings that are round 1's own unswept fixes mean the fix round was itself a drafting event. Conflating them mis-fires, and sends a sound chapter back to be narrowed |
-| **A taught-ledger with explicit "Do not" rows** | No gate looks at sequence. A chapter can be internally perfect and wrong about where it sits |
+| **A taught-ledger with explicit "Do not" rows** | **Gate 8 reads sequence, but only for terms that have a Key Terms row.** Nothing checks whether a chapter re-explains what the reader already has, or claims something false about what came before. A chapter can be internally perfect and wrong about where it sits |
 | **A shorthand ledger** — the clear name against the word the field actually says | A book naturally uses its own vocabulary throughout. A reader who searches it for the word they have heard elsewhere then finds nothing, even where the subject is covered at length |
 | **A defect ledger of *classes*, each with its instance and the practice** | A list of mistakes is not reusable. A class is |
 | **Concept ownership: each concept owned by exactly one chapter** | Some concepts are naturally touched by several chapters, and without an owner each one re-teaches it slightly differently |
@@ -87,8 +87,11 @@ answers one.
 
 **[I RECOMMEND]** `CLAIMS.tsv`, one row per load-bearing claim. This is the central change.
 
-**The schema is in `CLAIMS.tsv`'s own header and comment block, and nowhere else.** A copy here
-would drift from the file the moment a column changed, and the copy is what a reader would trust.
+**The schema is in `CLAIMS.tsv`'s own header and comment block**, and this file does not copy it: a
+copy here would drift the moment a column changed, and the copy is what a reader would trust. **The
+one permitted copy is in `briefs/TEMPLATE-area-research.md`**, because the agent filling that brief
+may not read project files and so cannot be sent to the source — the exceptions are in
+`../CLAUDE.md`.
 
 Eleven columns. The ones worth naming here, because the rest of this file refers to them:
 `maturity` (is the science settled), `class` (how long it will hold), `review_by` (when to look
@@ -197,10 +200,12 @@ EXPIRE → RESEARCH → CONFIRM → SELECT → PLAN → WRITE → VERIFY → CLO
 would demand that stale claims be re-verified at a point before the stage that re-verifies them.
 First, it also guarantees **no cycle is researched on top of claims known to be stale.**
 
-**A cycle boundary is the moment EXPIRE completes.** `tools/verify-expiry.py` needs a definition and
-this is it: CLOSE writes a dated `cycle-boundary` line into `CHANGELOG.md` when the following
-EXPIRE finishes clean, and the gate reads the last such line. Between boundaries the gate only
-reports; at a boundary it fails on any claim past its review date.
+**A cycle boundary is the moment EXPIRE completes, and EXPIRE writes it.** `tools/verify-expiry.py`
+needs a definition and this is it: on finishing clean, EXPIRE writes a dated `cycle-boundary` line
+into `CHANGELOG.md` for the cycle it is opening, and the gate reads the last such line. **The stage
+that creates the event is the stage that records it** — CLOSE cannot, because the boundary it would
+record falls after CLOSE has finished. Between boundaries the gate only reports; at a boundary it
+fails on any claim past its review date.
 
 **The key property:** EXPIRE replaces the full rescan. A cycle's size is set by what has actually
 gone stale, not by the calendar.
@@ -212,8 +217,8 @@ at CONFIRM**, not by a scout and not by a writer:
 
 | Column | Where it comes from |
 |---|---|
-| `claim` `source` `maturity` `maturity_basis` `class` | The scout's row, unchanged |
-| `source_strength` | The scout's `strength` field, renamed to the file's column name. **Same vocabulary, different column name** — the scout's brief calls it `strength` because the row it writes has no other kind |
+| `claim` `maturity` `class` | The scout's row, unchanged |
+| `source` `source_strength` `maturity_basis` | **Renamed, not changed.** The scout writes `source URL`, `strength` and `basis`; the columns are `source`, `source_strength` and `maturity_basis`. **Same vocabulary, different column names** — the brief uses short names because the row it writes has no other kind of source, strength or basis to distinguish them from |
 | `id` | Assigned here: **the area's number, a hyphen, and a zero-padded counter** — `A03-001`. A number rather than a slug, because a slug can itself contain a hyphen and then the id cannot be parsed. The area's number comes from the approved list at step 4. Never reused, never renumbered |
 | `verified_on` | **The date the claim verifier ran**, not the date the scout read it. A row the verifier has not touched leaves this empty, which is what marks it unconfirmed |
 | `review_by` | Computed from `class` and `maturity` by the policy in `GATES.md` |
@@ -355,16 +360,18 @@ claims against their recorded strength, and a reader proving a lab runs from the
 | **3 · Lab execution** | The chapter text only, in a fresh folder | Anything that does not run; anything that runs and disagrees |
 | **4 · Fix-verification** | **Only the named changed passages** | Survivals, and errors the fixes introduced |
 
-**Every review brief includes**, because the briefs that work are long and specific:
+**Two things are in every review brief**, and they are the two that fail silently:
 
-- the chapter path and its sources, named;
-- *"read BOTH in full"*, and anything not read closely;
-- the six finding categories above;
-- the chapter's **declared non-scope**, so findings outside it can be rejected;
-- the relevant taught-ledger rows and boundary cases, so they are not reported as errors — but ask
-  the agent to say if it thinks one is wrong;
-- specific claims to verify independently, named;
+- **delegation depth 0**, so the budget means something;
 - *"If unsure, say so rather than asserting. A wrong finding costs more than a missed one."*
+
+**Everything else is per pass, and each brief in `briefs/` specifies its own inputs.** Pass 1 reads
+widest and so takes the most: the sources named, *"read BOTH in full"*, the six finding categories,
+the chapter's declared non-scope so findings outside it can be rejected, the relevant taught-ledger
+rows, and specific claims to verify independently. **Passes 2, 3 and 4 deliberately read narrower**
+— the claims file, the chapter text alone, the changed passages — and giving them pass 1's inputs
+would widen them back into a second pass 1. A brief is filled in, never rewritten
+(`briefs/README.md`).
 
 For pass 4, additionally **every changed passage, listed**. A re-check told only "look at the
 chapter" re-reads everything and finds what pass 1 already found.
@@ -416,13 +423,13 @@ for setting a claim's review date**, which `tools/verify-expiry.py` reads.
 | Outline | The PDF outline nests correctly |
 | Glossary · cheat sheet | Generated appendices match their source tables |
 | Acceptance bank | Each record names the questions it owns |
-| Claims | Every load-bearing claim in a chapter has a `CLAIMS.tsv` row, and no claim is stated above its recorded strength |
+| Claims | The claim bookkeeping: a chapter's claims all have rows, a `contested` row's chapter carries a dispute section, a `superseded` row is not cited as current. **Not the wording** — that is pass 2's |
 | Ownership | No concept claimed by two chapters; no chapter teaching one it does not own |
 | Expiry | Lists every claim past its `review_by` |
 
-**Three cannot be built yet, and `GATES.md` says so in each one's own entry** rather than here: the
-boundary gate waits on the mathematics decision, the inputs gate on vocabulary the research seeds,
-and the outline gate on the build toolchain.
+**Three are not fully usable yet, and `GATES.md` says so in each one's own entry** rather than here:
+the boundary gate runs list-only until the mathematics decision, the inputs gate needs vocabulary
+the research seeds, and the outline gate cannot run at all until there is a build.
 
 ---
 
@@ -453,10 +460,12 @@ because they are properties of the process rather than of the book:
 ## 11. Documentation architecture
 
 **[I RECOMMEND]** A small multi-file structure, not one file. The owner's preference was one
-comprehensive file. The reasoning against it: an agent given one very long file spends context on
-what it does not need, and **context dilution is what makes an agent invent content** — so a single
-file makes the known failure mode more likely, not less. A fix-verifier needs the changed passages
-and the finding categories; it does not need the build conventions.
+comprehensive file. The reasoning against it: an agent given one very long file spends its
+attention on what it does not need. A fix-verifier needs the changed passages and the finding
+categories; it does not need the build conventions, and reading them crowds out the part that
+matters. **The stronger form of this — that a diluted context is what makes an agent invent
+content — is an unmeasured belief (§2)**, so the argument here rests on relevance instead, which is
+checkable: open any brief and count how much of a single combined file it would have to ignore.
 
 | File | Job | Change rate | Audience |
 |---|---|---|---|
@@ -479,10 +488,9 @@ and the finding categories; it does not need the build conventions.
 
 **Three rules that make multiple files safe**, which is the real answer to the owner's concern:
 
-1. **One file is authoritative per topic**, and `../CLAUDE.md` says which. **A rule may be referred
-   to from several files; it may be *stated* in only one.** A second statement is a defect even while
-   the two agree, because they will drift. Where a document needs a rule it does not own, it cites
-   the owner by filename and section.
+1. **One file is authoritative per topic**, and `../CLAUDE.md` says which — **and owns the
+   one-statement rule and its two exceptions**, which this file therefore does not restate. Where a
+   document needs a rule it does not own, it cites the owner by filename and section.
 2. **The precedence order is written down.** The repository beats every document; a machine-checked
    file beats prose; `GUIDE.md` beats `PROCESS.md` on anything about the book itself. This is the
    rule stated in `../CLAUDE.md`. The figures it cites come from a single preprint and are recorded

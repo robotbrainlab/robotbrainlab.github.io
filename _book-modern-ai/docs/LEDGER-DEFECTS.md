@@ -26,8 +26,10 @@ chapter.
 *Practice:* the coverage gate is a hint, and following the hint is manual. Read the plan's promise
 for the chapter and the chapter side by side, not the word lists.
 
-**2. A chapter can be internally perfect and wrong about where it sits.** No gate looks at
-sequence. `LEDGER-TAUGHT.md` is the only defence, and it has to be read for its `Do not` rows as
+**2. A chapter can be internally perfect and wrong about where it sits.** **Gate 8 reads sequence
+for terms with a Key Terms row, and that is the whole of the machine coverage.** Re-explaining what
+the reader already has, and claiming something false about an earlier chapter, are checked by
+nothing. `LEDGER-TAUGHT.md` is their only defence, and it has to be read for its `Do not` rows as
 well as its ownership rows.
 *Practice:* grep the taught-ledger for `Do not` before writing the opening paragraph.
 

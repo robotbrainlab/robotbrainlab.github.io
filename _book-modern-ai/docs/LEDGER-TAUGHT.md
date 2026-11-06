@@ -5,9 +5,11 @@ chapter**, and grep it for `Do not` before writing the opening paragraph.
 
 ## Why it exists
 
-No gate looks at sequence. A chapter can be internally perfect and wrong about where it sits: it
-can re-explain something the reader already has, assume something the reader does not have yet, or
-claim something false about what came before. This file is the only defence against all three.
+A chapter can be internally perfect and wrong about where it sits: it can re-explain something the
+reader already has, assume something the reader does not have yet, or claim something false about
+what came before. **Only the middle one has a gate** — gate 8 catches a term used before the
+chapter that owns it, and only where that term has a Key Terms row. **Nothing machine-checks the
+other two**, and this file is their only defence.
 
 ## How to use it
 

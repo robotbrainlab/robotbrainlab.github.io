@@ -29,7 +29,10 @@ confirm the chapter is fine.
 | `source-absence` | "the source does not state Y" | anything about what Y is |
 | `training-data-unverified` | nothing. **A chapter may not rest on one of these** | anything |
 
-**THE STATE VOCABULARY:**
+**THE STATE VOCABULARY.** This is the `state` column — where this project stands on the claim. **Do
+not confuse it with the `maturity` column**, which asks whether the science is settled and uses
+`disputed` for a rebutted claim. A row can be `maturity = disputed` and `state = verified`:
+the dispute is real and this project has confirmed that it is real.
 
 | State | Consequence for the chapter |
 |---|---|

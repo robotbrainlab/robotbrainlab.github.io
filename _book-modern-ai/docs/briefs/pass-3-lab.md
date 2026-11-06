@@ -43,11 +43,13 @@ You are testing a promise, so here is the promise. The specification requires ev
 - **ship its own data**, in a directory the chapter names. No lab may say "use your own files";
 - **pin every version**, and pin any model to a dated snapshot;
 - **print the identifier that came back** beside any figure that depends on it;
-- **state the hardware it needs**, and give a reduced version where the full one needs more than one
-  accelerator — or say plainly that there is no reduced version;
+- **state the hardware it needs**, and where the full experiment needs more than the reader is
+  likely to have, give a reduced version that fits — or say plainly that there is none;
 - **never promise exact output from a stochastic system.** It may say what shape the output takes,
   which assertion must pass, or give a range;
-- **take any credential from the environment.** Never from a file, and never printed or logged.
+- **take any credential from the environment.** Never from a file, and never printed or logged;
+- **declare what the book planted** in data it built itself — every property put there
+  deliberately, so no lab can report as a discovery something the data was built to contain.
 
 **Each of these is a thing to check.** A lab that breaks one of them is a finding even if it runs.
 
@@ -79,7 +81,7 @@ what you did instead. THIS IS THE MOST IMPORTANT SECTION — it is the one
 nobody else can produce.
 
 ## Promises kept and broken
-One line for each of the six requirements above: kept, broken, or not applicable.
+One line for each of the seven requirements above: kept, broken, or not applicable.
 Quote the chapter where it is broken.
 
 ## The numbers I got

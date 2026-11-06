@@ -28,7 +28,7 @@ Then read only what that step needs:
 | `docs/PLAN.md` | The spine and this cycle's subjects. **Empty, and says why** |
 | `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, strength, maturity and review date. **Empty** |
 | `docs/briefs/` | One brief per agent role. Fill one in; do not rewrite it |
-| `research/` `records/` `data/` | What the research returned, the per-chapter records, the labs' data. **All empty** |
+| `research/` `records/` `data/` | What the research returned, the per-chapter records, the labs' data. **No content yet; each holds a `README.md` saying what goes in it** |
 
 ## Precedence, when two documents disagree
 
@@ -43,6 +43,18 @@ Then read only what that step needs:
 **A rule may be cited from several files; it may be stated in only one.** A second statement is a
 defect while the two still agree, because they will drift. Cite the owning file and section.
 
+**Two exceptions, because without them the rule cannot be obeyed:**
+
+1. **A brief in `docs/briefs/` is self-contained.** The agent filling it is forbidden from reading
+   project files, so it cannot be sent to an owning document. A brief may therefore carry any rule
+   or vocabulary its agent needs — **copied word for word, never summarised**, so a drift is a
+   difference anyone can see.
+2. **This file may state the rules easiest to break**, in the list below, because its job is to be
+   read first and in full. Each entry names its owning file.
+
+**Everywhere else a second statement is a defect**, and a *summary* of a rule is a second
+statement of it.
+
 ## The rules that are easy to break
 
 - **The book is fully independent and self-contained.** Not a continuation, extension or revision of
@@ -52,8 +64,8 @@ defect while the two still agree, because they will drift. Cite the owning file 
 - **Duplication with anything outside this book is fine and expected. Duplication *within* this book
   is a defect** — one concept, one owning chapter (`docs/OWNERSHIP.tsv`). Two different rules.
 - **No topic gets less explanation because something else covered it.**
-- **Scope is a property of the subject, not a position in any curriculum.** Stated in full in
-  `docs/GUIDE.md` §3 and nowhere else — including not in short form here.
+- **The scope boundary.** Stated in full in `docs/GUIDE.md` §3 and nowhere else, **including not in
+  short form here** — read it there before deciding anything is in or out.
 - **Never state a claim above the strength of its source**, and quote the source.
 - **Give a count with its source, or a ratio against a denominator somebody else defined.** Never a
   share of "the field": nobody can define that denominator, so nobody can check it.
@@ -65,8 +77,9 @@ defect while the two still agree, because they will drift. Cite the owning file 
 - **Page estimates never decide scope.**
 - **Nothing is drafted until `docs/PLAN.md` is approved.**
 - **One chapter at a time. Never a part at a time.**
-- **The repository is public.** Scan for secrets before every commit. Never push as the
-  `dlakshmizlk` account.
+- **The repository is public.** Scan for secrets before every commit. **Push only to the
+  `github-robotbrainlab` remote**, which is the `robotbrainlab` account; never as the
+  `dlakshmizlk` account, which has write access and is the wrong identity for this work.
 
 ## Style, in everything the owner reads
 

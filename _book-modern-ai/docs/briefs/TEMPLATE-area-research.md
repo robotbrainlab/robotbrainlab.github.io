@@ -8,7 +8,7 @@ needed, change this file and say in the commit what the change fixes, so the nex
 Replace `<AREA>`, `<SCOPE>`, `<EXCLUDED>`, `<OUTFILE>` and `<CAP>`. Change nothing else. If a
 change seems necessary, change this template itself — `README.md` says how it is recorded.
 
-**`<OUTFILE>`** is `../research/YYYY-MM-DD-<area-slug>.md`, relative to `docs/briefs/` — one file
+**`<OUTFILE>`** is `../../research/YYYY-MM-DD-<area-slug>.md`, relative to `docs/briefs/` — one file
 per area per run, dated so two runs over the same area never collide. The slug is lower-case with
 hyphens.
 
@@ -131,8 +131,8 @@ enforced: a record that exceeds one is not finished, so cut it.
 | Value | Meaning |
 |---|---|
 | `CHAPTER` | All three. It earns a full chapter |
-| `FOUNDATIONS-ONLY` | Mechanism yes, buildable yes, **live research no** — the answer has settled. It is something the reader must know cold, taught as established knowledge rather than as a frontier, and it needs no dispute section |
-| `REJECT` | No mechanism, or nothing a reader can do. **Say which, and why** — a rejection may be reconsidered next cycle, and the reason is the only way to tell whether anything changed |
+| `FOUNDATIONS-ONLY` | Mechanism yes, buildable yes, **live research no** — the answer has settled, **and something still moving is unintelligible without it.** It is something the reader must know cold, taught as established knowledge rather than as a frontier, and it needs no dispute section |
+| `REJECT` | No mechanism, or nothing a reader can do — **or settled with nothing moving depending on it.** A settled subject no live subject needs is not foundations, it is out of scope. **Say which, and why** — a rejection may be reconsidered next cycle, and the reason is the only way to tell whether anything changed |
 
 **The `CLAIMS` vocabulary**
 
@@ -159,7 +159,7 @@ that matter.
 |---|---|
 | `established` | Independently replicated, **and** used as a premise by work outside the originating group |
 | `converging` | Replicated, but the field is still arguing for it |
-| `contested` | A serious published rebuttal exists |
+| `disputed` | A serious published rebuttal exists |
 | `single-source` | One group, no independent confirmation |
 | `unexamined` | Nobody appears to have tried to break it |
 
