@@ -16,7 +16,7 @@
 - [3. The research philosophy](#3-the-research-philosophy)
   - [3.1 The five questions, per area](#31-the-five-questions-per-area)
   - [3.2 The five dimensions, per subject](#32-the-five-dimensions-per-subject)
-  - [3.3 Research cannot supply the taxonomy](#33-research-cannot-supply-the-taxonomy)
+  - [3.3 A partition is an argument — and where its reasons come from](#33-a-partition-is-an-argument--and-where-its-reasons-come-from)
   - [3.4 Evidence rules](#34-evidence-rules)
   - [3.5 Awareness is separate from research](#35-awareness-is-separate-from-research)
 - [4. The learning philosophy](#4-the-learning-philosophy)
@@ -220,10 +220,9 @@ states it.
 to provide direction and additional context, not as a strict requirement or a narrowly defined
 scope."*
 
-### 3.3 Research cannot supply the taxonomy
+### 3.3 A partition is an argument — and where its reasons come from
 
-**[I RECOMMEND]** this principle, which I arrived at after getting it wrong twice in this project,
-and which the owner has questioned twice and not yet ruled on:
+**[I RECOMMEND]** the epistemics, which I arrived at after getting the partition wrong twice:
 
 - **A partition of the field is an argument, not a finding.** No amount of searching produces one,
   because a partition is a decision about what to treat as the same thing — and a decision has
@@ -241,6 +240,43 @@ and which the owner has questioned twice and not yet ruled on:
 - **Consequence:** any percentage computed over a chosen set of areas is a percentage of **that
   choice**, not a property of the field. Measure one area against two different area lists and its
   share changes while the area does not.
+
+**[AGREED 2026-11-06] Who supplies the argument, and the error this corrects.**
+
+**I previously concluded from the bullets above that the owner must author the area list. That does
+not follow, and he rejected it more than once before I accepted it.** The bullets establish what an
+area list *is* — a coverage device, chosen for a purpose. **They say nothing about its author.** An
+argument needs a purpose and reasons; it does not need a particular author. The purpose is already
+written down: §1.1's career goal and §3.1's five questions.
+
+**Why asking the owner was wrong on its own terms.** A partition of the current field requires
+knowing how the current field divides — which is the knowledge this book exists to give him. The
+request was circular. And the sentence I used to rule out my own judgement said I would be
+"choosing the answer the research is meant to reach": if the research is meant to reach it, it does
+not come from him either.
+
+**Where the frame comes from instead.** The field already partitions itself: work is filed,
+reviewed and presented under categories nobody in this project chose. **That frame is evidence, and
+it meets the same standard §3.4 sets for every number — a denominator somebody else defined.** It
+is not my judgement, so the objection to my judgement does not reach it; and it is not a curriculum
+or roadmap built for another purpose, so it carries no authority it did not earn here.
+
+**The division of labour, and it is the same as everywhere else in this project:**
+
+| Who | Does what |
+|---|---|
+| **A framing run** (`briefs/TEMPLATE-area-frame.md`) | Reports the categories the field currently files its work under, each with a named source, its exclusions, and what it could not reach. **It proposes; it does not decide** |
+| **The owner** | Approves, redraws or rejects the proposed list, **with the evidence for each boundary in front of him**, and the reasons are recorded with it |
+| **One scout per approved area** (`briefs/TEMPLATE-area-research.md`) | The subjects inside it |
+
+**Why this is the right shape.** At SELECT the research proposes subjects and the owner rules on
+them. At step 8 the plan is written and he approves it. At step 7 he chooses among candidates laid
+out for him. **Step 4 was the only place he was asked to originate content from nothing**, and that
+inconsistency was the signal that the step was wrong rather than hard.
+
+**What does not change.** The framing run is still bounded, because an unbounded one measures the
+index. Its bound is that **every boundary it proposes must name the source it came from** — a
+category with no source is the agent's invention, which is the thing the second bullet forbids.
 
 **[AGREED 2026-11-06] How this reconciles with the overview the owner asked for.** §10 records his
 requirement that the research report each field's estimated share, dominance, adoption and growth.

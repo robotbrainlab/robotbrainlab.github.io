@@ -5,14 +5,14 @@ it first, act on the current step, then update it.
 
 ## Current position
 
-**Step 4 is next, and it is the owner's decision.**
+**Step 4 is next. A framing run proposes the areas; the owner rules on them.**
 
 | # | Step | Who decides | Deliverable | State |
 |---|---|---|---|---|
 | 1 | Agree the goal | Owner | `GOAL.md` | **Done** |
 | 2 | Agree the method | Owner | `PROCESS.md`, `GUIDE.md`, `GATES.md` | Written. **Contents not yet approved** |
 | 3 | Write the research brief | Claude | A brief with a capped output, a counted budget and a stopping rule with a fixed point | **Written** — `briefs/TEMPLATE-area-research.md`. **That it terminates is designed, not demonstrated**: no run has exercised it, so step 5's first area is also the test of the brief |
-| 4 | **Choose the areas to research** | **Owner** | A list of areas, with the reason for the list | **Next** |
+| 4 | **Establish the research areas** | Claude proposes · **Owner rules** | A candidate list from a framing run, each boundary with its source — then approved, redrawn or rejected, with the reasons recorded | **Next** |
 | 5 | Run the research | Claude | One file per area in `../research/` | Not started |
 | 6 | Select the subjects | **Owner** | The subjects that get chapters, and the rejections with reasons | Not started |
 | 7 | Decide the book's shape | **Owner** | The four open questions that need the subjects, plus the one that does not have to wait but closes here | Not started |
@@ -28,15 +28,31 @@ build toolchain is decided (gate 9).
 
 ## What step 4 needs
 
-A list of areas, and **the reason for the list**. It is the owner's decision, and this document does
-not pre-empt it.
+**Two parts, in order.** `GOAL.md` §3.3 owns the argument for the split and this document does not
+restate it.
+
+1. **A framing run**, `briefs/TEMPLATE-area-frame.md`. It reports the categories the field currently
+   files its own work under — each with the named source it came from, what it excludes, and what
+   the run could not reach. **It proposes a list; it decides nothing.**
+2. **The owner rules on that list** — approves it, redraws the boundaries, or rejects it — with the
+   evidence for each boundary in front of him. **The reasons are recorded with the list**, because a
+   later cycle has to be able to ask whether a boundary still makes sense.
+
+**Step 4 is not finished until the list is approved.** Everything downstream reads "the approved
+list at step 4": the scouts' scope and exclusions (`briefs/TEMPLATE-area-research.md`) and the area
+numbers in claim ids (`PROCESS.md` §5.1).
 
 ### Where the areas may not come from
 
 | Not from | Why |
 |---|---|
-| **A prior taxonomy of the field, however good** | A partition is an argument, not a finding (`GOAL.md` §3.3). One written for another purpose carries authority it did not earn here, and reasons that were somebody else's |
-| **My judgement of how the field divides** | Same reason, with less authority. I would be choosing the answer the research is meant to reach |
+| **A curriculum, roadmap, course or syllabus** | Built for somebody else's purpose, so it carries authority it did not earn here and reasons that were not about this book (`GOAL.md` §3.3) |
+| **My judgement of how the field divides** | I would be choosing the answer the research is meant to reach |
+| **A category the framing run cannot source** | A boundary with no named source behind it is the agent's invention, which is the same defect as my judgement with less visibility |
+
+**Note what is *not* on that list.** The categories a field currently files its work under are
+evidence, not a prior taxonomy: nobody here chose them, they describe the present rather than a
+teaching order, and each one is checkable at its source. That is the whole basis of part 1.
 
 ### What a good area is
 
@@ -73,4 +89,4 @@ not pre-empt it.
 open rather than put to the owner now. **The other five do not** and could be settled at any time;
 the build toolchain is the one of those with a step waiting on it.
 
-## Nothing after step 3 may start until step 4 is decided
+## Nothing after step 4 may start until the area list is approved

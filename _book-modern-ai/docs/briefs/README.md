@@ -7,7 +7,8 @@ in a growing block at the top of a brief an agent has to read past.
 
 | Brief | Role | When it runs |
 |---|---|---|
-| `TEMPLATE-area-research.md` | **Scout** — find the subjects in one area | Research stage |
+| `TEMPLATE-area-frame.md` | **Framer** — report the categories the field files its work under, as a candidate area list | Step 4, once per cycle, **before** any scout |
+| `TEMPLATE-area-research.md` | **Scout** — find the subjects in one area | Research stage, one per approved area |
 | `claim-verifier.md` | **Claim verifier** — re-check one claim at source, adversarially | Expire stage, and any time a claim is challenged |
 | `pass-1-completeness.md` | **Completeness reviewer** | After a chapter is written |
 | `pass-2-claims.md` | **Adversary** — every claim against its recorded strength | After pass 1's fixes |
@@ -36,6 +37,6 @@ without `UNIT` is not.
 > If unsure, say so rather than asserting. **A wrong finding costs more than a missed one.**
 
 A missed finding costs one defect. A wrong finding costs a verification, an argument, and sometimes
-a change that makes the chapter worse. **It is in all six**, including the claim verifier and the
-lab runner, because an agent reporting a verdict it has not earned is the same failure wherever it
-happens.
+a change that makes the chapter worse. **It is in all seven**, including the framer, the claim verifier and
+the lab runner, because an agent reporting a verdict it has not earned is the same failure wherever
+it happens.
