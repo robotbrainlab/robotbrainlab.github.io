@@ -247,6 +247,18 @@ which is rule 1.
 
 ---
 
+## Form and content — the line every gate sits on
+
+**Every gate here checks *form*: does this equation evaluate, does this table have the right number
+of cells, is this hash stale, does this string occur. No gate judges *content*** — whether a claim
+is overstated, whether an explanation teaches, whether a chapter belongs where it sits. That split
+is why the suite can be trusted at all, and `briefs/README.md` states it as a rule binding every
+agent too.
+
+**A gate's output is a hint about where to read.** `tools/sweep.py` counts occurrences; a phrasing
+nobody thought of has no string to count, so the count is followed by reading the sections it
+touched (`LEDGER-DEFECTS.md` entry 5).
+
 ## What no gate reads
 
 **Every rule below is stated somewhere in these documents and sampled by nothing** — no gate, no

@@ -36,16 +36,31 @@ Replace `<FRAME-FILES>`, `<OUTFILE>` and `<AREA-RULE>`. **Change nothing else.**
   whole. **This run cannot start without it**, because every rejection it makes is an application of
   that rule and nothing else.
 
-**[I RECOMMEND]** this as the rule, and **the owner has not ruled on it.** Until he does, it is my
-definition and the consolidation would be mine rather than his:
+**[AGREED 2026-11-07] The rule is the book's own title.** *Research, Science and Engineering* are
+three modes, not a slogan, and a category is an area if it belongs to at least one of them.
 
-> **An area qualifies when AI itself advances there in a way that does not transfer.** It fails when
-> it is ordinary AI pointed at another field's data, a description of AI's effect on the world, an
-> audience, a format, or one organisation's product name.
+> **Keep a category if it belongs to the science of AI, the research in AI, or the engineering of
+> AI — and engineering includes its tools, its measurement and its operation.**
+>
+> **Drop it if it belongs to none of the three:** AI applied to another field's problems, a report
+> on AI's effect on the world, a meeting format or audience, or an organisation.
+>
+> **A product or tool name is not dropped. It is reported as the engineering area it instances**,
+> with the product named as evidence.
+>
+> **Tag every surviving area with the mode or modes it serves.**
 
-**The label is not the test.** A domain can genuinely drive AI forward — where it does, the methods
-that come out of it do not transfer back, and that is what makes it an area rather than an
-application. Where the only thing that changes is whose data it is, it is an application.
+**Why the three modes and not a flat test.** An earlier draft of this rule asked only whether AI
+itself advances somewhere, and it had five holes. It deleted a benchmark suite's name when the work
+behind it — measuring inference by deployment target — is how engineering knows anything. It
+deleted a domain label when the work behind it was a real area. It had no verdict at all for a
+standards body's working groups. **Engineering requires tools, so a tool category is an engineering
+area rather than an exception to be rescued by a clause.**
+
+**Why the mode tag matters more than it looks.** `../GOAL.md` §3.2 requires every subject to carry
+science *and* research *and* engineering. **So an area list that comes back all science and no
+engineering cannot deliver what the book exists for** — and without the tag, nothing would say so
+until chapters were being written.
 
 ---
 
@@ -147,6 +162,12 @@ files, and a category you cannot judge from them is `UNCLEAR`, not researched fu
 
 **FORBIDDEN**
 
+- **Substituting a search, a pattern, a count or a lookup for reading.** You read and you judge.
+  **A pattern match tells you where a string is; it cannot tell you what the thing means**, and
+  every question in this brief is about meaning. Where you do run a search or a count, it is a
+  **hint about where to read** and never the finding itself — a phrasing you did not think of has no
+  string to search for. **Automation gives no context, which is the whole of what you were asked
+  for.**
 - **Rejecting a category for being unimportant, small, quiet, unfashionable, or not worth covering.**
   That is the owner's judgement and this run must not make it. Reject only on kind.
 - **Adding a category no framing run reported.** If the rule implies an area the runs missed, say so

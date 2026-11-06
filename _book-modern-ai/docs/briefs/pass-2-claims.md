@@ -89,6 +89,12 @@ If you stop early, name the sections you covered.
 
 **FORBIDDEN**
 
+- **Substituting a search, a pattern, a count or a lookup for reading.** You read and you judge.
+  **A pattern match tells you where a string is; it cannot tell you what the thing means**, and
+  every question in this brief is about meaning. Where you do run a search or a count, it is a
+  **hint about where to read** and never the finding itself — a phrasing you did not think of has no
+  string to search for. **Automation gives no context, which is the whole of what you were asked
+  for.**
 - **Judging whether a claim is true.** You judge only whether the chapter's wording matches the
   strength on record. A true claim stated too strongly is a finding; a false claim stated at its
   recorded strength is not yours.

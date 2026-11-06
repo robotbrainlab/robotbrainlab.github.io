@@ -98,6 +98,12 @@ where the survival will be**, so the list matters more than the findings.
 
 **FORBIDDEN**
 
+- **Substituting a search, a pattern, a count or a lookup for reading.** You read and you judge.
+  **A pattern match tells you where a string is; it cannot tell you what the thing means**, and
+  every question in this brief is about meaning. Where you do run a search or a count, it is a
+  **hint about where to read** and never the finding itself — a phrasing you did not think of has no
+  string to search for. **Automation gives no context, which is the whole of what you were asked
+  for.**
 - **Reviewing unchanged text on its own merits.** The earlier passes did that.
 - **Reporting a survival you can show in only one place.** Two locations, or it is not one.
 - **Rewriting.** You report; you do not edit.

@@ -80,6 +80,9 @@ statement of it.
   retracted or withdrawn since it was indexed (`docs/GOAL.md` §3.4).
 - **Every brief has an output shape and a stopping rule with a fixed point.** No agent delegates
   (`docs/PROCESS.md` §4.6).
+- **No agent — and not you either — substitutes a search, a pattern or a count for reading.**
+  Automation may check form; it may never judge content. A count is a hint about where to read
+  (`docs/briefs/README.md`).
 - **Research output goes to a file**, never into the conversation. An agent returns a summary only
   (`docs/briefs/TEMPLATE-area-research.md`).
 - **Structure follows the subjects.** Do not choose the parts before the research names them

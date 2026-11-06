@@ -64,6 +64,7 @@ occasion, because a story invites the reply that it will not happen here.
 | **The book ships its own lab data** (`GUIDE.md` §6) | An expected result that depends on the reader's own files holds for nobody, so the lab cannot be checked by anyone |
 | **Labs isolated: own folder, no credential files, keys from the environment** | The repository is public |
 | **Claude writes. The owner reads and works through everything** | The owner's decision. It is settled: do not propose that he writes it |
+| **No agent substitutes matching for reading** (`briefs/README.md` owns it) | A pattern match tells you where a string is; it cannot tell you what a thing means. **Automation may check form — arithmetic, table shape, a stale hash, whether a string occurs. It may never judge content** — whether something is an area, whether a claim is overstated, whether an explanation teaches. A count is a hint about where to read, never the finding |
 
 ### 2.1 What happens when a decision is waiting
 

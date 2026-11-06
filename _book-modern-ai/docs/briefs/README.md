@@ -56,6 +56,34 @@ states its question as `YOUR JOB` or `QUESTION` — a review returns findings, w
 unit count to cap. A brief that leaves out one of the four above is defective; a review brief
 without `UNIT` is not.
 
+## No agent substitutes matching for reading
+
+**[AGREED 2026-11-07]** Every brief here carries this, word for word, because an agent cannot read
+this file:
+
+> **An agent reads and judges. It may not substitute a search, a pattern, a count or a lookup for
+> reading.** A pattern match tells you where a string is; it cannot tell you what the thing means.
+> Where a search or count is used it is a **hint about where to read**, never the finding.
+
+**The line that has to survive, or this would delete the gates.** **Automation may check form. It
+may never judge content.**
+
+| May be automated | May not |
+|---|---|
+| Does this equation evaluate · does this table have the right number of cells · is this hash stale · does this string appear · how many times | Is this an area · is this claim overstated · does this explanation teach · does this chapter sit in the right place · is this the same category under another name |
+
+The fourteen gates all check form, and `../GATES.md`'s "What no gate reads" already names the
+judgements no gate can make. **`tools/sweep.py` is the clearest case**: it counts occurrences, which
+is a hint, and `../LEDGER-DEFECTS.md` entry 5 already says the sweep is followed by **reading** the
+sections it touched, because a phrasing nobody thought of has no string to search for.
+
+**Why this is a rule and not a preference.** Three times in one day a pattern match was used here to
+answer a question about meaning, and all three failed: a sweep for withdrawn evidence found six
+places where reading found twenty-five; a pattern over category names both over-matched and missed
+two entire classes; and a keyword lookup, seeded with what its author already believed, returned
+only what it was given. **Automation gives no context, which is the whole of what the question
+asked for.**
+
 ## The sentence that goes in every brief here
 
 > If unsure, say so rather than asserting. **A wrong finding costs more than a missed one.**

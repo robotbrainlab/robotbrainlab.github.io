@@ -133,6 +133,12 @@ stopped and why.** Report the gap rather than engineering around it.
 
 **FORBIDDEN**
 
+- **Substituting a search, a pattern, a count or a lookup for reading.** You read and you judge.
+  **A pattern match tells you where a string is; it cannot tell you what the thing means**, and
+  every question in this brief is about meaning. Where you do run a search or a count, it is a
+  **hint about where to read** and never the finding itself — a phrasing you did not think of has no
+  string to search for. **Automation gives no context, which is the whole of what you were asked
+  for.**
 - **Using knowledge the chapter did not give you** to supply a missing step.
 - **Correcting a command silently.**
 - **Rounding a number to match the chapter's**, or adjusting anything to make a `reproduce` lab
