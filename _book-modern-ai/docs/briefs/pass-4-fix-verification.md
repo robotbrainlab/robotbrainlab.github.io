@@ -1,6 +1,8 @@
 # Pass 4 — fix verification
 
-Fill in `<CHAPTER>` and `<CHANGED-PASSAGES>`.
+Fill in `<CHAPTER>`, `<ANSWERS>` and `<CHANGED-PASSAGES>`. `<ANSWERS>` is the path to
+`markdown/ZZ-review-answers.md` and this chapter's section number in it — the review answers are in
+the back matter, not the chapter (`../GUIDE.md` §5).
 
 **What this pass is for, and why it is not optional.** The recurring defect in a long document is
 not writing a passage badly. **It is correcting a claim where you are looking and leaving it where
@@ -39,7 +41,9 @@ Answer two questions about each listed passage:
 1. **Did the fix land everywhere?** One claim appears in several phrasings. Search for all of them.
    **Look in the summary, the key-term table, the "worth memorising" table and the review answers
    first** — those read as settled because they look like a glossary rather than an argument, so
-   they are where a fix goes to not happen.
+   they are where a fix goes to not happen. **The review answers are in `<ANSWERS>`, a different
+   file**, which makes them the likeliest survival of all: a fix applied to the chapter never
+   touches them.
 2. **Did the fix break something?** A fix round that touches many passages is writing many new
    sentences, and new sentences carry errors whether or not they are called fixes. Check each
    changed passage against text that did **not** change.

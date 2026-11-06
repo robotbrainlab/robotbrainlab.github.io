@@ -100,7 +100,10 @@ triaged by hand and the triage recorded.
 **Fails on:** a list that will run together into one paragraph; a table row with the wrong number
 of cells for its header; an unclosed fence; a heading level skipped; a callout not in the three
 permitted forms; **mathematics in `$…$` rather than `\(`/`\[` (`GUIDE.md` §8), which is a pattern
-check and belongs here**; and
+check and belongs here**; **an opening over 400 words**, counted from the chapter title to the first
+`##` (`GUIDE.md` §5 caps parts 1 to 4); **a chapter whose `### Review Questions` have no matching
+numbered section in `markdown/ZZ-review-answers.md`**, or answers numbered differently from their
+questions — the answers live in the back matter now, so nothing else notices when they drift; and
 **in a hand-drawn diagram only**, a line wider than 64 characters or a line of a different width
 from its neighbours.
 **Not checked:** the width of **captured program output**. `GUIDE.md` §10 applies the 64-character

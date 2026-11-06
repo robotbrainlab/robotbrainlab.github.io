@@ -53,6 +53,10 @@ sha256:
 - [ ] **Every term built on** was already given to the reader
 - [ ] The chapter holds the anatomy in `GUIDE.md` §5, including its durable question and its
       `Claims` section
+- [ ] **The opening is within 400 words** — parts 1 to 4 of `GUIDE.md` §5, title to the first `##`.
+      Give the count
+- [ ] **This chapter's review answers are written into `markdown/ZZ-review-answers.md`**, numbered
+      to match its questions. They are **not** in the chapter (`GUIDE.md` §5)
 - [ ] Where a well-known explanation is wrong, the book states the correct rule — and it is flagged
       in the report
 - [ ] A disputed subject carries `## What is disputed` in the fixed shape, including **what

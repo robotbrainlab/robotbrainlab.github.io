@@ -36,12 +36,22 @@ the book's word for anything.
 **[STATED]** The owner is the reader the book is written for. **Whether he is the only one is
 `[OPEN]` below** — who it is written for and who may read it are different questions.
 
-**[I RECOMMEND]** what the book may assume, as a proposal:
+**[AGREED 2026-11-06]** what the book may assume:
 
 - **Python** at working level.
 - **Nothing** about any subject in the book's own scope.
-- A prerequisite from outside the scope — a piece of statistics, a piece of mathematics — is
-  **taught inline, from zero, in the chapter that needs it.** Never sent elsewhere.
+- **A prerequisite from outside the scope is taught from zero, inside the book, and never sent
+  elsewhere.** Where it is taught depends on how many chapters need it:
+
+| Needed by | Taught |
+|---|---|
+| **One chapter** | **Inline**, in that chapter, from zero |
+| **More than one chapter** | **Its own `FOUNDATIONS-ONLY` chapter**, taught once (§3). Later chapters refer to it and do not re-teach it (`OWNERSHIP.tsv`) |
+
+**Why the split.** The one-concept-one-owner rule means the first chapter to need something carries
+the whole teaching load for it. Without this split, a chapter about a current result becomes partly a
+chapter about linear algebra — and that is the wrong chapter for it. **Nothing is sent outside the
+book either way**, which is what the rule was protecting.
 
 **[AGREED 2026-11-06] The owner alone, for now.** So a chapter may assume his Python and his
 background, and need not explain what he already knows. **This is the faster book to write and it
@@ -102,6 +112,12 @@ question, no lab, no review questions and no `You understand this when` line. **
 section inside the chapter that owns the nearest durable question**, so it is read in context rather
 than filed in an appendix; a short entry with no such chapter waits in `PLAN.md` rather than being
 dropped. It may own a term in the glossary, under the same rules as any chapter.
+
+**A `FOUNDATIONS-ONLY` chapter has two sources.** The research reports one of them: a settled
+subject that the moving subjects are unintelligible without. **The other is found at PLAN, not by
+research** — a prerequisite from outside the scope that more than one chapter needs (§2). It is not
+a research subject and has no `CLAIMS.tsv` rows of its own unless it makes claims; it exists because
+two chapters would otherwise teach the same thing twice.
 
 **One consequence worth stating.** A settled subject still earns a chapter when the moving subjects
 are unintelligible without it. The research records that case as `FOUNDATIONS-ONLY`: taught as
@@ -179,6 +195,13 @@ written to be followed and corrected, not to be derived again from somewhere els
 2. **An opening paragraph** saying what the reader will be able to do by the end.
 3. **`*The problem.*`** — the reader's own words, first person, non-technical.
 4. **The answer, in short**, before any detail.
+
+   **[AGREED 2026-11-06] Parts 1 to 4 together are capped at about 400 words** — roughly half a
+   page. Each does work the others do not: one names the question, one promises a capability, one
+   creates the itch in the reader's own voice, one answers at once. **The risk is not the count but
+   the length**: four half-page preambles is a page and a half before anything is taught, which is
+   the shape that makes a reader skim to the body. `GATES.md` gate 3 counts the words from the
+   chapter title to the first `##`.
 5. **The body**, built around a mechanism, with the science, the research and the engineering
    **braided into one argument**. See the rule below.
 6. **`## What is disputed`** — when the subject is contested. Fixed shape: the claim, who holds it,
@@ -186,11 +209,19 @@ written to be followed and corrected, not to be derived again from somewhere els
    meanwhile.
 7. **`## Build it`** — the lab. See §6.
 8. **`## Summary, Key Terms, and Review Questions`**, with `### Summary`, `### Key Terms` (Term |
-   Meaning), an optional `### Worth Memorising` (numbers, defaults and formulas only),
-   `### Review Questions` (4–6, numbered), and **`### Review Answers`**, numbered to match.
-   **The answers are part of the chapter**, because a reader working alone cannot check their own
-   recall without them — and three of the four review passes check the answers against the body,
-   since an answer key is read as settled and is where a correction goes to not happen.
+   Meaning), an optional `### Worth Memorising` (numbers, defaults and formulas only), and
+   `### Review Questions` (4–6, numbered).
+
+   **[AGREED 2026-11-06] The answers are not here. They are collected in the back matter**, in
+   `markdown/ZZ-review-answers.md`, one numbered section per chapter. A reader working alone still
+   needs them, but **an answer printed under its question is read rather than recalled** — turning
+   to the back is the friction that makes the difference between recognition and memory.
+
+   **This is the one place a chapter is not self-contained**, and it is a real cost, accepted for
+   that reason. The answers are still written when the chapter is written, and **three of the four
+   review passes still check them against the body**, because an answer key is read as settled and
+   is where a correction goes to not happen. Their briefs are given the answers file as well as the
+   chapter.
 9. **`> **You understand this when** …`** — one sentence.
 10. **`## Claims`** — every load-bearing claim in the chapter, with its `CLAIMS.tsv` id.
 
@@ -219,10 +250,16 @@ somebody else defined.** Never as a share of "the field": nobody can define that
 reader can check it. `briefs/TEMPLATE-area-research.md` states the rule for the research; this is
 the same rule for the book.
 
-**[I RECOMMEND]** **Correctness outranks the source.** Where a well-known explanation is wrong, the
-book states the correct rule and flags the correction, because that is the reader's only way to
-learn that the common explanation is wrong. A source is evidence that something is *said*, never
+**[AGREED 2026-11-06] Correctness outranks the source.** Where a well-known explanation is wrong,
+the book states the correct rule **and flags the correction**, because that is the reader's only way
+to learn that the common explanation is wrong. A source is evidence that something is *said*, never
 evidence that it is *true*.
+
+**This holds even where no source disputes it** — the case worth catching is the one where a whole
+field has it wrong, and a rule that waits for a dissenting citation is silent exactly there. **The
+risk it carries is being confidently wrong**, and the guards are the claim's own row with its
+strength and the adversarial pass that reads the prose against it (`GATES.md` gate 12,
+`briefs/pass-2-claims.md`). A flagged correction that pass 2 cannot support is a finding.
 
 ## 6. Labs
 
@@ -328,7 +365,7 @@ numbering straight through in reading order works whatever the grouping turns ou
 
 ```
 docs/        the planning documents. Never built, never published with the book
-markdown/    the chapters, one file each. The only source of truth
+markdown/    the chapters, one file each, plus ZZ-review-answers.md. The only source of truth
 data/        data a lab ships with, one directory per chapter
 records/     one evidence record per chapter
 research/    what the research returned, one file per area per run

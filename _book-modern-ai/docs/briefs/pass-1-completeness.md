@@ -6,6 +6,7 @@ brief that asks a different question each time:**
 | Placeholder | Source |
 |---|---|
 | `<CHAPTER>` | The chapter's path |
+| `<ANSWERS>` | The path to `markdown/ZZ-review-answers.md` **and this chapter's section number in it.** The answers are in the back matter, not the chapter (`../GUIDE.md` §5), so without this you cannot check them |
 | `<SOURCES>` | The record's `sources:` field, verbatim |
 | `<NON-SCOPE>` | The record's `non-scope:` field, verbatim |
 | `<TAUGHT>` | Every `../LEDGER-TAUGHT.md` row above this chapter, and **every `Do not` row wherever it sits** |
@@ -38,7 +39,7 @@ chapter. You are not editing it and not rewriting it. You are finding defects.
 | **Omission** | The sources contain something the chapter promised and does not deliver |
 | **Alteration** | The chapter states something the sources do not support, or supports differently |
 | **False claim** | The chapter states something untrue, whatever the sources say |
-| **Self-contradiction** | Two passages in the chapter disagree. **Check the summary, the key-term table and the answer key against the body** — they are read as settled and are where contradictions hide |
+| **Self-contradiction** | Two passages disagree. **Check the summary, the key-term table and the answer key against the body** — they are read as settled and are where contradictions hide. **The answer key is in `<ANSWERS>`, not in the chapter** |
 | **Out-of-boundary** | The chapter teaches material the mathematics test excludes, without declaring it |
 | **Cross-chapter error** | The chapter re-teaches a concept it does not own, uses a term no earlier chapter gave the reader, or contradicts a `Do not` row |
 

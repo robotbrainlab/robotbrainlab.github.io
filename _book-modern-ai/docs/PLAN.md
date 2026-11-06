@@ -37,6 +37,11 @@ in `GOAL.md` §11 class C.
 `Verdict` is from the research: `CHAPTER`, `FOUNDATIONS-ONLY`, `SHORT-ENTRY` or `REJECT`
 (`GOAL.md` §10). A `SHORT-ENTRY` row names the chapter whose section will hold it, or `pending` if
 no chapter owns a question it bears on yet.
+
+**One kind of row does not come from the research at all.** A prerequisite from outside the scope
+that more than one chapter needs gets its own `FOUNDATIONS-ONLY` chapter (`GUIDE.md` §2). **It is
+found here, at PLAN**, by noticing that two chapters would teach the same thing — so its
+`Source record` reads `PLAN` rather than a research file.
 `Lab form` is `construct` or `reproduce` (`GUIDE.md` §6).
 `Source record` is the research file the subject came from.
 **`Must cover`** is what the chapter is required to contain, drawn from the subject record. It is
