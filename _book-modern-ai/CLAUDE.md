@@ -63,23 +63,29 @@ statement of it.
   own right, with nothing to consult. See `docs/GOAL.md` §2.4.
 - **Duplication with anything outside this book is fine and expected. Duplication *within* this book
   is a defect** — one concept, one owning chapter (`docs/OWNERSHIP.tsv`). Two different rules.
-- **No topic gets less explanation because something else covered it.**
+- **No topic gets less explanation because something else covered it** (`docs/GOAL.md` §2.4).
 - **The scope boundary.** Stated in full in `docs/GUIDE.md` §3 and nowhere else, **including not in
   short form here** — read it there before deciding anything is in or out.
-- **Never state a claim above the strength of its source**, and quote the source.
+- **Never state a claim above the strength of its source**, and quote the source (`docs/GUIDE.md`
+  §5).
 - **Give a count with its source, or a ratio against a denominator somebody else defined.** Never a
-  share of "the field": nobody can define that denominator, so nobody can check it.
+  share of "the field": nobody can define that denominator, so nobody can check it
+  (`docs/GUIDE.md` §5).
 - **A search summary is not a source.** Fetch the page — it may have been revised, corrected,
-  retracted or withdrawn since it was indexed.
-- **Every brief has an output shape and a stopping rule with a fixed point.** No agent delegates.
-- **Research output goes to a file**, never into the conversation. An agent returns a summary only.
-- **Structure follows the subjects.** Do not choose the parts before the research names them.
-- **Page estimates never decide scope.**
-- **Nothing is drafted until `docs/PLAN.md` is approved.**
-- **One chapter at a time. Never a part at a time.**
+  retracted or withdrawn since it was indexed (`docs/GOAL.md` §3.4).
+- **Every brief has an output shape and a stopping rule with a fixed point.** No agent delegates
+  (`docs/PROCESS.md` §4.6).
+- **Research output goes to a file**, never into the conversation. An agent returns a summary only
+  (`docs/briefs/TEMPLATE-area-research.md`).
+- **Structure follows the subjects.** Do not choose the parts before the research names them
+  (`docs/GOAL.md` §5.3).
+- **Page estimates never decide scope** (`docs/GUIDE.md` §9).
+- **Nothing is drafted until `docs/PLAN.md` is approved** (`docs/ROADMAP.md`, step 8).
+- **One chapter at a time. Never a part at a time** (`docs/PROCESS.md` §2).
 - **The repository is public.** Scan for secrets before every commit. **Push only to the
   `github-robotbrainlab` remote**, which is the `robotbrainlab` account; never as the
-  `dlakshmizlk` account, which has write access and is the wrong identity for this work.
+  `dlakshmizlk` account. **No gate checks either of these** (`docs/GATES.md`, "What no gate
+  reads") — they are the committer's, and nothing in the book can see them.
 
 ## Style, in everything the owner reads
 

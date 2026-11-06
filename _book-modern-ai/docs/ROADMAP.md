@@ -15,7 +15,7 @@ it first, act on the current step, then update it.
 | 4 | **Choose the areas to research** | **Owner** | A list of areas, with the reason for the list | **Next** |
 | 5 | Run the research | Claude | One file per area in `../research/` | Not started |
 | 6 | Select the subjects | **Owner** | The subjects that get chapters, and the rejections with reasons | Not started |
-| 7 | Decide the book's shape | **Owner** | The open questions that need the subjects, and the two that do not have to wait | Not started |
+| 7 | Decide the book's shape | **Owner** | The four open questions that need the subjects, plus the one that does not have to wait but closes here | Not started |
 | 8 | Write the table of contents | **Owner approves** | `PLAN.md` | Not started |
 | 9 | Write the acceptance questions | Claude | `ACCEPTANCE.md`, filled | Not started |
 | 10 | Build the machinery | Claude | `tools/`, each check proved before it is wired in | Not started |
@@ -52,8 +52,8 @@ not pre-empt it.
 
 ### Where the scope comes from
 
-**`GUIDE.md` §3, and nowhere else.** This document does not restate it, not even in short form — a
-summary of a rule is a second statement of it, and two statements drift.
+**`GUIDE.md` §3, and nowhere else.** This document does not restate it, not even in short form
+(`../CLAUDE.md` owns the rule about that).
 
 ## The open decisions, and the step that closes each
 

@@ -10,8 +10,10 @@ cannot test whether anything is missing, because it was derived from what is the
 written **before** the chapter is a requirement the chapter has to satisfy.
 
 So: these are written at step 9 of `ROADMAP.md`, from `PLAN.md`'s subjects, **before step 11
-drafts anything.** A question added later is marked `late:` and is understood to be weaker, for
-exactly this reason.
+drafts anything.** A question added later is marked `late: YYYY-MM-DD` in its `State`
+column and is understood to be weaker, for exactly this reason. **The date is required** — gate 11
+fails on an undated `late:`, because without it nobody can tell which chapters the question was
+added behind.
 
 ## What a question is
 

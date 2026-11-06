@@ -451,7 +451,7 @@ candidates, with what each costs:
 | **B · The progression inside each area** | Each area is a small complete book: comprehend → operate → construct → judge | The pattern repeats; cross-area material has no home |
 | **C · Shared foundations, then one part per area** | A foundations part first, then an area per part, each with its own progression | Needs the foundations to be genuinely shared, or it becomes a dumping ground |
 | **D · Flat by subject, with reading maps** | No parts. Chapters are subjects; maps give several orders through them | Loses the progression that makes the material learnable — the thing §5.1's standard rests on |
-| **E · Parts by the five dimensions** | Part per dimension: why it matters, the science, the research, the engineering, reproducing | **Rejected.** The owner's instruction is that the dimensions must *not* become sections (§4.1) |
+| **E · Parts by the five dimensions** | Part per dimension: why it matters, the science, the research, the engineering, reproducing | **Rejected.** It makes the science one part and the engineering another, which is what the owner's bridging rule forbids (§4.1) |
 
 **[I RECOMMEND]** **C combined with B** — a shared foundations part, then an area per part, each
 area carrying its own progression. **Its two halves do not stand equally, and the weaker one is
@@ -523,11 +523,11 @@ stated objective in §1.1, which does not depend on it.
 **[STATED]** Exercises, experiments, implementations and projects reinforce the material. The book
 holds them; it does not hold the record of having done them.
 
-**[I RECOMMEND]** **two lab forms, specified in `GUIDE.md` §6.** A lab either **constructs** —
-build the thing, then measure it — or **reproduces or refutes** a published claim: does this
-improvement survive a fair baseline, does this result hold when the protocol changes, is this
-difference real. The second form exists because the book must be able to teach a subject whose
-answer is not settled. Which form a chapter uses follows from its subject.
+**[I RECOMMEND]** **two lab forms, specified in `GUIDE.md` §6**, which owns them and says what each
+requires. The reason they belong to the goal rather than only to the specification: **one of the two
+exists so the book can teach a subject whose answer is not settled.** Without it, practical work
+would be possible only where the science had stopped moving — which is most of what this book is
+about.
 
 **[I RECOMMEND]** three *shapes* a reproduction lab takes. These are shapes, not labs: **each needs
 a real published claim to attach to**, and the research is what supplies those.
@@ -861,7 +861,7 @@ intention. Eight of the eleven can be:
 
 | Class | The mechanism |
 |---|---|
-| A · claiming without reading | A reading obligation per step in `ROADMAP.md`, naming the files |
+| A · claiming without reading | A reading obligation naming the files: per step in `../CLAUDE.md`, per chapter in `RECORD-TEMPLATE.md` |
 | C · deciding what was the owner's | Every statement in this document carries a marker |
 | D · claims above their evidence | `CLAIMS.tsv` plus the adversarial pass (`PROCESS.md` §7) |
 | G · no termination condition | The brief schema (`PROCESS.md` §4.6) |
@@ -892,22 +892,23 @@ project. A mechanism does.**
    There is no record of what has been run. Given that the owner's practice is deliberately outside
    the book, this may belong outside the book too — but something has to hold it, or no cycle can
    know where the last one stopped.
-3. **Superseded material needs a policy, not a deletion.** When a finding is overturned, the
-   honest record is that it *was* believed and is no longer. A book that silently replaces its
-   claims teaches the current answer and hides the lesson about how answers change — which is the
-   specific lesson a research engineer needs.
+3. **Superseded material needs a policy, not a deletion.** **`PROCESS.md` §4.1 owns the rule** and
+   `CHANGELOG.md` owns how the reader meets it. What belongs here is why it is a goal rather than
+   bookkeeping: **how answers change is the specific thing a research engineer has to learn**, and a
+   book that silently replaces its claims hides exactly that.
 4. **The research's own findings need a durable home separate from the book.** A research round
    produces checkable claims with sources. **If those live only in a conversation, the next cycle
    re-derives them** — a conversation is the one place a result cannot be re-read or re-checked. If
    instead they live in the book, the book cannot distinguish a claim it verified from a claim it
    was handed. `CLAIMS.tsv` is their home, and `research/` keeps the run each row came from.
 5. **The shorthand ledger has a hard job here.** The usual gap is between a formal name and the
-   word practitioners actually say. Where a subject is worked on by more than one community, the same technique can carry a
-   different name in each, and a reader who knows one cannot find the others. **Whether that is
-   common is for the research to report** — the ledger's multi-name rule exists so the case is
-   handled when it appears, not because it is claimed to be typical.
-6. **Reuse by copying, never by sharing.** Where a script or mechanism is taken from elsewhere, it
-   is copied into this project, so that improving this book cannot break anything else.
+   word practitioners actually say, and a subject worked on by more than one community can carry a
+   different name in each. **`LEDGER-SHORTHAND.md` owns the rule for that case**; what belongs here
+   is why it matters — a reader who searches for the word they will actually hear and finds nothing
+   concludes the book does not cover the subject at all.
+6. **Reuse by copying, never by sharing.** The rule and its reason are `PROCESS.md` §11's. It
+   belongs on this list because an external dependency this project does not control is a risk to
+   the book, not only to its machinery.
 
 [↑ Back to Table of Contents](#table-of-contents)
 

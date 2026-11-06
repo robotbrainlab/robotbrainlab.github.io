@@ -316,7 +316,7 @@ docs/        the planning documents. Never built, never published with the book
 markdown/    the chapters, one file each. The only source of truth
 data/        data a lab ships with, one directory per chapter
 records/     one evidence record per chapter
-research/    what the research returned, one file per area per cycle
+research/    what the research returned, one file per area per run
 tools/       the gates, the driver, the generators
 latex/       generated. Never edited
 ```
@@ -340,9 +340,8 @@ latex/       generated. Never edited
   entries one by one is a check that no entry is a phrase bolded for emphasis rather than a term.
 - **The Markdown is the only source of truth.** Never edit generated output.
 
-**[OPEN]** The build toolchain. **Markdown → pandoc → XeLaTeX → PDF** is the proposal. Wherever an
-existing script is reused, it is **copied into this project, never shared with another**, so that
-improving this book cannot break anything else.
+**[OPEN]** The build toolchain. **Markdown → pandoc → XeLaTeX → PDF** is the proposal. Where an
+existing script is reused, `PROCESS.md` §11's copy-never-share rule applies.
 
 ## 11. What the book never does
 

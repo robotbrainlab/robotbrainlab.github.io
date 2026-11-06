@@ -18,8 +18,8 @@ describe them. Each entry below says what the gate reads, what makes it fail, an
    **Exception: a list-only gate cannot be proved this way.** A list-only gate never exits
    non-zero — it reports and the human triages. **Which gates those are is decided by their own
    entries below, not by a list here**, because a list here would go stale when a gate changed:
-   a gate is list-only exactly when its entry says it fails on nothing. At present that is gates 6
-   and 7, and gate 2 while the mathematics boundary is open.
+   a gate is list-only exactly when its entry says it fails on nothing. **Read the entries; do not
+   trust a list here, including this sentence's absence of one.**
    **Prove a list-only gate by planting something it should list and confirming it appears in the
    output**, and record that proof in the gate's docstring. Its failure mode is a list nobody reads,
    so its proof is about the list and not the exit code.
@@ -59,8 +59,10 @@ or an agent. Also any first-person reference to the writing process.
 **How:** a pattern list, in `tools/voice-patterns.txt`, one regex per line with a comment saying
 what defect it was added for. The list is the gate; adding a pattern is how the gate learns.
 **Seeded, when the gate is built, from `GUIDE.md` §11's first prohibition and §12's last line** —
-the two that concern self-reference, which is all this gate can express as a pattern. §11's other
-prohibitions are gate 12's and pass 2's, and none of them is a regex. Thereafter a
+the two that concern self-reference, which is all this gate can express as a pattern. Of §11's
+other prohibitions, strength, unsourced numbers and superseded claims are gate 12's and pass 2's.
+**"Never organises by vendor, product, framework or model name" belongs to no instrument** — see
+"What no gate reads" below. Thereafter a
 pattern is added only when something gets past the gate, and the comment names what.
 **Why it is worded this way:** the book is independent and self-contained, so it has no origins to
 disclose — and a chapter that mentions the apparatus breaks the reader's footing. *Prove it* by
@@ -88,7 +90,8 @@ triaged by hand and the triage recorded.
 **Reads:** every chapter.
 **Fails on:** a list that will run together into one paragraph; a table row with the wrong number
 of cells for its header; an unclosed fence; a heading level skipped; a callout not in the three
-permitted forms; and
+permitted forms; **mathematics in `$…$` rather than `\(`/`\[` (`GUIDE.md` §8), which is a pattern
+check and belongs here**; and
 **in a hand-drawn diagram only**, a line wider than 64 characters or a line of a different width
 from its neighbours.
 **Not checked:** the width of **captured program output**. `GUIDE.md` §10 applies the 64-character
@@ -171,7 +174,10 @@ sub-section nested under the wrong parent; the back matter nested under the last
 ## 10 · `tools/glossary.py --check`, `tools/cheatsheet.py --check` and `tools/changelog.py --check` — generated pages are current
 
 **Reads:** every `Key Terms` and `Worth Memorising` table, every chapter record's operation rows, and the three generated pages — the glossary, the cheat sheet and `CHANGELOG.md`.
-**Fails on:** any difference. All three are generated and go stale the moment a chapter changes.
+**Fails on:** any difference between a generated page and what its sources produce.
+**Except `CHANGELOG.md`'s `### Boundaries` block**, which is not generated from anything: EXPIRE
+appends to it (`CHANGELOG.md`). **`changelog.py` copies that block through unchanged and this gate
+skips it** — a generator that rewrote it would delete the only record of where the cycles are.
 **Why:** writing a glossary at the end means writing it from memory, and a hand-written changelog
 records what the writer remembers changing.
 
@@ -180,7 +186,8 @@ records what the writer remembers changing.
 **Reads:** `ACCEPTANCE.md` and `records/*.md`.
 **Fails on:** a question whose owning chapter is written and whose record does not name it; a record
 naming a question that does not exist; a question owned by two chapters; a written chapter with no
-question and no deliberate-exemption row.
+question and no deliberate-exemption row; **a question whose `State` is `late:` with no date after
+it**, since an undated `late:` cannot be read against the chapter it was added behind.
 **See:** `ACCEPTANCE.md` for what a question is and how one is answered.
 
 ## 12 · `tools/verify-claims.py` — no claim stated above its evidence
@@ -211,14 +218,38 @@ signal the carving is wrong, and it belongs in the cycle's operation counts.
 
 **Reads:** `CLAIMS.tsv`, **and `CHANGELOG.md` for the last `cycle-boundary` line** — nothing else
 defines where a cycle begins, and this gate behaves differently at a boundary.
-**Fails on:** nothing during a cycle. **Exits 1 only at a cycle boundary**, when a claim is past its
-`review_by` and has not been re-verified.
+**Fails on:** nothing when run during a cycle. **Exits 1 only when run with `--at-boundary`**, and
+then on any claim past its `review_by` that has not been re-verified. **The flag is the mode, not
+the file** — EXPIRE passes it, because the boundary is the stage running and no line in
+`CHANGELOG.md` can say "a boundary is happening now". The lines record boundaries already past, and
+the gate reads the last one to date its report.
+**With no boundary line at all**, as in the first cycle, every claim is treated as due: nothing has
+been re-verified yet, which is exactly what EXPIRE must act on.
 **Prints always:** every claim within thirty days of expiry, so a cycle can be planned. **Thirty
 days is an operational choice**, not a derived figure — long enough to schedule a cycle, short
 enough that the list stays readable.
 **Why it is not a per-chapter gate:** staleness is a property of time, not of the chapter being
 written. Failing a chapter because an unrelated claim expired would make the suite untrustworthy,
 which is rule 1.
+
+---
+
+## What no gate reads
+
+**Every rule below is stated somewhere in these documents and sampled by nothing** — no gate, no
+review pass, no record checkbox. They are listed here because a rule whose enforcement is assumed
+is worse than one known to rest on care: the first is believed, the second is watched.
+
+| Rule | Owner | Why no instrument |
+|---|---|---|
+| Never organises by vendor, product, framework or model name | `GUIDE.md` §11 | A chapter's organising principle is not a string. It needs a reader asking "what is this chapter arranged around?" |
+| Do not report progress as a fraction of a total | `GUIDE.md` §9 | A judgement about framing, not a pattern |
+| Scan for secrets before every commit; push only to the named remote | `../CLAUDE.md` | Not a property of the book. It belongs to whoever runs `git`, and nothing a chapter check reads can see it |
+| A claim a chapter rests on may not stay `provisional` | `CLAIMS.tsv` | **Discharged by procedure at CONFIRM** (`PROCESS.md` §5), not by a check. Gate 12 fails on a maturity with no basis, which is a different thing |
+
+**All four need a reader, which is why they are listed rather than built.** Two others that were on
+this list have been closed instead: the mathematics delimiters are now gate 3's, and `late:` is now
+gate 11's once the row carries a date.
 
 ---
 

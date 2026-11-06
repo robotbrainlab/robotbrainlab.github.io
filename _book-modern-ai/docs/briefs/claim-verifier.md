@@ -37,9 +37,13 @@ settled?
    that does not.
 3. **Check whether the source has changed.** A new version, an erratum, a retraction notice, a
    withdrawal. **Say the version and the date of what you read.**
-4. **Look for a direct rebuttal.** Has anyone published a result contradicting this? A claim with a
-   published rebuttal gets `state = contested` and `maturity = disputed`, whatever its original
-   source says. **The two columns are different questions** — see `../CLAIMS.tsv`.
+4. **Look for a direct rebuttal.** Has anyone published a result contradicting this? **A published
+   rebuttal sets `maturity = disputed`** — that is what the value means, whatever the original source
+   says. **It does not by itself set `state`.** `state` is your own verdict after reading both sides:
+   `contested` if the rebuttal leaves the claim doubtful at its recorded strength, `verified` if the
+   claim still holds despite the rebuttal existing. **`maturity = disputed` with `state = verified`
+   is a real and expected row** — the dispute is real and you confirmed the claim survives it.
+   See `../CLAIMS.tsv`.
 5. **Judge the recorded strength.** A paper whose authors sell the thing it measures is `vendor`,
    not `preprint`, however it is published.
 6. **Establish its maturity. This is the expensive half of the job and the reason this pass
@@ -91,8 +95,9 @@ and say which signal you were pursuing. Do NOT write `provisional` as the
 maturity — it is a basis value, not a maturity value.
 
 ## Scope consequence
-The book is about what is MOVING in a subject, not about its settled
-foundations. So answer, in one word plus one line of reason:
+The boundary, quoted from GUIDE.md section 3: "The book is about what is
+currently moving in a subject. It is not about the subject's settled
+foundations." So answer, in one word plus one line of reason:
 
   SUBJECT  — the answer is still moving, so this belongs as the book's subject
   SUPPORT  — settled, and a moving subject is unintelligible without it
@@ -136,5 +141,7 @@ not.**
 
 Stop when the claim has a verdict, a maturity with its basis or an honest statement that it is
 unestablished, and a scope consequence — or when the budget is spent. Do not verify a second claim.
+
+**IF UNSURE, SAY SO RATHER THAN ASSERTING. A WRONG FINDING COSTS MORE THAN A MISSED ONE.**
 
 **DELEGATION: ZERO.** Do not start any sub-agent.

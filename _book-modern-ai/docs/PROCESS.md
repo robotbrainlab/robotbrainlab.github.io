@@ -45,7 +45,7 @@ occasion, because a story invites the reply that it will not happen here.
 | **Sources read in full, immediately before writing** — not earlier in the session | Reading earlier in the session means the sources are out of working context by the time the chapter is written, and the chapter then gets written from memory of them. Named in the record, with what was read |
 | **Non-scope declared in the record before writing** | Without an edge, review never terminates. Once a chapter claims to handle any case, "what about X?" is always a correct question and every answer creates the next one |
 | **A completeness review against the sources, side by side** | A reviewer checks what is present against the sources; nothing in that act surfaces what is absent from both |
-| **A fix-verification pass reading only the named changed passages** | The recurring defect is not writing badly — it is fixing a claim where you are looking and missing it where you are not. A reviewer reading only the changed passages finds survivals a full re-read buries in its own findings |
+| **A fix-verification pass whose subject is the named changed passages** | The recurring defect is not writing badly — it is fixing a claim where you are looking and missing it where you are not. A reviewer given the changed passages as its subject finds survivals that a full re-read buries in its own findings. **It still searches the whole chapter**, because a survival is by definition somewhere the fix did not land |
 | **Every fix is a sweep, counted before and after, back matter first** | One claim appears in several phrasings, and the writer applying a fix sees the one the finding quoted. The back matter goes first because a summary, a key-term row and an answer key are read as settled — they look like a glossary rather than an argument — so they are where a fix goes to not happen |
 | **In a lab, one claim lives in the prose *and* in the code** | A lab's programs print counts, comparisons and universals, and that printed output is captured into the chapter. So the same claim can exist in the body, the program, the captured block, the summary, a key-term row and an answer — **six places on that list, four of them prose** — and fixing the prose alone makes the chapter contradict its own printed output |
 | **A staged driver that refuses, not a checklist** | A checklist in prose is read once and skipped thereafter. A program that will not advance until the current stage's evidence is present cannot be skipped — see §6.1 |
@@ -85,7 +85,15 @@ answers one.
 
 ### 4.1 The claim is the unit of evidence
 
-**[I RECOMMEND]** `CLAIMS.tsv`, one row per load-bearing claim. This is the central change.
+**[I RECOMMEND]** `CLAIMS.tsv`, one row per claim the project has checked or must check. This is the
+central change.
+
+**Which claims get a row, because the review-date policy turns on it.** Every claim a scout returns
+becomes a row at CONFIRM, including claims belonging to subjects the owner later rejects — a row is
+how a claim is tracked, and dropping the rejected ones means re-deriving them next cycle. **What
+makes a row load-bearing is its `dependents` column**: a chapter listed there would teach something
+different if the claim fell. `GOAL.md` §3.4 defines the term, and `GATES.md`'s shorter review date
+for a load-bearing claim reads that column, so a row with no dependents keeps its class interval.
 
 **The schema is in `CLAIMS.tsv`'s own header and comment block**, and this file does not copy it: a
 copy here would drift the moment a column changed, and the copy is what a reader would trust. **The
@@ -315,7 +323,7 @@ of the claims file, and the only reason a book like this survives its third cycl
 | 3 | **Pass 1, completeness review** — a subagent reads the sources and the chapter side by side |
 | 4 | **Apply the findings**, verifying each before accepting it, and sweep each one book-wide, counted |
 | 5 | **Pass 2, adversarial claims**, then **pass 3, lab execution** from the chapter text alone. Apply and sweep what they find |
-| 6 | **Pass 4, fix-verification** — a subagent reads **only the changed passages**, named |
+| 6 | **Pass 4, fix-verification** — a subagent whose **subject is the named changed passages**, and which searches the whole chapter for what they contain |
 
 **Six steps, four passes** (§7). Passes 2 and 3 sit at step 5 because both read the chapter *after*
 pass 1's fixes land — running them earlier checks text that is about to change.
@@ -358,7 +366,7 @@ claims against their recorded strength, and a reader proving a lab runs from the
 | **1 · Completeness** | Sources and chapter, both in full | Omission · alteration · false claim · self-contradiction · out-of-boundary theory · cross-chapter error |
 | **2 · Adversarial claims** | The chapter against `CLAIMS.tsv` | Any claim stated above its recorded source strength |
 | **3 · Lab execution** | The chapter text only, in a fresh folder | Anything that does not run; anything that runs and disagrees |
-| **4 · Fix-verification** | **Only the named changed passages** | Survivals, and errors the fixes introduced |
+| **4 · Fix-verification** | The named changed passages **as its subject**, and the whole chapter for the claims they carry | Survivals, and errors the fixes introduced |
 
 **Two things are in every review brief**, and they are the two that fail silently:
 
@@ -421,7 +429,7 @@ for setting a claim's review date**, which `tools/verify-expiry.py` reads.
 | Absolutes | Lists every absolute for testing |
 | Inputs | Terms used before the book gives them |
 | Outline | The PDF outline nests correctly |
-| Glossary · cheat sheet | Generated appendices match their source tables |
+| Generated pages | The glossary, the cheat sheet and the changelog match what their sources produce |
 | Acceptance bank | Each record names the questions it owns |
 | Claims | The claim bookkeeping: a chapter's claims all have rows, a `contested` row's chapter carries a dispute section, a `superseded` row is not cited as current. **Not the wording** — that is pass 2's |
 | Ownership | No concept claimed by two chapters; no chapter teaching one it does not own |
@@ -439,13 +447,16 @@ the research seeds, and the outline gate cannot run at all until there is a buil
 
 ### Per chapter
 
-**`GUIDE.md` §12 owns this list** and this file does not restate it. `RECORD-TEMPLATE.md` turns it
-into checkboxes, which is applying it rather than copying it. **Three criteria belong here instead**,
-because they are properties of the process rather than of the book:
+**`GUIDE.md` §12 owns this list** and this file does not restate it — not even the claims and lab
+criteria, which are its bullets and not this file's. `RECORD-TEMPLATE.md` turns §12 into
+checkboxes, which is applying it rather than copying it.
 
-- **Every load-bearing claim has a `CLAIMS.tsv` row with its source and strength**
-- **Pass 2 clean: no claim stated above its source strength**
-- **Pass 3 ran the lab from the chapter text alone and it produced a verdict**
+**One criterion belongs here instead**, because it is a property of the process rather than of the
+book:
+
+- **Pass 2 came back clean** — no claim in the chapter is stated above the strength `CLAIMS.tsv`
+  records for it. §12 requires the row and the strength; this requires that the reader checked the
+  prose against them and found nothing.
 
 ### Per cycle
 
@@ -495,11 +506,12 @@ checkable: open any brief and count how much of a single combined file it would 
    file beats prose; `GUIDE.md` beats `PROCESS.md` on anything about the book itself. This is the
    rule stated in `../CLAUDE.md`. The figures it cites come from a single preprint and are recorded
    at that strength: evidence, not settled fact.
-3. **Nothing is restated for convenience.** Cross-reference by filename and section.
+3. **A brief is the one place a rule may be copied**, because its agent may not read project files. The copy is word for word, never a summary (`../CLAUDE.md`).
 
-**[I RECOMMEND]** one rule about reuse: **copy, never share.** Where a script or mechanism comes
-from another project, it is copied into this one. A shared script means improving this book can
-break something else, and it gives this project an external dependency it does not control.
+**[I RECOMMEND]** one rule about reuse, and **this file owns it**: **copy, never share.** Where a
+script or mechanism comes from another project, it is copied into this one. A shared script means
+improving this book can break something else, and it gives this project an external dependency it
+does not control.
 
 ---
 

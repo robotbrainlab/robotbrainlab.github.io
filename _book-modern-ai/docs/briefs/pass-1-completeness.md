@@ -11,6 +11,7 @@ brief that asks a different question each time:**
 | `<TAUGHT>` | Every `../LEDGER-TAUGHT.md` row above this chapter, and **every `Do not` row wherever it sits** |
 | `<VERIFY>` | **Every claim the chapter's own argument turns on** — its `## Claims` section, plus any figure the chapter computed itself. Not a selection: all of them |
 | `<KNOWN-DELIBERATE>` | Anything in the record's `absolutes:` or `coverage-misses:` fields that was triaged and deliberately left, with the reason given there |
+| `<SHORTHAND>` | Every `../LEDGER-SHORTHAND.md` row whose `Home` is this chapter or an earlier one, **including its `State` column**. A `Named, body` row has no Key Terms row, so gate 8 cannot see it and this review is its only defence |
 | `<VOICE>` | `../GUIDE.md` §4 — the rules and the fourteen habits, pasted in full |
 
 ---
@@ -40,6 +41,13 @@ chapter. You are not editing it and not rewriting it. You are finding defects.
 | **Self-contradiction** | Two passages in the chapter disagree. **Check the summary, the key-term table and the answer key against the body** — they are read as settled and are where contradictions hide |
 | **Out-of-boundary** | The chapter teaches material the mathematics test excludes, without declaring it |
 | **Cross-chapter error** | The chapter re-teaches a concept it does not own, uses a term no earlier chapter gave the reader, or contradicts a `Do not` row |
+
+**THE FIELD'S SHORTHAND, AND WHICH CHAPTER MAY USE IT**
+
+`<SHORTHAND>`
+
+A chapter using a shorthand before the chapter that names it is a **cross-chapter error**. For a
+`Named, body` row no gate can catch this, so it is yours.
 
 **WHAT THE READER ALREADY KNOWS**
 
@@ -75,8 +83,8 @@ so under `Scope doubt`.
 
 - **Every number.** Recompute it against the thing it describes. A chain must hold: a denominator
   must equal the product above it.
-- **Every absolute** — *always*, *never*, *every*, *cannot*, *only*. Find a counter-example or say
-  none exists.
+- **Every absolute.** `../GATES.md` gate 7 owns the list of words that count; apply it. Find a
+  counter-example for each or say none exists.
 - **Every claim's strength.** If the chapter states something more strongly than its source does,
   that is an alteration.
 - **The capability promise.** The opening says what the reader will be able to do. Can they?

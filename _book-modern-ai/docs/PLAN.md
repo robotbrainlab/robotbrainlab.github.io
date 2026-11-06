@@ -72,10 +72,16 @@ something **buildable**.
 
 ## The open decisions this file is waiting on
 
-From `GOAL.md` §10 and `GUIDE.md`, and none of them can be settled before step 1:
+From `GOAL.md` §10 and `GUIDE.md`. **Three need the subjects and two do not** — `ROADMAP.md`'s
+open-decisions table owns which step closes each:
 
-- The book's shape — breadth against depth
-- The structure — five candidates in `GOAL.md` §5.3
-- How deep the mathematics goes — three candidates
-- Whether cross-references go by chapter or by concept
-- Whether the book is for one reader or more
+| Decision | Needs the subjects? |
+|---|---|
+| The book's shape — breadth against depth | **Yes** |
+| The structure — five candidates in `GOAL.md` §5.3 | **Yes** |
+| How deep the mathematics goes — three candidates | **Yes** |
+| Whether cross-references go by chapter or by concept | **No**, and `GUIDE.md` §7 says it is expensive to reverse — so it should be settled early rather than left to this file |
+| Whether the book is for one reader or more | **No** |
+
+**Only the three marked Yes block this file**, and they wait on the research returning subjects
+(`ROADMAP.md` step 6).

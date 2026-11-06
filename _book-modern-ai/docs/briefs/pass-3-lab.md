@@ -138,4 +138,6 @@ stopped and why.** Report the gap rather than engineering around it.
 Stop when the lab has reached a verdict, **or** when a gap has stopped you and you have recorded it.
 One retry per step and one attempt per gap, then stop.
 
+**IF UNSURE, SAY SO RATHER THAN ASSERTING. A WRONG FINDING COSTS MORE THAN A MISSED ONE.**
+
 **DELEGATION: ZERO.** Do not start any sub-agent.

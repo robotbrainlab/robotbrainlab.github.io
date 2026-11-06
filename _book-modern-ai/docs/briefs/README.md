@@ -19,16 +19,23 @@ in the main session with the sources open, not delegated.
 
 ## The schema every brief follows
 
-**`../PROCESS.md` §4.6 owns the schema.** Every file here carries its slots. Two are the same in
-every brief and are repeated because they fail silently:
+**`../PROCESS.md` §4.6 owns the schema**, and this file does not restate it.
 
-1. **Delegation depth is zero.** An agent that may spawn agents has no budget.
-2. **The stopping rule has a fixed point** — a condition that becomes true and stays true.
-   "Report everything you find" is not one.
+**Four slots are in every brief here**, because each fails silently when left out: `OUTPUT`,
+`BUDGET`, `STOPPING RULE` and `DELEGATION`.
 
-## The sentence that goes in every review brief
+**The rest are per brief.** The research brief carries all ten, because it produces records rather
+than findings and needs `UNIT`, `TARGET` and `SAMPLING` to bound them. **A review brief folds
+`UNIT` and `SAMPLING` into `OUTPUT`**, which names its sections and asks for a coverage report, and
+states its question as `YOUR JOB` or `QUESTION` — a review returns findings, which have no fixed
+unit count to cap. A brief that leaves out one of the four above is defective; a review brief
+without `UNIT` is not.
+
+## The sentence that goes in every brief here
 
 > If unsure, say so rather than asserting. **A wrong finding costs more than a missed one.**
 
 A missed finding costs one defect. A wrong finding costs a verification, an argument, and sometimes
-a change that makes the chapter worse.
+a change that makes the chapter worse. **It is in all six**, including the claim verifier and the
+lab runner, because an agent reporting a verdict it has not earned is the same failure wherever it
+happens.

@@ -22,6 +22,8 @@ amended:
 absolutes:      count from the absolutes gate, and what was scoped back
 new-terms:      count from the inputs gate, each triaged
 coverage-misses: count, each triaged one by one
+operations:     the changelog operations this chapter needed, one row each, or `none`.
+                GATES.md gate 10 reads these, and CHANGELOG.md is generated from them
 sha256:
 ```
 
@@ -63,6 +65,8 @@ sha256:
 - [ ] **The book builds clean** — 0 overfull lines, 0 missing glyphs, 0 undefined references. Write
       the command and its counts. **While the build toolchain is `[OPEN]` (`GUIDE.md` §10) there is
       nothing to run: write `no build yet` and move on**
+- [ ] **Every command and code sample in the chapter has been run** — say how many, and that the
+      output shown is what came back (`GUIDE.md` §4)
 - [ ] Index entries read one by one against Key Terms **before** review
 - [ ] **Pass 1, completeness review** — launched with the brief in `briefs/`
 - [ ] Each finding **verified before accepting**; each fix **swept book-wide, counted before and
@@ -72,11 +76,11 @@ sha256:
 - [ ] **Pass 4, fix verification** — launched, naming every changed passage
 - [ ] `LEDGER-TAUGHT.md` row added; `LEDGER-SHORTHAND.md` updated; `OWNERSHIP.tsv` updated
 - [ ] `LEDGER-DEFECTS.md` updated if a new defect class appeared
-- [ ] `CHANGELOG.md` **operation rows recorded** — every operation this chapter needed, from the six
-      in `PROCESS.md` §5.2, with the kind (new / revised / overturned). `ADD`, `SPLIT`, `MERGE` and
-      `RETIRE` are decided here; a `NEW QUESTION` or `RECARVE` is the owner's and its row is written
-      at PLAN, so record `none` rather than leaving the field empty. The page is generated from
-      these rows, never written
+- [ ] **The `operations:` field above is filled** — every operation this chapter needed, from the
+      six in `PROCESS.md` §5.2, with the kind (new / revised / overturned). `ADD`, `SPLIT`, `MERGE`
+      and `RETIRE` are decided here; a `NEW QUESTION` or `RECARVE` is the owner's and its row is
+      written at PLAN, so write `none` rather than leaving the field empty. `CHANGELOG.md` is
+      generated from these rows, never written
 - [ ] Every acceptance question in `ACCEPTANCE.md` keyed to this chapter marked `answered`,
       `answered-as-disputed` or `cannot` — and **a `cannot` reopens the chapter or moves the
       question with a reason**
