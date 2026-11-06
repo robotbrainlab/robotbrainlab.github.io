@@ -141,6 +141,13 @@ not.**
   string to search for. **Automation gives no context, which is the whole of what you were asked
   for.**
 - **Substituting another source** when the named one cannot be reached. Return `cannot-reach`.
+  **A venue's abstract page and its own full text are one source, not two**, so reaching either is
+  reaching the source. Where the full text is unreachable — a size limit, a paywall — **a preprint of
+  the same work may stand in for the body only if you name its version and date, mark every quote
+  taken from it as lower confidence, and say what you therefore could not confirm about the
+  published version.** The first run of this brief did exactly that when a camera-ready PDF exceeded
+  the fetch limit, and it is the right answer. **What stays forbidden is quoting a different work, or
+  a summary of this one, as though it were the source.**
 - **Falling back on what you already know.** An unreachable source is a finding; guessing hides it.
 - **Setting a maturity with no basis**, or writing `provisional` as a maturity.
 - **Checking more than the one claim you were given.**

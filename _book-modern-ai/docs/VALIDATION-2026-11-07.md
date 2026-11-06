@@ -375,6 +375,48 @@ records, so the owner rules rather than inherits.
 
 ---
 
+### V21 · The claim verifier caught a real overstatement in the scout's own output, on its first run
+
+**This is the best result of the phase, so it is recorded as a finding rather than buried in a
+table.**
+
+The scout recorded, as a `peer-reviewed` claim: *"FlashAttention-4 reaches 1613 TFLOP/s on B200 (71%
+utilisation), 1.3× cuDNN 9.13 and 2.7× Triton."* The verifier fetched the named source and then
+found, **in the paper's own figure caption**, that newer releases of the library it is compared
+against have since absorbed its techniques and now perform comparably.
+
+So the claim was stated in the present tense while the source itself retires one third of it. The
+verifier returned `superseded`, explained precisely which part expired and why the row cannot be
+`verified` as a bundle, and rewrote it with the hedges restored, the baseline versions pinned, the
+as-of date given, and the stale comparison demoted to a historical statement.
+
+**It also found three things the scout did not.** The paper's own reproducibility appendix names a
+*different* chip from the one in its headline; it dates its library versions to a year before the
+paper was submitted; and it attaches no sequence length, head dimension or pass direction to the
+peak figure, so the number is a best case whose configuration is undisclosed.
+
+**And it declined to overreach.** Independent work reports a ratio against this result from which an
+absolute figure can be back-solved that is lower than the claim. The verifier calculated it, said it
+would be the brief's "originator-strongest" signal, and then **refused to reword the claim on it**,
+because the figure is derived rather than reported. That is the brief's "a wrong finding costs more
+than a missed one" working as written.
+
+**What this demonstrates about the method, beyond this one claim.** The scout's *metadata* was right
+— it had already marked the row `single-source` with basis `originator-strongest`, and the verifier
+confirmed both independently. The scout's *prose* was too strong. **That is exactly the division of
+labour the design assumes**: the research stage records the evidence honestly, and a later
+adversarial read catches the wording. On its first live test, it worked.
+
+**One small brief gap found in passing.** The camera-ready PDF exceeded the fetch size limit, so the
+verifier quoted the body from the preprint, named the version, and flagged every such quote as lower
+confidence — while stating it could not confirm whether the paper's internal inconsistencies were
+corrected for publication. That is the right behaviour, but the brief forbids "substituting another
+source when the named one cannot be reached" and does not say that a venue's abstract page and its
+PDF are one source, nor that a preprint may stand in for the body if the version is named and the
+difference flagged. **The brief should say what this run did.**
+
+---
+
 ## What held, checked the same way
 
 An honest account has to say what the instruments got right, or the findings above read as a verdict
@@ -477,3 +519,102 @@ had fallen to near nothing, and the marginal return on executing them is high.
   subject or neither claiming it". One scout runs here, so there is no sibling area to collide with,
   and the failure that rule prevents cannot occur.
 - **The sixteen gate scripts.** None exists. Step 10 has not started.
+
+---
+
+## Final assessment
+
+### 1. Is the research approach ready?
+
+**Yes, for the research half, with the three repairs below already made.** The chain ran end to end
+for the first time: framing → consolidation → scout → claim verification. **Four of the five
+instrument runs produced output a person can use.** Every defect found is fixed in the brief that
+caused it, so the next run inherits the fix.
+
+**Three things are true at the same time and all three belong in the answer.**
+
+- **The instruments work.** The scout terminated on its stopping rule. The consolidator closed its
+  arithmetic on 181 records and rejected nothing for being unimportant. The verifier caught a real
+  overstatement in the scout's own output and refused to overreach beyond it. These were the three
+  things most likely to fail.
+- **The framing stage is lossy and that is not fully fixable.** Two runs of the same brief on the
+  same day produced 104 and 77 categories, and **both lost real categories that yesterday's runs
+  found** (V11). Three defects in it were found only by opening source pages (V3, V12, V14). It
+  samples the world; it does not converge on it.
+- **One structural gap remains open** (V15), and it is the reason this document is twenty-one
+  findings long rather than three.
+
+### 2. What critical issues remain
+
+| # | Issue | Status |
+|---|---|---|
+| 1 | **No stage verifies a research run.** Four review passes and fourteen gates all read a chapter. Self-reporting missed four defects that reading found, three needing a source opened | **Open. The one decision I am putting to you** |
+| 2 | **The framing stage does not converge** (V11). A later run is not a superset of an earlier one | **Not fixable. Manage it: union the runs, never replace them** |
+| 3 | **No occupational taxonomy exists in fetchable form** (V7), across six runs. No *research engineer*, no *MLOps* category anywhere | **Permanent. It bears directly on the career goal** |
+| 4 | **The AI standards subcommittee has refused all six runs** (V8). Nothing in any list covers conformance, certification, risk management or terminology | **Permanent by this method** |
+| 5 | **Three of the scout's four verdicts have never been issued** (V19). Six of six came out `CHAPTER` | **Brief fixed; the fix is untested** |
+| 6 | **A fifth of the consolidated area list was judged from category names** (V17) | **Brief fixed; the fix is untested** |
+| 7 | **No file owns the reading order.** `GOAL.md` says of it: "this requirement rests on nothing" | **Open, and yours. It needs the subjects first** |
+
+### 3. Are we overengineering?
+
+**Yes — but misallocated rather than excessive, and the distinction changes what to do about it.**
+
+**The rules themselves are earned.** Thirteen mistake classes are recorded with the instances that
+produced them, and today's runs show the mechanisms working: the no-filtering rule held twice, the
+disclosure rule is the only reason the isolation failure is known, and the vendor rule correctly
+reclassified two refereed papers.
+
+**The allocation is wrong, and today measured it.**
+
+| | Verification | Work actually done |
+|---|---|---|
+| Writing a chapter | 4 passes, 14 gates, 16 scripts | **none — no chapter exists** |
+| Research | **none** | 6 framing runs, 1 consolidation, 1 scout, 1 verification |
+
+**Specific recommendation: build five gates before chapter one, not sixteen.** Record, claims,
+arithmetic, render, ownership — those bear on a first chapter. **Defer nine**: the boundary gate
+runs list-only until the mathematics decision; the inputs gate needs vocabulary the research has not
+produced; the outline gate prints `VACUOUS` until a build exists; coverage needs an approved plan;
+and voice, absolutes, generated pages, the acceptance bank and expiry can all wait for a chapter to
+test them against. **Sixteen scripts written before one chapter exists are sixteen scripts written
+against a guess.**
+
+**On diminishing returns, which you asked me to measure rather than assert.** Of the 43 findings
+fixed yesterday, **31 were created in the preceding two days by the fix rounds themselves.** Today's
+21 findings came from running the instruments, and four could only be found by opening a source page.
+**The marginal return on re-reading these documents is near zero. The marginal return on executing
+them is high.** That is the whole answer: stop reading, start running.
+
+### 4. What I am explicitly not recommending
+
+You asked me not to propose work for completeness. So, plainly:
+
+- **No third framing run.** Two today cost about two hours, added 138 names, and lost real
+  categories. A third adds sampling noise, not knowledge. The gaps that matter (V7, V8) are source
+  absences no further run will close.
+- **No more document audits.** Four reader audits missed all of yesterday's 43 findings; a fifth
+  reading would find a twenty-second finding and cost a day.
+- **No ninth brief for its own sake.** Issue 1 needs a decision, not reflex.
+
+### 5. Do I recommend closing this phase?
+
+**Yes.** The method has been run, its outputs read, its defects found and fixed in the briefs. What
+is left open is either a decision that is yours, or a limit of the world rather than of the method.
+
+**Two cautions to carry into the break.**
+
+**First, and I am challenging your plan here: do not delete the earlier research files.** Deleting
+`research/frames/2026-11-06-*.md` destroys the only record of **AI Alignment** — a refereed special
+track that both earlier runs found independently, with its sub-topics named — and of the **five
+working groups of the AI standards subcommittee.** **Today's runs, made with the better brief, did
+not recover either** (V11). Keep them as the dated archive they already are and let a fresh run be
+*unioned* with them, not substituted for them. Re-running the method is right; discarding the
+evidence is not. One caveat in the other direction: those five standards records overstate their own
+source (V12), so they are worth keeping and worth distrusting.
+
+**Second, "the process is ready" means the *research* process.** The chapter loop, the four review
+passes and the fourteen gates are entirely unvalidated and cannot be validated without a written
+chapter. **Expect the first chapter to be its own validation phase, and to produce a list like this
+one.** It will not mean the method failed. It will mean the method is being used for the first time,
+which is when defects become visible — as twenty-one of them did today.

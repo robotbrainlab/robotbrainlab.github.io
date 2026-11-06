@@ -18,11 +18,26 @@ approvals matter. **If a decision waits more than seven days I act on my recomme
 **Step 4 is next. Two framing runs record what the field files, a consolidation run turns that into
 one candidate list, and the owner rules on it.**
 
+**[2026-11-07] The whole chain has now been run once as a validation, and its outputs are
+disposable.** Framing twice, consolidation once, one scout, one claim verification — then every
+output file read against its brief, with four source pages opened to check what the runs claimed.
+**21 findings, in `VALIDATION-2026-11-07.md`**, and the brief that caused each is fixed. Read that
+file's final assessment before acting on this one. **Three things in it change what step 4 means:**
+
+1. **A framing run's losses are the only unrecoverable ones** (V13). The consolidator may add no
+   category, so what framing misses never reaches the owner.
+2. **The method does not converge** (V11). Today's two runs lost categories yesterday's four found,
+   including a refereed alignment track and a standards body's five working groups. **So framing
+   runs are unioned across cycles, never substituted** — which is why `research/frames/` keeps every
+   dated file.
+3. **Nothing verifies a research run** (V15). Every defect above was found by hand. Whether that
+   becomes a stage of its own is the one open decision this validation produced.
+
 | # | Step | Who decides | Deliverable | State |
 |---|---|---|---|---|
 | 1 | Agree the goal | Owner | `GOAL.md` | **Done** |
 | 2 | Agree the method | Owner | `PROCESS.md`, `GUIDE.md`, `GATES.md` | **Partly approved.** Eight topics were settled on 2026-11-06 — grep `[AGREED 2026-11-06]` for them. The rest stay marked `[I RECOMMEND]` and are ruled on as they come up in practice |
-| 3 | Write the research brief | Claude | A brief with a capped output, a counted budget and a stopping rule with a fixed point | **Written** — `briefs/TEMPLATE-area-research.md`. **That it terminates is designed, not demonstrated**: no run has exercised it, so step 5's first area is also the test of the brief |
+| 3 | Write the research brief | Claude | A brief with a capped output, a counted budget and a stopping rule with a fixed point | **Written and exercised** — `briefs/TEMPLATE-area-research.md`. **It terminates**: the validation run of 2026-11-07 stopped on its fetch limit and wrote up without starting a further record. Three defects it exposed are fixed in the brief; see `VALIDATION-2026-11-07.md` V18–V20, of which **V19 matters most — six of six verdicts came out `CHAPTER`, so three of the four verdicts have still never been issued** |
 | 4 | **Establish the research areas** | Claude proposes · **Owner rules** | Two framing runs record what the field files; a consolidation run turns that into one candidate list; the owner approves, redraws or rejects, with the reasons recorded | **Next** |
 | 5 | Run the research | Claude | One file per area in `../research/` | Not started |
 | 6 | Select the subjects | Claude sorts · **Owner rules** | What passed the three tests, and every rejection with the test it failed and why. He rules on both | Not started |
