@@ -171,11 +171,12 @@ step 8.
 
 ## 9 · `tools/verify-outline.py` — the document outline nests correctly
 
-**Blocked until the build toolchain is decided** (`GUIDE.md` §10, `[OPEN]`). It is the one gate that
-reads the output rather than the source, so unlike gate 2 it has nothing to run in list-only mode:
-until there is a build, it prints `VACUOUS`.
+**The toolchain is decided** (`GUIDE.md` §10: pandoc → XeLaTeX), so this gate can be built. It is
+the only gate that reads the output rather than the source, so it has nothing to run in list-only
+mode: **until a build exists it prints `VACUOUS`, and it is built with the build** rather than ahead
+of it.
 
-**Reads:** the built document.
+**Reads:** the built document — the PDF's own outline, not the Markdown headings.
 **Fails on:** front matter missing from the outline; a chapter orphaned above its part; a
 sub-section nested under the wrong parent; the back matter nested under the last chapter.
 **Why:** every other gate reads Markdown. **None of them opens the output.**

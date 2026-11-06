@@ -453,9 +453,10 @@ for setting a claim's review date**, which `tools/verify-expiry.py` reads.
 | Ownership | No concept claimed by two chapters; no chapter teaching one it does not own |
 | Expiry | Lists every claim past its `review_by` |
 
-**Three are not fully usable yet, and `GATES.md` says so in each one's own entry** rather than here:
-the boundary gate runs list-only until the mathematics decision, the inputs gate needs vocabulary
-the research seeds, and the outline gate cannot run at all until there is a build.
+**Two are not fully usable yet, and `GATES.md` says so in each one's own entry** rather than here:
+the boundary gate runs list-only until the mathematics decision, and the inputs gate needs
+vocabulary the research seeds. **The outline gate is no longer among them** — its toolchain is
+decided; it prints `VACUOUS` until a build exists, and is built with the build.
 
 ---
 
@@ -552,7 +553,7 @@ marked `[OPEN]` in the file that owns it, and that file is where its options liv
 | Which area goes deep, if the shape is asymmetric | `GOAL.md` §10 |
 | The structure — which of the candidates the book takes | `GOAL.md` §5.3. **Must wait for the subjects** |
 | Reference by chapter, or by concept | `GUIDE.md` §7 |
-| Whether the book is for the owner alone | `GOAL.md` §10 |
+| ~~Whether the book is for the owner alone~~ | **Closed 2026-11-06**: the owner alone, for now (`GUIDE.md` §2) |
 
 **None of these blocks the research.** Scope versus depth is **not** open: it is settled in
 `GUIDE.md` §3.

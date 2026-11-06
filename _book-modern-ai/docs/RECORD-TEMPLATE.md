@@ -66,8 +66,8 @@ sha256:
       chapter with no arithmetic or no absolutes gets `VACUOUS` from those gates and that is
       correct, but an unexpected `VACUOUS` means the gate found nothing to read (`GATES.md`)
 - [ ] **The book builds clean** — 0 overfull lines, 0 missing glyphs, 0 undefined references. Write
-      the command and its counts. **While the build toolchain is `[OPEN]` (`GUIDE.md` §10) there is
-      nothing to run: write `no build yet` and move on**
+      the command and its counts. The toolchain is pandoc → XeLaTeX (`GUIDE.md` §10). **Until that
+      build exists there is nothing to run: write `no build yet` and move on**
 - [ ] **Every command and code sample in the chapter has been run** — say how many, and that the
       output shown is what came back (`GUIDE.md` §4)
 - [ ] Index entries read one by one against Key Terms **before** review

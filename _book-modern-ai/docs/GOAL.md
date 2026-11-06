@@ -444,7 +444,7 @@ twice.** Difficulty belongs to the subject, never to the prose.
 **[STATED]** The voice is not a preference and not decoration. It is what makes the material
 learnable, and it is as binding as any other rule.
 
-**It is specified in full in `GUIDE.md` §4** — the rules, and the fourteen habits that make them
+**It is specified in full in `GUIDE.md` §4** — the rules, and the habits that make them
 concrete, seven of which make the material easy and three of which keep it rigorous. Dropping
 either set produces something the owner has rejected: a textbook that performs rigour through
 difficulty, or a summary that trades depth for ease.
@@ -732,8 +732,8 @@ an answer that does not come from evidence answers nothing. **This closes only a
 reports its skills-and-careers dimension across every area**, and it depends on the
 breadth-against-depth decision above.
 
-**[OPEN]** Whether the book is for the owner alone or eventually for others. It changes what page
-one may assume.
+**[AGREED 2026-11-06]** The book is for the owner alone, for now. **`GUIDE.md` §2 owns the
+consequence** — what a chapter may assume — and this file does not restate it.
 
 **[OPEN]** Whether the labs become public artefacts. The owner has noted that his practice is
 separate from the book, so this may be out of the book's scope entirely.

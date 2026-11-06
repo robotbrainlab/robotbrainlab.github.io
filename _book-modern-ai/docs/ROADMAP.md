@@ -21,10 +21,10 @@ it first, act on the current step, then update it.
 | 10 | Build the machinery | Claude | `tools/`, each check proved before it is wired in. **`tools/sweep.py` and the driver come before the first fix round**, not at the end (`GATES.md`) | Not started |
 | 11 | Write chapter one, then the rest | Claude | Chapters. **Cycle 1 is one chapter, and both durations are recorded before cycle 2 is sized** (`PROCESS.md` §10) | Not started |
 
-**Most of step 10 can run alongside step 5.** Three checks cannot be finished there: the inputs
-gate's vocabulary is seeded from the research (`GATES.md` gate 8), the boundary gate only lists
-until step 7's mathematics decision (gate 2), and the outline gate cannot run at all until the
-build toolchain is decided (gate 9).
+**Most of step 10 can run alongside step 5.** Two checks cannot be finished there: the inputs gate's
+vocabulary is seeded from the research (`GATES.md` gate 8), and the boundary gate only lists until
+step 7's mathematics decision (gate 2). A third, the outline gate, is built alongside the build
+itself because it reads the built document.
 
 ## What step 4 needs
 
@@ -97,12 +97,13 @@ teaching order, and each one is checkable at its source. That is the whole basis
 | How deep does the mathematics go? | 7 | **Yes** |
 | What structure, and whether the book has parts at all | 7 | **Yes** |
 | Which area goes deep, if any? | 7 | **Yes** |
-| Reference by chapter, or by concept? | 7 | No — decidable now, and cheap to decide early |
-| Is the book for the owner alone? | 8 | No |
-| **The build toolchain** (`GUIDE.md` §10) | **10** | No — but **step 10 cannot finish without it**, because gate 9 reads the built document |
+| ~~Reference by chapter, or by concept?~~ | — | **Closed 2026-11-06**: by concept (`GUIDE.md` §7) |
+| ~~Is the book for the owner alone?~~ | — | **Closed 2026-11-06**: the owner alone, for now (`GUIDE.md` §2) |
+| ~~The build toolchain~~ | — | **Closed 2026-11-06**: pandoc → XeLaTeX (`GUIDE.md` §10) |
 
 **Four need the subjects**, and the subjects come from the research — which is why they are marked
-open rather than put to the owner now. **The other five do not** and could be settled at any time;
-the build toolchain is the one of those with a step waiting on it.
+open rather than put to the owner now. **Of the five that did not, three are closed** and the
+closures stay on the table so a later cycle can see what was decided and when. The two left are the
+method's contents (step 2) and the area list (step 4).
 
 ## Nothing after step 4 may start until the area list is approved

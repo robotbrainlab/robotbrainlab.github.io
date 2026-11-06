@@ -43,8 +43,14 @@ the book's word for anything.
 - A prerequisite from outside the scope — a piece of statistics, a piece of mathematics — is
   **taught inline, from zero, in the chapter that needs it.** Never sent elsewhere.
 
-**[OPEN]** Whether the book is for the owner alone or eventually for others. It changes what page
-one may assume.
+**[AGREED 2026-11-06] The owner alone, for now.** So a chapter may assume his Python and his
+background, and need not explain what he already knows. **This is the faster book to write and it
+matches the stated purpose** — his single learning resource, not a publication.
+
+**The cost of changing it later is real and runs one way:** opening the book up means adding
+explanation throughout, not removing it. Nothing in the design depends on the answer staying as it
+is, and §3's scope rule is unaffected — a prerequisite is still taught inline from zero, because
+*he* may not know it either.
 
 ## 3. Scope
 
@@ -125,7 +131,7 @@ the material learnable, and it is as binding as anything else in this file.
 **[AGREED]** A rule list is not a voice. These fourteen are the voice, stated as habits a writer
 either has or does not.
 
-**The `which set` column says what each one does.** Seven make the material **easy** (1–7), three
+**Thirteen are in force. The `which set` column says what each one does.** Seven make the material **easy** (1–7), three
 keep it **rigorous** (9, 12, 14), three do **both** (8, 10, 13), and one is **conditional** on an
 open decision (11). Dropping the easy set produces a textbook that performs rigour through
 difficulty; dropping the rigorous set produces a summary that trades depth for ease. The owner has
@@ -146,7 +152,7 @@ written to be followed and corrected, not to be derived again from somewhere els
 | 8 | **Tables compare; prose explains.** Never prose doing a table's job | both |
 | 9 | **One word per concept, forever.** Name the field's shorthand once, then never alternate | rigorous |
 | 10 | **Limits are stated as decisions, not gaps** | both |
-| 11 | Chapters **keep their promises out loud** — *conditional on §7's decision; if references go by concept this habit is dropped, and §7 says what that costs* | conditional |
+| 11 | ~~Chapters **keep their promises out loud**~~ — **dropped by §7's decision to reference by concept.** The row and its number stay so that habits 12 to 14 keep theirs | dropped |
 | 12 | **The arithmetic is done, not described** | rigorous |
 | 13 | Where a subject's **practical stakes** are known, name them plainly and without inflation — what it is used for, what it costs to get wrong | both |
 | 14 | **Density without padding.** Density is a feature; filler is not | rigorous |
@@ -270,15 +276,15 @@ That last line is load-bearing. Without it a lab gets quietly tuned until it con
 **structure follows the subjects** — it cannot be chosen before the research names them. Nothing
 here presumes it.
 
-**[OPEN]** One decision that must be made early, because it is expensive to reverse:
+**[AGREED 2026-11-06] Reference by concept.** Name the idea; the reader looks up where it lives.
+The alternative was a chapter naming a chapter by number — *"Chapter 9 promised to open this"* —
+which reads as one continuous argument and costs a sweep through the prose on every re-order. **This
+book is revised on a cycle and will be re-ordered many times**, so the sweep would be paid
+repeatedly and forever.
 
-| Choice | Buys | Costs |
-|---|---|---|
-| Reference **by chapter**, with a promise — *"Chapter 9 promised to open this"* | A book that reads as one continuous argument | Every re-order is a sweep through the prose |
-| Reference **by concept**, with the location looked up | Re-ordering is nearly free | Less of that one-argument feeling |
-
-**[I RECOMMEND]** by concept, because this book is revised on a cycle and will be re-ordered many
-times. Habit 11 in §4 is the casualty, and it is a real loss.
+**What it costs, and it is a real loss.** Habit 11 in §4 is dropped: chapters no longer keep their
+promises out loud, and the book reads slightly less as a single argument. **Decided early on purpose
+— after twenty chapters, reversing it means rewriting every cross-reference in the book.**
 
 ## 8. Mathematics
 
@@ -349,8 +355,12 @@ latex/       generated. Never edited
   entries one by one is a check that no entry is a phrase bolded for emphasis rather than a term.
 - **The Markdown is the only source of truth.** Never edit generated output.
 
-**[OPEN]** The build toolchain. **Markdown → pandoc → XeLaTeX → PDF** is the proposal. Where an
-existing script is reused, `PROCESS.md` §11's copy-never-share rule applies.
+**[AGREED 2026-11-06] The build toolchain is Markdown → pandoc → XeLaTeX → PDF.** Chosen because a
+working version of this chain already exists elsewhere on this machine, so its failure modes are
+known rather than to be discovered. **Every script is copied into this project, never shared**
+(`PROCESS.md` §11), so improving this book's build cannot break anything else.
+
+This unblocks gate 9, which is the only check that reads the built document rather than the source.
 
 ## 11. What the book never does
 
