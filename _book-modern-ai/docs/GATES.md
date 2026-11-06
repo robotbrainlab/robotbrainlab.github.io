@@ -6,6 +6,15 @@ entries, sixteen scripts** — entry 10 is three generators checked the same way
 **None of this is built yet.** `ROADMAP.md` step 10 builds it, and the present tense below is the
 specification each script is written against, not a report that it runs.
 
+**Build order inside step 10.** The record, claims, ownership and expiry gates first, because they
+guard the files every later chapter depends on. **Entry 10's three generators last** — a glossary,
+a cheat sheet and a changelog built from one chapter's tables return nothing until there are many
+chapters to be inconsistent with each other.
+
+**`tools/sweep.py` is not a gate** and is not in this suite. It is the tool `PROCESS.md` §2 requires
+a fix round to use, so that the sweep's count is derived rather than typed. It belongs with the
+driver, and it is needed before the first fix round rather than at the end of step 10.
+
 **This file is the specification.** `PROCESS.md` §9 lists the gates and points here; it does not
 describe them. Each entry below says what the gate reads, what makes it fail, and what it prints.
 
@@ -281,6 +290,14 @@ is too short; if most things had, it is too long.
 
 **Nothing lengthens a review date.** A date is shortened by evidence of fragility and never
 extended by confidence.
+
+**One asymmetry worth knowing, because it is the real shape of the cycle-three risk.** The claims
+file makes **finding** what must change proportional to what changed. It does not make **applying**
+it so. A superseded claim with five dependents reopens five chapters, and each reopened chapter pays
+a sweep across the whole book — `PROCESS.md` §2's figure is that one claim lives in about six places,
+four of them prose. **So re-verification scales with change and correction scales with the book.**
+`PROCESS.md` §5.2's "the work is proportional to what changed, not to how big the book is" is true of
+the first half only. Nothing fixes this; `tools/sweep.py` only makes the cost visible and honest.
 
 **One interaction worth knowing.** A `volatile` claim comes due every three months, and a cycle runs
 on roughly twelve weeks — so nearly every volatile claim is due at nearly every cycle. **That is

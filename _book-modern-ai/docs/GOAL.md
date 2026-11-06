@@ -265,7 +265,7 @@ or roadmap built for another purpose, so it carries no authority it did not earn
 
 | Who | Does what |
 |---|---|
-| **A framing run** (`briefs/TEMPLATE-area-frame.md`) | Reports the categories the field currently files its work under, each with a named source, its exclusions, and what it could not reach. **It proposes; it does not decide** |
+| **Two framing runs** (`briefs/TEMPLATE-area-frame.md`) | Each reports the categories the field currently files its work under, each with a fetched source, the level of the source's own hierarchy it was taken from, its exclusions, and what the run could not reach. **Two runs, so a division that is an artefact of whichever sources one run opened shows up as a disagreement. They propose; they do not decide** |
 | **The owner** | Approves, redraws or rejects the proposed list, **with the evidence for each boundary in front of him**, and the reasons are recorded with it |
 | **One scout per approved area** (`briefs/TEMPLATE-area-research.md`) | The subjects inside it |
 
@@ -924,10 +924,28 @@ project. A mechanism does.**
    through, and the ratio either justifies this concern or retires it. The book therefore needs a
    **reading order and a priority**, not only a structure — otherwise the first cycle produces more
    than a cycle can absorb.
-2. **The mirror of the taught-ledger is missing.** There is a record of what the book taught.
-   There is no record of what has been run. Given that the owner's practice is deliberately outside
-   the book, this may belong outside the book too — but something has to hold it, or no cycle can
-   know where the last one stopped.
+2. **Nothing in this project measures the learner, and that is the largest gap in it.** Fourteen
+   gates, four review passes and three ledgers all sample the *text*. `ACCEPTANCE.md`'s test is
+   explicitly *"answer each one out of the chapter alone"* — it tests whether the chapter is
+   complete, not whether anything was learned. §9 defines "done" as six things **the owner** can do,
+   and no instrument in the design reads him. **So a cycle cannot know whether the last cycle's
+   material was learned**, which means the cadence cannot be steered by the one variable that
+   matters.
+
+   **[I RECOMMEND]** a `practice/` directory beside the book, holding one file per chapter worked
+   through: the date, what was built or run, the numbers it produced, where the reader got stuck,
+   and each acceptance question marked answered, shaky or not yet. It sits **outside** the book,
+   because §2.3 puts practice outside the book and that stands. It is the mirror of
+   `LEDGER-TAUGHT.md`: that file records what the book gave, this one records what landed.
+
+   **[I RECOMMEND]** the cheapest part of it, which costs almost nothing because the instrument is
+   already written. `ACCEPTANCE.md`'s questions are specified as ones *"you should be able to answer
+   out loud in about a minute"* — that bank **is** a spoken drill and nobody noticed. Run it aloud
+   against the chapters already worked through, record which answers came and which did not, and §9
+   item 6 closes with no new machinery.
+
+   **[OPEN]** Whether the owner wants this at all. It is a record of his own practice, so it is his
+   to accept or refuse, and nothing else in the plan depends on it.
 3. **Superseded material needs a policy, not a deletion.** **`PROCESS.md` §4.1 owns the rule** and
    `CHANGELOG.md` owns how the reader meets it. What belongs here is why it is a goal rather than
    bookkeeping: **how answers change is the specific thing a research engineer has to learn**, and a

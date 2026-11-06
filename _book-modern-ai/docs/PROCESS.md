@@ -46,7 +46,7 @@ occasion, because a story invites the reply that it will not happen here.
 | **Non-scope declared in the record before writing** | Without an edge, review never terminates. Once a chapter claims to handle any case, "what about X?" is always a correct question and every answer creates the next one |
 | **A completeness review against the sources, side by side** | A reviewer checks what is present against the sources; nothing in that act surfaces what is absent from both |
 | **A fix-verification pass whose subject is the named changed passages** | The recurring defect is not writing badly — it is fixing a claim where you are looking and missing it where you are not. A reviewer given the changed passages as its subject finds survivals that a full re-read buries in its own findings. **It still searches the whole chapter**, because a survival is by definition somewhere the fix did not land |
-| **Every fix is a sweep, counted before and after, back matter first** | One claim appears in several phrasings, and the writer applying a fix sees the one the finding quoted. The back matter goes first because a summary, a key-term row and an answer key are read as settled — they look like a glossary rather than an argument — so they are where a fix goes to not happen |
+| **Every fix is a sweep, counted before and after, back matter first** | One claim appears in several phrasings, and the writer applying a fix sees the one the finding quoted. The back matter goes first because a summary, a key-term row and an answer key are read as settled — they look like a glossary rather than an argument — so they are where a fix goes to not happen. **`tools/sweep.py` derives the counts, and the record stores its output rather than a typed number** — a sweep done properly prints `0`, which is what a sweep never run also looks like, so this is the one obligation whose evidence the person doing the work must not be the one to produce |
 | **In a lab, one claim lives in the prose *and* in the code** | A lab's programs print counts, comparisons and universals, and that printed output is captured into the chapter. So the same claim can exist in the body, the program, the captured block, the summary, a key-term row and an answer — **six places on that list, four of them prose** — and fixing the prose alone makes the chapter contradict its own printed output |
 | **A staged driver that refuses, not a checklist** | A checklist in prose is read once and skipped thereafter. A program that will not advance until the current stage's evidence is present cannot be skipped — see §6.1 |
 | **The record carries the chapter's hash, written last** | Editing one character afterwards makes the record stale and fails the suite |
@@ -195,7 +195,7 @@ EXPIRE → RESEARCH → CONFIRM → SELECT → PLAN → WRITE → VERIFY → CLO
 
 | Stage | What happens | Approved by |
 |---|---|---|
-| **Expire** | Every claim past its `review_by` is re-verified by `briefs/claim-verifier.md` and becomes `verified`, `contested` or `superseded`. **A superseded claim names its dependent chapters, and only those reopen.** `tools/verify-expiry.py` must be clean before the next stage begins | — |
+| **Expire** | Every claim past its `review_by` is re-verified and becomes `verified`, `contested` or `superseded`. **A superseded claim names its dependent chapters, and only those reopen.** `tools/verify-expiry.py` must be clean before the next stage begins. **Who re-verifies depends on the claim — §5.3** | Owner, for load-bearing claims |
 | **Research** | One scout per area, fixed brief schema, delegation depth 0. Output: candidate **subjects**, each a complete unit, plus claims with sources | — |
 | **Confirm** | Every scout claim becomes a `CLAIMS.tsv` row (§5.1). **Then `briefs/claim-verifier.md` runs on each claim whose `maturity_basis` is `provisional` and which a candidate chapter would rest on** — because a chapter may not rest on an unestablished maturity, and nothing else in the cycle discharges that | — |
 | **Select** | Subjects filtered by the three-part test (`GOAL.md` §10): a mechanism worth understanding · live research · something buildable. **Rejections recorded with reasons** | **Owner** |
@@ -309,6 +309,24 @@ here only because a book revised on a cycle re-orders often.
 
 **The work is proportional to what changed, not to how big the book is.** That is the whole purpose
 of the claims file, and the only reason a book like this survives its third cycle.
+
+### 5.3 Who verifies a claim, and why it is not always an agent
+
+**[AGREED 2026-11-06]** Verifying a claim means fetching the source, reading how later work cites
+it, judging whether a strength is `preprint` or `vendor`, and noticing when the largest version of a
+claim is the originating group's. **That is `GOAL.md` §1.2's definition of a research-oriented
+engineer, almost word for word.** It was the project's own target skill, delegated.
+
+| Claim | Verified by | Why |
+|---|---|---|
+| **Load-bearing** — a chapter listed in `dependents` would teach something different if it fell | **The owner** | Reading a well-argued verdict about a claim is not the same as reaching one. This is the activity §1.2 names, and it is the reason the book exists |
+| **Everything else**, and every `volatile` row at EXPIRE | `briefs/claim-verifier.md` | A version number or a price is a single fetch and teaches nothing. Spending the owner's attention there buys nothing |
+| **Any claim the owner asks it to** | `briefs/claim-verifier.md` | A second opinion he can check against his own is useful; a substitute for his own is not |
+
+**This does not touch `PROCESS.md` §2's settled rule that Claude writes and the owner reads.
+Verifying is not writing.** The brief stays exactly as it is, because the owner uses it too: it is
+the written-down method for the job, and following it is how the job is learned rather than
+improvised.
 
 ---
 
@@ -460,6 +478,11 @@ book:
 
 ### Per cycle
 
+- **Cycle 1 is one chapter, and that is not a schedule but a measurement.** The owner works it
+  through, and both durations are recorded: how long it took to produce under the full loop, and how
+  long it took him to read it, run its lab and answer its questions. **Cycle 2's size is set from
+  that ratio.** `GOAL.md` §12 item 1 proposes measuring both rates in cycle 1 and is one step short:
+  a measurement that arrives after the production it was meant to size cannot size it
 - Every claim past `review_by` re-verified or marked `superseded`
 - Every superseded claim retained, with the date and the reason
 - The changelog entry distinguishes **new** from **revised** from **overturned**

@@ -46,7 +46,10 @@ sha256:
       written — say how many
 - [ ] **Every claim has a `CLAIMS.tsv` row**, with its source and strength, and **none is stated
       above its recorded strength**
-- [ ] **Every absolute tested** against a counter-example *in the book*, not only in this chapter
+- [ ] **Every absolute tested** against a counter-example **in this chapter**, and against any
+      `Do not` row in `LEDGER-TAUGHT.md` that bears on it. **Not against the whole book** — that
+      obligation grows with the book while being charged to one chapter, which is how it comes to be
+      skipped
 - [ ] **Every term built on** was already given to the reader
 - [ ] The chapter holds the anatomy in `GUIDE.md` §5, including its durable question and its
       `Claims` section
@@ -69,8 +72,9 @@ sha256:
       output shown is what came back (`GUIDE.md` §4)
 - [ ] Index entries read one by one against Key Terms **before** review
 - [ ] **Pass 1, completeness review** — launched with the brief in `briefs/`
-- [ ] Each finding **verified before accepting**; each fix **swept book-wide, counted before and
-      after — zero, or it is not done**, back matter first
+- [ ] Each finding **verified before accepting**; each fix **swept book-wide with `tools/sweep.py`,
+      back matter first — paste its before and after output, not a number you typed.** Zero, or the
+      fix is not done (`PROCESS.md` §2)
 - [ ] **Pass 2, adversarial claims** — CLEAN
 - [ ] **Pass 3, lab execution from the chapter text alone** — produced a verdict
 - [ ] **Pass 4, fix verification** — launched, naming every changed passage

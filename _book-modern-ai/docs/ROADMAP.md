@@ -18,8 +18,8 @@ it first, act on the current step, then update it.
 | 7 | Decide the book's shape | **Owner** | The four open questions that need the subjects, plus the one that does not have to wait but closes here | Not started |
 | 8 | Write the table of contents | **Owner approves** | `PLAN.md` | Not started |
 | 9 | Write the acceptance questions | Claude | `ACCEPTANCE.md`, filled | Not started |
-| 10 | Build the machinery | Claude | `tools/`, each check proved before it is wired in | Not started |
-| 11 | Write chapter one, then the rest | Claude | Chapters | Not started |
+| 10 | Build the machinery | Claude | `tools/`, each check proved before it is wired in. **`tools/sweep.py` and the driver come before the first fix round**, not at the end (`GATES.md`) | Not started |
+| 11 | Write chapter one, then the rest | Claude | Chapters. **Cycle 1 is one chapter, and both durations are recorded before cycle 2 is sized** (`PROCESS.md` §10) | Not started |
 
 **Most of step 10 can run alongside step 5.** Three checks cannot be finished there: the inputs
 gate's vocabulary is seeded from the research (`GATES.md` gate 8), the boundary gate only lists
@@ -31,12 +31,28 @@ build toolchain is decided (gate 9).
 **Two parts, in order.** `GOAL.md` §3.3 owns the argument for the split and this document does not
 restate it.
 
-1. **A framing run**, `briefs/TEMPLATE-area-frame.md`. It reports the categories the field currently
-   files its own work under — each with the named source it came from, what it excludes, and what
-   the run could not reach. **It proposes a list; it decides nothing.**
+1. **Two framing runs**, `briefs/TEMPLATE-area-frame.md`, in a fresh session outside this
+   repository so no project file is in the agent's context. Each reports the categories the field
+   currently files its own work under — each with a fetched source, **the level of that source's own
+   hierarchy it was taken from**, what it excludes, and what the run could not reach. **They propose
+   a list; they decide nothing.**
 2. **The owner rules on that list** — approves it, redraws the boundaries, or rejects it — with the
-   evidence for each boundary in front of him. **The reasons are recorded with the list**, because a
-   later cycle has to be able to ask whether a boundary still makes sense.
+   evidence for each boundary in front of him, and the two runs' disagreements beside it. **The
+   reasons are recorded with the list**, because a later cycle has to be able to ask whether a
+   boundary still makes sense.
+3. **Somebody turns the approved categories into each scout's `<SCOPE>` and `<EXCLUDED>`**, and
+   **that somebody is the owner**, in the same sitting as the approval. A framing run reports what
+   work is *filed* in a category; a scout needs the *subjects* it is responsible for. Whoever
+   converts one into the other is choosing what the scouts look for, so it is not a clerical step
+   and it is not Claude's. Every area's exclusions are written at the same time as every other's,
+   from the one approved list.
+
+**Two things to expect, so neither is read as a defect in the runs.** Filing categories do not
+record whether a subject is still moving, so a settled area can arrive looking like a live one —
+`GUIDE.md` §3's test is per claim and only applies later, which means a scout budget can be spent on
+an area that turns out to be foundations. And the runs are forbidden from aiming at areas that are
+agent-sized and non-overlapping, because they must report what the sources carry; **closing that gap
+is what the owner's redraw is for**, and a boundary he draws is his rather than a source's.
 
 **Step 4 is not finished until the list is approved.** Everything downstream reads "the approved
 list at step 4": the scouts' scope and exclusions (`briefs/TEMPLATE-area-research.md`) and the area

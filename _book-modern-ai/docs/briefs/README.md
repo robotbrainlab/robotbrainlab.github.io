@@ -7,7 +7,7 @@ in a growing block at the top of a brief an agent has to read past.
 
 | Brief | Role | When it runs |
 |---|---|---|
-| `TEMPLATE-area-frame.md` | **Framer** — report the categories the field files its work under, as a candidate area list | Step 4, once per cycle, **before** any scout |
+| `TEMPLATE-area-frame.md` | **Framer** — report the categories the field files its work under, as a candidate area list | Step 4, **twice per cycle**, in a fresh session outside this repository, before any scout |
 | `TEMPLATE-area-research.md` | **Scout** — find the subjects in one area | Research stage, one per approved area |
 | `claim-verifier.md` | **Claim verifier** — re-check one claim at source, adversarially | Expire stage, and any time a claim is challenged |
 | `pass-1-completeness.md` | **Completeness reviewer** | After a chapter is written |

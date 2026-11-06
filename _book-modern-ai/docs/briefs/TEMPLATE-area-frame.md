@@ -4,26 +4,41 @@
 does not look for subjects — one scout per approved area does that afterwards
 (`TEMPLATE-area-research.md`).
 
-**Why it exists.** A brief that says "research modern AI" measures the search index rather than the
+**Why it exists.** A brief that names no areas at all measures the search index rather than the
 field (`../GOAL.md` §3.3). The areas are a coverage device that forces attention somewhere the index
 does not point. **This run gets that device from the categories the field already files its own work
 under**, so the boundaries come from evidence with a source rather than from anybody here.
 
 ## How to fill this in
 
-Replace `<OUTFILE>`, `<CAP>` and `<RUN-ID>`. **Change nothing else, and add no examples.** If a
-change is needed, change this file and say in the commit what it fixes.
+Replace `<FIELD>`, `<OUTFILE>`, `<CAP>`, `<RUN-ID>` and `<FLOOR>`. **Change nothing else, and add no
+examples.** If a change is needed, change this file and say in the commit what it fixes.
 
-- **`<OUTFILE>`** is `../../research/YYYY-MM-DD-frame-<RUN-ID>.md`, relative to `docs/briefs/`.
-- **`<RUN-ID>`** is `a` for the first run of a cycle, `b` for the second. **Run this brief twice,
-  independently, with no agent seeing the other's output.** Two runs that produce different carvings
-  mean the carving is an artefact of what each one happened to read — which is a finding about the
-  frame, and the owner needs it before he rules.
-- **`<CAP>`** is the maximum number of candidate areas to report. **It bounds the report, not the
-  field**, so it cannot be calibrated by the run it bounds. The run must say whether it hit the cap.
+- **`<FIELD>`** is the field being divided, in the exact words the agent will be given. **It is the
+  single input that most determines the answer**, because different wordings return different
+  category lists from the same sources. The brief requires the agent to copy it back verbatim, so
+  every run's output records the question it was actually asked. **Two runs are comparable only if
+  this string is identical in both.**
+- **`<OUTFILE>`** is `../../research/frames/YYYY-MM-DD-<RUN-ID>.md`, relative to `docs/briefs/`. The
+  `frames/` subdirectory keeps these out of the scouts' namespace, where a dated filename is read as
+  an area slug (`../../research/README.md`).
+- **`<RUN-ID>`** is `a` for the first run, `b` for the second. **Run this brief twice.**
+- **`<CAP>`** is the maximum number of candidate areas to report.
+- **`<FLOOR>`** is the minimum number of sources that must be fetched. **Four is the starting
+  value.** Without a floor, a run that opens two listings, fills every field and stops has obeyed
+  the brief exactly — and a thin list looks identical to a thorough one.
 
-**This brief names no area, no subject, no venue, no index and no expected outcome, and it must stay
-that way.** An instrument told what to expect finds it.
+**Where to run it.** **In a fresh session outside this repository**, with no project file in its
+context. Telling an agent to ignore files already attached to it does not work: it cannot unread
+them. This is the only way the isolation is real rather than requested.
+
+**Why twice.** A division produced once cannot be told from an artefact of whichever sources that
+run happened to open. **Two runs disagreeing is a finding the owner needs before he rules.** Two
+runs agreeing is weaker evidence than it looks — same model over the same prompt shares its priors
+— so read agreement as "no disagreement found", not as confirmation.
+
+**This brief names no area, no subject, no venue, no index, no vendor and no expected outcome, and
+it must stay that way.** An instrument told what to expect finds it.
 
 ---
 
@@ -33,64 +48,93 @@ that way.** An instrument told what to expect finds it.
 
 **QUESTION**
 
-Under what categories does this field currently file, review and present its own work — and what
+Under what categories does **`<FIELD>`** currently file, review and present its own work — and what
 does each category include and exclude?
 
-You are describing how the field is already organised. **You are not proposing how it should be
-organised, and you are not saying which parts matter.**
+You are describing how this subject is already organised, **by the people who work in it**. You are
+not proposing how it should be organised, and you are not saying which parts matter.
 
 **WHAT TO DO**
 
-1. **Find the places where the field sorts its own work into named categories.** Submission or
-   review categories, programme or session groupings, index or archive subject classes, the standing
-   sections of a field-wide survey. **You choose which of these to consult** — nobody here has
-   chosen them for you, and which ones you chose is part of what you report.
-2. **Take the category names from those sources.** Not from your own sense of how the field divides,
-   and not from any teaching sequence, course, roadmap or curriculum.
-3. **Where sources disagree about a boundary, report the disagreement** rather than resolving it.
-   Two sources splitting one area differently is evidence the owner needs, not noise to tidy.
-4. **Merge only where two names are plainly the same category** under different labels, and say
-   which two and on what basis.
-5. **Report what you could not reach**, and what your chosen sources systematically miss.
+1. **Find the places where this subject sorts its own work into named categories.** Five kinds
+   count, and a good list draws on more than one:
+
+   | Kind | What it is |
+   |---|---|
+   | `review-venue` | The submission or review categories of a venue that refereed the work |
+   | `index` | The subject classification of an archive, index or catalogue |
+   | `programme` | The session or track groupings of a meeting |
+   | `survey` | The standing sections of a field-wide survey. **One author group's expository choice, so weaker than the others** — never your only kind |
+   | `practitioner` | A taxonomy used to organise this work in industry: a named job board's categories, a named standards body's or trade group's classification, a named vendor-neutral benchmark suite's divisions. **These carry the applied and operational categories the academic kinds have no submission category for, so a list without them under-reports engineering** |
+
+   A source that sells a product in this subject is marked `vendor` whatever else it is, and is the
+   weakest kind. **You choose which sources to consult. That choice shapes the answer, so it is
+   part of what you report.**
+
+2. **Take the category names from those sources**, not from your own sense of how the subject
+   divides, and not from any teaching sequence, course, roadmap, syllabus or textbook contents page.
+3. **Say which level of each source's own hierarchy you took.** Filing systems are layered: one
+   level may hold a handful of categories and the level below it ten times as many. **Which level
+   you report decides how coarse the division is, so it is reported, never assumed.**
+4. **Where sources disagree about a boundary, report the disagreement** rather than resolving it.
+5. **Merge only where two names are plainly the same category** under different labels, and say
+   which two and on what basis. **Split a source's category only if a different source splits it**,
+   and name that source. Do not split on your own judgement.
+6. **Report what you could not reach**, and what your chosen sources systematically miss.
 
 **OUTPUT**
 
-**Write the candidate list to `<OUTFILE>`.** Create it.
+**Write the candidate list to `<OUTFILE>`.** Create it, and its directory if it does not exist.
 
 **Return to me only this:**
 
-1. `## Sources used` — one line each: what it is, why you chose it, and its date.
-2. `## Candidate areas` — one line per area: its name and the number of sources that carry it.
-3. `## Disagreements` — boundaries the sources draw differently.
-4. `## What this run could not see` — in full, as specified below.
-5. `## Written to` — the file path and the number of areas in it.
+1. `## The question I was asked` — **`<FIELD>`** copied back exactly, character for character.
+2. `## Sources used` — one line each: what it is, its URL, its date, its kind, and `FETCHED` or
+   `RECALLED`.
+3. `## Candidate areas` — one line per area: its name, the level you took it from, and **one clause
+   of what it includes and one of what it excludes**. No counts and no scores on this line.
+4. `## Disagreements` — boundaries the sources draw differently. `none found` if none.
+5. `## What this run could not see` — in full, as specified below.
+6. `## Written to` — the file path and the number of areas in it.
 
-**UNIT — one candidate area, every field filled**
+**UNIT — one candidate area**
 
 ```
-NAME            the category name, as the sources call it. Not a name you coined
-SOURCES         every source that carries this category: what it is, and its date.
-                A category with no source is not reportable — drop it
+NAME            the category name, as its source calls it. Not a name you coined
+LEVEL           where this sits in its source's own hierarchy: which level you took,
+                what the level above groups it under, and roughly how many
+                categories the level below splits it into. Write "flat" if the
+                source has only one level
+SOURCES         one line each: what it is, its URL, its date, its kind, and
+                FETCHED or RECALLED. At least one must be FETCHED with a URL,
+                or this category is not reportable — drop it
 ALSO CALLED     other names the same category appears under, with their sources
-INCLUDES        what work is filed here, in the sources' own terms
-EXCLUDES        what is filed elsewhere, naming the category it goes to instead
-OVERLAPS        any other candidate area whose INCLUDES overlap this one, and how
+INCLUDES        what work is filed here, in the source's own terms
+EXCLUDES        what is filed elsewhere, naming where it goes. Where it goes to
+                something not on your list, write "off-list: <name>".
+                Do NOT add that name as a candidate area to make this field work
+OVERLAPS        any other candidate area whose INCLUDES overlap this one, and how.
+                "none found" is a complete answer
 SIZE SIGNAL     an absolute count with its source, or a ratio against a denominator
-                the source itself defines. NEVER a share of "the field" or "all of AI":
-                nobody can define that denominator, so nobody can check it.
-                Write "none available" rather than estimating
-SOURCE DISAGREES  where a source splits, merges or omits this category differently
+                the source itself defines. NEVER a share of "the field" or of the
+                whole subject: nobody can define that denominator, so nobody can
+                check it. Write "none available" rather than estimating
+SOURCE DISAGREES  where another source splits, merges or omits this category
+                differently. "none found" is a complete answer
 ```
 
 **TARGET**
 
-At most `<CAP>` candidate areas. **A cap, not a goal.** Report fewer complete units rather than more
-incomplete ones. **Say whether you hit the cap**, and if so, which categories you left out and on
-what basis — that is a finding about the cap, not a tidy-up.
+At most `<CAP>` candidate areas, from at least `<FLOOR>` fetched sources of at least three different
+kinds. **A cap, not a goal.** Report fewer complete units rather than more incomplete ones.
+
+**Say whether you hit the cap**, and if so which categories you left out and on what basis — that is
+a finding about the cap, not a tidy-up. **Say if you could not reach the floor**, and what you
+reached instead.
 
 **BUDGET**
 
-25 searches, 20 fetches. Spend them on reaching the category listings themselves rather than on
+25 searches, 25 fetches. Spend them on reaching the category listings themselves rather than on
 reading about them.
 
 **WHAT THIS RUN COULD NOT SEE**
@@ -98,11 +142,15 @@ reading about them.
 Required, and judged as strictly as the list itself. **An honest account of what the instrument
 missed is worth more than a longer list.**
 
-- **Which sources you chose, and which you considered and rejected** — with the reason for each
+- **Searches used, of 25. Fetches used, of 25. Sub-agents started (must be zero).**
+- **Which sources you chose, and which you considered and rejected**, with the reason for each
   rejection.
-- **What your sources systematically miss.** Work that is not submitted, reviewed or indexed
-  anywhere is invisible to every source of this kind. Say so, and say what kinds of work those are.
-- **Language.** Say which languages your sources are in, and that categories named only in other
+- **Which categories rest on a `RECALLED` source** — one you did not open in this run. List them by
+  name.
+- **What your sources systematically miss.** Work that is not submitted, reviewed, indexed or
+  advertised anywhere is invisible to every source of this kind. Say so, and say what kinds of work
+  those are.
+- **Language.** Which languages your sources are in, and that categories named only in other
   languages are absent.
 - **Recency.** Each source's date. A category established since the newest source you read will not
   appear.
@@ -110,34 +158,39 @@ missed is worth more than a longer list.**
 
 **FORBIDDEN**
 
-- **Proposing a category no source carries.** If you think the field is missing one, say so under
+- **Proposing a category no source carries.** If you think the subject is missing one, say so under
   `What this run could not see` — never as a candidate area.
 - **Using a curriculum, course, syllabus, roadmap, textbook contents page or learning path** as a
-  source of categories. Those are teaching orders built for somebody else's purpose.
+  source of categories. Those are teaching orders built for somebody else's purpose. A `survey`'s
+  standing sections are permitted and are marked as such; a book's table of contents is not.
+- **A search-result summary treated as a source.** A snippet tells you something was said. Fetch the
+  page before you quote it: a source can have been revised, corrected, retracted or withdrawn since
+  it was indexed. A category you did not open is marked `RECALLED` and listed as such.
 - **Saying which areas are most important, most active, most promising or most worth studying.**
-  Not in the list, not in the headline, not in passing. That judgement is not this run's, and an
-  ordering is an argument disguised as a report.
-- **Ordering the list by anything but the alphabet.** A ranked list is a recommendation.
-- **A number without what it is a ratio of**, and any share of "the field".
+  Not in the list, not in the summary, not in passing. An ordering is an argument disguised as a
+  report.
+- **Ordering the list by anything but the alphabet.**
+- **A number without what it is a ratio of**, and any share of the whole subject.
 - **Resolving a disagreement between sources** by picking the one you find more convincing.
-- **Reading any file in this repository.** It holds the planning documents for the book this feeds,
-  and reading them would tell you what is expected rather than what is true. Project instruction
-  files may be attached to your context automatically — **ignore them, and open no file except the
-  one you are told to write.**
+- **Splitting a source's category on your own judgement.** Only another source may split it.
+- **Reading any file in this repository**, if you can see one. Open no file except the one you are
+  told to write.
 
 **PARTIAL**
 
-If the budget runs out, report the complete units you have and name the sources you had not reached.
-**A short sourced list with an honest coverage section is a complete result.**
+If the budget runs out, report the complete units you have, the floor you reached, and the sources
+you had not opened. **A short list with an honest coverage section is a complete result.**
 
 **STOPPING RULE**
 
-Stop when every candidate area has every `UNIT` field filled from a named source, **or** when the
-budget is spent. Do not keep searching for a better carving — there is no better carving to find,
-only more sources, and the coverage section is where that is reported.
+Stop when every candidate area has `NAME`, `LEVEL`, `SOURCES`, `INCLUDES` and `EXCLUDES` filled from
+a named source, the remaining fields filled or honestly marked `none found` / `none available`, and
+the floor reached or its shortfall reported — **or** when the budget is spent. Do not keep searching
+for a better carving: there is no better carving to find, only more sources, and the coverage section
+is where that is reported.
 
 **IF UNSURE, SAY SO RATHER THAN ASSERTING. A WRONG FINDING COSTS MORE THAN A MISSED ONE.** A
-boundary you reported as disputed costs one reading. A boundary you reported as settled, wrongly,
-becomes a research area and then a part of the book.
+boundary reported as disputed costs one reading. A boundary reported as settled, wrongly, becomes a
+research area and then a part of a book.
 
 **DELEGATION: ZERO.** Do not start any sub-agent.
