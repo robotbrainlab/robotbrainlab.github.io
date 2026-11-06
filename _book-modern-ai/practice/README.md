@@ -37,12 +37,16 @@ in about a minute."* That is a spoken drill. Nothing new had to be built.
 | `shaky` | Came out, but slowly or incompletely |
 | `not-yet` | Did not come out |
 
-**[I RECOMMEND]** when it runs, and the owner has not ruled on the timing:
+**[AGREED 2026-11-06]** It runs twice:
 
-- **After working through a chapter**, which is the first and most useful reading.
+- **After working through a chapter**, which is the first reading and the least informative, because
+  nothing has had time to fade.
 - **Again at EXPIRE**, on earlier chapters. That stage already re-checks claims whose truth may have
-  moved; re-drilling asks the same question of what was known. A `shaky` on a chapter that drilled
-  `answered` two cycles ago is the most useful row this file can hold.
+  moved; re-drilling asks the same question of what was known. **A `shaky` on a chapter that drilled
+  `answered` two cycles ago is the most useful row this file can hold.**
+
+**The bar is `GOAL.md` §9's: aloud, from memory, with the book shut.** It is strict on purpose, and
+the three outcomes are why that is survivable — **a `shaky` is information, not a failure.**
 
 ## `DRILL.tsv`
 

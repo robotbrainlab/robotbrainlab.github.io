@@ -34,8 +34,10 @@ every answer it will carry.** This is the single most consequential sentence in 
 recommended projects. He verifies what he learns against authoritative sources and does not take
 the book's word for anything.
 
-**[STATED]** The owner is the reader the book is written for. **Whether he is the only one is
-`[OPEN]` below** — who it is written for and who may read it are different questions.
+**[STATED]** The owner is the reader the book is written for, and **[AGREED 2026-11-06]** he is the
+only one for now — the decision and its consequences are below. Who it is written for and who may
+read it are different questions: the repository is public, so anyone *may* read it, and nothing in
+the book is written for them.
 
 **[AGREED 2026-11-06]** what the book may assume:
 

@@ -630,17 +630,39 @@ in this project:
 understand it thoroughly, develop relevant capabilities, and position myself to successfully pursue
 these career opportunities."*
 
-**[I RECOMMEND]** this statement of what "done" means for a cycle, because the goal otherwise has
-no test:
+**[AGREED 2026-11-06]** what "done" means for a cycle, because the goal otherwise has no test.
 
-After a cycle, the owner can, for each subject the cycle covered:
+**After a cycle, for each subject that earned a full chapter, the owner can:**
 
 1. state what problem the subject solves and why it is receiving attention;
-2. explain the mechanism from the foundations, without notes;
+2. **explain the mechanism from the foundations, aloud and with the book shut**;
 3. name what is currently disputed and what the dispute turns on;
 4. build a working instance of it;
 5. take a published claim about it and say what it was measured against, then check it;
 6. answer, aloud and in about a minute, the questions a research-engineer interview would ask.
+
+**[AGREED 2026-11-06] The bar in item 2 is aloud, from memory, with the book shut** — the same
+standard as item 6, so one bar covers both and the drill tests both at once
+(`../practice/README.md`). Spoken rather than written, because that is what an interview asks and
+because speaking exposes a gap that writing lets you edit around.
+
+**It is a strict bar deliberately, and the record is not pass-or-fail.** A drill outcome is
+`answered`, `shaky` or `not-yet`. **A `shaky` is information, not a failure** — which is what stops
+a hard standard from making the drill something to avoid.
+
+**[AGREED 2026-11-06] Not every subject is held to all six**, because the book itself makes some of
+them impossible:
+
+| Subject's verdict | Held to |
+|---|---|
+| `CHAPTER` | **All six** |
+| `FOUNDATIONS-ONLY` | **Items 1, 2 and 3.** It has no lab (`GUIDE.md` §6), so items 4 and 5 cannot apply |
+| `SHORT-ENTRY` | **Item 1 only.** By definition nobody has explained its mechanism or nothing can be built, which is why it is a page rather than a chapter (§10) |
+
+**Why this needed saying.** The list previously read "for each subject the cycle covered" and
+required building a working instance of every one. **That was already false** the moment a verdict
+existed for subjects with no lab. A standard that cannot be met is not a standard; it is something
+to be quietly ignored.
 
 [↑ Back to Table of Contents](#table-of-contents)
 
@@ -737,8 +759,12 @@ breadth-against-depth decision above.
 **[AGREED 2026-11-06]** The book is for the owner alone, for now. **`GUIDE.md` §2 owns the
 consequence** — what a chapter may assume — and this file does not restate it.
 
-**[OPEN]** Whether the labs become public artefacts. The owner has noted that his practice is
-separate from the book, so this may be out of the book's scope entirely.
+**[AGREED 2026-11-06]** The labs do **not** become public artefacts, and this is out of the book's
+scope. Two reasons, and the second is new: his practice is separate from the book (§2.3), **and the
+labs are now pinned to his machine rather than written for a stranger** (`GUIDE.md` §6). Publishing
+them would oblige them to run for other people, which undoes that decision. **The lab code still
+lives in the repository**, because the book ships it — what is ruled out is presenting the labs as
+work for an audience.
 
 [↑ Back to Table of Contents](#table-of-contents)
 
@@ -986,8 +1012,11 @@ project. A mechanism does.**
    losing it with a machine would lose the one thing the pace can be set from. The columns are what
    make that safe.
 
-   **[OPEN]** When the drill runs. `practice/README.md` recommends after a chapter is worked through
-   and again at EXPIRE, which already re-checks what may have moved.
+   **[AGREED 2026-11-06]** The drill runs **twice**: once when a chapter has been worked through,
+   and **again at EXPIRE** on earlier chapters. EXPIRE already re-checks claims whose truth may have
+   moved; re-drilling asks the same question of what was known. **A `shaky` on a chapter that
+   drilled `answered` two cycles ago is the most useful row the record can hold**, and the first
+   drill alone cannot produce it — nothing has had time to fade.
 3. **Superseded material needs a policy, not a deletion.** **`PROCESS.md` §4.1 owns the rule** and
    `CHANGELOG.md` owns how the reader meets it. What belongs here is why it is a goal rather than
    bookkeeping: **how answers change is the specific thing a research engineer has to learn**, and a
