@@ -34,7 +34,9 @@ in `GOAL.md` §11 class C.
 |---|---|---|---|---|---|---|
 | — | *Empty.* | — | — | — | — | — |
 
-`Verdict` is from the research: `CHAPTER`, `FOUNDATIONS-ONLY` or `REJECT`.
+`Verdict` is from the research: `CHAPTER`, `FOUNDATIONS-ONLY`, `SHORT-ENTRY` or `REJECT`
+(`GOAL.md` §10). A `SHORT-ENTRY` row names the chapter whose section will hold it, or `pending` if
+no chapter owns a question it bears on yet.
 `Lab form` is `construct` or `reproduce` (`GUIDE.md` §6).
 `Source record` is the research file the subject came from.
 **`Must cover`** is what the chapter is required to contain, drawn from the subject record. It is

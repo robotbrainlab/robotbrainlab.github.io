@@ -104,8 +104,10 @@ foundations." So answer, in one word plus one line of reason:
   NEITHER  — settled, and nothing moving depends on it
 
 This feeds the subject's verdict at SELECT (PLAN.md's Verdict column): a
-subject whose claims are all SUPPORT is FOUNDATIONS-ONLY, and one whose claims
-are all NEITHER is a REJECT. Say which you are contributing to.
+subject whose claims are all SUPPORT is FOUNDATIONS-ONLY. One whose claims are
+all NEITHER is a REJECT, unless the research's SKILLS field says a practitioner
+is expected to know it, in which case it is a SHORT-ENTRY. Say which you are
+contributing to.
 
 ## Rewording
 If the claim is true but recorded too strongly or too loosely, write the

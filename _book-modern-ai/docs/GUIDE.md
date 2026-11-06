@@ -88,6 +88,15 @@ subject.
 establishes it. **Without that column the boundary cannot be applied**, which is why the maturity
 assessment is part of the research method and not an optional extra.
 
+**A short entry is not a chapter, and does not use the anatomy in §5.** It is one page for a subject
+the reader will be asked about but which fails the selection rule — nobody has explained its
+mechanism, or no part of it can be built here (`GOAL.md` §10). It states what the subject is, what
+it is used for, and **what is not known or not reproducible here, and why.** It carries no durable
+question, no lab, no review questions and no `You understand this when` line. **It sits as a marked
+section inside the chapter that owns the nearest durable question**, so it is read in context rather
+than filed in an appendix; a short entry with no such chapter waits in `PLAN.md` rather than being
+dropped. It may own a term in the glossary, under the same rules as any chapter.
+
 **One consequence worth stating.** A settled subject still earns a chapter when the moving subjects
 are unintelligible without it. The research records that case as `FOUNDATIONS-ONLY`: taught as
 established knowledge the reader must know cold, with no dispute section, and present as support

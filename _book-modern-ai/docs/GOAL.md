@@ -657,8 +657,9 @@ models was wrong.
 **[I RECOMMEND]** that the **unit of the book is the subject, not the area.** Research finds
 subjects; subjects get chapters. An area is a container used to ensure coverage.
 
-**[I RECOMMEND]** a selection rule, so that depth has a bound. A subject earns a full chapter when
-it has all three of:
+**[AGREED 2026-11-06]** a selection rule, so that depth has a bound. **All three are required for a
+full chapter** — the owner ruled on this directly, and on the two tests that do the work. A subject
+earns a full chapter when it has all three of:
 
 1. a **mechanism** worth understanding, not merely a practice to copy;
 2. **live research**, so following it teaches how to read the literature;
@@ -671,6 +672,31 @@ puts all three questions directly.
 **What this means in practice:** a subject the field is quietly abandoning fails test 2, and a
 subject nobody can build fails test 3 — and both verdicts come from the research record rather than
 from my judgement.
+
+**[AGREED 2026-11-06] A fourth verdict, `SHORT-ENTRY`, because failing a test must not mean
+silence.** The three verdicts were nearly binary: a subject failing test 1 or test 3 got `REJECT`,
+which is **no coverage at all**. So the book could say nothing about something the owner is asked
+about, because nobody can build it or nobody has explained it yet. That is a bad way to fail, and
+the rule caused it.
+
+| Fails | And | Verdict |
+|---|---|---|
+| **Test 1** — nobody has explained the mechanism yet | the research's `SKILLS` field says a practitioner is expected to know it | `SHORT-ENTRY` |
+| **Test 3** — no part of it can be built or measured here | the same | `SHORT-ENTRY` |
+| Either | and `SKILLS` does not say so | `REJECT`, as before |
+
+**What a short entry is.** One page, never a chapter. It states what the subject is, what it is used
+for, and **what is not known or not reproducible here, and why.** No lab. It carries no durable
+question of its own, because it is not a chapter. **`GUIDE.md` §5 owns its shape.**
+
+**Why the two cases are worth a page each.** That a practice works and nobody has explained it is
+itself a research engineer's insight, not an absence of one. And a result the owner cannot reproduce
+is still a result he must be able to discuss, including the fact that he could not check it — which
+is a more honest answer in an interview than silence.
+
+**Whether a subject qualifies is the research's to report, not mine.** The test is the `SKILLS` field
+(`briefs/TEMPLATE-area-research.md`), which requires named evidence. Without that evidence the
+verdict stays `REJECT`.
 
 **[OPEN]** **Breadth against depth.** Three candidate shapes, and this decision determines almost
 everything else:

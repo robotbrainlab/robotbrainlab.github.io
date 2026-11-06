@@ -198,7 +198,7 @@ EXPIRE → RESEARCH → CONFIRM → SELECT → PLAN → WRITE → VERIFY → CLO
 | **Expire** | Every claim past its `review_by` is re-verified and becomes `verified`, `contested` or `superseded`. **A superseded claim names its dependent chapters, and only those reopen.** `tools/verify-expiry.py` must be clean before the next stage begins. **Who re-verifies depends on the claim — §5.3** | Owner, for load-bearing claims |
 | **Research** | One scout per area, fixed brief schema, delegation depth 0. Output: candidate **subjects**, each a complete unit, plus claims with sources | — |
 | **Confirm** | Every scout claim becomes a `CLAIMS.tsv` row (§5.1). **Then `briefs/claim-verifier.md` runs on each claim whose `maturity_basis` is `provisional` and which a candidate chapter would rest on** — because a chapter may not rest on an unestablished maturity, and nothing else in the cycle discharges that | — |
-| **Select** | Subjects filtered by the three-part test (`GOAL.md` §10): a mechanism worth understanding · live research · something buildable. **Rejections recorded with reasons** | **Owner** |
+| **Select** | Subjects filtered by the three-part test (`GOAL.md` §10): a mechanism worth understanding · live research · something buildable. **All three for a chapter**; a subject failing the first or third that a practitioner is expected to know gets a `SHORT-ENTRY`. **Rejections recorded with reasons** | **Owner** |
 | **Plan** | Subjects become chapters. Ownership assigned. Structure chosen *now*, from the subjects that exist — never before (`GOAL.md` §5.3). Acceptance questions written **before** drafting | **Owner** |
 | **Write** | One chapter. Six steps, §6 | — |
 | **Verify** | Four passes (§7) | — |

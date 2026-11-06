@@ -133,7 +133,8 @@ enforced: a record that exceeds one is not finished, so cut it.
 |---|---|
 | `CHAPTER` | All three. It earns a full chapter |
 | `FOUNDATIONS-ONLY` | Mechanism yes, buildable yes, **live research no** — the answer has settled, **and something still moving is unintelligible without it.** It is something the reader must know cold, taught as established knowledge rather than as a frontier, and it needs no dispute section |
-| `REJECT` | No mechanism, or nothing a reader can do — **or settled with nothing moving depending on it.** A settled subject no live subject needs is not foundations, it is out of scope. **Say which, and why** — a rejection may be reconsidered next cycle, and the reason is the only way to tell whether anything changed |
+| `SHORT-ENTRY` | Fails the mechanism test or the buildable test, **but your `SKILLS` field says a practitioner is expected to know this.** It gets one page, not a chapter: what it is, what it is for, and what is not known or not reproducible. **Name the evidence in `SKILLS` that puts it here** — without that evidence the verdict is `REJECT` |
+| `REJECT` | No mechanism, or nothing a reader can do, and **nothing in `SKILLS` says a practitioner must know it** — **or** settled with nothing moving depending on it. A settled subject no live subject needs is not foundations, it is out of scope. **Say which, and why** — a rejection may be reconsidered next cycle, and the reason is the only way to tell whether anything changed |
 
 **The `CLAIMS` vocabulary**
 
