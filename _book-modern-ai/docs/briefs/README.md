@@ -14,7 +14,7 @@ in a growing block at the top of a brief an agent has to read past.
 | `pass-1-completeness.md` | **Completeness reviewer** | After a chapter is written |
 | `pass-2-claims.md` | **Adversary** — every claim against its recorded strength | After pass 1's fixes |
 | `pass-3-lab.md` | **Lab runner** — run the lab from the chapter text alone | After pass 2 |
-| `pass-4-fix-verification.md` | **Fix verifier** — only the changed passages | Last |
+| `pass-4-fix-verification.md` | **Fix verifier** — the changed passages as its subject, the whole chapter as its search | Last |
 
 **The writer has no brief here.** Writing a chapter is the six-step loop in `../PROCESS.md` §6, done
 in the main session with the sources open, not delegated.
@@ -49,12 +49,16 @@ into `CLAIMS.tsv` rows (`../PROCESS.md` §5.1). This is that pattern applied to 
 **Four slots are in every brief here**, because each fails silently when left out: `OUTPUT`,
 `BUDGET`, `STOPPING RULE` and `DELEGATION`.
 
-**The rest are per brief.** The research brief carries all ten, because it produces records rather
-than findings and needs `UNIT`, `TARGET` and `SAMPLING` to bound them. **A review brief folds
-`UNIT` and `SAMPLING` into `OUTPUT`**, which names its sections and asks for a coverage report, and
-states its question as `YOUR JOB` or `QUESTION` — a review returns findings, which have no fixed
-unit count to cap. A brief that leaves out one of the four above is defective; a review brief
-without `UNIT` is not.
+**The rest are per brief, and there are three kinds here:**
+
+| Kind | Which | Slots |
+|---|---|---|
+| **Record-producing, bounded by a count** | The scout | All ten. `UNIT`, `TARGET` and `SAMPLING` bound what it returns |
+| **Record-producing, bounded by something else** | The framer, the consolidator | `UNIT` yes, **`TARGET` no** — the framer reports every category its sources name and is bounded by its two floors; the consolidator is bounded by its input, which is finite because the framing files are already written |
+| **Finding-producing** | The four passes, the claim verifier | **`UNIT` and `SAMPLING` folded into `OUTPUT`**, which names the sections and asks for coverage; the question is stated as `YOUR JOB` or `QUESTION`. Findings have no fixed unit count to cap |
+
+A brief that leaves out one of the four universal slots is defective. **A brief with no `TARGET` must
+say what bounds it instead** (`../PROCESS.md` §4.6).
 
 ## No agent substitutes matching for reading
 

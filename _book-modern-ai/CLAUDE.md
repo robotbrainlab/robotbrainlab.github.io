@@ -20,7 +20,7 @@ Then read only what that step needs:
 
 | Read | For |
 |---|---|
-| `docs/GOAL.md` | What the book is for, and why. **Every statement is marked** as the owner's words, agreed, my recommendation, open, or **defaulted** — mine, acted on because the decision was waiting. Nothing is a decision unless it says so. §11 holds the eleven classes of mistake already made |
+| `docs/GOAL.md` | What the book is for, and why. **Every statement is marked** as the owner's words, agreed, my recommendation, open, or **defaulted** — mine, acted on because the decision was waiting. Nothing is a decision unless it says so. §11 holds the thirteen classes of mistake already made |
 | `docs/GUIDE.md` | What the book **is**: scope, voice, chapter anatomy, labs, length, conventions |
 | `docs/PROCESS.md` | How it gets built: the cycle, the chapter loop, the four passes, the agents, the brief schema |
 | `docs/GATES.md` | What each gate reads, fails on and prints — and the policy for a claim's review date |
@@ -28,7 +28,8 @@ Then read only what that step needs:
 | `docs/PLAN.md` | The spine and this cycle's subjects. **Empty, and says why** |
 | `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, strength, maturity and review date. **Empty** |
 | `docs/briefs/` | One brief per agent role. Fill one in; do not rewrite it |
-| `research/` `records/` `data/` | What the research returned, the per-chapter records, the labs' data. **No content yet; each holds a `README.md` saying what goes in it** |
+| `records/` `data/` | The per-chapter records and the labs' data. **No content yet; each holds a `README.md` saying what goes in it** |
+| `research/` | What the research returned. **`frames/` holds the framing runs and the consolidated candidate list — about 5,600 lines, and the input to step 4.** The scouts' own files are not written yet |
 | `practice/` | **The only record of what the owner has worked through.** `DRILL.tsv` holds the drill outcome per question. **It may be read to judge the book and the pace, never to judge the reader** — `practice/README.md` owns that rule |
 
 ## Precedence, when two documents disagree
@@ -106,10 +107,13 @@ better than prose. **No internal codes or shorthand: name things.**
 
 ## Before claiming anything about a file
 
-**Open it.** `docs/GOAL.md` §11 records eleven classes of mistake made on this project, and the
-largest is claiming what was not read. The two shortest rules from it:
+**Open it.** `docs/GOAL.md` §11 records thirteen classes of mistake made on this project, and the
+largest is claiming what was not read. **Class M is the other one to know: a pattern match answers a
+question about strings, never one about meaning.** The three shortest rules:
 
 - **Do not claim what you have not read.** A summary of a document tells you only that the document
   exists.
 - **Do not assess a thing with an instrument that does not sample it.** Name the instrument and
   what it samples, before the claim.
+- **Do not substitute a search or a count for reading.** Automation may check form; it may never
+  judge content.

@@ -37,15 +37,15 @@ in `GOAL.md` §11 class C.
 `Verdict` is from the research: `CHAPTER`, `FOUNDATIONS-ONLY`, `SHORT-ENTRY` or `REJECT`
 (`GOAL.md` §10). A `SHORT-ENTRY` row names the chapter whose section will hold it, or `pending` if
 no chapter owns a question it bears on yet.
+`Lab form` is `construct` or `reproduce` (`GUIDE.md` §6).
+`Source record` is the research file the subject came from.
+**`Must cover`** is what the chapter is required to contain, drawn from the subject record. It is
+what `tools/verify-coverage.py` reads, and it is the only promise a chapter can be found short of.
 
 **One kind of row does not come from the research at all.** A prerequisite from outside the scope
 that more than one chapter needs gets its own `FOUNDATIONS-ONLY` chapter (`GUIDE.md` §2). **It is
 found here, at PLAN**, by noticing that two chapters would teach the same thing — so its
 `Source record` reads `PLAN` rather than a research file.
-`Lab form` is `construct` or `reproduce` (`GUIDE.md` §6).
-`Source record` is the research file the subject came from.
-**`Must cover`** is what the chapter is required to contain, drawn from the subject record. It is
-what `tools/verify-coverage.py` reads, and it is the only promise a chapter can be found short of.
 
 ---
 
@@ -79,16 +79,16 @@ something **buildable**.
 
 ## The open decisions this file is waiting on
 
-From `GOAL.md` §10 and `GUIDE.md`. **Three need the subjects and two do not** — `ROADMAP.md`'s
-open-decisions table owns which step closes each:
+From `GOAL.md` §10. **Four, and every one of them needs the subjects** — `ROADMAP.md`'s
+open-decisions table owns which step closes each, and it also records the decisions already closed:
 
-| Decision | Needs the subjects? |
+| Decision | Where |
 |---|---|
-| The book's shape — breadth against depth | **Yes** |
-| The structure — five candidates in `GOAL.md` §5.3 | **Yes** |
-| How deep the mathematics goes — three candidates | **Yes** |
-| Whether cross-references go by chapter or by concept | **No**, and `GUIDE.md` §7 says it is expensive to reverse — so it should be settled early rather than left to this file |
-| Whether the book is for one reader or more | **No** |
+| The book's shape — breadth against depth | `GOAL.md` §10 |
+| The structure — five candidates | `GOAL.md` §5.3 |
+| How deep the mathematics goes — three candidates | `GOAL.md` §10 |
+| Which area goes deep, if the shape is asymmetric | `GOAL.md` §10 |
 
-**Only the three marked Yes block this file**, and they wait on the research returning subjects
-(`ROADMAP.md` step 6).
+**All four wait on the research returning subjects** (`ROADMAP.md` step 6). The two that used to sit
+here — how cross-references work, and whether the book is for one reader — were settled on
+2026-11-06 and are no longer this file's business.

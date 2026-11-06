@@ -15,7 +15,8 @@ approvals matter. **If a decision waits more than seven days I act on my recomme
 
 ## Current position
 
-**Step 4 is next. A framing run proposes the areas; the owner rules on them.**
+**Step 4 is next. Two framing runs record what the field files, a consolidation run turns that into
+one candidate list, and the owner rules on it.**
 
 | # | Step | Who decides | Deliverable | State |
 |---|---|---|---|---|
@@ -25,7 +26,7 @@ approvals matter. **If a decision waits more than seven days I act on my recomme
 | 4 | **Establish the research areas** | Claude proposes · **Owner rules** | Two framing runs record what the field files; a consolidation run turns that into one candidate list; the owner approves, redraws or rejects, with the reasons recorded | **Next** |
 | 5 | Run the research | Claude | One file per area in `../research/` | Not started |
 | 6 | Select the subjects | Claude sorts · **Owner rules** | What passed the three tests, and every rejection with the test it failed and why. He rules on both | Not started |
-| 7 | Decide the book's shape | **Owner** | The four open questions that need the subjects, plus the one that does not have to wait but closes here | Not started |
+| 7 | Decide the book's shape | **Owner** | The four open questions that need the subjects: breadth against depth, the mathematics boundary, the structure, and which area goes deep | Not started |
 | 8 | Write the table of contents | **Owner approves** | `PLAN.md` | Not started |
 | 9 | Write the acceptance questions | Claude | `ACCEPTANCE.md`, filled | Not started |
 | 10 | Build the machinery | Claude | `tools/`, each check proved before it is wired in. **`tools/sweep.py` and the driver come before the first fix round**, not at the end (`GATES.md`) | Not started |
@@ -38,7 +39,7 @@ itself because it reads the built document.
 
 ## What step 4 needs
 
-**Two parts, in order.** `GOAL.md` §3.3 owns the argument for the split and this document does not
+**Four parts, in order.** `GOAL.md` §3.3 owns the argument for the split and this document does not
 restate it.
 
 1. **Two framing runs**, `briefs/TEMPLATE-area-frame.md`, in a fresh session outside this

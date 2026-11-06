@@ -116,9 +116,20 @@ enforced: a record that exceeds one is not finished, so cut it.
 | `TRANSITION` | Where this sits between research and practice: what is **still experimental**, what is **becoming practice**, and what is **established engineering**. Say what the evidence for each is — a thing is not established practice because a paper proposed it | 150 words |
 | `ENGINEERING` | How it is actually built, the central trade-off, and the tools or frameworks in real use | 150 words |
 | `SKILLS` | What someone would need to understand, reproduce, implement or contribute to this: the knowledge, the technical skills, and the practical experience. **Be specific** — "strong maths" is not an answer; "able to read a proof of a convergence bound" is | 130 words |
-| `BUILDABLE` | Three parts. **(a)** What reproducing the central result here actually takes — hardware, time, and cost if it is material. **(b)** The **smallest experiment that teaches the mechanism**, what it measures, and what it needs; if that still needs more than one accelerator, say so rather than shrinking it until it is wrong. **(c)** A line beginning `HARDWARE:`. **If nothing here can be reproduced outside a large lab, say that** — it is a true and important finding about the area, not a failure | 180 words |
+| `BUILDABLE` | Three parts, judged against **THE MACHINE** below. **(a)** What reproducing the central result here actually takes — memory, disk, time, and cost. **All four, not only the interesting ones.** **(b)** The **smallest experiment that teaches the mechanism**, what it measures, and what it needs; if that still needs more than the machine below, say so rather than shrinking it until it is wrong. **(c)** A line beginning `HARDWARE:`. **If nothing here can be reproduced on that machine, say that** — it is a true and important finding about the area, not a failure | 180 words |
 | `CLAIMS` | 3 to 6 rows: `claim \| source URL \| strength \| maturity \| basis \| class`. See below | — |
 | `VERDICT` | Answer three questions, then give one value. See below | 80 words |
+
+**THE MACHINE**
+
+Judge `BUILDABLE` against this and nothing else. **An Apple Silicon Mac** — unified memory, Metal
+acceleration, **no discrete NVIDIA GPU and no cluster**. So small models run and fine-tune locally,
+most inference work is possible, and **a large training run is not**. A paid model API is available
+for a few pounds per subject, so a result reachable only through a hosted model is still reachable —
+say what it would cost.
+
+**The exact memory figure is not recorded**, which is why part (a) asks for the requirement rather
+than a yes or no. Report what the work needs; do not guess whether it fits.
 
 **The three verdict questions**
 

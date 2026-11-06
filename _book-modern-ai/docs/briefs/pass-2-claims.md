@@ -1,6 +1,9 @@
 # Pass 2 — adversarial claims
 
-Fill in `<CHAPTER>` and `<CLAIMS-FILE>`.
+Fill in `<CHAPTER>`, `<CLAIMS-FILE>` and `<ANSWERS>`. `<ANSWERS>` is the path to
+`markdown/ZZ-review-answers.md` and this chapter's section number in it — **the review answers are
+in the back matter, not the chapter** (`../GUIDE.md` §5), and check 3 below cannot be done without
+them.
 
 **What this pass is for.** Pass 1 checks the chapter against its sources. This pass checks the
 chapter against **what the project has recorded about the strength of those sources.** A claim can
@@ -47,9 +50,12 @@ the dispute is real and this project has confirmed that it is real.
    finding, and it is the most serious kind.
 2. **No claim is stated above its recorded strength.** Quote the chapter's wording and the row.
 3. **No `contested` claim is presented as settled** — including in the summary, the key-term table
-   and the answer key, which are where this hides.
-4. **Every size claim says what it is a share of.** A percentage or a ratio with no denominator is
-   a finding.
+   and **the answer key in `<ANSWERS>`**, which are where this hides. The answer key is a separate
+   file, which makes it the easiest of the three to forget.
+4. **Every size claim is a count with its source, or a ratio against a denominator somebody else
+   defined** — a named index, a named job board. **A share of "the field" is a finding even when a
+   denominator is given**, because nobody can define that denominator, so no reader can check it
+   (`../GUIDE.md` §5).
 5. **Every benchmark or comparison result says what it was compared against**, and whether the
    comparison was fair. "Better than X" with no statement of how X was configured is a finding.
 
@@ -75,9 +81,9 @@ If a section is clean, say so in one line rather than leaving it out.
 
 **BUDGET**
 
-One reading of the chapter against the claims file. **No web searches, no fetches** — this pass
-compares two files and nothing else. Verifying a claim at its source is the claim verifier's job,
-not yours.
+One reading of the chapter against the claims file, **and of `<ANSWERS>` for this chapter's
+section**. **No web searches, no fetches** — this pass compares files already given to you.
+Verifying a claim at its source is the claim verifier's job, not yours.
 
 **TARGET**
 
@@ -99,6 +105,7 @@ If you stop early, name the sections you covered.
   strength on record. A true claim stated too strongly is a finding; a false claim stated at its
   recorded strength is not yours.
 - **Fetching a source.**
+- **Skipping `<ANSWERS>`** because it is not the chapter. It is where check 3 most often lands.
 - **Rewriting the chapter.**
 
 **STOPPING RULE**

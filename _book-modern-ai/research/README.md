@@ -9,4 +9,5 @@ Research output goes here and **never into a conversation** — that is what kee
 affordable. **What the scout returns instead is the four sections listed in
 `../docs/briefs/TEMPLATE-area-research.md`**, and the records stay in the file.
 
-Empty. No research has been run under an agreed brief.
+**No scout has run yet**, so there is no area file here. `frames/` is not empty — it holds the
+framing runs and the consolidated candidate list that step 4 rules on.

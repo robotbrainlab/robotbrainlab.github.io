@@ -103,11 +103,11 @@ foundations." So answer, in one word plus one line of reason:
   SUPPORT  — settled, and a moving subject is unintelligible without it
   NEITHER  — settled, and nothing moving depends on it
 
-This feeds the subject's verdict at SELECT (PLAN.md's Verdict column): a
-subject whose claims are all SUPPORT is FOUNDATIONS-ONLY. One whose claims are
-all NEITHER is a REJECT, unless the research's SKILLS field says a practitioner
-is expected to know it, in which case it is a SHORT-ENTRY. Say which you are
-contributing to.
+This feeds the subject's verdict at SELECT, but it does not decide it. You see
+one claim row and nothing else, so you cannot see the research record the
+verdict also turns on. Report SUBJECT, SUPPORT or NEITHER and stop there;
+the verdict is assembled at SELECT from every claim plus the subject's own
+record (GOAL.md section 10).
 
 ## Rewording
 If the claim is true but recorded too strongly or too loosely, write the

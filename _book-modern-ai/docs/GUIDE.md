@@ -1,6 +1,6 @@
 # The specification — what this book is, and how a chapter is built
 
-**Written 2026-11-06.** This file says what the book *is*. `PROCESS.md` says how it gets made, and
+This file says what the book *is*. `PROCESS.md` says how it gets made, and
 `GOAL.md` says why it exists. Where this file and `PROCESS.md` disagree about the book itself, this
 file wins.
 
@@ -35,9 +35,12 @@ recommended projects. He verifies what he learns against authoritative sources a
 the book's word for anything.
 
 **[STATED]** The owner is the reader the book is written for, and **[AGREED 2026-11-06]** he is the
-only one for now — the decision and its consequences are below. Who it is written for and who may
-read it are different questions: the repository is public, so anyone *may* read it, and nothing in
-the book is written for them.
+only one, for now. So a chapter may assume his Python and his background and need not explain what
+he already knows — **the faster book to write, and the one that matches the stated purpose**: a
+single learning resource, not a publication.
+
+Who it is written for and who may read it are different questions: the repository is public, so
+anyone *may* read it, and nothing in the book is written for them.
 
 **[AGREED 2026-11-06]** what the book may assume:
 
@@ -56,11 +59,7 @@ the whole teaching load for it. Without this split, a chapter about a current re
 chapter about linear algebra — and that is the wrong chapter for it. **Nothing is sent outside the
 book either way**, which is what the rule was protecting.
 
-**[AGREED 2026-11-06] The owner alone, for now.** So a chapter may assume his Python and his
-background, and need not explain what he already knows. **This is the faster book to write and it
-matches the stated purpose** — his single learning resource, not a publication.
-
-**The cost of changing it later is real and runs one way:** opening the book up means adding
+**The cost of that decision runs one way:** opening the book up means adding
 explanation throughout, not removing it. Nothing in the design depends on the answer staying as it
 is, and §3's scope rule is unaffected — a prerequisite is still taught inline from zero, because
 *he* may not know it either.
@@ -273,7 +272,7 @@ done them** — the owner's practice lives outside it.
 **[AGREED 2026-11-06] One lab per full chapter, and its size varies with the subject.** A lab may
 be an afternoon or twenty minutes. **The chapter states the expected effort**, so a week can be
 planned, and `briefs/pass-3-lab.md` reports whether that estimate held. A `FOUNDATIONS-ONLY` chapter
-and a short entry carry no lab at all (§3, §5).
+and a short entry carry no lab at all (§3, which owns both).
 
 **[AGREED]** **Two lab forms, and the chapter's subject decides which.**
 
@@ -304,9 +303,9 @@ most inference work is possible, and a large training run is not.** A lab that n
 says so and gives the reduced version, or says plainly that there is none (below).
 
 **The exact memory figure is not recorded here**, because nobody has written it down. **So every lab
-states its own requirement** — memory, disk, and time — rather than relying on a machine
-description, and the owner can tell at a glance whether it fits. If the figure is ever recorded,
-this paragraph is where it goes.
+states its own requirement** rather than relying on a machine description, and the owner can tell at
+a glance whether it fits. **What it must state is the four-item list below**, not a shorter one. If
+the memory figure is ever recorded, this paragraph is where it goes.
 
 **[AGREED 2026-11-06] A lab may spend money, up to a few pounds a chapter.** Many current results
 can only be reproduced against a hosted model. The conditions:
@@ -407,7 +406,9 @@ docs/        the planning documents. Never built, never published with the book
 markdown/    the chapters, one file each, plus ZZ-review-answers.md. The only source of truth
 data/        data a lab ships with, one directory per chapter
 records/     one evidence record per chapter
-research/    what the research returned, one file per area per run
+research/    what each scout returned, one file per area per run
+research/frames/  the framing runs, and the consolidated candidate list
+practice/    what landed: the drill outcome per question. Outside the book
 tools/       the gates, the driver, the generators
 latex/       generated. Never edited
 ```

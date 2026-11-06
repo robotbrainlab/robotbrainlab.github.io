@@ -14,7 +14,7 @@ caught does not belong here — it belongs in the gate.
 worth more than one imported from elsewhere, because an imported entry carries a story nobody in
 this project paid for and invites the reaction *"that will not happen to us."*
 
-**The ten entries below are stated as arguments**, so that each one holds because of how writing
+**The eight entries below are stated as arguments**, so that each one holds because of how writing
 and reviewing work rather than because of something that once happened. None of them has an
 incident attached, and that is deliberate: this project has not yet produced one.
 
@@ -69,29 +69,7 @@ errors at that same rate — and nobody expects it to, because it is called a fi
 round's findings is `PROCESS.md` §6's stopping rule**, which distinguishes a mis-scoped chapter from
 an unswept fix round; this entry exists because the two look identical from inside the round.
 
-**8. A brief can specify where to look and never say what to look for.** A brief carries budgets,
-floors, a stopping rule and a forbidden list, and all of those bound the *process*. **None of them
-defines the output's unit.** So an agent answers the question asked — faithfully — and returns
-something that is not what the work needed, and the gap is invisible until a human glances at the
-result. The framing brief asked what categories a field files its work under; filing categories
-include application domains, session formats, audience labels and vendors' product names, so that
-is what came back.
-*Practice:* **every brief states what one unit of its output is and what is not one**, with the
-near-misses named. And where reporting and judging are both needed, **they are two agents**
-(`briefs/README.md`): a reporter that filters cannot be checked, while a consolidator's output can
-be read back against the record it came from.
-
-**9. A pattern match answers a question about strings, and gets used to answer one about meaning.**
-Searching is fast, it produces a tidy count, and the count looks like a finding. But the instrument
-samples text while the question is about what the text *is* — and the pattern is written by someone
-who already believes what they will find, so it confirms rather than checks. **A keyword list seeded
-with the expected answer can only return the expected answer.**
-*Practice:* **automation may check form; it may never judge content** (`briefs/README.md`). A count
-is a hint about where to read. Where the question is "what is this?", read it. Three failures in one
-day paid for this entry: a sweep that found six of twenty-five, a pattern over names that missed two
-whole classes of thing, and a lookup that returned exactly its own seed list.
-
-**10. A gate can lie to the suite and nothing will say so.** A gate is ordinary software and fails
+**8. A gate can lie to the suite and nothing will say so.** A gate is ordinary software and fails
 in ordinary ways: crashing on a renamed column, passing vacuously on an empty directory, printing a
 success banner over no output. In each case it reports health and checks nothing — **worse than no
 gate, because it is trusted.**

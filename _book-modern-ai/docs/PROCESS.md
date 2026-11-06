@@ -1,6 +1,6 @@
 # How this book gets built
 
-**Written 2026-11-06.** The proposed development framework for *Modern AI: Research, Science and
+The proposed development framework for *Modern AI: Research, Science and
 Engineering*. The purpose of the book is in `GOAL.md` and is deliberately not restated here, so
 that a disagreement about method cannot quietly change the goal.
 
@@ -55,14 +55,14 @@ occasion, because a story invites the reply that it will not happen here.
 | **The stopping rule, with round-2 classification** | Round 2 findings about the *subject* mean the chapter is mis-scoped. Round 2 findings that are round 1's own unswept fixes mean the fix round was itself a drafting event. Conflating them mis-fires, and sends a sound chapter back to be narrowed |
 | **A taught-ledger with explicit "Do not" rows** | **Gate 8 reads sequence, but only for terms that have a Key Terms row.** Nothing checks whether a chapter re-explains what the reader already has, or claims something false about what came before. A chapter can be internally perfect and wrong about where it sits |
 | **A shorthand ledger** — the clear name against the word the field actually says | A book naturally uses its own vocabulary throughout. A reader who searches it for the word they have heard elsewhere then finds nothing, even where the subject is covered at length |
-| **A defect ledger of *classes*, each with its instance and the practice** | A list of mistakes is not reusable. A class is |
+| **A defect ledger of *classes*, each stated as the argument for why the defect happens, with the practice that follows** | A list of mistakes is not reusable. A class is. An incident is named only where this project produced one (`LEDGER-DEFECTS.md`) |
 | **Concept ownership: each concept owned by exactly one chapter** | Some concepts are naturally touched by several chapters, and without an owner each one re-teaches it slightly differently |
 | **Correctness outranks the source** (`GUIDE.md` §5 owns the rule) | Received explanations in any technical field include confident wrong ones. A book that follows its sources faithfully will reproduce them, and the reader has no way to tell |
 | **Page budgets never bind, and never decide scope** (`GUIDE.md` §9) | Padding and cutting are visible and easy to resist. The failure that is not visible is deciding **scope** by the page count and then justifying the decision on other grounds — which can only be caught by looking at what was dropped, not at the reason given |
 | **`You understand this when …`, one sentence per chapter** | The reader's own test |
 | **An acceptance bank written before the chapters exist** (`ACCEPTANCE.md`) | A question written after a chapter can only ask about what the chapter contains, so it cannot detect an omission. Written first, it is a standard the chapter must meet |
 | **The book ships its own lab data** (`GUIDE.md` §6) | An expected result that depends on the reader's own files holds for nobody, so the lab cannot be checked by anyone |
-| **Labs isolated: own folder, no credential files, keys from the environment** | The repository is public |
+| **Labs isolated: own folder, no credential files, keys from the environment** | **Isolation is for reproducibility**: a lab that reads or writes outside its folder cannot be re-run from a clean state, so its result cannot be trusted. **The credential half is because the repository is public** — a key committed once is public forever |
 | **Claude writes. The owner reads and works through everything** | The owner's decision. It is settled: do not propose that he writes it |
 | **No agent substitutes matching for reading** (`briefs/README.md` owns it) | A pattern match tells you where a string is; it cannot tell you what a thing means. **Automation may check form — arithmetic, table shape, a stale hash, whether a string occurs. It may never judge content** — whether something is an area, whether a claim is overstated, whether an explanation teaches. A count is a hint about where to read, never the finding |
 
@@ -199,7 +199,8 @@ at all, because each new agent brings its own.
 QUESTION        one sentence. The output must answer exactly this
 OUTPUT          named sections, in order. Nothing else is returned
 UNIT            what one complete item of output looks like, field by field
-TARGET          how many units. A cap, not a goal
+TARGET          what bounds the output. A unit cap where a count bounds it; where
+                nothing should cap it, the brief says what bounds it instead
 BUDGET          counted: searches, fetches, or runs. Whatever the agent can exhaust
 DELEGATION      depth allowed. Default: 0
 STOPPING RULE   when to write up
@@ -210,8 +211,12 @@ SAMPLING        what to report about your own coverage
 
 **The two rules that make it terminate:**
 
-1. **Completeness is per unit, and the unit count is capped.** "Report fewer complete units rather
-   than more incomplete ones." An instruction that only rewards thoroughness has no fixed point.
+1. **Completeness is per unit, and something bounds the output.** "Report fewer complete units
+   rather than more incomplete ones." An instruction that only rewards thoroughness has no fixed
+   point. **A cap is the usual bound and not the only one**: the framer reports every category its
+   sources name, so its bound is its two floors — enough sources, enough searches — and the
+   consolidator's bound is its input, which is finite because the framing files are written. **A
+   brief with no cap states what bounds it in place of one.**
 2. **Delegation depth 0 by default.** An agent that may spawn agents has no budget.
 
 ---
@@ -248,6 +253,13 @@ fails on any claim past its review date.
 
 **The key property:** EXPIRE replaces the full rescan. A cycle's size is set by what has actually
 gone stale, not by the calendar.
+
+**Why framing and consolidation are not stages here.** The areas are established once, at step 4,
+and **they persist across cycles.** A cycle researches *inside* the approved areas; it does not
+re-divide the field. Re-framing every cycle would contradict §5.2's own carving test — a `RECARVE`
+every cycle means the carving is wrong — and would reset the area numbers that claim ids are built
+from (§5.1). **The areas are re-framed only when a `RECARVE` is approved**, which is an owner
+decision and rare by design.
 
 ### 5.1 From a scout's claim to a claims row
 
@@ -326,8 +338,9 @@ That is a falsifiable test on the structure, and it runs for free.
 
 Binding chapters together with promises — *"chapter 9 promised to open this"* — is part of what
 makes a book read as one argument, and it is exactly what makes re-ordering expensive. **`GUIDE.md`
-§7 owns that decision**, with the trade-off and the recommendation. It is `[OPEN]`, and it matters
-here only because a book revised on a cycle re-orders often.
+§7 owns that decision and it is settled — reference by concept** (`[AGREED 2026-11-06]`), precisely
+because a book revised on a cycle re-orders often and the alternative charges a prose sweep every
+time.
 
 #### What maintenance actually looks like, per cycle
 
@@ -338,8 +351,12 @@ here only because a book revised on a cycle re-orders often.
 5. `CHANGELOG.md` — "What Changed in This Edition" — is **generated from those rows**, not written
    by hand.
 
-**The work is proportional to what changed, not to how big the book is.** That is the whole purpose
-of the claims file, and the only reason a book like this survives its third cycle.
+**Finding what must change is proportional to what changed. Applying it is not.** A superseded
+claim with five dependents reopens five chapters, and each reopened chapter pays a sweep across the
+whole book — one claim lives in about six places (§2). **So re-verification scales with change and
+correction scales with the book**, and `GATES.md` records that asymmetry as the real shape of the
+cycle-three risk. The claims file buys the first half, which is the half that was unbounded before;
+nothing buys the second.
 
 ### 5.3 Who verifies a claim, and why it is not always an agent
 
@@ -445,6 +462,8 @@ chapter" re-reads everything and finds what pass 1 already found.
 
 | Agent | Job | May delegate |
 |---|---|---|
+| **Framer** | The categories the field files its work under, reported faithfully. Two runs | No |
+| **Consolidator** | Those records → one candidate area list: classify, merge, pick one level | No |
 | **Scout** | One research area → subject units | No |
 | **Claim verifier** | Re-check one claim at source, adversarially | No |
 | *(no agent)* | **Writing a chapter is not delegated.** It is the loop in §6, done in the main session with the sources open | — |
@@ -457,7 +476,9 @@ chapter" re-reads everything and finds what pass 1 already found.
 
 - **No agent delegates.** Depth 0, everywhere, unless a brief states otherwise and says why.
 - **One chapter in flight at a time.**
-- **Scouts may run in parallel.** Everything after SELECT is serial.
+- **Scouts may run in parallel**, and so do the two framing runs — independently, neither seeing
+  the other's output. Everything after SELECT is serial.
+- **The framer and the consolidator run at step 4 only**, not every cycle (§5).
 - **`CLAIMS.tsv` is the only shared mutable state.** The verifier and the writer touch it in
   different phases, never at the same time.
 - **An agent reports its own sampling**: what it searched, what it could not reach, what its
@@ -553,8 +574,9 @@ of one thing. **That drift is caused by the split**, not by carelessness around 
 criteria, the lab forms, the dispute shape and the gate descriptions each produced a finding because
 that boundary is genuinely blurry.
 
-**The decision.** `GUIDE.md`, `PROCESS.md` and `GATES.md` **merge into one specification**, about
-1,380 lines. The precedence rule between them becomes unnecessary, and so does the one-statement
+**The decision.** `GUIDE.md`, `PROCESS.md` and `GATES.md` **merge into one specification**. **No
+line count is given**, because the three files are still moving and a figure written here goes stale
+the next time one of them is edited — `wc -l` on the three is the answer whenever it is needed. The precedence rule between them becomes unnecessary, and so does the one-statement
 rule's hardest case.
 
 **The trigger, because a decision with no trigger means no.** The merge happens **once step 7
@@ -588,7 +610,10 @@ while the text is still moving weekly is the worst available moment.
 | `ACCEPTANCE.md` | The questions each chapter must answer, written before any chapter | Per cycle, before drafting | Both |
 | `RECORD-TEMPLATE.md` | The per-chapter record, copied into `records/` | Rarely | Both |
 | `CHANGELOG.md` | "What Changed in This Edition" — generated | Every cycle | Owner |
+| `research/` | What each scout returned, one file per area per run | Per cycle | Both |
+| `research/frames/` | The framing runs, and the consolidated candidate list they feed | Step 4, and any `RECARVE` | Both |
 | `data/<chapter-slug>/` | Data a lab ships with | Per chapter | Both |
+| `../practice/README.md` | What the drill is, when it runs, and **the one rule about how the record may be read** | Rarely | Owner |
 | `../practice/DRILL.tsv` | What landed: the drill outcome per question. **Read to judge the book, never the reader** | Per chapter, and at EXPIRE | Owner |
 | `records/NN-slug.md` | Per-chapter evidence | Once, plus amendments | Machine |
 | `briefs/*.md` | Filled briefs, kept so a result can be read against what was asked | Per brief | Both |

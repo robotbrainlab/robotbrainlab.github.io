@@ -62,12 +62,15 @@ two, and that every written chapter's record names its questions.
 ## Deliberate exemptions
 
 Some chapters carry no question, on purpose. Each needs a row here saying why, or
-`tools/verify-bank.py` fails. The two reasons that qualify:
+`tools/verify-bank.py` fails. **One reason qualifies:**
 
-- **The chapter is about the book's own arrangement** — nobody asks about that.
 - **The chapter's subject is tested through another chapter's questions**, named here.
 
 Anything else is a chapter that should have a question and does not.
+
+**Front matter is not a chapter** and needs no exemption row — it has no subject to be asked about.
+There is no exemption for "a chapter about the book's own arrangement", because `GUIDE.md` §11
+forbids the book from referring to its own planning, research or machinery at all.
 
 ## The questions
 

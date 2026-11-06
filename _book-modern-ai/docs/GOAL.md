@@ -62,7 +62,7 @@ out of this file so that a disagreement about method cannot quietly change the g
 
 ## 0. How to read this document
 
-Every substantive statement carries one of four markers. This is a requirement of the owner's,
+Every substantive statement carries one of five markers. This is a requirement of the owner's,
 made because I have previously presented my own recommendations as settled decisions.
 
 | Marker | Meaning |
@@ -447,10 +447,11 @@ twice.** Difficulty belongs to the subject, never to the prose.
 **[STATED]** The voice is not a preference and not decoration. It is what makes the material
 learnable, and it is as binding as any other rule.
 
-**It is specified in full in `GUIDE.md` §4** — the rules, and the habits that make them
-concrete, seven of which make the material easy and three of which keep it rigorous. Dropping
-either set produces something the owner has rejected: a textbook that performs rigour through
-difficulty, or a summary that trades depth for ease.
+**It is specified in full in `GUIDE.md` §4** — the rules, and the habits that make them concrete.
+**That file owns the habits and how they divide; this one does not restate the split.** What belongs
+here is why both halves are required: dropping the habits that make the material easy produces a
+textbook that performs rigour through difficulty, and dropping the ones that keep it rigorous
+produces a summary that trades depth for ease. The owner has rejected both.
 
 It is stated there as rules a writer follows, with nothing to consult and nothing to imitate.
 
@@ -560,7 +561,8 @@ stated objective in §1.1, which does not depend on it.
 ### 7.1 What practical work must do
 
 **[STATED]** Exercises, experiments, implementations and projects reinforce the material. The book
-holds them; it does not hold the record of having done them.
+holds them; it does not hold the record of having done them. **That record now exists outside the
+book** — `practice/DRILL.tsv`, the drill outcome per question — and §12 item 2 says what it is for.
 
 **[I RECOMMEND]** **two lab forms, specified in `GUIDE.md` §6**, which owns them and says what each
 requires. The reason they belong to the goal rather than only to the specification: **one of the two
@@ -619,7 +621,11 @@ in this project:
    research reshuffles subjects each cycle, ownership moves, and the ledger that prevents
    re-teaching is the first thing to break.
 
-**[OPEN]** How each of those three is solved.
+**[OPEN]** Whether each of those three is solved. **`PROCESS.md` proposes an answer to each** —
+§4.1 for the revision cost, §4.2 for the acceptance rule, §4.4 for ownership moving between cycles —
+and §12 of that file states the honest position: **proposed, and none tested.** So what is open is
+not whether anything has been attempted, but whether the attempts work, and the first cycle is what
+decides it.
 
 [↑ Back to Table of Contents](#table-of-contents)
 
@@ -712,7 +718,8 @@ the rule caused it.
 
 **What a short entry is.** One page, never a chapter. It states what the subject is, what it is used
 for, and **what is not known or not reproducible here, and why.** No lab. It carries no durable
-question of its own, because it is not a chapter. **`GUIDE.md` §5 owns its shape.**
+question of its own, because it is not a chapter. **`GUIDE.md` §3 owns its shape**, beside the scope
+rule that puts it there.
 
 **Why the two cases are worth a page each.** That a practice works and nobody has explained it is
 itself a research engineer's insight, not an absence of one. And a result the owner cannot reproduce
@@ -737,15 +744,15 @@ hires across areas, medium depth everywhere may be worth less than depth in one.
 plausible claim about hiring, and **whether it holds is not known here** — the research's
 skills-and-careers dimension is what would establish it.
 
-**[OPEN]** **The mathematics boundary.** A boundary calibrated for application engineering — teach
-what a model computes when it answers, state how it learned, and move on — is broken by dimension
-5, which asks the reader to reproduce a result. Three candidates:
+**[OPEN]** **The mathematics boundary.** Dimension 5 asks the reader to reproduce a result and
+judge whether a claimed improvement is real. **That is what sets the floor**, and nothing in this
+book has a boundary yet. Three candidates:
 
 | Candidate | Consequence |
 |---|---|
 | Enough to **reproduce** a result: the statistics of comparison, and enough optimisation and learning theory to read a training paper critically | Dimension 5 becomes possible; this is my recommendation |
 | Enough to **produce** new results: full derivations, optimisation theory, learning theory | Needed to contribute original research; considerably slower |
-| **Keep the current boundary** | Fastest; dimension 5 has to be dropped |
+| Enough only to **follow** a result: what a model computes when it answers, and how it learned, stated rather than derived | Fastest, and **dimension 5 has to be dropped** — so the book could not teach the thing §1.2 defines |
 
 **[I RECOMMEND]** the replacement test, if the boundary moves: *does the reader need this to tell
 whether a claimed improvement is real, and to build the thing that tests it?* This is sharper than
@@ -945,10 +952,49 @@ absent, and say so in place of asserting one. That is the correct state. **It wi
 — a claim superseded at EXPIRE leaves every chapter resting on it in exactly this position
 (`PROCESS.md` §5).
 
+### Class L — A brief that says where to look and never what to look for
+
+**Instance.** The framing brief carried a budget, two floors, a stopping rule and a nine-item
+forbidden list — and **no definition of its own output unit.** It asked what categories a field
+files its work under. Filing categories include application domains, session formats, audience
+labels and a vendor's product names, because that is what venues route submissions by. The runs
+answered faithfully, and about a quarter of what came back was not a research area. The owner saw it
+on a glance; six reader audits had not.
+
+**Why it is wrong.** Budgets, floors, stopping rules and forbidden lists all bound the *process*.
+None of them says what one good answer looks like. An agent then answers the question asked, well,
+and returns something the work cannot use — and the gap is invisible until a human looks at the
+result.
+
+**The practice.** **Every brief states what one unit of its output is, and what is not one**, with
+the near-misses named. And where a stage needs both a faithful record and a judgement about it,
+**those are two agents** (`briefs/README.md`): a reporter that filters cannot be checked, while a
+consolidator's output can be read back against the record it came from.
+
+### Class M — Using a pattern match to answer a question about meaning
+
+**Instances.** (1) A sweep for withdrawn evidence across all the documents found six places;
+reading the same documents found twenty-five. (2) A pattern over category names, written to count
+how many were application domains, both over-matched and missed two entire classes — a benchmark
+vendor's product names and a survey's chapters. (3) A keyword lookup, seeded with the twenty-one
+terms I already believed were in a list, returned exactly those terms. **It could not have returned
+anything else.** The owner's reply: *"You still used an automated check. How many times have I told
+you about this."*
+
+**Why it is wrong.** The instrument samples strings; the question is about what the strings *are*.
+And the pattern is written by someone who already believes what they will find, so it confirms
+rather than checks. **A keyword list seeded with the expected answer can only return the expected
+answer** — that is not a weak check, it is no check.
+
+**The practice.** **Automation may check form; it may never judge content** —
+`briefs/README.md` owns the line and `GATES.md` states it for the gates. A count is a hint about
+where to read. Where the question is *what is this*, read it. This is class H with a different
+instrument: name what the instrument samples before trusting what it says.
+
 ### What follows for the framework
 
-**[I RECOMMEND]** that classes A, C, D, G, H, I, J and K each become a mechanism rather than an
-intention. Eight of the eleven can be:
+**[I RECOMMEND]** that classes A, C, D, G, H, I, J, K, L and M each become a mechanism rather than
+an intention. Ten of the thirteen can be:
 
 | Class | The mechanism |
 |---|---|
@@ -960,7 +1006,9 @@ intention. Eight of the eleven can be:
 | I · adjacent work | `ROADMAP.md` names one current step and its deliverable |
 | J · superseded document | Cite a document's date and purpose in the same sentence as its content |
 | K · evidence that stops counting | Mark the argument, never re-word it. §5.3, §7.1 and §10 are the pattern |
-**The design principle behind all eight is `PROCESS.md` §1's: convert care into mechanism.** It is
+| L · a brief with no output unit | Every brief states what one unit is and what is not one; report and judge are two agents (`briefs/README.md`) |
+| M · matching instead of reading | Automation checks form, never content. A count is a hint about where to read (`briefs/README.md`) |
+**The design principle behind all ten is `PROCESS.md` §1's: convert care into mechanism.** It is
 stated there, with its worked example, and not restated here. **Care does not survive a long
 project. A mechanism does.**
 
@@ -979,13 +1027,20 @@ project. A mechanism does.**
    through, and the ratio either justifies this concern or retires it. The book therefore needs a
    **reading order and a priority**, not only a structure — otherwise the first cycle produces more
    than a cycle can absorb.
-2. **Nothing in this project measures the learner, and that is the largest gap in it.** Fourteen
-   gates, four review passes and three ledgers all sample the *text*. `ACCEPTANCE.md`'s test is
-   explicitly *"answer each one out of the chapter alone"* — it tests whether the chapter is
-   complete, not whether anything was learned. §9 defines "done" as six things **the owner** can do,
-   and no instrument in the design reads him. **So a cycle cannot know whether the last cycle's
-   material was learned**, which means the cadence cannot be steered by the one variable that
-   matters.
+
+   **[OPEN] Who owns the reading order.** Nothing does yet. It is not the structure, because a
+   structure says how the material divides and a reading order says what to work through first; and
+   it is not `PLAN.md`'s spine, which is a set of durable questions in no particular order. **It
+   most likely belongs as a column in `PLAN.md`'s part two**, set when the subjects are chosen, but
+   that is a `[I RECOMMEND]` and `PLAN.md` does not carry it today. Until it does, this requirement
+   rests on nothing — which is why it is marked rather than assumed.
+2. **Nothing measured the learner, and that was the largest gap in this project. It is now
+   closed, and this records why it mattered.** Fourteen gates, four review passes and three ledgers
+   all sample the *text*. `ACCEPTANCE.md`'s test is explicitly *"answer each one out of the chapter
+   alone"* — it tests whether the chapter is complete, not whether anything was learned. §9 defines
+   "done" as six things **the owner** can do, and nothing in the design read him. **So a cycle could
+   not know whether the last cycle's material had landed**, which means the cadence could not be
+   steered by the one variable that matters.
 
    **[AGREED 2026-11-06]** `practice/DRILL.tsv`, and **the drill results only** — not a log of what
    was built, what the numbers were, or where the reader got stuck. The owner chose the minimum
@@ -1047,9 +1102,9 @@ project. A mechanism does.**
 - **The table of contents.** No subjects are chosen here, and none may be chosen until the research
   has run and the owner has selected from what it returned (`ROADMAP.md` steps 5 and 6).
 - **Any decision marked `[OPEN]`.** The count is not stated here on purpose — a hand-maintained
-  count drifts out of step with the markers it counts. **Grep for `[OPEN]`.** The ones
-  that block the rest are in §10 — the book's shape, the mathematics boundary, and which area goes
-  deep if the shape is asymmetric — and all three need the research first.
+  count drifts out of step with the markers it counts. **Grep for `[OPEN]`.** The ones that block
+  the rest are the book's shape, the mathematics boundary and which area goes deep, all in §10, plus
+  **the structure, which is in §5.3** — and all four need the research first.
 
 [↑ Back to Table of Contents](#table-of-contents)
 
