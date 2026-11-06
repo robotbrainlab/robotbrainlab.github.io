@@ -72,7 +72,7 @@ not proposing how it should be organised, and you are not saying which parts mat
    | `review-venue` | The submission or review categories of a venue that refereed the work |
    | `index` | The subject classification of an archive, index or catalogue |
    | `programme` | The session or track groupings of a meeting |
-   | `survey` | The standing sections of a field-wide survey. **One author group's expository choice, so weaker than the others** — never your only kind |
+   | `survey` | The standing sections of a field-wide survey **of the work itself**. **One author group's expository choice, so weaker than the others** — never your only kind. **An annual report that measures AI's effect on the world does not qualify**, however standing its chapters: its sections file measurements, not submissions, so its chapter list answers a different question from the one above |
    | `practitioner` | A taxonomy used to organise this work in industry: a named job board's categories, a named standards body's or trade group's classification, a named vendor-neutral benchmark suite's divisions. **These carry the applied and operational categories the academic kinds have no submission category for, so a list without them under-reports engineering** |
 
    A source that sells a product in this subject is marked `vendor` whatever else it is, and is the
@@ -140,6 +140,13 @@ ATTESTED BY     how many of your sources name this category, and which ones.
 least `<FLOOR>` fetched sources of at least three different kinds, having spent at least
 `<SEARCH-FLOOR>` searches.
 
+**Having chosen a level in a source, report every category at that level, and say how many that
+level holds.** A partial read of the level you chose is the one incompleteness nothing downstream
+can detect: the list looks deliberate. A run that took a source's twelve named suites and reported
+ten lost the only two that measured something other than speed — and the coarser level, read in
+full, carried more than the finer level read in part. **If you cannot read a level exhaustively,
+take the level above it and say so.**
+
 **You may not filter the list.** Not by how many sources attest a category, not by a tiebreak, not
 by your sense of what belongs together, not to keep the list a readable length. **If your sources
 name forty categories, report forty.** A long list with source counts is exactly what the owner
@@ -194,6 +201,12 @@ missed is worth more than a longer list.**
 - **Using a curriculum, course, syllabus, roadmap, textbook contents page or learning path** as a
   source of categories. Those are teaching orders built for somebody else's purpose. A `survey`'s
   standing sections are permitted and are marked as such; a book's table of contents is not.
+  **A faithful reproduction of a named body's own classification is not caught by this rule, wherever
+  it is hosted** — including on a teaching site, and including when a teaching order has been
+  annotated onto it. Name the classifying body as the source, name the page you read as the route,
+  and ignore the annotations. Two runs of this brief split on exactly this point, and the one that
+  refused such a page lost two real categories it had suspected were there. **What is forbidden is
+  taking somebody's teaching order as a taxonomy, not reading a taxonomy on a teacher's website.**
 - **A search-result summary treated as a source.** A snippet tells you something was said. Fetch the
   page before you quote it: a source can have been revised, corrected, retracted or withdrawn since
   it was indexed. A category you did not open is marked `RECALLED` and listed as such.
