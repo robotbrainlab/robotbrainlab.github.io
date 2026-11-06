@@ -98,6 +98,16 @@ sense of what matters.
    | `PRODUCT` | One organisation's branded suite or tool, not a category of work |
    | `UNCLEAR` | **The record does not settle it.** Say what would |
 
+   **A record that carries no scope cannot be an `AREA`.** Where `INCLUDES` says the source gave a
+   name and a level and nothing more, the record does not settle anything, so the verdict is
+   `UNCLEAR` and what would settle it is "a scope statement from the source". **This holds even when
+   the name looks unambiguous**, and especially then: a `WHY` that paraphrases the name is the name
+   being used as the record. One run of this brief gave `AREA` to fourteen such records — among them
+   *Graphs*, justified as "learning on graph-structured data", and *Harness Engineering*, justified
+   as "the harness a model runs inside" — and said in its own coverage section that `AREA` on those
+   meant no more than "a track name that denotes AI engineering". **It is the owner's business
+   whether a bare track title becomes an area of his book, not this run's.**
+
 3. **Merge categories that are the same area under different names**, and **only** on evidence from
    the records: the same sources, or `ALSO CALLED` naming the other, or `INCLUDES` that match. Give
    the kept name, every name merged into it, and the evidence. **Two names you merely think are

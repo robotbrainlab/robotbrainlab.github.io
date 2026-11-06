@@ -250,6 +250,141 @@ the source page to check the run's claim.** That work took one person about an h
 is not in the process anywhere. **The research half of this project has no verification stage at
 all**, while the writing half has four.
 
+### V16 · One venue's area list has now defeated all six runs, and one claim about it is unverified
+
+A fourth major venue reviews by area but publishes the list only behind its submission system. An
+earlier run found a third party's repost carrying fourteen of its area names — among them two that
+**no other source on any list names** — and rejected it, because the venue's own page carries no
+list to check the repost against. Both fresh runs reached the same dead end independently.
+
+**The V1 fix does not rescue this.** That fix permits a faithful reproduction of a *classifying
+body's own taxonomy*; a third party's repost of a conference call is not that, and there is nothing
+to verify it against. So the hole stands, and it is the second-largest after the standards body.
+
+**One thing I could not check.** Run `f` states that this venue's main call lists no areas at all.
+The page would not load for me either, so **that claim is recorded as the run's, not as verified.**
+
+---
+
+### V17 · The consolidator judged a fifth of the area list from category names, which its brief forbids in those words
+
+**The run itself did well on the two rules that were hardest to keep.** It gave all 181 records
+exactly one verdict with no arithmetic gap; every rejection cites a kind and **not one cites
+importance**; it added no category, and where the rule implied an area neither run had reported — the
+operation of a deployed system — it said so under what it could not settle instead of inventing it.
+Its account of its own doubts runs to two pages and names the merges to undo first.
+
+**It broke the other one.** Its brief says: "**Judge from the record, not from the name.**"
+
+**Fourteen of the 69 areas carry `COVERS: name and level only in the source` and `EXCLUDES: not
+stated`** — the record contains a category name, the level it sits at, and nothing else. For each,
+the run wrote a `WHY` that paraphrases the name:
+
+| Area | The `WHY` written for it | What the record held |
+|---|---|---|
+| Graphs | "learning on graph-structured data" | the word *Graphs* |
+| Harness Engineering | "the harness a model runs inside" | the two words, restated |
+| Computer Use | "models operating a computer" | the two words |
+| Inference | "serving models" | the word |
+
+The other ten are Context Engineering, Data Quality, Design Engineering, Local AI, Memory &
+Continual Learning, Posttraining & Midtraining, Robotics & World Models, Sandbox & Platform
+Engineering, Vision & OCR, and Voice & Realtime AI.
+
+**The correct verdict was available and defined.** `UNCLEAR` means "the record does not settle it",
+and the run used it six times — but only where a *name pointed two ways*, never where the *record
+was empty*. Where the name pointed one way, it followed the name.
+
+**The run disclosed the problem and issued the verdict anyway.** Its coverage section says: "'AREA'
+on an applied track means no more than 'a track name that denotes AI engineering'." That sentence is
+an accurate description of a defect, filed beside the output it describes.
+
+**Why this one matters most.** It is where the chain converts nothing into something. A conference
+publishes a track title; the framing run reports it faithfully, which is correct; the consolidator
+must give it a verdict and has nothing to judge, so it judges the title; and an area enters the list
+the owner rules on. **Downstream it gets worse**: each approved area becomes a scout's `<SCOPE>`,
+and a scout handed "Harness Engineering" with no source scope would supply one itself.
+
+**Fixed in `briefs/TEMPLATE-area-consolidate.md`**: a record carrying no scope from its source cannot
+receive `AREA`.
+
+---
+
+## What held, checked the same way
+
+An honest account has to say what the instruments got right, or the findings above read as a verdict
+on the method rather than a list of repairs.
+
+**The consolidation run was checked against seven of its brief's rules. Six held.**
+
+| Rule | Held? | How it was checked |
+|---|---|---|
+| Every record gets exactly one verdict, none unaccounted for | **Yes** | The arithmetic closes twice: 104 + 77 = 181, and 116 area records + 18 + 10 + 18 + 13 + 6 = 181 |
+| **Never reject for being unimportant** — only on kind | **Yes** | Every rejection in the file was read. Each names the clause of the rule it fails. **No rejection anywhere appeals to size, activity, fashion or worth** |
+| A borderline rejection must reach the owner | **Yes** | The closest call — a category rejected on a one-line gloss while its near neighbour was kept — is marked **Close** in the table and carried into its own section, with the reason |
+| Add no category the runs did not report | **Yes** | The rule implies an area neither run named — the operation of a deployed system. The run put it under what it could not settle and **did not add it** |
+| Resolve the level, and name what sits below rather than dropping it | **Yes** | It chose one level, argued for it from what differs in the work, and listed what the choice demotes — then said which of its own choices it thinks may be wrong, and why |
+| Order by nothing but the alphabet; no scores | **Yes** | Read the list |
+| **Judge from the record, not from the name** | **No** | V17 |
+
+**Both framing runs also kept the rule they were most likely to break.** Neither filtered its list,
+neither invented a cutting rule, and both reported categories their own text calls audience
+groupings or session formats rather than quietly dropping them — one writing, on an audience
+category, "I have left it on the list rather than apply a rule of my own." **That is exactly the
+defect the brief's first two runs committed yesterday** — each capped its own list and invented its
+own rule for cutting it — and the fix made after them held today, twice.
+
+**The disclosure rules worked where the isolation rules did not.** Two of the three runs named the
+project files injected into their context and said what each contained. That is how V5 is known at
+all.
+
+---
+
+## The cost inventory, for the overengineering question
+
+Facts, counted from the files. The verdict they support is at the end of this document, after the
+remaining runs.
+
+**What the method specifies, and how much of it has ever run:**
+
+| Part | Specified | Built | Ever run |
+|---|---|---|---|
+| Briefs, one per agent role | 8 | — | **2** (framing, consolidation) |
+| Chapter review passes | 4 | — | **0** |
+| Gates | 14, over 16 scripts | **0** | **0** |
+| Roadmap steps | 11 | — | 3 closed, now on step 4 |
+| Approval points per cycle | 5 | — | 0 cycles run |
+| Mistake classes recorded, with instances | 13 | 10 mechanised | — |
+| Decision markers in use | 5 | — | — |
+
+**What one chapter will cost, from `PROCESS.md` §6 and `GUIDE.md` §12:** six loop steps; four
+review-pass agent runs; a book-wide sweep after each pass's findings, counted before and after; all
+fourteen gates `CLEAN` or `VACUOUS` with a reason; every command and code sample run; the lab run
+from the chapter text alone in a fresh folder; a record whose hash is written last, so any later
+edit makes it stale; four ledger and ownership files updated; and a driver program with four stages
+that each refuse to advance.
+
+**Where the verification actually sits:**
+
+| Half of the project | Verification stages | Work done so far |
+|---|---|---|
+| **Writing a chapter** | 4 passes + 14 gates | **Nothing. No chapter exists** |
+| **Research** | **None** | 6 framing runs, 1 consolidation, 1 scout |
+
+**What the documents still leave open.** 22 statements marked `[OPEN]` and 50 marked
+`[I RECOMMEND]`. Reading each `[OPEN]` site, they reduce to seven real decisions, and **four of the
+seven cannot be taken before the research reports**: the book's structure, breadth against depth,
+the mathematics boundary, and which area goes deep. Two more need cycle 1 to have happened: whether
+the revision cost, the acceptance rule for contested material, and ownership moving between cycles
+are solved. **The seventh is a genuine gap with nothing behind it** — `GOAL.md` records that no file
+owns the reading order, and says so in those terms: "this requirement rests on nothing."
+
+**Where the last two days went.** Of the 43 findings fixed yesterday, the file recording them says
+31 were created in the preceding two days by the fix rounds themselves. **Today's 16 findings came
+from running the instruments, and 3 of them could only be found by opening a source page.** That is
+the measurement the overengineering question needs: the marginal return on re-reading the documents
+had fallen to near nothing, and the marginal return on executing them is high.
+
 ---
 
 ## What this phase cannot test at all
