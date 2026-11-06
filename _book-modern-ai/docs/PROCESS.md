@@ -201,7 +201,7 @@ EXPIRE → RESEARCH → CONFIRM → SELECT → PLAN → WRITE → VERIFY → CLO
 | **Select** | Subjects filtered by the three-part test (`GOAL.md` §10): a mechanism worth understanding · live research · something buildable. **All three for a chapter**; a subject failing the first or third that a practitioner is expected to know gets a `SHORT-ENTRY`. **Rejections recorded with reasons** | **Owner** |
 | **Plan** | Subjects become chapters. Ownership assigned. Structure chosen *now*, from the subjects that exist — never before (`GOAL.md` §5.3). Acceptance questions written **before** drafting | **Owner** |
 | **Write** | One chapter. Six steps, §6 | — |
-| **Verify** | Four passes (§7) | — |
+| **Verify** | Four passes (§7). **Pass 3 re-runs the chapter's lab, so a lab that costs money costs it again here** — `briefs/pass-3-lab.md` carries a spend limit and takes the chapter's smaller run where one exists | — |
 | **Close** | Record hashed, ledgers updated, claims' `dependents` filled, operation rows written for the changelog | — |
 
 **EXPIRE is first, and the order matters.** Put it last and the cycle eats itself: the expiry check

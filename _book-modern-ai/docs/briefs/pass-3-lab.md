@@ -1,7 +1,14 @@
 # Pass 3 — run the lab from the chapter text alone
 
 Fill in `<CHAPTER>`, `<FRESH-FOLDER>`, `<LAB-FORM>` (`construct` or `reproduce`, from the chapter's
-row in `../PLAN.md`), and `<HARDWARE-AVAILABLE>`.
+row in `../PLAN.md`), `<HARDWARE-AVAILABLE>` and `<SPEND-LIMIT>`.
+
+**On `<SPEND-LIMIT>`, which is the cost nobody had counted.** A lab may spend a few pounds on a
+hosted model (`../GUIDE.md` §6). **This pass runs every lab, so it spends that money again, every
+chapter.** The limit is therefore stated per run and the agent must stop at it rather than finish
+the lab. **Where the chapter offers a smaller run, this pass takes the smaller one** and says so —
+the question here is whether the lab can be followed, not whether the full result reproduces, and
+the smaller run answers that for less.
 
 **What this pass is for.** The book promises a lab is reproducible from its own text. A writer who
 runs their own lab cannot test that promise, because they know what they meant. This agent knows
@@ -100,10 +107,11 @@ reduced version if the chapter offers one, and report whether that worked. If
 the chapter offers none, that is the result — report it and do not
 substitute a smaller experiment of your own.
 
-## Time
-How long it took, end to end. If the chapter states an expected effort,
-say whether that held. If it states none, report the time and say nothing
-about whether it should have been faster.
+## Time and cost
+How long it took, end to end, against the effort the chapter states —
+the chapter is required to state one (../GUIDE.md section 6), so a
+missing estimate is itself a finding. Then what it cost, against the
+expected cost the chapter states, and whether you took the smaller run.
 
 ## Coverage
 What you ran, what you skipped, and why.
@@ -132,6 +140,10 @@ stopped and why.** Report the gap rather than engineering around it.
 - **Reading or writing anything outside the fresh folder and the data directory the chapter names.**
 - **Touching any credential.**
 - **Substituting a smaller experiment of your own** when the hardware is not available. Report it.
+  **Taking the chapter's own smaller run is not substituting** — that is what it is for, and you say
+  which you took.
+- **Spending beyond `<SPEND-LIMIT>`.** Stop and report where you stopped. A lab that cannot be
+  finished inside the limit is a finding about the lab, not a failed run.
 
 **STOPPING RULE**
 

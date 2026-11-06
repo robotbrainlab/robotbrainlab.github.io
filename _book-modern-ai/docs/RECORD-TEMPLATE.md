@@ -61,8 +61,11 @@ sha256:
       in the report
 - [ ] A disputed subject carries `## What is disputed` in the fixed shape, including **what
       measurement would settle it**
-- [ ] The lab states the hardware it needs, and gives the reduced version `GUIDE.md` §6 requires —
+- [ ] The lab states **memory, disk, expected effort and expected cost** — all four, not just the
+      ones that happen to be interesting (`GUIDE.md` §6) — and gives the reduced version it requires,
       or says plainly that there is none
+- [ ] **The lab was run on the owner's machine and its stated result holds there.** It is pinned to
+      that setup and says what it pinned; it is not written for an unknown reader (`GUIDE.md` §6)
 
 ## After writing
 

@@ -267,7 +267,12 @@ strength and the adversarial pass that reads the prose against it (`GATES.md` ga
 exercises and project recommendations are part of the book. **The book is not a record of having
 done them** — the owner's practice lives outside it.
 
-**[I RECOMMEND]** **Two lab forms, and the chapter's subject decides which.**
+**[AGREED 2026-11-06] One lab per full chapter, and its size varies with the subject.** A lab may
+be an afternoon or twenty minutes. **The chapter states the expected effort**, so a week can be
+planned, and `briefs/pass-3-lab.md` reports whether that estimate held. A `FOUNDATIONS-ONLY` chapter
+and a short entry carry no lab at all (§3, §5).
+
+**[AGREED]** **Two lab forms, and the chapter's subject decides which.**
 
 | Form | What the reader does | Use it when |
 |---|---|---|
@@ -288,12 +293,42 @@ the research to find.
 
 That last line is load-bearing. Without it a lab gets quietly tuned until it confirms its source.
 
+### What a lab may assume about the machine
+
+**[AGREED 2026-11-06]** The labs are written for **an Apple Silicon Mac** — unified memory, Metal
+acceleration, no discrete NVIDIA GPU and no cluster. **So small models run and fine-tune locally,
+most inference work is possible, and a large training run is not.** A lab that needs more than this
+says so and gives the reduced version, or says plainly that there is none (below).
+
+**The exact memory figure is not recorded here**, because nobody has written it down. **So every lab
+states its own requirement** — memory, disk, and time — rather than relying on a machine
+description, and the owner can tell at a glance whether it fits. If the figure is ever recorded,
+this paragraph is where it goes.
+
+**[AGREED 2026-11-06] A lab may spend money, up to a few pounds a chapter.** Many current results
+can only be reproduced against a hosted model. The conditions:
+
+- **The chapter states the expected cost before the first command**, so the reader chooses before
+  spending rather than after.
+- **Where a smaller run exists, the chapter gives it**, with what is lost by taking it.
+- **A lab that cannot be done without spending says so**, rather than appearing free and failing
+  part-way.
+- Keys still come from the environment and are never read, printed, logged or committed.
+
+**[AGREED 2026-11-06] A lab's expected result must hold on the owner's machine, not on any
+machine.** This follows from §2: the book is for him alone. So a lab **pins to his setup and states
+what it pinned** — versions, model snapshots, hardware — instead of degrading to the weakest machine
+a stranger might have. **Sharper labs, easier to write.** The cost is the same one §2 already
+accepted: opening the book up later means revisiting every lab, not just the prose.
+
 ### Rules for every lab
 
 - **Isolated and safe.** Its own fresh folder. It never touches anything outside it.
-- **State what it needs to run** — hardware, time, and cost where that is material. Where the full
-  experiment needs more than the reader is likely to have, give a reduced version that fits, **or
-  say plainly that there is none.** Do not shrink an experiment until it no longer shows the thing.
+- **State what it needs to run** — memory, disk, **expected effort**, and **expected cost where any
+  is incurred.** All four are required, not conditional: the effort figure is what makes a week
+  plannable, and the cost figure is what lets the reader decide before spending. Where the full
+  experiment needs more than the machine above can do, give a reduced version that fits, **or say
+  plainly that there is none.** Do not shrink an experiment until it no longer shows the thing.
 - **The book ships its own data** where data is needed, in `data/<chapter-slug>/`, which is
   published beside the book and listed in `PROCESS.md` §11. No lab says "your own files": an
   expected result that depends on the reader's files holds for nobody. A lab may read `data/` and
@@ -304,8 +339,9 @@ That last line is load-bearing. Without it a lab gets quietly tuned until it con
   beside any figure that depends on it.
 - **No credential ever** is read, written, printed, logged or committed. Keys come from the
   environment.
-- **Expected results must hold for every reader.** Never promise exact output from a stochastic
-  system: say what shape it takes, which assertion must pass, or give a range.
+- **Expected results must hold on the owner's machine**, pinned and stated (above) — not on every
+  machine. Never promise exact output from a stochastic system: say what shape it takes, which
+  assertion must pass, or give a range.
 
 ## 7. Structure, and the cost of cross-references
 
