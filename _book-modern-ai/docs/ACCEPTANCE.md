@@ -20,6 +20,11 @@ added behind.
 **A question a competent person would ask you about this subject, which you should be able to
 answer out loud in about a minute.** Not a quiz item, not a definition prompt, not a recall check.
 
+**This bank is therefore also the spoken drill**, and that is not a second use bolted on — it is
+what "answerable aloud in a minute" already meant. `../practice/README.md` owns how the drill runs
+and what it records. Each question is drilled by its number here, so **a question's number is
+permanent**: renumbering would orphan every row that cites it.
+
 | Not this | This |
 |---|---|
 | "What is X?" | "Why would you use X rather than Y, and what does it cost you?" |

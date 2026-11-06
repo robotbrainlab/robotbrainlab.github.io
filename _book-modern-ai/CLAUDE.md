@@ -29,6 +29,7 @@ Then read only what that step needs:
 | `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, strength, maturity and review date. **Empty** |
 | `docs/briefs/` | One brief per agent role. Fill one in; do not rewrite it |
 | `research/` `records/` `data/` | What the research returned, the per-chapter records, the labs' data. **No content yet; each holds a `README.md` saying what goes in it** |
+| `practice/` | **The only record of what the owner has worked through.** `DRILL.tsv` holds the drill outcome per question. **It may be read to judge the book and the pace, never to judge the reader** — `practice/README.md` owns that rule |
 
 ## Precedence, when two documents disagree
 

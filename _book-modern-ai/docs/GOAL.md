@@ -958,20 +958,34 @@ project. A mechanism does.**
    material was learned**, which means the cadence cannot be steered by the one variable that
    matters.
 
-   **[I RECOMMEND]** a `practice/` directory beside the book, holding one file per chapter worked
-   through: the date, what was built or run, the numbers it produced, where the reader got stuck,
-   and each acceptance question marked answered, shaky or not yet. It sits **outside** the book,
-   because §2.3 puts practice outside the book and that stands. It is the mirror of
-   `LEDGER-TAUGHT.md`: that file records what the book gave, this one records what landed.
+   **[AGREED 2026-11-06]** `practice/DRILL.tsv`, and **the drill results only** — not a log of what
+   was built, what the numbers were, or where the reader got stuck. The owner chose the minimum
+   deliberately, and the reason is the project audit's own: **a mechanism that gets quietly
+   abandoned is worse than one never built**, because the documents still claim it. A full practice
+   log is homework tracking and would not survive its third month. One line per drill will.
 
-   **[I RECOMMEND]** the cheapest part of it, which costs almost nothing because the instrument is
-   already written. `ACCEPTANCE.md`'s questions are specified as ones *"you should be able to answer
-   out loud in about a minute"* — that bank **is** a spoken drill and nobody noticed. Run it aloud
-   against the chapters already worked through, record which answers came and which did not, and §9
-   item 6 closes with no new machinery.
+   **The instrument already existed.** `ACCEPTANCE.md`'s questions are specified as ones *"you
+   should be able to answer out loud in about a minute"* — that bank **is** a spoken drill, and
+   nothing new had to be built. Answering them aloud with the chapter closed, and recording the
+   outcome per question, closes §9 item 6 as well.
 
-   **[OPEN]** Whether the owner wants this at all. It is a record of his own practice, so it is his
-   to accept or refuse, and nothing else in the plan depends on it.
+   **[AGREED 2026-11-06] The one rule about how it may be read**, and `practice/README.md` owns it:
+
+   > **It may be read to judge the book and the pace. It may never be read to judge the reader.**
+
+   A question nobody can answer is a finding about the chapter that was supposed to answer it. **The
+   columns enforce this rather than trusting it**: every one holds a date, a question number or a
+   concept name, so there is no field in which a judgement about the reader could be written. That
+   is §11 class H made structural, and it is also why the file is safe to commit to a public
+   repository.
+
+   **[AGREED 2026-11-06]** It is **committed with the book**, which was the owner's decision against
+   my recommendation to keep it local. His reason holds: it is the only record of what landed, so
+   losing it with a machine would lose the one thing the pace can be set from. The columns are what
+   make that safe.
+
+   **[OPEN]** When the drill runs. `practice/README.md` recommends after a chapter is worked through
+   and again at EXPIRE, which already re-checks what may have moved.
 3. **Superseded material needs a policy, not a deletion.** **`PROCESS.md` §4.1 owns the rule** and
    `CHANGELOG.md` owns how the reader meets it. What belongs here is why it is a goal rather than
    bookkeeping: **how answers change is the specific thing a research engineer has to learn**, and a

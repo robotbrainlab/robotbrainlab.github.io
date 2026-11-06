@@ -482,7 +482,8 @@ book:
 - **Cycle 1 is one chapter, and that is not a schedule but a measurement.** The owner works it
   through, and both durations are recorded: how long it took to produce under the full loop, and how
   long it took him to read it, run its lab and answer its questions. **Cycle 2's size is set from
-  that ratio.** `GOAL.md` §12 item 1 proposes measuring both rates in cycle 1 and is one step short:
+  that ratio**, and from `../practice/DRILL.tsv` — whether the questions came out at all is the
+  other half of whether a cycle landed. `GOAL.md` §12 item 1 proposes measuring both rates in cycle 1 and is one step short:
   a measurement that arrives after the production it was meant to size cannot size it
 - Every claim past `review_by` re-verified or marked `superseded`
 - Every superseded claim retained, with the date and the reason
@@ -518,6 +519,7 @@ checkable: open any brief and count how much of a single combined file it would 
 | `RECORD-TEMPLATE.md` | The per-chapter record, copied into `records/` | Rarely | Both |
 | `CHANGELOG.md` | "What Changed in This Edition" — generated | Every cycle | Owner |
 | `data/<chapter-slug>/` | Data a lab ships with | Per chapter | Both |
+| `../practice/DRILL.tsv` | What landed: the drill outcome per question. **Read to judge the book, never the reader** | Per chapter, and at EXPIRE | Owner |
 | `records/NN-slug.md` | Per-chapter evidence | Once, plus amendments | Machine |
 | `briefs/*.md` | Filled briefs, kept so a result can be read against what was asked | Per brief | Both |
 
