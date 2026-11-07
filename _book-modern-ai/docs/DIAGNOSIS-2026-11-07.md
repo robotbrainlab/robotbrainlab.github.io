@@ -233,3 +233,57 @@ every floor in the register is higher tonight than it was this morning, and floo
 fourteen gates — remains untested and cannot be tested without a chapter. **And one caution about
 this result**: a single run passing is evidence that the register works, not proof that every future
 run will read every page properly. The check is cheap and should be run every cycle.
+
+---
+
+## 8. A defect in run `g` that my own check of it missed
+
+**Found afterwards, by opening a source.** Section 7's check passed run `g` on coverage, on both
+recoveries and on every floor. **It did not ask whether the scope each record states is the source's
+or the run's**, and on one class of source it is the run's.
+
+**What the records say.** For sources that give a bare label and nothing else, run `g` writes a
+one-line gloss:
+
+| Category | What run `g` put in `INCLUDES` |
+|---|---|
+| *Product Management* | "product management of AI products" |
+| *Graphs* | "graph-shaped data and knowledge in AI applications" |
+| *Agentic Commerce* | "agents transacting — buying, selling and paying on a user's behalf" |
+| *Notebook Environment* | "notebook environments as a category of open-source AI tooling" |
+
+**What the source says.** I opened the 2026 programme file directly. **It is 1.35 MB of session
+listings. Each session carries a `Track:` field and an abstract of that session. There is no track
+description anywhere in it.** So the track has a name and a set of talks filed under it, and no
+scope. The first gloss above restates its name. The third does not even match the session filed under
+it, which is about company growth and pricing rather than about agents paying for things.
+
+**At least 64 of the 283 records are affected** — 32 tracks of one programme edition, 18 of the
+other, 14 landscape categories — because all three sources file by bare label.
+
+**Why this matters more than it looks, and it is the point.** This morning's fix to the consolidation
+brief says that **a record carrying no scope cannot be an area**: it goes to the owner undecided,
+because deciding whether a bare track title becomes an area of his book is his business. **An
+invented scope defeats that rule silently.** The consolidation run has no sources and no fetches by
+design, so it cannot tell a sentence the run wrote from a sentence the source wrote. The guard is
+real; it was simply installed one stage downstream of the hole.
+
+**An earlier run had this right.** Run `e`, reading the thinner programme page, wrote: *"the source
+gives the track name only and no scope statement; nothing inferred here."* **The better-briefed,
+more thorough run is the one that got it wrong** — which is worth saying plainly, because it cuts
+against the assumption that later is better.
+
+**Fixed in the framing brief.** `INCLUDES` is now either the source's own words or the explicit
+admission that the source gives a name and a level and no scope — in those words. A sentence that
+restates the name is named as worse than an empty field, because nothing in it is false enough to
+notice. Where a source files items under a bare label, the items may be reported **as items,
+attributed to the item**: "three of the twelve sessions under this track are about X" is a finding;
+"this track covers X" is not.
+
+**The file is not patched.** `2026-11-07-g.md` stands as it was written. It is evidence of what the
+instrument produced, and editing it would destroy the only record of this defect.
+
+**What it costs now.** The consolidation of run `g` is running against a file in which about a
+quarter of the records carry a scope that may be inferred. Any `AREA` verdict on one of those rests
+on that gloss. **Section 9 reports whether the consolidation noticed** — it has no sources, so if it
+did not, that is a structural limit rather than a failure of that run.

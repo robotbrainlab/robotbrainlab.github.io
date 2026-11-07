@@ -196,6 +196,26 @@ ten lost the only two that measured something other than speed — and the coars
 full, carried more than the finer level read in part. **If you cannot read a level exhaustively,
 take the level above it and say so.**
 
+**`INCLUDES` is quotation or it is an admission. It is never your gloss.** Either give the source's
+own words for what the category covers, or write that **the source gives the name and the level and
+no scope statement** — in those words. **A sentence that restates the name is the name being used as
+the scope**, and it is worse than an empty field, because the next run cannot tell it from a real
+one: it has no source to check and nothing in it is false enough to notice. Run `g` wrote "product
+management of AI products" for a track called *Product Management*, and "graph-shaped data and
+knowledge in AI applications" for a track called *Graphs*, where both sources give a bare label and
+no description at all. **An earlier run got this right** on a thinner page — "the source gives the
+track name only and no scope statement; nothing inferred here" — and that is the wording to copy.
+
+**Where a source files items under a bare label**, the items are evidence of what goes in it and you
+may report them — **as the items, named, and attributed to the item and not to the category.** "Three
+of the twelve sessions under this track are about X" is a finding. "This track covers X" is not,
+unless the source says so.
+
+**Why this one matters more than it looks.** The next run is forbidden to call a category an area when
+the record carries no scope; such a record goes to the owner undecided instead. **An invented scope
+defeats that rule silently**, because the next run has no sources and cannot tell your sentence from
+the source's.
+
 **Every label at the registered level goes in the main list, including the ones you judge are not
 subjects.** A room name, a stage, a day, an audience, a job title, a company size, a session format
 or a branded product at that level is still a label the source puts at that level, so it is reported
