@@ -83,8 +83,17 @@ restate it.
    categories from all nineteen sources. Both things the earlier runs lost came back, and it found
    three groups at a standards source that the only run ever to reach that source had missed.
    `DIAGNOSIS-2026-11-07.md` §7 has the check in full, including the one finding against it and the
-   two floors of mine it proved wrong. **So part 1 of step 4 is complete. Part 2, the consolidation
-   run, is the next action**, with `2026-11-07-g.md` as its single input file.
+   two floors of mine it proved wrong. **§8 records a defect in run `g` that §7's check missed** —
+   on sources that file by a bare label it wrote its own scope instead of the source's, which
+   affects about 64 of its 283 records and is fixed in the brief.
+
+   **[2026-11-07] Part 2 is also done.** `research/frames/CONSOLIDATED-2026-11-07-g.md` — **63
+   areas** from 283 input categories, arithmetic closing exactly, no rejection on importance, every
+   area mode-tagged. `DIAGNOSIS-2026-11-07.md` §9 has the check. **Two things the owner needs before
+   he rules:** thirteen of the 63 are kept on scope that may not be the source's, each named in that
+   run's own closing section; and **32 labels in run `g`'s appendices never got a verdict**, because
+   that run put them outside its list and the consolidator judged the list. Both causes are fixed
+   upstream. **So part 3 — the owner's ruling — is the next action, and it is his.**
 2. **A consolidation run**, `briefs/TEMPLATE-area-consolidate.md`, once. The framing runs report
    faithfully, which means they report application domains, session formats, audience labels and
    vendors' product names too — because those are what venues route submissions by. This run gives

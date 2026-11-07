@@ -287,3 +287,79 @@ instrument produced, and editing it would destroy the only record of this defect
 quarter of the records carry a scope that may be inferred. Any `AREA` verdict on one of those rests
 on that gloss. **Section 9 reports whether the consolidation noticed** — it has no sources, so if it
 did not, that is a structural limit rather than a failure of that run.
+
+---
+
+## 9. The consolidation of run `g`
+
+**Input:** `research/frames/2026-11-07-g.md`, unaltered. **Output:**
+`research/frames/CONSOLIDATED-2026-11-07-g.md`, 1,802 lines. Conditions written before it ran, in
+`CHECK-consolidation-2026-11-07-g.md`. **63 areas**, from 283 input categories.
+
+### What held
+
+| Condition | Result |
+|---|---|
+| **Arithmetic closes** | **Pass, exactly.** 63 areas + 47 merged + 123 filed below + 36 `DOMAIN` + 0 `RECORD` + 9 `FORMAT` + 0 `PRODUCT` + 5 `UNCLEAR` = 283. There is a numbered ledger of all 283 with one verdict each |
+| **No rejection on importance** | **Pass.** Every rejection cites a clause of the rule on kind. The only sentence in the file about importance is the file restating the prohibition. **Second run in a row this has held** |
+| **Mode tags** | **Pass.** All 63 carry one, which the rule requires and which nothing else would have reported |
+| **Products not dropped** | **Pass, and better than last time.** `PRODUCT` is empty **because the rule was applied properly**: the branded suites and the harness protocol are reported as the measurement and harness work they instance, with the product named as evidence. The previous run rejected 13 as `PRODUCT` |
+| **The alignment track survives** | **Pass.** Verdict `AREA`. **The risk was that a run judging on the name would call "Special Track on AI Alignment" a track slot**; it judged on the record instead, and carried the track's eleven subjects into `COVERS` in the page's own words. It is merged into `Safety`, and it flags that merge as thin and says in terms that "alignment has no area of its own" so the owner can split it |
+| **The eight standards groups survive the stage** | **Pass.** All eight have a verdict with a reason: three kept as areas, one filed below a kept area, two merged, two `DOMAIN` as AI pointed at another field. **None silently dropped** |
+| **Level choice argued** | **Pass**, and argued from the records' own words — three of them state that their whole venue sits one level below a kept area |
+
+### Finding 1 — the 32 appendix labels got no verdict, and the two defects compounded
+
+**Run `g` moved 32 labels at the registered level into appendices.** §7 called that mild, because
+nothing was hidden. **It was not mild.** This run judged the 283 units and **never opened the
+appendices** — there is no mention of them anywhere in its 1,802 lines. So those 32 labels have no
+verdict, and **a category with no verdict does not reach the owner's ruling list.**
+
+Neither run did anything wrong by its own brief. Run `g` listed them in full with reasons; this run
+gave every category in the list exactly one verdict. **The defect lives in the handover between
+them**, which is where the earlier audits kept finding defects too. Fixed upstream: every label at
+the registered level now goes in the main list, and an appendix is not an option.
+
+### Finding 2 — the no-scope rule fired only where the framing run was honest
+
+This is the clearest result of the whole day, and §8 predicted it.
+
+**Where it worked.** Three working groups whose source page gives no description at all went to
+`UNCLEAR`, with the file saying in its own words: *"a record carrying no scope cannot be judged."*
+**That is this morning's fix doing exactly its job.**
+
+**Where it did nothing.** The kept area `Graphs` has this as its justification:
+
+> **WHY:** the engineering of AI — its tools: graph-shaped data and knowledge in AI applications.
+
+**That sentence is run `g`'s invented gloss, used verbatim as the reason for the verdict.** `Graphs`
+is one of the two examples the consolidation brief names as the previous run's failure — and it
+passed again, by a different route.
+
+**The mechanism, stated exactly.** The rule triggers on a record whose `INCLUDES` says the source
+gave a name and a level and nothing more. **No record in run `g`'s file says that** — I measured it:
+zero. So the trigger condition never existed, and the rule had nothing to match. **A guard that reads
+the previous stage's words cannot survive the previous stage writing better words than it has.**
+
+**What stopped it being worse.** The run flagged thirteen areas as kept on thin scope, named `Graphs`
+and `Harness Engineering` among them, and said plainly that **under a stricter reading of the no-scope
+test these move to `UNCLEAR`.** So the owner is told. That is the design's real safety property: not
+that no run errs, but that a run which errs says where.
+
+### Finding 3 — isolation again was not achievable
+
+It disclosed three project files in its context, including a memory index. **It named them and used
+none as evidence**, and it explicitly declined to apply a line from the memory index about questions
+every area must answer, on the grounds that the brief said the rule it was given is the only rule.
+**That is the correct behaviour**, and it leaves a real question for the owner: if those questions
+are to be applied to the area list, that is a separate pass and nobody has run it.
+
+### Verdict
+
+**Step 4 part 2 is done, and the list is ready for the owner's ruling** — with two caveats he needs
+before he rules: **thirteen of the 63 are kept on scope that may not be the source's**, each named;
+and **32 labels never got a verdict**, and are in run `g`'s appendices.
+
+**Neither caveat is a reason to re-run anything now.** Both are upstream fixes already made, and the
+next cycle starts from a clean framing run. **The list in hand is good enough to rule on**, and
+ruling on it is what unblocks the rest.
