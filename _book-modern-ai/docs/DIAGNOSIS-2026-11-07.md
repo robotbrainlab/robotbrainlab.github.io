@@ -157,3 +157,79 @@ narrower problem than the one diagnosed here.
 
 **What this does not test.** The writing half — the chapter loop, the four review passes, the fourteen
 gates — remains untested and cannot be tested without a chapter.
+
+---
+
+## 7. The test was run, and it passed
+
+**Run `g`, 2026-11-07.** One framing run, over the register, in an isolated agent with the register's
+`CARRIES` column removed from its copy. The pass conditions were written down **before its output
+existed** and are in `CHECK-run-g-2026-11-07.md`. Output: `research/frames/2026-11-07-g.md`, 283
+categories, 3,211 lines. **Every judgement below is from reading that file**, and the two pages the
+whole test turns on were opened by hand in the browser before the run finished.
+
+### The result against each condition
+
+| Condition | Result |
+|---|---|
+| **All 19 registered sources opened** | **Pass.** All nineteen, each named in its coverage section. This is the **first run of six to open every source** — the previous best was 15 of a self-chosen set |
+| **The alignment track recovered** | **Pass.** Reported with the page's own words, and with the page's own Summary counting *"Three technical tracks (Main Track; AI for Social Impact; AI Alignment)"* — which is exactly what I read at the source myself. The run was not told it was there |
+| **The standards working groups recovered** | **Pass, and better than the floor. Eight, not five.** It found the three joint working groups — testing of AI-based systems, AI enabled health informatics, functional safety and AI systems — that run `d` missed on the page it alone had reached |
+| **Nothing below a floor without a reason** | **Pass.** Every floor met or exceeded |
+| **Nothing from "do not read"** | **Pass.** No trace of the excluded report or the textbook-site mirror anywhere in the file |
+| **No searches on the unreachable sources** | **Pass.** 4 searches of 25, all four on discovery |
+| **No filtering** | **Pass.** No threshold, no tiebreak, no cap, alphabetical only |
+| **Discovery reported, not added** | **Pass.** Two sources reported for the owner — a model hub's task vocabulary, and the European standards committee writing the AI Act's standards. **Neither appears in the candidate list** |
+
+### What it recovered that nobody had asked it to
+
+**Four nodes of the ACM classification that runs `c`, `e` and `f` all lost** — distributed computing
+methodologies, symbolic and algebraic manipulation, planning and scheduling, and search
+methodologies. One registered route renders that scheme only partially; the register names a second
+route, and the run used it. **Those four were lost three times before by runs that had no second
+route to use.**
+
+### Two of my own floors were wrong, and the run was right
+
+1. **I had the benchmark-rules source at 10 Areas. It holds 7.** My floor added the two tables' rows
+   and double-counted the three Areas that appear in both. I read all seven records to establish
+   this; the run states which table each Area sits in, and the arithmetic comes out 6 + 4 with 3
+   shared.
+2. **I expected 8 units from the archive taxonomy and got 7.** The run merged two categories that
+   carry the *same name* at that source, named both with their own descriptions, and recorded the
+   split as a disagreement citing the rule that only another source may split a category. **A
+   documented, reversible merge, not a loss.**
+
+**This is the check working on me as well as on the run.** A floor I wrote from an earlier run's
+report was wrong in one place and over-strict in another, and reading found both.
+
+### The one finding against the run
+
+**It moved 32 labels into appendices instead of reporting them as units.** Room names, stages, days,
+an audience, a session format and a few placeholders — all at the registered level, all listed in
+full with reasons, none hidden. **But deciding that a label is a format rather than an area is the
+consolidator's verdict**, and that run has six verdicts for exactly this. Doing it a stage early
+routes those labels around the stage the owner reverses decisions at. **Mild, visible, reversible —
+and fixed in the brief**, which now says every label at the registered level goes in the main list
+with its nature stated, and that an appendix is not an option.
+
+### Three corrections the run made to the register, all applied
+
+1. One route's URL resolves to a different node than the register intended; the register now names
+   both nodes it means. The run reported the under-specification rather than guessing.
+2. One URL form of that route returns 403 where the other works. Recorded, so no run loses a fetch
+   to it again.
+3. One programme source has rolled to the next event year and now needs two fetches, so the two
+   programme entries are two editions rather than two views of one.
+
+### Verdict
+
+**The input problem is closed.** The register did what it was built to do: coverage was complete,
+both known losses came back, four further losses came back unasked, and the two things that went
+wrong were a floor of mine and a decision taken one stage early. **The method now accumulates** —
+every floor in the register is higher tonight than it was this morning, and floors never fall.
+
+**What this still does not test.** The writing half — the chapter loop, the four review passes, the
+fourteen gates — remains untested and cannot be tested without a chapter. **And one caution about
+this result**: a single run passing is evidence that the register works, not proof that every future
+run will read every page properly. The check is cheap and should be run every cycle.

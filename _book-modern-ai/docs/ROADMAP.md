@@ -78,6 +78,13 @@ restate it.
    **Check it against the register before the consolidator runs.** Every source accounted for, and
    nothing reported thinner than the register's `CARRIES` floor without a stated reason. That check
    is reading, and it takes about an hour.
+
+   **[2026-11-07] Done once, and it passed** — run `g`, `research/frames/2026-11-07-g.md`, 283
+   categories from all nineteen sources. Both things the earlier runs lost came back, and it found
+   three groups at a standards source that the only run ever to reach that source had missed.
+   `DIAGNOSIS-2026-11-07.md` §7 has the check in full, including the one finding against it and the
+   two floors of mine it proved wrong. **So part 1 of step 4 is complete. Part 2, the consolidation
+   run, is the next action**, with `2026-11-07-g.md` as its single input file.
 2. **A consolidation run**, `briefs/TEMPLATE-area-consolidate.md`, once. The framing runs report
    faithfully, which means they report application domains, session formats, audience labels and
    vendors' product names too — because those are what venues route submissions by. This run gives

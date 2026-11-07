@@ -196,6 +196,17 @@ ten lost the only two that measured something other than speed — and the coars
 full, carried more than the finer level read in part. **If you cannot read a level exhaustively,
 take the level above it and say so.**
 
+**Every label at the registered level goes in the main list, including the ones you judge are not
+subjects.** A room name, a stage, a day, an audience, a job title, a company size, a session format
+or a branded product at that level is still a label the source puts at that level, so it is reported
+as a unit — **with its nature said plainly in `INCLUDES`, and never moved to an appendix or a
+separate section.** Deciding that a label is a format rather than an area is the next run's job, not
+yours (`TEMPLATE-area-consolidate.md` gives it six verdicts for exactly this), and the owner reverses
+those verdicts from one list. **Run `g` put 32 such labels into appendices with its reasons given in
+full** — nothing was hidden, and it is still a decision taken one stage too early. **A label genuinely
+*below* the level — an individual talk, a dataset, a standards project — is a different matter and is
+not a unit at all.**
+
 **You may not filter the list.** Not by how many sources attest a category, not by a tiebreak, not
 by your sense of what belongs together, not to keep the list a readable length. **If your sources
 name forty categories, report forty.** A long list with source counts is exactly what the owner

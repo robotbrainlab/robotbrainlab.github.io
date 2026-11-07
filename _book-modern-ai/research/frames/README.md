@@ -28,6 +28,11 @@ They live in their own directory because the scouts' files in `../` are named
   only record of a refereed alignment track.** Both are now named in `SOURCES.md` so that a future run
   reaches them on its own.
 - `2026-11-07-e.md`, `2026-11-07-f.md` — the third pair, and **the last pair**. 104 and 77 categories.
+- `2026-11-07-g.md` — **the first run over the register, and the current one.** 283 categories from
+  all nineteen registered sources, 3,211 lines. It is the only run that opened every source, and the
+  only one that recovered both of the things the earlier runs lost. **It is the input to the next
+  consolidation run.** `../../docs/CHECK-run-g-2026-11-07.md` is the pass/fail list written *before*
+  its output existed, and `../../docs/DIAGNOSIS-2026-11-07.md` §7 is the result of checking it.
 - `SOURCES.md` — **the source register.** Every filing system any of the six runs opened, the level to
   take from it, what it was already found to carry, and the route round it where it blocks. Built
   from the six runs; no new research went into it.
