@@ -31,6 +31,13 @@ Replace `<FRAME-FILES>`, `<OUTFILE>` and `<AREA-RULE>`. **Change nothing else.**
 - **`<FRAME-FILES>`** is every framing run's output file for this cycle, by absolute path. **All of
   them**, including runs whose lists were superseded — a category only one run found is still
   evidence, and dropping a whole run is a selection rule.
+
+  **[2026-11-07] That is now one file per cycle**, because framing runs no longer come in pairs
+  (`../DIAGNOSIS-2026-11-07.md` §5.3). **It is this cycle's run only.** The six runs of 2026-11-06
+  and 2026-11-07 are history, not input: what they found that matters is carried forward in
+  `../../research/frames/SOURCES.md`, which the framing run reads, so **a current run that misses
+  something an old run had is a failure to be fixed at the framing stage — not a hole for this run to
+  patch from an old file.** This run still adds no category of its own.
 - **`<OUTFILE>`** is `../../research/frames/CONSOLIDATED-YYYY-MM-DD.md`, relative to `docs/briefs/`.
 - **`<AREA-RULE>`** is the owner's definition of what counts as an area for this book, pasted in
   whole. **This run cannot start without it**, because every rejection it makes is an application of

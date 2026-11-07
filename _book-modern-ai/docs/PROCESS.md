@@ -476,8 +476,9 @@ chapter" re-reads everything and finds what pass 1 already found.
 
 - **No agent delegates.** Depth 0, everywhere, unless a brief states otherwise and says why.
 - **One chapter in flight at a time.**
-- **Scouts may run in parallel**, and so do the two framing runs — independently, neither seeing
-  the other's output. Everything after SELECT is serial.
+- **Scouts may run in parallel.** **There is one framing run, not two** — `[2026-11-07]`, see
+  `DIAGNOSIS-2026-11-07.md` §5.3: the pair existed to expose artefacts of a run's own source choice,
+  and the source register removes the choice. Everything after SELECT is serial.
 - **The framer and the consolidator run at step 4 only**, not every cycle (§5).
 - **`CLAIMS.tsv` is the only shared mutable state.** The verifier and the writer touch it in
   different phases, never at the same time.

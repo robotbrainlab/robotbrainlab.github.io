@@ -15,30 +15,42 @@ approvals matter. **If a decision waits more than seven days I act on my recomme
 
 ## Current position
 
-**Step 4 is next. Two framing runs record what the field files, a consolidation run turns that into
+**Step 4 is next. One framing run records what the field files, a consolidation run turns that into
 one candidate list, and the owner rules on it.**
 
 **[2026-11-07] The whole chain has now been run once as a validation, and its outputs are
 disposable.** Framing twice, consolidation once, one scout, one claim verification — then every
 output file read against its brief, with four source pages opened to check what the runs claimed.
-**21 findings, in `VALIDATION-2026-11-07.md`**, and the brief that caused each is fixed. Read that
-file's final assessment before acting on this one. **Three things in it change what step 4 means:**
+**21 findings, in `VALIDATION-2026-11-07.md`**, and the brief that caused each is fixed.
+
+**[2026-11-07, later the same day] Two of those findings were wrong, and the diagnosis that replaced
+them is the most useful thing the validation produced.** It is in `DIAGNOSIS-2026-11-07.md`, which
+supersedes V8 and V11 of the validation file. In short: **the six framing runs were never comparable,
+because the brief told each run to choose its own sources.** Only two sources were common to all six.
+A route around a blocked page found by one run was unavailable to the next. **So the fix is not
+another brief rule — it is `research/frames/SOURCES.md`, a register of the sources themselves**,
+built from what the six runs already found. **Four things in it change what step 4 means:**
 
 1. **A framing run's losses are the only unrecoverable ones** (V13). The consolidator may add no
    category, so what framing misses never reaches the owner.
-2. **The method does not converge** (V11). Today's two runs lost categories yesterday's four found,
-   including a refereed alignment track and a standards body's five working groups. **So framing
-   runs are unioned across cycles, never substituted** — which is why `research/frames/` keeps every
-   dated file.
-3. **Nothing verifies a research run** (V15). Every defect above was found by hand. Whether that
-   becomes a stage of its own is the one open decision this validation produced.
+2. ~~**The method does not converge**~~ **— withdrawn.** I recorded non-convergence as a property of
+   the method and told the owner to union the runs across cycles forever. **It is not a property of
+   the method; it is the symptom of an unspecified input**, and the register closes it. The dated
+   files in `research/frames/` are still kept, as evidence of what the sources carried on a date —
+   not because the method cannot settle.
+3. **One framing run per cycle, not a pair.** The pair existed only to expose artefacts of a run's
+   own source choice. With a register there is no source choice, and the register's recorded contents
+   give a single run something a pair never did: **a floor it can be checked against.**
+4. **Nothing verifies a research run** (V15). The register's floor is the first check the research
+   half has ever had, and it needs no new agent and no new brief. Whether anything further is added
+   is the one open decision this validation produced.
 
 | # | Step | Who decides | Deliverable | State |
 |---|---|---|---|---|
 | 1 | Agree the goal | Owner | `GOAL.md` | **Done** |
 | 2 | Agree the method | Owner | `PROCESS.md`, `GUIDE.md`, `GATES.md` | **Partly approved.** Eight topics were settled on 2026-11-06 — grep `[AGREED 2026-11-06]` for them. The rest stay marked `[I RECOMMEND]` and are ruled on as they come up in practice |
 | 3 | Write the research brief | Claude | A brief with a capped output, a counted budget and a stopping rule with a fixed point | **Written and exercised** — `briefs/TEMPLATE-area-research.md`. **It terminates**: the validation run of 2026-11-07 stopped on its fetch limit and wrote up without starting a further record. Three defects it exposed are fixed in the brief; see `VALIDATION-2026-11-07.md` V18–V20, of which **V19 matters most — six of six verdicts came out `CHAPTER`, so three of the four verdicts have still never been issued** |
-| 4 | **Establish the research areas** | Claude proposes · **Owner rules** | Two framing runs record what the field files; a consolidation run turns that into one candidate list; the owner approves, redraws or rejects, with the reasons recorded | **Next** |
+| 4 | **Establish the research areas** | Claude proposes · **Owner rules** | One framing run over the source register records what the field files; a consolidation run turns that into one candidate list; the owner approves, redraws or rejects, with the reasons recorded | **Next** |
 | 5 | Run the research | Claude | One file per area in `../research/` | Not started |
 | 6 | Select the subjects | Claude sorts · **Owner rules** | What passed the three tests, and every rejection with the test it failed and why. He rules on both | Not started |
 | 7 | Decide the book's shape | **Owner** | The four open questions that need the subjects: breadth against depth, the mathematics boundary, the structure, and which area goes deep | Not started |
@@ -57,11 +69,15 @@ itself because it reads the built document.
 **Four parts, in order.** `GOAL.md` §3.3 owns the argument for the split and this document does not
 restate it.
 
-1. **Two framing runs**, `briefs/TEMPLATE-area-frame.md`, in a fresh session outside this
-   repository so no project file is in the agent's context. Each reports the categories the field
-   currently files its own work under — each with a fetched source, **the level of that source's own
-   hierarchy it was taken from**, what it excludes, and what the run could not reach. **They propose
-   a list; they decide nothing.**
+1. **One framing run**, `briefs/TEMPLATE-area-frame.md`, in a fresh session outside this repository
+   so no project file is in the agent's context, with `research/frames/SOURCES.md` pasted into the
+   brief. It reports the categories the field currently files its own work under — each with a
+   fetched source, **the level of that source's own hierarchy it was taken from**, what it excludes,
+   and what the run could not reach. **It proposes a list; it decides nothing.**
+
+   **Check it against the register before the consolidator runs.** Every source accounted for, and
+   nothing reported thinner than the register's `CARRIES` floor without a stated reason. That check
+   is reading, and it takes about an hour.
 2. **A consolidation run**, `briefs/TEMPLATE-area-consolidate.md`, once. The framing runs report
    faithfully, which means they report application domains, session formats, audience labels and
    vendors' product names too — because those are what venues route submissions by. This run gives

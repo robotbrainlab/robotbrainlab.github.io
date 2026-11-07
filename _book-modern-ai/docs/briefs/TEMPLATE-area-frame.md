@@ -11,8 +11,8 @@ under**, so the boundaries come from evidence with a source rather than from any
 
 ## How to fill this in
 
-Replace `<FIELD>`, `<OUTFILE>`, `<RUN-ID>`, `<FLOOR>` and `<SEARCH-FLOOR>`. **Change nothing else,
-and add no examples.** If a change is needed, change this file and say in the commit what it fixes.
+Replace `<FIELD>`, `<OUTFILE>`, `<RUN-ID>` and `<SOURCES>`. **Change nothing else, and add no
+examples.** If a change is needed, change this file and say in the commit what it fixes.
 
 - **`<FIELD>`** is the field being divided, in the exact words the agent will be given. **It is the
   single input that most determines the answer**, because different wordings return different
@@ -22,31 +22,61 @@ and add no examples.** If a change is needed, change this file and say in the co
 - **`<OUTFILE>`** is `../../research/frames/YYYY-MM-DD-<RUN-ID>.md`, relative to `docs/briefs/`. The
   `frames/` subdirectory keeps these out of the scouts' namespace, where a dated filename is read as
   an area slug (`../../research/README.md`).
-- **`<RUN-ID>`** is `a` for the first run, `b` for the second. **Run this brief twice.**
+- **`<RUN-ID>`** is the next unused letter. **Run this brief once per cycle.** It used to be run
+  twice; see "Why once" below.
+- **`<SOURCES>`** is `../../research/frames/SOURCES.md`, pasted in **with its `CARRIES` column
+  deleted and nothing else changed**. The agent cannot read project files, so the register has to
+  travel inside the brief — the same way `<AREA-RULE>` travels inside
+  `TEMPLATE-area-consolidate.md`. Everything that remains is **copied word for word, never
+  summarised**, so a drift between the two is a difference anyone can see (`../../CLAUDE.md`,
+  precedence exception 1).
+
+  **The `CARRIES` column is the one thing withheld, and withholding it is what makes the check
+  work.** It records what a previous run found on each page. **A run shown that can report it back
+  without establishing it**, and then the check compares the run's output against text the run was
+  handed — which tests nothing. The run gets the URL, the kind, the level and the route; **the owner
+  keeps what the page was found to hold.** A URL and a level say where to read. A list of expected
+  categories is an answer, and this brief gives no answers (see below).
 - **There is no cap on candidate areas.** The first two runs each had one, each hit it, and **each
   invented its own rule for cutting the list down** — an attestation threshold in one, a tiebreak in
   the other. Neither was asked for, and one of them reported that a different tiebreak over the same
   sources would have produced a different list. **A cutting rule is a decision about how the field
   divides, which is the owner's.** So the run reports every category its sources name, and he cuts.
-- **`<FLOOR>`** is the minimum number of sources that must be fetched. **Five is the starting
-  value**, raised from four because four was reachable without searching. Without a floor, a run
-  that opens two listings, fills every field and stops has obeyed the brief exactly — and a thin
-  list looks identical to a thorough one.
-- **`<SEARCH-FLOOR>`** is the minimum number of searches that must be spent. **Ten is the starting
-  value.** The first two runs used two and four of twenty-five: each hit a blocked page, recorded
-  the loss, and stopped rather than looking for another route to the same taxonomy.
+- **There are no longer a source floor and a search floor.** Both existed because the run chose its
+  own sources: without a floor, a run that opened two listings and filled every field had obeyed the
+  brief exactly, and a thin list looked identical to a thorough one. **The register replaces them
+  with something exact** — the floor is now *every source named in it*, which is checkable, where
+  "at least five of three kinds" never was. The search floor went the same way: ten searches were a
+  proxy for hunting sources and routes, and the register already holds the routes, so a floor would
+  now force spending on work already done.
 
 **Where to run it.** **In a fresh session outside this repository**, with no project file in its
 context. Telling an agent to ignore files already attached to it does not work: it cannot unread
 them. This is the only way the isolation is real rather than requested.
 
-**Why twice.** A division produced once cannot be told from an artefact of whichever sources that
-run happened to open. **Two runs disagreeing is a finding the owner needs before he rules.** Two
-runs agreeing is weaker evidence than it looks — same model over the same prompt shares its priors
-— so read agreement as "no disagreement found", not as confirmation.
+**Why once, where it used to be twice.** The pair existed for one reason: "a division produced once
+cannot be told from an artefact of whichever sources that run happened to open". **The register
+removes that reason** — no run chooses its sources, so no division can be an artefact of the choice.
+What the pair was really detecting was the brief's own missing input, and it detected it by producing
+two incomparable lists rather than by reporting the cause.
 
-**This brief names no area, no subject, no venue, no index, no vendor and no expected outcome, and
-it must stay that way.** An instrument told what to expect finds it.
+**What replaces it is a stronger check, not a weaker one.** The register records what each page was
+already found to carry, so **a single run is checkable against a known floor**: a run that opens a
+registered page and reports less than the register holds has failed, and the failure is visible
+without opening the page. A pair of runs offered no such floor — two runs agreeing was never
+confirmation anyway, since the same model over the same prompt shares its priors.
+
+**This brief names no area, no subject, no category and no expected outcome, and it must stay that
+way.** An instrument told what to expect finds it.
+
+**It does name the sources, and that is not the same thing.** Until 2026-11-07 it named none, on the
+reasoning above. That was wrong, and it is the single defect that cost the most. **A source is a
+place to look, not an answer**: naming the arXiv taxonomy tells a run where to read and tells it
+nothing about what it will find there, because the page decides that. Leaving the choice to each run
+had three measured effects — only two sources were common to all six runs, four venues were read at
+different editions, and **a route around a blocked page that one run found was not available to the
+next, which hit the same block and gave up.** `../../research/frames/SOURCES.md` records why in
+full.
 
 ---
 
@@ -64,8 +94,24 @@ not proposing how it should be organised, and you are not saying which parts mat
 
 **WHAT TO DO**
 
-1. **Find the places where this subject sorts its own work into named categories.** Five kinds
-   count, and a good list draws on more than one:
+1. **Open every source the register below names under "Read these", at the level it gives.** You do
+   not choose your sources and you do not skip one because another looks similar. **Nothing under
+   "Do not read these" or "Unreachable" is to be opened or searched for** — each line says what was
+   already tried and what route works instead.
+
+   **THE REGISTER**
+
+   `<SOURCES>`
+
+   **The register tells you where to read and at what level. It does not tell you what is there,
+   and that is deliberate** — report what each page carries now, in full, exactly as if no previous
+   run had ever opened it. **Where a page carries less than its level suggests, or nothing at all,
+   say so in `What this run could not see` rather than leaving a quiet gap.**
+
+2. **Then spend up to four searches looking for a filing system the register does not have**, and
+   report at most two for addition — what it is, its URL, its kind, the level you would take and why
+   it is a filing system rather than somebody's opinion. **Report them; do not add them to your
+   list.** The owner adds a source to the register, or does not. Five kinds count:
 
    | Kind | What it is |
    |---|---|
@@ -76,19 +122,22 @@ not proposing how it should be organised, and you are not saying which parts mat
    | `practitioner` | A taxonomy used to organise this work in industry: a named job board's categories, a named standards body's or trade group's classification, a named vendor-neutral benchmark suite's divisions. **These carry the applied and operational categories the academic kinds have no submission category for, so a list without them under-reports engineering** |
 
    A source that sells a product in this subject is marked `vendor` whatever else it is, and is the
-   weakest kind. **You choose which sources to consult. That choice shapes the answer, so it is
-   part of what you report.**
+   weakest kind.
 
-2. **Take the category names from those sources**, not from your own sense of how the subject
-   divides, and not from any teaching sequence, course, roadmap, syllabus or textbook contents page.
-3. **Say which level of each source's own hierarchy you took.** Filing systems are layered: one
-   level may hold a handful of categories and the level below it ten times as many. **Which level
-   you report decides how coarse the division is, so it is reported, never assumed.**
-4. **Where sources disagree about a boundary, report the disagreement** rather than resolving it.
-5. **Merge only where two names are plainly the same category** under different labels, and say
+3. **Take the category names from the registered sources**, not from your own sense of how the
+   subject divides, and not from any teaching sequence, course, roadmap, syllabus or textbook
+   contents page.
+4. **Confirm the level you took against the register**, and say so. The register fixes the level per
+   source precisely so that two cycles are comparable. **If a page's structure has changed and the
+   register's level no longer exists, say which level you took instead and why** — that is a finding
+   about the source, and the owner updates the register from it.
+5. **Where sources disagree about a boundary, report the disagreement** rather than resolving it.
+6. **Merge only where two names are plainly the same category** under different labels, and say
    which two and on what basis. **Split a source's category only if a different source splits it**,
    and name that source. Do not split on your own judgement.
-6. **Report what you could not reach**, and what your chosen sources systematically miss.
+7. **Report what you could not reach**, and what the registered sources systematically miss. The
+   register's closing section lists what every source of these kinds misses; **you are not asked to
+   rediscover those, only to add anything further you noticed.**
 
 **OUTPUT**
 
@@ -136,9 +185,9 @@ ATTESTED BY     how many of your sources name this category, and which ones.
 
 **TARGET**
 
-**Every category your sources name, with no exceptions and no selection rule of your own.** From at
-least `<FLOOR>` fetched sources of at least three different kinds, having spent at least
-`<SEARCH-FLOOR>` searches.
+**Every category the registered sources name, with no exceptions and no selection rule of your
+own**, from **every source the register lists under "Read these"** — all of them, at the level it
+gives.
 
 **Having chosen a level in a source, report every category at that level, and say how many that
 level holds.** A partial read of the level you chose is the one incompleteness nothing downstream
@@ -156,18 +205,25 @@ removed.
 **Each unit carries `ATTESTED BY`** — how many of your sources name this category, and which. That
 number is what he cuts on. **It is not a score and you may not order by it.**
 
-**Say if you could not reach either floor**, and what you reached instead.
+**Account for every registered source by name**: opened, or not opened with the reason. A run that
+silently leaves one out is the failure the register exists to make visible.
 
 **BUDGET**
 
-25 searches, 25 fetches, and **at least `<SEARCH-FLOOR>` searches must be spent.** Spend them on
-reaching the category listings themselves rather than on reading about them.
+25 searches, 25 fetches. **The registered sources come first and every one of them is opened**; a
+long page read in two parts spends two fetches, and the register says which pages need that. **At
+most four searches go to finding a source the register does not have.**
 
-**A page you cannot reach is not a lost source until you have searched for another route to it.**
-When a fetch returns 403, redirects away, or renders without the list, **search for the same
-taxonomy elsewhere** — a mirror the body itself publishes, a different page of the same site, the
-listing quoted in full by the organisation that owns it. Only after that does it become a loss, and
-then you report both the block and the search that failed.
+**A registered page that will not open is not a lost source until you have tried the route the
+register gives**, where it gives one. Only where the register has no route do you search for the
+same taxonomy elsewhere — a mirror the body itself publishes, a different page of the same site, the
+listing quoted in full by the organisation that owns it — and then you report both the block and
+whether the search worked, **so that the register gains the route and the next run does not repeat
+the hunt.** That is the whole point: run `e` spent searches on a block run `d` had already got
+round, and called the result the biggest hole in its list.
+
+**Do not spend a single search on anything in the register's "Unreachable" section.** Each line
+records what was already tried, by how many runs, and what route works instead.
 
 **WHAT THIS RUN COULD NOT SEE**
 
@@ -175,17 +231,22 @@ Required, and judged as strictly as the list itself. **An honest account of what
 missed is worth more than a longer list.**
 
 - **Searches used, of 25. Fetches used, of 25. Sub-agents started (must be zero).**
-- **Which sources you chose, and which you considered and rejected**, with the reason for each
-  rejection.
+- **Every registered source, by name: opened, or not opened and why.** This is the first thing
+  checked, because a source quietly left out is invisible in the list itself.
+- **Any registered page whose level or structure no longer matches the register**, and what you took
+  instead. The register is then wrong and the owner fixes it; saying nothing leaves two cycles
+  incomparable for a reason nobody can see.
+- **The sources you found that the register does not have** — at most two, with kind and level, for
+  the owner to add or refuse. Say if you found none.
 - **Which categories rest on a `RECALLED` source** — one you did not open in this run. List them by
   name.
-- **What your sources systematically miss.** Work that is not submitted, reviewed, indexed or
-  advertised anywhere is invisible to every source of this kind. Say so, and say what kinds of work
-  those are.
-- **Language.** Which languages your sources are in, and that categories named only in other
-  languages are absent.
-- **Recency.** Each source's date. A category established since the newest source you read will not
-  appear.
+- **Anything the registered sources systematically miss that its closing section does not already
+  list.** That section carries what is known to be missing from every source of these kinds —
+  unpublished work, non-English categories, anything newer than the newest source, and roles and
+  occupations. **Do not restate those.** Add only what you noticed beyond them, or say you found
+  nothing to add.
+- **Recency.** Each source's date as you read it. A category established since the newest source
+  will not appear.
 - **Anything you could not fetch**, and what you lost by it.
 
 **FORBIDDEN**
@@ -227,19 +288,18 @@ missed is worth more than a longer list.**
 
 **PARTIAL**
 
-If the budget runs out, report the complete units you have, the floor you reached, and the sources
-you had not opened. **A short list with an honest coverage section is a complete result.**
+If the budget runs out, report the complete units you have and **name every registered source you
+had not opened.** **A short list with an honest coverage section is a complete result**; a short list
+that does not say which sources are missing from it is not a result at all.
 
 **STOPPING RULE**
 
-Stop when **both floors are reached** — `<FLOOR>` fetched sources and `<SEARCH-FLOOR>` searches
-spent — **and** every category your sources name has `NAME`, `LEVEL`, `SOURCES`, `INCLUDES`,
-`EXCLUDES` and `ATTESTED BY` filled, with the remaining fields filled or honestly marked
-`none found` / `none available` — **or** when the budget is spent. **Reaching the source floor is
-not a reason to stop searching**: the first two runs stopped there and lost three taxonomies between
-them that a search might have reached. Do not keep searching
-for a better carving: there is no better carving to find, only more sources, and the coverage section
-is where that is reported.
+Stop when **every source in the register's "Read these" section has been opened or accounted for**,
+**and** every category those sources name has `NAME`, `LEVEL`, `SOURCES`, `INCLUDES`, `EXCLUDES` and
+`ATTESTED BY` filled, with the remaining fields filled or honestly marked `none found` /
+`none available` — **or** when the budget is spent. **The register being finished is not a reason to
+skip the four discovery searches**, and the four being spent is not a reason to keep searching: there
+is no better carving to find, only more sources, and the coverage section is where that is reported.
 
 **IF UNSURE, SAY SO RATHER THAN ASSERTING. A WRONG FINDING COSTS MORE THAN A MISSED ONE.** A
 boundary reported as disputed costs one reading. A boundary reported as settled, wrongly, becomes a

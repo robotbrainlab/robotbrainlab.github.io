@@ -137,6 +137,16 @@ evidence, and no further framing run will close it.
 
 ### V8 · One standards body has defeated every run, and it holds categories nothing else carries
 
+> **WITHDRAWN, 2026-11-07, same day.** See `DIAGNOSIS-2026-11-07.md` §4. **The body did not defeat
+> every run.** Run `d` reached its five working groups through a Wikipedia page quoting the
+> subcommittee's own titles, and those five records are in this repository with their includes and
+> excludes. The body's *own* site returned 403; its classification was not lost.
+>
+> **This finding contradicts V11 below, in the same file**, which correctly records the five working
+> groups as "found by one earlier run". I wrote V8 without reading V11 against it. That is the
+> project's own first mistake class — claiming what was not read — committed inside the document
+> written to catch it.
+
 The international standards subcommittee for artificial intelligence returned HTTP 403 in all five
 runs. Both fresh runs name it as their largest single loss, and both say what is missing with it:
 conformance, certification, risk management, terminology and use-case documentation. **No source
@@ -181,8 +191,22 @@ were checked by reading the earlier records in full:**
 | **AI Alignment** | A refereed special track beside a major venue's main track, with its sub-topics named: scalable oversight, mechanistic interpretability, empirical robustness evaluation, red-teaming, safe-by-design engineering | **Both** earlier runs, independently |
 | **The five working groups of the international standards subcommittee** | Foundational standards · data · trustworthiness · use cases and applications · computational approaches — each with its level, its includes and its excludes | One earlier run |
 
-**So a later run of this method is not a superset of an earlier one.** The method does not converge:
-it samples, and each sample misses different things. See V12 for the other half of this picture.
+**So a later run of this method is not a superset of an earlier one.** ~~The method does not
+converge: it samples, and each sample misses different things.~~ See V12 for the other half of this
+picture.
+
+> **The second sentence is WITHDRAWN, 2026-11-07, same day.** See `DIAGNOSIS-2026-11-07.md` §4.
+> **Non-convergence is not a property of the method.** It is the symptom of one unspecified input:
+> the brief told each run to choose its own sources, so only two sources were common to all six runs
+> and four venues were read at different editions. **Both losses in the table above have a specific
+> cause** — the alignment track sits on a page of the venue the later runs did not open, and the
+> working groups sit on a route one earlier run found and nothing carried forward. `SOURCES.md` fixes
+> the input; the losses come back by naming two pages.
+>
+> **The observation stands, the explanation does not.** A later run was indeed not a superset. I
+> turned that into a law about sampling, and recommended unioning every run forever on the strength
+> of it. The comparison it rests on is also unsound: 138 names from two unfiltered runs against 251
+> from four, which `DIAGNOSIS-2026-11-07.md` §1 and §2 take apart.
 
 ### V12 · An earlier run attributed a source it had not opened
 
@@ -318,7 +342,7 @@ wrote up without starting a seventh record, exactly as instructed.
 
 **But it stopped with 27 of its 30 searches unspent.** The stopping rule is 24 searches **or** 24
 fetches, and fetches hit first. **This is the same defect the framing brief was given a floor to
-prevent** — its first two runs spent 2 and 4 searches of 25, which is why `<SEARCH-FLOOR>` exists
+prevent** — its first two runs spent 2 and 4 searches of 25, which is why a search floor existed
 and is set to 10. **The scout brief never received that fix.**
 
 The consequence is visible in the output and the run states it plainly: **nine of its fourteen
