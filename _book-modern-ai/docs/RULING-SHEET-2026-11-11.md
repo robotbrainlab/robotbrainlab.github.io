@@ -172,6 +172,27 @@ the boundary — where a source is missing, where two sources disagree, where th
 
 ---
 
+## What has been checked, and what has not
+
+**`briefs/document-check.md` was run over the first version of this sheet**, against the
+consolidated list, the framing run, `GOAL.md` and `DIAGNOSIS-2026-11-07.md`, all four read in full.
+Every finding was verified at source before it was acted on.
+
+**What it checked and found right:** all 63 `Src` figures against `ATTESTED BY`; all 63 `Family`
+figures; the mode-mix counts and the 24 / 23 / 16 split; the six ⚠ and their exact membership; the
+32 appendix labels name for name and their 18 / 1 / 13 split; the five `UNCLEAR`; and the rejection
+counts with the closing sum.
+
+**What it found wrong, now fixed:** a `Below` column of counts I had derived by splitting strings —
+wrong for 28 of the 63 rows, and summing to 149 against the source's own 123, **which is why it is
+gone**; a sentence converting `GOAL.md` §3.2's guidance into a requirement the list could fail; the
+`DOMAIN` and `FORMAT` glosses above; and the claim that all six ⚠ areas had no scope on their source
+page, which was checked for four and assumed for two.
+
+**What it has not checked**, because these were written after it started reading: the two †
+flags, the per-area notes quoted below, the four losses of the chosen level, and the three implied
+areas no source reported. **Those four sections carry no check.**
+
 ## The shape of the list, as a fact and not a recommendation
 
 `GOAL.md` §3.1 `[STATED]` — the owner's own words — requires every area to answer five questions,
@@ -201,12 +222,26 @@ to keep or cut anything.
 
 ## The two caveats, read rather than repeated
 
-**1. Six areas rest on scope the source may not have written** — marked ⚠ above: `Graphs`,
-`Harness Engineering`, `causal reasoning`, `learning on graphs and other geometries & topologies`,
-`Software Factories`, `Design Engineering`. For these six no scope statement was found on the source
-page, so the one-clause gloss is the framing run's own words. `DIAGNOSIS-2026-11-07.md` §8 has the
-mechanism. **The caveat was recorded as "thirteen of the 63" until 2026-11-11**: thirteen categories
-are thin, but seven of those sit below an area rather than among the 63.
+**1. Six areas rest on scope the source may not have written** — marked ⚠ above. **They are thin
+for two different reasons, and only four of the six are the defect `DIAGNOSIS-2026-11-07.md` §8
+describes.**
+
+| Area | Source | Why it is thin |
+|---|---|---|
+| `Graphs` | World's Fair 2026 | §8's defect: the 1.35 MB programme file **carries no track description anywhere**, so the one-clause scope is the framing run's own words |
+| `Harness Engineering` | World's Fair 2026 | the same |
+| `Software Factories` | World's Fair 2026 | the same |
+| `Design Engineering` | World's Fair 2025 / 2026 | the same |
+| `causal reasoning` | ICLR 2026 call | **a different thing.** The record's own note reads "thin scope — the record's `INCLUDES` restates the name". ICLR publishes a bare topic list the page itself calls non-exhaustive. **No file in this repository records opening that page to check whether it states a scope** |
+| `learning on graphs and other geometries & topologies` | ICLR 2026 call | the same |
+
+**§8's defect covers three sources — the two World's Fair editions and the LF AI landscape, 64
+records in all. The ICLR call is not one of them.** `[2026-11-11]` This caveat first said all six
+had "no scope statement found on the source page"; that was checked for four of them and assumed
+for two.
+
+**The caveat was also recorded as "thirteen of the 63"**: thirteen categories are thin, but seven of
+those sit below an area rather than among the 63.
 
 **2. Thirty-two labels never got a verdict, and none of them names a subject.** Run `g` put them in
 an appendix; the consolidation run judged the 283 units in the main list and never opened the
@@ -267,12 +302,37 @@ Every rejection is listed with its reason in `../research/frames/CONSOLIDATED-20
 
 | Verdict | Count | Means |
 |---|---|---|
-| `DOMAIN` | 36 | AI pointed at another field's data |
-| `FORMAT` | 9 | a session shape, track slot, audience or working arrangement |
+| `DOMAIN` | 36 | AI pointed at another field's data — **for 30 of them.** See below |
+| `FORMAT` | 9 | a session shape, a track slot, an audience, **a company size**, a working arrangement |
 | `RECORD` | 0 | — |
 | `PRODUCT` | 0 | by the rule: a product is reported as the engineering area it instances |
 | Merged into a kept area | 47 | each with the evidence for the merge |
 | Filed below a kept area | 123 | named, never dropped |
+
+**Six of the 36 `DOMAIN` rejections are not domains, and the run says so.** The verdict ledger bears
+it out: 30 rows read "AI applied to another field's problems" and 6 read "belongs to none of the
+three — a neighbouring field". (The run's own heading for them says "five" and then lists six, and
+notes the discrepancy itself.) They are the six ACM CCS siblings of the `Artificial intelligence`
+node — Computer graphics, Concurrent computing methodologies,
+Distributed computing methodologies, Parallel computing methodologies, Modeling and simulation, and
+Symbolic and algebraic manipulation. In the run's own words: *"none of the six verdict labels fits
+them: they are not AI pointed at another field's data, not a record, not a format, not a product. I
+used `DOMAIN` as the nearest label and said so on every row.* **If the owner reads the rule as
+dropping only the four named kinds, these come back."** `[2026-11-11]` The one-line gloss above hid
+that sentence.
+
+**Three of the nine `FORMAT` rejections the run marked Close**, which the brief requires it to
+surface because *"a borderline rejection the owner never sees is a decision taken from him"*:
+
+| Name | Source | Clause failed, in the run's words |
+|---|---|---|
+| **AI-Native Enterprises** | World's Fair 2026 | "a working arrangement" — companies built around AI from the start, and the practice of running them |
+| **Forward Deployed Engineering** | World's Fair 2026 | "a working arrangement" — engineers deployed with customers to build AI systems in place; a delivery model |
+| **Product Management** | World's Fair 2025 | "belongs to none of the three — a job function, not the science, research or engineering of AI" |
+
+The other six failed on an audience (AI Architects), a session shape (AI Architects: Show my
+Workflow), a company size (AI in the Fortune 500; Tiny Teams) and an organisation (Hosting
+Companies; LF AI & Data Member Company).
 
 **63 + 47 + 123 + 36 + 9 + 5 = 283.** The arithmetic closing is what says nothing was silently
 dropped.
