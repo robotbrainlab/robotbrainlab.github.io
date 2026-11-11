@@ -106,6 +106,7 @@ Notes:
 | *(moved to the Desktop archive 2026-11-11)* | The old D&I guide page with the pipeline diagram |
 | `books/interview-prep/` | **The interview-prep book**, *Modern AI Engineering from Zero* — a whole separate project living here for safekeeping. See "The interview-prep book" below. `[2026-11-12]` This row said "Unpublished (leading `_`)"; **the underscore is gone and so is Jekyll**, so nothing here is unpublished — `/robots.txt` is what keeps it out of search results |
 | `books/future-books/README.md` | **Decisions for the two books that come after it** — *Python*, and *Machine Learning and Deep Learning*. Nothing is started. Ten decisions with their reasons and the rules still to write. `[2026-11-12]` This row pointed at `books/` and a `DECISIONS.md` that has never existed |
+| `books/modern-ai/` | ***Modern AI: Research, Science and Engineering*** — **in research, no manuscript.** `[2026-11-12]` It governs itself: `books/modern-ai/CLAUDE.md`, then `docs/ROADMAP.md`, whose **first section is an unanswered question from the owner that blocks everything else**. `docs/HOW-IT-WORKS.md` is the plain map of the process. **This row did not exist until today** |
 | `books/rag-from-zero/` | *RAG from Zero: A Practical Guide*, added 2026-11-12. **PDF only**, no Markdown source here, and **not linked from any page** |
 
 Removed on purpose, so don't recreate them: the Mathematics and D&I on-ramps, the separate `cse/on-ramp.html` page

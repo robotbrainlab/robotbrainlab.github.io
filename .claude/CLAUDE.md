@@ -25,14 +25,23 @@ AskUserQuestion tool):
    website and governs itself — go straight to `books/interview-prep/docs/HANDOVER.md` and `books/interview-prep/docs/BOOK-GUIDE.md`
    and follow those, not this file. **That book is finished** (2026-10-31, all 57 chapters and
    Appendix B); a session here is an edit to it, not drafting.
-4. **The two books that come after it** — Python, and Core Machine Learning and Deep Learning.
+4. **`[2026-11-12]` Researching *Modern AI: Research, Science and Engineering*.** The book in
+   `books/modern-ai/`. **It governs itself and does not follow this file** — go straight to
+   `books/modern-ai/CLAUDE.md`, which sends you to `books/modern-ai/docs/ROADMAP.md`. **Read that
+   roadmap's first section before anything else**: it opens with a question the owner has not
+   answered, about what he expected this process to be, **and nothing proceeds until he does.**
+   `books/modern-ai/docs/HOW-IT-WORKS.md` is the plain-language map of the whole process, written
+   for him. Nothing about the website. **This option was missing from this list for six days while
+   it was the only work happening.**
+5. **The two books that come after it** — Python, and Machine Learning and Deep Learning.
    **Neither is started, and neither may be started until its rules are written and its table of
    contents approved**, which is the owner's instruction. Read `books/future-books/README.md`
    first (`[2026-11-12]` this said `books/FUTURE-BOOKS.md`, which has never existed);
    it records every decision and the rules still to be settled. Nothing about the website.
 
 Then follow the matching section of the handover: "Restyle work", "Website work", or
-"The interview-prep book".
+"The interview-prep book". **Kinds 4 and 5 have no handover section and need none** — each book's
+own files govern it.
 If the user's first message already makes the answer obvious, confirm it in one line instead
 of asking.
 
