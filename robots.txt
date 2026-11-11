@@ -1,0 +1,44 @@
+# Towards Intelligence — robotbrainlab.github.io
+#
+# Jekyll is off (see /.nojekyll), so every file in the repository is served.
+# This file decides what search engines collect. Nothing here hides anything:
+# the repository is public and every file is readable on github.com.
+#
+# The rule: the finished books are findable. The workshop behind them is not.
+
+User-agent: *
+
+# The website
+Allow: /$
+Allow: /index.html
+Allow: /cse/
+Allow: /mathematics/
+Allow: /data-intelligence/
+Allow: /theme/
+Allow: /favicon/
+
+# Finished books stay findable
+Allow: /books/$
+Allow: /books/README.md
+
+# Working material: reachable by anyone who has the link, not collected
+Disallow: /books/latex/
+Disallow: /books/backlog/
+Disallow: /books/modern-ai/
+Disallow: /books/*/markdown/
+Disallow: /books/*/chapters/
+Disallow: /books/*/records/
+Disallow: /books/*/labs/
+Disallow: /books/*/tools/
+Disallow: /books/*/docs/
+Disallow: /research/
+Disallow: /tools/
+Disallow: /backup/
+
+# The folders above are being renamed. Until that lands, the old names too.
+Disallow: /_book/
+Disallow: /_book-modern-ai/
+Disallow: /_sources/
+Disallow: /_tools/
+Disallow: /_backup/
+Disallow: /_future-books/
