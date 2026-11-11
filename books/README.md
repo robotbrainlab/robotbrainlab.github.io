@@ -40,6 +40,7 @@ own `front/`, `tools/`, `assets/`, `content/` or `cover/`. Only the guide does.
 | `linux-and-git` | *Linux and Git from Zero* | **Published**, with labs |
 | `infrastructure-engineering` | *Infrastructure Engineering from Zero* | **Published**, with labs |
 | `apis-to-fastapi` | *APIs to FastAPI* | **Published.** PDF and cover only — no Markdown source in this repository |
+| `rag-from-zero` | *RAG from Zero: A Practical Guide* | **Published** (first edition 2026-09-30), 9 chapters in 3 parts, 2 appendices, 74 pages. `[2026-11-12]` **PDF only** — no Markdown source and no `labs/` in this repository, though the book's copyright page says a `labs` folder accompanies it. Not linked from the website |
 | `web-applications` | *Web Applications from Zero* | Not published alone. Its six chapters are the pre-book inside the guide |
 | `modern-ai` | *Modern AI: Research, Science and Engineering* | **In research.** No manuscript yet |
 | `future-books` | Python, and Core ML and Deep Learning, plus five topics that are a `TOC.md` and nothing else | Not started |
