@@ -21,13 +21,13 @@ AskUserQuestion tool):
 
 1. **Changing the HTML look.** This means the restyle to the reference design; content stays letter-for-letter.
 2. **Working on the website.** This means content, pages, links, books, the roadmap sources, publishing.
-3. **Writing the interview-prep book.** The book in `_book/`. It has nothing to do with the
-   website and governs itself — go straight to `_book/HANDOVER.md` and `_book/BOOK-GUIDE.md`
+3. **Writing the interview-prep book.** The book in `books/interview-prep/`. It has nothing to do with the
+   website and governs itself — go straight to `books/interview-prep/HANDOVER.md` and `books/interview-prep/BOOK-GUIDE.md`
    and follow those, not this file. **That book is finished** (2026-10-31, all 57 chapters and
    Appendix B); a session here is an edit to it, not drafting.
 4. **The two books that come after it** — Python, and Core Machine Learning and Deep Learning.
    **Neither is started, and neither may be started until its rules are written and its table of
-   contents approved**, which is the owner's instruction. Read `_future-books/DECISIONS.md` first;
+   contents approved**, which is the owner's instruction. Read `books/FUTURE-BOOKS.md` first;
    it records every decision and the rules still to be settled. Nothing about the website.
 
 Then follow the matching section of the handover: "Restyle work", "Website work", or
