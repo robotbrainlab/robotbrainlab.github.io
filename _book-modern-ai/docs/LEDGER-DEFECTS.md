@@ -15,8 +15,10 @@ worth more than one imported from elsewhere, because an imported entry carries a
 this project paid for and invites the reaction *"that will not happen to us."*
 
 **The eight entries below are stated as arguments**, so that each one holds because of how writing
-and reviewing work rather than because of something that once happened. None of them has an
-incident attached, and that is deliberate: this project has not yet produced one.
+and reviewing work rather than because of something that once happened. **`[2026-11-11]` Seven of
+the eight still carry no incident, which is deliberate — no chapter has been written yet, so no
+defect has got past a gate.** Entry 5 is the exception: it was earned, not by a chapter, but by the
+governance prose in `docs/`, which has no gate at all (`GATES.md`, "What no gate reads").
 
 ---
 
@@ -52,6 +54,13 @@ defect is structural, not careless: nothing in the act of fixing one passage sur
 *Practice:* the counted sweep, which `PROCESS.md` §2 states — including which sections to sweep
 first, and why those. **Searching is not enough on its own**: a phrasing you did not think of has no
 string to search for, so the sweep is followed by reading the sections the sweep touched.
+*Incident, 2026-11-11:* four corrections were made where a check quoted them and not where the same
+claim was repeated — "five classes" fixed in `POSTMORTEM-2026-11-11.md` and left standing in
+`GATES.md`; "recorded weeks ago" fixed in that document's findings table and left standing in its
+own opening line; "two runs" fixed in one file and left in three; "two floors" removed from the
+framing brief and left in `PROCESS.md` §4.6, the section that owns the schema. **Each was found by
+opening the file, and none by a search.** `../CLAUDE.md` now states the rule as *a grep is not a
+sweep*.
 
 **6. A lab's programs narrate their own output, so a claim exists in code as well as in prose.**
 Printed lines state counts, comparisons and universals, and that narration is captured into the

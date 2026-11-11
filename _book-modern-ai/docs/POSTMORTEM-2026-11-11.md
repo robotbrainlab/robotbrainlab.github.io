@@ -17,9 +17,9 @@ of this analysis contained an error of the same class it was written to explain.
 
 ## 1. The finding, in one line
 
-**Every one of my errors is an instance of a class this project recorded weeks ago, with the
-practice already written beside it. Not one of those classes has a mechanism that reads what I
-write.**
+**Every one of my errors is an instance of a class this project had already recorded — the newest
+of them the day before — with the practice already written beside it. Not one of those classes has
+a mechanism that reads what I write.**
 
 | My error | The class, already recorded | Where the error lives |
 |---|---|---|
@@ -29,9 +29,9 @@ write.**
 | Set a floor of 10 benchmark areas by adding two tables' rows, double-counting the three in both | **H — assessing a thing with an instrument that does not sample it** | `CHECK-run-g-2026-11-07.md` |
 | Passed run `g` on coverage and floors without asking whose words its scope statements were | **H again** — my check sampled completeness, never provenance | §7 of `DIAGNOSIS-2026-11-07.md` |
 
-**Five errors. Four classes, all written down before any of them happened. Zero mechanisms that
-could have caught any of them** — because all five live in prose, and nothing in this project reads
-prose I write.
+**Five errors. Three classes — A twice, D once, H twice — all written down before any of them
+happened. Zero mechanisms that could have caught any of them** — because all five live in prose,
+and nothing in this project reads prose I write.
 
 **`GOAL.md` was committed on 2026-11-06**, the day before the errors. So the classes were not
 written long ago and forgotten; **they were written the day before, and broken the next day.** That
@@ -50,7 +50,7 @@ of exactly two things:
 
 | What is bound | By what | What it gets |
 |---|---|---|
-| **An agent** | One of eight briefs | A budget, a stopping rule, a forbidden list, an output shape, a statement of what one unit is, `DELEGATION: ZERO` |
+| **An agent** | One of the eight briefs that existed before this document | A budget, a stopping rule, a forbidden list, an output shape, a statement of what one unit is, `DELEGATION: ZERO` |
 | **A chapter** | Fourteen gates, four review passes, `CLAIMS.tsv`, `records/` | A script that refuses, a reviewer that reads it, a row that must carry a basis |
 
 **The prose I write is neither.** `VALIDATION-…md`, `DIAGNOSIS-…md`, the edits to `ROADMAP.md`,
@@ -209,8 +209,9 @@ That section already exists and already surfaces classes A, H and M. It gains:
   cites it has been **opened**. The set is small and nameable — `CLAUDE.md`, `GOAL.md`, `GUIDE.md`,
   `PROCESS.md`, `GATES.md`, `ROADMAP.md`, `briefs/README.md`, the briefs — and **a grep is not a
   sweep**, because it finds the phrasings you thought of.
-- **Classes C and D, in one line each**, so that all four classes that fire while writing prose are
-  in the file that is read first. `GOAL.md` §11 keeps the full text and stays their owner.
+- **Classes C and D, in one line each**, so that all five classes that have fired while writing
+  prose on this project — **A, C, D, H and M** — are in the file that is read first. `GOAL.md` §11
+  keeps the full text and stays their owner.
 
 ### 4.3 One row in `GATES.md`, "What no gate reads"
 
@@ -255,7 +256,7 @@ analysis and the ten files it cites, and none of my reasoning. **It found seven 
 | # | What it found | Verdict after I checked it at source |
 |---|---|---|
 | 1 | **§2.2's central claim is false.** §3.3 retracts that the owner must *author* the list; the brief's line is about *rejecting* an entry on a proposed list, which §3.3's own table assigns to him | **Correct, and it is the finding of the day.** §2.2 is rewritten and the brief is changed back |
-| 2 | "Five errors, five classes" — the document names **four** classes across five errors | **Correct.** Fixed |
+| 2 | "Five errors, five classes" — the document names **four** classes across five errors | **Half right, and I compounded it.** Five was wrong, but the table names **three** distinct classes — A, D, A, H, H — not four. I took the replacement number without recounting, which is the same error the checker had just found. Corrected to three on 2026-11-11 by counting the table |
 | 3 | `GATES.md`'s pre-existing rows are not "four chapter rules" — one is the committer's | **Correct.** Fixed |
 | 4 | **Three** classes lack a mechanism, not two: B, E and **F** | **Correct.** `GOAL.md` §11's table offers mechanisms for ten of thirteen. Fixed |
 | 5 | "recorded weeks ago" is unsupported; the corpus dates run 2026-11-03 to 2026-11-11 | **Correct.** `GOAL.md` was committed 2026-11-06 — **the day before the errors.** Fixed, and it makes the finding worse |
@@ -285,6 +286,57 @@ also has no access to anything outside the files it is handed, so everything in 
 **The measurement stands as stated there:** the number that matters is how many defects it catches
 in the next document before the owner sees it. This time the number is seven, and the owner saw
 none of them.
+
+## 8. The second run, on `briefs/README.md`
+
+**Asked whether the seven findings in section 7 were fixed, I checked instead of answering.** The
+seven were fixed and committed as `09e08ac`. **The check itself found more.**
+
+**Found by opening files before the second run started** — four statements the commit's own sweep
+had missed, each the class in `LEDGER-DEFECTS.md` entry 5, *a fix applied where you are looking
+survives where you are not*:
+
+| Where | What it still said | Why the sweep missed it |
+|---|---|---|
+| `briefs/README.md` | the sentence goes in "all eight" briefs; the finding-producing row omitted the ninth | I added the ninth brief's row at the top of that file and did not read to the bottom |
+| `GATES.md` | "five errors of five already-recorded classes" | The count was corrected in the postmortem and not in the file I had edited an hour earlier |
+| This document, line 20 | "a class this project recorded weeks ago" | **Section 7 records that finding as fixed.** It was fixed in the findings table and not in the sentence the finding was about |
+| `PROCESS.md` §4.6 | the framer "is bounded by its two floors" | The section that *owns* the brief schema. My sweep searched "two runs", never "two floors" |
+
+**And a count nobody had checked: the five errors span three classes, not four.** The table in
+section 1 reads A, D, A, H, H. The first run of the check said five was wrong and offered four; I
+took the replacement without recounting, which is the same error it had just found in me. Corrected
+by counting the table.
+
+**The second run, over `briefs/README.md` and its twelve cited files, returned eight citation
+findings, two contradictions with a marked decision and two claims past their evidence.** I verified
+every one at source. **Eight held.** Among them: the index gave the claim verifier two of its three
+occasions and dropped the one its brief calls easiest to forget; the schema table said the framer and
+consolidator carry no `TARGET` when both do; "every brief carries this, word for word" quoted a
+sentence no brief carries; and a citation pointed at `GATES.md`'s "What no gate reads" for
+judgements its *previous* section names. **Checking that last one by opening the file found a ninth
+defect the run did not name** — the sentence under that table still said "all four need a reader"
+after I added a fifth row to it this morning.
+
+**Two findings I judged differently from the run, and said why.** It called the two-agent argument a
+claim past its evidence; the read-back it asks for has now happened once
+(`CHECK-consolidation-2026-11-07-g.md`), so I recorded the instance rather than weakening the
+sentence, and said that one instance is not a property. It flagged "automation gives no context" for
+the same reason; that sentence is the standing rule the briefs carry, so I gave the count in the
+sentence and said which it is.
+
+**The counts, stated so they can be checked.** The first run returned **7** findings, all of which
+held. The second returned **8** citation findings and **2** contradictions; all 8 held, one
+contradiction was new and the other duplicated something I had already found, so **9** were defects
+the run found first. **Reading found 13 more that neither run was given the files to see** — the
+four in the table above, the class count, `GOAL.md` §11's row A, `CLAUDE.md`'s rule count, the row
+count under `GATES.md`'s table, two stale claims in `research/frames/README.md`, the register's
+description there, and two places saying no scout has run while its 255-line output sits in
+`research/`.
+
+**The owner saw none of them.** Two runs is not a track record, and the instrument is not the only
+reader: of the **22** defects found after the commit, **13 came from opening a file and 9 from the
+check.** The instrument is worth having and it is not sufficient.
 
 ### The one thing the owner needs from this
 

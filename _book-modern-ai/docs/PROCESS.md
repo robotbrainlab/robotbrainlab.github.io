@@ -214,7 +214,10 @@ SAMPLING        what to report about your own coverage
 1. **Completeness is per unit, and something bounds the output.** "Report fewer complete units
    rather than more incomplete ones." An instruction that only rewards thoroughness has no fixed
    point. **A cap is the usual bound and not the only one**: the framer reports every category its
-   sources name, so its bound is its two floors — enough sources, enough searches — and the
+   sources name, so its bound is **the source register it is given** (`research/frames/SOURCES.md`)
+   — `[2026-11-07]` **the two floors it used to be bound by were removed** when the run stopped
+   choosing its own sources, and the register replaced them, because *every source named in it* is
+   checkable where "at least five of three kinds" never was (`briefs/TEMPLATE-area-frame.md`). The
    consolidator's bound is its input, which is finite because the framing files are written. **A
    brief with no cap states what bounds it in place of one.**
 2. **Delegation depth 0 by default.** An agent that may spawn agents has no budget.

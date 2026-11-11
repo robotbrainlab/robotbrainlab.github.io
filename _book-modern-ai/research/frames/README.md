@@ -24,18 +24,22 @@ They live in their own directory because the scouts' files in `../` are named
 - `2026-11-06-a.md`, `2026-11-06-b.md` — **the first pair, superseded.** Each hit a cap and invented
   its own rule for cutting the list, which is why the brief was changed.
 - `2026-11-06-c.md`, `2026-11-06-d.md` — the second pair. 86 and 209 categories, nothing filtered.
-  **`d` holds the only record of a standards body's five working groups**, and **`c` and `d` hold the
-  only record of a refereed alignment track.** Both are now named in `SOURCES.md` so that a future run
-  reaches them on its own.
+  **For a time these held the only record of two things the later pair lost** — a standards body's
+  working groups (`d`, which found 5 and missed the 3 joint groups) and a refereed alignment track
+  (`c` and `d`). Both were then named in `SOURCES.md` so that a future run reaches them on its own,
+  **and run `g` did: it recovered the alignment track and found all 8 groups.** `[2026-11-11]` This
+  entry said "the only record" until run `g` superseded it.
 - `2026-11-07-e.md`, `2026-11-07-f.md` — the third pair, and **the last pair**. 104 and 77 categories.
 - `2026-11-07-g.md` — **the first run over the register, and the current one.** 283 categories from
   all nineteen registered sources, 3,211 lines. It is the only run that opened every source, and the
   only one that recovered both of the things the earlier runs lost. **It is the input to the next
   consolidation run.** `../../docs/CHECK-run-g-2026-11-07.md` is the pass/fail list written *before*
   its output existed, and `../../docs/DIAGNOSIS-2026-11-07.md` §7 is the result of checking it.
-- `SOURCES.md` — **the source register.** Every filing system any of the six runs opened, the level to
-  take from it, what it was already found to carry, and the route round it where it blocks. Built
-  from the six runs; no new research went into it.
+- `SOURCES.md` — **the source register.** Every filing system any run opened, the level to take from
+  it, what it was already found to carry, and the route round it where it blocks. Built from runs
+  `a`–`f`; no new research went into it. **`[2026-11-07]` Its `CARRIES` column was then ratcheted
+  upwards by run `g`**, which opened all nineteen — floors only ever rise, so a later run that
+  reports less than the register holds has failed, visibly.
 - `MERGED-CANDIDATES.md` — runs `a`–`d` merged: 254 distinct categories with their source counts.
   **Not a proposal, and not comparable with a consolidated list** — it is every name any source
   carried, before any rejection on kind.

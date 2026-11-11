@@ -22,8 +22,9 @@ examples.** If a change is needed, change this file and say in the commit what i
 - **`<OUTFILE>`** is `../../research/frames/YYYY-MM-DD-<RUN-ID>.md`, relative to `docs/briefs/`. The
   `frames/` subdirectory keeps these out of the scouts' namespace, where a dated filename is read as
   an area slug (`../../research/README.md`).
-- **`<RUN-ID>`** is the next unused letter. **Run this brief once per cycle.** It used to be run
-  twice; see "Why once" below.
+- **`<RUN-ID>`** is the next unused letter. **One run, not two** — it used to be run twice; see "Why
+  once" below. **How often framing happens at all is `../PROCESS.md` §5's**: at step 4, and after
+  that only when a `RECARVE` is approved, which is not every cycle.
 - **`<SOURCES>`** is `../../research/frames/SOURCES.md`, pasted in **with its `CARRIES` column
   deleted and nothing else changed**. The agent cannot read project files, so the register has to
   travel inside the brief — the same way `<AREA-RULE>` travels inside

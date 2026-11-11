@@ -7,10 +7,10 @@ in a growing block at the top of a brief an agent has to read past.
 
 | Brief | Role | When it runs |
 |---|---|---|
-| `TEMPLATE-area-frame.md` | **Framer** — report the categories the field files its work under, faithfully and without filtering | Step 4, **once per cycle**, in a fresh session outside this repository, before any scout |
-| `TEMPLATE-area-consolidate.md` | **Consolidator** — turn the framers' records into one candidate area list: classify, merge, pick one level | Step 4, **once**, after the framing runs and before the owner rules |
+| `TEMPLATE-area-frame.md` | **Framer** — report the categories the field files its work under, faithfully and without filtering | **At step 4, one run and not two** `[2026-11-07]`, in a fresh session outside this repository, before any scout. **How often framing happens at all is `../PROCESS.md` §5's** — at step 4, then only on an approved `RECARVE`, not every cycle |
+| `TEMPLATE-area-consolidate.md` | **Consolidator** — turn the framers' records into one candidate area list: classify, merge, pick one level | At step 4, **once**, after the framing run and before the owner rules. Same cadence as the framer, and `../PROCESS.md` §5 owns it |
 | `TEMPLATE-area-research.md` | **Scout** — find the subjects in one area | Research stage, one per approved area |
-| `claim-verifier.md` | **Claim verifier** — re-check one claim at source, adversarially | Expire stage, and any time a claim is challenged |
+| `claim-verifier.md` | **Claim verifier** — re-check one claim at source, adversarially | **Three occasions, and the brief owns the list** — at CONFIRM, at EXPIRE, and whenever a claim is challenged. `[2026-11-11]` This row named two and dropped CONFIRM, which the brief itself calls the one easily forgotten |
 | `pass-1-completeness.md` | **Completeness reviewer** | After a chapter is written |
 | `pass-2-claims.md` | **Adversary** — every claim against its recorded strength | After pass 1's fixes |
 | `pass-3-lab.md` | **Lab runner** — run the lab from the chapter text alone | After pass 2 |
@@ -36,9 +36,17 @@ report of how a field files its work is not a list of research areas.**
 
 The tempting fix was a rejection rule inside the framing brief. **That would have made the reporter
 the judge**, which is the defect that brief exists to prevent and which its first two runs
-demonstrated by inventing their own cutting rules. Splitting the jobs keeps the record honest and
-makes the judgement checkable: **a consolidator's output can be read back against the records it
-came from, and a filtering reporter's cannot.**
+demonstrated by inventing their own cutting rules. Splitting the jobs makes the judgement checkable:
+**a consolidator's output can be read back against the records it came from, and a filtering
+reporter's cannot.**
+
+**`[2026-11-11]` That has now been done once, so it is an observation and not only an argument.**
+The consolidation of run `g` was read back against run `g`'s own records
+(`../CHECK-consolidation-2026-11-07-g.md`, written before the output existed), and the read-back
+found two things the run's own summary did not report: **32 labels it moved into appendices and
+never gave a verdict**, and **thirteen kept areas resting on scope the source may not have
+written** (`../DIAGNOSIS-2026-11-07.md` §9). **One read-back is one instance**, not a property of
+the method.
 
 **The same shape already exists one level down.** A scout reports claims; CONFIRM transforms them
 into `CLAIMS.tsv` rows (`../PROCESS.md` §5.1). This is that pattern applied to areas.
@@ -54,17 +62,22 @@ into `CLAIMS.tsv` rows (`../PROCESS.md` §5.1). This is that pattern applied to 
 
 | Kind | Which | Slots |
 |---|---|---|
-| **Record-producing, bounded by a count** | The scout | All ten. `UNIT`, `TARGET` and `SAMPLING` bound what it returns |
-| **Record-producing, bounded by something else** | The framer, the consolidator | `UNIT` yes, **`TARGET` no** — the framer reports every category its sources name and is bounded by its two floors; the consolidator is bounded by its input, which is finite because the framing files are already written |
-| **Finding-producing** | The four passes, the claim verifier | **`UNIT` and `SAMPLING` folded into `OUTPUT`**, which names the sections and asks for coverage; the question is stated as `YOUR JOB` or `QUESTION`. Findings have no fixed unit count to cap |
+| **Record-producing, bounded by a count** | The scout | Ten slots, **with `SCOPE` where the others head a `UNIT`** — its unit is specified field by field inside `OUTPUT`, which is what the schema asks a `UNIT` for. `TARGET` and `SAMPLING` bound what it returns |
+| **Record-producing, bounded by something else** | The framer, the consolidator | `UNIT` yes, and **`TARGET` yes but carrying no count** — each uses the slot to state what bounds it, which is what `../PROCESS.md` §4.6 asks of a brief with no cap. The framer's bound is the source register it is given (`TEMPLATE-area-frame.md`: **the two floors were removed on 2026-11-07** and the register replaced them); the consolidator's is its input, which is finite because the framing files are already written |
+| **Finding-producing** | The four passes, the claim verifier, the document checker | **`UNIT` and `SAMPLING` folded into `OUTPUT`**, which names the sections and, in five of the six, asks for coverage in one — `pass-2-claims.md` asks instead through `## Clean` and its `PARTIAL`. The question is stated as `YOUR JOB` or `QUESTION`. **Four cap no number of findings; two cap at one** — the claim verifier ("One claim") and the lab runner ("One verdict"), because each is given a single subject |
 
-A brief that leaves out one of the four universal slots is defective. **A brief with no `TARGET` must
-say what bounds it instead** (`../PROCESS.md` §4.6).
+A brief that leaves out one of the four universal slots is defective. **A brief with no cap states in
+`TARGET` what bounds it in place of one** (`../PROCESS.md` §4.6, which owns the schema and that
+sentence).
 
 ## No agent substitutes matching for reading
 
-**[AGREED 2026-11-07]** Every brief here carries this, word for word, because an agent cannot read
-this file:
+**[AGREED 2026-11-07]** Every brief here carries this rule, because an agent cannot read this file.
+**It carries it as a `FORBIDDEN` bullet addressed to the agent, not as the sentence below** —
+`[2026-11-11]` this said "word for word", and no brief carries these words. The rule is the same in
+all nine; `document-check.md`'s copy adds one sentence about citations and drops two. **A drift is
+still visible, because the bullets are near-identical to each other**, which is what the word-for-word
+rule in `../CLAUDE.md` exists for:
 
 > **An agent reads and judges. It may not substitute a search, a pattern, a count or a lookup for
 > reading.** A pattern match tells you where a string is; it cannot tell you what the thing means.
@@ -77,8 +90,10 @@ may never judge content.**
 |---|---|
 | Does this equation evaluate · does this table have the right number of cells · is this hash stale · does this string appear · how many times | Is this an area · is this claim overstated · does this explanation teach · does this chapter sit in the right place · is this the same category under another name |
 
-The fourteen gates all check form, and `../GATES.md`'s "What no gate reads" already names the
-judgements no gate can make. **`tools/sweep.py` is the clearest case**: it counts occurrences, which
+The fourteen gates all check form. **`../GATES.md`'s "Form and content" names the judgements no
+gate can make** — whether a claim is overstated, whether an explanation teaches, whether a chapter
+belongs where it sits — and its "What no gate reads" lists the five rules nothing samples at all.
+`[2026-11-11]` This sentence cited the second section for what the first says. **`tools/sweep.py` is the clearest case**: it counts occurrences, which
 is a hint, and `../LEDGER-DEFECTS.md` entry 5 already says the sweep is followed by **reading** the
 sections it touched, because a phrasing nobody thought of has no string to search for.
 
@@ -86,14 +101,15 @@ sections it touched, because a phrasing nobody thought of has no string to searc
 answer a question about meaning, and all three failed: a sweep for withdrawn evidence found six
 places where reading found twenty-five; a pattern over category names both over-matched and missed
 two entire classes; and a keyword lookup, seeded with what its author already believed, returned
-only what it was given. **Automation gives no context, which is the whole of what the question
-asked for.**
+only what it was given. **In all three, automation gave no context, which was the whole of what the
+question asked for** — the general form of that sentence is the standing rule the briefs carry, not a
+finding drawn from these three.
 
 ## The sentence that goes in every brief here
 
 > If unsure, say so rather than asserting. **A wrong finding costs more than a missed one.**
 
 A missed finding costs one defect. A wrong finding costs a verification, an argument, and sometimes
-a change that makes the chapter worse. **It is in all eight**, including the framer, the consolidator, the claim
-verifier and the lab runner, because an agent reporting a verdict it has not earned is the same
-failure wherever it happens.
+a change that makes the chapter worse. **It is in all nine**, including the framer, the consolidator, the
+claim verifier, the lab runner and the document checker, because an agent reporting a verdict it has
+not earned is the same failure wherever it happens.

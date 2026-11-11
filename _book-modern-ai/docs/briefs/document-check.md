@@ -2,8 +2,9 @@
 
 **The one instrument that reads what Claude writes.** Every other brief here checks an agent, and
 every gate checks a chapter. **Nothing read the governance prose** — the assessments, validations,
-diagnoses and roadmap edits — until `../POSTMORTEM-2026-11-11.md` found five errors in it, each an
-instance of a class recorded weeks earlier.
+diagnoses and roadmap edits — until `../POSTMORTEM-2026-11-11.md` found five errors in it, spanning
+three classes this project had already recorded. **The newest of the three was written down the day
+before it was broken**, so the rules had not faded; nothing read the prose they govern.
 
 **Why it is a separate agent.** It is the same rule this project applies everywhere else: *report,
 then consolidate — two agents, never one*, and *a reporter that filters cannot be checked*

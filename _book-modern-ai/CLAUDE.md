@@ -29,7 +29,7 @@ Then read only what that step needs:
 | `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, strength, maturity and review date. **Empty** |
 | `docs/briefs/` | One brief per agent role. Fill one in; do not rewrite it |
 | `records/` `data/` | The per-chapter records and the labs' data. **No content yet; each holds a `README.md` saying what goes in it** |
-| `research/` | What the research returned. **`frames/` holds the framing runs, the source register and the consolidated candidate lists — 12 files, about 14,600 lines, and the input to step 4.** The scouts' own files are not written yet |
+| `research/` | What the research returned. **`frames/` holds the framing runs, the source register and the consolidated candidate lists — 12 files, about 14,600 lines, and the input to step 4.** One scout has run — a validation run of its brief, on an area the owner has not approved (`research/README.md`) |
 | `practice/` | **The only record of what the owner has worked through.** `DRILL.tsv` holds the drill outcome per question. **It may be read to judge the book and the pace, never to judge the reader** — `practice/README.md` owns that rule |
 
 ## Precedence, when two documents disagree
@@ -109,8 +109,8 @@ better than prose. **No internal codes or shorthand: name things.**
 
 **Open it.** `docs/GOAL.md` §11 records thirteen classes of mistake made on this project, and the
 largest is claiming what was not read. **Class M is the other one to know: a pattern match answers a
-question about strings, never one about meaning.** The six shortest rules — the first three are
-about evidence, the last three about the record, and **all six have been broken on this project**:
+question about strings, never one about meaning.** The seven shortest rules — the first three are
+about evidence, the last four about the record, and **all seven have been broken on this project**:
 
 - **Do not claim what you have not read.** A summary of a document tells you only that the document
   exists.
