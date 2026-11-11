@@ -140,6 +140,22 @@ rejected column). **`[2026-11-12]` What is settled before it** is decisions 11 t
 working an explanation shows, that topics are tiered, what makes a topic core, and that a large
 book is permitted rather than aimed at.
 
+### `[STATED 2026-11-12]` He raised it. The deferral above is spent for *Python*
+
+**Same day, later: *"After that we will start with the Python book, once Python book is completely
+done we will go to ML&DL book."*** That is him raising it, which is the only thing the paragraph
+above was waiting for. **`../python/TOC.md` was drafted on that instruction**, approved, then
+reviewed twice and corrected — its *What the review found* section records fourteen faults in the
+approved list.
+
+**The deferral still stands for *Machine Learning and Deep Learning*.** Nothing about that book's
+contents has been raised, offered or drafted, and a session does not open by offering one.
+
+**`[2026-11-12]` And decision 8's other half is still unmet, which the contents list now says in
+its own status line.** Approving a table of contents satisfies one of decision 8's two conditions.
+**The rules below are the other**, and they are not written. **So nothing is drafted yet** — not
+because the contents are unapproved, but because this section is unfinished.
+
 ## The rules still to be written
 
 This is the next piece of work, and it has not been done. What it has to settle:
