@@ -90,8 +90,10 @@ restate it.
    **[2026-11-07] Part 2 is also done.** `research/frames/CONSOLIDATED-2026-11-07-g.md` — **63
    areas** from 283 input categories, arithmetic closing exactly, no rejection on importance, every
    area mode-tagged. `DIAGNOSIS-2026-11-07.md` §9 has the check. **Two things the owner needs before
-   he rules:** thirteen of the 63 are kept on scope that may not be the source's, each named in that
-   run's own closing section; and **32 labels in run `g`'s appendices never got a verdict**, because
+   he rules:** six of the 63 are kept on scope that may not be the source's, each named in
+   `DIAGNOSIS-2026-11-07.md` §9 — `[2026-11-11]` this said thirteen, which is the number of thin-scope
+   categories the run names, seven of them below an area rather than among the 63; and **32 labels in
+   run `g`'s appendices never got a verdict**, though reading all 32 shows none names a subject, because
    that run put them outside its list and the consolidator judged the list. Both causes are fixed
    upstream. **So part 3 — the owner's ruling — is the next action, and it is his.**
 2. **A consolidation run**, `briefs/TEMPLATE-area-consolidate.md`, once. The framing runs report

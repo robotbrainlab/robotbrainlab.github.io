@@ -357,8 +357,19 @@ are to be applied to the area list, that is a separate pass and nobody has run i
 ### Verdict
 
 **Step 4 part 2 is done, and the list is ready for the owner's ruling** — with two caveats he needs
-before he rules: **thirteen of the 63 are kept on scope that may not be the source's**, each named;
-and **32 labels never got a verdict**, and are in run `g`'s appendices.
+before he rules, **both of which were overstated here until they were read on 2026-11-11**:
+
+- **Six of the 63, not thirteen, are kept on scope that may not be the source's**: `Graphs`,
+  `Harness Engineering`, `causal reasoning`, `learning on graphs and other geometries & topologies`,
+  `Software Factories`, `Design Engineering`. The consolidation run names thirteen thin-scope
+  categories, but **seven of them are finer categories filed under an area's `BELOW`**, not
+  boundaries he rules on. The caveat said "thirteen of the 63" and the two sets are not the same set.
+- **32 labels never got a verdict, and reading all 32 shows none of them names a subject.** They are
+  18 room, stage, day and placeholder labels from the 2026 fair programme; 1 expo-floor label from
+  2025; and 13 AAAI submission formats and programmes — Doctoral Consortium, Journal Track,
+  Workshops and the like. **The procedural defect is real and is fixed upstream**; what it cost this
+  list is, on reading, nothing. **That is a report, not a verdict** — the verdicts were the
+  consolidation run's to issue and it did not issue them.
 
 **Neither caveat is a reason to re-run anything now.** Both are upstream fixes already made, and the
 next cycle starts from a clean framing run. **The list in hand is good enough to rule on**, and
