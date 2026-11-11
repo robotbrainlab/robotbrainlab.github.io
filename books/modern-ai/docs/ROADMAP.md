@@ -46,6 +46,22 @@ defect.
 there is no evidence for is the three-week cadence**, and `PROCESS.md` §10 is explicit that cycle
 1 exists to measure how long a cycle actually takes, because nobody knows.
 
+**`[2026-11-12]` A measurement, because the cadence question has one and nobody had looked.**
+*Modern AI Engineering from Zero* took about **twelve days**: its own commit history begins
+2026-10-19 and `../README.md` records it finished 2026-10-31 — 57 chapters, 1,413 printed pages.
+**So the owner's three-week expectation was evidence-based, and the evidence was his own.** What is
+slow here is not the ambition and not the tooling: **that book's scope was given and this one is
+deriving its scope from the field.** Six days have gone on deciding what the book is about.
+**`GOAL.md` §3.3 predicted the cost** — *"a partition can only be worse or better for a purpose"*
+— but nothing weighed that cost against a cadence the owner had in mind and had not been asked for.
+
+**On deployment, since he named a web host.** Hostinger serves websites; it cannot run this, because
+the work is done by Claude wherever it is invoked. The only artefact that would sit on a host is the
+finished PDF, which GitHub Pages already serves from this repository. **The automatable parts are
+already automated** — the runs, the merging, the gates, the typesetting. **The five approvals are
+not, and that is the whole trade**: the robotics loss happened at the one stage that had no
+supervision.
+
 **`[OPEN]` This is the first thing to settle in the next session about this book**, ahead of the
 area ruling, because the answer changes what is worth building:
 
