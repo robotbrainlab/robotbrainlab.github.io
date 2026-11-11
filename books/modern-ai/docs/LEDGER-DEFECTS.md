@@ -62,6 +62,20 @@ framing brief and left in `PROCESS.md` §4.6, the section that owns the schema. 
 opening the file, and none by a search.** `../CLAUDE.md` now states the rule as *a grep is not a
 sweep*.
 
+**5a. The stage with no brief is the stage that loses things, and it leaves no trace.**
+Every bounded stage on a project can be checked against its input: it declares a total, and a total
+that does not close is visible. **A stage with no brief declares nothing, so nothing it drops can
+be counted.** The danger is not that such a stage is careless — it is that its output looks
+complete, because the only arithmetic it offers is arithmetic over the set it chose to work on.
+*Practice:* every stage that reduces its input gets a brief with an output shape, a per-item unit, a
+forbidden list and an arithmetic that closes over **its input's own total**, not over the part of
+the input it decided to handle.
+*Incident, 2026-11-11:* the area proposal stage, invented that morning and left unbriefed because
+"an agent cannot do it", cut the best-attested area in the register and removed world models,
+Control methods, six AAMAS areas, expert systems and theorem proving without naming one of them. Its
+arithmetic — `12 + 27 + 24 = 63` — was correct and closed over 63 when the consolidation's total was
+283. **The two stages before it, both briefed, lost nothing.** `briefs/area-proposal.md` closes it.
+
 **6. A lab's programs narrate their own output, so a claim exists in code as well as in prose.**
 Printed lines state counts, comparisons and universals, and that narration is captured into the
 chapter. Correcting the prose and not the program makes the chapter contradict itself on its own

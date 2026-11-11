@@ -94,6 +94,12 @@ statement of it.
   rejects a proposal; he does not originate one.** This was broken at step 4 for four days: an
   inventory of 63 areas was put to him as if it were a recommendation, and he said so four times
   before it was heard.
+- **A stage that reduces its input must close its arithmetic over the input's own total**, not over
+  the part it chose to handle, and must name what every removal takes with it — the `BELOW`
+  children, the single-source subjects, the items an earlier stage flagged
+  (`docs/briefs/area-proposal.md`). **The stage with no brief is the one that loses things**, and
+  because it declares no total, nothing it drops can be counted
+  (`docs/LEDGER-DEFECTS.md` entry 5a).
 - **Page estimates never decide scope** (`docs/GUIDE.md` §9).
 - **Nothing is drafted until `docs/PLAN.md` is approved** (`docs/ROADMAP.md`, step 8).
 - **A decision waiting more than seven days is acted on and marked `[DEFAULTED]`** — but **never

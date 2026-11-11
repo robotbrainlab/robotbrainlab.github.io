@@ -99,9 +99,19 @@ restate it.
    that run put them outside its list and the consolidator judged the list. Both causes are fixed
    upstream.
 
-   **[2026-11-11] Part 3 is also done.** `PROPOSAL-areas-2026-11-11.md` — 12 areas kept, 27 folded
-   into them, 24 cut, checked name by name so all 63 are accounted for exactly once. **The next
-   action is the owner's ruling on that proposal.**
+   **[2026-11-11, evening] Part 3 was done and is withdrawn.** `PROPOSAL-areas-2026-11-11.md` cut
+   `Intelligent Robotics` — the best-attested area in the register, 10 of 19 sources — and took
+   world models, Control methods, six AAMAS areas, expert systems and theorem proving with it
+   without naming any of them. It also ignored a requirement in the consolidation brief to dispose
+   of the five `UNCLEAR`. **An independent review found this; the stage had no brief at all.**
+   `briefs/area-proposal.md` now binds it. **Part 3 must be run again to that brief**, and the
+   withdrawn document carries the full account at its head.
+
+   | | |
+   |---|---|
+   | Stage 1, framing | reported robotics seven times over. No loss |
+   | Stage 2, consolidation | kept it, merged nine names into it, flagged world models as unique. **No loss** |
+   | Stage 3, proposal | **cut it.** The only stage with no brief |
 2. **A consolidation run**, `briefs/TEMPLATE-area-consolidate.md`, once. The framing runs report
    faithfully, which means they report application domains, session formats, audience labels and
    vendors' product names too — because those are what venues route submissions by. This run gives

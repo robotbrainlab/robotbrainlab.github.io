@@ -15,18 +15,29 @@ in a growing block at the top of a brief an agent has to read past.
 | `pass-2-claims.md` | **Adversary** — every claim against its recorded strength | After pass 1's fixes |
 | `pass-3-lab.md` | **Lab runner** — run the lab from the chapter text alone | After pass 2 |
 | `pass-4-fix-verification.md` | **Fix verifier** — the changed passages as its subject, the whole chapter as its search | Last |
+| `area-proposal.md` | **Area proposer** — which of the candidate areas the book covers, with what every cut costs | Step 4 part 3, after the consolidation run and before the owner rules. **Not delegated**: Claude works to it in the main session |
 | `document-check.md` | **Document checker** — the only instrument that reads what Claude writes: citations that do not hold, contradictions with a marked decision, claims past their evidence | Before any document in `../` is called finished, and after any rule change |
 
 **The writer has no brief here.** Writing a chapter is the six-step loop in `../PROCESS.md` §6, done
 in the main session with the sources open, not delegated.
 
-**Neither has the area proposal** `[2026-11-11]`. The consolidator returns an **inventory**; what the
-owner rules on is a **proposal**. Turning one into the other — which areas the book covers, with the
-reason per area — is Claude's, in the main session, against §1.1's career goal and §3.1's five
-questions (`../GOAL.md` §3.3). **It has no brief because an agent cannot do it**: the criteria are
-the owner's own words about his career, and a brief cannot carry a judgement about them that he can
-check. **Never hand him the inventory and call it the list** — that happened, four times, and it is
-what `../POSTMORTEM-2026-11-11.md` and §3.3's history note record.
+**The area proposal is not delegated either, but it does have a brief** — `area-proposal.md`.
+The consolidator returns an **inventory**; what the owner rules on is a **proposal**. Turning one
+into the other is Claude's, in the main session, against §1.1's career goal and §3.1's five
+questions (`../GOAL.md` §3.3).
+
+**`[2026-11-11, evening]` This section said the stage had no brief, "because an agent cannot do
+it".** That argued against *delegating* the judgement and was then read as an argument against
+*bounding* it, so the stage that made the largest reduction in the pipeline — 63 areas to 12 — ran
+with no output shape, no stopping rule and no forbidden list. An independent review found what it
+lost: `Intelligent Robotics`, the best-attested area in the register, and with it **world models**
+(which the consolidation had flagged as "the only subject no other source names"), **Control
+methods**, **six AAMAS areas**, **expert systems and theorem proving**, and **all five `UNCLEAR`
+categories that `TEMPLATE-area-consolidate.md` required the proposal to dispose of.** A brief can
+bound a judgement made in the main session; that is what `area-proposal.md` does.
+
+**Never hand him the inventory and call it the list** — that happened, four times, and it is what
+`../POSTMORTEM-2026-11-11.md` and §3.3's history note record.
 
 ## Report, then consolidate — two agents, never one
 
@@ -83,7 +94,7 @@ sentence).
 **[AGREED 2026-11-07]** Every brief here carries this rule, because an agent cannot read this file.
 **It carries it as a `FORBIDDEN` bullet addressed to the agent, not as the sentence below** —
 `[2026-11-11]` this said "word for word", and no brief carries these words. The rule is the same in
-all nine; `document-check.md`'s copy adds one sentence about citations and drops two. **A drift is
+all ten; `document-check.md`'s copy adds one sentence about citations and drops two. **A drift is
 still visible, because the bullets are near-identical to each other**, which is what the word-for-word
 rule in `../CLAUDE.md` exists for:
 
@@ -118,6 +129,6 @@ finding drawn from these three.
 > If unsure, say so rather than asserting. **A wrong finding costs more than a missed one.**
 
 A missed finding costs one defect. A wrong finding costs a verification, an argument, and sometimes
-a change that makes the chapter worse. **It is in all nine**, including the framer, the consolidator, the
+a change that makes the chapter worse. **It is in all ten**, including the framer, the consolidator, the area proposer, the
 claim verifier, the lab runner and the document checker, because an agent reporting a verdict it has
 not earned is the same failure wherever it happens.

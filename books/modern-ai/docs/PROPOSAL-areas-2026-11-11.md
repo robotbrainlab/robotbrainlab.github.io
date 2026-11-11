@@ -1,5 +1,37 @@
 # Proposed areas for the book — 12, from the 63 candidates
 
+> # ⚠ WITHDRAWN — do not rule on this
+>
+> **`[2026-11-11, evening]` This proposal does not meet `briefs/area-proposal.md`**, the brief
+> written after an independent review found what it lost. **It is kept as the record of the failure
+> and must be redone to the brief before the owner rules on anything.**
+>
+> **What it removed without naming:**
+>
+> | Lost | Where it was recorded |
+> |---|---|
+> | **world models** | The consolidation wrote: *"the only subject no other source names"* and *"if the owner wants world models as its own area, that is the split to make"*. This document does not contain the phrase |
+> | **Control methods** | ACM CCS's own child node, filed `BELOW` Intelligent Robotics |
+> | **Six AAMAS areas** — COINE, EMAS, HAI, LEARN, RR, SOPS — and `Distributed artificial intelligence` | Filed `BELOW` Multiagent Systems, cut in the same sentence |
+> | **expert systems, theorem proving** | Named only under `cs.AI` and `KRR`, both cut |
+> | **The five `UNCLEAR`** — Chakra, Croissant, MLCube, Emerging Trends in AI Track, Science | `TEMPLATE-area-consolidate.md` **required this document to say what it did with each.** It says nothing |
+>
+> **Four defects in how it argues:**
+>
+> 1. **The arithmetic is right and complete over the wrong set.** `12 + 27 + 24 = 63` holds, but the
+>    consolidation's own total is `63 + 47 + 123 + 36 + 9 + 5 = 283`; the five `UNCLEAR` were never
+>    in the 63.
+> 2. **The operative test at the top of this file was written here, in this document, in the same
+>    sitting.** It appears in no rule file, and it is the instrument that removed robotics.
+> 3. **"The research here is largely mature"** is an empirical claim about ten research areas with no
+>    source, and it is the whole justification for the largest cut. `GOAL.md` §3.4 `[AGREED]`
+>    forbids that.
+> 4. **Ten areas were cut under one shared paragraph**, where §3.3 requires a reason per area. Those
+>    ten carry roughly a hundred named AAAI keywords between them.
+>
+> **One thing it got right and should be kept in the redo:** it named robotics as its most reversible
+> cut and offered it back. That is why the question reached the owner at all.
+
 **`[I RECOMMEND] 2026-11-11`. This is a proposal, not a decision.** `GOAL.md` §3.3 gives the owner
 "approves, redraws or rejects **the proposed list**". Until today nobody made the proposal: the
 framing run reports and does not decide, and the consolidation run is forbidden from rejecting
