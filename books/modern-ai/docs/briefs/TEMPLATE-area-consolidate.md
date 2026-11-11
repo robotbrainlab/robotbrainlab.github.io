@@ -151,6 +151,12 @@ sense of what matters.
 
 **Write the consolidated list to `<OUTFILE>`.** Create it.
 
+**`[STATED 2026-11-11]` Every section listed below goes in that file as well, not only in your
+reply** — section 6 above all. A coverage report that exists only in a conversation is lost: that
+is exactly how the one real run of `TEMPLATE-area-research.md` lost its own, and nothing can now say
+what that run could not reach. The file holds the full `UNIT` record for every area in addition;
+your reply does not.
+
 **Return to me only this:**
 
 1. `## Areas` — one line each: name, source count, whether academic sources, applied sources or both

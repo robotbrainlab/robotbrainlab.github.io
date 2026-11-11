@@ -119,6 +119,13 @@ below is the owned wording, in this file:
 > **An agent reads and judges. It may not substitute a search, a pattern, a count or a lookup for
 > reading.** A pattern match tells you where a string is; it cannot tell you what the thing means.
 > Where a search or count is used it is a **hint about where to read**, never the finding.
+> **`[STATED 2026-11-11]` This binds Claude in the main session exactly as it binds an agent.**
+
+The owner was asked whether to keep the rule or allow searching for speed, and kept it:
+*"Full manual reading."* **The sentence above said only "an agent" until that answer.**
+`../CLAUDE.md` has cited this file for *"No agent — and not you either"* since it was written, so
+for as long as the citation existed it did not hold — and on 2026-11-11 Claude broke the rule three
+times in the main session, which is where it was not stated.
 
 **The line that has to survive, or this would delete the gates.** **Automation may check form. It
 may never judge content.**

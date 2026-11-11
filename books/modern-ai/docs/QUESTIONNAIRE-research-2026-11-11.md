@@ -405,6 +405,38 @@ research changes the verdict.
 
 ---
 
+## Part 7 — ANSWERED 2026-11-11
+
+| # | Answer | Applied |
+|---|---|---|
+| 7.1 | **All three tests required** — with "buildable" clarified, see below | `GOAL.md` §10 |
+| 7.2 | **Keep short entries** | no change |
+| 7.3 | **The tests decide; he sees only the close calls** | `briefs/select-subjects.md` |
+| 7.4 | **Record what each `must cover` cell drops** | already in `briefs/plan-chapters.md` as `NOT CARRIED` |
+
+**7.1, and he was right to push.** His question: *"It's good to have what new research is going on,
+but we will always not have something to build right?"* — frontier work nobody can reproduce.
+
+**I had stated the test more harshly than it is.** The research brief does not ask whether the
+headline result can be reproduced. It asks for **the smallest experiment that teaches the
+mechanism**, as a separate thing from what reproducing the central result would cost, and it says in
+its own words: *"if nothing here can be reproduced on that machine, say that — it is a true and
+important finding about the area, not a failure."*
+
+You cannot train a frontier model; you can implement attention and watch why a KV-cache matters.
+You cannot run a ten-thousand-GPU job; you can run data-parallel across two processes and watch the
+gradients synchronise. **Both pass.** Where there truly is no smallest experiment — emergent
+behaviour only visible at unreachable scale, interpretability needing the actual weights — the
+subject fails test 3 and takes the short-entry route **he kept in 7.2**. The two answers fit
+together: the strict test is survivable precisely because the escape exists.
+
+`GOAL.md` §10 now says this, because its one-line version — *"something buildable, so dimension 5 is
+possible at all"* — is what I misread to him, and a later reader would misread it the same way.
+
+**7.3 follows his 4.1 answer down one level.** He does not rule on every subject, for the same
+reason he does not rule on every area: the three tests are answered by the research, not by him.
+He sees the close calls and anything resting on an assumption about him.
+
 # Part 8 — Keeping it honest over time
 
 **8.1** Research output goes to a file, never into our conversation, because a result that lives in
@@ -421,6 +453,80 @@ overstated).
 
 **8.4** No agent may start another agent.
 **Keep this?**
+
+---
+
+## Part 8 — ANSWERED 2026-11-11
+
+| # | Answer | Applied |
+|---|---|---|
+| 8.1 | **Everything to a file**, the agent's account of its own limits included | `briefs/TEMPLATE-area-consolidate.md`, `area-proposal.md`, `select-subjects.md`, `plan-chapters.md`, `../CLAUDE.md` |
+| 8.2 | **Keep everything, but clean up periodically** — cadence left to me | `PROCESS.md` §11.1 (new), §5 `Close` row, §10 per cycle, `research/frames/README.md`, `ROADMAP.md`, `../CLAUDE.md` |
+| 8.3 | **Full manual reading** | `briefs/README.md`, `../CLAUDE.md` |
+| 8.4 | **He asked what I would suggest** — keep the ban, and take it out of Claude's hands | `PROCESS.md` §4.6 and §8 |
+
+### 8.1 — four stages had no file to write to
+
+The rule existed in the scout's brief and the framer's. **It did not exist in the consolidator's,
+nor in any of the three main-session reducing stages** — the area proposal, SELECT and PLAN. Each
+of those three now names its output file in its own brief, and the consolidator must put its
+coverage section in the file rather than only in its reply.
+
+**Why the gap sat exactly there.** A delegated agent hands back a reply and keeps nothing, so its
+brief had to say where the work goes or there would be no work. **A main-session stage has no such
+boundary** — the writing is already in the conversation, so nothing forces the file. That is the
+same structural blindness as the robotics loss: the stages that run in the main session are the
+ones whose rules nobody wrote.
+
+### 8.2 — his question was the cadence, and the cadence was the wrong question
+
+His words: *"We should do some cleanup thing may be every 3 researches or 6. I am not sure, because
+we are already making the book."*
+
+**A cadence alone cannot do this job.** Between two cleanups a superseded file sits in a live
+directory, and any session that opens it reads a void document as current. That is `GOAL.md` §11
+class J, which has already cost this project a re-run. **So the rule is a trigger first and a sweep
+second:** a document moves to `superseded/` in the same commit that supersedes it, and a sweep at
+`CLOSE` every cycle catches what the trigger missed. `PROCESS.md` §11.1 owns both, and answers
+the three forms of his question in a table — why every cycle and not every third or sixth, why
+`CLOSE` and not `EXPIRE`, and why it is worth the time while the book is being written.
+
+**Nothing has been moved yet, and that is deliberate.** About a dozen files here are already
+superseded — framing runs `a` to `g`, both consolidated lists, `SOURCES.md`,
+`MERGED-CANDIDATES.md`, the two check files, and the withdrawn area proposal. **Question 9.11 asks
+you to confirm that the old 283 categories and 63 areas are history.** Moving them before you
+answer would take that decision from you, which §11.1 forbids in its own words. **The sweep runs
+in the commit after 9.11 is answered**, and `ROADMAP.md` now records that debt so it cannot be
+lost.
+
+### 8.3 — the rule did not say what `CLAUDE.md` claimed it said
+
+You chose reading. The rule stays. **Checking it, I found the citation did not hold.**
+`../CLAUDE.md` has always said *"No agent — and not you either — substitutes a search…"* and
+cited `briefs/README.md`. **The owned wording in `briefs/README.md` said only "An agent reads and
+judges."** So the half of the rule that binds Claude in the main session was stated nowhere, and on
+2026-11-11 Claude broke it three times in the main session. The owned wording now says it.
+
+### 8.4 — what I suggest, and why
+
+**Keep the ban.** Not because spawning is never useful, but because of what it would cost in
+exactly the places this project keeps failing:
+
+| | |
+|---|---|
+| **The budget stops being countable** | `PROCESS.md` §4.6 already says it: *"one that may start further agents has no budget at all, because each new agent brings its own."* |
+| **Attribution is lost** | The robotics loss was diagnosed only because every stage's output was a file with one author. With five helpers under one agent, *"who opened the standards body's page"* has no answer |
+| **The reports compound** | A parent summarising its children's summaries is `GOAL.md` class A twice over: *"having the summary is worse than having nothing, because nothing makes you look"* |
+
+**And the coverage it would buy is already bought a safer way.** Two or more independent framing
+runs per cycle, unioned, give breadth at the top level where I launch each one, count its budget,
+and read its file. **Every serious failure on this project came from a stage being unbounded, not
+from a stage being too small** — so spawning pushes in the direction every failure came from.
+
+**One thing I changed on my own initiative, and you should know about it.** §8 used to read
+*"Depth 0, everywhere, unless a brief states otherwise and says why."* That made the ban something
+Claude could lift by editing a brief — the same file Claude edits anyway. It now says **only the
+owner lifts it.** All twelve briefs already carry `DELEGATION: ZERO`; nothing else changed.
 
 ---
 

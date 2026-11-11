@@ -202,7 +202,7 @@ UNIT            what one complete item of output looks like, field by field
 TARGET          what bounds the output. A unit cap where a count bounds it; where
                 nothing should cap it, the brief says what bounds it instead
 BUDGET          counted: searches, fetches, or runs. Whatever the agent can exhaust
-DELEGATION      depth allowed. Default: 0
+DELEGATION      depth allowed. Always 0; only the owner lifts it (§8)
 STOPPING RULE   when to write up
 PARTIAL         what to do when the budget runs out before the target
 FORBIDDEN       what must not appear in the output
@@ -244,7 +244,7 @@ EXPIRE → RESEARCH → CONFIRM → SELECT → PLAN → WRITE → VERIFY → CLO
 | **Plan** | Subjects become chapters. Ownership assigned. Structure chosen *now*, from the subjects that exist — never before (`GOAL.md` §5.3). Acceptance questions written **before** drafting | **Owner** |
 | **Write** | One chapter. Six steps, §6 | — |
 | **Verify** | Four passes (§7). **Pass 3 re-runs the chapter's lab, so a lab that costs money costs it again here** — `briefs/pass-3-lab.md` carries a spend limit and takes the chapter's smaller run where one exists | — |
-| **Close** | Record hashed, ledgers updated, claims' `dependents` filled, operation rows written for the changelog | — |
+| **Close** | Record hashed, ledgers updated, claims' `dependents` filled, operation rows written for the changelog. **`[STATED 2026-11-11]` The document sweep also runs here** — one pass over `docs/`, `research/` and `research/frames/` moving anything this cycle superseded (§11.1) | — |
 
 **EXPIRE is first, and the order matters.** Put it last and the cycle eats itself: the expiry check
 would demand that stale claims be re-verified at a point before the stage that re-verifies them.
@@ -484,7 +484,11 @@ chapter" re-reads everything and finds what pass 1 already found.
 
 **Coordination:**
 
-- **No agent delegates.** Depth 0, everywhere, unless a brief states otherwise and says why.
+- **No agent delegates.** Depth 0, everywhere. **`[STATED 2026-11-11]` A brief may not lift this,
+  and none does** — all twelve carry `DELEGATION: ZERO`. The owner asked what should happen here
+  and was given the argument in §4.6; the sentence used to end *"unless a brief states otherwise
+  and says why"*, which made the ban something Claude could edit away in the file it was editing
+  anyway. Only the owner lifts it.
 - **One chapter in flight at a time.**
 - **Scouts may run in parallel.** **So do the framing runs — two or more per cycle, launched
   separately and unaware of each other** `[STATED 2026-11-11]`. The pair exists to expose artefacts
@@ -559,6 +563,7 @@ book:
 - The changelog entry distinguishes **new** from **revised** from **overturned**
 - `OWNERSHIP.tsv` has no collisions
 - Nothing the owner rejected at SELECT appears in the book
+- **No document this cycle superseded is still sitting in a live directory** (§11.1)
 
 ---
 
@@ -646,6 +651,45 @@ while the text is still moving weekly is the worst available moment.
 script or mechanism comes from another project, it is copied into this one. A shared script means
 improving this book can break something else, and it gives this project an external dependency it
 does not control.
+
+
+### 11.1 When a document stops being current
+
+**`[STATED 2026-11-11]` Nothing is deleted. A superseded document moves.** The owner was asked
+whether to keep every superseded file in place for ever and answered: *"We should do some cleanup
+thing may be every 3 researches or 6. I am not sure, because we are already making the book."*
+**This section is the answer to that, and this file owns the rule.**
+
+**Why a move and not a banner on the file.** `GOAL.md` §11 class J is *treating a superseded
+document as current*, and it has already happened here with the supersession written inside the
+file. A banner is read by somebody who has already opened the file. A directory listing is read by
+everybody, every session, before anything is opened. **The listing is the instrument; the banner is
+a note to a reader who no longer needs it.**
+
+**The trigger, which is the rule that does the work.** A document moves to `superseded/` inside its
+own directory — `docs/superseded/`, `research/superseded/`, `research/frames/superseded/` — **in
+the same commit that supersedes it.** It keeps its name and gains one dated first line: what
+replaced it, and why. Its directory's `README.md` gains one line saying the same. **A live
+directory then holds only what a session may read as current**, which is the whole of the point.
+
+**The sweep, which catches what the trigger missed.** At **CLOSE**, every cycle, one pass over
+`docs/`, `research/` and `research/frames/`, asking of each file: *would a session reading this
+today be misled?*
+
+| The owner's question | The answer, and why |
+|---|---|
+| Every third or sixth research run? | **Every cycle.** A "research run" is not a stage of anything; the cycle is the only unit this project has, so it is the only cadence that can be checked against the record |
+| At `EXPIRE`, with the claims? | **At `CLOSE`.** `EXPIRE` opens the *next* cycle, so a document superseded in this one would sit live through a whole further cycle. `CLOSE` ends the cycle that created the supersession |
+| Is it worth the time while the book is being written? | **It gets more expensive the longer it is left.** The cost of doing it is one pass over a directory listing. The cost of skipping it is a stage reading a void file, which is `GOAL.md` §11 class J and has already cost this project a re-run |
+
+**The sweep reads; it may not grep.** Whether a file is still true is a question about meaning
+(`briefs/README.md`).
+
+**Three things the sweep may not do.** It may not move a file the owner has not yet ruled on —
+that takes his decision (`GOAL.md` §11 class C). It may not move a file another live document still
+cites, until that citation is changed in the same commit. And it may not move a file into
+`superseded/` to mean *finished*: `superseded/` means **do not read this as current**, and a
+finished record that is still true stays where it is.
 
 ---
 

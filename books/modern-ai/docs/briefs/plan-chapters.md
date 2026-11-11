@@ -76,6 +76,14 @@ SOURCE RECORD   the path to the research file
 **`NOT CARRIED` is the point of this brief.** "Nothing" is an answer only after you have read the
 field and can say why it needs no coverage. **A field you did not read cannot be marked carried.**
 
+**`[STATED 2026-11-11]` Write every section below to `../PLAN-RECORD-YYYY-MM-DD.md` before any of
+it is put to the owner.** A stage that runs in the main session has no agent boundary to force the
+write, so the rule has to be stated here. A result that lives in a conversation cannot be read
+next cycle, cannot be cited, and cannot be checked against what it claimed — and the stage that
+lost robotics was a main-session stage whose working was never written down. **`## Rows`
+additionally becomes `../PLAN.md`'s rows once the owner approves them**; the other eight sections
+live only in the record, which is the only place the fields a row dropped are named.
+
 **OUTPUT — every section, in this order**
 
 ```

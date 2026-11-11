@@ -106,6 +106,16 @@ restate it.
    `research/frames/2026-11-07-g.md` and `CONSOLIDATED-2026-11-07-g.md` are kept as records. They
    are not input to anything, and the next consolidation unions this cycle's runs only.
 
+   **`[2026-11-11]` The first document sweep is owed, and it waits on one answer.**
+   `PROCESS.md` §11.1 now says a superseded document moves to `superseded/` in the commit that
+   supersedes it. Roughly a dozen files here are already superseded — runs `a` to `g`, both
+   `CONSOLIDATED-*` files, `SOURCES.md`, `MERGED-CANDIDATES.md`, the two `CHECK-*` files and the
+   withdrawn `PROPOSAL-areas-2026-11-11.md`. **They have not been moved**, because
+   `QUESTIONNAIRE-research-2026-11-11.md` question 9.11 asks the owner to confirm that the old 283
+   categories and 63 areas are history, and moving them first would take that decision from him
+   (§11.1's own prohibition, and `GOAL.md` §11 class C). **The sweep runs in the commit after he
+   answers 9.11**, and every citation of a moved path is changed in that same commit.
+
    **What is worth carrying as method rather than content** — none of it names a category, so none
    of it offends the independence rule: run `g` wrote its own scope instead of the source's on
    sources that file by a bare label, affecting about 64 of its 283 records

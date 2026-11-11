@@ -17,8 +17,9 @@ run found and another missed is still a category the field files, so the consoli
 union and never the intersection. `../../docs/DIAGNOSIS-2026-11-07.md` has the measurements that
 say what independence costs.
 
-**Run ids run `a`, `b`, `c`, `d` …** — the next unused letter. Nothing is ever deleted: a superseded
-run is still evidence of what a source carried on a date.
+**Run ids run `a`, `b`, `c`, `d` …** — the next unused letter. A superseded run is still evidence of
+what a source carried on a date, so it is kept — **and moved to `superseded/` in the commit that
+supersedes it**, which is `../../docs/PROCESS.md` §11.1's rule and not restated here.
 
 **Framing happens at step 4, not every cycle.** The areas persist across cycles; they are re-framed
 only when a `RECARVE` is approved (`../../docs/PROCESS.md` §5).

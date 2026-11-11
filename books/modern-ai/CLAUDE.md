@@ -87,9 +87,17 @@ statement of it.
   (`docs/PROCESS.md` §4.6).
 - **No agent — and not you either — substitutes a search, a pattern or a count for reading.**
   Automation may check form; it may never judge content. A count is a hint about where to read
-  (`docs/briefs/README.md`).
+  (`docs/briefs/README.md`). `[STATED 2026-11-11]` The owner kept this rule when offered the faster
+  alternative, and the owning statement now says in its own words that it binds the main session —
+  it said only "an agent" until then, so this bullet's "and not you either" had nothing behind it.
 - **Research output goes to a file**, never into the conversation. An agent returns a summary only
-  (`docs/briefs/TEMPLATE-area-research.md`).
+  (`docs/briefs/TEMPLATE-area-research.md`). **`[STATED 2026-11-11]` The three main-session
+  reducing stages now name an output file too** — the area proposal, SELECT and PLAN — and the
+  consolidator must put its coverage section in its file, not only in its reply. A main-session
+  stage has no agent boundary to force the write, which is why none of the three had one.
+- **A superseded document moves to `superseded/` in the commit that supersedes it**, so a live
+  directory lists only what may be read as current. Nothing is deleted, and the sweep that catches
+  what the move missed runs at `CLOSE`, every cycle (`docs/PROCESS.md` §11.1).
 - **Structure follows the subjects.** Do not choose the parts before the research names them
   (`docs/GOAL.md` §5.3).
 - **The owner is never handed an unrecommended list.** Where he rules on something, somebody

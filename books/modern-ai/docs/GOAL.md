@@ -736,6 +736,22 @@ earns a full chapter when it has all three of:
 2. **live research**, so following it teaches how to read the literature;
 3. something **buildable**, so dimension 5 is possible at all.
 
+**`[STATED 2026-11-11]` What "buildable" means, because it has been read too harshly.** The owner
+asked: *"we will always not have something to build right?"* — pointing at frontier work nobody can
+reproduce. **The test is not "can you reproduce the headline result".** It is: **is there a smallest
+experiment that teaches the mechanism?** `briefs/TEMPLATE-area-research.md` asks the research for
+exactly that, separately from what reproducing the central result would cost, and adds: *"if nothing
+here can be reproduced on that machine, say that — it is a true and important finding about the
+area, not a failure."*
+
+So: you cannot train a frontier model, and you can implement attention and watch why a KV-cache
+matters. You cannot run a ten-thousand-GPU job, and you can run data-parallel across two processes
+and watch the gradients synchronise. **Those pass test 3.**
+
+**Where there genuinely is no smallest experiment** — emergent behaviour that only appears at a
+scale nobody here can reach, interpretability that needs the actual weights — **the subject fails
+test 3 and takes the `SHORT-ENTRY` route below**, which exists for exactly this. It is not silence.
+
 **The rule needs no worked examples to be applied.** The research reports `LIVE RESEARCH` and
 `BUILDABLE` for each subject, which is exactly what tests 2 and 3 ask for, and its `VERDICT` field
 puts all three questions directly.
