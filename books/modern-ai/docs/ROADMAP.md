@@ -115,6 +115,14 @@ restate it.
    `research/frames/superseded/`. They are not input to anything, and the next consolidation unions
    this cycle's runs only.
 
+   **`[2026-11-12]` Parts 1 and 2 are done.** Runs `h` and `i` were checked against their own
+   coverage sections and against each other (`CHECK-runs-h-i-2026-11-12.md`), then consolidated to
+   `research/frames/CONSOLIDATED-2026-11-12.md` — **223 distinct categories from a 307-record
+   union, of which 99 are `UNCLEAR`.** The consolidation was then checked against its brief
+   (`CHECK-consolidation-2026-11-12.md`): **its arithmetic closes**, and three count errors in its
+   own summary are marked in the file. **Part 3, the proposal, is next**, and the 99 undecided
+   categories are its largest piece — most of the field's engineering vocabulary is in them.
+
    **`[STATED 2026-11-12]` The owner confirmed that the 283 categories and the 63 areas are
    history, and the first document sweep ran.** Fifteen files moved: eleven to
    `research/frames/superseded/` and four to `docs/superseded/`, each with a dated line saying what

@@ -34,13 +34,17 @@ They live in their own directory because the scouts' files in `../` are named
 |---|---|
 | `2026-11-11-h.md` | **A current framing run.** 172 areas from 9 sources, 2,357 lines. Launched under the independence rule: no register, no routes, nothing from an earlier run |
 | `2026-11-11-i.md` | **A current framing run.** 135 areas from 10 sources, 2,034 lines. Launched separately from `h` and unaware of it |
-| `superseded/` | Eleven superseded runs and lists, each with a dated line saying what superseded it. **Input to nothing**, including the next consolidation |
+| `CONSOLIDATED-2026-11-12.md` | **The current candidate list** `[2026-11-12]`. The union of `h` and `i`: 307 records, 84 merges, **223 distinct categories** — 47 `AREA`, 51 `DOMAIN`, 9 `RECORD`, 17 `FORMAT`, 0 `PRODUCT`, **99 `UNCLEAR`**. **An inventory, not a recommendation.** Checked against its brief in `../../docs/CHECK-consolidation-2026-11-12.md`: arithmetic closes, three count errors in its own summary are marked in the file |
+| `superseded/` | Eleven superseded runs and lists, each with a dated line saying what superseded it. **Input to nothing**, including this consolidation |
 
 **Both current runs independently reported the same gap**: no source they could reach files AI work
 by job or role. That is why the source floor gained a practitioner requirement, and the owner asked
 for a route to be found. **It is still open.**
 
-**Next: consolidate `h` and `i`** — the **union**, never the intersection — to
-`../../docs/briefs/TEMPLATE-area-consolidate.md`, then propose the area cut to
-`../../docs/briefs/area-proposal.md`. `../../docs/ROADMAP.md` step 4 is the authority on what that
-needs.
+**`[2026-11-12]` The consolidation is done. Next is the area proposal**, to
+`../../docs/briefs/area-proposal.md`, and `../../docs/ROADMAP.md` step 4 is the authority on what
+it needs. **The largest piece of it is the 99 `UNCLEAR` categories**: the brief requires a
+disposition line for each one before the owner sees anything, and forbids a reason shared between
+areas. **Most of the engineering vocabulary is in that pile** — the consolidation's own finding:
+*"A book on the engineering of AI that took only this run's `AREA` list would have almost no
+engineering in it."*

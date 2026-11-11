@@ -1285,6 +1285,18 @@ framing files and this output:
 - The user-level memory file listed `[Never hand an unrecommended list]` and `[Page budgets never
   bind]`; neither changed anything here.
 
+**`[CORRECTED 2026-11-12 by Claude, in the main session, after checking this file against its own
+lists — the original wording above is left standing]`** Three counts in this coverage section
+disagree with the lists they summarise. The lists are right.
+
+| Says | Should say | Checked against |
+|---|---|---|
+| *"the **ten** arXiv categories that carry AI-adjacent ground"* | **thirteen** | The same sentence then names thirteen, and thirteen carry **Close** in Rejected: cs.AR, cs.CR, cs.DB, cs.DC, cs.GT, cs.HC, cs.IR, cs.LO, cs.PF, cs.SC, cs.SD, cs.SE, cs.SY |
+| *"the **five** ACM CCS siblings with the same problem"* | **three** | Only Distributed computing methodologies, Modeling and simulation and Symbolic and algebraic manipulation carry **Close**. Computer graphics, Concurrent and Parallel computing methodologies are rejected without it. (The *"six ACM CCS siblings"* under *Two reading policies* counts something else — every CCS sibling rejected — and is correct) |
+| *"(JWG 3 health, **JWG 7** finance)"* | **no number for the second** | Its Rejected line reads *"Joint Working Group SC 42 – ISO/TC 68: Artificial intelligence"* and gives no group number. `JWG 7` is unsupported here |
+
+**No verdict changes.** `docs/CHECK-consolidation-2026-11-12.md` has the working.
+
 **My arithmetic.**
 
 | | Count |
