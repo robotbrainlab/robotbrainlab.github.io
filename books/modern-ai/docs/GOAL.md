@@ -77,6 +77,26 @@ made because I have previously presented my own recommendations as settled decis
 **[DEFAULTED]** item is mine, acted on to keep the work moving, and the owner has not ruled on it. An
 [I RECOMMEND] item may be wrong, and several of my recommendations in this project already were.
 
+### `[STATED 2026-11-12]` When an [I RECOMMEND] item is put to the owner
+
+**Before the first time it binds something real, and not in a batch.** About fifty of these stand
+across the planning documents. The owner was asked whether to rule on them all at once and said no:
+**each comes to him when it first decides a concrete thing** — when a rule is about to shape a
+proposal he will rule on, a chapter that will be written, or money that will be spent.
+
+**Why not all at once.** A decision with no case in front of it is a decision made from the
+wording, which is what `§3.3`'s history note records going wrong at step 4: an inventory of 63
+areas was put to him as if it were a recommendation, and he said so four times before it was heard.
+**A rule ruled on in the abstract is approved the same way.**
+
+**Why not silently either.** The failure this guards is the opposite one, and it is mine: acting on
+a recommendation at the moment it matters, without saying it was never ruled on. **An [I RECOMMEND]
+item that is about to bind is named as mine when it is used**, in the same message as the thing it
+binds.
+
+**The count is reported at `CLOSE`**, with the document sweep (`PROCESS.md` §11.1), so the pile
+cannot grow unseen.
+
 [↑ Back to Table of Contents](#table-of-contents)
 
 ---

@@ -11,7 +11,15 @@ and a merge is a drafting event best done when the text has stopped changing (`P
 stay for the first cycle. **[AGREED 2026-11-06]** They are reviewed after cycle 1 and not before,
 because nobody has run one of these cycles yet and cutting a gate now would be guessing at which
 approvals matter. **If a decision waits more than seven days I act on my recommendation and mark it
-`[DEFAULTED]`** (`PROCESS.md` §2.1) — four things never default, and that section lists them.
+`[DEFAULTED]`** (`PROCESS.md` §2.1) — **five** things never default `[2026-11-12]`, and that
+section lists them.
+
+**`[STATED 2026-11-12]` An independent rules review runs before each of these five approvals**, not
+on a calendar. The owner was offered a fixed schedule and chose this: the three reviews of
+2026-11-11 found 36 problems **where rules had just changed**, and a calendar review of unchanged
+text re-reads the same words at full cost. **This is in addition to `briefs/document-check.md`**,
+which runs on a single document before it is called finished and after any rule change; the review
+here reads the rules as a set, which is what found the contradictions between files.
 
 ## Current position
 

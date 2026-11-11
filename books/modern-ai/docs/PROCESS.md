@@ -77,7 +77,7 @@ not stop when he is busy.
 it is **reversible on request**, and the record names everything built on it so a reversal knows
 what it touches.
 
-**Four things never default, whatever the wait.** Each is either hard to reverse or not mine to do:
+**Five things never default, whatever the wait.** Each is either hard to reverse or not mine to do:
 
 | Never defaults | Why |
 |---|---|
@@ -85,6 +85,7 @@ what it touches.
 | **Spending money** | A lab may cost a few pounds (`GUIDE.md` §6). Spending the owner's money unasked is not a default, it is a liberty |
 | **A `RECARVE`, or anything that discards completed work** | Expensive and hard to undo. §5.2 says no mechanism makes it cheap |
 | **Anything the owner has reserved** in writing | His reservation outranks this rule |
+| **`[STATED 2026-11-12]` Changing a statement marked `[STATED]` or `[AGREED]`** | Those are his words or his explicit agreement. **A default over one is not unblocking the work, it is overriding him** — the thing the markers exist to make visible (`GOAL.md` §0). He added this row when he was shown that the four above cover it only if he had thought to reserve the rule in advance, which is the case where nobody thinks to |
 
 **Seven days is a starting figure, not a measurement.** A twelve-week cycle can absorb a week's
 wait; whether it can absorb more is unknown. If a defaulted decision is reversed more than once, the

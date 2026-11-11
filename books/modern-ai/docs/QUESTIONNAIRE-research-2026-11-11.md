@@ -13,8 +13,11 @@ that is actually broken; Parts 1–8 are mostly confirming or changing things th
 10 holds 4. **I called it 49 from the day it was written**, in the file's first commit and in every
 message since, because I counted the lines matching `**N.M**` and Part 9's questions are written
 `**9.1 The stage that…**` — a different shape, so the count never saw them. That is class M in
-`GOAL.md` §11: a pattern match answering a question about meaning. **56 are answered; Part 10's 4
-remain.**
+`GOAL.md` §11: a pattern match answering a question about meaning.
+
+**`[2026-11-12]` All 60 are answered.** Parts 1 to 10 each carry an `ANSWERED` section with the
+ruling and the files it changed. **What is still open is the space at the end of this file** —
+anything the questionnaire did not ask.
 
 **Words I will not use without explaining them:**
 
@@ -694,6 +697,46 @@ fixed.
 **10.4** I was told to read everything manually rather than searching files. That is slower and it is
 how three real errors were found today.
 **Keep it as the standing rule?**
+
+---
+
+## Part 10 — ANSWERED 2026-11-12
+
+**All four answered as recommended. With this, every one of the 60 questions is answered.**
+
+| # | Answer | Applied |
+|---|---|---|
+| 10.1 | **Each proposal comes to you when it first binds something** — never in a batch | `GOAL.md` §0 (new sub-section), `../CLAUDE.md` |
+| 10.2 | **Add a fifth thing that never defaults** | `PROCESS.md` §2.1, `ROADMAP.md`, `../CLAUDE.md` |
+| 10.3 | **A rules review before each of your five approval points** | `ROADMAP.md` |
+| 10.4 | **The reading rule binds all work in this repository** | `../../../.claude/CLAUDE.md`, `briefs/README.md` |
+
+**10.1 — both failures are now named, because they are opposite.** About fifty `[I RECOMMEND]`
+statements stand. You declined to rule on them in a batch, and the reason is in `§3.3`'s own
+history: **a rule ruled on in the abstract is approved from its wording**, which is exactly how an
+inventory of 63 areas came to be put to you as a recommendation. So each one comes to you when it
+first decides a concrete thing. **The opposite failure is mine and is written down beside it**:
+using a recommendation at the moment it matters without saying it was never ruled on. The count is
+now reported at `CLOSE`, so the pile cannot grow unseen.
+
+**10.2 — you closed a gap I found while checking the question.** The four things that never
+default are all about what an action costs: publishing, money, discarding work, and anything you
+reserved. **None of them covers a rule you had already stated or agreed to** — that is only
+covered if you thought to reserve it in advance, and the case where nobody thinks to is the case
+that matters. The fifth row says a `[STATED]` or `[AGREED]` statement never defaults, because
+changing one is not unblocking the work, it is overriding you.
+
+**10.3 — a trigger, not a calendar.** The three reviews of 2026-11-11 found 36 problems, and they
+found them **where rules had just changed.** A review runs before each of your five approvals,
+reading the rules as a set — which is what found the contradictions *between* files, and is a
+different instrument from `briefs/document-check.md`, which reads one document against what it
+cites.
+
+**10.4 — the rule left this book.** `../../../.claude/CLAUDE.md` now carries it for every session
+in this repository, and points back to `briefs/README.md` for the wording the briefs use and the
+table of what may be automated. One of the three pattern-match failures on 2026-11-11 was ordinary
+repository work, not research: a sweep for a phrase found six places where reading found
+twenty-five.
 
 ---
 

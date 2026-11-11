@@ -41,6 +41,24 @@ of asking.
 If the user wants to undo the redesign or part of it, follow "Rolling back the redesign" in the
 handover. Those recipes were tested; confirm with the user before pushing a rollback.
 
+## Standing rules, in every kind of session
+
+**`[STATED 2026-11-12]` Read. Do not substitute a search, a pattern or a count for reading.** This
+binds every session in this repository — the website, every book, and ordinary repository work —
+not only the research work in `books/modern-ai/`. **A program may check form; it may never judge
+content.** Where a search or a count is used, it is a hint about where to read and never the
+finding itself.
+
+**Why it is here and not only in the book.** The owner made it a rule for the research process, was
+then asked whether it was the standing rule for everything, and said it was. On 2026-11-11 three
+pattern matches were used in one day to answer questions about meaning and all three were wrong,
+and **one of them was ordinary repository work**: a sweep for a phrase found six places where
+reading found twenty-five.
+
+**`books/modern-ai/docs/briefs/README.md` owns the agent-facing form of this rule** — the wording
+the briefs carry, and the table of what may and may not be automated. Read it there before changing
+anything about it.
+
 ## Handover
 
 @HANDOVER.md

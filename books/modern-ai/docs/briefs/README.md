@@ -122,6 +122,11 @@ below is the owned wording, in this file:
 > Where a search or count is used it is a **hint about where to read**, never the finding.
 > **`[STATED 2026-11-11]` This binds Claude in the main session exactly as it binds an agent.**
 
+**`[STATED 2026-11-12]` And it binds every session in this repository, not only this book.** The
+owner was asked whether it was the standing rule for all work — the website, the other books,
+ordinary repository work — and said it was. **`../../../../.claude/CLAUDE.md` carries the
+repository-wide form**, and points back here for the wording the briefs carry and the table below.
+
 The owner was asked whether to keep the rule or allow searching for speed, and kept it:
 *"Full manual reading."* **The sentence above said only "an agent" until that answer.**
 `../CLAUDE.md` has cited this file for *"No agent — and not you either"* since it was written, so

@@ -118,8 +118,13 @@ statement of it.
 - **Page estimates never decide scope** (`docs/GUIDE.md` §9).
 - **Nothing is drafted until `docs/PLAN.md` is approved** (`docs/ROADMAP.md`, step 8).
 - **A decision waiting more than seven days is acted on and marked `[DEFAULTED]`** — but **never
-  push, never spend money, never discard finished work, and never override something the owner
-  reserved** (`docs/PROCESS.md` §2.1).
+  push, never spend money, never discard finished work, never override something the owner
+  reserved, and `[STATED 2026-11-12]` never change a statement marked `[STATED]` or `[AGREED]`**
+  (`docs/PROCESS.md` §2.1).
+- **An `[I RECOMMEND]` item is put to the owner before the first time it binds something real**, and
+  named as mine in the same message as the thing it binds. **Never in a batch**: about fifty stand,
+  and he ruled that a rule ruled on in the abstract is approved from its wording
+  (`docs/GOAL.md` §0).
 - **One chapter at a time. Never a part at a time** (`docs/PROCESS.md` §2).
 - **The repository is public.** Scan for secrets before every commit. **Push only to the
   `github-robotbrainlab` remote**, which is the `robotbrainlab` account; never as the
