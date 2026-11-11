@@ -51,14 +51,23 @@ def parse(path: Path) -> Links:
 # the pages a visitor can reach by following links from the home page. Books, research notes and
 # tooling are served too, but they are not the website and their internal links are not this
 # script's business.
-NOT_THE_WEBSITE = {"books", "research", "tools", "backup", "docs"}
+# Paths that are served but are not the website: a visitor never follows a link into them,
+# and their internal links are not this script's business.
+# [2026-11-11] data-intelligence/research is the roadmap generator, which moved inside the
+# discipline it serves. It holds Jinja2 templates whose {{ }} placeholders are not links.
+NOT_THE_WEBSITE = {"books", "tools"}
+NOT_THE_WEBSITE_PATHS = {("data-intelligence", "research")}
 
 
 def published(path: Path) -> bool:
     parts = path.relative_to(REPO).parts
     if any(part.startswith(".") for part in parts):
         return False
-    return parts[0] not in NOT_THE_WEBSITE if len(parts) > 1 else True
+    if len(parts) == 1:
+        return True
+    if parts[0] in NOT_THE_WEBSITE:
+        return False
+    return not any(parts[:len(p)] == p for p in NOT_THE_WEBSITE_PATHS)
 
 
 def main() -> int:

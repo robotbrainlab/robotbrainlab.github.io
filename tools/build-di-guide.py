@@ -6,7 +6,7 @@ Usage (from the repository root):
     python3 tools/build-di-guide.py
 
 1. Runs the roadmap's own generator (with its validation) into a temp directory.
-   The roadmap source in research/ai-roadmap/ is only read, never modified.
+   The roadmap source in data-intelligence/research/ is only read, never modified.
 2. Adds a "Towards Intelligence" link to each page's top bar, pointing back to
    the site home page, adds the site icon and the site theme override (theme/guide-override.css),
    and justifies the running text on the guide's home page.
@@ -30,7 +30,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-SOURCE = REPO / "research" / "ai-roadmap"
+SOURCE = REPO / "data-intelligence" / "research"   # [2026-11-11] was research/ai-roadmap
 GUIDE = REPO / "data-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
 # Site theme override for the guide (theme/guide-override.css). Bump when that file changes.

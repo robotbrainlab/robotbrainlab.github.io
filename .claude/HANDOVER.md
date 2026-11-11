@@ -14,13 +14,14 @@ every file exactly as it is. This site never used a Jekyll feature — no `_conf
 `{{ … }}` as a template command, and the books are full of that inside ordinary code samples.
 
 **So a leading underscore no longer decides anything, and there are no underscore folders left.**
-`_sources` is now `research/`, `_tools` is `tools/`, `_backup` is `backup/`, and the books are in
-`books/`. Everything in the repository is served.
+`_tools` is now `tools/`, and the books are in `books/`. `_sources` and `_backup` no longer exist at
+all: `_sources` was dissolved into the sections it served, and `_backup` went to the Desktop archive
+(both 2026-11-11, see the Map). Everything in the repository is served.
 
 The repository is **public**, so every file was already readable on github.com. What changed is
 that a file now also has a web address, which search engines collect. **`/robots.txt` decides what
 they collect**: the finished books are findable, and markdown, chapters, records, labs, tools,
-`books/backlog/`, `books/modern-ai/`, `research/`, `tools/` and `backup/` are not.
+`books/backlog/`, `books/modern-ai/`, *(dissolved 2026-11-11 — see below)*, `tools/` and `backup/` are not.
 
 ## Publishing
 
@@ -95,13 +96,13 @@ Notes:
 | `theme/site.css`, `theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=6`) |
 | `theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `tools/build-di-guide.py` (currently `10`) |
 | `favicon/` | Site icon: "Apex", a neural network converging into a radiant star, the culmination of AI (gradient tile). Also added to the D&I guide pages by the build script |
-| `research/ai-roadmap/` | Source of the D&I guide (a separate research repo; **this is its only copy**) |
-| `research/ai-tools/` | Claude Code guides, skills, and `html-reference/reference.html` (the design reference) |
-| `research/cs-roadmap/` | CS&E on-ramp books (Markdown + LaTeX) and `end-to-end/` (empty for now) |
-| `tools/build-di-guide.py` | Builds the D&I guide from `research/ai-roadmap/` |
+| `data-intelligence/research/` | Source of the D&I guide (a separate research repo; **this is its only copy**) |
+| `.claude/` | Claude Code guides, skills, and `html-reference/reference.html` (the design reference) |
+| `cse/` | CS&E on-ramp books (Markdown + LaTeX) and `end-to-end/` (empty for now) |
+| `tools/build-di-guide.py` | Builds the D&I guide from `data-intelligence/research/` |
 | `tools/text-check.py` | Proves a page's text, links and element ids did not change |
 | `tools/link-check.py` | Checks every internal link and `#anchor` on the site resolves |
-| `backup/data-intelligence/index.html` | The old D&I guide page with the pipeline diagram |
+| *(moved to the Desktop archive 2026-11-11)* | The old D&I guide page with the pipeline diagram |
 | `books/interview-prep/` | **The interview-prep book** — a whole separate project living here for safekeeping. Unpublished (leading `_`). See "The interview-prep book" below |
 | `books/` | **Decisions for the two books that come after it** — Python, and Core ML and Deep Learning. Nothing is started; `DECISIONS.md` records why, what was settled and the rules still to write. Unpublished (leading `_`) |
 
@@ -114,7 +115,7 @@ effort (a different, "technical" style the user rejected).
 ## Restyle work
 
 **Goal:** restyle every page to look like
-`research/ai-tools/claude-code/html-reference/reference.html`. That means Apple-like light theme by
+`.claude/design-reference.html`. That means Apple-like light theme by
 default with an iOS dark-mode switch, system fonts, sticky blurred nav, alternating bands, cards,
 blue accent and gradient emphasis. The rule is **not a single letter of content may change**.
 
@@ -151,7 +152,7 @@ per page, nothing pushed).
 
 | Page | Status |
 | --- | --- |
-| All reachable pages | **Done** (2026-09-26) in one commit: Home, the 2 Coming Soon pages, CS&E on-ramp (since merged into the CS&E guide), CS&E guide, and the D&I guide (72 pages via `theme/guide-override.css`). Checks: 81/81 pages text/link/id-identical to the previous `main`, 0 broken internal links, `research/` untouched |
+| All reachable pages | **Done** (2026-09-26) in one commit: Home, the 2 Coming Soon pages, CS&E on-ramp (since merged into the CS&E guide), CS&E guide, and the D&I guide (72 pages via `theme/guide-override.css`). Checks: 81/81 pages text/link/id-identical to the previous `main`, 0 broken internal links, *(dissolved 2026-11-11 — see below)* untouched |
 | Orphans (`mathematics/resources`, `data-intelligence/resources`, `data-intelligence/llm-engineering`) | Deliberately left in the old style. Nothing links to them |
 ---
 
@@ -159,7 +160,7 @@ per page, nothing pushed).
 
 ### D&I guide (AI Engineer Roadmap)
 
-- Source: `research/ai-roadmap/`. It has its own governance (`AGENTS.md`, `handover.md`,
+- Source: `data-intelligence/research/`. It has its own governance (`AGENTS.md`, `handover.md`,
   `MAINTENANCE.md`); read them before changing roadmap content. The user considers it a separate
   research repo. **Never change its content, templates or generator for site purposes.**
 - Rebuild: `python3 tools/build-di-guide.py` from the repo root. It runs the roadmap's generator
@@ -167,7 +168,7 @@ per page, nothing pushed).
   every page and the justify rule to the guide home, renames the guide to **Data & Intelligence** in
   its chrome (top bar, tab title, home heading) and its primary action to "Explore the roadmap",
   then replaces `data-intelligence/guide/`. The rename touches chrome only — the roadmap's own
-  running text keeps its name, and `research/ai-roadmap/` is never written to. Each replacement is
+  running text keeps its name, and `data-intelligence/research/` is never written to. Each replacement is
   checked, so the build stops rather than publishing a page it did not recognise.
 - **The Python resource points at this site's own page** (2026-10-07, commit `2042d27`).
   `data-intelligence/books/python-roadmap.html` is a staged path through the language that
@@ -187,7 +188,7 @@ per page, nothing pushed).
   check.
 - Don't run the roadmap's `build_site.py --out` straight into the guide, because the link would be
   lost. Never point `--out` at `data-intelligence/`, because it wipes that directory.
-- If `.venv` is missing: `cd research/ai-roadmap && python3.14 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt`.
+- If `.venv` is missing: `cd data-intelligence/research && python3.14 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt`.
 
 ### CS&E on-ramp books
 
@@ -227,7 +228,7 @@ per page, nothing pushed).
     stays true. `\phasestrip{0}` highlights none of the four phases, which is correct before the loop starts.
 - **⚠ The Complete Software Engineering Guide cannot be rebuilt from Markdown in this repo.** Its
   `tools/convert.sh` reads a Markdown library (`1-Product-Discovery/`, `2-Project-Planning/`,
-  `3-Writing-the-Code/`, `4-Building-Real-Applications/…`) that is **not in `research/` and not anywhere on
+  `3-Writing-the-Code/`, `4-Building-Real-Applications/…`) that is **not in *(dissolved 2026-11-11 — see below)* and not anywhere on
   this machine** — searched 2026-10-08. Only the generated `LaTeX-Book/chapters/*.tex` survive, and they are
   committed. So `make` fails at the convert step, but `make pdf` works:
   ```
@@ -249,9 +250,9 @@ per page, nothing pushed).
   *Use the Index, Luke!* ch. 1–5 assumes you can already write a join. The failure is silent — a missing
   index doesn't error, it gets slow later — so `databases/TOC.md` is the next book worth writing.
 
-### `research/` is the only copy
+### *(dissolved 2026-11-11 — see below)* is the only copy
 
-The originals outside this repo were deleted. Commit **every** file in `research/` except `.venv/`
+The originals outside this repo were deleted. Commit **every** file in *(dissolved 2026-11-11 — see below)* except `.venv/`
 and `.DS_Store`. The books' own `.gitignore` files exclude LaTeX output, so use `git add -f` and check that
 the number of files on disk matches the `git ls-files` count. Scan for secrets before committing
 (the repo is public).
@@ -275,7 +276,7 @@ already exists. **It is temporary** and will be removed once the job search ends
 was deleted on 2026-10-23, after checking that all 65 of its tracked files were byte-identical
 here and all 31 of its commits reachable. Do not go looking for it. The book is also published
 on the public repository, which the owner decided deliberately: the content is general
-technical material, and `research/` was already public on the same terms.
+technical material, and *(dissolved 2026-11-11 — see below)* was already public on the same terms.
 
 **It has nothing to do with the website.** It is not linked from any page, it is not part of
 the restyle, and it must never appear on the live site. The leading underscore is what
@@ -339,7 +340,7 @@ branch, so do it only if there is a reason, and never without asking.
   `scrollX`, not `scrollWidth`: the guide's hidden drawers overflow but `overflow-x: clip` stops scrolling),
   overlapping or off-screen buttons, and long paragraphs that aren't justified. Load each page in a
   same-origin iframe of that width; this works even while the Browser pane is hidden.
-- Git doesn't store empty folders. Use `.gitkeep` (as in `research/cs-roadmap/end-to-end/`).
+- Git doesn't store empty folders. Use `.gitkeep` (as in `cse/end-to-end/`).
 - Only the 3 orphan pages still load Google Fonts and have their own inline `<style>`.
 - Headless screenshots: use Chrome with `--force-prefers-reduced-motion`, or the fade-ins may not have
   finished (blank captures). A hidden Browser pane also pauses scroll observers and painting.

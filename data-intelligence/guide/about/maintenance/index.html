@@ -178,7 +178,7 @@
 </tr>
 <tr class="kv-row kv-row--current-baseline">
 <td><strong>Current baseline</strong></td>
-<td>Baseline 2, canonical in <a href="../curriculum/index.html" class="xref-link xref-link--curriculum">ROADMAP.md<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a></td>
+<td>Baseline 3, canonical in <a href="../curriculum/index.html" class="xref-link xref-link--curriculum">ROADMAP.md<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a></td>
 </tr>
 <tr class="kv-row kv-row--state-file">
 <td><strong>State file</strong></td>
@@ -222,6 +222,8 @@
 <li><a href="#9-baseline-versioning">Baseline Versioning</a></li>
 <li><a href="#10-standing-maintenance-items">Standing Maintenance Items</a></li>
 <li><a href="#11-completion-checklist">Completion Checklist</a></li>
+<li><a href="#12-where-the-dominant-practice-is--the-question-the-next-scan-must-answer">Where the Dominant Practice Is</a></li>
+<li><a href="#13-staying-current-between-reviews">Staying Current Between Reviews</a></li>
 </ol>
 </details>
 <hr class="section-break">
@@ -238,6 +240,7 @@
 <p class="ti-subhead"><strong>Perform the 12-week Curriculum Review.</strong></p>
 </blockquote>
 <p>An explicit command runs the named action even if it is not yet due. The state file is updated from the date the action was completed.</p>
+<p>The scan&#x27;s search directions changed on 2026-11-03 (<a href="#search-directions">4</a>), and the next scan must also answer the question in <a href="#12-where-the-dominant-practice-is--the-question-the-next-scan-must-answer">12</a>. Awareness of releases and tooling is kept outside the cadence, in <a href="#13-staying-current-between-reviews">13</a>.</p>
 <p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
 <hr class="section-break">
 </section>
@@ -347,22 +350,43 @@
 <p><strong>Purpose.</strong> Observe meaningful changes in contemporary AI engineering <strong>without continuously rewriting the curriculum</strong>. <strong>Cadence:</strong> every 4 weeks.</p>
 <p>The scan is <strong>lightweight</strong>. It does not require a full independent field reconstruction (<a href="../governance/index.html#proportional-independence">AGENTS.md — Proportional Independence</a>). It must, however, search the world rather than the roadmap: look for what changed, then ask whether it matters.</p>
 <h3 id="search-directions">Search Directions<a class="heading-anchor" href="#search-directions" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
-<p>Start from these directions. They are <strong>not</strong> a closed taxonomy; the scan must stay able to find developments outside them.</p>
+<p><strong>Changed 2026-11-03.</strong> The directions used to be a list of subjects — model capability, inference
+and serving, retrieval, agents, context, adaptation, evaluation, security, multimodality, standards.
+Every one of those is a language-model subject, so a scan pointed along them could only return
+language-model findings, and twice it did: all 23 sources of the 2026-11-03 scan were language-model
+or agent papers, and the current-practice register holds no row about tabular models, time series,
+recommenders, media generation or embodied systems. The old list carried a note saying it was &quot;not a
+closed taxonomy&quot;, and that note lost to the list both times.</p>
+<p class="ti-subhead"><strong>So the directions now name the kind of change to look for, not the technology it happens in.</strong></p>
 <ul>
-<li>model capability shifts that change what engineers can build;</li>
-<li>inference and serving practice;</li>
-<li>retrieval;</li>
-<li>agent and tool systems;</li>
-<li>context management;</li>
-<li>adaptation and post-training;</li>
-<li>evaluation;</li>
-<li>security;</li>
-<li>multimodality;</li>
-<li>standards and interoperability;</li>
-<li>important engineering patterns and failure reports;</li>
-<li><strong>active research frontiers</strong> — what researchers are trying to solve, which directions have substantial evidence, which are contested, and which could reshape the field. The track carries the open problems, so the scan must look for them. Frontier findings are recorded, never promoted to practice.</li>
+<li>What can engineers now build that they could not before?</li>
+<li>What changed in how systems are put together?</li>
+<li>What changed in how they are measured?</li>
+<li>What changed in how they fail, or are attacked?</li>
+<li>What changed in what they cost, or how fast they are?</li>
+<li>What became a standard, and what was dropped or deprecated?</li>
+<li>What is newly disputed, and what is now settled?</li>
+<li><strong>Active research frontiers</strong> — what researchers are trying to solve, which directions have
+substantial evidence, which are contested, and which could reshape the field. The track carries
+the open problems, so the scan must look for them. Frontier findings are recorded, never promoted
+to practice.</li>
 </ul>
-<p>Prefer primary evidence, as ranked in <a href="../governance/index.html#research-standards">AGENTS.md — Research Standards</a>. Record scientific evidence and engineering adoption as separate signals.</p>
+<p>Nothing in that list points at one technology, so a finding about any part of the field can come
+back through it. Language-model work is still found; it simply stops being the only thing the scan
+can see.</p>
+<p class="ti-subhead"><strong>Two rules that go with the change.</strong></p>
+<ol>
+<li><strong>Report where practice is concentrated, as a finding in its own right.</strong> Supply no taxonomy to a
+searching agent and name no areas — it builds its own structure from the evidence. Never frame
+any part of the search as &quot;outside language models&quot; or against an existing category: that defines
+the rest of the field by reference to one part of it and sends the agent hunting for a result
+instead of measuring one. <strong>The distribution is a finding, not a premise.</strong></li>
+<li><strong>Every searching agent reports what it searched, what it could not reach, and what its sources
+over-represent.</strong> A claim about the field&#x27;s shape is worth exactly as much as the sampling behind
+it.</li>
+</ol>
+<p>Prefer primary evidence, as ranked in <a href="../governance/index.html#research-standards">AGENTS.md — Research Standards</a>.
+Record scientific evidence and engineering adoption as separate signals.</p>
 <h3 id="anti-news-feed-rule">Anti-News-Feed Rule<a class="heading-anchor" href="#anti-news-feed-rule" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
 <p>The scan is <strong>not</strong>:</p>
 <ul>
@@ -470,6 +494,7 @@
 <li>failures and limitations that have become clearer;</li>
 <li>changes in maturity and durability;</li>
 <li>learner feedback, if available;</li>
+<li>the running notes file from <a href="#13-staying-current-between-reviews">13</a>, tested rather than accepted;</li>
 <li>resource updates — new editions, withdrawn materials, better candidates — where relevant;</li>
 <li>the <a href="#10-standing-maintenance-items">standing maintenance items</a>.</li>
 </ul>
@@ -647,8 +672,8 @@
 </tbody>
 </table></div>
 <ul>
-<li><strong>Current:</strong> Baseline 2, accepted 2026-09-19.</li>
-<li><strong>History:</strong> <a href="../history/roadmap-baseline-v0/index.html" class="xref-link xref-link--history">history/roadmap-baseline-v0.md<span class="xref xref--history" data-chrome><span class="visually-hidden"> (</span>Historical<span class="visually-hidden">)</span></span></a> and <a href="../history/roadmap-baseline-1/index.html" class="xref-link xref-link--history">history/roadmap-baseline-1.md<span class="xref xref--history" data-chrome><span class="visually-hidden"> (</span>Historical<span class="visually-hidden">)</span></span></a>. Every future outgoing baseline is preserved alongside them.</li>
+<li><strong>Current:</strong> Baseline 3, accepted 2026-11-02.</li>
+<li><strong>History:</strong> <a href="../history/roadmap-baseline-v0/index.html" class="xref-link xref-link--history">history/roadmap-baseline-v0.md<span class="xref xref--history" data-chrome><span class="visually-hidden"> (</span>Historical<span class="visually-hidden">)</span></span></a>, <a href="../history/roadmap-baseline-1/index.html" class="xref-link xref-link--history">history/roadmap-baseline-1.md<span class="xref xref--history" data-chrome><span class="visually-hidden"> (</span>Historical<span class="visually-hidden">)</span></span></a> and <a href="../history/roadmap-baseline-2/index.html" class="xref-link xref-link--history">history/roadmap-baseline-2.md<span class="xref xref--history" data-chrome><span class="visually-hidden"> (</span>Historical<span class="visually-hidden">)</span></span></a>. Every future outgoing baseline is preserved alongside them.</li>
 </ul>
 <blockquote class="callout callout-warning">
 <p>⚠️ Files in <code>history/</code> are immutable. Never overwrite or edit them.</p>
@@ -707,6 +732,77 @@
 <li><code>history/</code> files are unchanged.</li>
 <li>If learner-facing canonical content changed, the site was regenerated and checked.</li>
 <li>The completion message states: the action performed, the report path, state changes, changes made, and proposals awaiting approval.</li>
+</ul>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="12-where-the-dominant-practice-is--the-question-the-next-scan-must-answer">
+<h2 id="12-where-the-dominant-practice-is--the-question-the-next-scan-must-answer">12. Where the Dominant Practice Is — the question the next scan must answer<a class="heading-anchor" href="#12-where-the-dominant-practice-is--the-question-the-next-scan-must-answer" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>Agreed with the owner, 2026-11-03.</strong> This began as a one-off investigation. It is not one: the
+bias lived in the scan&#x27;s standing directions, so fixing it once would have fixed nothing. The
+directions in <a href="#search-directions">4</a> were changed instead, and <strong>the next scan under those
+directions is this investigation.</strong></p>
+<p>What it has to answer, alongside its normal findings:</p>
+<blockquote class="quote quote-principle">
+<p class="ti-subhead"><strong>Where is the dominant practice in AI engineering, and how is it distributed across the field?</strong></p>
+</blockquote>
+<h3 id="why-it-matters-beyond-the-scan">Why it matters beyond the scan<a class="heading-anchor" href="#why-it-matters-beyond-the-scan" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<p>It decides the scope of the second book — whether the Modern AI track has ten topics or more — and
+it is one of the two tasks blocking that book&#x27;s first chapter. See <code>_book/HANDOVER.md</code> §9.5.</p>
+<p>Two outcomes, both useful:</p>
+<ul>
+<li><strong>Substantial practice outside language models.</strong> The track is short of topics and the register
+needs rows it has never had.</li>
+<li><strong>Thin.</strong> Then &quot;Modern AI&quot; in this project honestly means the foundation-model layer, and
+<a href="../curriculum/index.html#6-modern-ai-research-science-and-engineering" class="xref-link xref-link--curriculum">ROADMAP.md §6<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a> should say so in one
+sentence rather than letting the name overclaim.</li>
+</ul>
+<h3 id="the-evidence-that-the-bias-was-real">The evidence that the bias was real<a class="heading-anchor" href="#the-evidence-that-the-bias-was-real" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h3>
+<ul>
+<li>The <a href="../../evidence/current-practice/index.html">current-practice register</a> holds 68 entries and <strong>not
+one</strong> concerns tabular models, time series and forecasting, recommenders, media generation or
+embodied systems. Multimodal input is the nearest thing, and that is still a language model.</li>
+<li>All 23 sources of the <a href="../../reviews/2026-11-03-modern-ai-scan/index.html">2026-11-03 scan</a> were language-model
+or agent papers.</li>
+<li>All three blind reconstructions run on 2026-11-03 disclosed the same limit unprompted. One wrote
+that its evidence was &quot;English-language, Western, LLM-centric research. Entirely,&quot; and named
+non-LLM work as the largest structural gap in its report.</li>
+<li><a href="../../research/2026-09-17-data-intelligence-landscape/index.html" class="xref-link xref-link--evidence">The landscape<span class="xref xref--evidence" data-chrome><span class="visually-hidden"> (</span>Evidence<span class="visually-hidden">)</span></span></a> §A point 2 says plainly that
+foundation models reorganised the field <strong>without replacing it</strong>, and two of the twenty frontier
+questions in its §F are not about language models at all.</li>
+</ul>
+<p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
+<hr class="section-break">
+</section>
+<section class="doc-section" aria-labelledby="13-staying-current-between-reviews">
+<h2 id="13-staying-current-between-reviews">13. Staying Current Between Reviews<a class="heading-anchor" href="#13-staying-current-between-reviews" data-chrome><span aria-hidden="true">#</span><span class="visually-hidden">Link to this section</span></a></h2>
+<p><strong>Agreed with the owner, 2026-11-03.</strong> The scan was being asked to do two jobs and did neither well.</p>
+<p><strong>The two jobs are different.</strong> Knowing that a lab shipped a tool is <strong>awareness</strong>. Deciding what the
+curriculum teaches is <strong>research</strong>. The <a href="#anti-news-feed-rule">Anti-News-Feed Rule</a> bars the scan from
+the first, so for two cycles the scan could not report the thing the owner most wanted to know, and
+filled the gap with <em>Watching</em> rows instead. A four-week research cycle is also the wrong instrument
+for it: too slow to hear about a release, and too heavy to be worth running for one.</p>
+<p><strong>So awareness is kept separately, as a running notes file, and it is not research.</strong> Follow release
+notes, changelogs and the tools actually in use, as broadly as you like. No report, no register, no
+evidence grading, no cadence.</p>
+<p class="ti-subhead"><strong>The one rule that makes it useful rather than noise:</strong></p>
+<blockquote class="quote quote-principle">
+<p class="ti-subhead"><strong>Watch the tools. Write down the capability.</strong></p>
+</blockquote>
+<p>A product launching tells you nothing. Several products doing the same new thing tells you a
+capability has become expected, and that is adoption evidence. So a note reads <em>&quot;several vendors now
+sell X, so it is becoming expected practice&quot;</em> — never <em>&quot;company Y shipped Z&quot;</em>. The product names are
+the evidence; the capability is the finding. This is the shape the landscape&#x27;s §E already uses, where
+the products sit in a column headed <strong>&quot;Implementation examples (not categories)&quot;</strong> beside the
+capability they evidence.</p>
+<p>Two consequences:</p>
+<ul>
+<li><strong>The notes file is an inbox, not a verdict.</strong> Things land there as they are noticed; the 12-week
+review is where each one is tested against <a href="#5-12-week-curriculum-review">5</a>&#x27;s procedure or thrown
+out. It is listed among that review&#x27;s inputs.</li>
+<li><strong>Expect to discard most of it.</strong> The landscape&#x27;s §E says plainly that engineering importance is
+not scientific importance, and that several widely adopted practices carry little novelty. Most of
+this layer changes nothing about what an engineer must understand.</li>
 </ul>
 <p class="back-to-contents"><a href="#contents">⬆ Back to Contents</a></p>
 </section>
@@ -770,6 +866,16 @@
         </li>
         <li class="toc-item">
           <a href="#11-completion-checklist" data-toc-link>11. Completion Checklist</a>
+        </li>
+        <li class="toc-item has-children">
+          <a href="#12-where-the-dominant-practice-is--the-question-the-next-scan-must-answer" data-toc-link>12. Where the Dominant Practice Is — the question the next scan must answer</a>
+          <ol class="toc-sublist">
+            <li><a href="#why-it-matters-beyond-the-scan" data-toc-link>Why it matters beyond the scan</a></li>
+            <li><a href="#the-evidence-that-the-bias-was-real" data-toc-link>The evidence that the bias was real</a></li>
+          </ol>
+        </li>
+        <li class="toc-item">
+          <a href="#13-staying-current-between-reviews" data-toc-link>13. Staying Current Between Reviews</a>
         </li>
       </ol>
     </nav>
