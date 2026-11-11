@@ -37,7 +37,7 @@ them is the most useful thing the validation produced.** It is in `DIAGNOSIS-202
 supersedes V8 and V11 of the validation file. In short: **the six framing runs were never comparable,
 because the brief told each run to choose its own sources.** Only two sources were common to all six.
 A route around a blocked page found by one run was unavailable to the next. **The fix at the time
-was `research/frames/SOURCES.md`, a register of the sources themselves**, built from what the six
+was the source register, now `research/frames/superseded/SOURCES.md`**, built from what the six
 runs had already found.
 
 **`[STATED 2026-11-11]` That register is revoked** — see the current position above and `GOAL.md`
@@ -63,7 +63,7 @@ restored floors exist to mitigate:
 | 1 | Agree the goal | Owner | `GOAL.md` | **Done** |
 | 2 | Agree the method | Owner | `PROCESS.md`, `GUIDE.md`, `GATES.md` | **Partly approved.** Eight topics were settled on 2026-11-06 — grep `[AGREED 2026-11-06]` for them. The rest stay marked `[I RECOMMEND]` and are ruled on as they come up in practice |
 | 3 | Write the research brief | Claude | A brief with a capped output, a counted budget and a stopping rule with a fixed point | **Written and exercised** — `briefs/TEMPLATE-area-research.md`. **It terminates**: the validation run of 2026-11-07 stopped on its fetch limit and wrote up without starting a further record. Three defects it exposed are fixed in the brief; see `VALIDATION-2026-11-07.md` V18–V20, of which **V19 matters most — six of six verdicts came out `CHAPTER`, so three of the four verdicts have still never been issued** |
-| 4 | **Establish the research areas** | Claude proposes · **Owner rules** | **Two or more independent framing runs**, each finding its own sources, record what the field files; a consolidation run **unions** them into one candidate list; **Claude proposes the cut against §1.1's purpose, with the reason for each keep and each cut**; the owner approves, redraws or rejects that proposal, with the reasons recorded | **Parts 1–2 must be re-run** `[STATED 2026-11-11]`: the source register is revoked, so the existing 283 categories and 63 areas came from a method the owner has withdrawn. **Part 3 is WITHDRAWN too** — `PROPOSAL-areas-2026-11-11.md` must not be ruled on; it cut the best-attested area and five further groups of subjects. See "What step 4 needs" below |
+| 4 | **Establish the research areas** | Claude proposes · **Owner rules** | **Two or more independent framing runs**, each finding its own sources, record what the field files; a consolidation run **unions** them into one candidate list; **Claude proposes the cut against §1.1's purpose, with the reason for each keep and each cut**; the owner approves, redraws or rejects that proposal, with the reasons recorded | **Parts 1–2 must be re-run** `[STATED 2026-11-11]`: the source register is revoked, so the existing 283 categories and 63 areas came from a method the owner has withdrawn. **Part 3 is WITHDRAWN too** — `docs/superseded/PROPOSAL-areas-2026-11-11.md` must not be ruled on; it cut the best-attested area and five further groups of subjects. See "What step 4 needs" below |
 | 5 | Run the research | Claude | One file per area in `../research/` | Not started |
 | 6 | Select the subjects | Claude sorts · **Owner rules** | What passed the three tests, and every rejection with the test it failed and why. He rules on both | Not started |
 | 7 | Decide the book's shape | **Owner** | The four open questions that need the subjects: breadth against depth, the mathematics boundary, the structure, and which area goes deep | Not started |
@@ -103,18 +103,15 @@ restate it.
    decision, which is precisely what is no longer allowed. **The same follows for the 63 areas
    consolidated from it.**
 
-   `research/frames/2026-11-07-g.md` and `CONSOLIDATED-2026-11-07-g.md` are kept as records. They
-   are not input to anything, and the next consolidation unions this cycle's runs only.
+   Run `g` and its consolidation are kept as records, in
+   `research/frames/superseded/`. They are not input to anything, and the next consolidation unions
+   this cycle's runs only.
 
-   **`[2026-11-11]` The first document sweep is owed, and it waits on one answer.**
-   `PROCESS.md` §11.1 now says a superseded document moves to `superseded/` in the commit that
-   supersedes it. Roughly a dozen files here are already superseded — runs `a` to `g`, both
-   `CONSOLIDATED-*` files, `SOURCES.md`, `MERGED-CANDIDATES.md`, the two `CHECK-*` files and the
-   withdrawn `PROPOSAL-areas-2026-11-11.md`. **They have not been moved**, because
-   `QUESTIONNAIRE-research-2026-11-11.md` question 9.11 asks the owner to confirm that the old 283
-   categories and 63 areas are history, and moving them first would take that decision from him
-   (§11.1's own prohibition, and `GOAL.md` §11 class C). **The sweep runs in the commit after he
-   answers 9.11**, and every citation of a moved path is changed in that same commit.
+   **`[STATED 2026-11-12]` The owner confirmed that the 283 categories and the 63 areas are
+   history, and the first document sweep ran.** Fifteen files moved: eleven to
+   `research/frames/superseded/` and four to `docs/superseded/`, each with a dated line saying what
+   superseded it, and each directory with a `README.md` listing them. **Nothing was deleted**
+   (`PROCESS.md` §11.1).
 
    **What is worth carrying as method rather than content** — none of it names a category, so none
    of it offends the independence rule: run `g` wrote its own scope instead of the source's on
@@ -123,7 +120,7 @@ restate it.
    the consolidation judged the main list only, so those 32 got no verdict. **All three are fixed in
    the briefs**, and the fixes stand whatever the next runs find.
 
-   **[2026-11-11, evening] Part 3 was done and is withdrawn.** `PROPOSAL-areas-2026-11-11.md` cut
+   **[2026-11-11, evening] Part 3 was done and is withdrawn.** `superseded/PROPOSAL-areas-2026-11-11.md` cut
    `Intelligent Robotics` — the best-attested area in the register, 10 of 19 sources — and took
    world models, Control methods, six AAMAS areas, expert systems and theorem proving with it
    without naming any of them. It also ignored a requirement in the consolidation brief to dispose
@@ -155,7 +152,7 @@ restate it.
    decide; the consolidation run may not reject anything for being unimportant. So both runs finish
    and what exists is an inventory of 63 with no recommendation — and asking him to cut an inventory
    is asking him to originate the argument from nothing, which `GOAL.md` §3.3 retracts in his own
-   words. **The proposal is `PROPOSAL-areas-2026-11-11.md`: 12 areas, 27 folded, 24 cut, each with
+   words. **The proposal was `superseded/PROPOSAL-areas-2026-11-11.md`: 12 areas, 27 folded, 24 cut, each with
    its reason, judged against §1.1's career goal and §3.1's five questions, which is what §3.3 says
    the argument is made from.** `GOAL.md` §3.3 now carries the missing row, so the step cannot go
    missing again. **The reasons are recorded with the list**, because a later cycle has to be able to
@@ -167,8 +164,21 @@ restate it.
    its `UNCLEAR` list, its close rejections, its thin merges and the areas it kept on thin scope. A
    grep for the phrasings I had in mind did not find this clause on 2026-11-07; opening the file did
    (`POSTMORTEM-2026-11-11.md` §2.3).
-4. **Somebody turns the approved categories into each scout's `<SCOPE>` and `<EXCLUDED>`**, in the
-   same sitting as the approval. A framing run reports what work is *filed* in a category; a scout
+4. **`[STATED 2026-11-12]` The approved areas are numbered, in the same sitting as the approval.**
+   `A01`, `A02`, `A03` … in the order of the approved list, written into the file that records the
+   ruling. **Every claim id is the area's number, a hyphen and a counter** (`PROCESS.md` §5.1), so
+   until this happens no claim can get an id — **and until 2026-11-12 no stage assigned one at all.**
+
+   **Why at approval and not in the proposal.** A number is never reused and never renumbered
+   (§5.1). The owner cuts areas and redraws boundaries when he rules, so numbering before the
+   ruling would mean renumbering after it. The owner was given both options and chose this one.
+   **`confirm-claims.md` stops rather than coining a number** for an area that has none.
+
+5. **Somebody turns the approved categories into each scout's `<SCOPE>` and `<EXCLUDED>`**, in the
+   same sitting as the approval. `[STATED 2026-11-12]` **The proposal now carries `COVERS` and
+   `EXCLUDES` forward from the consolidation** (`briefs/area-proposal.md`), which is what makes
+   this step possible: it used to say "from the approved list", and the approved list carried
+   neither. A framing run reports what work is *filed* in a category; a scout
    needs the *subjects* it is responsible for. Whoever converts one into the other is choosing what
    the scouts look for, so it is not a clerical step. Every area's exclusions are written at the
    same time as every other's, from the one approved list.

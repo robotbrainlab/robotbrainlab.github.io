@@ -14,10 +14,14 @@ chapter:        markdown/NN-slug.md
 question:       the chapter's durable question, one sentence
 sources:        named, with what was read of each
 non-scope:      what this chapter does NOT cover, so review has an edge
-claims:         the CLAIMS.tsv ids this chapter rests on
-owner-verifies: at most three of those ids — the ones this chapter's argument most
-                turns on. The owner verifies these himself and may swap any of
-                them; the agent takes the rest (PROCESS.md 5.3)
+owner-verifies: at most three ids from the chapter's own ## Claims section — the
+                ones this chapter's argument most turns on. The owner verifies these
+                himself and may swap any of them; the agent takes the rest
+                (PROCESS.md 5.3). These same ids are re-opened at source at CLOSE
+                [2026-11-12]. A `claims:` field sat here and listed the ids a third
+                time, checked by nothing: gate 12 checks the chapter's ## Claims
+                against CLAIMS.tsv `dependents` in both directions, so a third copy
+                could only drift. The owner removed it
 begun:
 written:
 reviewed:
@@ -90,6 +94,11 @@ sha256:
 - [ ] **Pass 2, adversarial claims** — CLEAN
 - [ ] **Pass 3, lab execution from the chapter text alone** — produced a verdict
 - [ ] **Pass 4, fix verification** — launched, naming every changed passage
+- [ ] **`## What this chapter does not cover` is in the chapter**, written from `non-scope` above,
+      each line saying which of the three it is (`GUIDE.md` §5 part 11)
+- [ ] **Every `owner-verifies` id re-opened at source** through `briefs/claim-verifier.md`, before
+      the hash — give each verdict. **This is the only thing in the loop that re-reads a source**
+      (`PROCESS.md` §5, `Close`)
 - [ ] `LEDGER-TAUGHT.md` row added; `LEDGER-SHORTHAND.md` updated; `OWNERSHIP.tsv` updated
 - [ ] `LEDGER-DEFECTS.md` updated if a new defect class appeared
 - [ ] **The `operations:` field above is filled** — every operation this chapter needed, from the
@@ -114,3 +123,9 @@ pass-4-fix-verification:
 Record for each: how many findings, how many declined and why, and how many were **false teaching**
 rather than cosmetic. The stopping rule in `PROCESS.md` §6 reads these numbers, and it reads them
 for what caused them rather than as a verdict on the chapter.
+
+**`[STATED 2026-11-12]` And keep the findings themselves**, under each pass — one line each: what
+the finding said, and `accepted` or `declined, because …`. Until today only the counts survived.
+**`LEDGER-DEFECTS.md` is built from findings**, and a finding declined for a bad reason is
+invisible when the record keeps only a number — which is precisely the failure that ledger exists
+to catch. The owner was offered counts-only and chose this.

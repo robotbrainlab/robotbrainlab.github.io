@@ -1,5 +1,7 @@
 # The source register — REVOKED 2026-11-11
 
+> **SUPERSEDED 2026-11-12, and REVOKED 2026-11-11.** The source register. **The owner revoked it** because a fixed source list decides what a run can find, which makes it scope rather than method (`../../../docs/GOAL.md` §3.3). **It may not be pasted into any brief, including its routes** — a route is still a previous run's finding. Kept as a record of what six runs found.
+
 > ## ⚠ This is a record. It is not an input, and no run may be given it.
 >
 > **`[STATED 2026-11-11]` The owner revoked this register.** His reasoning: a fixed list of sources

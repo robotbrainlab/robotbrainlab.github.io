@@ -497,7 +497,8 @@ superseded — framing runs `a` to `g`, both consolidated lists, `SOURCES.md`,
 you to confirm that the old 283 categories and 63 areas are history.** Moving them before you
 answer would take that decision from you, which §11.1 forbids in its own words. **The sweep runs
 in the commit after 9.11 is answered**, and `ROADMAP.md` now records that debt so it cannot be
-lost.
+lost. **`[2026-11-12]` He answered 9.11 and the sweep has run** — fifteen files moved, nothing
+deleted. See the Part 9 record below.
 
 ### 8.3 — the rule did not say what `CLAUDE.md` claimed it said
 
@@ -583,6 +584,89 @@ wordings.
 **9.11 The existing 283 categories and 63 areas are now void**, because they came from the source
 list you revoked. Two fresh runs are going now.
 **Confirm you want the old ones treated as history and not used.**
+
+---
+
+## Part 9 — ANSWERED 2026-11-12
+
+**All eleven were verified at source before being put to him**, and **all eleven were answered as
+recommended.**
+
+| # | Answer | Applied |
+|---|---|---|
+| 9.1 | **Write CONFIRM a brief** | `briefs/confirm-claims.md` (new), `briefs/README.md`, `../CLAUDE.md`, `PROCESS.md` §8 |
+| 9.2 | **Verify every provisional claim** | `PROCESS.md` §5 `Confirm` row, `briefs/confirm-claims.md` |
+| 9.3 | **Areas numbered at his approval** | `ROADMAP.md` step 4 part 4, `PROCESS.md` §5.1 |
+| 9.4 | **The proposal carries `COVERS` and `EXCLUDES`** | `briefs/area-proposal.md` UNIT, `ROADMAP.md` step 4 part 5 |
+| 9.5 | **Re-open the load-bearing sources at CLOSE** | `PROCESS.md` §5 `Close` row, `RECORD-TEMPLATE.md` |
+| 9.6 | **An amendment runs pass 4 and the sweep** | `PROCESS.md` §6.1, `GATES.md` gate 5 |
+| 9.7 | **Keep the findings, not only the counts** | `RECORD-TEMPLATE.md` |
+| 9.8 | **The chapter tells the reader what it left out** | `GUIDE.md` §5 part 11, `RECORD-TEMPLATE.md` |
+| 9.9 | **Remove the third copy of the claim mapping** | `RECORD-TEMPLATE.md` |
+| 9.10 | **The document checker checks the one-statement rule** | `briefs/document-check.md` (a fourth finding type), `../CLAUDE.md`, `PROCESS.md` §8 |
+| 9.11 | **The old 283 and 63 are history** | **The first document sweep ran** — see below |
+
+### What each answer changed
+
+**9.1 and 9.2 go together.** CONFIRM was the last reducing stage running on prose alone. Its new
+brief closes an arithmetic over the claims the research returned, refuses a row rather than
+guessing a column, and **stops rather than coining an area number** — which is 9.3. The old
+verification trigger said *"every provisional claim a candidate chapter would rest on"*; what a
+chapter rests on is `dependents`, empty until CLOSE, so **the trigger could never fire.** It now
+reads every provisional row, which is what it already meant: at CONFIRM every researched subject
+is still a candidate.
+
+**9.3 and 9.4 are both the proposal not carrying enough forward.** Nothing assigned area numbers,
+so no claim id could be formed; the numbers are now fixed when you approve the list, in its order,
+because a number is never renumbered and you cut and redraw when you rule. And the scout's scope
+was to be written "from the approved list", which carried neither `COVERS` nor `EXCLUDES` — so the
+proposal now carries both, on cuts as well as keeps, because **what an area covers is exactly what
+cutting it removes.**
+
+**9.5 found something worse than the question said.** Pass 1 does read the sources, but its brief
+says *"No web searches — everything you need is in the files named."* **Nothing in the chapter
+loop opens a source at all.** The chapter's `owner-verifies` ids — at most three — are now
+re-opened at CLOSE through the claim verifier, before the record is hashed.
+
+**9.6, 9.7 and 9.8 are three ways the record was thinner than it looked.** An amendment now runs
+pass 4 and the book-wide sweep, and nothing else, because you declined the full re-run and said
+why it would be wrong: a one-line correction costing what a chapter costs is how amending stops
+happening. Findings are kept, not just counted, because `LEDGER-DEFECTS.md` is built from them.
+And `non-scope` now reaches the page, as `## What this chapter does not cover`, naming for each
+line which of the three it is — another chapter owns it, the research did not reach it, or it did
+not fit.
+
+**9.9 removed a field rather than adding a check.** Gate 12 already compares the chapter's
+`## Claims` with `CLAIMS.tsv` `dependents` in both directions. The record's `claims:` field was a
+third copy that nothing read, so it could only drift.
+
+**9.10 could not be given to a program, by your own 8.3 answer.** Whether two paragraphs state one
+rule is a question about meaning. `document-check.md` is the only instrument that reads prose, so
+it gained a fourth finding type — **rules stated twice** — with the two exceptions written in:
+a delegated agent's brief copies word for word, and `CLAUDE.md` may restate a rule in its
+easy-to-break list **as long as the entry names its owning file.**
+
+### 9.11 — the first document sweep, and what it corrected in its own rule
+
+**Fifteen files moved. Nothing was deleted.** Eleven to `research/frames/superseded/` — framing
+runs `a` to `g`, both consolidated lists, `MERGED-CANDIDATES.md` and `SOURCES.md` — and four to
+`docs/superseded/`: the withdrawn area proposal, its ruling sheet, and the two run-`g` check files.
+Each carries a dated line under its title saying what superseded it; each directory has a
+`README.md` listing them.
+
+**Three files were deliberately left in place**, and the `superseded/README.md` says so:
+`FINDINGS-2026-11-07.md` and the two reorganisation files are **finished and still true**, and
+§11.1 says `superseded/` means *do not read this as current*, never *this is finished*.
+`VALIDATION-2026-11-07.md` stays too — the diagnosis supersedes two of its items, not the file.
+
+**The sweep found §11.1 too broad and it was corrected.** The rule said a file may not move while
+*another live document* still cites it. Doing that would have meant rewriting the paths inside
+`DIAGNOSIS-2026-11-07.md`, `VALIDATION-2026-11-07.md`, `POSTMORTEM-2026-11-11.md` and this
+questionnaire — **falsifying four dated records of where a file was on a date.** The clause now
+binds **live governance documents only**: `CLAUDE.md`, the five specification files, the briefs and
+every directory `README.md`. Those were all changed in the moving commit. **The directory
+`README.md` is what carries a reader from an old path to a new one**, which is why §11.1 required
+a line there from the start.
 
 ---
 

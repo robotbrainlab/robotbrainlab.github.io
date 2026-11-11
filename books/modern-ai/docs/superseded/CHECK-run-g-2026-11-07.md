@@ -1,5 +1,7 @@
 # The check for run g — written 2026-11-07, BEFORE the run's output existed
 
+> **SUPERSEDED 2026-11-12.** The pass/fail list written before run `g`'s output existed. Run `g` is superseded, so this checks a run that feeds nothing. **The practice it demonstrates stands** — writing the check before the output exists — and `../ROADMAP.md` step 4 carries it.
+
 **Why it is written first.** If I decide what counts as a pass after reading the output, I will find
 that the output passes. The floor below is the register's withheld `CARRIES` column plus the two
 known losses, fixed before there was anything to grade.

@@ -1,5 +1,7 @@
 # The inventory behind the area proposal — 63 candidates
 
+> **SUPERSEDED 2026-11-12.** The inventory of 63 candidates behind `PROPOSAL-areas-2026-11-11.md`, which is withdrawn. Both rest on the run-`g` consolidation, which is void with the source register the owner revoked. Kept as a record.
+
 > **`[2026-11-11]` Read `PROPOSAL-areas-2026-11-11.md` first.** It cuts these 63 to 12, with a
 > reason for each keep and each cut. **This file is the evidence behind that proposal**, kept so any
 > part of it can be reversed. It was first written as a sheet for the owner to rule from, when no

@@ -1,5 +1,7 @@
 # Candidate research areas — the merged evidence from four framing runs
 
+> **SUPERSEDED 2026-11-12.** Runs `a` to `d` merged: 254 distinct categories with their source counts. **Never a proposal and never comparable with a consolidated list.** This cycle's framing runs are `../2026-11-11-h.md` and `../2026-11-11-i.md`. It is input to nothing.
+
 **This is not a proposal and nothing here is recommended.** It is every category that any
 source named across four independent runs of `../../docs/briefs/TEMPLATE-area-frame.md`, with
 how many sources named it and which kinds of source. **The cut is proposed by Claude and ruled on by the owner** (`../../docs/GOAL.md` §3.3) — `[2026-11-11]`, this said the cut was the owner's, which left him an inventory and no recommendation (`ROADMAP.md`

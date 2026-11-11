@@ -1,5 +1,7 @@
 # Proposed areas for the book — 12, from the 63 candidates
 
+> **SUPERSEDED 2026-11-12, and WITHDRAWN 2026-11-11.** The first area proposal, 63 candidates cut to 12. **It must not be ruled on.** It cut the best-attested area in the register and five further groups of subjects without naming them, which is what `briefs/area-proposal.md` was then written to prevent. Its input, the run-`g` consolidation, is void as well.
+
 > # ⚠ WITHDRAWN — do not rule on this
 >
 > **`[2026-11-11, evening]` This proposal does not meet `briefs/area-proposal.md`**, the brief

@@ -239,12 +239,12 @@ EXPIRE → RESEARCH → CONFIRM → SELECT → PLAN → WRITE → VERIFY → CLO
 |---|---|---|
 | **Expire** | Every claim past its `review_by` is re-verified and becomes `verified`, `contested` or `superseded`. **A superseded claim names its dependent chapters, and only those reopen.** `tools/verify-expiry.py` must be clean before the next stage begins. **Who re-verifies depends on the claim — §5.3.** **The owner also re-drills earlier chapters here** (`../practice/README.md`): the stage that asks what is still true is the right one to ask what is still known | Owner, for load-bearing claims |
 | **Research** | One scout per area, fixed brief schema, delegation depth 0. Output: candidate **subjects**, each a complete unit, plus claims with sources | — |
-| **Confirm** | Every scout claim becomes a `CLAIMS.tsv` row (§5.1). **Then `briefs/claim-verifier.md` runs on each claim whose `maturity_basis` is `provisional` and which a candidate chapter would rest on** — because a chapter may not rest on an unestablished maturity, and nothing else in the cycle discharges that | — |
+| **Confirm** | Every scout claim becomes a `CLAIMS.tsv` row (§5.1), **to `briefs/confirm-claims.md`** `[2026-11-12]`. **Then `briefs/claim-verifier.md` runs on every row whose `maturity_basis` is `provisional`** — because a chapter may not rest on an unestablished maturity, and nothing else in the cycle discharges that. `[STATED 2026-11-12]` This used to read *"and which a candidate chapter would rest on"*, **which could not fire**: what a chapter rests on is `dependents`, empty until CLOSE, and SELECT and PLAN have not run. At CONFIRM every researched subject is still a candidate, so "every provisional row" is what the old wording already meant. Verification stays ahead of SELECT, which reads a claim's state to judge its subject | — |
 | **Select** | **I sort first, he rules.** Every subject is scored against the three tests (`GOAL.md` §10) and he receives **what passed, and every rejection with the test it failed and the record's own words for why** — not forty raw records of thirty-one fields each. **Tests 2 and 3 are mechanical**: the research reports `LIVE RESEARCH` and `BUILDABLE` directly. **Test 1 is judgement**, so my reading of it is stated with the quote it rests on, and he can overturn any rejection without reading the rest | **Owner** |
 | **Plan** | Subjects become chapters. Ownership assigned. Structure chosen *now*, from the subjects that exist — never before (`GOAL.md` §5.3). Acceptance questions written **before** drafting | **Owner** |
 | **Write** | One chapter. Six steps, §6 | — |
 | **Verify** | Four passes (§7). **Pass 3 re-runs the chapter's lab, so a lab that costs money costs it again here** — `briefs/pass-3-lab.md` carries a spend limit and takes the chapter's smaller run where one exists | — |
-| **Close** | Record hashed, ledgers updated, claims' `dependents` filled, operation rows written for the changelog. **`[STATED 2026-11-11]` The document sweep also runs here** — one pass over `docs/`, `research/` and `research/frames/` moving anything this cycle superseded (§11.1) | — |
+| **Close** | Record hashed, ledgers updated, claims' `dependents` filled, operation rows written for the changelog. **`[STATED 2026-11-12]` The chapter's `owner-verifies` ids are re-opened at source here** — at most three per chapter, through `briefs/claim-verifier.md`, **before the record is hashed**. Nothing else in the chapter loop re-opens a source: `briefs/pass-1-completeness.md` reads the sources named in the record and says *"No web searches"*, so a paper corrected or withdrawn between the research and the writing would go unnoticed until the claim's review date. The owner was given three options and chose this one, because it reuses an agent that already fetches and is bounded to the claims the chapter turns on. **`[STATED 2026-11-11]` The document sweep also runs here** — one pass over `docs/`, `research/` and `research/frames/` moving anything this cycle superseded (§11.1) | — |
 
 **EXPIRE is first, and the order matters.** Put it last and the cycle eats itself: the expiry check
 would demand that stale claims be re-verified at a point before the stage that re-verifies them.
@@ -276,7 +276,7 @@ transformation, and it happens at CONFIRM**, not by a scout and not by a writer:
 |---|---|
 | `claim` `maturity` `class` | The scout's row, unchanged |
 | `source` `source_strength` `maturity_basis` | **Renamed, not changed.** The scout writes `source URL`, `strength` and `basis`; the columns are `source`, `source_strength` and `maturity_basis`. **Same vocabulary, different column names** — the brief uses short names because the row it writes has no other kind of source, strength or basis to distinguish them from |
-| `id` | Assigned here: **the area's number, a hyphen, and a zero-padded counter** — `A03-001`. A number rather than a slug, because a slug can itself contain a hyphen and then the id cannot be parsed. The area's number comes from the approved list at step 4. Never reused, never renumbered |
+| `id` | Assigned here: **the area's number, a hyphen, and a zero-padded counter** — `A03-001`. A number rather than a slug, because a slug can itself contain a hyphen and then the id cannot be parsed. The area's number comes from the approved list at step 4, **where `ROADMAP.md` step 4 now says who fixes it and when** `[STATED 2026-11-12]` — until then no stage assigned one, so no id could be formed. Never reused, never renumbered |
 | `verified_on` | **The date the claim verifier ran**, not the date the scout read it. A row the verifier has not touched leaves this empty, which is what marks it unconfirmed |
 | `review_by` | Computed from `class` and `maturity` by the policy in `GATES.md` |
 | `state` | `unverified` on arrival. Becomes `verified`, `contested` or `superseded` only through the claim verifier |
@@ -422,13 +422,26 @@ thereafter; a program that refuses to advance cannot be skipped. Four stages, an
 | `chapter.py begin NN-slug` | The chapter file already exists, or the record's `question`, `sources` or `non-scope` fields are empty. **It creates the record from `RECORD-TEMPLATE.md`**, so a chapter cannot start without one |
 | `chapter.py written NN-slug` | Any box in the *Before writing* or *While writing* sections is unticked, or is ticked with nothing after it |
 | `chapter.py reviewed NN-slug` | Any of the four pass verdicts is missing. **On success it writes the `sha256` last**, so any later edit makes the record stale and fails the record gate |
-| `chapter.py amend NN-slug "reason"` | The record is not closed, no reason is given, or the chapter has not actually changed. It appends a dated line to `amended:` and re-hashes |
+| `chapter.py amend NN-slug "reason"` | The record is not closed, no reason is given, the chapter has not actually changed, **or the amendment's own checks have not run** `[STATED 2026-11-12]`. It appends a dated line to `amended:` and re-hashes |
 
 **`amend` exists because the obvious way to change a closed chapter is dishonest.** The record
 carries the chapter's hash, so an edit makes it stale — and the quickest way past that is to
 re-hash by hand, which turns the record from evidence into decoration and leaves no trace that a
 published chapter moved. `amend` is the honest path, and the record gate checks every amendment is
 dated, reasoned, and not earlier than the review it follows.
+
+**`[STATED 2026-11-12]` An amendment also runs its own checks, and they are proportional to it.**
+Until today a finished chapter could be changed with none of the checks that applied when it was
+written — no review, and no sweep. Two now run, and no more than two:
+
+| What runs | Why that one |
+|---|---|
+| **Pass 4, fix verification** (`briefs/pass-4-fix-verification.md`), naming every changed passage | Its brief already takes *"the named changed passages as its subject, and the whole chapter for the claims they carry"*. It is the one pass built for a change rather than for a chapter |
+| **`tools/sweep.py` book-wide, back matter first**, with its before and after output pasted into the `amended:` line | §2's rule for any fix. **An error worth amending is an error that may sit elsewhere**, and the sweep is the only thing that looks |
+
+**Not every check**, because the owner was offered that and declined it: re-running the full suite
+would make a one-line correction cost what a chapter costs, which is how amending quietly stops
+happening and the dishonest re-hash comes back.
 
 ---
 
@@ -480,12 +493,12 @@ chapter" re-reads everything and finds what pass 1 already found.
 | **Adversary** | Pass 2 | No |
 | **Lab runner** | Pass 3 | No |
 | **Fix verifier** | Pass 4 | No |
-| **Document checker** | **The only agent that reads what Claude writes.** One document in `docs/` against the files it cites: citations that do not hold, contradictions with a marked decision, claims past their evidence `[2026-11-11]` | No |
+| **Document checker** | **The only agent that reads what Claude writes.** One document in `docs/` against the files it cites: citations that do not hold, contradictions with a marked decision, claims past their evidence `[2026-11-11]`, **and a rule stated in two files** `[2026-11-12]` | No |
 
 **Coordination:**
 
 - **No agent delegates.** Depth 0, everywhere. **`[STATED 2026-11-11]` A brief may not lift this,
-  and none does** — all twelve carry `DELEGATION: ZERO`. The owner asked what should happen here
+  and none does** — all thirteen carry `DELEGATION: ZERO`. The owner asked what should happen here
   and was given the argument in §4.6; the sentence used to end *"unless a brief states otherwise
   and says why"*, which made the ban something Claude could edit away in the file it was editing
   anyway. Only the owner lifts it.
@@ -686,10 +699,20 @@ today be misled?*
 (`briefs/README.md`).
 
 **Three things the sweep may not do.** It may not move a file the owner has not yet ruled on —
-that takes his decision (`GOAL.md` §11 class C). It may not move a file another live document still
-cites, until that citation is changed in the same commit. And it may not move a file into
-`superseded/` to mean *finished*: `superseded/` means **do not read this as current**, and a
-finished record that is still true stays where it is.
+that takes his decision (`GOAL.md` §11 class C). It may not move a file whose path a **live
+governance document** still gives, until that citation is changed in the same commit. And it may
+not move a file into `superseded/` to mean *finished*: `superseded/` means **do not read this as
+current**, and a finished record that is still true stays where it is — `FINDINGS-2026-11-07.md`
+and the two reorganisation files are the standing examples.
+
+**`[2026-11-12]` Which citations must change, because the first sweep found this clause too
+broad.** A live governance document is one a session navigates by: `../CLAUDE.md`, `GOAL.md`,
+`GUIDE.md`, this file, `GATES.md`, `ROADMAP.md`, the briefs, and every directory's `README.md`.
+**Those are changed in the moving commit. A dated record is not** — a diagnosis, a validation, a
+postmortem, a findings file or an answered questionnaire **recorded where a file was on a date**,
+and rewriting its paths would falsify the record it exists to be. **The directory `README.md` is
+what carries a reader from the old path to the new one**, which is why §11.1 requires a line there
+for every move.
 
 ---
 

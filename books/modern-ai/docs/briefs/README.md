@@ -10,6 +10,7 @@ in a growing block at the top of a brief an agent has to read past.
 | `TEMPLATE-area-frame.md` | **Framer** — report the categories the field files its work under, faithfully and without filtering | **At step 4, one run and not two** `[2026-11-07]`, in a fresh session outside this repository, before any scout. **How often framing happens at all is `../PROCESS.md` §5's** — at step 4, then only on an approved `RECARVE`, not every cycle |
 | `TEMPLATE-area-consolidate.md` | **Consolidator** — turn the framers' records into one candidate area list: classify, merge, pick one level | At step 4, **once**, after the framing run and before the owner rules. Same cadence as the framer, and `../PROCESS.md` §5 owns it |
 | `TEMPLATE-area-research.md` | **Scout** — find the subjects in one area | Research stage, one per approved area |
+| `confirm-claims.md` | **Claim confirmer** — every scout claim to a `../CLAIMS.tsv` row, then every provisional row verified | CONFIRM, after the research and before SELECT, which reads a claim's state to judge its subject. **Not delegated**: Claude works to it in the main session |
 | `select-subjects.md` | **Subject selector** — every researched subject to `CHAPTER`, `SHORT-ENTRY` or `REJECT`, against `../GOAL.md` §10's three tests | SELECT, after the research and before `PLAN.md`. **Not delegated**: test 1 is judgement |
 | `plan-chapters.md` | **Chapter planner** — approved subjects to `PLAN.md` rows, and what each chapter must contain | PLAN, after SELECT. **Not delegated** |
 | `claim-verifier.md` | **Claim verifier** — re-check one claim at source, adversarially | **Three occasions, and the brief owns the list** — at CONFIRM, at EXPIRE, and whenever a claim is challenged. `[2026-11-11]` This row named two and dropped CONFIRM, which the brief itself calls the one easily forgotten |
@@ -18,7 +19,7 @@ in a growing block at the top of a brief an agent has to read past.
 | `pass-3-lab.md` | **Lab runner** — run the lab from the chapter text alone | After pass 2 |
 | `pass-4-fix-verification.md` | **Fix verifier** — the changed passages as its subject, the whole chapter as its search | Last |
 | `area-proposal.md` | **Area proposer** — which of the candidate areas the book covers, with what every cut costs | Step 4 part 3, after the consolidation run and before the owner rules. **Not delegated**: Claude works to it in the main session |
-| `document-check.md` | **Document checker** — the only instrument that reads what Claude writes: citations that do not hold, contradictions with a marked decision, claims past their evidence | Before any document in `../` is called finished, and after any rule change |
+| `document-check.md` | **Document checker** — the only instrument that reads what Claude writes: citations that do not hold, contradictions with a marked decision, claims past their evidence, **and a rule stated in two files** `[2026-11-12]` | Before any document in `../` is called finished, and after any rule change |
 
 **The writer has no brief here.** Writing a chapter is the six-step loop in `../PROCESS.md` §6, done
 in the main session with the sources open, not delegated.
@@ -63,7 +64,7 @@ reporter's cannot.**
 
 **`[2026-11-11]` That has now been done once, so it is an observation and not only an argument.**
 The consolidation of run `g` was read back against run `g`'s own records
-(`../CHECK-consolidation-2026-11-07-g.md`, written before the output existed), and the read-back
+(`../superseded/CHECK-consolidation-2026-11-07-g.md`, written before the output existed), and the read-back
 found two things the run's own summary did not report: **32 labels it moved into appendices and
 never gave a verdict**, and **six kept areas resting on scope the source may not have
 written** (`[2026-11-11]` this said thirteen; thirteen is the number of thin-scope categories the run
@@ -103,14 +104,14 @@ sentence).
 **[AGREED 2026-11-07]** Every brief here carries this rule, because an agent cannot read this file.
 **It carries it as a `FORBIDDEN` bullet addressed to the agent, not as the sentence below** —
 `[2026-11-11]` this said "word for word", and no brief carries these words. The rule is the same in
-eight of the twelve, word for word. **The other four are not copies and should not be**, and
+eight of the thirteen, word for word. **The other five are not copies and should not be**, and
 `[2026-11-11]` an independent review was right to find the old claim of uniformity false.
 
 | Brief | How it carries the rule | Why |
 |---|---|---|
 | The eight delegated ones | **Word for word** | Their agents are forbidden from reading project files, so the rule has to travel with the brief. `../CLAUDE.md` exception 1 |
 | `document-check.md` | Adapted — adds a sentence about citations, drops two | Its whole input is project files; the dropped sentences are about sources it does not use |
-| `area-proposal.md`, `select-subjects.md`, `plan-chapters.md` | Adapted to the stage, and they **cite** the owning file | **`../CLAUDE.md` exception 1 does not apply to them.** It licenses copying *because* an agent cannot be sent to an owning document. These three are run by Claude in the main session, where the owning document is open — so citing is the correct behaviour and copying would be the second statement the one-statement rule forbids |
+| `area-proposal.md`, `confirm-claims.md`, `select-subjects.md`, `plan-chapters.md` | Adapted to the stage, and they **cite** the owning file | **`../CLAUDE.md` exception 1 does not apply to them.** It licenses copying *because* an agent cannot be sent to an owning document. These three are run by Claude in the main session, where the owning document is open — so citing is the correct behaviour and copying would be the second statement the one-statement rule forbids |
 
 **The exception's premise, stated plainly so it is not misread again:** a brief copies a rule
 because its agent cannot go and read it. A stage that *can* read it cites it instead. The rule
@@ -154,6 +155,6 @@ finding drawn from these three.
 > If unsure, say so rather than asserting. **A wrong finding costs more than a missed one.**
 
 A missed finding costs one defect. A wrong finding costs a verification, an argument, and sometimes
-a change that makes the chapter worse. **It is in all twelve**, including the framer, the consolidator, the area proposer, the subject selector, the chapter planner, the
+a change that makes the chapter worse. **It is in all thirteen**, including the framer, the consolidator, the area proposer, the claim confirmer, the subject selector, the chapter planner, the
 claim verifier, the lab runner and the document checker, because an agent reporting a verdict it has
 not earned is the same failure wherever it happens.

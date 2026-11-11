@@ -1,5 +1,7 @@
 # The check for the consolidation of run g — written BEFORE its output existed
 
+> **SUPERSEDED 2026-11-12.** The check of the run-`g` consolidation, which is void. Kept as a record of what that check found.
+
 **Input:** `research/frames/2026-11-07-g.md`, 283 units plus the labels in its Appendix A.
 **The file is not edited before the run.** It is evidence, and a defect found in it is reported, not
 patched away.

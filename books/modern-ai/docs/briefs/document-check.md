@@ -13,8 +13,15 @@ error is the reasoning that would review it. **This run is given the document an
 cites, and none of the reasoning behind it**, on purpose.
 
 **What it is not.** It is not a reviewer of quality, style, structure or whether the argument is
-good. **It answers three mechanical questions**, and anything outside them is out of scope — a
+good. **It answers four mechanical questions**, and anything outside them is out of scope — a
 longer remit would make it a second author.
+
+**`[STATED 2026-11-12]` The fourth question was added by the owner.** The rule *"a rule may be
+cited from several files; it may be stated in only one"* had nothing checking it, and an
+independent review found seven cases where one rule had drifted into different wordings. **A
+program cannot do this**: whether two paragraphs state the same rule is a question about meaning,
+and the owner's own answer forbids automation from judging content (`README.md`). **This is the
+only instrument that reads prose**, so it is the only place the check can live.
 
 ## How to fill this in
 
@@ -42,7 +49,7 @@ elsewhere, or generalise beyond the evidence it names?
 
 **WHAT TO DO**
 
-Read `<DOCUMENT>` in full. Then read every file in `<CITED-FILES>` in full. Then report **three
+Read `<DOCUMENT>` in full. Then read every file in `<CITED-FILES>` in full. Then report **four
 things and nothing else.**
 
 1. **Citations that do not support the sentence citing them.** For every citation in the document —
@@ -70,6 +77,25 @@ things and nothing else.**
    names, and what it would take to support it. **"Two runs did X" does not support "the method does
    X."**
 
+4. **Rules stated twice.** `[STATED 2026-11-12]` **One rule, one owning file.** Report every rule
+   that `<DOCUMENT>` *states* and a file in `<CITED-FILES>` also *states*. Quote both. **State the
+   rule in your own words once, so the owner can see they are the same rule** — the whole failure
+   is that two statements of one rule drift into different wordings, so matching the words is
+   exactly what does not work here.
+
+   **Stating is not citing.** *"A superseded document moves to `superseded/` (`PROCESS.md`
+   §11.1)"* is a citation and is correct. A paragraph that explains when and why a document moves,
+   in a file that is not `PROCESS.md`, is a second statement and is the finding. **A summary of a
+   rule is a second statement of it.**
+
+   **Two exceptions, and do not report either:**
+   - **A brief whose agent may not read project files** carries its rules copied word for word,
+     because it cannot be sent to the owning document. Word for word is the test: an *adapted*
+     wording in such a brief is still a finding.
+   - **`CLAUDE.md`** may restate the rules in its own "rules that are easy to break" list, because
+     its job is to be read first and in full. Each entry there names its owning file; **an entry
+     that names none is a finding.**
+
 **OUTPUT**
 
 ```
@@ -87,6 +113,11 @@ conflict. "None found" if none.
 One entry each: the claim quoted; how many instances the document names; and
 what would support it. "None found" if none.
 
+## Rules stated twice
+One entry each: the rule in your own words; the document's statement quoted;
+the other file's statement quoted, with file and section; and whether either
+is an exception. "None found" if none.
+
 ## What I could not check
 Every citation you could not resolve, and why. Every file in the list you
 could not read in full, and how much of it you read. Any project file in your
@@ -97,8 +128,8 @@ context that was not given to you, named, with what it told you.
 
 **TARGET**
 
-**Three lists, and nothing else.** There is no target number of findings, and **"None found" on all
-three is a real and expected result** — say it plainly rather than manufacturing a finding to look
+**Four lists, and nothing else.** There is no target number of findings, and **"None found" on all
+four is a real and expected result** — say it plainly rather than manufacturing a finding to look
 useful.
 
 **BUDGET**
@@ -114,7 +145,7 @@ check*, not chased.
   every question in this brief is about meaning. Where you do run a search or a count, it is a
   **hint about where to read** and never the finding itself. **A citation is checked by opening the
   cited place, never by matching the section number.**
-- **Reviewing the document's quality, style, structure, length or usefulness.** Three questions,
+- **Reviewing the document's quality, style, structure, length or usefulness.** Four questions,
   nothing else. A good argument with a bad citation is a finding; a weak argument with sound
   citations is not.
 - **Proposing rewrites, fixes or better wording.** You report what does not hold. What to do about
@@ -133,7 +164,7 @@ that does not is worse than none, because it will be read as a clean bill.
 **STOPPING RULE**
 
 Stop when every citation in the document has been resolved or reported as unresolvable, every cited
-file has been read in full or reported as unfinished, and the three lists are written. **There is
+file has been read in full or reported as unfinished, and the four lists are written. **There is
 nothing to search for, so there is no reason to continue past that point.**
 
 **IF UNSURE, SAY SO RATHER THAN ASSERTING. A WRONG FINDING COSTS MORE THAN A MISSED ONE.** A

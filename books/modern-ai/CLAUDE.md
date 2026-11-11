@@ -29,7 +29,7 @@ Then read only what that step needs:
 | `docs/CLAIMS.tsv` | **Every claim a scout returns**, with its source, strength, maturity and review date — not only the load-bearing ones (`docs/PROCESS.md` §4.1). **Empty** |
 | `docs/briefs/` | One brief per agent role. Fill one in; do not rewrite it |
 | `records/` `data/` | The per-chapter records and the labs' data. **No content yet; each holds a `README.md` saying what goes in it** |
-| `research/` | What the research returned. **`frames/` holds the framing runs and the consolidated candidate lists — 12 files, about 14,600 lines.** It also holds `SOURCES.md`, the source register, **which the owner revoked on 2026-11-11: it is a record and may not be given to any run** (`docs/GOAL.md` §3.3). One scout has run — a validation run of its brief, on an area the owner has not approved (`research/README.md`) |
+| `research/` | What the research returned. **`frames/` holds this cycle's two framing runs** — `2026-11-11-h.md` and `2026-11-11-i.md`, about 4,400 lines, not yet consolidated. **`frames/superseded/` holds the other eleven runs and lists** `[2026-11-12]`, each with a dated line saying what superseded it; **it is input to nothing**, and that includes `SOURCES.md`, the source register the owner revoked on 2026-11-11 (`docs/GOAL.md` §3.3). One scout has run — a validation run of its brief, on an area the owner has not approved (`research/README.md`) |
 | `practice/` | **The only record of what the owner has worked through.** `DRILL.tsv` holds the drill outcome per question. **It may be read to judge the book and the pace, never to judge the reader** — `practice/README.md` owns that rule |
 
 ## Precedence, when two documents disagree
@@ -48,15 +48,18 @@ ordering exists to arbitrate.
 
 **A rule may be cited from several files; it may be stated in only one.** A second statement is a
 defect while the two still agree, because they will drift. Cite the owning file and section.
+**`[STATED 2026-11-12]` `docs/briefs/document-check.md` checks this**, as its fourth finding type.
+It had no instrument until then, and an independent review found seven drifted wordings. **A
+program cannot do it** — whether two paragraphs state one rule is a question about meaning.
 
 **Two exceptions, because without them the rule cannot be obeyed:**
 
 1. **A brief in `docs/briefs/` whose agent cannot read project files is self-contained.** That
    agent cannot be sent to an owning document, so its brief may carry any rule or vocabulary it
    needs — **copied word for word, never summarised**, so a drift is a difference anyone can see.
-   **`[2026-11-11]` Four of the twelve briefs are run by Claude in the main session**, where the
-   owning document is open: `area-proposal.md`, `select-subjects.md`, `plan-chapters.md` and
-   `document-check.md`. **The premise does not hold for them, so they cite rather than copy** — and
+   **`[2026-11-12]` Five of the thirteen briefs are run by Claude in the main session**, where the
+   owning document is open: `area-proposal.md`, `confirm-claims.md`, `select-subjects.md`,
+   `plan-chapters.md` and `document-check.md`. **The premise does not hold for them, so they cite rather than copy** — and
    a copy in one of those would be the second statement this rule forbids
    (`docs/briefs/README.md`).
 2. **This file may state the rules easiest to break**, in the list below, because its job is to be

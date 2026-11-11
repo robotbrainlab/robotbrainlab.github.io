@@ -307,7 +307,8 @@ it any less flawed."*
 **His reasoning, which stands on its own:** a fixed list of sources decides what can be found. That
 makes it scope, not method, and a later run inheriting it is not an independent reading of the field
 — it is a re-reading of one earlier run's idea of where the field lives. **This supersedes the
-`[AGREED 2026-11-07]` decision to adopt `research/frames/SOURCES.md` as a binding register.**
+`[AGREED 2026-11-07]` decision to adopt the source register, now
+`research/frames/superseded/SOURCES.md`, as binding.**
 
 **What this costs, recorded rather than argued away.** The register was built because six
 independent runs produced six incomparable lists: only two sources were common to all six, four
@@ -318,7 +319,8 @@ unavailable to the next, which hit the same block and called it the biggest hole
 intersected.** That is a worse trade on efficiency and a better one on independence, and it is the
 owner's to make.
 
-**`research/frames/SOURCES.md` is kept as a record of what six runs found and is given to no run.**
+**`research/frames/superseded/SOURCES.md` is kept as a record of what six runs found and is given
+to no run.** `[2026-11-12]` It moved there in the first document sweep (`PROCESS.md` §11.1).
 It is evidence about dates and routes; it is not an input, and nothing may paste it into a brief.
 
 **[AGREED 2026-11-06] How this reconciles with the overview the owner asked for.** §10 records his

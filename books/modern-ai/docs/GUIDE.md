@@ -228,6 +228,18 @@ written to be followed and corrected, not to be derived again from somewhere els
    chapter.
 9. **`> **You understand this when** …`** — one sentence.
 10. **`## Claims`** — every load-bearing claim in the chapter, with its `CLAIMS.tsv` id.
+11. **`## What this chapter does not cover`** — `[STATED 2026-11-12]` two to five lines, from the
+    record's `non-scope` field, naming what was left out **and which of the three it was**: it
+    belongs to another chapter (name it), the research did not reach it (say so), or it did not fit
+    (say that plainly).
+
+    **Why it is on the page and not only in the record.** `non-scope` has always existed, for the
+    reviewer, so that review has an edge. The reader never saw it. **The reader here is the owner**,
+    working alone, and a subject reaches this book through a six-subject cap per area and a word
+    budget — so without this part he cannot tell a subject the book covered fully from one it
+    covered as far as it got. **A drill question he cannot answer then reads as his gap rather than
+    the book's**, which `../practice/README.md` exists to prevent. He was offered the record-only
+    option and chose this.
 
 ### The rule that governs the body
 

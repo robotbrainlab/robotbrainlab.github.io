@@ -132,7 +132,8 @@ the printed precision.
 **Reads:** `records/*.md` and the chapters they name.
 **Fails on:** any unticked box; any ticked box with no evidence after it; a missing review verdict;
 a `sha256` that does not match the chapter; stages dated out of order; an amendment that is
-undated, unreasoned, or earlier than the review it follows.
+undated, unreasoned, or earlier than the review it follows; **`[2026-11-12]` an amendment with no
+pass-4 verdict and no sweep output after it** (`PROCESS.md` §6.1).
 **Why the hash is last:** editing one character of a closed chapter makes its record stale, so a
 published chapter cannot move without leaving a trace. **The honest way to change a closed chapter
 is `amend`**, whose refusals are specified in `PROCESS.md` §6.1. What this gate adds is the check

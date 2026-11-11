@@ -18,5 +18,6 @@ is evidence about the brief and not about the area.** `[2026-11-11]` This paragr
 run while that file sat in this directory.
 
 `frames/` holds the framing runs and the consolidated candidate list that step 4 rules on. It also
-holds `SOURCES.md`, the source register — **revoked 2026-11-11, kept as a record of what six runs
+holds `frames/superseded/`, which has its own `README.md` and is input to nothing. Among its
+eleven files is `SOURCES.md`, the source register — **revoked 2026-11-11, kept as a record of what six runs
 found, and given to no run** (`../docs/GOAL.md` §3.3).

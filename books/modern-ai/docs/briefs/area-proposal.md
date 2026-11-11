@@ -71,6 +71,12 @@ apply it.**
 NAME            as the consolidation named it. Not a name you coined
 DECISION        KEEP | FOLD INTO <area> | CUT
 ATTESTED BY     carried forward from the consolidation, not recomputed
+COVERS          what work goes in this area, carried forward from the consolidation's
+                COVERS. `[STATED 2026-11-12]` Required on a KEEP and a FOLD, because
+                the scout's <SCOPE> is written from the approved list and nothing else
+                carries it. Required on a CUT too: it is what the cut removes
+EXCLUDES        what goes to a neighbouring area instead, carried forward the same way.
+                The scout's <EXCLUDED> is written from these, all areas in one sitting
 WHY             the clause of §1.1 or §3.1 it serves or fails, in one sentence
 ABSORBS         for a FOLD: every name and subject this takes in
 CARRIES FORWARD for a FOLD: what of the absorbed area survives under the new name

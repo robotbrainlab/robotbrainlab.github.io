@@ -1,5 +1,7 @@
 # Consolidated candidate areas — `modern artificial intelligence`
 
+> **SUPERSEDED 2026-11-12.** Run `g` consolidated: 63 areas from 283 categories. **Void with run `g`** — the owner revoked the source register those 283 came from, and confirmed on 2026-11-12 that the 283 and the 63 are history. This cycle's framing runs are `../2026-11-11-h.md` and `../2026-11-11-i.md`. It is input to nothing.
+
 Consolidation run `g`, 2026-11-07. Input: `frame-g.md` (283 category records, 19 sources, two
 appendices), read in full. No searches, no fetches, no evidence added. Every verdict is from the
 records.

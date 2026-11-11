@@ -1,5 +1,7 @@
 # Consolidated candidate areas — runs E and F judged against one rule
 
+> **SUPERSEDED 2026-11-12.** Runs `e` and `f` consolidated: 181 records, 69 of them areas. This cycle's framing runs are `../2026-11-11-h.md` and `../2026-11-11-i.md`. Kept as a record; it is input to nothing.
+
 Consolidation run, 2026-11-07. Input: `2026-11-07-e.md` (104 category records) and
 `2026-11-07-f.md` (77 category records) — **181 records, each given exactly one verdict**.
 No source was fetched, no search was run, and no category was added that neither run reported.
