@@ -46,6 +46,9 @@
 \newcommand{\symdv}[1]{\begingroup\edef\@tempa{\f@family}\edef\@tempb{\ttdefault}%
   \ifx\@tempa\@tempb #1\else\ifx\@tempa\diagram@family #1\else{\dejavufont #1}\fi\fi\endgroup}
 \makeatother
+% The shared build folder (books/latex), passed in by the shared Makefile.
+\providecommand{\BookShared}{../latex}  % every book sits at books/<slug>/
+
 % Emoji (colour, drawn from Apple Color Emoji into assets/emoji/<codepoint>.png).
 % Add a line here, and the PNG, for any new emoji a book uses.
 \newcommand{\emoji}[1]{\raisebox{-0.12em}{\includegraphics[height=0.95em]{assets/emoji/#1.png}}}
@@ -101,7 +104,11 @@
 \newcommand{\indexchapter}[1]{\titlespacing*{name=\chapter, numberless}{0pt}{24pt}{23pt}\chapter*{#1}}
 \indexsetup{level=\indexchapter, headers={\MakeUppercase{\indexname}}{\MakeUppercase{\indexname}}}
 
-\graphicspath{{../markdown/}{./}}      % images are referenced relative to the Markdown folder
+\graphicspath{{markdown/}{./}{\BookShared/}}
+% [2026-11-11] Was {{../markdown/}{./}}, correct when book.tex lived in the book's own
+% latex/ folder. It now sits at the book root, so the Markdown is ./markdown/. The third
+% entry is books/latex/, which holds the shared assets/emoji set; a book that needs its own
+% emoji keeps an assets/ folder and {./} finds it first.
 \floatplacement{figure}{H}             % figures stay where the author put them
 \renewcommand{\thefigure}{\thechapter-\arabic{figure}}
 % pandoc wraps images in \pandocbounded: shrink to the text width, never enlarge

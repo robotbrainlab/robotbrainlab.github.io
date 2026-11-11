@@ -22,7 +22,7 @@ AskUserQuestion tool):
 1. **Changing the HTML look.** This means the restyle to the reference design; content stays letter-for-letter.
 2. **Working on the website.** This means content, pages, links, books, the roadmap sources, publishing.
 3. **Writing the interview-prep book.** The book in `books/interview-prep/`. It has nothing to do with the
-   website and governs itself — go straight to `books/interview-prep/HANDOVER.md` and `books/interview-prep/BOOK-GUIDE.md`
+   website and governs itself — go straight to `books/interview-prep/docs/HANDOVER.md` and `books/interview-prep/docs/BOOK-GUIDE.md`
    and follow those, not this file. **That book is finished** (2026-10-31, all 57 chapters and
    Appendix B); a session here is an edit to it, not drafting.
 4. **The two books that come after it** — Python, and Core Machine Learning and Deep Learning.

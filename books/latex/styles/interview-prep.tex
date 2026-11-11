@@ -115,7 +115,11 @@
 \newcommand{\indexchapter}[1]{\titlespacing*{name=\chapter, numberless}{0pt}{24pt}{23pt}\chapter*{#1}}
 \indexsetup{level=\indexchapter, headers={\MakeUppercase{\indexname}}{\MakeUppercase{\indexname}}}
 
-\graphicspath{{../markdown/}{./}}      % images are referenced relative to the Markdown folder
+\providecommand{\BookShared}{../latex}  % every book sits at books/<slug>/
+\graphicspath{{markdown/}{./}{\BookShared/}}
+% [2026-11-11] Was {{../markdown/}{./}}, correct when book.tex lived in this book's own
+% latex/ folder. It is at the book root now, so the Markdown is ./markdown/, and the shared
+% assets/emoji set is in books/latex/.
 \floatplacement{figure}{H}             % figures stay where the author put them
 \renewcommand{\thefigure}{\thechapter-\arabic{figure}}
 % pandoc wraps images in \pandocbounded: shrink to the text width, never enlarge

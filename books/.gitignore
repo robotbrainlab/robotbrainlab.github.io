@@ -1,0 +1,23 @@
+# Build output, for every book. One rule instead of one .gitignore per book.
+#
+# The Markdown is the source. chapters/ and generated/ are produced from it by
+# `make -C books/latex BOOK=<slug> convert`, and book.pdf by `... pdf`, so none of it
+# belongs in the repository.
+#
+# The ONE exception is complete-software-engineering-guide/chapters/: that book has no
+# Markdown in this repository and nothing can regenerate those files, so they are its
+# source and are force-added. See books/README.md.
+chapters/
+generated/
+book.pdf
+book.aux
+book.log
+book.toc
+book.out
+book.fls
+book.fdb_latexmk
+book.xdv
+book.idx
+book.ilg
+book.ind
+book-tectonic.pdf

@@ -296,8 +296,8 @@ git log --oneline e8aadd3 -- markdown/05-where-the-work-goes.md
 
 | Read | For |
 | --- | --- |
-| `books/interview-prep/HANDOVER.md` | Every decision with its reason, the current state, what is blocked |
-| `books/interview-prep/BOOK-GUIDE.md` | Scope, the maths boundary, style, the five-step writing loop, the gates |
+| `books/interview-prep/docs/HANDOVER.md` | Every decision with its reason, the current state, what is blocked |
+| `books/interview-prep/docs/BOOK-GUIDE.md` | Scope, the maths boundary, style, the five-step writing loop, the gates |
 | `books/interview-prep/TOC.md` | All 57 chapters and 4 appendices, and who owns which concept |
 | `books/interview-prep/LEDGER-TAUGHT.md` | What each finished chapter taught, and what a later chapter must not re-introduce |
 | `books/interview-prep/LEDGER-DEFECTS.md` | 20 entries of what the gates cannot catch. Read before writing a chapter |
