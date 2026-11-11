@@ -10,6 +10,8 @@ in a growing block at the top of a brief an agent has to read past.
 | `TEMPLATE-area-frame.md` | **Framer** — report the categories the field files its work under, faithfully and without filtering | **At step 4, one run and not two** `[2026-11-07]`, in a fresh session outside this repository, before any scout. **How often framing happens at all is `../PROCESS.md` §5's** — at step 4, then only on an approved `RECARVE`, not every cycle |
 | `TEMPLATE-area-consolidate.md` | **Consolidator** — turn the framers' records into one candidate area list: classify, merge, pick one level | At step 4, **once**, after the framing run and before the owner rules. Same cadence as the framer, and `../PROCESS.md` §5 owns it |
 | `TEMPLATE-area-research.md` | **Scout** — find the subjects in one area | Research stage, one per approved area |
+| `select-subjects.md` | **Subject selector** — every researched subject to `CHAPTER`, `SHORT-ENTRY` or `REJECT`, against `../GOAL.md` §10's three tests | SELECT, after the research and before `PLAN.md`. **Not delegated**: test 1 is judgement |
+| `plan-chapters.md` | **Chapter planner** — approved subjects to `PLAN.md` rows, and what each chapter must contain | PLAN, after SELECT. **Not delegated** |
 | `claim-verifier.md` | **Claim verifier** — re-check one claim at source, adversarially | **Three occasions, and the brief owns the list** — at CONFIRM, at EXPIRE, and whenever a claim is challenged. `[2026-11-11]` This row named two and dropped CONFIRM, which the brief itself calls the one easily forgotten |
 | `pass-1-completeness.md` | **Completeness reviewer** | After a chapter is written |
 | `pass-2-claims.md` | **Adversary** — every claim against its recorded strength | After pass 1's fixes |
@@ -78,6 +80,12 @@ into `CLAIMS.tsv` rows (`../PROCESS.md` §5.1). This is that pattern applied to 
 **Four slots are in every brief here**, because each fails silently when left out: `OUTPUT`,
 `BUDGET`, `STOPPING RULE` and `DELEGATION`.
 
+**`[2026-11-11]` Three briefs bind a stage Claude runs in the main session** — `area-proposal.md`,
+`select-subjects.md` and `plan-chapters.md`. They are record-producing and bounded by their input's
+own total, which each states before it starts. **Not being delegated is why they need a brief, not
+a reason to go without one**: each is a stage that reduces researched material, and
+`../LEDGER-DEFECTS.md` entry 5a is what an unbriefed reducing stage costs.
+
 **The rest are per brief, and there are three kinds here:**
 
 | Kind | Which | Slots |
@@ -95,9 +103,18 @@ sentence).
 **[AGREED 2026-11-07]** Every brief here carries this rule, because an agent cannot read this file.
 **It carries it as a `FORBIDDEN` bullet addressed to the agent, not as the sentence below** —
 `[2026-11-11]` this said "word for word", and no brief carries these words. The rule is the same in
-all ten; `document-check.md`'s copy adds one sentence about citations and drops two. **A drift is
-still visible, because the bullets are near-identical to each other**, which is what the word-for-word
-rule in `../CLAUDE.md` exists for:
+eight of the twelve, word for word. **The other four are not copies and should not be**, and
+`[2026-11-11]` an independent review was right to find the old claim of uniformity false.
+
+| Brief | How it carries the rule | Why |
+|---|---|---|
+| The eight delegated ones | **Word for word** | Their agents are forbidden from reading project files, so the rule has to travel with the brief. `../CLAUDE.md` exception 1 |
+| `document-check.md` | Adapted — adds a sentence about citations, drops two | Its whole input is project files; the dropped sentences are about sources it does not use |
+| `area-proposal.md`, `select-subjects.md`, `plan-chapters.md` | Adapted to the stage, and they **cite** the owning file | **`../CLAUDE.md` exception 1 does not apply to them.** It licenses copying *because* an agent cannot be sent to an owning document. These three are run by Claude in the main session, where the owning document is open — so citing is the correct behaviour and copying would be the second statement the one-statement rule forbids |
+
+**The exception's premise, stated plainly so it is not misread again:** a brief copies a rule
+because its agent cannot go and read it. A stage that *can* read it cites it instead. The rule
+below is the owned wording, in this file:
 
 > **An agent reads and judges. It may not substitute a search, a pattern, a count or a lookup for
 > reading.** A pattern match tells you where a string is; it cannot tell you what the thing means.
@@ -130,6 +147,6 @@ finding drawn from these three.
 > If unsure, say so rather than asserting. **A wrong finding costs more than a missed one.**
 
 A missed finding costs one defect. A wrong finding costs a verification, an argument, and sometimes
-a change that makes the chapter worse. **It is in all ten**, including the framer, the consolidator, the area proposer, the
+a change that makes the chapter worse. **It is in all twelve**, including the framer, the consolidator, the area proposer, the subject selector, the chapter planner, the
 claim verifier, the lab runner and the document checker, because an agent reporting a verdict it has
 not earned is the same failure wherever it happens.

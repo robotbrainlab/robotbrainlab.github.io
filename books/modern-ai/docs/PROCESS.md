@@ -470,6 +470,7 @@ chapter" re-reads everything and finds what pass 1 already found.
 | **Scout** | One research area → subject units | No |
 | **Claim verifier** | Re-check one claim at source, adversarially | No |
 | *(no agent)* | **Proposing the area cut is not delegated, but it is briefed** `[2026-11-11]`. After the consolidator returns its inventory, Claude proposes which areas the book covers in the main session, working to `briefs/area-proposal.md` (`GOAL.md` §3.3). **An agent cannot make the judgement** — the criteria are §1.1's career goal and §3.1's five questions, the owner's words about his own life. **That is a reason not to delegate it, not a reason to leave it unbounded**: the first, unbriefed run cut the best-attested area in the register and lost five further subjects without naming them | — |
+| *(no agent)* | **SELECT and PLAN are not delegated, and both are briefed** `[2026-11-11]`. SELECT sorts every researched subject against `GOAL.md` §10's three tests (`briefs/select-subjects.md`); PLAN turns the approved ones into `PLAN.md` rows and decides what each chapter must contain (`briefs/plan-chapters.md`). **They are the two largest reductions in the pipeline** and ran unbounded until three independent reviews said so | — |
 | *(no agent)* | **Writing a chapter is not delegated.** It is the loop in §6, done in the main session with the sources open | — |
 | **Completeness reviewer** | Pass 1 | No |
 | **Adversary** | Pass 2 | No |

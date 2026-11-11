@@ -51,10 +51,14 @@ defect while the two still agree, because they will drift. Cite the owning file 
 
 **Two exceptions, because without them the rule cannot be obeyed:**
 
-1. **A brief in `docs/briefs/` is self-contained.** The agent filling it is forbidden from reading
-   project files, so it cannot be sent to an owning document. A brief may therefore carry any rule
-   or vocabulary its agent needs — **copied word for word, never summarised**, so a drift is a
-   difference anyone can see.
+1. **A brief in `docs/briefs/` whose agent cannot read project files is self-contained.** That
+   agent cannot be sent to an owning document, so its brief may carry any rule or vocabulary it
+   needs — **copied word for word, never summarised**, so a drift is a difference anyone can see.
+   **`[2026-11-11]` Four of the twelve briefs are run by Claude in the main session**, where the
+   owning document is open: `area-proposal.md`, `select-subjects.md`, `plan-chapters.md` and
+   `document-check.md`. **The premise does not hold for them, so they cite rather than copy** — and
+   a copy in one of those would be the second statement this rule forbids
+   (`docs/briefs/README.md`).
 2. **This file may state the rules easiest to break**, in the list below, because its job is to be
    read first and in full. Each entry names its owning file.
 
