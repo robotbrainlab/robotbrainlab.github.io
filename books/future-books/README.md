@@ -91,7 +91,6 @@ existing ones: the language. This says why he is doing it at all.
 | 18 | `[STATED 2026-11-12]` **Both books use the finished book's chapter shape, exactly** | The owner: *"we have solid information on how the book should be and the chapters should be. Follow exactly from the book already we built. I really love the book."* **So `../interview-prep/docs/BOOK-GUIDE.md` §5 “Every chapter” is the spec, copied, not reinvented**: an opening paragraph saying what the chapter gives; *The problem.* and *The question.*; the idea explained before any command or code, with an everyday picture where it helps; every new term bolded and carried into that chapter's `### Key Terms` table, which **is** the glossary; `tip` / `note` / `warning` callouts; **a lab with expected results**; then `## Summary, Key Terms, and Review Questions`, with an optional `### Worth Memorising` for numbers, defaults and formulas only, and 4–6 review questions; and `> **You understand this when** …`. Each part opens with a **“What to ignore for now”** note. **This settles two open rules at once**: the chapter shape, and whether the roadmap's projects become labs — **every chapter has a lab, so they do** | Designing a chapter shape from scratch for books whose reader has already read 57 chapters of this one |
 | 19 | `[STATED 2026-11-12]` **Everything transfers, not only the chapter — the owner overruled my recommendation** | I proposed keeping the chapter shape and leaving three things behind: Appendix B's interview bank, Part IV's four threads, and the part names. **The owner ruled against all three**: *"I would prefer having it all, the whole point is for occupation, isn't it."* **He is right, and my reason for excluding the interview bank was wrong.** Its own spec says an answer is *"what the reader should be able to say in about sixty seconds: the mechanism, the trade-off, and how they would check it"*, written **last, from the finished chapters, never from memory**. **That is an instrument for exactly the purpose at the top of this file** — it tests whether he can explain a thing without looking it up, which is what *independent problem-solving ability* means. It serves employability and understanding at once; I had treated them as alternatives. **The four threads transfer too**, asked of each book's own subject, and **the part names transfer as a default** — with one limit below | Keeping only the chapter, which was my recommendation and which he rejected |
 | 20 | `[I RECOMMEND 2026-11-12]` **The part NAMES are a default, not a constraint, and structure still follows the subjects** | Decision 19 carries Understand / Use / Apply / What Next across. **The one thing that cannot follow is the division of material into them**, because *Python*'s material arrives in the roadmap's six phases and the machine-learning book's arrives as chapter 17's list. So the names are the starting shape and the **contents decide whether they survive** — `../modern-ai/docs/GOAL.md` §5.3's rule, *structure follows the subjects*, applies here as it does there. **This is not a disagreement with decision 19**: it says when the default would have to bend, and the owner rules on that when he sees the contents | Fixing the four names before the contents exist, which chooses the shape before the material is known |
-
 | 21 | `[I RECOMMEND 2026-11-12]` **Which KINDS of topic get a short entry** | The owner asked *“for what type of topics you will do this?”* **Decision 13 is the test and it does not change: a topic is taught if anything else in the book rests on it.** A short entry is therefore never a judgement that something is unimportant — it is the statement that **nothing else here depends on it**. Five kinds come out that way, each with its own examples: **(1) A sibling the book does not build on** — another model family or another tool doing the same job. Machine learning: graph neural networks, Gaussian processes. Python: Django and Flask, which the roadmap already rules on — *“Framework collecting … pick one and go deep”*. **(2) What a source the book follows already says to skip** — Python: writing your own pytest plugin, where the roadmap says *“skip only ch. 15 (writing them)”*; the C API and metaclass authoring. **(3) What belongs to a later stage** — Python: descriptors, metaprogramming, variance and performance, which the roadmap puts in Advanced, and CPython internals, which it puts in Mastery. **(4) What cannot be built or checked on the owner's machine** — machine learning: behaviour that appears only at a scale nobody here can reach, interpretability that needs the actual weights. This is the route `../modern-ai/docs/GOAL.md` §10 already keeps open for a subject that fails the buildable test. **(5) An open research question** — which the finished book's chapter 17 already handles this way: *why depth helps* is listed as *“An open research question. Not a settled account being withheld”*. **And what is NEVER a short entry: anything another part of the book needs.** That is the test, it is a fact about the book rather than an opinion about the field, and the owner or anyone else can check it. **`[2026-11-12]` The five kinds are NOT a second rule, and saying so matters** — they are the shapes that come out when the one test above is applied, listed so the answer can be seen before the contents exist. The owner did not follow this row until it was put that way, and a reader who takes the five kinds as the rule will start sorting topics by category instead of asking the only question that counts: **does any later part of this book need it?** | Deciding it by how interesting or fashionable a topic is, which is unreviewable and is how robotics was cut |
 
 
@@ -154,6 +153,12 @@ This is the next piece of work, and it has not been done. What it has to settle:
   writing *Modern AI Engineering from Zero* was two pieces each internally sound and jointly
   contradictory. **Two books teaching attention in two registers is exactly that risk, on
   purpose.**
+  **`[STATED 2026-11-12]` Narrowed, by the owner, and no longer blocking.** He ruled that a
+  mechanism cannot differ between books — *"it's like saying 2+2 will differ in explanations"* —
+  and he is right. **What is left is vocabulary and cross-references**, not correctness: a word
+  used two ways, or one book claiming the other covers something it does not. **So this is a
+  running list kept while writing, not a document to finish first.** The section *"The two books
+  may be written IN PARALLEL"* at the end of this file holds the full ruling and the evidence.
 - **Where the mathematics boundary now sits**, since decision 5 moves it.
   `../interview-prep/docs/BOOK-GUIDE.md` §6 draws a line that the machine-learning book is meant
   to cross, so that book needs its own line drawn in its own terms.
@@ -234,8 +239,49 @@ Zero* was **two pieces each internally sound and jointly contradictory** — ins
 one author saw both. Across two books and two sessions, nothing is watching at all.
 
 **`[I RECOMMEND]`** either write the shared ledger before the second session starts, or accept
-that the two books will need a reconciliation pass afterwards and budget it. **The owner has not
-ruled on this.**
+that the two books will need a reconciliation pass afterwards and budget it. ~~**The owner has not
+ruled on this.**~~ **`[2026-11-12]` He has now ruled. The two sections below say how.**
+
+### `[STATED 2026-11-12]` SEQUENTIAL, so this hazard does not arise
+
+**The owner will write *Python* first, finish it completely, and only then start *Machine Learning
+and Deep Learning*:** *"we will start with the Python book, once Python book is completely done we
+will go to ML&DL book."* That is decision 6's order, now confirmed as the **working method** and
+not only as a dependency.
+
+**So the condition this whole section is written against is false.** It assumes *neither session
+will see the other's prose*. With sequential writing the second book is written against a finished
+first one, which its session can read.
+
+**Everything above stays, because the decision is reversible and the five shared things are still
+real.** If the two books are ever in flight at once, the five rules in that table apply as written.
+
+### `[STATED 2026-11-12]` Duplication stands — and the owner corrected my framing
+
+He was asked to rule on the shared ledger and answered with an objection instead, which was right:
+
+> *"How will the same concept differ in two books, explanation might be different, but topic is
+> same it's like saying 2+2 will differ in explanations."*
+
+**He is correct, and I had overstated the risk.** The paragraph above says each book could *"teach
+the same mechanism differently"*. **A mechanism does not differ between books.** Attention's
+arithmetic is the same arithmetic, and two books that disagreed about it would both be wrong — a
+correctness defect that ordinary checking catches, not something a ledger is needed for.
+
+**What two books can actually do is use a word two ways, or point at each other wrongly.** The
+evidence is in the finished book rather than in my judgement:
+`../interview-prep/docs/LEDGER-TAUGHT.md` carries the row *"52's **model routing** is distinct from
+**chapter 34's routing**, which is one call picking a branch; both chapters say so."* **One book,
+one author, and "routing" still had to be disambiguated by hand.** The second kind is pure
+bookkeeping: one book saying *the other covers this* when it does not.
+
+**So the shared ledger is downgraded. It is not a precondition and it blocks nothing** — it is a
+running list of terms and cross-references, kept while writing, in the form `LEDGER-TAUGHT.md`
+already uses. The first item under *The rules still to be written* is amended by this.
+
+**Recorded because this file records corrections.** I put a vocabulary risk to him as a correctness
+risk, and recommended blocking work on it. **He refused the framing before he ruled on it.** That is
+`../modern-ai/docs/GOAL.md` §11 class D — stating a claim above the strength of its evidence.
 
 ## Where this came from
 
