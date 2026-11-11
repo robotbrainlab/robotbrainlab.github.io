@@ -91,7 +91,12 @@ LOSES           what this decision removes: its BELOW children by name, any subj
 ## Disposition of every UNCLEAR  one line each. Required by the consolidation brief
 ## Borderlines inherited          the consolidation's own flagged rejections and thin merges,
                                   each with what this stage did about it
-## Arithmetic          keeps + folds + cuts + unclear = the consolidation's total
+## Arithmetic          EVERY verdict the consolidation issued, each on its own line,
+                      summing to its stated total. Areas + names merged into an area +
+                      categories filed BELOW an area + each rejection verdict + UNCLEAR.
+                      `keeps + folds + cuts + unclear` is NOT this sum: it covers the
+                      area list only, which is what the first run closed over while
+                      losing 215 of 283 categories from view
 ## What this stage could not settle
 ```
 
