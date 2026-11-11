@@ -1,0 +1,110 @@
+# Python from Zero — session instructions
+
+## This file can be out of date. The repository cannot.
+
+Where this file and the actual state of the repository disagree, **the repository wins**. Check
+what the files actually say before acting on an instruction here. Do not change the repository to
+match this file. Say that this file looks out of date, and ask.
+
+## What this is
+
+A book that teaches Python from the first program, built against the **Fundamentals stage** of the
+owner's own roadmap page at `../../data-and-intelligence/books/python-roadmap.html` — six phases,
+49 projects, three capstones. The Advanced and Mastery stages are **not** in this book.
+
+It is the **first** of the two books still to be written. `../future-books/README.md` holds every
+decision about both, and is the authority on all of them. **This file does not restate those
+decisions**; it says what a session does.
+
+**Writing is sequential.** `[STATED 2026-11-12]` Python is finished completely before *Machine
+Learning and Deep Learning* starts. Do not start the second book.
+
+## First thing in every session
+
+**Read `TOC.md`** — the contents, 51 chapters in four parts. It is approved and it has been
+reviewed. Its last section, *What the review found*, lists fourteen faults two reviews found in it
+**after** it was approved, and what was done about each. Read that section before trusting any
+other summary of this book, including this file.
+
+Then read only what the work needs:
+
+| Read | For |
+|---|---|
+| `../future-books/README.md` | Every decision, with its marker. **Nothing is a decision unless it is `[STATED]` or `[AGREED]`.** `[I RECOMMEND]` is a proposal the owner has not ruled on |
+| `../interview-prep/docs/BOOK-GUIDE.md` §5 | **The chapter shape**, copied exactly (decision 18). §5 is the spec; do not reinvent it |
+| `../interview-prep/docs/BOOK-GUIDE.md` §6, §7, §9 | The maths line, the writing style, and what a lab is |
+| `../interview-prep/docs/LEDGER-DEFECTS.md` | What the gates cannot catch. 20 entries, earned |
+| `../../data-and-intelligence/books/python-roadmap.html` | The source. **Read the HTML, not a stripped copy** — the owner asked for this specifically, and reading the stripped text once hid phase 1.5's reading list |
+
+## `[2026-11-12]` Nothing is drafted yet, and the reason is NOT the contents
+
+Decision 8 has **two** conditions: *"Nothing is drafted until **the rules are written** and the
+table of contents is approved."*
+
+**The contents are approved. The rules are not written.** `../future-books/README.md` holds them
+under *The rules still to be written*. Most of what is left there belongs to the second book or is
+already closed. **For this book one item is live:**
+
+> **Which of the finished book's gates transfer unchanged, which need changing, and which do not
+> apply.** The machinery in `../interview-prep/tools/` is reusable and is the part that took
+> longest to get right.
+
+**That is the next piece of work, and it is the last thing between this book and chapter 1.** It
+decides what test says a chapter is finished. Settle it before writing, because deciding it after
+ten chapters means re-reading ten chapters.
+
+## The rules that are easy to break
+
+- **This book points at three others rather than repeating them.** Each pointer is the owner's
+  ruling, not a convenience:
+  - ***Linux and Git from Zero*** (`../linux-and-git/`) — the shell, the editor and Git. **The
+    book teaches none of it.** `[STATED 2026-11-12]` *"make sure you point to the Linux and Git
+    Book."*
+  - ***APIs to FastAPI*** (`../apis-to-fastapi/`) — building a web service. **The book teaches
+    none of it.** `[STATED 2026-11-12]` *"We have the API book already, just point it out there
+    just like Linux and Git Book."* Part III stops at the Python a service needs.
+  - The roadmap page itself, which `[STATED 2026-11-12]` **nothing happens to.** It stays exactly
+    as it is when this book ships. Do not repoint it, do not retire it, do not propose either.
+- **Six of the 49 roadmap projects are deliberately not placed**, each with the book that owns it.
+  `TOC.md`'s header lists all six. **Never silently re-add one, and never silently drop another** —
+  an unnamed cut is `../modern-ai/docs/LEDGER-DEFECTS.md` entry 5a, the worst failure this project
+  has recorded.
+- **The language is taught twice** (decision 15). Part I gets the reader writing Python; Part II
+  returns to the same ground and explains it. **This is the mechanism, not redundancy.** Do not
+  merge the passes.
+- **Page estimates never decide scope** (decision 14). The finished book's size is permission, not
+  a target. `TOC.md` carries no page column on purpose; do not add one.
+- **One chapter at a time. Never a part at a time.** Read that chapter's roadmap sources in full
+  immediately before writing it.
+- **Read. Do not substitute a search, a pattern or a count for reading.** `../../.claude/CLAUDE.md`
+  makes this a standing rule for every session in this repository. A grep is a hint about where to
+  read, never the finding. **This rule has been broken on this book already**: the first version of
+  a decision about phase 1.5 was written from regular expressions over the roadmap page and dropped
+  SQL; the owner caught it.
+- **The owner is never handed an unrecommended list.** Propose, with a reason per item, and he
+  rules. A sorted inventory is not a proposal.
+- **An `[I RECOMMEND]` item is put to him before the first time it binds something real, named as
+  mine, and never in a batch** (`../modern-ai/docs/GOAL.md` §0, `[STATED 2026-11-12]`). Two stand
+  against this book: decision 13, the test for what is taught, and decision 21, the kinds that get
+  a one-page entry instead. `TOC.md` says where each already binds.
+- **The repository is public.** Scan for secrets before every commit. Push only to the
+  `github-robotbrainlab` remote; never as the `dlakshmizlk` account.
+
+## Style, in everything the owner reads
+
+Plain, controlled English — about 80% ASD-STE100. Short sentences. Active voice. The answer first,
+then what was done and decided, then the explanation. Tables where they carry the information
+better than prose. **No internal codes or shorthand: name things.** He asked for this directly on
+2026-11-12, including for the questions put to him.
+
+## Where things are
+
+| Path | What |
+|---|---|
+| `TOC.md` | The contents. Approved, reviewed, corrected |
+| `../future-books/README.md` | Every decision about this book and the next |
+| `../latex/` | **The shared build, which serves every book.** Treat as frozen; a book needing its own style adds `../latex/styles/python.tex`, which is additive |
+| `../README.md` | The book index |
+
+**Nothing else exists yet.** No `markdown/`, no `book.tex`, no `book-meta.tex`. `../README.md`
+describes the shape a book takes and how to start one.
