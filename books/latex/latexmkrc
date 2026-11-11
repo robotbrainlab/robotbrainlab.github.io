@@ -1,0 +1,15 @@
+# latexmk settings, shared by every book.
+#
+# [2026-11-11] This file used to sit in each book's own latex/ folder, so `tools/index.ist`
+# resolved beside it. The machinery now lives in books/latex/ while latexmk runs with the
+# book folder as its working directory, so the index style is found through BOOK_SHARED,
+# exported by the shared Makefile. Without it, fall back to this file's own folder.
+
+my $shared = $ENV{'BOOK_SHARED'};
+unless (defined $shared && -d $shared) {
+    use File::Basename;
+    $shared = dirname(__FILE__);
+}
+
+$pdf_mode = 5;                                                       # XeLaTeX
+$makeindex = "makeindex -s $shared/tools/index.ist %O -o %D %S";     # index with letter headings

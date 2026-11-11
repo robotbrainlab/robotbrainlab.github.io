@@ -12,11 +12,15 @@
 # ================================================================
 set -euo pipefail
 
-HERE="$(cd "$(dirname "$0")/.." && pwd)"                 # the latex folder
-MD="${MARKDOWN_DIR:-$HERE/../markdown}"
+# [2026-11-11] Shared by every book; lives in books/latex/tools/.
+# SHARED is where this script lives. HERE is the book being built, passed in as BOOK_DIR
+# by the shared Makefile; run by hand from inside a book folder it defaults to $PWD.
+SHARED="$(cd "$(dirname "$0")/.." && pwd)"               # books/latex
+HERE="${BOOK_DIR:-$PWD}"                                 # books/<slug>
+MD="${MARKDOWN_DIR:-$HERE/markdown}"
 if [[ ! -d "$MD" ]]; then
   echo "convert.sh: no Markdown folder at $MD" >&2
-  echo "  (layout: books/<slug>/markdown/*.md next to books/<slug>/latex/)" >&2
+  echo "  (layout: books/<slug>/markdown/*.md, build machinery in books/latex/)" >&2
   exit 1
 fi
 MD="$(cd "$MD" && pwd)"
@@ -38,7 +42,7 @@ buildset="${buildset#,}"
 
 # Syntax-highlighting macros from the series theme (tools/code.theme)
 printf '```python\nx = 1\n```\n' |
-  pandoc -f commonmark_x -t latex -s --syntax-highlighting="$HERE/tools/code.theme" |
+  pandoc -f commonmark_x -t latex -s --syntax-highlighting="$SHARED/tools/code.theme" |
   grep -E '^\\(DefineVerbatimEnvironment\{Highlighting\}|newcommand\{\\[A-Za-z]+Tok\})' \
   > "$HERE/generated/highlighting.tex"
 
@@ -49,8 +53,8 @@ FROM="commonmark_x-emoji-tex_math_dollars+implicit_figures"
 for f in "${files[@]}"; do
   stem="$(basename "$f" .md)"
   (cd "$MD" && pandoc -f "$FROM" -t latex --wrap=preserve \
-         --syntax-highlighting="$HERE/tools/code.theme" \
-         --lua-filter "$HERE/tools/filter.lua" \
+         --syntax-highlighting="$SHARED/tools/code.theme" \
+         --lua-filter "$SHARED/tools/filter.lua" \
          -M stem="$stem" -M buildset="$buildset" \
          -o "$HERE/chapters/$stem.tex" "$f")
 done
