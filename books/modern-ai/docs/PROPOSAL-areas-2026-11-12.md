@@ -7,6 +7,33 @@
 
 ---
 
+## `[STATED 2026-11-12]` THE OWNER'S RULING
+
+**He was given four questions and ruled on all four. Nothing below this line was changed to match;
+the proposal as put to him stands, and this records what he decided about it.**
+
+| # | Question | Ruling |
+|---|---|---|
+| 1 | Choose the areas now from the 47 that carry a scope statement, or read the 99 that do not first? | **Read them first.** One targeted run over the 62 named pages, then he chooses from the whole list. **This is now the next action**, ahead of any cut |
+| 2 | The twelve measurement suites: one area or twelve? | **One area, with all twelve named underneath**, so none is lost |
+| 3 | Robotics, Intelligent Robots and Control methods: one area or three? | **Keep all three. Decide after the research** says whether they are the same work under three names |
+| 4 | The five remaining same-ground pairs | **Keep apart for now**, and let the research settle each |
+
+**What rulings 2, 3 and 4 do to the count.** The consolidation issued **47** `AREA` verdicts. This
+proposal folds **3** of them as containers. Ruling 2 folds **12** more into one new area. So the
+proposed list is **33 areas**: 32 kept exactly as the consolidation named them, plus one new
+measurement area absorbing twelve. **32 + 12 + 3 = 47** — every `AREA` verdict accounted for.
+
+**Rulings 3 and 4 keep eleven rows that a tidier list would have merged.** That is deliberate and
+it is his: **keeping a pair costs one reading; merging a pair wrongly hides one of the two**, and
+the research is what will settle them with evidence rather than with a judgement nobody can check.
+
+**`[CORRECTED 2026-11-12]` This file said "41 KEEP" below. It is 44** — rows 1 to 32, plus ten
+MLPerf rows, plus AILuminate and AlgoPerf. The arithmetic section had it right at 44 and the
+heading did not. After ruling 2 the figure is **33**.
+
+---
+
 ## Criteria
 
 **`GOAL.md` §1.1 `[STATED]` — the career goal, in the owner's words.** The objective is to become a
@@ -73,7 +100,8 @@ to *judged*, and only then is a cut safe.
 
 ## Proposed areas
 
-**41 KEEP.** Every one passes `GOAL.md` §1.1 on its own row. **No area is kept or cut by a reason
+**44 KEEP as put to the owner; 33 after his ruling 2** (see the ruling, above). Every one passes
+`GOAL.md` §1.1 on its own row. **No area is kept or cut by a reason
 shared with another** — the brief forbids it.
 
 | # | Area | Sources | Why it serves §1.1 |
@@ -110,12 +138,10 @@ shared with another** — the brief forbids it.
 | 30 | Philosophical/theoretical foundations of artificial intelligence | 1 | Cognitive science and theory of mind as foundations. The smallest CCS node and the only one that is pure science |
 | 31 | cs.NE (Neural and Evolutionary Computing) | 1 | Neural networks, connectionism, genetic algorithms, adaptive behaviour — the mechanisms under capability 1 |
 | 32 | Retrieval + Search | 1 | **One of only two programme tracks in either run with a scope statement**, and the only applied area that is not a benchmark suite. Engineering of deployed AI |
-| 33–42 | The ten MLPerf suites | 1 each | Measurement of AI systems by deployment class. See the fold question |
-| 43 | AILuminate | 1 | Safety assessment of chatbot systems — measurement again |
-| 44 | AlgoPerf | 1 | What a changed training algorithm buys — measurement again |
+| 33 | **Measuring AI systems** `[STATED 2026-11-12]` | 1 | **The owner's ruling 2.** One area absorbing all twelve MLCommons suites, each named underneath so none is lost: MLPerf Training · MLPerf Training: HPC · MLPerf Inference: Datacenter · MLPerf Inference: Edge · MLPerf Inference: Mobile · MLPerf Inference: Tiny · MLPerf Endpoints · MLPerf Client · MLPerf Automotive · MLPerf Storage · AILuminate · AlgoPerf. **Evidence for the fold: one source, one body, one purpose** — measuring how fast or how safely an AI system runs. **It loses nothing**: every suite is a named child, and the two the consolidation refused to merge on a copy-pasted sentence stay distinct children rather than becoming one |
 
-*(Rows 33–44 are twelve areas; the table numbers them as a block because the fold question below
-proposes they become one. Until the owner rules, they are twelve.)*
+*(As put to the owner this was twelve rows, 33 to 44. His ruling made it one, and the twelve are
+carried as its children.)*
 
 ## Folds
 
