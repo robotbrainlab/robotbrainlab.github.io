@@ -15,10 +15,17 @@ approvals matter. **If a decision waits more than seven days I act on my recomme
 
 ## Current position
 
-**Step 4 is next. One framing run records what the field files; a consolidation run turns that into
-one candidate list; Claude proposes which of those areas the book covers, with the reason for each;
-the owner approves, redraws or rejects that proposal.** `[2026-11-11]` The third of those four was
-missing from every document until today, and its absence put an unproposed cut on the owner.
+**Step 4 is next. Two or more independent framing runs record what the field files; a consolidation
+run unions them into one candidate list; Claude proposes which of those areas the book covers, with
+the reason for each; the owner approves, redraws or rejects that proposal.** `[2026-11-11]` The
+third of those four was missing from every document until that day, and its absence put an
+unproposed cut on the owner.
+
+**`[STATED 2026-11-11]` The source register is revoked and every run is independent.** The owner
+ruled that a fixed source list decides what can be found, which makes it scope rather than method.
+**No run is given sources, routes, levels or any earlier run's output.** `GOAL.md` §3.3 carries the
+decision, what it costs, and the two things restored to pay for it: the source and search floors,
+and more than one run per cycle, unioned.
 
 **[2026-11-07] The whole chain has now been run once as a validation, and its outputs are
 disposable.** Framing twice, consolidation once, one scout, one claim verification — then every
@@ -29,30 +36,34 @@ output file read against its brief, with four source pages opened to check what 
 them is the most useful thing the validation produced.** It is in `DIAGNOSIS-2026-11-07.md`, which
 supersedes V8 and V11 of the validation file. In short: **the six framing runs were never comparable,
 because the brief told each run to choose its own sources.** Only two sources were common to all six.
-A route around a blocked page found by one run was unavailable to the next. **So the fix is not
-another brief rule — it is `research/frames/SOURCES.md`, a register of the sources themselves**,
-built from what the six runs already found. **Four things in it change what step 4 means:**
+A route around a blocked page found by one run was unavailable to the next. **The fix at the time
+was `research/frames/SOURCES.md`, a register of the sources themselves**, built from what the six
+runs had already found.
+
+**`[STATED 2026-11-11]` That register is revoked** — see the current position above and `GOAL.md`
+§3.3. The diagnosis's measurements still hold and are worth keeping, because they are what the
+restored floors exist to mitigate:
 
 1. **A framing run's losses are the only unrecoverable ones** (V13). The consolidator may add no
-   category, so what framing misses never reaches the owner.
-2. ~~**The method does not converge**~~ **— withdrawn.** I recorded non-convergence as a property of
-   the method and told the owner to union the runs across cycles forever. **It is not a property of
-   the method; it is the symptom of an unspecified input**, and the register closes it. The dated
-   files in `research/frames/` are still kept, as evidence of what the sources carried on a date —
-   not because the method cannot settle.
-3. **One framing run per cycle, not a pair.** The pair existed only to expose artefacts of a run's
-   own source choice. With a register there is no source choice, and the register's recorded contents
-   give a single run something a pair never did: **a floor it can be checked against.**
-4. **Nothing verifies a research run** (V15). The register's floor is the first check the research
-   half has ever had, and it needs no new agent and no new brief. Whether anything further is added
-   is the one open decision this validation produced.
+   category, so what framing misses never reaches the owner. **This is the reason more than one run
+   per cycle is now required, and why runs are unioned rather than intersected.**
+2. **Coverage does not accumulate between independent runs.** Run `d` found a route round a standards
+   body that run `e` then hit and gave up on, a day later, calling it the biggest hole in its list.
+   **With the register gone this can happen again**, and the owner accepted that cost for
+   independence. The search floor is what pays for it.
+3. ~~**One framing run per cycle, not a pair**~~ **— reversed.** The pair existed to expose artefacts
+   of a run's own source choice. The register removed the source choice and so removed the reason;
+   revoking the register restores both.
+4. **Nothing verifies a research run** (V15), and with the register's floor gone, **nothing does
+   again.** The source and search floors bound a run's effort, not its correctness. This is the one
+   genuinely open question in the research half.
 
 | # | Step | Who decides | Deliverable | State |
 |---|---|---|---|---|
 | 1 | Agree the goal | Owner | `GOAL.md` | **Done** |
 | 2 | Agree the method | Owner | `PROCESS.md`, `GUIDE.md`, `GATES.md` | **Partly approved.** Eight topics were settled on 2026-11-06 — grep `[AGREED 2026-11-06]` for them. The rest stay marked `[I RECOMMEND]` and are ruled on as they come up in practice |
 | 3 | Write the research brief | Claude | A brief with a capped output, a counted budget and a stopping rule with a fixed point | **Written and exercised** — `briefs/TEMPLATE-area-research.md`. **It terminates**: the validation run of 2026-11-07 stopped on its fetch limit and wrote up without starting a further record. Three defects it exposed are fixed in the brief; see `VALIDATION-2026-11-07.md` V18–V20, of which **V19 matters most — six of six verdicts came out `CHAPTER`, so three of the four verdicts have still never been issued** |
-| 4 | **Establish the research areas** | Claude proposes · **Owner rules** | One framing run over the source register records what the field files; a consolidation run turns that into one candidate list; **Claude proposes the cut against §1.1's purpose, with the reason for each keep and each cut**; the owner approves, redraws or rejects that proposal, with the reasons recorded | **Parts 1–2 done. Part 3 WITHDRAWN** `[2026-11-11, evening]` — `PROPOSAL-areas-2026-11-11.md` must not be ruled on; it lost the best-attested area in the register and five further groups of subjects. **Part 3 is run again to `briefs/area-proposal.md`.** See part 3 below |
+| 4 | **Establish the research areas** | Claude proposes · **Owner rules** | **Two or more independent framing runs**, each finding its own sources, record what the field files; a consolidation run **unions** them into one candidate list; **Claude proposes the cut against §1.1's purpose, with the reason for each keep and each cut**; the owner approves, redraws or rejects that proposal, with the reasons recorded | **Parts 1–2 must be re-run** `[STATED 2026-11-11]`: the source register is revoked, so the existing 283 categories and 63 areas came from a method the owner has withdrawn. **Part 3 is WITHDRAWN too** — `PROPOSAL-areas-2026-11-11.md` must not be ruled on; it cut the best-attested area and five further groups of subjects. See "What step 4 needs" below |
 | 5 | Run the research | Claude | One file per area in `../research/` | Not started |
 | 6 | Select the subjects | Claude sorts · **Owner rules** | What passed the three tests, and every rejection with the test it failed and why. He rules on both | Not started |
 | 7 | Decide the book's shape | **Owner** | The four open questions that need the subjects: breadth against depth, the mathematics boundary, the structure, and which area goes deep | Not started |
@@ -71,33 +82,36 @@ itself because it reads the built document.
 **Four parts, in order.** `GOAL.md` §3.3 owns the argument for the split and this document does not
 restate it.
 
-1. **One framing run**, `briefs/TEMPLATE-area-frame.md`, in a fresh session outside this repository
-   so no project file is in the agent's context, with `research/frames/SOURCES.md` pasted into the
-   brief. It reports the categories the field currently files its own work under — each with a
-   fetched source, **the level of that source's own hierarchy it was taken from**, what it excludes,
-   and what the run could not reach. **It proposes a list; it decides nothing.**
+1. **Two or more framing runs**, `briefs/TEMPLATE-area-frame.md`, each in a fresh session outside
+   this repository so no project file is in the agent's context, **each launched separately and
+   given nothing** — no sources, no routes, no levels, no earlier output. Each reports the
+   categories the field currently files its own work under, with a fetched source, **the level of
+   that source's own hierarchy it was taken from**, what it excludes, and what the run could not
+   reach. **They propose a list; they decide nothing.**
 
-   **Check it against the register before the consolidator runs.** Every source accounted for, and
-   nothing reported thinner than the register's `CARRIES` floor without a stated reason. That check
-   is reading, and it takes about an hour.
+   **Check each run against its own coverage section before the consolidator runs**, and check the
+   runs against each other. `[STATED 2026-11-11]` There is no register to check against any more,
+   so what is checkable is: did each meet the source floor of eight sources across four kinds, did
+   each account for every source it opened, and **what did one run find that the other did not?**
+   That last question is the whole reason there is more than one run. That check is reading, and it
+   takes about an hour per run.
 
-   **[2026-11-07] Done once, and it passed** — run `g`, `research/frames/2026-11-07-g.md`, 283
-   categories from all nineteen sources. Both things the earlier runs lost came back, and it found
-   three groups at a standards source that the only run ever to reach that source had missed.
-   `DIAGNOSIS-2026-11-07.md` §7 has the check in full, including the one finding against it and the
-   two floors of mine it proved wrong. **§8 records a defect in run `g` that §7's check missed** —
-   on sources that file by a bare label it wrote its own scope instead of the source's, which
-   affects about 64 of its 283 records and is fixed in the brief.
+   **`[STATED 2026-11-11]` Run `g` is superseded and parts 1 and 2 must be re-run.** Run `g` was
+   handed the nineteen registered sources and told to open exactly those. **Its 283 categories are
+   therefore what that source list contains, and the source list is the thing the owner revoked.**
+   The run was not careless — it read every source it was given — but its scope came from a previous
+   decision, which is precisely what is no longer allowed. **The same follows for the 63 areas
+   consolidated from it.**
 
-   **[2026-11-07] Part 2 is also done.** `research/frames/CONSOLIDATED-2026-11-07-g.md` — **63
-   areas** from 283 input categories, arithmetic closing exactly, no rejection on importance, every
-   area mode-tagged. `DIAGNOSIS-2026-11-07.md` §9 has the check. **Two things the owner needs before
-   he rules:** six of the 63 are kept on scope that may not be the source's, each named in
-   `DIAGNOSIS-2026-11-07.md` §9 — `[2026-11-11]` this said thirteen, which is the number of thin-scope
-   categories the run names, seven of them below an area rather than among the 63; and **32 labels in
-   run `g`'s appendices never got a verdict**, though reading all 32 shows none names a subject, because
-   that run put them outside its list and the consolidator judged the list. Both causes are fixed
-   upstream.
+   `research/frames/2026-11-07-g.md` and `CONSOLIDATED-2026-11-07-g.md` are kept as records. They
+   are not input to anything, and the next consolidation unions this cycle's runs only.
+
+   **What is worth carrying as method rather than content** — none of it names a category, so none
+   of it offends the independence rule: run `g` wrote its own scope instead of the source's on
+   sources that file by a bare label, affecting about 64 of its 283 records
+   (`DIAGNOSIS-2026-11-07.md` §8); it put 32 labels into appendices instead of the main list; and
+   the consolidation judged the main list only, so those 32 got no verdict. **All three are fixed in
+   the briefs**, and the fixes stand whatever the next runs find.
 
    **[2026-11-11, evening] Part 3 was done and is withdrawn.** `PROPOSAL-areas-2026-11-11.md` cut
    `Intelligent Robotics` — the best-attested area in the register, 10 of 19 sources — and took

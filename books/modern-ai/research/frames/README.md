@@ -1,14 +1,21 @@
 # Framing runs
 
-One file per framing run, named `YYYY-MM-DD-<run-id>.md`, plus **`SOURCES.md`, the source register —
-read that first.** It is the list of filing systems a framing run opens, and the run no longer
-chooses its own.
+One file per framing run, named `YYYY-MM-DD-<run-id>.md`, plus `SOURCES.md`.
 
-**[2026-11-07] Runs no longer come in pairs.** They did, so that "a division that is an artefact of
-whichever sources one run opened shows up as a disagreement before the owner rules". **The register
-removes the source choice, so it removes the artefact** — and it gives a single run something a pair
-never did: a recorded floor of what each page was already found to carry, which a run can be checked
-against. `../../docs/DIAGNOSIS-2026-11-07.md` has the measurement behind this.
+**`[STATED 2026-11-11]` Every run is independent and is given nothing.** No source list, no routes,
+no levels, no earlier output. Each run finds its own sources under a source floor — eight sources
+across four kinds — and a search floor of ten searches. **`SOURCES.md` is a record, not an input**:
+the owner revoked it as a register because a fixed source list decides what can be found, which
+makes it scope rather than method (`../../docs/GOAL.md` §3.3). **It may not be pasted into any
+brief**, including its routes, because a route is still a previous run's finding.
+
+**Runs come in pairs again — two or more per cycle, launched separately and unaware of each other,
+and UNIONED.** The pair exists so that "a division that is an artefact of whichever sources one run
+opened shows up as a disagreement before the owner rules". It was dropped on 2026-11-07 when the
+register removed the source choice, and **restored when the register was revoked.** A category one
+run found and another missed is still a category the field files, so the consolidator takes the
+union and never the intersection. `../../docs/DIAGNOSIS-2026-11-07.md` has the measurements that
+say what independence costs.
 
 **Run ids run `a`, `b`, `c`, `d` …** — the next unused letter. Nothing is ever deleted: a superseded
 run is still evidence of what a source carried on a date.

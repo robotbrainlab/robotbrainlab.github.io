@@ -267,7 +267,7 @@ or roadmap built for another purpose, so it carries no authority it did not earn
 
 | Who | Does what |
 |---|---|
-| **One framing run** (`briefs/TEMPLATE-area-frame.md`) | It reports the categories the field currently files its work under, each with a fetched source, the level of the source's own hierarchy it was taken from, its exclusions, and what the run could not reach. **It reads the source register `research/frames/SOURCES.md` and does not choose its own sources** — `[2026-11-07]`, `DIAGNOSIS-2026-11-07.md`. It used to be run twice, to expose artefacts of a run's own source choice; the register removes the choice and replaces the pair with a recorded floor the single run is checked against. **It proposes; it does not decide** |
+| **Two or more framing runs** (`briefs/TEMPLATE-area-frame.md`) | Each reports the categories the field currently files its work under, each with a fetched source, the level of the source's own hierarchy it was taken from, its exclusions, and what the run could not reach. **Each finds its own sources and is given nothing from any earlier run** — `[STATED 2026-11-11]`, see below. Runs are **unioned, never intersected**. **They propose; they do not decide** |
 | **A consolidation run** (`briefs/TEMPLATE-area-consolidate.md`) | Turns those records into one candidate list: every category gets a verdict, duplicates are merged, one level of resolution is picked. **It may reject a category for not being an area; never for being unimportant.** Every rejection and merge is listed with its reason. **Its output is an inventory, not a recommendation** |
 | **Claude, after the consolidation run** `[AGREED 2026-11-11]`, to `briefs/area-proposal.md` | **Proposes the cut.** Which of the candidate areas the book covers — each kept area with the reason it serves §1.1's career goal and can answer §3.1's five questions, each cut area with the reason it cannot. **Reasons, not a count**: there is no target number. **The owner is never handed an unrecommended list** |
 | **The owner** | Approves, redraws or rejects **that proposal**, with the inventory and its evidence still beside it, and the reasons are recorded with it |
@@ -296,6 +296,30 @@ need a particular author."*
 **What does not change.** The framing run is still bounded, because an unbounded one measures the
 index. Its bound is that **every boundary it proposes must name the source it came from** — a
 category with no source is the agent's invention, which is the thing the second bullet forbids.
+
+### `[STATED 2026-11-11]` Every research effort is independent. The source register is revoked.
+
+**The owner's words:** *"Every research effort must be completely independent, evaluated from
+scratch without being influenced by previous decisions, assumptions, or agreements. Even if I
+explicitly agreed to that approach earlier, it was a stupid decision, and my agreement doesn't make
+it any less flawed."*
+
+**His reasoning, which stands on its own:** a fixed list of sources decides what can be found. That
+makes it scope, not method, and a later run inheriting it is not an independent reading of the field
+— it is a re-reading of one earlier run's idea of where the field lives. **This supersedes the
+`[AGREED 2026-11-07]` decision to adopt `research/frames/SOURCES.md` as a binding register.**
+
+**What this costs, recorded rather than argued away.** The register was built because six
+independent runs produced six incomparable lists: only two sources were common to all six, four
+venues were read at different editions, and a route around a blocked page that one run found was
+unavailable to the next, which hit the same block and called it the biggest hole in its list.
+**Those costs return.** They are paid for by restoring the two things the register had replaced —
+**the source and search floors**, and **more than one run per cycle, unioned rather than
+intersected.** That is a worse trade on efficiency and a better one on independence, and it is the
+owner's to make.
+
+**`research/frames/SOURCES.md` is kept as a record of what six runs found and is given to no run.**
+It is evidence about dates and routes; it is not an input, and nothing may paste it into a brief.
 
 **[AGREED 2026-11-06] How this reconciles with the overview the owner asked for.** §10 records his
 requirement that the research report each field's estimated share, dominance, adoption and growth.

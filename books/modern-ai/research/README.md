@@ -17,5 +17,6 @@ cycle's research** — it was what exposed the three brief defects recorded as V
 is evidence about the brief and not about the area.** `[2026-11-11]` This paragraph said no scout had
 run while that file sat in this directory.
 
-`frames/` holds the framing runs, the source register and the consolidated candidate list that step
-4 rules on.
+`frames/` holds the framing runs and the consolidated candidate list that step 4 rules on. It also
+holds `SOURCES.md`, the source register — **revoked 2026-11-11, kept as a record of what six runs
+found, and given to no run** (`../docs/GOAL.md` §3.3).

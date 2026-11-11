@@ -214,12 +214,15 @@ SAMPLING        what to report about your own coverage
 1. **Completeness is per unit, and something bounds the output.** "Report fewer complete units
    rather than more incomplete ones." An instruction that only rewards thoroughness has no fixed
    point. **A cap is the usual bound and not the only one**: the framer reports every category its
-   sources name, so its bound is **the source register it is given** (`research/frames/SOURCES.md`)
-   — `[2026-11-07]` **the two floors it used to be bound by were removed** when the run stopped
-   choosing its own sources, and the register replaced them, because *every source named in it* is
-   checkable where "at least five of three kinds" never was (`briefs/TEMPLATE-area-frame.md`). The
-   consolidator's bound is its input, which is finite because the framing files are written. **A
-   brief with no cap states what bounds it in place of one.**
+   sources name, so its bound is **a source floor and a search floor** — at least eight sources
+   across at least four kinds, and at least ten searches spent finding them
+   (`briefs/TEMPLATE-area-frame.md`). **`[STATED 2026-11-11]`** These floors were removed on
+   2026-11-07, when a fixed source register replaced them, and **restored when the owner revoked
+   that register** so every run would be independent (`GOAL.md` §3.3). They are weak instruments —
+   "eight sources across four kinds" bounds effort, not correctness — and **what covers their
+   weakness is that there is more than one run and the runs are unioned.** The consolidator's bound
+   is its input, which is finite because the framing files are written. **A brief with no cap states
+   what bounds it in place of one.**
 2. **Delegation depth 0 by default.** An agent that may spawn agents has no budget.
 
 ---
@@ -465,7 +468,7 @@ chapter" re-reads everything and finds what pass 1 already found.
 
 | Agent | Job | May delegate |
 |---|---|---|
-| **Framer** | The categories the field files its work under, reported faithfully, over the source register. **One run per cycle** `[2026-11-07]` | No |
+| **Framer** | The categories the field files its work under, reported faithfully, **over sources it finds itself** under a source floor and a search floor. **Two or more runs per cycle, independent of each other and unioned** `[STATED 2026-11-11]` | No |
 | **Consolidator** | Those records → one candidate area list: classify, merge, pick one level | No |
 | **Scout** | One research area → subject units | No |
 | **Claim verifier** | Re-check one claim at source, adversarially | No |
@@ -482,9 +485,11 @@ chapter" re-reads everything and finds what pass 1 already found.
 
 - **No agent delegates.** Depth 0, everywhere, unless a brief states otherwise and says why.
 - **One chapter in flight at a time.**
-- **Scouts may run in parallel.** **There is one framing run, not two** — `[2026-11-07]`, see
-  `DIAGNOSIS-2026-11-07.md` §5.3: the pair existed to expose artefacts of a run's own source choice,
-  and the source register removes the choice. Everything after SELECT is serial.
+- **Scouts may run in parallel.** **So do the framing runs — two or more per cycle, launched
+  separately and unaware of each other** `[STATED 2026-11-11]`. The pair exists to expose artefacts
+  of a run's own source choice. It was removed on 2026-11-07 when a fixed register removed the
+  choice, and **restored when the owner revoked that register** (`GOAL.md` §3.3). Everything after
+  SELECT is serial.
 - **The framer and the consolidator run at step 4 only**, not every cycle (§5).
 - **`CLAIMS.tsv` is the only shared mutable state.** The verifier and the writer touch it in
   different phases, never at the same time.

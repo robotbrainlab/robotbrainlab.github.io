@@ -46,12 +46,18 @@ Replace `<FRAME-FILES>`, `<OUTFILE>` and `<AREA-RULE>`. **Change nothing else.**
   them**, including runs whose lists were superseded — a category only one run found is still
   evidence, and dropping a whole run is a selection rule.
 
-  **[2026-11-07] That is now one file per cycle**, because framing runs no longer come in pairs
-  (`../DIAGNOSIS-2026-11-07.md` §5.3). **It is this cycle's run only.** The six runs of 2026-11-06
-  and 2026-11-07 are history, not input: what they found that matters is carried forward in
-  `../../research/frames/SOURCES.md`, which the framing run reads, so **a current run that misses
-  something an old run had is a failure to be fixed at the framing stage — not a hole for this run to
-  patch from an old file.** This run still adds no category of its own.
+  **`[STATED 2026-11-11]` That is two or more files per cycle, and they are UNIONED.** Framing runs
+  are independent again — each finds its own sources and is given nothing from any other
+  (`../GOAL.md` §3.3). So the runs will not agree, and **disagreement is not noise to be resolved
+  here: a category only one run found is still a category the field files.** Take every category
+  from every run in `<FRAME-FILES>`.
+
+  **Where two runs report the same category, carry both records** — the sources, levels and
+  `INCLUDES` of each. Where they report it at different levels or with different scope, that is a
+  `SOURCE DISAGREES` finding and it travels; it is not for you to settle.
+
+  **Only this cycle's runs are input.** Earlier cycles' files are history. This run still adds no
+  category of its own.
 - **`<OUTFILE>`** is `../../research/frames/CONSOLIDATED-YYYY-MM-DD.md`, relative to `docs/briefs/`.
 - **`<AREA-RULE>`** is the owner's definition of what counts as an area for this book, pasted in
   whole. **This run cannot start without it**, because every rejection it makes is an application of

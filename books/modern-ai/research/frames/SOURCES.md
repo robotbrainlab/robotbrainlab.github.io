@@ -1,8 +1,25 @@
-# The source register
+# The source register — REVOKED 2026-11-11
 
-**What this is.** Every filing system any framing run has opened, with the level to take from it and
-what it was already found to carry. **A framing run reads this list. It does not choose its own
-sources.**
+> ## ⚠ This is a record. It is not an input, and no run may be given it.
+>
+> **`[STATED 2026-11-11]` The owner revoked this register.** His reasoning: a fixed list of sources
+> decides what can be found, which makes it scope rather than method, and a run that inherits it is
+> not reading the field independently — it is re-reading one earlier run's idea of where the field
+> lives. He revoked his own `[AGREED 2026-11-07]` decision to adopt it. `../../docs/GOAL.md` §3.3
+> carries the decision and what it costs.
+>
+> **What replaces it:** each framing run finds its own sources, under a source floor and a search
+> floor, and **two or more runs per cycle are unioned, never intersected**
+> (`../../docs/briefs/TEMPLATE-area-frame.md`).
+>
+> **Why this file is kept.** It is evidence of what six runs found between 2026-11-06 and
+> 2026-11-07 — which pages were reachable on which date, which returned 403, and what each was
+> recorded as carrying. That is history worth having. **Pasting any part of it into a brief is
+> forbidden**, including the routes: a route is still a previous run's finding.
+
+**What this was.** Every filing system any framing run had opened, with the level to take from it
+and what it was already found to carry. **A framing run read this list and did not choose its own
+sources.** That is no longer how framing works.
 
 **Why it exists.** Six framing runs ran between 2026-11-06 and 2026-11-07. Each chose its own
 sources, because the brief told it to. **Only two sources were opened by all six** — the arXiv

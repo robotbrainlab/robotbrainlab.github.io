@@ -29,7 +29,7 @@ Then read only what that step needs:
 | `docs/CLAIMS.tsv` | **Every claim a scout returns**, with its source, strength, maturity and review date — not only the load-bearing ones (`docs/PROCESS.md` §4.1). **Empty** |
 | `docs/briefs/` | One brief per agent role. Fill one in; do not rewrite it |
 | `records/` `data/` | The per-chapter records and the labs' data. **No content yet; each holds a `README.md` saying what goes in it** |
-| `research/` | What the research returned. **`frames/` holds the framing runs, the source register and the consolidated candidate lists — 12 files, about 14,600 lines, and the input to step 4.** One scout has run — a validation run of its brief, on an area the owner has not approved (`research/README.md`) |
+| `research/` | What the research returned. **`frames/` holds the framing runs and the consolidated candidate lists — 12 files, about 14,600 lines.** It also holds `SOURCES.md`, the source register, **which the owner revoked on 2026-11-11: it is a record and may not be given to any run** (`docs/GOAL.md` §3.3). One scout has run — a validation run of its brief, on an area the owner has not approved (`research/README.md`) |
 | `practice/` | **The only record of what the owner has worked through.** `DRILL.tsv` holds the drill outcome per question. **It may be read to judge the book and the pace, never to judge the reader** — `practice/README.md` owns that rule |
 
 ## Precedence, when two documents disagree
