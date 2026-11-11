@@ -63,8 +63,9 @@ reporter's cannot.**
 The consolidation of run `g` was read back against run `g`'s own records
 (`../CHECK-consolidation-2026-11-07-g.md`, written before the output existed), and the read-back
 found two things the run's own summary did not report: **32 labels it moved into appendices and
-never gave a verdict**, and **thirteen kept areas resting on scope the source may not have
-written** (`../DIAGNOSIS-2026-11-07.md` §9). **One read-back is one instance**, not a property of
+never gave a verdict**, and **six kept areas resting on scope the source may not have
+written** (`[2026-11-11]` this said thirteen; thirteen is the number of thin-scope categories the run
+names, and seven of those sit below an area rather than among the 63) (`../DIAGNOSIS-2026-11-07.md` §9). **One read-back is one instance**, not a property of
 the method.
 
 **The same shape already exists one level down.** A scout reports claims; CONFIRM transforms them

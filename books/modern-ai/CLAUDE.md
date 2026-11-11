@@ -26,7 +26,7 @@ Then read only what that step needs:
 | `docs/GATES.md` | What each gate reads, fails on and prints — and the policy for a claim's review date |
 | `docs/ACCEPTANCE.md` | The questions each chapter must answer, written **before** any chapter is drafted |
 | `docs/PLAN.md` | The spine and this cycle's subjects. **Empty, and says why** |
-| `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, strength, maturity and review date. **Empty** |
+| `docs/CLAIMS.tsv` | **Every claim a scout returns**, with its source, strength, maturity and review date — not only the load-bearing ones (`docs/PROCESS.md` §4.1). **Empty** |
 | `docs/briefs/` | One brief per agent role. Fill one in; do not rewrite it |
 | `records/` `data/` | The per-chapter records and the labs' data. **No content yet; each holds a `README.md` saying what goes in it** |
 | `research/` | What the research returned. **`frames/` holds the framing runs, the source register and the consolidated candidate lists — 12 files, about 14,600 lines, and the input to step 4.** One scout has run — a validation run of its brief, on an area the owner has not approved (`research/README.md`) |

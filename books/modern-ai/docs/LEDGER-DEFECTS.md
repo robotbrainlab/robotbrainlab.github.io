@@ -104,7 +104,14 @@ invisible to every other check, so nothing but reading its output catches it.
 
 ## Entries earned in this project
 
-None yet. The first will be added the first time something gets past every gate.
+**Two: entries 5 and 5a, both on 2026-11-11.** `[2026-11-11]` This section read "None yet", which
+was true when written and false by the time the two incidents were attached above it.
+
+**And the admission rule needs its second half.** The rule at the top of this file is *"add an entry
+whenever a defect gets past every gate"* — which neither 5 nor 5a can satisfy, because the corpus
+that produced them has no gate. **So: add an entry when a defect gets past every gate, or when one
+gets past a corpus that has none.** The second kind is the more dangerous, because nothing was ever
+going to catch it.
 
 **Note the boundary with `GOAL.md` §11.** That section records mistakes in *how this project has
 been run* — mis-read instructions, unverified claims, briefs that asked the wrong question. This

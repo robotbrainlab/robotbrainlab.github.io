@@ -17,9 +17,15 @@ be faithful to its source and still be stated too strongly, and no other pass lo
 
 **YOUR JOB**
 
-Read `<CHAPTER>` and `<CLAIMS-FILE>`. Find every place the chapter states something more strongly
-than the claims file says it may be stated. Be adversarial: your job is to find these, not to
-confirm the chapter is fine.
+Read `<CHAPTER>` and `<CLAIMS-FILE>`. Find every place the chapter states something **at a
+different strength from what the claims file says it may be stated at — in either direction.**
+Be adversarial: your job is to find these, not to confirm the chapter is fine.
+
+**Overstatement is the common failure and it is not the only one.** `[2026-11-11]` This brief used
+to say "more strongly" and nothing anywhere read the prose the other way. A `peer-reviewed`,
+`established` result hedged into "some researchers suggest" misteaches the state of knowledge as
+badly as the reverse, and the book exists to tell the owner whether a claimed improvement is real.
+Report understatement in its own section; it is a finding, not a style note.
 
 **THE STRENGTH VOCABULARY**, and what each permits the chapter to say:
 
@@ -63,6 +69,7 @@ the dispute is real and this project has confirmed that it is real.
 
 ```
 ## Overstated
+## Understated
 One per finding: the chapter's wording (quoted) · the claim id · its recorded strength ·
 what the chapter may say instead.
 

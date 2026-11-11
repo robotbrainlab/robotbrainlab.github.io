@@ -50,8 +50,11 @@ You are testing a promise, so here is the promise. The specification requires ev
 - **ship its own data**, in a directory the chapter names. No lab may say "use your own files";
 - **pin every version**, and pin any model to a dated snapshot;
 - **print the identifier that came back** beside any figure that depends on it;
-- **state the hardware it needs**, and where the full experiment needs more than the reader is
-  likely to have, give a reduced version that fits — or say plainly that there is none;
+- **state the hardware it needs**, and **pin its expected result to the owner's machine, saying
+  what it pinned** — `GUIDE.md` §6 `[AGREED 2026-11-06]`. `[2026-11-11]` This read "where the full
+  experiment needs more than the reader is likely to have, give a reduced version that fits", which
+  is the rule the owner replaced: a result pinned to the weakest machine a stranger might have is
+  not a result. A reduced version is still welcome, and still says plainly where there is none;
 - **never promise exact output from a stochastic system.** It may say what shape the output takes,
   which assertion must pass, or give a range;
 - **take any credential from the environment.** Never from a file, and never printed or logged;

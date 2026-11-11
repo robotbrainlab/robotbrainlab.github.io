@@ -45,8 +45,10 @@ They live in their own directory because the scouts' files in `../` are named
   carried, before any rejection on kind.
 - `CONSOLIDATED-2026-11-07-g.md` — **run `g` consolidated, and the current candidate list.** 63
   areas from 283 input categories, with a numbered ledger of all 283. **It is an inventory, not a
-  recommendation** — what the owner rules on is `../../docs/PROPOSAL-areas-2026-11-11.md`, which cuts
-  these 63 to 12 with a reason for each. Read `../../docs/DIAGNOSIS-2026-11-07.md` §9 first: it names
+  recommendation** — a proposal is made from it at step 4 part 3.
+  **`[2026-11-11, evening]` `PROPOSAL-areas-2026-11-11.md` is WITHDRAWN and must not be ruled
+  on** — it cut the best-attested area in the register. Part 3 runs again to
+  `../../docs/briefs/area-proposal.md`. Read `../../docs/DIAGNOSIS-2026-11-07.md` §9 first: it names
   the **six** areas kept on scope that may not be their source's (`[2026-11-11]`, it said thirteen),
   and the 32 labels that got no verdict.
 - `CONSOLIDATED-2026-11-07.md` — runs `e` and `f` consolidated: 181 records, each with one verdict,

@@ -150,8 +150,10 @@ the material learnable, and it is as binding as anything else in this file.
 either has or does not.
 
 **Thirteen are in force. The `which set` column says what each one does.** Seven make the material **easy** (1–7), three
-keep it **rigorous** (9, 12, 14), three do **both** (8, 10, 13), and one is **conditional** on an
-open decision (11). Dropping the easy set produces a textbook that performs rigour through
+keep it **rigorous** (9, 12, 14), three do **both** (8, 10, 13), and **habit 11 was dropped** by §7's `[AGREED 2026-11-06]`
+decision to reference by concept. `[2026-11-11]` This read "one is conditional on an open
+decision (11)", twenty lines above the table that marks it dropped — and §4 is pasted into every
+pass-1 agent in full.
 difficulty; dropping the rigorous set produces a summary that trades depth for ease. The owner has
 rejected both.
 

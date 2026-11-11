@@ -211,6 +211,17 @@ it**, since an undated `late:` cannot be read against the chapter it was added b
 - a `CLAIMS.tsv` row whose `dependents` names a chapter that does not list it;
 - a row with a `maturity` set and no `maturity_basis`;
 - a row with `state = contested` whose chapter does not carry a `## What is disputed` section;
+- **`[2026-11-11]` a row with `maturity = disputed` whose chapter does not carry one either** — a
+  serious published rebuttal exists, and the documents allow `maturity = disputed` to sit beside
+  `state = verified`. Every consequence used to key on `state` alone, so a claim this project judged
+  to survive its rebuttal could be taught flat with the rebuttal invisible. `GUIDE.md` §3 admits
+  subjects to the book **because** they are disputed, so this was the one flattening the book least
+  afford;
+- **`[2026-11-11]` a chapter that rests on a claim it does not list in `## Claims`.** This gate used
+  to check `dependents` → chapter and nothing checked chapter → `dependents`. A chapter could rest
+  on a perfectly good row, never name it, leave `dependents` empty — and when EXPIRE later found
+  that claim superseded and reopened its dependent chapters, the chapter actually teaching it was
+  not among them. **The failure ran in the direction the check did not;**
 - a row with `state = superseded` cited by a chapter as current;
 - a row with `source_strength = training-data-unverified` listed as load-bearing by any chapter.
 
@@ -262,7 +273,9 @@ touched (`LEDGER-DEFECTS.md` entry 5).
 ## What no gate reads
 
 **Every rule below is stated somewhere in these documents and sampled by nothing** — no gate, no
-review pass, no record checkbox. They are listed here because a rule whose enforcement is assumed
+review pass, no record checkbox. **`[2026-11-11]` Two exceptions are marked in the table itself**:
+the `provisional` row names a procedure, and the `docs/` row names an agent. Everything else here
+rests on somebody remembering. They are listed here because a rule whose enforcement is assumed
 is worse than one known to rest on care: the first is believed, the second is watched.
 
 | Rule | Owner | Why no instrument |
@@ -273,7 +286,15 @@ is worse than one known to rest on care: the first is believed, the second is wa
 | A claim a chapter rests on may not stay `provisional` | `CLAIMS.tsv` | **Discharged by procedure at CONFIRM** (`PROCESS.md` §5), not by a check. Gate 12 fails on a maturity with no basis, which is a different thing |
 | **Everything in `docs/` itself** — this file, `GOAL.md`, `PROCESS.md`, `GUIDE.md`, `ROADMAP.md`, the briefs, and every assessment, validation and diagnosis written here | Whoever writes them | **No gate, pass or record reads any of them.** Gates read a built chapter; the passes read a drafted chapter; the briefs bind agents. **The prose that governs the project is the one corpus with no instrument at all** — which is how five errors of three already-recorded classes reached the owner — four on 2026-11-07 and one on 2026-11-11. `briefs/document-check.md` is now the only thing that reads it, and it is an agent, not a gate: it checks citations, contradictions with marked decisions, and claims past their evidence. **The rest still needs a reader** (`POSTMORTEM-2026-11-11.md`) |
 
-**All five need a reader, which is why they are listed rather than built.** Two others that were on
+| **Never present a subjective estimate as an established fact** | `GUIDE.md` §11 | `[2026-11-11]` Gate 1 accounts for §11's other prohibitions by name — strength, unsourced numbers and superseded claims go to gate 12 and pass 2, vendor-organising to this list. This one was accounted for by nothing. Pass 2 reaches it only where the estimate is load-bearing **and** already has a row |
+| **The source is quoted** | `GUIDE.md` §5, `GOAL.md` §3.4 | `[2026-11-11]` No gate reads for a quotation and **`CLAIMS.tsv` has no column to hold one**. The claim verifier produces the span; nothing stores it. Pass 2, which judges wording against strength, may not fetch — so it works from a label and a URL it cannot open |
+| **A hand-written `<!-- captured -->` marker** | `GUIDE.md` §10, gate 3 | `[2026-11-11]` Gate 3 and `GUIDE.md` both say in so many words that writing this marker on a block no program produced defeats the check and no gate can detect it. **Two files called it undetectable and this table did not carry it** |
+| **Never let a page count decide scope** | `GUIDE.md` §9 | `[2026-11-11]` `PROCESS.md` §2 says this one "can only be caught by looking at what was dropped, not at the reason given". The table carried §9's *other* item — progress as a fraction — and not the one both files call invisible |
+| **A question's number is permanent** | `ACCEPTANCE.md` | Gate 11 checks ownership and `late:` dates, not renumbering. `practice/DRILL.tsv` rows cite question numbers, so a renumber orphans them silently |
+| **The four that never default** — push, spend, discard finished work, override something reserved | `PROCESS.md` §2.1 | Only the git half of one of them is sampled, by the row above. The other three rest entirely on the person acting |
+| **A rule may be stated in only one place** | `../CLAUDE.md` | `[2026-11-11]` The project's central rule about its own rules. `briefs/document-check.md` reads **one** document and the files **it** cites, so it cannot find a third file stating the same rule under a phrasing the document never uses. An independent review found seven drifted duplicates that no instrument could have caught |
+
+**All twelve need a reader, which is why they are listed rather than built.** Two others that were on
 this list have been closed instead: the mathematics delimiters are now gate 3's, and `late:` is now
 gate 11's once the row carries a date.
 
@@ -301,6 +322,13 @@ is too short; if most things had, it is too long.
 
 - A claim with `maturity` of `single-source` or `unexamined` gets **+6 months regardless of class**.
   It has not been independently confirmed, so its durability is unknown whatever its subject.
+**`[2026-11-11]` When the load-bearing shortening is applied, and why it is not at CONFIRM.**
+What makes a row load-bearing is its `dependents` column, and `PROCESS.md` §5.1 fills that **at
+CLOSE, not before**. So the rule below cannot be applied when the row is written — the column it
+reads is empty by rule at that moment. **`review_by` is therefore recomputed at CLOSE**, for every
+row whose `dependents` the closing chapter has just filled. Until this was written down, every row
+kept its class interval forever and the shortening never fired once.
+
 - A **load-bearing** claim (`GOAL.md` §3.4 defines the term) gets the **shorter of its class date
   and 12 months**. If removing the claim would change what the chapter teaches, it is checked more
   often.

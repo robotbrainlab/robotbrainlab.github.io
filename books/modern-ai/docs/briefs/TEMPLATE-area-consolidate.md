@@ -112,7 +112,7 @@ sense of what matters.
 
    | Verdict | Means |
    |---|---|
-   | `AREA` | Passes the rule. A place AI itself advances |
+   | `AREA` | **Passes the rule you were given above** — it belongs to the science of AI, the research in AI, or the engineering of AI, and engineering includes its tools, its measurement and its operation |
    | `DOMAIN` | Ordinary AI pointed at another field's data |
    | `RECORD` | About AI's effect on the world rather than about AI |
    | `FORMAT` | A session shape, a track slot, an audience, a company size, a working arrangement |

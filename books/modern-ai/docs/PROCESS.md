@@ -608,7 +608,7 @@ while the text is still moving weekly is the worst available moment.
 | `GUIDE.md` | The spec: structure, style, maths line, chapter anatomy, lab rules | Rarely | Both |
 | `PROCESS.md` | This file: the cycle, the loop, the passes, brief schemas, stopping rules | When the method changes | Agents |
 | `PLAN.md` | A stable spine plus this cycle's subjects, clearly separated | Every cycle; owner approves | Owner |
-| `CLAIMS.tsv` | Every load-bearing claim | Continuously | Machine |
+| `CLAIMS.tsv` | **Every claim a scout returns**, load-bearing or not (§4.1 owns this and says why: dropping the rest means re-deriving them next cycle) | Continuously | Machine |
 | `OWNERSHIP.tsv` | Concept → owning chapter | Per cycle | Machine |
 | `LEDGER-TAUGHT.md` · `LEDGER-DEFECTS.md` · `LEDGER-SHORTHAND.md` | What the reader has been given · what the gates cannot catch · the field's own words | Continuously | Both |
 | `ROADMAP.md` | Which of the eleven steps we are on, and what is next. **Read first** | Every step | Owner |
@@ -655,7 +655,7 @@ marked `[OPEN]` in the file that owns it, and that file is where its options liv
 | How deep the mathematics goes | `GOAL.md` §10, with the test in `GUIDE.md` §8 |
 | Which area goes deep, if the shape is asymmetric | `GOAL.md` §10 |
 | The structure — which of the candidates the book takes | `GOAL.md` §5.3. **Must wait for the subjects** |
-| Reference by chapter, or by concept | `GUIDE.md` §7 |
+| ~~Reference by chapter, or by concept~~ | **Closed 2026-11-06**: by concept (`GUIDE.md` §7 `[AGREED]`). `[2026-11-11]` It was still listed here as open, two sections after §5.2 says it is settled |
 | ~~Whether the book is for the owner alone~~ | **Closed 2026-11-06**: the owner alone, for now (`GUIDE.md` §2) |
 
 **None of these blocks the research.** Scope versus depth is **not** open: it is settled in
