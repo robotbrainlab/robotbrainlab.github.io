@@ -40,6 +40,15 @@ other two exist.
 | 9 | `[STATED 2026-11-12]` ***Machine Learning and Deep Learning* covers transformers in full, and stands alone** | Asked where the book stops, given that *Modern AI Engineering from Zero* already teaches a transformer's arithmetic by hand — tokens, the embedding table, attention, the stack, logits to a sampled word — and withholds only the *why*. The owner chose the widest of three options: **the architecture and its arithmetic again**, so a reader who opens this book alone is not sent to another one. **Overlap with *Modern AI Engineering from Zero* is deliberate and accepted** | Stopping before transformers, which would have made a clean seam between the two books; or teaching only the theory and leaving the forward pass to *Modern AI Engineering from Zero* |
 | 10 | `[STATED 2026-11-12]` ***Python* assumes *Linux and Git from Zero* and is built against the roadmap's Fundamentals stage** | The owner: *"I like the second option, but book should be made in accordance with the fundamentals level in the python roadmap which is in the website."* So the book starts at the first Python program, names the owner's own published book as the prerequisite, and takes its scope and exit criteria from the Fundamentals stage at `../../data-and-intelligence/books/python-roadmap.html` — not from the Advanced or Mastery stages. **The table of contents is to be discussed separately and is not settled here** | Teaching the shell, the editor and version control again from zero, which duplicates a published book; or scoping the book to the whole roadmap, all three stages |
 
+**`[STATED 2026-11-12]` The tables of contents are deferred, for both books, deliberately.** The
+owner: *"we can discuss the Table of Contents (TOC) later, but not right now."* **So a session
+does not open by offering one, and does not draft one.** Decision 8 already bars drafting a
+chapter before a table of contents is approved; this is the step before that — **the table of
+contents itself is not on the table yet**, and the work in front of it is the rules below.
+
+**He raises it when he is ready.** Offering it unasked has already been declined once (decision 8's
+rejected column).
+
 ## The rules still to be written
 
 This is the next piece of work, and it has not been done. What it has to settle:
