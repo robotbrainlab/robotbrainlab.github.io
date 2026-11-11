@@ -21,6 +21,40 @@ text re-reads the same words at full cost. **This is in addition to `briefs/docu
 which runs on a single document before it is called finished and after any rule change; the review
 here reads the rules as a set, which is what found the contradictions between files.
 
+## `[STATED 2026-11-12]` An expectation gap, recorded before anything else is planned
+
+**The owner said this at the end of a long day, and it has never been written down:**
+
+> *"I initially thought the entire process would be deployed on Hostinger, and I'd receive a new
+> book every three weeks. But this is turning out to be much harder and more time-consuming than I
+> expected."*
+
+**That is not what this design does, and the difference is not a detail.** What is built here is a
+supervised pipeline with **five approval points per cycle** and **one chapter in cycle 1**. It
+cannot run unattended, and it does not produce a book on a schedule. **Nothing in these documents
+promised otherwise — and nothing in them asked him what he expected either**, which is the actual
+defect.
+
+**He also said what he hopes pays for it, and he may well be right:**
+
+> *"I do believe that the first run of the book will make future runs easier, since we'll likely
+> encounter a lot of issues along the way, and resolving them now should help us clear up many
+> things for the future."*
+
+**There is evidence for that**: `books/future-books/README.md` records that the machinery in
+`../interview-prep/tools/` *"is the part that took longest to get right"* and is reusable. **What
+there is no evidence for is the three-week cadence**, and `PROCESS.md` §10 is explicit that cycle
+1 exists to measure how long a cycle actually takes, because nobody knows.
+
+**`[OPEN]` This is the first thing to settle in the next session about this book**, ahead of the
+area ruling, because the answer changes what is worth building:
+
+- Does he want this pipeline, slower and supervised, for one book done properly?
+- Or does he want something closer to what he pictured — and if so, what has to be given up to get
+  it, since the five approvals exist to stop the failures `GOAL.md` §11 records?
+
+**Do not answer this for him, and do not start step 4's next action until he has.**
+
 ## Current position
 
 **Step 4 is next. Two or more independent framing runs record what the field files; a consolidation
