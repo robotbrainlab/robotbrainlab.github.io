@@ -76,7 +76,7 @@ Notes:
 - To undo a rollback, revert the rollback commit: `git revert <hash of the rollback>`.
 - After a rollback that touches the D&I guide (recipes 3 and 4), don't run `utilities/build-di-guide.py`
   until you've decided what you want. It rebuilds the guide from whatever that script and
-  `theme/guide-override.css` currently say.
+  `assets/theme/guide-override.css` currently say.
 - After publishing, reload each page once on the phone (pull down) so Safari drops cached styles.
 - If Git reports a conflict during a revert, stop with `git revert --abort` (nothing changes) and ask
   Claude to resolve it.
@@ -85,17 +85,18 @@ Notes:
 
 | Path | What it is |
 | --- | --- |
-| `index.html` | Home page. **Restyled** (live); uses `theme/` |
-| `cse/index.html` | CS&E guide: **restyled**. Starts with the **On-Ramp** section (`#on-ramp`, the "from Zero" book table), then the knowledge tree. Sidebar contents + back-to-top live in `theme/site.js` |
+| `index.html` | Home page. **Restyled** (live); uses `assets/theme/` |
+| `cse/index.html` | CS&E guide: **restyled**. Starts with the **On-Ramp** section (`#on-ramp`, the "from Zero" book table), then the knowledge tree. Sidebar contents + back-to-top live in `assets/theme/site.js` |
 | `books/` | **Every book, one folder per topic, with one shared LaTeX build in `books/latex/`.** `books/README.md` is the index. The website links straight at these PDFs; there is one copy of each |
 | `mathematics/index.html`, `cse/resources.html` | "Coming Soon" placeholders: **restyled** (linked from Home and the CS&E guide) |
 | `mathematics/resources.html`, `data-and-intelligence/llm-engineering.html`, `data-and-intelligence/resources.html` | **Orphans.** No page links to them (reachable by URL only). Not part of the restyle |
 | `data-and-intelligence/index.html` | Redirects to `guide/` |
-| `data-and-intelligence/books/python-roadmap.html` | Hand-written, self-contained page (its own CSS, JS and theme switch; no `theme/` link). The Python resource for **both** the D&I guide and the CS&E on-ramp. Not generated — edit it directly |
-| `data-and-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site (72 pages). Never edit by hand. Restyled by `theme/guide-override.css`, which the build script links in |
-| `theme/site.css`, `theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=6`) |
-| `theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `utilities/build-di-guide.py` (currently `10`) |
-| `favicon/` | Site icon: "Apex", a neural network converging into a radiant star, the culmination of AI (gradient tile). Also added to the D&I guide pages by the build script |
+| `data-and-intelligence/books/python-roadmap.html` | Hand-written, self-contained page (its own CSS, JS and theme switch; no `assets/theme/` link). The Python resource for **both** the D&I guide and the CS&E on-ramp. Not generated — edit it directly |
+| `data-and-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site (72 pages). Never edit by hand. Restyled by `assets/theme/guide-override.css`, which the build script links in |
+| `assets/theme/site.css`, `assets/theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=6`) |
+| `assets/theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `utilities/build-di-guide.py` (currently `10`) |
+| `assets/` | **Everything the browser downloads**, grouped 2026-11-11: `assets/theme/` and `assets/favicon/`. Kept out of `utilities/` on purpose — `robots.txt` disallows `/utilities/`, and blocking a site's own stylesheet and icon changes how search engines render it |
+| `assets/favicon/` | Site icon: "Apex", a neural network converging into a radiant star, the culmination of AI (gradient tile). Also added to the D&I guide pages by the build script |
 | `data-and-intelligence/research/` | Source of the D&I guide (a separate research repo; **this is its only copy**) |
 | `.claude/` | Claude Code guides, skills, and `html-reference/reference.html` (the design reference) |
 | `cse/` | CS&E on-ramp books (Markdown + LaTeX) and `end-to-end/` (empty for now) |
@@ -135,12 +136,12 @@ per page, nothing pushed).
 
 ### Process for each page
 
-1. Read the page. Map its structure onto the `theme/site.css` components (`.band`/`.band.alt`,
+1. Read the page. Map its structure onto the `assets/theme/site.css` components (`.band`/`.band.alt`,
    `.sec-head`, `.card`, `.grid-2`, `.ctas`/`.btn`, `.prose`, …). Add new components to
-   `theme/site.css`, not inline.
+   `assets/theme/site.css`, not inline.
 2. Rewrite the page: keep the `<head>` meta, add the pre-paint theme `<script>` (copy it from
-   `index.html`), link `theme/site.css?v=N` with the current version (use `../theme/site.css?v=N` from subfolders), and load
-   `theme/site.js` at the end. Nav = brand + links + theme switch + hamburger.
+   `index.html`), link `assets/theme/site.css?v=N` with the current version (use `../assets/theme/site.css?v=N` from subfolders), and load
+   `assets/theme/site.js` at the end. Nav = brand + links + theme switch + hamburger.
 3. Run `python3 utilities/text-check.py <page>`. It must print `OK`. It compares against `HEAD`, so run it
    before committing (or pass `--rev <commit>`).
 4. Preview it (`.claude/launch.json` server `site`, port 8080). Check light and dark, desktop and
@@ -152,7 +153,7 @@ per page, nothing pushed).
 
 | Page | Status |
 | --- | --- |
-| All reachable pages | **Done** (2026-09-26) in one commit: Home, the 2 Coming Soon pages, CS&E on-ramp (since merged into the CS&E guide), CS&E guide, and the D&I guide (72 pages via `theme/guide-override.css`). Checks: 81/81 pages text/link/id-identical to the previous `main`, 0 broken internal links, *(dissolved 2026-11-11 — see below)* untouched |
+| All reachable pages | **Done** (2026-09-26) in one commit: Home, the 2 Coming Soon pages, CS&E on-ramp (since merged into the CS&E guide), CS&E guide, and the D&I guide (72 pages via `assets/theme/guide-override.css`). Checks: 81/81 pages text/link/id-identical to the previous `main`, 0 broken internal links, *(dissolved 2026-11-11 — see below)* untouched |
 | Orphans (`mathematics/resources`, `data-and-intelligence/resources`, `data-and-intelligence/llm-engineering`) | Deliberately left in the old style. Nothing links to them |
 ---
 
@@ -182,7 +183,7 @@ per page, nothing pushed).
   - **Adds a dated note** to the 7 pages that record earlier research, design or review work. Their
     own text is left exactly as written: renaming the resource there would claim that work examined
     something that did not exist yet. The note sits after the document's `doc-meta` block and uses
-    the `.ti-update` style in `theme/guide-override.css`.
+    the `.ti-update` style in `assets/theme/guide-override.css`.
   If the roadmap source ever changes that resource's wording, these swaps stop matching and **the
   build exits** rather than publishing a page it did not recognise. Fix the strings, don't delete the
   check.
@@ -215,7 +216,7 @@ per page, nothing pushed).
   Two earlier attempts failed and are worth not repeating. A labelled row *Across Development* read as
   a third topic under Development; widening that row to `colspan="2"` still left it inside the
   Development block, because the category cell beside it says what owns it. Only leaving the category
-  column altogether reads as *across*. Done with existing classes, so no `theme/` change and no
+  column altogether reads as *across*. Done with existing classes, so no `assets/theme/` change and no
   cache-version bump.
 - **Web Applications from Zero is no longer published on its own.** Its six chapters are now the pre-book
   *How Web Applications Work* inside the Complete Software Engineering Guide, sitting after the map
@@ -328,14 +329,14 @@ branch, so do it only if there is a reason, and never without asking.
 - Keep `.gitignore` rules anchored to the root (`/assets/`, `/docs/`, `/CLAUDE.md`). An unanchored
   `assets/` once silently dropped the D&I guide's CSS from git.
 - GitHub Pages lets browsers cache files for 10 minutes (phones often longer). Pages link the theme as
-  `theme/site.css?v=N` / `theme/site.js?v=N`. **Bump `N` on every page whenever `theme/` changes**, or
+  `assets/theme/site.css?v=N` / `assets/theme/site.js?v=N`. **Bump `N` on every page whenever `assets/theme/` changes**, or
   visitors keep the old styling.
 - **Phones (fixed 2026-09-27).** The D&I guide's own CSS sets prose ragged below 48em and its menu button
-  has a -0.9rem margin sized for its old tiny brand. `theme/guide-override.css` re-justifies prose (and the
+  has a -0.9rem margin sized for its old tiny brand. `assets/theme/guide-override.css` re-justifies prose (and the
   study-resource entries and step leads) and re-spaces the phone top bar. Only running text is
-  justified: `theme/guide-override.css` keeps headings, step and item names, button labels, pull
+  justified: `assets/theme/guide-override.css` keeps headings, step and item names, button labels, pull
   quotes and (on phones) the large lead paragraphs ragged right, because they hold three or four
-  words per phone line. `theme/site.css` does the same for the site's own buttons. Audit every page at
+  words per phone line. `assets/theme/site.css` does the same for the site's own buttons. Audit every page at
   320/360/375/390/414/430px for: top-bar overlaps, cut-off brand, real sideways scroll (`scrollTo` then
   `scrollX`, not `scrollWidth`: the guide's hidden drawers overflow but `overflow-x: clip` stops scrolling),
   overlapping or off-screen buttons, and long paragraphs that aren't justified. Load each page in a

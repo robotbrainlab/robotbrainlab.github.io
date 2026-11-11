@@ -17,7 +17,7 @@ first ("Restyle work" has the rules and the design reference); this file is the 
 4. **Never ask the user anything during the run. They're away.** If a page can't be made to pass,
    restore it (`git restore <page>`), note why in the log, and move on. Never leave a failing page
    committed.
-5. Don't delete files and don't touch `books/`, `favicon/`, or `.gitignore`.
+5. Don't delete files and don't touch `books/`, `assets/favicon/`, or `.gitignore`.
 
 ## Running in the cloud (claude.ai/code)
 
@@ -49,7 +49,7 @@ git switch -c restyle                        # or `git switch restyle` to resume
 | 1 | Coming Soon pages | `mathematics/index.html` (linked from Home), `cse/resources.html` (linked from the CS&E guide) | Same template. Make it a centred hero (eyebrow, big title, text, button) in one commit |
 | 2 | CS&E on-ramp | `cse/on-ramp.html` | One big table with row spans. Restyle it like the reference's `table.grid` inside a `.card`; scroll sideways on phones. Keep `target="_blank"` on book links |
 | 3 | CS&E guide | `cse/index.html` | ~1,100 lines of nested knowledge tree. Map the levels to bands, cards and lists. The largest hand-written page, so take care |
-| 4 | D&I guide | `data-and-intelligence/guide/` (72 generated pages) | Add an **override stylesheet** (`theme/guide-override.css`) that `utilities/build-di-guide.py` links into every page. Map the guide's own CSS tokens (`data-and-intelligence/guide/assets/css/tokens.css`) to the theme's colours and fonts. Keep the guide's own light/dark toggle working. Rebuild, then text-check all 72 pages |
+| 4 | D&I guide | `data-and-intelligence/guide/` (72 generated pages) | Add an **override stylesheet** (`assets/theme/guide-override.css`) that `utilities/build-di-guide.py` links into every page. Map the guide's own CSS tokens (`data-and-intelligence/guide/assets/css/tokens.css`) to the theme's colours and fonts. Keep the guide's own light/dark toggle working. Rebuild, then text-check all 72 pages |
 | 5 | Consistency pass | all restyled pages | Same nav and footer everywhere, same `?v=N` on every theme link, no leftover Google Fonts or old inline `<style>` blocks |
 
 **Out of scope. Don't touch these:** no page on the site links to them.
@@ -61,16 +61,16 @@ git switch -c restyle                        # or `git switch restyle` to resume
 1. **Read the whole page** before changing it. List its structure (nav, hero, sections, tables, lists)
    and write down **every behaviour** its `<script>` provides, for example the mobile menu, scroll reveal,
    highlighting of the table of contents (`cse/index.html`), and the back-to-top button (`cse/index.html`).
-   Each one must still work afterwards. Move it into `theme/site.js` if it's generic, otherwise keep a
+   Each one must still work afterwards. Move it into `assets/theme/site.js` if it's generic, otherwise keep a
    small page script.
 2. **Restyle it**, following the Rules in HANDOVER.md → Restyle work:
    - `<head>`: keep every meta tag, the title and the favicon link. Add the pre-paint theme script
-     (copy it from `index.html`). Link `../theme/site.css?v=N`. Remove the page's own `<style>` block
+     (copy it from `index.html`). Link `../assets/theme/site.css?v=N`. Remove the page's own `<style>` block
      and its Google Fonts link once nothing needs them.
    - Nav: `.nav` with the brand, links, theme switch and hamburger. **Keep every existing link's href
      and text.** The restyle may not add links, so reuse the page's existing nav and menu links.
-   - Put reusable components in `theme/site.css`, not inline. Bump `?v=N` on **every** restyled page
-     whenever `theme/` changes.
+   - Put reusable components in `assets/theme/site.css`, not inline. Bump `?v=N` on **every** restyled page
+     whenever `assets/theme/` changes.
    - Keep text nodes whole. Restyle through classes and wrappers only.
 3. **Text check:** `python3 utilities/text-check.py <page(s)> --rev main` must say OK. It also fails if an
    element `id` disappears, since jump links target them. If it fails,
@@ -90,7 +90,7 @@ git switch -c restyle                        # or `git switch restyle` to resume
    Every page that isn't in this commit must still pass too, which catches accidental edits.
 6. **Update `.claude/HANDOVER.md`**: set the page's row in the Restyle Status table to
    "Done on `restyle` branch (not live)".
-7. **Commit** (only the files for this page, plus `theme/` and HANDOVER if they changed):
+7. **Commit** (only the files for this page, plus `assets/theme/` and HANDOVER if they changed):
    ```
    Restyle <page name> to the new design
 

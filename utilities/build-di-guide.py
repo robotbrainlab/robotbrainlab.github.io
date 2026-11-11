@@ -8,7 +8,7 @@ Usage (from the repository root):
 1. Runs the roadmap's own generator (with its validation) into a temp directory.
    The roadmap source in data-and-intelligence/research/ is only read, never modified.
 2. Adds a "Towards Intelligence" link to each page's top bar, pointing back to
-   the site home page, adds the site icon and the site theme override (theme/guide-override.css),
+   the site home page, adds the site icon and the site theme override (assets/theme/guide-override.css),
    and justifies the running text on the guide's home page.
 3. Names the guide after the site's discipline ("Data & Intelligence") in its chrome, names the
    home page's two actions for where they go, and marks the bold-text sub-headings so they can
@@ -33,7 +33,7 @@ REPO = Path(__file__).resolve().parent.parent
 SOURCE = REPO / "data-and-intelligence" / "research"   # [2026-11-11] was research/ai-roadmap
 GUIDE = REPO / "data-and-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
-# Site theme override for the guide (theme/guide-override.css). Bump when that file changes.
+# Site theme override for the guide (assets/theme/guide-override.css). Bump when that file changes.
 OVERRIDE_VERSION = 10
 
 ANCHOR = '<div class="topbar-tools">'
@@ -185,7 +185,7 @@ def swap_python_resource(html: str, page: str) -> str:
 
 # A Markdown sub-heading written as bold text comes through as a paragraph holding nothing but
 # that bold run. It is a heading, not running text, so it is marked here and set ragged right in
-# theme/guide-override.css: justifying a six-word line only stretches it into gaps. CSS alone
+# assets/theme/guide-override.css: justifying a six-word line only stretches it into gaps. CSS alone
 # cannot tell such a paragraph from one that merely opens with a bold lead-in, hence the marker.
 SUBHEAD = re.compile(r"<p><strong>((?:(?!</strong>).)*?)</strong></p>", re.S)
 
@@ -231,8 +231,8 @@ def add_home_link(out: Path) -> int:
         if html.count(ANCHOR) != 1 or html.count("</head>") != 1:
             sys.exit(f"Unexpected page structure, not patching: {page.relative_to(out)}")
         up = "../" * depth
-        icon = f'<link rel="icon" type="image/svg+xml" href="{up}favicon/favicon.svg"/>\n'
-        theme = f'<link rel="stylesheet" href="{up}theme/guide-override.css?v={OVERRIDE_VERSION}"/>\n'
+        icon = f'<link rel="icon" type="image/svg+xml" href="{up}assets/favicon/favicon.svg"/>\n'
+        theme = f'<link rel="stylesheet" href="{up}assets/theme/guide-override.css?v={OVERRIDE_VERSION}"/>\n'
         rel = page.relative_to(out).as_posix()
         html = html.replace(ANCHOR, home_link(up)).replace("</head>", icon + theme + STYLE)
         if rel == HOME_PAGE:
