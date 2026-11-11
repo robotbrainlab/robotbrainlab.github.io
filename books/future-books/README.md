@@ -22,7 +22,7 @@ last because it is read last. **`books/modern-ai/CLAUDE.md` already carries the 
 
 | Book | What it is | State |
 |---|---|---|
-| **Python** | The language from fundamentals, built against the Fundamentals stage of the roadmap at `../../data-and-intelligence/books/python-roadmap.html` | Not started |
+| **Python** | The language from fundamentals, built against the Fundamentals stage of the roadmap at `../../data-and-intelligence/books/python-roadmap.html` | **Started 2026-11-12.** Contents approved, reviewed and corrected: `../python/TOC.md`, 51 chapters. **No chapter drafted** — decision 8's other half, the rules, is unwritten. `../python/CLAUDE.md` governs a session there |
 | **Machine Learning and Deep Learning** | Everything the AI-engineering book black-boxed, **including the mathematics**, and **including transformers in full** | Not started |
 | **Modern AI Engineering from Zero** | The finished one. 57 chapters, 4 appendices, 1,413 printed pages | **Finished** 2026-10-31. `../interview-prep/` |
 

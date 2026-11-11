@@ -33,19 +33,28 @@ AskUserQuestion tool):
    `books/modern-ai/docs/HOW-IT-WORKS.md` is the plain-language map of the whole process, written
    for him. Nothing about the website. **This option was missing from this list for six days while
    it was the only work happening.**
-5. **The two books that come after it** — Python, and Machine Learning and Deep Learning.
-   **`[2026-11-12]` These two may be written in parallel, in two sessions.** If another session is
-   working on the other book, read *"The two books may be written IN PARALLEL"* in
-   `books/future-books/README.md` **before touching anything outside your own book's folder** —
-   it names the five shared things and the rule for each.
-   **Neither is started, and neither may be started until its rules are written and its table of
-   contents approved**, which is the owner's instruction. Read `books/future-books/README.md`
-   first (`[2026-11-12]` this said `books/FUTURE-BOOKS.md`, which has never existed);
-   it records every decision and the rules still to be settled. Nothing about the website.
+5. **`[2026-11-12]` Writing *Python from Zero*.** The book in `books/python/`. **It governs
+   itself** — go straight to `books/python/CLAUDE.md`, which sends you to `books/python/TOC.md`.
+   **It started on 2026-11-12**: 51 chapters, approved by the owner, then reviewed twice and
+   corrected. **No chapter is drafted**, and the thing blocking that is **not** the contents — it
+   is decision 8's other half, the rules, and for this book one is live: **which of the finished
+   book's gates transfer.** `books/python/CLAUDE.md` says so where a session reads it first.
+   Nothing about the website.
+6. **`[2026-11-12]` *Machine Learning and Deep Learning*, which is NOT started and may not be.**
+   The owner ruled on 2026-11-12 that the books are written **sequentially**: *"once Python book
+   is completely done we will go to ML&DL book."* **So a session does not start it, offer a table
+   of contents for it, or draft a chapter of it.** Its decisions are in
+   `books/future-books/README.md`, which records every one with its marker.
+   **`[2026-11-12]` The parallel-writing section in that file no longer describes the plan.** It
+   is kept because the ruling is reversible and the five shared things are still real. Read it
+   only if two books are ever genuinely in flight at once.
+   `[2026-11-12]` This entry said *"this said `books/FUTURE-BOOKS.md`, which has never existed"*;
+   the path has been right since then.
 
 Then follow the matching section of the handover: "Restyle work", "Website work", or
-"The interview-prep book". **Kinds 4 and 5 have no handover section and need none** — each book's
-own files govern it.
+"The interview-prep book". **Kinds 4, 5 and 6 have no handover section and need none** — each
+book's own files govern it. `[2026-11-12]` There are six kinds now, not five: the two unwritten
+books were one entry while neither had started, and *Python* has.
 If the user's first message already makes the answer obvious, confirm it in one line instead
 of asking.
 
