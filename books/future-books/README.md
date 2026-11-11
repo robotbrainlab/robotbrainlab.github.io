@@ -202,6 +202,41 @@ This is the next piece of work, and it has not been done. What it has to settle:
   Two books will teach attention. The rule has to say what each is allowed to assume of the other,
   what a reader who reads only one gets, and which book owns a term when both define it.
 
+## `[STATED 2026-11-12]` The two books may be written IN PARALLEL, in separate sessions
+
+**The owner said he might build *Python* and *Machine Learning and Deep Learning* at the same time,
+in two Claude Code sessions, and asked for the conflict risk to be recorded before it happens.**
+
+**Each book's own folder is safe.** Two sessions writing `books/python/` and
+`books/machine-learning/` cannot collide there. **Everything below is what they share**, and every
+one of them is a real way to break the other session's work.
+
+### The five shared things, and the rule for each
+
+| Shared | Why it is a hazard | The rule |
+|---|---|---|
+| **This file** | Both sessions record decisions here, in one numbered table. Two sessions appending row 22 is a guaranteed conflict | **Commit a change to this file on its own, immediately, and push it.** Never hold an edit to it across other work |
+| **`../latex/`** — `preamble.tex`, `Makefile`, `latexmkrc`, `front/`, `tools/`, `assets/` | **One build serves every book.** A change to the shared preamble changes the other book's PDF silently, and `tools/convert.sh` and `filter.lua` turn Markdown into chapters for both | **Treat `../latex/` as frozen while two books are in flight.** A book needing a change there puts it to the owner as a change to *both* books. A book needing its own style adds `../latex/styles/<slug>.tex`, which is additive and safe — that is what `interview-prep.tex` and `complete-software-engineering-guide.tex` already are |
+| **`../README.md`** | Both add a row to the book index | One line each, committed with that book's first commit |
+| **`../../.claude/CLAUDE.md`** and **`../../.claude/HANDOVER.md`** | Both sessions may register their book | Same rule as this file: on its own, immediately, pushed |
+| **One git branch** | Two sessions committing to `main` means one push is rejected and the other session is mid-work. **The dangerous repair is a force-push** | **Pull before every commit. Never force-push.** If the two sessions are writing at the same time for more than an hour, give each its own branch and merge deliberately |
+
+### The hazard that file discipline does NOT fix
+
+**Decision 9 lets the two books overlap on purpose, and the ledger that would catch a contradiction
+is still unwritten** — it is the first item under *The rules still to be written*. **Two parallel
+sessions make that worse, not better**: each book can define a term its own way, teach the same
+mechanism differently, and neither session will see the other's prose.
+
+**So if the books are written in parallel, the shared ledger stops being a rule to write later and
+becomes a precondition.** The commonest defect found while writing *Modern AI Engineering from
+Zero* was **two pieces each internally sound and jointly contradictory** — inside one book, where
+one author saw both. Across two books and two sessions, nothing is watching at all.
+
+**`[I RECOMMEND]`** either write the shared ledger before the second session starts, or accept
+that the two books will need a reconciliation pass afterwards and budget it. **The owner has not
+ruled on this.**
+
 ## Where this came from
 
 The owner asked for the two books. The first answer given was an objection on three grounds, and

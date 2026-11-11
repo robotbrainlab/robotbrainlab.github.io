@@ -34,6 +34,10 @@ AskUserQuestion tool):
    for him. Nothing about the website. **This option was missing from this list for six days while
    it was the only work happening.**
 5. **The two books that come after it** — Python, and Machine Learning and Deep Learning.
+   **`[2026-11-12]` These two may be written in parallel, in two sessions.** If another session is
+   working on the other book, read *"The two books may be written IN PARALLEL"* in
+   `books/future-books/README.md` **before touching anything outside your own book's folder** —
+   it names the five shared things and the rule for each.
    **Neither is started, and neither may be started until its rules are written and its table of
    contents approved**, which is the owner's instruction. Read `books/future-books/README.md`
    first (`[2026-11-12]` this said `books/FUTURE-BOOKS.md`, which has never existed);
