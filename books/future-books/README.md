@@ -83,6 +83,9 @@ existing ones: the language. This says why he is doing it at all.
 | 15 | `[STATED 2026-11-12]` ***Python* teaches the language twice, as the roadmap does** | The roadmap teaches 1.1's ground again at depth in 1.3, deliberately, and makes it the one hard ordering: *"1.1 before 1.3, because 1.3 is a second pass over the same ground."* It calls 1.3 *"the hinge of everything here"* and says *"Most self-taught developers never arrive here — which is exactly why they plateau."* **A book would normally merge the two.** The owner kept them apart: first pass to get him writing Python, second to show him why it behaves that way. **The repetition is the mechanism, not a redundancy to optimise away**, and decision 14 has already permitted the length | Teaching it once deeply, which removes the thing the roadmap says works; or a short second pass, which decides in advance which parts surprise a reader |
 | 16 | `[STATED 2026-11-12]` **Phase 1.6 is SET as work. Phase 1.5 is split** | 1.6 is three capstones — *"the three things you point at when someone asks what you've built"* — and **a capstone you read is not a capstone**, so the book sets it rather than teaching it. **1.5 is not the same case, and the first version of this row said it was.** 1.5 calls itself *"a vehicle, not a subject"*, but its reading list carries real subject matter: SQLite and SQL, *Use the Index, Luke!*, SQLAlchemy, Alembic, Postgres, Pydantic, httpx, tenacity, FastAPI, password hashing and the OWASP API top ten. **Decision 17 says what happens to it.** For HTTP and API design the book points at `../apis-to-fastapi/` — which is **what the roadmap already does**, naming *APIs to FastAPI* ch. 1–8 as a reading item inside 1.5 | Teaching web frameworks and APIs again in the book's own words, which rewrites eight chapters of a published book; or dropping both phases, which loses the part of Fundamentals that makes the rest stick |
 | 17 | `[STATED 2026-11-12]` **The book teaches SQL and databases properly** | The owner was given four options and chose this one. **Nothing he owns covers SQL**, and `../../.claude/HANDOVER.md` already names it: *"The one known gap in Python Fundamentals is SQL. Phase 1.5 opens with five database items, and *Use the Index, Luke!* ch. 1–5 assumes you can already write a join. The failure is silent — a missing index doesn't error, it gets slow later."* **The roadmap says so itself**, in its *What's Not Here* appendix: SQL — *"Joins, indexes, transactions, query plans. **If you learn one thing here, learn this**"* — and under *Covered here?* it answers *"Partly — Phase 1.5 covers enough to build with."* **The one thing it says to learn is the one thing it only partly covers.** A silent failure is the worst kind to leave to a pointer. HTTP and API design are not in the same position, because a book of his already covers them | Pointing at outside SQL material, which leaves the gap his own notes call silent; teaching all of 1.5, which duplicates a published book; or a separate databases book, which is a fourth book to write |
+| 18 | `[STATED 2026-11-12]` **Both books use the finished book's chapter shape, exactly** | The owner: *"we have solid information on how the book should be and the chapters should be. Follow exactly from the book already we built. I really love the book."* **So `../interview-prep/docs/BOOK-GUIDE.md` §5 “Every chapter” is the spec, copied, not reinvented**: an opening paragraph saying what the chapter gives; *The problem.* and *The question.*; the idea explained before any command or code, with an everyday picture where it helps; every new term bolded and carried into that chapter's `### Key Terms` table, which **is** the glossary; `tip` / `note` / `warning` callouts; **a lab with expected results**; then `## Summary, Key Terms, and Review Questions`, with an optional `### Worth Memorising` for numbers, defaults and formulas only, and 4–6 review questions; and `> **You understand this when** …`. Each part opens with a **“What to ignore for now”** note. **This settles two open rules at once**: the chapter shape, and whether the roadmap's projects become labs — **every chapter has a lab, so they do** | Designing a chapter shape from scratch for books whose reader has already read 57 chapters of this one |
+| 19 | `[2026-11-12]` **What does NOT transfer, and it is not the chapter** | Decision 18 takes the chapter. **Three things above the chapter are specific to the finished book and must not be copied.** (a) **Appendix B, the interview bank** — its own spec says *"This appendix is the reason the book exists"*, and the reason these books exist is the one at the top of this file, not interviews. (b) **The four threads of Part IV** — security, speed, failure and cost — which answer how an AI system behaves in production. (c) **The part structure itself**, Understand / Use / Apply / What Next with its shares: that was drawn for that book's material. **Structure follows the subjects** — *Python* follows the roadmap's six phases, and *Machine Learning and Deep Learning* follows chapter 17's list. `[I RECOMMEND]`, because the owner said to follow the book exactly and this names where “exactly” stops | Copying the parts and the appendix too, which would give a Python book an interview bank and a thread about inference cost |
+
 
 **`[2026-11-12]` How decisions 15 to 17 were nearly got wrong, recorded because it matters.** The
 first version of row 16 was written from regular expressions run over
@@ -149,24 +152,26 @@ This is the next piece of work, and it has not been done. What it has to settle:
 - **Which of the finished book's gates transfer unchanged**, which need changing, and which do not
   apply. The machinery in `../interview-prep/tools/` is reusable and is the part that took longest
   to get right.
-- **What a chapter of an academic book in this language looks like** — the structure spec. The
-  finished book's chapter shape was built for an interview reader and Part IV changed it once
-  already. `[2026-11-12]` **Decision 11 settles the depth question inside a chapter; this is still
-  open about the chapter's shape.**
-- **`[2026-11-12]` What a NOTED topic looks like on the page**, now that decision 12 creates one.
-  It is not a bare name: what the thing is, why it is not taught here, and where to read it. The
-  finished book's chapter 17 is the worked example of this at book scale — *"a boundary you can
-  recite is a boundary you can defend"* — and the per-topic form has to be written.
+- ~~**What a chapter of an academic book in this language looks like**~~ — **`[2026-11-12]` CLOSED
+  by decision 18**: the finished book's chapter shape, copied exactly. Decision 19 names the three
+  things above the chapter that do not come with it.
+- **`[2026-11-12]` What a NOTED topic looks like on the page** — **the last of the three that
+  block a contents list, and decision 18 nearly settles it too.** The finished book's chapter 17
+  is the form at book scale: a table of *what you cannot explain* · *where you met it* · *what it
+  actually is*, closing with *“a boundary you can recite is a boundary you can defend”*.
+  **`[I RECOMMEND]` the same table, as the closing chapter of each book**, with a third column
+  naming where to read it — so a noted topic is a row the owner can read in a minute, exactly as
+  chapter 17 is. He has not ruled on this.
 - **`[2026-11-12]` What happens to the roadmap page once *Python* exists.** It is a reading path
   through other people's documents — the Tutorial, the HOWTOs, the Library Reference — and
   decision 2 says the book replaces those with the owner's own prose. **So the two will say the
   same thing in two registers.** The page is live and linked from two places (the Data &
   Intelligence guide and the CS&E on-ramp), so this is a website decision as well as a book one:
   the page stays as it is, is repointed at the book, or is retired.
-- **`[2026-11-12]` Whether the 49 phase projects become the book's labs.** The finished book has a
-  lab per chapter. The roadmap has 49 projects and says *"A phase is finished when its phase
-  project is finished, not when you have read every line of it."* Nothing yet says whether those
-  are the same thing.
+- ~~**Whether the 49 phase projects become the book's labs**~~ — **`[2026-11-12]` CLOSED by
+  decision 18**: every chapter has a lab with expected results, so they do. **What is left is
+  smaller**: which roadmap project feeds which chapter's lab, which is drawn with the contents and
+  not before.
 - **`[2026-11-12]` How a noted topic becomes a taught one.** Decision 12 says the drill detects it.
   Nothing yet says what happens next: whether it is written into the book in place, added as an
   appendix, or held for a second edition.
