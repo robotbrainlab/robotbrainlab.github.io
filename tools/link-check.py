@@ -3,8 +3,8 @@
 
 Usage (from the repository root):
 
-    python3 _tools/link-check.py                 # all tracked, published pages (skips _ and . folders)
-    python3 _tools/link-check.py cse/index.html  # just these pages
+    python3 tools/link-check.py                  # every page of the website (not books/ or research/)
+    python3 tools/link-check.py cse/index.html  # just these pages
 
 External links (http/https/mailto) are not fetched. Exits 1 on any broken link.
 """
@@ -46,8 +46,19 @@ def parse(path: Path) -> Links:
     return _cache[path]
 
 
+# [2026-11-11] Jekyll is off (/.nojekyll), so a leading underscore no longer decides what is
+# served and there are no underscore folders left. This check is now about what the WEBSITE is:
+# the pages a visitor can reach by following links from the home page. Books, research notes and
+# tooling are served too, but they are not the website and their internal links are not this
+# script's business.
+NOT_THE_WEBSITE = {"books", "research", "tools", "backup", "docs"}
+
+
 def published(path: Path) -> bool:
-    return not any(part.startswith(("_", ".")) for part in path.relative_to(REPO).parts)
+    parts = path.relative_to(REPO).parts
+    if any(part.startswith(".") for part in parts):
+        return False
+    return parts[0] not in NOT_THE_WEBSITE if len(parts) > 1 else True
 
 
 def main() -> int:
