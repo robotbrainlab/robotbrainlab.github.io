@@ -21,6 +21,7 @@ Then read only what that step needs:
 | Read | For |
 |---|---|
 | `docs/GOAL.md` | What the book is for, and why. **Every statement is marked** as the owner's words, agreed, my recommendation, open, or **defaulted** — mine, acted on because the decision was waiting. Nothing is a decision unless it says so. §11 holds the thirteen classes of mistake already made |
+| `docs/HOW-IT-WORKS.md` | **For the owner, in plain language**: the eleven steps, the repeating cycle, and the five points where he decides something. `[2026-11-12]` **A map, not an authority** — it states no rule and names the owning file for each step |
 | `docs/GUIDE.md` | What the book **is**: scope, voice, chapter anatomy, labs, length, conventions |
 | `docs/PROCESS.md` | How it gets built: the cycle, the chapter loop, the four passes, the agents, the brief schema |
 | `docs/GATES.md` | What each gate reads, fails on and prints — and the policy for a claim's review date |
