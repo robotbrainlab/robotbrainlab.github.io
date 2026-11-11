@@ -7,7 +7,7 @@ in a growing block at the top of a brief an agent has to read past.
 
 | Brief | Role | When it runs |
 |---|---|---|
-| `TEMPLATE-area-frame.md` | **Framer** — report the categories the field files its work under, faithfully and without filtering | Step 4, **twice per cycle**, in a fresh session outside this repository, before any scout |
+| `TEMPLATE-area-frame.md` | **Framer** — report the categories the field files its work under, faithfully and without filtering | Step 4, **once per cycle**, in a fresh session outside this repository, before any scout |
 | `TEMPLATE-area-consolidate.md` | **Consolidator** — turn the framers' records into one candidate area list: classify, merge, pick one level | Step 4, **once**, after the framing runs and before the owner rules |
 | `TEMPLATE-area-research.md` | **Scout** — find the subjects in one area | Research stage, one per approved area |
 | `claim-verifier.md` | **Claim verifier** — re-check one claim at source, adversarially | Expire stage, and any time a claim is challenged |
@@ -15,6 +15,7 @@ in a growing block at the top of a brief an agent has to read past.
 | `pass-2-claims.md` | **Adversary** — every claim against its recorded strength | After pass 1's fixes |
 | `pass-3-lab.md` | **Lab runner** — run the lab from the chapter text alone | After pass 2 |
 | `pass-4-fix-verification.md` | **Fix verifier** — the changed passages as its subject, the whole chapter as its search | Last |
+| `document-check.md` | **Document checker** — the only instrument that reads what Claude writes: citations that do not hold, contradictions with a marked decision, claims past their evidence | Before any document in `../` is called finished, and after any rule change |
 
 **The writer has no brief here.** Writing a chapter is the six-step loop in `../PROCESS.md` §6, done
 in the main session with the sources open, not delegated.

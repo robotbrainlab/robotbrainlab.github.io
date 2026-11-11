@@ -105,15 +105,29 @@ restate it.
    **It needs the owner's definition of an area before it can run**, because every rejection it
    makes is an application of that rule. The draft is in the brief and is marked as mine.
 3. **The owner rules on that list** — approves it, redraws the boundaries, or rejects it — with the
-   evidence for each boundary in front of him, and the two runs' disagreements beside it. **The
-   reasons are recorded with the list**, because a later cycle has to be able to ask whether a
-   boundary still makes sense.
-4. **Somebody turns the approved categories into each scout's `<SCOPE>` and `<EXCLUDED>`**, and
-   **that somebody is the owner**, in the same sitting as the approval. A framing run reports what
-   work is *filed* in a category; a scout needs the *subjects* it is responsible for. Whoever
-   converts one into the other is choosing what the scouts look for, so it is not a clerical step
-   and it is not Claude's. Every area's exclusions are written at the same time as every other's,
-   from the one approved list.
+   evidence for each boundary in front of him. **The reasons are recorded with the list**, because a
+   later cycle has to be able to ask whether a boundary still makes sense.
+
+   **`[2026-11-11]` This used to say "and the two runs' disagreements beside it".** With one framing
+   run per cycle there is no second run to disagree with it, and **what replaces that evidence is the
+   register's recorded floor plus the consolidation run's own account of what it could not settle** —
+   its `UNCLEAR` list, its close rejections, its thin merges and the areas it kept on thin scope. A
+   grep for the phrasings I had in mind did not find this clause on 2026-11-07; opening the file did
+   (`POSTMORTEM-2026-11-11.md` §2.3).
+4. **Somebody turns the approved categories into each scout's `<SCOPE>` and `<EXCLUDED>`**, in the
+   same sitting as the approval. A framing run reports what work is *filed* in a category; a scout
+   needs the *subjects* it is responsible for. Whoever converts one into the other is choosing what
+   the scouts look for, so it is not a clerical step. Every area's exclusions are written at the
+   same time as every other's, from the one approved list.
+
+   **`[OPEN 2026-11-11]` Who does it.** This clause used to say "that somebody is the owner … and it
+   is not Claude's", undated and unmarked. **`GOAL.md` §3.3, marked `[AGREED 2026-11-06]`, retracts
+   the same reasoning one step earlier**: asking the owner to partition the current field is
+   circular, because that knowledge is what the book exists to give him, and the argument comes from
+   the purpose instead — §1.1's career goal and §3.1's five questions. That reasoning applies to
+   writing the scopes exactly as it applied to authoring the list. **The owner rules on this; I have
+   marked it rather than resolved it**, because resolving it myself is the error that produced it
+   (`POSTMORTEM-2026-11-11.md` §3).
 
 **Two things to expect, so neither is read as a defect in the runs.** Filing categories do not
 record whether a subject is still moving, so a settled area can arrive looking like a live one —

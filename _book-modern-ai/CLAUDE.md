@@ -29,7 +29,7 @@ Then read only what that step needs:
 | `docs/CLAIMS.tsv` | Every load-bearing claim, with its source, strength, maturity and review date. **Empty** |
 | `docs/briefs/` | One brief per agent role. Fill one in; do not rewrite it |
 | `records/` `data/` | The per-chapter records and the labs' data. **No content yet; each holds a `README.md` saying what goes in it** |
-| `research/` | What the research returned. **`frames/` holds the framing runs and the consolidated candidate list — about 5,600 lines, and the input to step 4.** The scouts' own files are not written yet |
+| `research/` | What the research returned. **`frames/` holds the framing runs, the source register and the consolidated candidate lists — 12 files, about 14,600 lines, and the input to step 4.** The scouts' own files are not written yet |
 | `practice/` | **The only record of what the owner has worked through.** `DRILL.tsv` holds the drill outcome per question. **It may be read to judge the book and the pace, never to judge the reader** — `practice/README.md` owns that rule |
 
 ## Precedence, when two documents disagree
@@ -109,7 +109,8 @@ better than prose. **No internal codes or shorthand: name things.**
 
 **Open it.** `docs/GOAL.md` §11 records thirteen classes of mistake made on this project, and the
 largest is claiming what was not read. **Class M is the other one to know: a pattern match answers a
-question about strings, never one about meaning.** The three shortest rules:
+question about strings, never one about meaning.** The six shortest rules — the first three are
+about evidence, the last three about the record, and **all six have been broken on this project**:
 
 - **Do not claim what you have not read.** A summary of a document tells you only that the document
   exists.
@@ -117,3 +118,28 @@ question about strings, never one about meaning.** The three shortest rules:
   what it samples, before the claim.
 - **Do not substitute a search or a count for reading.** Automation may check form; it may never
   judge content.
+- **Do not inherit a citation's authority without opening the citation.** A section number beside a
+  claim is the most persuasive thing in these documents and the easiest to be wrong. **Citing a
+  marked statement means quoting its marker and its date.**
+- **Read the whole section, not the part that settles it for you.** `GOAL.md` §3.3 retracts one
+  thing in its opening and assigns the opposite in a table forty lines below. Reading the first part
+  and stopping produced a confident correction of a statement that had been right
+  (`docs/POSTMORTEM-2026-11-11.md` §2.2). **A partially-read section is more dangerous than an
+  unread one, because it is quotable** — class A says the same of summaries: *having the summary is
+  worse than having nothing, because nothing makes you look.*
+- **Do not decide what the record has already decided, in either direction.** Class C is usually
+  taking the owner's decision; **it is the same error to hand him one the record never took off
+  him.** Before saying who decides anything, open the marked statement that says so **and read it to
+  the end.**
+- **Do not state a property from instances.** Two runs doing something is not what the method does
+  (class D). Give the count in the sentence that makes the claim.
+
+**A rule change is not finished until every file that states or cites it has been opened** —
+`CLAUDE.md`, `docs/GOAL.md`, `docs/GUIDE.md`, `docs/PROCESS.md`, `docs/GATES.md`,
+`docs/ROADMAP.md`, `docs/briefs/README.md` and the briefs. **A grep is not a sweep**: it finds the
+phrasings you thought of. On 2026-11-07 a four-file change was declared complete by a grep for three
+phrasings, and `docs/briefs/README.md` kept the old rule under a fourth.
+
+**Before any document in `docs/` is called finished**, run `docs/briefs/document-check.md` over it.
+It is the only instrument on this project that reads what Claude writes; everything else checks an
+agent or a chapter (`docs/POSTMORTEM-2026-11-11.md`).

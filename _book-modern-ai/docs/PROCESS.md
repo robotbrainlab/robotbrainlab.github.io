@@ -462,7 +462,7 @@ chapter" re-reads everything and finds what pass 1 already found.
 
 | Agent | Job | May delegate |
 |---|---|---|
-| **Framer** | The categories the field files its work under, reported faithfully. Two runs | No |
+| **Framer** | The categories the field files its work under, reported faithfully, over the source register. **One run per cycle** `[2026-11-07]` | No |
 | **Consolidator** | Those records → one candidate area list: classify, merge, pick one level | No |
 | **Scout** | One research area → subject units | No |
 | **Claim verifier** | Re-check one claim at source, adversarially | No |
@@ -471,6 +471,7 @@ chapter" re-reads everything and finds what pass 1 already found.
 | **Adversary** | Pass 2 | No |
 | **Lab runner** | Pass 3 | No |
 | **Fix verifier** | Pass 4 | No |
+| **Document checker** | **The only agent that reads what Claude writes.** One document in `docs/` against the files it cites: citations that do not hold, contradictions with a marked decision, claims past their evidence `[2026-11-11]` | No |
 
 **Coordination:**
 

@@ -527,8 +527,11 @@ are solved. **The seventh is a genuine gap with nothing behind it** — `GOAL.md
 owns the reading order, and says so in those terms: "this requirement rests on nothing."
 
 **Where the last two days went.** Of the 43 findings fixed yesterday, the file recording them says
-31 were created in the preceding two days by the fix rounds themselves. **Today's 16 findings came
-from running the instruments, and 3 of them could only be found by opening a source page.** That is
+31 were created in the preceding two days by the fix rounds themselves. **Today's 21 findings came
+from running the instruments, and 4 of them could only be found by opening a source page.** (This
+sentence read "16" and "3" until 2026-11-11: it was a draft count left behind when findings were
+added, and it contradicted the same claim made correctly in the final assessment of this file. Found
+by the first run of `briefs/document-check.md`.) That is
 the measurement the overengineering question needs: the marginal return on re-reading the documents
 had fallen to near nothing, and the marginal return on executing them is high.
 

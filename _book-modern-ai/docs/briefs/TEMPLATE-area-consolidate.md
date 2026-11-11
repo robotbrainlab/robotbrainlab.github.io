@@ -24,6 +24,14 @@ judgement that an area is small, quiet, unpromising or not worth the owner's tim
 and nobody else's** (`../GOAL.md` §3.3). Every rejection and every merge is listed with its reason
 so he can reverse either without reading the raw files.
 
+**[2026-11-11] This paragraph was changed earlier today on the claim that its citation was false, and
+changed back, because the citation holds.** §3.3's own division-of-labour table gives the
+consolidation run "**may reject a category for not being an area; never for being unimportant**" and
+gives the owner "**approves, redraws or rejects the proposed list, with the evidence for each
+boundary in front of him**". What §3.3 retracts is that the owner must *author* the list — a
+different act, and one nobody asks of him, since the list is proposed to him. The error was mine and
+is recorded in `../POSTMORTEM-2026-11-11.md` §2.2; **do not re-apply the change.**
+
 ## How to fill this in
 
 Replace `<FRAME-FILES>`, `<OUTFILE>` and `<AREA-RULE>`. **Change nothing else.**
