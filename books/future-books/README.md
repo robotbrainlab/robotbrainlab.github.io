@@ -25,6 +25,43 @@ last because it is read last. **`books/modern-ai/CLAUDE.md` already carries the 
 from Zero.** The finished book is read last and was written first, which is the whole reason the
 other two exist.
 
+## Why these books exist
+
+**`[STATED 2026-11-12]` This is the purpose, in the owner's own words, and every other decision in
+this file is tested against it.** It was said on 2026-11-12 and was **not** written down until he
+asked whether everything had been noted.
+
+> *"I already have three years of professional experience. However, I want you to **assume that I
+> am starting from zero, with no prior knowledge of the subjects**. The reason is that I have
+> relied heavily on AI-assisted tools for most of my professional work, so I do not want my years
+> of experience to be mistaken for a strong understanding of the underlying concepts.*
+>
+> *In fact, **this is the sole reason I am creating these three books** and committing to learning
+> these subjects properly. I want to move beyond depending on AI-assisted tools and develop the
+> knowledge, understanding, and independent problem-solving ability that I currently lack."*
+
+And what success looks like, in his words: *"My goal with these books is to develop a thorough
+understanding of AI and its foundational subjects. I want to build a strong foundation first, and
+once I have achieved that, I intend to start reading other books independently to deepen my
+knowledge further."*
+
+**Three things follow, and they are not decisions — they are the standard decisions are judged by.**
+
+1. **Assume zero knowledge of the subject. Do not assume zero ability.** He has shipped software
+   for three years. Every term is defined and nothing is inherited from that experience — but a
+   book that re-explains what a function is, or walks him through something a lab already had him
+   do, is spending the one thing he is short of. **Zero knowledge, full competence as a reader.**
+2. **The test of these books is whether he can read the next book without them**, not whether they
+   contain everything. That is what *"start reading other books independently"* asks for, and it is
+   the argument that decided decision 11.
+3. **He is employed.** *"The main reason I am building these three books is because of my time
+   constraints."* Time is the binding constraint on everything here — which is **not** a licence
+   to cut understanding, and **is** a reason to prefer a hand-checkable example over an exhaustive
+   derivation.
+
+**Decision 2 is a different reason and both hold.** That one says why a *new* book rather than the
+existing ones: the language. This says why he is doing it at all.
+
 ## Decisions
 
 | # | Decision | Reason | Rejected |
@@ -139,6 +176,13 @@ This is the next piece of work, and it has not been done. What it has to settle:
   added 2026-11-12 — opens by assuming *"You write Python and have called an API before"* and no
   machine learning at all, which places it between the two unwritten books. **The path has to say
   where every published book sits, not only these three.**
+- **`[2026-11-12]` Where *Machine Learning and Deep Learning* starts at the bottom.** Decision 9
+  settled its top edge exactly. **Nothing settles its floor**: whether it opens from no machine
+  learning at all, and whether it assumes *Python* or stands alone there too, the way decision 9
+  made it stand alone at the top.
+- **`[2026-11-12]` What mathematics floor that book writes from.** Decision 5 says it carries its
+  own mathematics. From school algebra? From nothing? The answer changes how much of the book is
+  mathematics.
 - **`[2026-11-12]` What the deliberate overlap means in practice**, now that decision 9 allows it.
   Two books will teach attention. The rule has to say what each is allowed to assume of the other,
   what a reader who reads only one gets, and which book owns a term when both define it.
