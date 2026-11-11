@@ -1,7 +1,13 @@
 # Python from Zero — Table of Contents
 
-**Status: draft, awaiting approval. Nothing is drafted until this is approved**
-(`../future-books/README.md` decision 8).
+**Status: approved by the owner 2026-11-12, then reviewed and corrected. See *What the review
+found* at the end.**
+
+**`[2026-11-12]` Approving this list does NOT unblock drafting, and the first version of this line
+said it did.** Decision 8 has **two** conditions — *"Nothing is drafted until **the rules are
+written** and the table of contents is approved"* — and this line quoted only the second. **The
+rules are still unwritten**; `../future-books/README.md` lists what is left under *The rules still
+to be written*. That work stands between this list and chapter 1.
 
 - **Scope: the Fundamentals stage of the roadmap, and nothing above it**
   (`../../data-and-intelligence/books/python-roadmap.html`, decision 10). Six phases, 49 projects,
@@ -15,13 +21,21 @@
 - **No page estimates appear in this file, deliberately.** `../future-books/README.md` decision 14
   says the finished book's size is permission and never a target, and that the figure may not be
   cited for including or excluding anything. A page column would be cited.
-- **Every chapter has a lab with expected results** (decision 18), so the roadmap's 49 projects
+- **Every chapter in Parts I–III has a lab with expected results** (decision 18), so the roadmap's 49 projects
   become the labs. The **Lab** column names which project feeds which chapter. Projects are cited
   as *phase.number* — `1.3 p7` is Phase 1.3's project 7.
-- **48 of the 49 are placed. The missing one is named, not dropped silently.** Project `1.2 p9`,
-  *History surgery — interactive rebase on a messy branch*, had the Git chapter and lost it with
-  that chapter. **It belongs to *Linux and Git from Zero***, and chapter 55 points the reader
-  there for it. **Stated at its real strength:** that book's chapter 10 covers *"rebasing in
+- **43 of the 49 are placed. The other six are named, not dropped silently**, and each one went
+  with a chapter the owner ruled out. **Five belong to *APIs to FastAPI***: `1.5 p4` URL
+  shortener, `1.5 p5` CRUD API with auth, `1.5 p6` async endpoints, `1.5 p7` OWASP audit, and
+  phase 1.5's own project, *a service you'd actually use*. **One belongs to *Linux and Git from
+  Zero***: `1.2 p9`, below. **Chapter 51 lists all six with the book that owns each.**
+  **What this costs is stated plainly, not buried:** phase 1.5's building half leaves this book,
+  and with it the stage exit criterion *"Build a tested, typed API from empty directory to running
+  service in an afternoon."* **The reader still builds one** — Capstone 3 in chapter 50 is a
+  backend service — but the teaching for it is in the other book, by the owner's ruling.
+- **The sixth: project `1.2 p9`**, *History surgery — interactive rebase on a messy branch*, had
+  the Git chapter and lost it with that chapter. **It belongs to *Linux and Git from Zero***, and
+  chapter 51 points the reader there for it. **Stated at its real strength:** that book's chapter 10 covers *"rebasing in
   brief"* — which is less than the roadmap's project asks for, and the only thing in this stage
   that neither book now covers in full. It is a small, named gap and not a silent one, which is
   the failure `../modern-ai/docs/LEDGER-DEFECTS.md` entry 5a exists for.
@@ -38,8 +52,9 @@
 
 **Decision 19 carried Understand / Use / Apply / What Next across as a default. Only *What Next*
 survives here, and the reason is decision 15. The owner was shown the three options below and
-chose the new names.** This closes decision 20, which said the names were a default and the
-contents would decide.
+chose the new names.** This discharges decision 20 **for *Python* only**; that row still
+governs *Machine Learning and Deep Learning*, which gets the same four names as its default and
+the same test.
 
 The four names are a progression in what a reader can do: comprehend, then operate, then
 construct, then judge. **Python's material does not arrive in that order, because the roadmap
@@ -53,7 +68,7 @@ Three ways out were considered:
 |---|---|
 | Keep the names, teach 1.3 first | Breaks the roadmap's hard ordering `1.1 before 1.3`, and removes the double pass decision 15 protects |
 | Keep the names, call 1.1 *Understand* | Puts the deepest material (1.3) in the middle of the book under *Use*, which is the opposite of what it is |
-| **Name the parts for the stage the reader is at, and keep *What Next*** | **Taken.** `../modern-ai/docs/GOAL.md` §5.3's rule — *structure follows the subjects* — applied here |
+| **Name the parts for the stage the reader is at, and keep *What Next*** | **Taken.** The same sequencing point as `../modern-ai/docs/GOAL.md` §5.3, *structure follows the subjects* — **which is marked `[I RECOMMEND]` there, in a section headed *Structure — not yet decided*, and about a different book. It is cited as a parallel, not as authority.** What carries this row is the owner's own ruling above it |
 
 **`[2026-11-12]` Note what this does NOT overturn.** Decision 19 still stands in full: the
 interview bank, the four threads and the chapter shape all transfer, and Part IV is still called
@@ -89,15 +104,15 @@ book and not an optional extra, and this part says so again at the first chapter
 | # | Chapter | Opens with | Covers | Lab |
 |---|---|---|---|---|
 | 1 | Getting Python, and Running Something | I have Python installed three times already and I don't know which one runs when I type `python`. | The interpreter and where it lives; `uv` for a project and an environment; running a file, a module and the REPL; what a virtual environment actually isolates | Set up a project, run it three ways |
-| 2 | Values, Types and Operators | I can read `x = 1`. I cannot tell you what Python did, or why `0.1 + 0.2` isn't `0.3`. | Objects and names; numbers, strings, booleans; operators and precedence; binary floating point and where it bites; `Decimal` when the cents must reconcile | 1.1 p2 — Bill splitter |
-| 3 | Control Flow and Functions | Loops and `if` I can manage. `match` looks like a `switch` and people tell me it isn't. | `if`/`elif`/`else`, `for`, `while`; `match` and structural patterns; defining functions; arguments, defaults and return values; what a function returns when you don't say | 1.1 p1, p3 — Unit converter, guessing game |
+| 2 | Values, Types and Operators | I can read `x = 1`. I cannot tell you what Python did, or why `0.1 + 0.2` isn't `0.3`. | Objects and names; numbers, strings, booleans; operators and precedence; binary floating point and where it bites; `Decimal` when the cents must reconcile; **f-strings and format specifications** — width, alignment and decimal places, which project 1 needs | 1.1 p1, p2 — Unit converter, bill splitter |
+| 3 | Control Flow and Functions | Loops and `if` I can manage. `match` looks like a `switch` and people tell me it isn't. | `if`/`elif`/`else`, `for`, `while`; `match` and structural patterns; defining functions; arguments, defaults and return values; what a function returns when you don't say | 1.1 p3 — Number-guessing game |
 | 4 | The Four Data Structures | I use a list for everything. I suspect that's wrong and I can't say when. | `list`, `tuple`, `dict`, `set` — what each costs and what each guarantees; comprehensions; sorting with `key`; `Counter`, `defaultdict` and `deque`, and when to reach for them | 1.1 p4, p5 — Word frequency, contact book |
 | 5 | Modules and Packages | My code is one long file and I know that's a problem. I don't know what the right shape is. | Modules, imports and the import path; `__name__`; packages and `__init__.py`; what `python -m` does; circular imports and why they happen | 1.1 p6 — Text-utility module |
-| 6 | Files, Paths and Formats | I've been building file paths by gluing strings together with slashes. | `pathlib` instead of string paths; opening, reading and writing; `json` and `csv`; `shutil` and `zipfile`; why you close a file and what `with` is doing | 1.1 p8, p9, p12 — Organizer, CSV→JSON, backup |
+| 6 | Files, Paths and Formats | I've been building file paths by gluing strings together with slashes. | `pathlib` instead of string paths; opening, reading and writing; `json` and `csv`; `shutil` and `zipfile`; why you close a file and what `with` is doing | 1.1 p8, p9 — File organizer, CSV→JSON |
 | 7 | Text, and the Encodings Under It | I got a `UnicodeDecodeError` and solved it by copying a Stack Overflow line I don't understand. | Characters, code points and bytes; what an encoding is; `str` versus `bytes`; reading a file that isn't UTF-8; normalisation, and why two identical-looking strings compare unequal | A file that round-trips through three encodings |
-| 8 | Errors and Exceptions | My scripts stop on the first bad row. I want them to keep going and tell me what went wrong. | Raising and catching; the exception hierarchy and its shape; `try`/`except`/`else`/`finally`; custom exceptions; catching too much, and why a bare `except` hides bugs; reading a traceback | 1.1 p7 — Log parser, malformed lines counted |
+| 8 | Errors and Exceptions | My scripts stop on the first bad row. I want them to keep going and tell me what went wrong. | Raising and catching; the exception hierarchy and its shape; `try`/`except`/`else`/`finally`; custom exceptions; catching too much, and why a bare `except` hides bugs; reading a traceback | Count the bad rows instead of stopping on the first |
 | 9 | Classes, First Pass | I've written classes that were just dictionaries with extra steps. | Defining a class; `__init__` and instance state; methods; `__repr__` and `__len__`; `@property` and enforced invariants; when a class is the wrong answer | 1.1 p10, p11 — Deck of cards, bank account |
-| 10 | The Standard Library You Will Actually Reach For | The standard library is enormous and I don't know which parts I'm supposed to already know. | A tour with a purpose: `re` and the Regex HOWTO in full; `datetime` and the aware-versus-naive distinction that causes the bugs; `argparse` for a real CLI; `subprocess`, and why `shell=True` is never the answer | 1.1 phase project — Journal CLI |
+| 10 | The Standard Library You Will Actually Reach For | The standard library is enormous and I don't know which parts I'm supposed to already know. | A tour with a purpose: `re` and the Regex HOWTO in full; `datetime` and the aware-versus-naive distinction that causes the bugs; `argparse` for a real CLI; `subprocess`, and why `shell=True` is never the answer. **Closing with the two FAQs** — *Design & History*, then *Programming*, both in full, which is where the roadmap puts them and which answer *why is Python like this* | 1.1 p7, p12, phase project — Log parser, backup tool, Journal CLI |
 | 11 | Style, and the Tool That Enforces It | Everyone's Python looks the same and mine doesn't. I can't tell if that matters. | PEP 8, PEP 20 and PEP 257; docstrings; `ruff` configured and run; fixing every finding in code you already wrote; why a formatter ends the argument rather than winning it | 1.2 p1 — Ruff everything |
 | 12 | Testing: Functions, Fixtures and Parametrization | I've written tests that passed whatever the code did. | `pytest` and test discovery; assertions; fixtures and what they are for; the builtin fixtures; parametrizing instead of copying a test body; markers | 1.2 p2, p3 — Retrofit tests, parametrize |
 | 13 | Testing: Strategy, Mocking and Properties | I test the happy path. I know that isn't testing. | Test strategy and what to cover; configuration and coverage; mocking, and the trap of testing the mock; debugging a failing test; advanced parametrization; property testing with Hypothesis | 1.2 p4 — Hypothesis finds a bug you'd never test for |
@@ -114,8 +129,10 @@ book and not an optional extra, and this part says so again at the first chapter
 write, and explains it. **The roadmap calls this phase the hinge of everything, and says most
 self-taught developers never arrive here — which is exactly why they plateau.** Do not rush it.
 
-*What to ignore for now:* descriptors, metaclasses and the C API. Those are the Advanced stage and
-this book stops below them. Chapter 55 says where they are.
+*What to ignore for now:* descriptors, metaclasses and the C API. The first two are the Advanced
+stage and the C API is further out still — the roadmap puts it in Mastery and tells you to skip it
+*"before Advanced is complete"*. Either way
+this book stops below them. Chapter 51 says where they are.
 
 | # | Chapter | Opens with | Covers | Lab |
 |---|---|---|---|---|
@@ -137,18 +154,26 @@ this book stops below them. Chapter 55 says where they are.
 
 *Part III's own note:* the roadmap calls phase 1.5 *"the only phase that isn't Python"* and *"a
 vehicle, not a subject"*. **One part of it is treated as a subject here, on your ruling: SQL and
-databases** (decision 17). HTTP and API design are not, because `../apis-to-fastapi/` already
-covers them and the roadmap already sends a reader there.
+databases** (decision 17). **Building an API is not**, and this part stops short of it.
+
+*And one thing this part does not teach at all:* **how to build a web service.** `[STATED
+2026-11-12]` The owner ruled it out — *"We have the API book already, just point it out there just
+like Linux and Git Book."* **Read `../apis-to-fastapi/APIs to FastAPI.pdf`** for it. That book's
+Part III is eight chapters on exactly this, and the roadmap already names it inside phase 1.5.
+This part teaches the Python that a service needs — storage, validation, and calling other
+services — and sends you there for the service itself. **This is decision 16 obeyed**, whose
+rejected column reads *"Teaching web frameworks and APIs again in the book's own words, which
+rewrites eight chapters of a published book."*
 
 *What to ignore for now:* deployment. Docker and hosting are outside the roadmap and outside this
-book. Chapter 55 says so and says where to go.
+book. Chapter 51 says so and says where to go.
 
 | # | Chapter | Opens with | Covers | Lab |
 |---|---|---|---|---|
 | 29 | I/O-Bound, CPU-Bound, and the GIL | I've read that Python can't do threads properly. I've also read that's a myth. | What makes a program wait versus what makes it work; the global interpreter lock, what it actually locks, and what it does not; why threads help one kind of program and not the other; measuring which kind you have | Time the same job both ways |
 | 30 | Threads and Queues | I started a thread, it printed nothing, and the program exited. | Starting and joining; why shared mutable state goes wrong; a queue as the way threads talk; a worker pool; clean shutdown and the sentinel | 1.4 p1 — Threaded downloader |
-| 31 | Processes | I need real parallelism and I don't know what it costs. | Processes versus threads; what has to be pickled to cross the boundary; `multiprocessing` pools; start methods; measuring the speedup and explaining the gap between it and the number of cores | 1.4 p2 — Parallel file processor |
-| 32 | One Interface, Two Executors | There appear to be four ways to do this and I don't know which to pick. | `concurrent.futures`; `ThreadPoolExecutor` and `ProcessPoolExecutor` behind one interface; futures, results and exceptions; `map` versus `submit`; the difference between the two executors as the whole lesson | Swap one executor for the other, unchanged |
+| 31 | One Interface, Two Executors | There appear to be four ways to do this and I don't know which to pick. | `concurrent.futures`; `ThreadPoolExecutor` and `ProcessPoolExecutor` behind one interface; futures, results and exceptions; `map` versus `submit`; the difference between the two executors as the whole lesson; measuring the speedup and explaining the gap between it and the number of cores | 1.4 p2 — Parallel file processor |
+| 32 | Processes, Underneath | I used `ProcessPoolExecutor` and it worked. I don't know what it did. | What the executor was hiding: process creation, start methods, and what has to be pickled to cross the boundary; `multiprocessing` pools directly; why an object that works in a thread fails in a process | Send an unpicklable object across, and fix it |
 | 33 | `asyncio` | `async def` and `await` look like syntax I can paste. I'd rather understand them. | The event loop; coroutines as suspendable functions; `await` as a yield point; why one blocking call stalls everything; `asyncio.run`; debug mode | 1.4 p3 — Async fetcher, semaphore-bounded |
 | 34 | Tasks, Cancellation and `TaskGroup` | I cancelled a task and something leaked. | Tasks versus coroutines; `TaskGroup`; `CancelledError` and why you must not swallow it; `timeout()` and `shield()`; **cancellation is the part everyone gets wrong** | 1.4 p4 — A task cancelled cleanly mid-flight |
 | 35 | Choosing a Model | I now know three ways to do this and still can't choose. | The decision in one sentence; the same job written three ways and measured; what each costs in complexity; when the answer is "none of them, make it faster instead" | 1.4 p5, phase project — Three ways measured; concurrent tool |
@@ -160,12 +185,8 @@ book. Chapter 55 says so and says where to go.
 | 41 | An ORM, and What It Hides | An ORM made my queries slower and I couldn't see them. | SQLAlchemy 2.0: the core and the session; mapping classes to tables; relationships; **the N+1 query, found by logging the SQL**; when to drop to raw SQL | Find and fix an N+1 |
 | 42 | Migrations | I changed a column by hand on my own machine and broke everything else. | Why a schema needs version control; Alembic; autogenerate and why you read what it wrote; a data migration; the migration that cannot be undone | 1.5 p2 — Three migrations, one of them data |
 | 43 | Moving to Postgres | SQLite is fine. I'm told it won't be. | What changes and what doesn't; `psycopg` 3; types SQLite was lax about; connection pools; **why a hosted service cannot keep SQLite on an ephemeral filesystem** | Move one project across |
-| 44 | Validating What Comes In | I check incoming data with a pile of `if` statements. | Pydantic v2 models; validators; parsing versus validating; how it builds on Part II's dataclasses; errors a caller can act on | 1.5 p3 (part) — Pydantic-validated responses |
-| 45 | Calling Other Services | My script hung for eleven minutes because a server never answered. | **Assumes `../apis-to-fastapi/` ch. 1–8** for what an API is, HTTP, REST, auth, pagination and rate limits. Here: `httpx`; **a timeout on every call, unprompted**; retries with `tenacity`; backoff; idempotency; transparent pagination | 1.5 p3 — API client |
-| 46 | Building an API | I can call an API. Building one looks like a different skill. | FastAPI and how heavily it leans on Part I's type hints; path and query parameters; request and response models; status codes; automatic OpenAPI docs | 1.5 p4 — URL shortener |
-| 47 | Dependencies, Middleware and Lifespan | `Depends()` is magic and I don't like depending on magic. | Dependency injection, which is Part II's closures and decorators; middleware; lifespan events, which are Part II's context managers; background work, and why `BackgroundTasks` dies with the process | 1.5 p6 — Async endpoints under load |
-| 48 | Passwords, Tokens and Access | I hashed a password with SHA-256 once. I've since learned that was wrong. | Why a fast hash is the wrong hash; `scrypt` and `argon2`; `secrets` for tokens; what a JWT is and what it is not; role checks; per-user data isolation | 1.5 p5 — CRUD API with auth |
-| 49 | The Ten Ways an API Gets Broken | I've never looked at my own API the way an attacker would. | The OWASP API Security Top Ten, all ten, once; the two that account for most real breaches; auditing your own service against the list and fixing what you find | 1.5 p7, phase project — OWASP audit; a service you'd use |
+| 44 | Validating What Comes In | I check incoming data with a pile of `if` statements. | Pydantic v2 models; validators; parsing versus validating; how it builds on Part II's dataclasses; errors a caller can act on | Reject six malformed payloads, each for a stated reason |
+| 45 | Calling Other Services | My script hung for eleven minutes because a server never answered. | **Assumes `../apis-to-fastapi/APIs to FastAPI.pdf` ch. 1–8** for what an API is, HTTP, REST, auth, pagination, rate limits, retries and idempotency — **this chapter does not re-teach any of them.** Here only the Python: `httpx`; **a timeout on every outbound call, unprompted**, which is a stage exit criterion; `tenacity` for the retry policy; reading a paginated response into an iterator | 1.5 p3 — API client |
 
 ---
 
@@ -175,16 +196,19 @@ book. Chapter 55 says so and says where to go.
 the same rule `../interview-prep/docs/BOOK-GUIDE.md` §5 states.
 
 **The four threads transfer** (decision 19), asked of Python's own subject rather than of a model.
-Part IV chapters carry no lab, no Key Terms table and no review questions, per §5.
+Per §5, Part IV chapters carry **none of its last four items**: no callouts, no lab, no
+`## Summary, Key Terms, and Review Questions` block, and no `> **You understand this when** …`
+line. `[2026-11-12]` The first version of this sentence named three of the four and left out the
+callouts and the closing line, which is the sentence a writer would have worked from.
 
 | # | Chapter | Opens with | Covers |
 |---|---|---|---|
-| 50 | Thread · Security | I've fixed the holes I was told about. I don't know how to look for the rest. | Untrusted input as the single idea; `subprocess` and `shell=True`; `pickle` as remote code execution; dependency supply chain and lock files; secrets that end up in git; what `pip install` actually runs |
-| 51 | Thread · Speed | My program is slow and my instinct is to rewrite it in something else. | Measure before you change anything; `timeit`, `cProfile`, `tracemalloc`; algorithmic cost before micro-optimisation; where Python is genuinely slow and where you only think it is; the cost of the wrong data structure |
-| 52 | Thread · Failure | It worked for a month and then it didn't, and the logs said nothing. | Reading a traceback to the cause; logging that is useful at three in the morning; what fails when a dependency is slow rather than down; retries that make an outage worse; the failure that only appears under concurrency |
-| 53 | Thread · Cost | Nobody told me a program could cost money by being badly written. | What a query costs, what a container costs, what a retry storm costs; the N+1 as a bill; bounded memory as a cost control; when to stop optimising |
-| 54 | The Three Capstones | I've finished the book. I don't know whether I can actually do any of this. | **Set, not taught** (decision 16) — a capstone you read is not a capstone. The three, with the roadmap's two options each and its must-have list for each; what each one proves; how to get it reviewed by somebody who is not you; the real test: read an unfamiliar module from `Lib/` and explain every line |
-| 55 | What This Book Does Not Teach | I need to know what I still don't know, by name. | **The closing table you approved** — four columns: *what this book does not teach* · *where you met it* · *what it actually is* · *where to read it*. Descriptors, metaclasses, variance, performance tuning and architecture (the Advanced stage); CPython internals (Mastery); Django and Flask; writing a pytest plugin; the C API; deployment, Docker and hosting; data science, scraping and the other domains. **And the shell, the editor and Git**, whose fourth column is ***Linux and Git from Zero*** — including the interactive rebase that project `1.2 p9` asks for, which that book covers in brief. **The second column is the point: you met it, so the book did not hide it** |
+| 46 | Thread · Security | I've fixed the holes I was told about. I don't know how to look for the rest. | Untrusted input as the single idea, in the Python the book has taught: `subprocess` and `shell=True`, which phase 1.1 names and tells you to read twice; `pickle` as remote code execution, which is what phase 1.4's *"how data crosses the boundary"* is really about; secrets that end up in git; what `pip install` actually runs. **`[2026-11-12]` The roadmap marks *security hygiene* as not covered by it**, so this chapter is the thread asking its question of this book's own material, and does not become a security course. **API security belongs to `../apis-to-fastapi/`** |
+| 47 | Thread · Speed | My program is slow and my instinct is to rewrite it in something else. | **Finding** the slow thing, not tuning it: measure before you change anything; `timeit`, `cProfile`, `tracemalloc`; algorithmic cost before micro-optimisation; the cost of the wrong data structure. **`[2026-11-12]` The boundary is explicit and chapter 51 repeats it** — the roadmap puts *performance* in the Advanced stage, so this chapter teaches you to locate a bottleneck and stops there |
+| 48 | Thread · Failure | It worked for a month and then it didn't, and the logs said nothing. | Reading a traceback to the cause; logging that is useful at three in the morning; what fails when a dependency is slow rather than down; retries that make an outage worse; the failure that only appears under concurrency |
+| 49 | Thread · Cost | Nobody told me a program could cost money by being badly written. | What a query costs, what a retry storm costs; the N+1 as a bill; bounded memory as a cost control; when to stop optimising. **`[2026-11-12]` Containers were cut from this row**: the roadmap marks Docker and deployment *"No — and deliberately not required by any capstone"*, and chapter 51 lists them as not taught, so pricing them here contradicted both |
+| 50 | The Three Capstones | I've finished the book. I don't know whether I can actually do any of this. | **Set, not taught** (decision 16) — a capstone you read is not a capstone. The three, with the roadmap's two options each and its must-have list for each; what each one proves; how to get it reviewed by somebody who is not you; the real test: read an unfamiliar module from `Lib/` and explain every line |
+| 51 | What This Book Does Not Teach | I need to know what I still don't know, by name. | **The closing table you approved** — four columns: *what this book does not teach* · *where you met it* · *what it actually is* · *where to read it*. **Three rows carry a book of the owner's own in the fourth column, and they are the point of this chapter**: **building a web service** — FastAPI, routing, request and response models, dependency injection, API auth and the OWASP API top ten — → ***APIs to FastAPI***, whose Part III is eight chapters on it; **the shell, the editor and Git**, including the interactive rebase project `1.2 p9` asks for → ***Linux and Git from Zero***; and **the six roadmap projects this book does not set** — `1.2 p9`, `1.5 p4`–`p7` and phase 1.5's own project — each listed with the book that owns it. Then the rest: descriptors, metaclasses, variance, performance tuning and architecture (the Advanced stage); CPython internals and the C API (Mastery); Django and Flask; writing a pytest plugin; deployment, Docker and hosting; data science, scraping and the other domains. **The second column is the point: you met it, so the book did not hide it** |
 
 ---
 
@@ -203,23 +227,25 @@ Part IV chapters carry no lab, no Key Terms table and no review questions, per �
 
 **Settled by `../future-books/README.md`, and reflected above:** the scope (decision 10), the
 double pass (15), the capstones as set work and 1.5 split (16), SQL taught properly (17), the
-chapter shape (18), and that the interview bank, the four threads and the part names transfer
-(19).
+chapter shape (18), and that the interview bank and the four threads transfer (19). **The part
+names are the exception and are NOT reflected above** — decision 19 carried them as a default and
+the owner then ruled they do not survive here, which the section above records.
 
 **`[STATED 2026-11-12]` Settled by the owner on this list, in one sitting:**
 
 | Asked | He ruled |
 |---|---|
-| Do the four part names survive? | **No.** The new names stand. This closes decision 20 |
+| Do the four part names survive? | **No.** The new names stand. Decision 20 is discharged for *Python*, and still governs the second book |
 | Should the book have a Git chapter? | **No.** It is dropped, and the book points at *Linux and Git from Zero* instead |
 | What happens to the roadmap page on the website? | **Literally nothing.** It stays exactly as it is, and the book does not change it. This closes the open rule *"What happens to the roadmap page once Python exists"* |
+| Should the four API chapters stay? | **No.** *"We have the API book already, just point it out there just like Linux and Git Book."* Chapters on building an API, dependency injection, API auth and the OWASP top ten are cut, and Part III stops at the Python a service needs |
 
 **Still open, and not needed to approve this list:**
 
 | Open | Where it bites |
 |---|---|
-| **Decision 13** — *core* is a dependency test | When chapter 55's table is filled, and when any topic above is moved out of a chapter into it |
-| **Decision 21** — the five kinds of short entry | Same moment as 13; it is 13's output |
+| **Decision 13** — *core* is a dependency test | When chapter 51's table is filled, and when any topic above is moved out of a chapter into it |
+| **Decision 21** — the five kinds of short entry | Same moment as 13; it is 13's output. **`[2026-11-12]` It already binds, and this is said rather than hidden:** chapter 51's list and Part II's *what to ignore* note are decision 21's sort, published while the rule behind it is unruled. If the owner redraws the rule, both lists are redrawn with it |
 
 **What this list still does not do**, named here rather than left silent:
 
@@ -234,3 +260,42 @@ chapter shape (18), and that the interview bank, the four threads and the part n
 
 **`[2026-11-12]` Two items that were on this list are now closed**, by the owner's rulings above:
 the Git chapter is dropped, and the roadmap page is left exactly as it is.
+
+---
+
+## `[2026-11-12]` What the review found
+
+**Two independent reviews read this list against its two sources** — one against the roadmap page,
+one against `../future-books/README.md` and `../interview-prep/docs/BOOK-GUIDE.md` §5. Neither was
+told what the answer was expected to be. **Every finding below was then checked against the files
+by hand before it was acted on**, which is the rule at the top of `../../.claude/CLAUDE.md`.
+
+**They found fourteen faults. The list had been approved before they ran.** That is the point of
+recording this: an approved document is not a checked one.
+
+| What was wrong | What was done |
+|---|---|
+| **Four chapters rewrote *APIs to FastAPI*** — decision 16's rejected column names that exact act, and Part III's note claimed the book did not do it | Cut, on the owner's ruling. Part III now stops at the Python a service needs |
+| **The Python FAQs had no chapter.** The roadmap says *"Both in full"* | Added to chapter 10, where the roadmap puts them |
+| **Format specifications had no chapter**, and project `1.1 p1` exercises them | Added to chapter 2, which now carries that project |
+| **Cursor pagination had no chapter**, and project `1.5 p5` requires it | Goes with the cut chapters to *APIs to FastAPI*; named in chapter 51 |
+| **Project `1.5 p3` was cited as a lab twice** | Chapter 44 now has a lab of its own |
+| **Phase 1.4 ran in the wrong order.** The roadmap reads `concurrent.futures` before `multiprocessing`; the book had it reversed | Chapters 31 and 32 swapped. Project `1.4 p2` is `ProcessPoolExecutor`, so it moved with the executors |
+| **Five labs sat ahead of the chapter teaching them** | `1.1 p7` and `1.1 p12` moved to chapter 10, which owns `re` and `datetime`. The rest resolved with the cuts |
+| **Decision 8 was quoted as its own superseded predecessor**, dropping the condition that is still unmet | Both conditions now quoted. **Approving this list does not unblock drafting; the rules are still unwritten** |
+| **`GOAL.md` §5.3 was cited as a rule.** It is `[I RECOMMEND]`, in a section headed *not yet decided*, about a different book | Recited as a parallel. The owner's own ruling carries the row |
+| **Decision 20 was called closed.** It still governs the second book | Now *discharged for *Python*** |
+| **"The part names transfer" was listed as settled and reflected above.** The owner had ruled the opposite | Corrected, with the exception named |
+| **The header claimed every chapter has a lab.** Part IV has none | Scoped to Parts I–III |
+| **Chapter 47 taught performance and chapter 49 priced containers**, while chapter 51 said the book taught neither | 47 scoped to finding a bottleneck, not tuning. Containers cut from 49 |
+| **The C API was filed under the Advanced stage.** The roadmap puts it in Mastery | Corrected in both places |
+
+**What the reviews did not find**, which is worth recording too: the chapter numbering, every
+cross-reference, every relative path, every other decision citation, and the mapping of every
+remaining project to its chapter were all sound.
+
+**One finding was rejected rather than fixed.** A reviewer read the drafting of this list as
+breaking the `[STATED]` deferral *"we can discuss the Table of Contents later, but not right
+now."* **The owner lifted that himself** — *"After that we will start with the Python book"* —
+and this file records the rulings he then made on it. The deferral paragraph in
+`../future-books/README.md` should say so, and does not yet.
