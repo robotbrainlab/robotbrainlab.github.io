@@ -277,6 +277,28 @@ them. At step 8 the plan is written and he approves it. At step 7 he chooses amo
 out for him. **Step 4 was the only place he was asked to originate content from nothing**, and that
 inconsistency was the signal that the step was wrong rather than hard.
 
+**[AGREED 2026-11-11] The table above has a hole, and it put the step back on him in practice.**
+The owner's row says he rules on **the proposed list**. **Nothing in the table proposes one.** The
+framing run reports and does not decide; the consolidation run classifies and merges and is
+*forbidden* from rejecting anything for being unimportant. So when both runs finish, what exists is
+an **inventory** — 63 categories with their evidence — and no recommendation. Handing him the
+inventory and asking him to cut it is asking him to originate the argument from nothing, which is
+the error this section retracts. He said so four times before it was heard.
+
+**The missing row is Claude's, and this section already names the criteria for it:** *"An argument
+needs a purpose and reasons; it does not need a particular author. The purpose is already written
+down: §1.1's career goal and §3.1's five questions."*
+
+| Who | Does what |
+|---|---|
+| **Claude, after the consolidation run** | **Proposes the cut**: which of the candidate areas the book covers, each kept area with the reason it serves §1.1's career goal and can answer §3.1's five questions, each cut with the reason it cannot. **Reasons, not a count** — no target number |
+| **The owner** | Approves, redraws or rejects **that proposal**, with the inventory and its evidence still beside it |
+
+**This does not return the frame to Claude's judgement**, which is what the bullets above forbid.
+The *categories* still come only from what the field files, with a source named for each. What is
+being judged is which of those field-given areas serve this book's stated purpose — and that
+purpose is the owner's, written in his own words at §1.1.
+
 **What does not change.** The framing run is still bounded, because an unbounded one measures the
 index. Its bound is that **every boundary it proposes must name the source it came from** — a
 category with no source is the agent's invention, which is the thing the second bullet forbids.

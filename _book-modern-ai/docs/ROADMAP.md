@@ -106,8 +106,17 @@ restate it.
 
    **It needs the owner's definition of an area before it can run**, because every rejection it
    makes is an application of that rule. The draft is in the brief and is marked as mine.
-3. **The owner rules on that list** — approves it, redraws the boundaries, or rejects it — with the
-   evidence for each boundary in front of him. **The reasons are recorded with the list**, because a
+3. **Claude proposes the cut, then the owner rules on the proposal** — approves it, redraws the
+   boundaries, or rejects it — with the evidence for each boundary in front of him.
+
+   **`[2026-11-11]` This step had a hole and the owner fell through it four times.** His row says he
+   rules on *the proposed list*; nothing in the table made one. The framing run reports and does not
+   decide; the consolidation run may not reject anything for being unimportant. So both runs finish
+   and what exists is an inventory of 63 with no recommendation — and asking him to cut an inventory
+   is asking him to originate the argument from nothing, which `GOAL.md` §3.3 retracts in his own
+   words. **The proposal is `PROPOSAL-areas-2026-11-11.md`: 12 areas, 27 folded, 24 cut, each with
+   its reason, judged against §1.1's career goal and §3.1's five questions, which is what §3.3 says
+   the argument is made from.** `GOAL.md` §3.3 now carries the missing row. **The reasons are recorded with the list**, because a
    later cycle has to be able to ask whether a boundary still makes sense.
 
    **`[2026-11-11]` This used to say "and the two runs' disagreements beside it".** With one framing
@@ -122,7 +131,13 @@ restate it.
    the scouts look for, so it is not a clerical step. Every area's exclusions are written at the
    same time as every other's, from the one approved list.
 
-   **`[OPEN 2026-11-11]` Who does it.** This clause used to say "that somebody is the owner … and it
+   **`[RESOLVED 2026-11-11]` Claude does it**, in the same sitting as the approval, by the same
+   argument that assigns the proposal to Claude — writing a scope from an approved list is applying
+   the owner's stated purpose, not originating content from nothing. He corrects any scope he
+   disagrees with, as he corrects the proposal. The reasoning that was marked open is kept below
+   because it is what the resolution answers.
+
+   **`[was OPEN 2026-11-11]` Who does it.** This clause used to say "that somebody is the owner … and it
    is not Claude's", undated and unmarked. **`GOAL.md` §3.3, marked `[AGREED 2026-11-06]`, retracts
    the same reasoning one step earlier**: asking the owner to partition the current field is
    circular, because that knowledge is what the book exists to give him, and the argument comes from
