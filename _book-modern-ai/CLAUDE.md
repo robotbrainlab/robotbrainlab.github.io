@@ -88,6 +88,12 @@ statement of it.
   (`docs/briefs/TEMPLATE-area-research.md`).
 - **Structure follows the subjects.** Do not choose the parts before the research names them
   (`docs/GOAL.md` §5.3).
+- **The owner is never handed an unrecommended list.** Where he rules on something, somebody
+  proposes it first, with a reason per item, and that somebody is you. A run that reports or sorts
+  has not proposed anything (`docs/GOAL.md` §3.3, `[AGREED 2026-11-11]`). **He approves, redraws or
+  rejects a proposal; he does not originate one.** This was broken at step 4 for four days: an
+  inventory of 63 areas was put to him as if it were a recommendation, and he said so four times
+  before it was heard.
 - **Page estimates never decide scope** (`docs/GUIDE.md` §9).
 - **Nothing is drafted until `docs/PLAN.md` is approved** (`docs/ROADMAP.md`, step 8).
 - **A decision waiting more than seven days is acted on and marked `[DEFAULTED]`** — but **never

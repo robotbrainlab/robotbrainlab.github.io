@@ -41,8 +41,12 @@ examples.** If a change is needed, change this file and say in the commit what i
 - **There is no cap on candidate areas.** The first two runs each had one, each hit it, and **each
   invented its own rule for cutting the list down** — an attestation threshold in one, a tiebreak in
   the other. Neither was asked for, and one of them reported that a different tiebreak over the same
-  sources would have produced a different list. **A cutting rule is a decision about how the field
-  divides, which is the owner's.** So the run reports every category its sources name, and he cuts.
+  sources would have produced a different list. **A cutting rule is a decision this run is not
+  positioned to make**, because a reporter that filters cannot be checked against what it filtered.
+  So the run reports every category its sources name. **The cut happens twice afterwards and never
+  here**: Claude proposes it against the book's stated purpose, and the owner approves, redraws or
+  rejects that proposal (`../GOAL.md` §3.3, `[AGREED 2026-11-11]`). `[2026-11-11]` This sentence
+  used to end "and he cuts", which put an unproposed cut on the owner.
 - **There are no longer a source floor and a search floor.** Both existed because the run chose its
   own sources: without a floor, a run that opened two listings and filled every field had obeyed the
   brief exactly, and a thin list looked identical to a thorough one. **The register replaces them
@@ -309,8 +313,9 @@ missed is worth more than a longer list.**
 - **Ordering the list by anything but the alphabet.**
 - **Any selection rule of your own** — a threshold, a tiebreak, a minimum source count, a judgement
   that two categories are "really" one beyond the merge rule above, or any cut made to keep the list
-  short. **Report everything your sources name.** Deciding which categories survive is the owner's
-  job and the single thing this run must not do for him.
+  short. **Report everything your sources name.** Deciding which categories survive happens in two
+  later steps — a proposal, then the owner's ruling on it — and is the single thing this run must
+  not do.
 - **Abandoning a blocked source without searching for another route to it.**
 - **A number without what it is a ratio of**, and any share of the whole subject.
 - **Resolving a disagreement between sources** by picking the one you find more convincing.

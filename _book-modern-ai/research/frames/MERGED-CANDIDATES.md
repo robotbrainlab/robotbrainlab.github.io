@@ -2,7 +2,7 @@
 
 **This is not a proposal and nothing here is recommended.** It is every category that any
 source named across four independent runs of `../../docs/briefs/TEMPLATE-area-frame.md`, with
-how many sources named it and which kinds of source. **The cut is the owner's** (`ROADMAP.md`
+how many sources named it and which kinds of source. **The cut is proposed by Claude and ruled on by the owner** (`../../docs/GOAL.md` §3.3) — `[2026-11-11]`, this said the cut was the owner's, which left him an inventory and no recommendation (`ROADMAP.md`
 step 4). Ordered by source count, then alphabetically — the count is a fact about the evidence,
 not a score and not a ranking of importance.
 

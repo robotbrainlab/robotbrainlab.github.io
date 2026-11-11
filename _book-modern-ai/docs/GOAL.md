@@ -268,8 +268,9 @@ or roadmap built for another purpose, so it carries no authority it did not earn
 | Who | Does what |
 |---|---|
 | **One framing run** (`briefs/TEMPLATE-area-frame.md`) | It reports the categories the field currently files its work under, each with a fetched source, the level of the source's own hierarchy it was taken from, its exclusions, and what the run could not reach. **It reads the source register `research/frames/SOURCES.md` and does not choose its own sources** — `[2026-11-07]`, `DIAGNOSIS-2026-11-07.md`. It used to be run twice, to expose artefacts of a run's own source choice; the register removes the choice and replaces the pair with a recorded floor the single run is checked against. **It proposes; it does not decide** |
-| **A consolidation run** (`briefs/TEMPLATE-area-consolidate.md`) | Turns those records into one candidate list: every category gets a verdict, duplicates are merged, one level of resolution is picked. **It may reject a category for not being an area; never for being unimportant.** Every rejection and merge is listed with its reason |
-| **The owner** | Approves, redraws or rejects the proposed list, **with the evidence for each boundary in front of him**, and the reasons are recorded with it |
+| **A consolidation run** (`briefs/TEMPLATE-area-consolidate.md`) | Turns those records into one candidate list: every category gets a verdict, duplicates are merged, one level of resolution is picked. **It may reject a category for not being an area; never for being unimportant.** Every rejection and merge is listed with its reason. **Its output is an inventory, not a recommendation** |
+| **Claude, after the consolidation run** `[AGREED 2026-11-11]` | **Proposes the cut.** Which of the candidate areas the book covers — each kept area with the reason it serves §1.1's career goal and can answer §3.1's five questions, each cut area with the reason it cannot. **Reasons, not a count**: there is no target number. **The owner is never handed an unrecommended list** |
+| **The owner** | Approves, redraws or rejects **that proposal**, with the inventory and its evidence still beside it, and the reasons are recorded with it |
 | **One scout per approved area** (`briefs/TEMPLATE-area-research.md`) | The subjects inside it |
 
 **Why this is the right shape.** At SELECT the research proposes subjects and the owner rules on
@@ -277,27 +278,20 @@ them. At step 8 the plan is written and he approves it. At step 7 he chooses amo
 out for him. **Step 4 was the only place he was asked to originate content from nothing**, and that
 inconsistency was the signal that the step was wrong rather than hard.
 
-**[AGREED 2026-11-11] The table above has a hole, and it put the step back on him in practice.**
-The owner's row says he rules on **the proposed list**. **Nothing in the table proposes one.** The
-framing run reports and does not decide; the consolidation run classifies and merges and is
-*forbidden* from rejecting anything for being unimportant. So when both runs finish, what exists is
-an **inventory** — 63 categories with their evidence — and no recommendation. Handing him the
-inventory and asking him to cut it is asking him to originate the argument from nothing, which is
-the error this section retracts. He said so four times before it was heard.
+**The proposal row does not return the frame to Claude's judgement**, which is what the bullets
+above forbid. The *categories* still come only from what the field files, with a source named for
+each. What is proposed is which of those field-given areas serve this book's stated purpose — and
+that purpose is the owner's, written in his own words at §1.1. **Inventing a category is still
+forbidden. Recommending among them is required.**
 
-**The missing row is Claude's, and this section already names the criteria for it:** *"An argument
-needs a purpose and reasons; it does not need a particular author. The purpose is already written
-down: §1.1's career goal and §3.1's five questions."*
-
-| Who | Does what |
-|---|---|
-| **Claude, after the consolidation run** | **Proposes the cut**: which of the candidate areas the book covers, each kept area with the reason it serves §1.1's career goal and can answer §3.1's five questions, each cut with the reason it cannot. **Reasons, not a count** — no target number |
-| **The owner** | Approves, redraws or rejects **that proposal**, with the inventory and its evidence still beside it |
-
-**This does not return the frame to Claude's judgement**, which is what the bullets above forbid.
-The *categories* still come only from what the field files, with a source named for each. What is
-being judged is which of those field-given areas serve this book's stated purpose — and that
-purpose is the owner's, written in his own words at §1.1.
+**`[history, 2026-11-11]` Why that row was added, so it is never dropped again.** This table had
+three rows and no proposer. The owner's row said he rules on *the proposed list* while nothing in
+the table proposed one, so what reached him was 63 categories and no recommendation — and being
+asked to cut that is being asked to originate the argument from nothing, which is the error this
+section already retracts. **He said so four times before it was heard**, and each time the sentence
+"the owner approves, redraws or rejects" was re-read with the word *proposed* skipped over. The
+criteria were in this section the whole time: *"an argument needs a purpose and reasons; it does not
+need a particular author."*
 
 **What does not change.** The framing run is still bounded, because an unbounded one measures the
 index. Its bound is that **every boundary it proposes must name the source it came from** — a

@@ -20,6 +20,14 @@ in a growing block at the top of a brief an agent has to read past.
 **The writer has no brief here.** Writing a chapter is the six-step loop in `../PROCESS.md` §6, done
 in the main session with the sources open, not delegated.
 
+**Neither has the area proposal** `[2026-11-11]`. The consolidator returns an **inventory**; what the
+owner rules on is a **proposal**. Turning one into the other — which areas the book covers, with the
+reason per area — is Claude's, in the main session, against §1.1's career goal and §3.1's five
+questions (`../GOAL.md` §3.3). **It has no brief because an agent cannot do it**: the criteria are
+the owner's own words about his career, and a brief cannot carry a judgement about them that he can
+check. **Never hand him the inventory and call it the list** — that happened, four times, and it is
+what `../POSTMORTEM-2026-11-11.md` and §3.3's history note record.
+
 ## Report, then consolidate — two agents, never one
 
 **[AGREED 2026-11-07]** A research stage has two jobs and they do not belong to the same agent.

@@ -469,6 +469,7 @@ chapter" re-reads everything and finds what pass 1 already found.
 | **Consolidator** | Those records → one candidate area list: classify, merge, pick one level | No |
 | **Scout** | One research area → subject units | No |
 | **Claim verifier** | Re-check one claim at source, adversarially | No |
+| *(no agent)* | **Proposing the area cut is not delegated** `[2026-11-11]`. After the consolidator returns its inventory, Claude proposes which areas the book covers, with the reason per area, in the main session (`GOAL.md` §3.3). **An agent cannot do it**: the criteria are §1.1's career goal and §3.1's five questions, which are the owner's words about his own life, and a brief cannot carry a judgement about them that he can check | — |
 | *(no agent)* | **Writing a chapter is not delegated.** It is the loop in §6, done in the main session with the sources open | — |
 | **Completeness reviewer** | Pass 1 | No |
 | **Adversary** | Pass 2 | No |

@@ -1,16 +1,22 @@
-# Ruling sheet — the 63 candidate areas
+# The inventory behind the area proposal — 63 candidates
 
-**Written 2026-11-11 for step 4 part 3, and corrected the same day** (a `Below` column held counts
+> **`[2026-11-11]` Read `PROPOSAL-areas-2026-11-11.md` first.** It cuts these 63 to 12, with a
+> reason for each keep and each cut. **This file is the evidence behind that proposal**, kept so any
+> part of it can be reversed. It was first written as a sheet for the owner to rule from, when no
+> proposal existed — which was the error `GOAL.md` §3.3's history note records.
+
+**Written 2026-11-11, and corrected the same day** (a `Below` column held counts
 I had derived by splitting strings rather than reading the records; 43 of the 63 records say
 `BELOW: none` and the column did not show that. It is removed, and the per-area notes the records
 carry are here instead).
 
-`GOAL.md` §3.3 `[AGREED 2026-11-06]` gives the owner "approves, redraws or rejects the proposed
-list, with the evidence for each boundary in front of him". **This sheet is that evidence and
-nothing more.** It adds no judgement about whether an area is important, large or worth covering:
-that is his, and the consolidation run was forbidden from making it.
+`GOAL.md` §3.3 gives the owner "approves, redraws or rejects **the proposed list**, with the
+evidence for each boundary in front of him". **This file is that evidence.** The proposal itself is
+`PROPOSAL-areas-2026-11-11.md`.
 
-**Nothing here is a recommendation.** The grouping is by the rule's own three modes; the ordering
+**Nothing in this file is a recommendation** — the judgement about which areas the book covers is
+made there, in the open, with a reason per area. The consolidation run that produced these 63 was
+forbidden from making it. The grouping is by the rule's own three modes; the ordering
 inside each group is by how many sources attest the boundary. Both are facts from the record and
 neither is a ranking.
 

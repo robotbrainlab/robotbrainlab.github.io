@@ -87,9 +87,12 @@ of.
 that my error was inherited from a stale citation. That claim was false, and the first run of
 `briefs/document-check.md` caught it.** What follows is the corrected account, which is worse.
 
-1. `briefs/TEMPLATE-area-consolidate.md` states: *"A judgement that an area is small, quiet,
+1. `briefs/TEMPLATE-area-consolidate.md` **then stated**: *"A judgement that an area is small, quiet,
    unpromising or not worth the owner's time is **the owner's and nobody else's** (`../GOAL.md`
-   §3.3)."*
+   §3.3)."* **`[2026-11-11, evening]` That sentence is gone.** It was true about what the
+   consolidation run may not do and wrong about where the judgement goes instead: it goes to a
+   proposal, made by Claude in the open with a reason per area, which the owner then rules on
+   (`GOAL.md` §3.3, now a four-row table). The brief says that in those words now.
 2. I read that line, did not open §3.3, and told the owner four times that cutting the area list was
    his.
 3. He challenged it: *"Why me?"*

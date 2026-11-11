@@ -1,8 +1,10 @@
 # Area consolidation brief
 
 **The consolidation run.** It takes what the framing runs reported and turns it into one candidate
-area list the owner can rule on. It runs **after** `TEMPLATE-area-frame.md` and **before** the
-owner's decision at step 4 (`../ROADMAP.md`).
+area list. It runs **after** `TEMPLATE-area-frame.md` and **before** two further steps that are not
+this run's: **Claude proposes which of the candidate areas the book covers, and the owner approves,
+redraws or rejects that proposal** (`../ROADMAP.md` step 4, parts 3 and 4). **This run's output is an
+inventory, not a recommendation.**
 
 **Why it exists, and why it is a separate agent.** A framing run must report what the field files,
 faithfully and without filtering — that is the whole reason its brief forbids any selection rule of
@@ -19,18 +21,22 @@ consolidates, and **the consolidator's output can be checked against the record 
 
 > **It may reject a row for not being an area. It may never reject a row for being unimportant.**
 
-A kind error — this is a domain, a format, an audience, a product name — is this run's to fix. A
-judgement that an area is small, quiet, unpromising or not worth the owner's time is **the owner's
-and nobody else's** (`../GOAL.md` §3.3). Every rejection and every merge is listed with its reason
-so he can reverse either without reading the raw files.
+A kind error — this is a domain, a format, an audience, a product name — is this run's to fix.
 
-**[2026-11-11] This paragraph was changed earlier today on the claim that its citation was false, and
-changed back, because the citation holds.** §3.3's own division-of-labour table gives the
-consolidation run "**may reject a category for not being an area; never for being unimportant**" and
-gives the owner "**approves, redraws or rejects the proposed list, with the evidence for each
-boundary in front of him**". What §3.3 retracts is that the owner must *author* the list — a
-different act, and one nobody asks of him, since the list is proposed to him. The error was mine and
-is recorded in `../POSTMORTEM-2026-11-11.md` §2.2; **do not re-apply the change.**
+**A judgement that an area is small, quiet, unpromising or not worth covering is not.** Not because
+it belongs to somebody more senior, but because **a run that filters cannot be checked against what
+it filtered.** That judgement is made one step later, in the open, where it is written down with a
+reason per area and can be reversed: `../GOAL.md` §3.3 `[AGREED 2026-11-11]` assigns the proposal to
+Claude and the ruling on it to the owner. Every rejection and every merge this run makes is listed
+with its reason, so either can be reversed without reading the raw files.
+
+**[2026-11-11] Two corrections to this paragraph on one day, and the second is the one that holds.**
+In the morning it was changed on the claim that its citation to §3.3 was false; the citation held, so
+it was changed back. In the evening the owner pointed out, for the fourth time, that nobody should be
+handing him an unrecommended list — and he was right: §3.3's table said he rules on *the proposed
+list* while nothing in the table proposed one. §3.3 now carries that missing row. **What this run
+must not do is unchanged. Where the judgement goes instead is now written down.** See
+`../POSTMORTEM-2026-11-11.md` §2.2 for the morning error.
 
 ## How to fill this in
 
@@ -120,8 +126,9 @@ sense of what matters.
    being used as the record. One run of this brief gave `AREA` to fourteen such records — among them
    *Graphs*, justified as "learning on graph-structured data", and *Harness Engineering*, justified
    as "the harness a model runs inside" — and said in its own coverage section that `AREA` on those
-   meant no more than "a track name that denotes AI engineering". **It is the owner's business
-   whether a bare track title becomes an area of his book, not this run's.**
+   meant no more than "a track name that denotes AI engineering". **Whether a bare track title becomes
+   an area of this book is settled in the open at step 4 part 3, with a reason written down, and then
+   by the owner — not inside this run where nobody can see it.**
 
 3. **Merge categories that are the same area under different names**, and **only** on evidence from
    the records: the same sources, or `ALSO CALLED` naming the other, or `INCLUDES` that match. Give
@@ -145,7 +152,8 @@ sense of what matters.
 2. `## Rejected` — one line each: name, verdict, and **the clause of the rule it fails.** Grouped by
    verdict.
 3. `## Merged` — one line each: the kept name, the names merged into it, and the evidence.
-4. `## Unclear` — every `UNCLEAR`, with what would settle it. **These go to the owner undecided.**
+4. `## Unclear` — every `UNCLEAR`, with what would settle it. **These leave this run undecided**, and
+   the proposal at step 4 part 3 must say what it did with each one before the owner sees it.
 5. `## Level` — which level you picked and why, and what sits below it.
 6. `## What this run could not settle` — in full, as specified below.
 7. `## Written to` — the path and the counts.
@@ -194,7 +202,8 @@ files, and a category you cannot judge from them is `UNCLEAR`, not researched fu
   string to search for. **Automation gives no context, which is the whole of what you were asked
   for.**
 - **Rejecting a category for being unimportant, small, quiet, unfashionable, or not worth covering.**
-  That is the owner's judgement and this run must not make it. Reject only on kind.
+  **Reject only on kind.** That judgement is made at step 4 part 3, per area and with its reason
+  recorded, where it can be reversed; a rejection buried in this run cannot be.
 - **Adding a category no framing run reported.** If the rule implies an area the runs missed, say so
   under `What this run could not settle` — never as an area.
 - **Any new research.** No searches, no fetches, no recall. The framing files are the evidence.

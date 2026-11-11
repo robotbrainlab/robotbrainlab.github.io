@@ -44,9 +44,11 @@ They live in their own directory because the scouts' files in `../` are named
   **Not a proposal, and not comparable with a consolidated list** — it is every name any source
   carried, before any rejection on kind.
 - `CONSOLIDATED-2026-11-07-g.md` — **run `g` consolidated, and the current candidate list.** 63
-  areas from 283 input categories, with a numbered ledger of all 283. **This is what the owner rules
-  on at step 4.** Read `../../docs/DIAGNOSIS-2026-11-07.md` §9 first: it names the thirteen areas
-  kept on scope that may not be their source's, and the 32 labels that got no verdict.
+  areas from 283 input categories, with a numbered ledger of all 283. **It is an inventory, not a
+  recommendation** — what the owner rules on is `../../docs/PROPOSAL-areas-2026-11-11.md`, which cuts
+  these 63 to 12 with a reason for each. Read `../../docs/DIAGNOSIS-2026-11-07.md` §9 first: it names
+  the **six** areas kept on scope that may not be their source's (`[2026-11-11]`, it said thirteen),
+  and the 32 labels that got no verdict.
 - `CONSOLIDATED-2026-11-07.md` — runs `e` and `f` consolidated: 181 records, each with one verdict,
   of which 69 are areas. **Read `../../docs/DIAGNOSIS-2026-11-07.md` before comparing this with
   `MERGED-CANDIDATES.md`**: the two count different things, and comparing them directly is what made

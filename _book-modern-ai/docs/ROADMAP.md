@@ -15,8 +15,10 @@ approvals matter. **If a decision waits more than seven days I act on my recomme
 
 ## Current position
 
-**Step 4 is next. One framing run records what the field files, a consolidation run turns that into
-one candidate list, and the owner rules on it.**
+**Step 4 is next. One framing run records what the field files; a consolidation run turns that into
+one candidate list; Claude proposes which of those areas the book covers, with the reason for each;
+the owner approves, redraws or rejects that proposal.** `[2026-11-11]` The third of those four was
+missing from every document until today, and its absence put an unproposed cut on the owner.
 
 **[2026-11-07] The whole chain has now been run once as a validation, and its outputs are
 disposable.** Framing twice, consolidation once, one scout, one claim verification — then every
@@ -50,7 +52,7 @@ built from what the six runs already found. **Four things in it change what step
 | 1 | Agree the goal | Owner | `GOAL.md` | **Done** |
 | 2 | Agree the method | Owner | `PROCESS.md`, `GUIDE.md`, `GATES.md` | **Partly approved.** Eight topics were settled on 2026-11-06 — grep `[AGREED 2026-11-06]` for them. The rest stay marked `[I RECOMMEND]` and are ruled on as they come up in practice |
 | 3 | Write the research brief | Claude | A brief with a capped output, a counted budget and a stopping rule with a fixed point | **Written and exercised** — `briefs/TEMPLATE-area-research.md`. **It terminates**: the validation run of 2026-11-07 stopped on its fetch limit and wrote up without starting a further record. Three defects it exposed are fixed in the brief; see `VALIDATION-2026-11-07.md` V18–V20, of which **V19 matters most — six of six verdicts came out `CHAPTER`, so three of the four verdicts have still never been issued** |
-| 4 | **Establish the research areas** | Claude proposes · **Owner rules** | One framing run over the source register records what the field files; a consolidation run turns that into one candidate list; the owner approves, redraws or rejects, with the reasons recorded | **Next** |
+| 4 | **Establish the research areas** | Claude proposes · **Owner rules** | One framing run over the source register records what the field files; a consolidation run turns that into one candidate list; **Claude proposes the cut against §1.1's purpose, with the reason for each keep and each cut**; the owner approves, redraws or rejects that proposal, with the reasons recorded | **Parts 1–3 done.** `PROPOSAL-areas-2026-11-11.md` — 12 areas. Awaiting the owner's ruling |
 | 5 | Run the research | Claude | One file per area in `../research/` | Not started |
 | 6 | Select the subjects | Claude sorts · **Owner rules** | What passed the three tests, and every rejection with the test it failed and why. He rules on both | Not started |
 | 7 | Decide the book's shape | **Owner** | The four open questions that need the subjects: breadth against depth, the mathematics boundary, the structure, and which area goes deep | Not started |
@@ -95,14 +97,19 @@ restate it.
    categories the run names, seven of them below an area rather than among the 63; and **32 labels in
    run `g`'s appendices never got a verdict**, though reading all 32 shows none names a subject, because
    that run put them outside its list and the consolidator judged the list. Both causes are fixed
-   upstream. **So part 3 — the owner's ruling — is the next action, and it is his.**
+   upstream.
+
+   **[2026-11-11] Part 3 is also done.** `PROPOSAL-areas-2026-11-11.md` — 12 areas kept, 27 folded
+   into them, 24 cut, checked name by name so all 63 are accounted for exactly once. **The next
+   action is the owner's ruling on that proposal.**
 2. **A consolidation run**, `briefs/TEMPLATE-area-consolidate.md`, once. The framing runs report
    faithfully, which means they report application domains, session formats, audience labels and
    vendors' product names too — because those are what venues route submissions by. This run gives
    every reported category one verdict, merges the same area reported under different names, and
    picks one level of resolution. **It may reject a category for not being an area. It may never
-   reject one for being unimportant** — that is the owner's, and every rejection and merge is listed
-   with its reason so he can reverse either.
+   reject one for being unimportant** — **that judgement belongs to part 3, where it is proposed with
+   its reason and then ruled on**, not to a run that cannot be checked against what it filtered. Every
+   rejection and merge is listed with its reason so either can be reversed.
 
    **It needs the owner's definition of an area before it can run**, because every rejection it
    makes is an application of that rule. The draft is in the brief and is marked as mine.
@@ -116,8 +123,9 @@ restate it.
    is asking him to originate the argument from nothing, which `GOAL.md` §3.3 retracts in his own
    words. **The proposal is `PROPOSAL-areas-2026-11-11.md`: 12 areas, 27 folded, 24 cut, each with
    its reason, judged against §1.1's career goal and §3.1's five questions, which is what §3.3 says
-   the argument is made from.** `GOAL.md` §3.3 now carries the missing row. **The reasons are recorded with the list**, because a
-   later cycle has to be able to ask whether a boundary still makes sense.
+   the argument is made from.** `GOAL.md` §3.3 now carries the missing row, so the step cannot go
+   missing again. **The reasons are recorded with the list**, because a later cycle has to be able to
+   ask whether a boundary still makes sense.
 
    **`[2026-11-11]` This used to say "and the two runs' disagreements beside it".** With one framing
    run per cycle there is no second run to disagree with it, and **what replaces that evidence is the
@@ -137,21 +145,21 @@ restate it.
    disagrees with, as he corrects the proposal. The reasoning that was marked open is kept below
    because it is what the resolution answers.
 
-   **`[was OPEN 2026-11-11]` Who does it.** This clause used to say "that somebody is the owner … and it
-   is not Claude's", undated and unmarked. **`GOAL.md` §3.3, marked `[AGREED 2026-11-06]`, retracts
-   the same reasoning one step earlier**: asking the owner to partition the current field is
-   circular, because that knowledge is what the book exists to give him, and the argument comes from
-   the purpose instead — §1.1's career goal and §3.1's five questions. That reasoning applies to
-   writing the scopes exactly as it applied to authoring the list. **The owner rules on this; I have
-   marked it rather than resolved it**, because resolving it myself is the error that produced it
-   (`POSTMORTEM-2026-11-11.md` §3).
+   **`[history]` How it got here.** This clause used to say "that somebody is the owner … and it is
+   not Claude's", undated and unmarked. **`GOAL.md` §3.3, marked `[AGREED 2026-11-06]`, retracts the
+   same reasoning one step earlier**: asking the owner to partition the current field is circular,
+   because that knowledge is what the book exists to give him, and the argument comes from the
+   purpose instead — §1.1's career goal and §3.1's five questions. That reasoning applies to writing
+   the scopes exactly as it applied to authoring the list. **It was then marked open rather than
+   resolved, which left the work on him a second time; the resolution above closes it.**
 
 **Two things to expect, so neither is read as a defect in the runs.** Filing categories do not
 record whether a subject is still moving, so a settled area can arrive looking like a live one —
 `GUIDE.md` §3's test is per claim and only applies later, which means a scout budget can be spent on
 an area that turns out to be foundations. And the runs are forbidden from aiming at areas that are
 agent-sized and non-overlapping, because they must report what the sources carry; **closing that gap
-is what the owner's redraw is for**, and a boundary he draws is his rather than a source's.
+is what part 3's proposal is for**, and the owner's redraw after it. A boundary he draws is his
+rather than a source's.
 
 **Step 4 is not finished until the list is approved.** Everything downstream reads "the approved
 list at step 4": the scouts' scope and exclusions (`briefs/TEMPLATE-area-research.md`) and the area
@@ -162,7 +170,7 @@ numbers in claim ids (`PROCESS.md` §5.1).
 | Not from | Why |
 |---|---|
 | **A curriculum, roadmap, course or syllabus** | Built for somebody else's purpose, so it carries authority it did not earn here and reasons that were not about this book (`GOAL.md` §3.3) |
-| **My judgement of how the field divides** | I would be choosing the answer the research is meant to reach |
+| **My judgement of how the field divides** | I would be choosing the answer the research is meant to reach. **`[2026-11-11]` This bars me from inventing the categories; it does not bar me from proposing which of the field's own categories this book covers.** The first would be deciding how AI is shaped — the thing the research exists to find. The second is applying §1.1's stated purpose to a list somebody else drew, which is what part 3 is and what `GOAL.md` §3.3 assigns to me |
 | **A category the framing run cannot source** | A boundary with no named source behind it is the agent's invention, which is the same defect as my judgement with less visibility |
 
 **Note what is *not* on that list.** The categories a field currently files its work under are
