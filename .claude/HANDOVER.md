@@ -104,8 +104,9 @@ Notes:
 | `utilities/text-check.py` | Proves a page's text, links and element ids did not change |
 | `utilities/link-check.py` | Checks every internal link and `#anchor` on the site resolves |
 | *(moved to the Desktop archive 2026-11-11)* | The old D&I guide page with the pipeline diagram |
-| `books/interview-prep/` | **The interview-prep book** — a whole separate project living here for safekeeping. Unpublished (leading `_`). See "The interview-prep book" below |
-| `books/` | **Decisions for the two books that come after it** — Python, and Core ML and Deep Learning. Nothing is started; `DECISIONS.md` records why, what was settled and the rules still to write. Unpublished (leading `_`) |
+| `books/interview-prep/` | **The interview-prep book**, *Modern AI Engineering from Zero* — a whole separate project living here for safekeeping. See "The interview-prep book" below. `[2026-11-12]` This row said "Unpublished (leading `_`)"; **the underscore is gone and so is Jekyll**, so nothing here is unpublished — `/robots.txt` is what keeps it out of search results |
+| `books/future-books/README.md` | **Decisions for the two books that come after it** — *Python*, and *Machine Learning and Deep Learning*. Nothing is started. Ten decisions with their reasons and the rules still to write. `[2026-11-12]` This row pointed at `books/` and a `DECISIONS.md` that has never existed |
+| `books/rag-from-zero/` | *RAG from Zero: A Practical Guide*, added 2026-11-12. **PDF only**, no Markdown source here, and **not linked from any page** |
 
 Removed on purpose, so don't recreate them: the Mathematics and D&I on-ramps, the separate `cse/on-ramp.html` page
 (merged into the CS&E guide on 2026-09-27, so each discipline has one guide; the site is for the owner only, so no redirect is kept), and the old `redesign/`

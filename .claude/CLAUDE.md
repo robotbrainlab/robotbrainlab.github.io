@@ -27,7 +27,8 @@ AskUserQuestion tool):
    Appendix B); a session here is an edit to it, not drafting.
 4. **The two books that come after it** — Python, and Core Machine Learning and Deep Learning.
    **Neither is started, and neither may be started until its rules are written and its table of
-   contents approved**, which is the owner's instruction. Read `books/FUTURE-BOOKS.md` first;
+   contents approved**, which is the owner's instruction. Read `books/future-books/README.md`
+   first (`[2026-11-12]` this said `books/FUTURE-BOOKS.md`, which has never existed);
    it records every decision and the rules still to be settled. Nothing about the website.
 
 Then follow the matching section of the handover: "Restyle work", "Website work", or
