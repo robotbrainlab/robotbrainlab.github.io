@@ -90,6 +90,11 @@ If a section is clean, say so in one line rather than leaving it out.
 
 One reading of the chapter against the claims file, **and of `<ANSWERS>` for this chapter's
 section**. **No web searches, no fetches** — this pass compares files already given to you.
+
+**`[STATED 2026-11-11]` The claims file now carries `source_quote`: the exact sentence from the
+source that carries each claim.** Judge the chapter's wording against **that sentence**, not against
+the strength label alone. Until today this pass had only a label and a URL it was forbidden to open,
+so it was asked to check prose against evidence it could not see.
 Verifying a claim at its source is the claim verifier's job, not yours.
 
 **TARGET**

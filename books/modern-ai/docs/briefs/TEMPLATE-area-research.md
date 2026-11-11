@@ -52,7 +52,12 @@ Out of scope, because another area owns it: `<EXCLUDED>`
 
 **Return to me only this**, and nothing else:
 
-1. `## Sampling` — your coverage report, in full, as specified at the end.
+1. `## Sampling` — your coverage report, in full, as specified at the end. **`[STATED 2026-11-11]`
+   Write this into `<OUTFILE>` as well, not only in your reply.** In the one real run of this brief
+   it existed only in the conversation and was lost: the file has an overview and six subjects and
+   no coverage section at all. What you could not reach, what your sources over-represent, which
+   subjects you skipped and whether the area looks wrongly drawn are findings, and a finding that
+   lives in a reply is re-derived next cycle or never.
 2. `## Subjects found` — one line per subject: its name, its verdict, and nothing more.
 3. `## Overview headline` — four lines: size, dominance, adoption, growth, each with its basis in
    under fifteen words.
@@ -107,6 +112,11 @@ this run.
 One `##` heading per subject, then these fields. **Every field is required.** The word limits are
 enforced: a record that exceeds one is not finished, so cut it.
 
+**`[STATED 2026-11-11]` When you cut to fit a limit, say what you cut.** Add one line at the end of
+that field: `CUT TO FIT: <what you left out>`. The limits are there to keep records comparable, not
+to lose material quietly — and until this was written down, **nothing recorded what a limit cost.**
+"Nothing of substance" is a legitimate line where it is true.
+
 | Field | Content | Limit |
 |---|---|---|
 | `NAME` | What the field calls it, plus every other name it goes by | 20 words |
@@ -117,7 +127,7 @@ enforced: a record that exceeds one is not finished, so cut it.
 | `ENGINEERING` | How it is actually built, the central trade-off, and the tools or frameworks in real use | 150 words |
 | `SKILLS` | What someone would need to understand, reproduce, implement or contribute to this: the knowledge, the technical skills, and the practical experience. **Be specific** — "strong maths" is not an answer; "able to read a proof of a convergence bound" is | 130 words |
 | `BUILDABLE` | Three parts, judged against **THE MACHINE** below. **(a)** What reproducing the central result here actually takes — memory, disk, time, and cost. **All four, not only the interesting ones.** **(b)** The **smallest experiment that teaches the mechanism**, what it measures, and what it needs; if that still needs more than the machine below, say so rather than shrinking it until it is wrong. **(c)** A line beginning `HARDWARE:`. **If nothing here can be reproduced on that machine, say that** — it is a true and important finding about the area, not a failure | 180 words |
-| `CLAIMS` | 3 to 6 rows: `claim \| source URL \| strength \| maturity \| basis \| class`. See below | — |
+| `CLAIMS` | **As many rows as hold up, to a maximum of 6**: `claim \| source URL \| **source quote** \| strength \| maturity \| basis \| class`. **`[STATED 2026-11-11]` The source quote is new and is required**: the exact sentence from the page that carries the claim, copied verbatim. If you cannot quote a sentence that carries it, you have not established the claim — drop it. See below. **`[STATED 2026-11-11]` There is no floor.** One solid claim is a complete answer, and "the evidence here is thin" is a finding. A floor of three once produced a single row bundling a throughput figure with two separate speed comparisons, one of which its own source had retired | — |
 | `VERDICT` | Answer three questions, then give one value. See below | 80 words |
 
 **THE MACHINE**
@@ -213,7 +223,7 @@ stage whose four verdicts always return the same one is not selecting anything.*
 
 **BUDGET**
 
-30 web searches and 30 page fetches. Count them. Report the counts.
+30 web searches and **45 page fetches**. Count them. Report the counts. **`[STATED 2026-11-11]` Fetches raised from 30.** In the two framing runs of 2026-11-11, fetches ran out while searches did not — 23 of 25 and 24 of 25 fetches against 11 and 16 of 25 searches — so the binding limit was pages opened, not searches made. Opening a page is what turns a search result into evidence.
 
 **At least 10 searches must be spent, and they are not interchangeable with fetches.** A fetch goes
 deeper into an index you already have; a search is the only thing that finds an index you do not.

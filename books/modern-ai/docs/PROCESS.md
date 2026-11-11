@@ -269,8 +269,8 @@ decision and rare by design.
 
 ### 5.1 From a scout's claim to a claims row
 
-The scout returns six fields. `CLAIMS.tsv` has eleven. **This is the transformation, and it happens
-at CONFIRM**, not by a scout and not by a writer:
+The scout returns six fields. `CLAIMS.tsv` has **twelve** `[STATED 2026-11-11]`. **This is the
+transformation, and it happens at CONFIRM**, not by a scout and not by a writer:
 
 | Column | Where it comes from |
 |---|---|
@@ -280,6 +280,7 @@ at CONFIRM**, not by a scout and not by a writer:
 | `verified_on` | **The date the claim verifier ran**, not the date the scout read it. A row the verifier has not touched leaves this empty, which is what marks it unconfirmed |
 | `review_by` | Computed from `class` and `maturity` by the policy in `GATES.md` |
 | `state` | `unverified` on arrival. Becomes `verified`, `contested` or `superseded` only through the claim verifier |
+| `source_quote` | **`[STATED 2026-11-11]` The exact sentence from the source that carries this claim, copied verbatim.** The scout supplies it; CONFIRM does not invent it. `GUIDE.md` §5 and `GOAL.md` §3.4 both require a source to be quoted, and until today there was nowhere to put the quotation — so `pass-2-claims.md`, which judges the chapter's wording against this row and may not fetch, was checking prose against a label and a URL it could not open |
 | `dependents` | Empty until a chapter lists the claim in its `## Claims` section. Filled at CLOSE, not before |
 
 **Two rules that follow.** A row with an empty `verified_on` has `state = unverified`, and a chapter

@@ -45,6 +45,25 @@ whether it is growing. It is forbidden to report "X% of AI", because nobody can 
 
 ---
 
+## Part 1 — ANSWERED 2026-11-11
+
+| # | Answer |
+|---|---|
+| 1.1 | **"AI: Research and Engineering. Simple and Clear."** The goal is stated as a field, not as four job titles |
+| 1.2 | **Keep both required.** An area needs live research AND live engineering |
+| 1.3 | **Split as described.** Perception, robot learning and vision-language-action in; mechanical, electrical, control theory and functional safety out |
+| 1.4 | **Keep all four measures** — size, concentration, adoption, growth |
+
+**What 1.1 changes, and it is not small.** The test was "does this serve AI Researcher, Research
+Engineer, AI Engineer or Machine Learning Engineer". It is now **"is this the research of AI or the
+engineering of AI"**. That is a test about the field, not about a job advertisement — and the
+robotics cut I made was argued entirely from job titles, which is no longer the question being
+asked. The answer to 1.3 stands on its own evidence and is unaffected.
+
+**One thing 1.1 leaves open and 3.2 must settle:** the book is called *Research, Science and
+Engineering*, and the consolidation rule keeps a category if it belongs to **any of those three**.
+1.1 names two. Question 3.2 asks whether science stays as a third mode.
+
 # Part 2 — Finding the areas (framing runs)
 
 **2.1** You revoked the fixed source list today. Each run now finds its own sources.
@@ -88,6 +107,24 @@ They do **not** happen every cycle.
 
 ---
 
+## Part 2 — ANSWERED 2026-11-11
+
+| # | Answer |
+|---|---|
+| 2.1 | **Science stays.** "You can consider AI: Research, Science and Engineering. I missed the Science part previously." The book's title and the three-mode rule both stand |
+| 2.2 | **Nothing is carried between runs.** No source list, no routes, no earlier findings |
+| 2.3 | **Combine: keep everything either run found.** A category one run found and the other missed is kept |
+| 2.4 | **Source floor stays at 8**, "keep a buffer if it is needed" |
+| 2.5 | **At least 4 of the 5 kinds**, with his reasoning: *"research without engineering at least for me is pointless, because we should know what we are up to"* |
+| 2.6 | **Find a route to role and job categories.** The gap must be closed, not just recorded |
+
+**`[STATED 2026-11-11]` The 4-of-5 rule gains a floor inside it, on evidence from the two runs.**
+Both runs met 4-of-5 and both still came back reporting the **same single gap: no source that files
+AI work by job or role.** Run `h` also recorded that 36 of its 172 labels came from one commercial
+programme — so the engineering side of its list rested on a single source. **4-of-5 can be satisfied
+while dropping the one kind that carries engineering**, which is the kind the owner says the book
+exists for. So: at least 4 of 5, **and at least one of them must be `practitioner`.**
+
 # Part 3 — Turning the runs into one list (consolidation)
 
 **3.1** One agent reads the framing runs and gives every category one verdict: it is an area, or it
@@ -112,6 +149,20 @@ rather than its 37 narrow ones — and file the finer ones underneath.
 **Keep this, or should every level be reported flat?**
 
 ---
+
+## Part 3 — ANSWERED 2026-11-11
+
+| # | Answer |
+|---|---|
+| 3.1 | **Sort first.** An agent gives every entry a verdict before it reaches the owner |
+| 3.2 | **Settled by 2.1** — the three modes stand: science, research, engineering |
+| 3.3 | **Keep the split.** The sorting agent may reject on kind, never on importance |
+| 3.4 | **No description means undecided, and it is sent to him** — never thrown out, never guessed |
+| 3.5 | **Take the broad level, keep the detail filed underneath** |
+
+**All four confirm the design as written.** Nothing changes in
+`briefs/TEMPLATE-area-consolidate.md` except what Part 2 already required: it now unions two or more
+independent runs instead of reading one.
 
 # Part 4 — Choosing what the book covers
 
@@ -142,6 +193,65 @@ you can reverse it later.
 **Is 7 days right? Longer? Or should nothing ever proceed without you?**
 
 ---
+
+## Part 4 — ANSWERED 2026-11-11 (4.1 reopened)
+
+| # | Answer |
+|---|---|
+| 4.2 | **Account for everything** — all ~300 entries, not only the areas |
+| 4.3 | **Name what each cut takes down with it** |
+| 4.4 | **One reason per cut.** Group reasons forbidden |
+| 4.1 | **Not answered — he asked a better question back** (below) |
+
+**4.1, in his words:** *"But do you recommend that it's necessary that I have to judge, because how
+will I know? If I know already, why would I do research in the first place?"*
+
+**He is right, and `GOAL.md` §3.3 already agrees with him** — it calls asking him to partition the
+field circular, *"because that knowledge is what the book exists to give him."* The retraction
+covered authoring the list. **It did not cover ruling on it, and the same circularity applies to
+most of that ruling.**
+
+**The distinction I had been missing.** Two different questions get bundled into "rule on the list":
+
+| Question | Who can answer it |
+|---|---|
+| Is this a real division of AI? Is this boundary drawn where the field draws it? | **The sources.** He cannot know this and should not be asked |
+| Does this selection serve what I want? Is robotics in my future? Would I take a job in evaluation infrastructure? | **Only him.** No source and no agent can answer it |
+
+**So the ruling narrows.** He is not shown 60 areas to approve. He is shown **only the decisions
+whose reason rests on an assumption about him** — which `briefs/area-proposal.md` already forces me
+to mark, under the five-at-a-time check. On the last proposal that would have been **three rows**:
+robotics, multi-agent systems, and the symbolic-AI group. Everything else was argued from
+attestation and evidence, and needs nothing from him.
+
+### `[STATED 2026-11-11]` 4.1 settled: the criterion is enough, with one rule derived from 1.3
+
+**His question:** *"Wouldn't the role as I said before — AI: Research, Science and Engineering — be
+sufficient for you to act on it? Or is there still grey area?"*
+
+**Almost. Three things could have been grey, and two are already closed by answers he has given:**
+
+| Could have been grey | Settled by |
+|---|---|
+| Is a settled, mature area still in? | **No** — 1.2, both live research and live engineering required; and `GUIDE.md` §3 `[AGREED]`, the book is about what is currently moving |
+| What about things half in AI and half in another field — robotics, AI hardware, computational biology, quantum machine learning, AI for science? | **1.3 gives the rule**: keep the part that is the science, research or engineering **of AI**; exclude the part that belongs to the other field. **Generalised from robotics to every boundary case, 2026-11-11** |
+| How many areas — 60 covered shallowly, or 12 covered deeply? | **Still open.** `GOAL.md` §10, `[OPEN]` Breadth against depth |
+
+**So the criterion is sufficient to act on, and the only thing it cannot decide is how many areas.**
+That is not a question about AI — it is a question about how much of his time the book is allowed to
+take, and it is already marked open at step 7, where the subjects are known and the choice is
+informed.
+
+**The practical consequence: he is not asked to rule on areas at all.** The criterion decides them.
+He is asked one question, later, about depth.
+
+## Part 4 — remaining answers
+
+| # | Answer |
+|---|---|
+| 4.5 | **Evidence-only cuts: just make them**, recorded with their reason, reversible |
+| 4.6 | **Keep seven days** |
+| 4.7 | **An independent agent always checks the proposal before he sees it** — comparing it against the full sorted list and reporting what left without being named |
 
 # Part 5 — Researching inside an area (scouts)
 
@@ -178,6 +288,49 @@ cap**, not to raise the cap in place.
 
 ---
 
+## Part 5 — ANSWERED 2026-11-11 (5.1 deferred, with a reason)
+
+| # | Answer |
+|---|---|
+| 5.1 | **"Not sure at all on this."** Deferred — see below |
+| 5.3 | **Keep the word limits, and record what was cut to meet them** |
+| 5.5 | **Drop the floor of three claims.** Report however many hold up, even if that is one |
+| 5.7 | **Save the coverage report into the file, and the next stage must say what it did about each point** |
+
+**5.1, and why not knowing is the correct answer.** The cap cannot be judged in the abstract, and
+it does not have to be — **5.7 is what dissolves it.** Once a run must save what it skipped, and
+the next stage must act on that list, **the cap stops being a limit on coverage and becomes a batch
+size.** A run that finds eleven subjects writes six and names five; the five are read, and the area
+is run again if they are worth having.
+
+So: **6 stays as a starting batch size, marked for review after the first real cycle**, on the same
+basis he used for the source floor — *"keep a buffer if it is needed."* The number to watch is how
+many subjects get named as skipped. If it is routinely large, 6 is too small and the evidence will
+say so.
+
+**5.5 has a consequence worth naming.** Dropping the floor removes the pressure that produced a
+bundled claim — one row that carried a throughput figure and two separate speed comparisons, where
+the source itself had retired part of it. **A subject with one solid claim is now a legitimate
+result**, and "thin evidence here" becomes a finding rather than something to pad around.
+
+## Part 5 — remaining answers, and what was applied
+
+| # | Answer | Applied to the brief |
+|---|---|---|
+| 5.2 | **Keep all nine parts** of a subject record | no change needed |
+| 5.4 | **Keep: two dated items from the last twelve months**, or say plainly there are none | no change needed |
+| 5.6 | **Raise fetches to 45**, searches stay at 30 | done |
+| 5.8 | **Re-run an oversized area**, never raise the cap mid-run | already stated; now owned by a stage |
+
+**All four Part 5 decisions are in `briefs/TEMPLATE-area-research.md` as of 2026-11-11**, not held
+for later: the word limits now require a `CUT TO FIT` line saying what was dropped to meet them;
+the floor of three claims is gone; fetches are 45; and the coverage report is written into the
+research file rather than returned in a reply and lost.
+
+**Why fetches and not searches.** The two framing runs on 2026-11-11 used 23 and 24 of 25 fetches,
+against 11 and 16 of 25 searches. **Pages opened was the binding limit, not searches made** — and
+opening a page is what turns a search result into evidence.
+
 # Part 6 — Recording what the research found
 
 **6.1** Every claim a scout returns becomes a row in a claims file — **including claims for subjects
@@ -202,6 +355,35 @@ and there is nowhere to put the quote.
 **Should a quote column be added?**
 
 ---
+
+## Part 6 — ANSWERED 2026-11-11
+
+| # | Answer | Applied |
+|---|---|---|
+| 6.1 | **Keep every claim**, including those of rejected subjects — he asked what I suggest, and this is it, with the reasoning below | already the rule |
+| 6.2 | **Keep both ratings** — how strong the source is, and how settled the claim is | no change |
+| 6.3 | **Keep 3 and 24 months** for review dates | no change |
+| 6.5 | **Add a quote column** | done, four files |
+
+**Why I suggested keeping every claim.** The cost of keeping one is a line in a text file. The cost
+of dropping one is researching it again from nothing. And his own position on rejected subjects
+makes the difference decisive: **rejections are re-raised next cycle.** Re-raising a rejection whose
+evidence has been deleted is hollow — it asks him to reconsider something with nothing in front of
+him. A claim found while researching a rejected subject also frequently supports a kept one; claims
+are not owned by a single subject.
+
+**The quote column, applied in four places** so it cannot be half-done:
+
+| File | Change |
+|---|---|
+| `CLAIMS.tsv` | `source_quote` added as column 4, with a comment saying why |
+| `PROCESS.md` §5.1 | Eleven columns became twelve; the new one documented in the transformation table |
+| `briefs/TEMPLATE-area-research.md` | The scout must now return the quote with every claim — **"if you cannot quote a sentence that carries it, you have not established the claim"** |
+| `briefs/pass-2-claims.md` | Judges the chapter's wording against the quote, not against the strength label |
+
+**This closes one of the eleven things that were broken.** `GUIDE.md` §5 and `GOAL.md` §3.4 both
+required that a source be quoted; there was nowhere to put the quotation; and the review that checks
+wording against evidence was forbidden to open the page. It was checking prose against a label.
 
 # Part 7 — Choosing which subjects become chapters
 
