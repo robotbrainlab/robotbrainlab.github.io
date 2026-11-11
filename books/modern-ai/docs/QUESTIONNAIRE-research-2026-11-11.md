@@ -9,6 +9,13 @@ fastest one. "I don't know yet" is also real — it tells me to leave the item m
 instead of guessing. **Do not feel you must answer all of them in one sitting.** Part 9 is the part
 that is actually broken; Parts 1–8 are mostly confirming or changing things that already work.
 
+**`[2026-11-12]` There are 60 questions, not 49.** Parts 1 to 8 hold 45, Part 9 holds 11 and Part
+10 holds 4. **I called it 49 from the day it was written**, in the file's first commit and in every
+message since, because I counted the lines matching `**N.M**` and Part 9's questions are written
+`**9.1 The stage that…**` — a different shape, so the count never saw them. That is class M in
+`GOAL.md` §11: a pattern match answering a question about meaning. **56 are answered; Part 10's 4
+remain.**
+
 **Words I will not use without explaining them:**
 
 | Word | What it means here |
