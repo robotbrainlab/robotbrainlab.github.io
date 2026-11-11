@@ -12,7 +12,7 @@ Three books in one body of work, read as one path. The first exists; the other t
 
 | # | Book | State |
 |---|---|---|
-| 1 | **Python** — the language from fundamentals, against the roadmap that already exists at `data-intelligence/books/python-roadmap.html` | Not started |
+| 1 | **Python** — the language from fundamentals, against the roadmap that already exists at `data-and-intelligence/books/python-roadmap.html` | Not started |
 | 2 | **Core Machine Learning and Deep Learning** — everything up to language models, **including the mathematics** | Not started |
 | 3 | **Modern AI Engineering from Zero** | **Finished**, 2026-10-31. Lives in `_book/`. 57 chapters, 4 appendices, 1,413 printed pages |
 

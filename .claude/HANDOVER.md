@@ -14,14 +14,14 @@ every file exactly as it is. This site never used a Jekyll feature — no `_conf
 `{{ … }}` as a template command, and the books are full of that inside ordinary code samples.
 
 **So a leading underscore no longer decides anything, and there are no underscore folders left.**
-`_tools` is now `tools/`, and the books are in `books/`. `_sources` and `_backup` no longer exist at
+`_tools` is now `utilities/`, and the books are in `books/`. `_sources` and `_backup` no longer exist at
 all: `_sources` was dissolved into the sections it served, and `_backup` went to the Desktop archive
 (both 2026-11-11, see the Map). Everything in the repository is served.
 
 The repository is **public**, so every file was already readable on github.com. What changed is
 that a file now also has a web address, which search engines collect. **`/robots.txt` decides what
 they collect**: the finished books are findable, and markdown, chapters, records, labs, tools,
-`books/backlog/`, `books/modern-ai/`, *(dissolved 2026-11-11 — see below)*, `tools/` and `backup/` are not.
+`books/backlog/`, `books/modern-ai/`, *(dissolved 2026-11-11 — see below)*, `utilities/` and `backup/` are not.
 
 ## Publishing
 
@@ -64,17 +64,17 @@ git revert --no-edit d6d73ce c08458d 422f0a0
 # 4. Full reset of the website to before any redesign (old look everywhere, old icon).
 #    Keeps research/, the docs and later tool improvements.
 git rm -r -q theme
-git checkout 0d44bc0 -- index.html favicon cse mathematics data-intelligence tools/build-di-guide.py
+git checkout 0d44bc0 -- index.html favicon cse mathematics data-intelligence utilities/build-di-guide.py
 git commit -m "Roll back the website to before the redesign"
 ```
 
 Then **look before publishing**: preview locally (Browser pane server `site`, port 8080), run
-`python3 tools/link-check.py` if it still exists (recipes 3 and 4 remove it along with the redesign), and
+`python3 utilities/link-check.py` if it still exists (recipes 3 and 4 remove it along with the redesign), and
 only then run `git push origin main`. Nothing goes live until that push.
 
 Notes:
 - To undo a rollback, revert the rollback commit: `git revert <hash of the rollback>`.
-- After a rollback that touches the D&I guide (recipes 3 and 4), don't run `tools/build-di-guide.py`
+- After a rollback that touches the D&I guide (recipes 3 and 4), don't run `utilities/build-di-guide.py`
   until you've decided what you want. It rebuilds the guide from whatever that script and
   `theme/guide-override.css` currently say.
 - After publishing, reload each page once on the phone (pull down) so Safari drops cached styles.
@@ -89,19 +89,19 @@ Notes:
 | `cse/index.html` | CS&E guide: **restyled**. Starts with the **On-Ramp** section (`#on-ramp`, the "from Zero" book table), then the knowledge tree. Sidebar contents + back-to-top live in `theme/site.js` |
 | `books/` | **Every book, one folder per topic, with one shared LaTeX build in `books/latex/`.** `books/README.md` is the index. The website links straight at these PDFs; there is one copy of each |
 | `mathematics/index.html`, `cse/resources.html` | "Coming Soon" placeholders: **restyled** (linked from Home and the CS&E guide) |
-| `mathematics/resources.html`, `data-intelligence/llm-engineering.html`, `data-intelligence/resources.html` | **Orphans.** No page links to them (reachable by URL only). Not part of the restyle |
-| `data-intelligence/index.html` | Redirects to `guide/` |
-| `data-intelligence/books/python-roadmap.html` | Hand-written, self-contained page (its own CSS, JS and theme switch; no `theme/` link). The Python resource for **both** the D&I guide and the CS&E on-ramp. Not generated — edit it directly |
-| `data-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site (72 pages). Never edit by hand. Restyled by `theme/guide-override.css`, which the build script links in |
+| `mathematics/resources.html`, `data-and-intelligence/llm-engineering.html`, `data-and-intelligence/resources.html` | **Orphans.** No page links to them (reachable by URL only). Not part of the restyle |
+| `data-and-intelligence/index.html` | Redirects to `guide/` |
+| `data-and-intelligence/books/python-roadmap.html` | Hand-written, self-contained page (its own CSS, JS and theme switch; no `theme/` link). The Python resource for **both** the D&I guide and the CS&E on-ramp. Not generated — edit it directly |
+| `data-and-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site (72 pages). Never edit by hand. Restyled by `theme/guide-override.css`, which the build script links in |
 | `theme/site.css`, `theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=6`) |
-| `theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `tools/build-di-guide.py` (currently `10`) |
+| `theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `utilities/build-di-guide.py` (currently `10`) |
 | `favicon/` | Site icon: "Apex", a neural network converging into a radiant star, the culmination of AI (gradient tile). Also added to the D&I guide pages by the build script |
-| `data-intelligence/research/` | Source of the D&I guide (a separate research repo; **this is its only copy**) |
+| `data-and-intelligence/research/` | Source of the D&I guide (a separate research repo; **this is its only copy**) |
 | `.claude/` | Claude Code guides, skills, and `html-reference/reference.html` (the design reference) |
 | `cse/` | CS&E on-ramp books (Markdown + LaTeX) and `end-to-end/` (empty for now) |
-| `tools/build-di-guide.py` | Builds the D&I guide from `data-intelligence/research/` |
-| `tools/text-check.py` | Proves a page's text, links and element ids did not change |
-| `tools/link-check.py` | Checks every internal link and `#anchor` on the site resolves |
+| `utilities/build-di-guide.py` | Builds the D&I guide from `data-and-intelligence/research/` |
+| `utilities/text-check.py` | Proves a page's text, links and element ids did not change |
+| `utilities/link-check.py` | Checks every internal link and `#anchor` on the site resolves |
 | *(moved to the Desktop archive 2026-11-11)* | The old D&I guide page with the pipeline diagram |
 | `books/interview-prep/` | **The interview-prep book** — a whole separate project living here for safekeeping. Unpublished (leading `_`). See "The interview-prep book" below |
 | `books/` | **Decisions for the two books that come after it** — Python, and Core ML and Deep Learning. Nothing is started; `DECISIONS.md` records why, what was settled and the rules still to write. Unpublished (leading `_`) |
@@ -141,7 +141,7 @@ per page, nothing pushed).
 2. Rewrite the page: keep the `<head>` meta, add the pre-paint theme `<script>` (copy it from
    `index.html`), link `theme/site.css?v=N` with the current version (use `../theme/site.css?v=N` from subfolders), and load
    `theme/site.js` at the end. Nav = brand + links + theme switch + hamburger.
-3. Run `python3 tools/text-check.py <page>`. It must print `OK`. It compares against `HEAD`, so run it
+3. Run `python3 utilities/text-check.py <page>`. It must print `OK`. It compares against `HEAD`, so run it
    before committing (or pass `--rev <commit>`).
 4. Preview it (`.claude/launch.json` server `site`, port 8080). Check light and dark, desktop and
    mobile (375px, no horizontal scroll), the mobile menu, the reveal animations, and the console for
@@ -153,25 +153,25 @@ per page, nothing pushed).
 | Page | Status |
 | --- | --- |
 | All reachable pages | **Done** (2026-09-26) in one commit: Home, the 2 Coming Soon pages, CS&E on-ramp (since merged into the CS&E guide), CS&E guide, and the D&I guide (72 pages via `theme/guide-override.css`). Checks: 81/81 pages text/link/id-identical to the previous `main`, 0 broken internal links, *(dissolved 2026-11-11 — see below)* untouched |
-| Orphans (`mathematics/resources`, `data-intelligence/resources`, `data-intelligence/llm-engineering`) | Deliberately left in the old style. Nothing links to them |
+| Orphans (`mathematics/resources`, `data-and-intelligence/resources`, `data-and-intelligence/llm-engineering`) | Deliberately left in the old style. Nothing links to them |
 ---
 
 ## Website work
 
 ### D&I guide (AI Engineer Roadmap)
 
-- Source: `data-intelligence/research/`. It has its own governance (`AGENTS.md`, `handover.md`,
+- Source: `data-and-intelligence/research/`. It has its own governance (`AGENTS.md`, `handover.md`,
   `MAINTENANCE.md`); read them before changing roadmap content. The user considers it a separate
   research repo. **Never change its content, templates or generator for site purposes.**
-- Rebuild: `python3 tools/build-di-guide.py` from the repo root. It runs the roadmap's generator
+- Rebuild: `python3 utilities/build-di-guide.py` from the repo root. It runs the roadmap's generator
   (1461 validation checks) into a temp directory, adds the "← Towards Intelligence" top-bar link to
   every page and the justify rule to the guide home, renames the guide to **Data & Intelligence** in
   its chrome (top bar, tab title, home heading) and its primary action to "Explore the roadmap",
-  then replaces `data-intelligence/guide/`. The rename touches chrome only — the roadmap's own
-  running text keeps its name, and `data-intelligence/research/` is never written to. Each replacement is
+  then replaces `data-and-intelligence/guide/`. The rename touches chrome only — the roadmap's own
+  running text keeps its name, and `data-and-intelligence/research/` is never written to. Each replacement is
   checked, so the build stops rather than publishing a page it did not recognise.
 - **The Python resource points at this site's own page** (2026-10-07, commit `2042d27`).
-  `data-intelligence/books/python-roadmap.html` is a staged path through the language that
+  `data-and-intelligence/books/python-roadmap.html` is a staged path through the language that
   sequences *The Python Tutorial* together with uv, ruff, mypy and pytest. The build script does two
   different things with it, both in `PYTHON_SWAPS` and `NOTE_PAGES`, each checked to match exactly
   once:
@@ -187,8 +187,8 @@ per page, nothing pushed).
   build exits** rather than publishing a page it did not recognise. Fix the strings, don't delete the
   check.
 - Don't run the roadmap's `build_site.py --out` straight into the guide, because the link would be
-  lost. Never point `--out` at `data-intelligence/`, because it wipes that directory.
-- If `.venv` is missing: `cd data-intelligence/research && python3.14 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt`.
+  lost. Never point `--out` at `data-and-intelligence/`, because it wipes that directory.
+- If `.venv` is missing: `cd data-and-intelligence/research && python3.14 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt`.
 
 ### CS&E on-ramp books
 
@@ -200,8 +200,8 @@ per page, nothing pushed).
   `<span class="book-status">Coming soon</span>` badge. Topics that are skipped at this level say
   *Not necessary at this level*.
 - The on-ramp's **Programming** entry (Software Engineering Track → Development → Application Engineering) links to
-  `data-intelligence/books/python-roadmap.html`, not to a "from Zero" PDF. It is the one on-ramp
-  entry served by a page rather than a book, so it crosses into `data-intelligence/`. Changed
+  `data-and-intelligence/books/python-roadmap.html`, not to a "from Zero" PDF. It is the one on-ramp
+  entry served by a page rather than a book, so it crosses into `data-and-intelligence/`. Changed
   2026-10-07; it used to be a "Programming from Zero — Coming soon" placeholder. The link reads
   **Programming Language From Zero: Python** (2026-10-29) — the topic is the language, Python is the
   instance — while the page's own title stays *Python Roadmap*, because the D&I guide links to it too.
@@ -227,7 +227,7 @@ per page, nothing pushed).
     **not** advance the part counter, so Product Discovery is still Part I and the preface's "four parts"
     stays true. `\phasestrip{0}` highlights none of the four phases, which is correct before the loop starts.
 - **⚠ The Complete Software Engineering Guide cannot be rebuilt from Markdown in this repo.** Its
-  `tools/convert.sh` reads a Markdown library (`1-Product-Discovery/`, `2-Project-Planning/`,
+  `utilities/convert.sh` reads a Markdown library (`1-Product-Discovery/`, `2-Project-Planning/`,
   `3-Writing-the-Code/`, `4-Building-Real-Applications/…`) that is **not in *(dissolved 2026-11-11 — see below)* and not anywhere on
   this machine** — searched 2026-10-08. Only the generated `LaTeX-Book/chapters/*.tex` survive, and they are
   committed. So `make` fails at the convert step, but `make pdf` works:
@@ -281,7 +281,7 @@ technical material, and *(dissolved 2026-11-11 — see below)* was already publi
 **It has nothing to do with the website.** It is not linked from any page, it is not part of
 the restyle, and it must never appear on the live site. The leading underscore is what
 guarantees that: GitHub Pages runs Jekyll with default settings, so `books/interview-prep/` is never
-published. `tools/link-check.py` does not scan it either — it still reports 81 pages, the
+published. `utilities/link-check.py` does not scan it either — it still reports 81 pages, the
 same as before the move.
 
 **Its history came with it.** The move was a subtree-style merge, not a copy, so all 31 of

@@ -7,13 +7,13 @@ first ("Restyle work" has the rules and the design reference); this file is the 
 ## Non-negotiables
 
 1. **Content is frozen.** Not one letter, link, title or meta tag may change. Every page must pass
-   `python3 tools/text-check.py <pages> --rev main` before it is committed. `main` is the untouched
+   `python3 utilities/text-check.py <pages> --rev main` before it is committed. `main` is the untouched
    baseline for the whole run.
 2. **Work only on the `restyle` branch. One page (or one page group) per commit.** Never commit to
    `main`, never merge, never force, never rewrite history. Never push, except `restyle` in the cloud
    (see below). The user
    can then `git revert` or drop any single page.
-3. **Never modify `data-intelligence/research/`.** The D&I guide is restyled only through `tools/build-di-guide.py`.
+3. **Never modify `data-and-intelligence/research/`.** The D&I guide is restyled only through `utilities/build-di-guide.py`.
 4. **Never ask the user anything during the run. They're away.** If a page can't be made to pass,
    restore it (`git restore <page>`), note why in the log, and move on. Never leave a failing page
    committed.
@@ -49,12 +49,12 @@ git switch -c restyle                        # or `git switch restyle` to resume
 | 1 | Coming Soon pages | `mathematics/index.html` (linked from Home), `cse/resources.html` (linked from the CS&E guide) | Same template. Make it a centred hero (eyebrow, big title, text, button) in one commit |
 | 2 | CS&E on-ramp | `cse/on-ramp.html` | One big table with row spans. Restyle it like the reference's `table.grid` inside a `.card`; scroll sideways on phones. Keep `target="_blank"` on book links |
 | 3 | CS&E guide | `cse/index.html` | ~1,100 lines of nested knowledge tree. Map the levels to bands, cards and lists. The largest hand-written page, so take care |
-| 4 | D&I guide | `data-intelligence/guide/` (72 generated pages) | Add an **override stylesheet** (`theme/guide-override.css`) that `tools/build-di-guide.py` links into every page. Map the guide's own CSS tokens (`data-intelligence/guide/assets/css/tokens.css`) to the theme's colours and fonts. Keep the guide's own light/dark toggle working. Rebuild, then text-check all 72 pages |
+| 4 | D&I guide | `data-and-intelligence/guide/` (72 generated pages) | Add an **override stylesheet** (`theme/guide-override.css`) that `utilities/build-di-guide.py` links into every page. Map the guide's own CSS tokens (`data-and-intelligence/guide/assets/css/tokens.css`) to the theme's colours and fonts. Keep the guide's own light/dark toggle working. Rebuild, then text-check all 72 pages |
 | 5 | Consistency pass | all restyled pages | Same nav and footer everywhere, same `?v=N` on every theme link, no leftover Google Fonts or old inline `<style>` blocks |
 
 **Out of scope. Don't touch these:** no page on the site links to them.
-`data-intelligence/llm-engineering.html`, `mathematics/resources.html`, `data-intelligence/resources.html`.
-`data-intelligence/index.html` is only a redirect. Leave it alone.
+`data-and-intelligence/llm-engineering.html`, `mathematics/resources.html`, `data-and-intelligence/resources.html`.
+`data-and-intelligence/index.html` is only a redirect. Leave it alone.
 
 ## The loop for each page
 
@@ -72,7 +72,7 @@ git switch -c restyle                        # or `git switch restyle` to resume
    - Put reusable components in `theme/site.css`, not inline. Bump `?v=N` on **every** restyled page
      whenever `theme/` changes.
    - Keep text nodes whole. Restyle through classes and wrappers only.
-3. **Text check:** `python3 tools/text-check.py <page(s)> --rev main` must say OK. It also fails if an
+3. **Text check:** `python3 utilities/text-check.py <page(s)> --rev main` must say OK. It also fails if an
    element `id` disappears, since jump links target them. If it fails,
    fix the markup, not the text. After 3 failed attempts, restore the page and log it.
 4. **Visual check** in the preview (`http://localhost:8080/<page>`):
@@ -86,7 +86,7 @@ git switch -c restyle                        # or `git switch restyle` to resume
    - Test every behaviour from step 1 by hand: click the table-of-contents links and watch the active
      highlight follow the scroll; scroll down and use back-to-top; open and close the menu.
    - Reset the viewport to desktop afterwards.
-5. **Regression check:** `python3 tools/text-check.py $(git ls-files '*.html' | grep -vE '^(books|tools|data-intelligence/research)/') --rev main`.
+5. **Regression check:** `python3 utilities/text-check.py $(git ls-files '*.html' | grep -vE '^(books|tools|data-and-intelligence/research)/') --rev main`.
    Every page that isn't in this commit must still pass too, which catches accidental edits.
 6. **Update `.claude/HANDOVER.md`**: set the page's row in the Restyle Status table to
    "Done on `restyle` branch (not live)".

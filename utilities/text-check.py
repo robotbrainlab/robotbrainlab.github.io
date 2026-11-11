@@ -3,9 +3,9 @@
 
 Usage (from the repository root):
 
-    python3 tools/text-check.py index.html                    # working copy vs HEAD
-    python3 tools/text-check.py index.html --rev 683e3ce
-    python3 tools/text-check.py $(git ls-files 'data-intelligence/guide/*.html')   # many pages
+    python3 utilities/text-check.py index.html                    # working copy vs HEAD
+    python3 utilities/text-check.py index.html --rev 683e3ce
+    python3 utilities/text-check.py $(git ls-files 'data-and-intelligence/guide/*.html')   # many pages
 
 Compared, in document order:
   - every text node in <head> <title> and <body> (scripts and styles excluded),

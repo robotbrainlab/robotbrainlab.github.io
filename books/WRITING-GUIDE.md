@@ -170,7 +170,7 @@ Part IV answers the same four questions for the book's topic:
 
 ### 8.2 Build pipeline
 
-Every book is built with the shared O'Reilly-style template in `books/book-template/`: **Markdown → pandoc (with `tools/filter.lua`) → XeLaTeX → PDF**. The Markdown is the only source of truth; never edit the generated `.tex` files. `books/book-template/README.md` explains the template, and `books/book-template/sample/` shows every feature in use.
+Every book is built with the shared O'Reilly-style template in `books/book-template/`: **Markdown → pandoc (with `utilities/filter.lua`) → XeLaTeX → PDF**. The Markdown is the only source of truth; never edit the generated `.tex` files. `books/book-template/README.md` explains the template, and `books/book-template/sample/` shows every feature in use.
 
 Set up the build before launching the writing agent; the editor (the main session) writes `book-meta.tex` and `book.tex`, not the agent. To set up a book's build:
 

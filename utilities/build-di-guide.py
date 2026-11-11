@@ -3,10 +3,10 @@
 
 Usage (from the repository root):
 
-    python3 tools/build-di-guide.py
+    python3 utilities/build-di-guide.py
 
 1. Runs the roadmap's own generator (with its validation) into a temp directory.
-   The roadmap source in data-intelligence/research/ is only read, never modified.
+   The roadmap source in data-and-intelligence/research/ is only read, never modified.
 2. Adds a "Towards Intelligence" link to each page's top bar, pointing back to
    the site home page, adds the site icon and the site theme override (theme/guide-override.css),
    and justifies the running text on the guide's home page.
@@ -14,7 +14,7 @@ Usage (from the repository root):
    home page's two actions for where they go, and marks the bold-text sub-headings so they can
    be set ragged right.
 4. Points step 1's primary Python resource at this site's own Python roadmap
-   (data-intelligence/books/python-roadmap.html), which opens in a new tab.
+   (data-and-intelligence/books/python-roadmap.html), which opens in a new tab.
 5. Adds a dated note to the seven pages that record earlier research, design or review work,
    saying the tutorial they name has since been replaced. Their own text is left as written.
    These are the only changes made to the generated pages; the roadmap's own files are untouched.
@@ -30,8 +30,8 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-SOURCE = REPO / "data-intelligence" / "research"   # [2026-11-11] was research/ai-roadmap
-GUIDE = REPO / "data-intelligence" / "guide"
+SOURCE = REPO / "data-and-intelligence" / "research"   # [2026-11-11] was research/ai-roadmap
+GUIDE = REPO / "data-and-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
 # Site theme override for the guide (theme/guide-override.css). Bump when that file changes.
 OVERRIDE_VERSION = 10
@@ -67,7 +67,7 @@ PRIMARY_ACTION = re.compile(r'(<a class="button button--primary" href="[^"]*">)[
 PRIMARY_LABEL = "Explore the roadmap "
 
 
-# This site hosts its own Python roadmap (data-intelligence/books/python-roadmap.html), written
+# This site hosts its own Python roadmap (data-and-intelligence/books/python-roadmap.html), written
 # for this curriculum: it sequences The Python Tutorial together with uv, ruff, mypy and pytest,
 # and splits the language into Fundamentals, Advanced and Mastery. Where the roadmap source names
 # the tutorial as a resource to read, the built page names this roadmap and the stage to read
@@ -156,7 +156,7 @@ def python_note(up: str) -> str:
     return (
         f'</dl><p class="ti-update"><strong>Update \u2014 {NOTE_DATE}:</strong> '
         "<em>The Python Tutorial</em> named on this page has been replaced across the guide by "
-        f'this site\u2019s own <a href="{up}data-intelligence/books/python-roadmap.html" '
+        f'this site\u2019s own <a href="{up}data-and-intelligence/books/python-roadmap.html" '
         'target="_blank" '
         'rel="noopener"><strong>Python Roadmap</strong></a>, researched and added on this date. '
         "It covers the language in full: Fundamentals, Advanced and Mastery.</p>"

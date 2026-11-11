@@ -3,8 +3,8 @@
 
 Usage (from the repository root):
 
-    python3 tools/link-check.py                  # every page of the website (not books/ or research/)
-    python3 tools/link-check.py cse/index.html  # just these pages
+    python3 utilities/link-check.py                  # every page of the website (not books/ or research/)
+    python3 utilities/link-check.py cse/index.html  # just these pages
 
 External links (http/https/mailto) are not fetched. Exits 1 on any broken link.
 """
@@ -53,10 +53,10 @@ def parse(path: Path) -> Links:
 # script's business.
 # Paths that are served but are not the website: a visitor never follows a link into them,
 # and their internal links are not this script's business.
-# [2026-11-11] data-intelligence/research is the roadmap generator, which moved inside the
+# [2026-11-11] data-and-intelligence/research is the roadmap generator, which moved inside the
 # discipline it serves. It holds Jinja2 templates whose {{ }} placeholders are not links.
-NOT_THE_WEBSITE = {"books", "tools"}
-NOT_THE_WEBSITE_PATHS = {("data-intelligence", "research")}
+NOT_THE_WEBSITE = {"books", "utilities"}
+NOT_THE_WEBSITE_PATHS = {("data-and-intelligence", "research")}
 
 
 def published(path: Path) -> bool:
