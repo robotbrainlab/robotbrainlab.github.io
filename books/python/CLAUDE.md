@@ -53,6 +53,15 @@ already closed. **For this book one item is live:**
 decides what test says a chapter is finished. Settle it before writing, because deciding it after
 ten chapters means re-reading ten chapters.
 
+## The book's title, and the name the on-ramps give it
+
+**`[STATED 2026-11-12]` The book is *Python from Zero*. The on-ramps call it
+*Programming Language From Zero: Python*, and that is deliberate** — the same rule the CS&E
+on-ramp has used since 2026-10-29: **the topic is the language, Python is the instance.** So the
+entry in `../../data-and-intelligence/on-ramp.html`, and the CS&E entry that will point here once
+this book ships (`../future-books/README.md` decision 22), both carry the longer name while the
+book's own cover does not. **Do not "fix" either to match the other.**
+
 ## The rules that are easy to break
 
 - **This book points at three others rather than repeating them.** Each pointer is the owner's
