@@ -17,55 +17,59 @@ user-level file, this is a project-level one).
 ## First thing in every session
 
 Before doing anything else, ask the user which kind of work this session is (use the
-AskUserQuestion tool):
+AskUserQuestion tool).
 
-1. **Changing the HTML look.** This means the restyle to the reference design; content stays letter-for-letter.
-2. **Working on the website.** This means content, pages, links, books, the roadmap sources, publishing.
-   **`[2026-11-12]` One job is pending and the owner asked for it to come up when he opens a
+**`[STATED 2026-11-12]` Use these exact labels, word for word. The owner asked for them to be
+fixed so the menu reads the same every time.** The tool shows **at most four options**, which is
+why there are three kinds and not six — see the note at the end of this section.
+
+| Label, exactly | Description, exactly |
+|---|---|
+| `Working on the website` | Pages, links, books, the roadmap sources, publishing, and the restyle |
+| `Modern AI research` | *Modern AI: Research, Science and Engineering* — choosing the areas the book covers |
+| `Writing Python from Zero` | The Python book: 51 chapters approved, no chapter drafted yet |
+
+**Then follow the matching kind below.**
+
+1. **Working on the website.** Content, pages, links, books, the roadmap sources, publishing —
+   **and the restyle**, which `[2026-11-12]` is no longer a kind of its own: the handover records
+   every reachable page restyled on 2026-09-26, so a session here changes a styled page rather than
+   restyling a new one. **One job is pending and the owner asked for it to come up when he opens a
    session: protect the generated guide from hand edits.** `data-and-intelligence/guide/` is 75
    pages built by `utilities/build-di-guide.py`; **not one of them says so**, and a hand edit to
    any of them is silently erased by the next build. Two fixes were agreed in principle — the
    cheap one first. See *Protecting the generated guide* in the handover's Gotchas.
-3. **Writing the interview-prep book.** The book in `books/interview-prep/`. It has nothing to do with the
-   website and governs itself — go straight to `books/interview-prep/docs/HANDOVER.md` and `books/interview-prep/docs/BOOK-GUIDE.md`
-   and follow those, not this file. **That book is finished** (2026-10-31, all 57 chapters and
-   Appendix B); a session here is an edit to it, not drafting.
-4. **`[2026-11-12]` Researching *Modern AI: Research, Science and Engineering*.** The book in
+2. **`[2026-11-12]` Researching *Modern AI: Research, Science and Engineering*.** The book in
    `books/modern-ai/`. **It governs itself and does not follow this file** — go straight to
    `books/modern-ai/CLAUDE.md`, which sends you to `books/modern-ai/docs/ROADMAP.md`. **Its
    section *"What is next — read this first"* names the next action**, which the owner chose on
    2026-11-12: fetch a scope statement for each of the 62 categories the consolidation could not
-   judge, before any area is cut. The roadmap's opening section records a question he has not
-   answered, about what he expected this process to be; `[2026-11-12]` **it is open but it does not
-   block the work** — this entry used to say nothing proceeds until he answers it, and he has since
-   ruled four times and named the next action.
-   `books/modern-ai/docs/HOW-IT-WORKS.md` is the plain-language map of the whole process, written
-   for him. Nothing about the website. **This option was missing from this list for six days while
-   it was the only work happening.**
-5. **`[2026-11-12]` Writing *Python from Zero*.** The book in `books/python/`. **It governs
+   judge, before any area is cut. The roadmap's second section records a question he has not
+   answered, about what he expected this process to be; **it is open but it does not block the
+   work.** Nothing about the website.
+3. **`[2026-11-12]` Writing *Python from Zero*.** The book in `books/python/`. **It governs
    itself** — go straight to `books/python/CLAUDE.md`, which sends you to `books/python/TOC.md`.
    **It started on 2026-11-12**: 51 chapters, approved by the owner, then reviewed twice and
    corrected. **No chapter is drafted**, and the thing blocking that is **not** the contents — it
    is decision 8's other half, the rules, and for this book one is live: **which of the finished
-   book's gates transfer.** `books/python/CLAUDE.md` says so where a session reads it first.
-   Nothing about the website.
-6. **`[2026-11-12]` *Machine Learning and Deep Learning*, which is NOT started and may not be.**
-   The owner ruled on 2026-11-12 that the books are written **sequentially**: *"once Python book
-   is completely done we will go to ML&DL book."* **So a session does not start it, offer a table
-   of contents for it, or draft a chapter of it.** Its decisions are in
-   `books/future-books/README.md`, which records every one with its marker.
-   **`[2026-11-12]` The parallel-writing section in that file no longer describes the plan.** It
-   is kept because the ruling is reversible and the five shared things are still real. Read it
-   only if two books are ever genuinely in flight at once.
-   `[2026-11-12]` This entry said *"this said `books/FUTURE-BOOKS.md`, which has never existed"*;
-   the path has been right since then.
+   book's gates transfer.** Nothing about the website.
 
-Then follow the matching section of the handover: "Restyle work", "Website work", or
-"The interview-prep book". **Kinds 4, 5 and 6 have no handover section and need none** — each
-book's own files govern it. `[2026-11-12]` There are six kinds now, not five: the two unwritten
-books were one entry while neither had started, and *Python* has.
-If the user's first message already makes the answer obvious, confirm it in one line instead
-of asking.
+**Two things that are NOT session kinds, and why:**
+
+- **`[STATED 2026-11-12]` *Modern AI Engineering from Zero* is finished and needs no session
+  type.** It is in `books/modern-ai-engineering-from-zero/` — **renamed from `interview-prep/` on
+  2026-11-12**, because the book outlived the interview deadline it was named for. A change to it
+  is website or book work like any other; the book governs itself through its own `docs/`.
+- **`[STATED 2026-11-12]` *Machine Learning and Deep Learning* is not started and may not be.** The
+  owner ruled that the books are written **sequentially**: *"once Python book is completely done we
+  will go to ML&DL book."* **So a session does not start it, offer a table of contents for it, or
+  draft a chapter of it.** Its decisions are in `books/future-books/README.md`.
+
+**`[2026-11-12]` There are three kinds now, not six.** The owner removed the interview-prep book.
+**Folding the restyle into website work, and moving the machine-learning prohibition out of the
+list, is mine** — he was shown the argument and did not rule on it. The reason is mechanical as
+well as tidy: **the question tool shows at most four options, and six could not be asked.** To
+restore either, put it back as its own numbered kind.
 
 **Exception: unattended restyle run.** If the first message asks you to follow
 `.claude/RESTYLE-RUNBOOK.md`, don't ask anything. Go straight to the runbook; the user is away.

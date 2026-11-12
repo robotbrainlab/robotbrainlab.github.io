@@ -31,9 +31,9 @@ Then read only what the work needs:
 | Read | For |
 |---|---|
 | `../future-books/README.md` | Every decision, with its marker. **Nothing is a decision unless it is `[STATED]` or `[AGREED]`.** `[I RECOMMEND]` is a proposal the owner has not ruled on |
-| `../interview-prep/docs/BOOK-GUIDE.md` §5 | **The chapter shape**, copied exactly (decision 18). §5 is the spec; do not reinvent it |
-| `../interview-prep/docs/BOOK-GUIDE.md` §6, §7, §9 | The maths line, the writing style, and what a lab is |
-| `../interview-prep/docs/LEDGER-DEFECTS.md` | What the gates cannot catch. 20 entries, earned |
+| `../modern-ai-engineering-from-zero/docs/BOOK-GUIDE.md` §5 | **The chapter shape**, copied exactly (decision 18). §5 is the spec; do not reinvent it |
+| `../modern-ai-engineering-from-zero/docs/BOOK-GUIDE.md` §6, §7, §9 | The maths line, the writing style, and what a lab is |
+| `../modern-ai-engineering-from-zero/docs/LEDGER-DEFECTS.md` | What the gates cannot catch. 20 entries, earned |
 | `../../data-and-intelligence/books/python-roadmap.html` | The source. **Read the HTML, not a stripped copy** — the owner asked for this specifically, and reading the stripped text once hid phase 1.5's reading list |
 
 ## `[2026-11-12]` Nothing is drafted yet, and the reason is NOT the contents
@@ -46,7 +46,7 @@ under *The rules still to be written*. Most of what is left there belongs to the
 already closed. **For this book one item is live:**
 
 > **Which of the finished book's gates transfer unchanged, which need changing, and which do not
-> apply.** The machinery in `../interview-prep/tools/` is reusable and is the part that took
+> apply.** The machinery in `../modern-ai-engineering-from-zero/tools/` is reusable and is the part that took
 > longest to get right.
 
 **That is the next piece of work, and it is the last thing between this book and chapter 1.** It

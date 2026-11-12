@@ -77,7 +77,7 @@ defect.
 > things for the future."*
 
 **There is evidence for that**: `books/future-books/README.md` records that the machinery in
-`../interview-prep/tools/` *"is the part that took longest to get right"* and is reusable. **What
+`../modern-ai-engineering-from-zero/tools/` *"is the part that took longest to get right"* and is reusable. **What
 there is no evidence for is the three-week cadence**, and `PROCESS.md` §10 is explicit that cycle
 1 exists to measure how long a cycle actually takes, because nobody knows.
 

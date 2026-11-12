@@ -61,7 +61,7 @@ It used to be its own repository; that folder was deleted on 2026-10-23 after ch
 tracked file was byte-identical here and every commit reachable. The leading `_` keeps it off
 the live site — GitHub Pages never publishes a `_`-prefixed folder, and every `_book/` URL
 returns 404. The website repository is public, which the owner decided deliberately. See that
-repository's `.claude/HANDOVER.md`, section "The interview-prep book", for the cleanup recipe.
+repository's `.claude/HANDOVER.md`, section "The modern-ai-engineering-from-zero book", for the cleanup recipe.
 
 **The book is complete. All 57 chapters are written and all 100 of Appendix B's model answers
 with them.** Part I is 17 chapters and 199 printed pages against a 266-page estimate; Part II is

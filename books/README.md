@@ -35,7 +35,7 @@ own `front/`, `tools/`, `assets/`, `content/` or `cover/`. Only the guide does.
 
 | Folder | What it is | State |
 |---|---|---|
-| `interview-prep` | *Modern AI Engineering from Zero* | **Finished** (2026-10-31), 57 chapters |
+| `modern-ai-engineering-from-zero` | *Modern AI Engineering from Zero* | **Finished** (2026-10-31), 57 chapters |
 | `complete-software-engineering-guide` | *The Complete Software Engineering Guide* | **Published.** ⚠ see below |
 | `linux-and-git` | *Linux and Git from Zero* | **Published**, with labs |
 | `infrastructure-engineering` | *Infrastructure Engineering from Zero* | **Published**, with labs |
@@ -55,7 +55,7 @@ own `front/`, `tools/`, `assets/`, `content/` or `cover/`. Only the guide does.
 | `front/` | cover, title page, copyright, preface, back cover — all driven by `book-meta.tex` |
 | `tools/` | `convert.sh`, the pandoc filter, the index style, the code theme |
 | `assets/` | the emoji set, shared by every book that does not override it |
-| `styles/` | the two preambles too different to merge: `interview-prep`, `complete-software-engineering-guide` |
+| `styles/` | the two preambles too different to merge: `modern-ai-engineering-from-zero`, `complete-software-engineering-guide` |
 | `template/` | `book.tex` + `book-meta.tex` for a new book, with `preview/` and `style-reference.pdf` showing the house style |
 
 ## ⚠ The guide cannot be rebuilt from Markdown

@@ -10,7 +10,7 @@ actually says.
 
     python3 tools/make-contents.py
 
-Writes CONTENTS.md in books/interview-prep/. It is generated - edit TOC.md or a chapter
+Writes CONTENTS.md in books/modern-ai-engineering-from-zero/. It is generated - edit TOC.md or a chapter
 and run this again. Headings are taken only from outside fenced blocks,
 because a `#` comment inside a program is not a section.
 """

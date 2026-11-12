@@ -104,7 +104,7 @@ Notes:
 | `utilities/text-check.py` | Proves a page's text, links and element ids did not change |
 | `utilities/link-check.py` | Checks every internal link and `#anchor` on the site resolves |
 | *(moved to the Desktop archive 2026-11-11)* | The old D&I guide page with the pipeline diagram |
-| `books/interview-prep/` | **The interview-prep book**, *Modern AI Engineering from Zero* — a whole separate project living here for safekeeping. See "The interview-prep book" below. `[2026-11-12]` This row said "Unpublished (leading `_`)"; **the underscore is gone and so is Jekyll**, so nothing here is unpublished — `/robots.txt` is what keeps it out of search results |
+| `books/modern-ai-engineering-from-zero/` | ***Modern AI Engineering from Zero*** — a whole separate project living here for safekeeping. **`[2026-11-12]` The folder was `interview-prep/` until today**; the owner renamed it because the book outlived the interview deadline it was named for. See its section below. `[2026-11-12]` This row said "Unpublished (leading `_`)"; **the underscore is gone and so is Jekyll**, so nothing here is unpublished — `/robots.txt` is what keeps it out of search results |
 | `books/python/` | ***Python from Zero*** — **started 2026-11-12. `TOC.md` and `CLAUDE.md` only, no manuscript.** 51 chapters built against the Fundamentals stage of `data-and-intelligence/books/python-roadmap.html`, approved by the owner and then reviewed twice and corrected. **It governs itself**: `books/python/CLAUDE.md`. **Nothing is drafted**, and the block is not the contents — decision 8's other half, the rules, is unwritten, and one is live for this book: which of the finished book's gates transfer. **It points at three other books rather than repeating them** — *Linux and Git from Zero*, *APIs to FastAPI*, and the roadmap page, which `[STATED]` nothing happens to |
 | `books/future-books/README.md` | **Decisions for *Python* and *Machine Learning and Deep Learning*** — **21 decisions** with their reasons, the rejected alternatives, and the rules still to write. **It is the authority on both books**; neither book's own files restate a decision. `[2026-11-12]` This row said *"Nothing is started. Ten decisions"* — **Python started on 2026-11-12** (see the row above) and the count was out of date. The owner also ruled the books are written **sequentially**, so the file's parallel-writing section no longer describes the plan and is kept only because the ruling is reversible |
 | `books/modern-ai/` | ***Modern AI: Research, Science and Engineering*** — **in research, no manuscript.** `[2026-11-12]` It governs itself: `books/modern-ai/CLAUDE.md`, then `docs/ROADMAP.md`, whose **first section is an unanswered question from the owner that blocks everything else**. `docs/HOW-IT-WORKS.md` is the plain map of the process. **This row did not exist until today** |
@@ -266,7 +266,7 @@ the number of files on disk matches the `git ls-files` count. Scan for secrets b
 
 ---
 
-## The interview-prep book (`books/interview-prep/`)
+## *Modern AI Engineering from Zero* (`books/modern-ai-engineering-from-zero/`)
 
 *Added 2026-10-23.*
 
@@ -279,21 +279,21 @@ was configured but the repository was never created, so nothing was ever pushed 
 copy was on one machine. Rather than lose it, the owner chose to keep it here, where a remote
 already exists. **It is temporary** and will be removed once the job search ends.
 
-**`books/interview-prep/` is the only copy.** The old folder at `~/LearningLab/towards-intelligence/modern-ai-interview-prep`
+**`books/modern-ai-engineering-from-zero/` is the only copy.** The old folder at `~/LearningLab/towards-intelligence/modern-ai-interview-prep`
 was deleted on 2026-10-23, after checking that all 65 of its tracked files were byte-identical
 here and all 31 of its commits reachable. Do not go looking for it. The book is also published
 on the public repository, which the owner decided deliberately: the content is general
 technical material, and *(dissolved 2026-11-11 — see below)* was already public on the same terms.
 
-**It has nothing to do with the website.** It is not linked from any page, it is not part of
-the restyle, and it must never appear on the live site. The leading underscore is what
-guarantees that: GitHub Pages runs Jekyll with default settings, so `books/interview-prep/` is never
-published. `utilities/link-check.py` does not scan it either — it still reports 81 pages, the
+**`[2026-11-12]` It IS on the website now.** The Data & Intelligence on-ramp links its PDF, and
+`/robots.txt` already allowed `/books/*/*.pdf`. **This paragraph said the opposite** — that it
+must never appear on the live site, guaranteed by a leading underscore and Jekyll. **Both are
+gone**: the underscore went on 2026-11-11 and Jekyll is off. It is not part of the restyle. `utilities/link-check.py` does not scan it either — it still reports 81 pages, the
 same as before the move.
 
 **Its history came with it.** The move was a subtree-style merge, not a copy, so all 31 of
 the book's own commits are in this repository's history. They are reachable but their paths
-are the old ones (`markdown/…`, not `books/interview-prep/markdown/…`), so `git log --follow` will not trace
+are the old ones (`markdown/…`, not `books/modern-ai-engineering-from-zero/markdown/…`), so `git log --follow` will not trace
 a file across the move. To read a book file's history before the move:
 
 ```bash
@@ -304,23 +304,23 @@ git log --oneline e8aadd3 -- markdown/05-where-the-work-goes.md
 
 | Read | For |
 | --- | --- |
-| `books/interview-prep/docs/HANDOVER.md` | Every decision with its reason, the current state, what is blocked |
-| `books/interview-prep/docs/BOOK-GUIDE.md` | Scope, the maths boundary, style, the five-step writing loop, the gates |
-| `books/interview-prep/TOC.md` | All 57 chapters and 4 appendices, and who owns which concept |
-| `books/interview-prep/LEDGER-TAUGHT.md` | What each finished chapter taught, and what a later chapter must not re-introduce |
-| `books/interview-prep/LEDGER-DEFECTS.md` | 20 entries of what the gates cannot catch. Read before writing a chapter |
+| `books/modern-ai-engineering-from-zero/docs/HANDOVER.md` | Every decision with its reason, the current state, what is blocked |
+| `books/modern-ai-engineering-from-zero/docs/BOOK-GUIDE.md` | Scope, the maths boundary, style, the five-step writing loop, the gates |
+| `books/modern-ai-engineering-from-zero/TOC.md` | All 57 chapters and 4 appendices, and who owns which concept |
+| `books/modern-ai-engineering-from-zero/LEDGER-TAUGHT.md` | What each finished chapter taught, and what a later chapter must not re-introduce |
+| `books/modern-ai-engineering-from-zero/LEDGER-DEFECTS.md` | 20 entries of what the gates cannot catch. Read before writing a chapter |
 
 Two rules worth knowing before you open any of them: **one chapter at a time** (never a part
-at a time), and **`bash books/interview-prep/tools/check-all.sh` must end `ALL GATES PASS`** before a chapter
-is closed. Build the PDF with `bash books/interview-prep/tools/build-probe.sh`, which reports a build's exit
+at a time), and **`bash books/modern-ai-engineering-from-zero/tools/check-all.sh` must end `ALL GATES PASS`** before a chapter
+is closed. Build the PDF with `bash books/modern-ai-engineering-from-zero/tools/build-probe.sh`, which reports a build's exit
 status beside its warning counts and refuses to report the counts at all when the build
 failed — read `LEDGER-DEFECTS.md` entry 17 for why that exists.
 
 **Cleaning it up later.** Removing it is one commit, and nothing on the site depends on it:
 
 ```bash
-git rm -r -q books/interview-prep
-git commit -m "Remove the interview-prep book; the job search is over"
+git rm -r -q books/modern-ai-engineering-from-zero
+git commit -m "Remove Modern AI Engineering from Zero; the job search is over"
 ```
 
 That leaves the book's 31 commits in the history, so it stays recoverable

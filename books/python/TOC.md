@@ -45,7 +45,7 @@ to be written*. That work stands between this list and chapter 1.
   Part II returns to the same ground and shows you why it behaves that way. The roadmap calls the
   second pass *"the hinge of everything here"* and makes `1.1 before 1.3` one of its only two hard
   orderings. **This is the mechanism, not a redundancy to remove.**
-- **Chapter shape is copied from `../interview-prep/docs/BOOK-GUIDE.md` §5**, exactly, per
+- **Chapter shape is copied from `../modern-ai-engineering-from-zero/docs/BOOK-GUIDE.md` §5**, exactly, per
   decision 18. Each chapter opens with its problem below, then the question it raises.
 
 ---
@@ -195,7 +195,7 @@ book. Chapter 51 says so and says where to go.
 ## Part IV · What Next
 
 *No "What to ignore for now" note*, because this part's last chapter says what to skip —
-the same rule `../interview-prep/docs/BOOK-GUIDE.md` §5 states.
+the same rule `../modern-ai-engineering-from-zero/docs/BOOK-GUIDE.md` §5 states.
 
 **The four threads transfer** (decision 19), asked of Python's own subject rather than of a model.
 Per §5, Part IV chapters carry **none of its last four items**: no callouts, no lab, no
@@ -268,7 +268,7 @@ the Git chapter is dropped, and the roadmap page is left exactly as it is.
 ## `[2026-11-12]` What the review found
 
 **Two independent reviews read this list against its two sources** — one against the roadmap page,
-one against `../future-books/README.md` and `../interview-prep/docs/BOOK-GUIDE.md` §5. Neither was
+one against `../future-books/README.md` and `../modern-ai-engineering-from-zero/docs/BOOK-GUIDE.md` §5. Neither was
 told what the answer was expected to be. **Every finding below was then checked against the files
 by hand before it was acted on**, which is the rule at the top of `../../.claude/CLAUDE.md`.
 
