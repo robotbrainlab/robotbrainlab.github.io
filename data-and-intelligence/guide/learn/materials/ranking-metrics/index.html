@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="../../../assets/css/site.css?v=5cbea89e99">
 <link rel="stylesheet" href="../../../assets/css/print.css?v=5cbea89e99" media="print">
 <link rel="icon" type="image/svg+xml" href="../../../../../assets/favicon/favicon.svg"/>
-<link rel="stylesheet" href="../../../../../assets/theme/guide-override.css?v=18"/>
+<link rel="stylesheet" href="../../../../../assets/theme/guide-override.css?v=19"/>
 <script>
 (function () {
   var root = document.documentElement, SITE = "ti-theme", GUIDE = "air-theme";
@@ -371,22 +371,22 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Precision@k</strong></td>
-<td>Of the top k results, what fraction are relevant</td>
-<td>Filling a fixed window with relevant material, order within the window ignored</td>
-<td>You will pass exactly k passages to a model and each costs context</td>
+<td data-label="Metric"><strong>Precision@k</strong></td>
+<td data-label="In one sentence">Of the top k results, what fraction are relevant</td>
+<td data-label="It rewards">Filling a fixed window with relevant material, order within the window ignored</td>
+<td data-label="Use it when">You will pass exactly k passages to a model and each costs context</td>
 </tr>
 <tr>
-<td><strong>MRR</strong> — mean reciprocal rank</td>
-<td>Average of 1/(rank of the first relevant result)</td>
-<td>Getting <em>one</em> right answer as high as possible; everything after the first relevant hit is ignored</td>
-<td>There is a single correct answer and the user stops at it</td>
+<td data-label="Metric"><strong>MRR</strong> — mean reciprocal rank</td>
+<td data-label="In one sentence">Average of 1/(rank of the first relevant result)</td>
+<td data-label="It rewards">Getting <em>one</em> right answer as high as possible; everything after the first relevant hit is ignored</td>
+<td data-label="Use it when">There is a single correct answer and the user stops at it</td>
 </tr>
 <tr>
-<td><strong>nDCG@k</strong> — normalized discounted cumulative gain</td>
-<td>Sum of the relevance grades in the top k, each discounted by how far down it sits, divided by the best possible such sum</td>
-<td>Graded relevance <em>and</em> position; the best documents first, the mediocre ones tolerated below</td>
-<td>Relevance has degrees, and the order within the window matters</td>
+<td data-label="Metric"><strong>nDCG@k</strong> — normalized discounted cumulative gain</td>
+<td data-label="In one sentence">Sum of the relevance grades in the top k, each discounted by how far down it sits, divided by the best possible such sum</td>
+<td data-label="It rewards">Graded relevance <em>and</em> position; the best documents first, the mediocre ones tolerated below</td>
+<td data-label="Use it when">Relevance has degrees, and the order within the window matters</td>
 </tr>
 </tbody>
 </table></div>

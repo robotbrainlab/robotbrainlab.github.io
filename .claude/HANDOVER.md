@@ -103,6 +103,7 @@ Notes:
 | `utilities/build-di-guide.py` | Builds the D&I guide from `data-and-intelligence/research/` |
 | `utilities/text-check.py` | Proves a page's text, links and element ids did not change |
 | `utilities/link-check.py` | Checks every internal link and `#anchor` on the site resolves |
+| `utilities/page-check.py` | **`[2026-11-12]` Opens every page in headless Chrome and measures it.** `python3 utilities/page-check.py` tests 375px and 1280px; `--width 320` picks one. Per page: real sideways scroll (scroll right, read `scrollX`), the chrome it must carry (home menu, switch, tile, tab icon), the four menu rows and their HTTP status, any box that scrolls sideways inside the page, and Google Fonts. It cache-busts the page **and** its stylesheets, ignores a closed off-canvas drawer (fixed, hidden, parked outside the viewport), and treats a table scrolling inside its own region as a defect only below 640px. Exit code 1 when anything fails |
 | *(moved to the Desktop archive 2026-11-11)* | The old D&I guide page with the pipeline diagram |
 | `books/modern-ai-engineering-from-zero/` | ***Modern AI Engineering from Zero*** — a whole separate project living here for safekeeping. **`[2026-11-12]` The folder was `interview-prep/` until today**; the owner renamed it because the book outlived the interview deadline it was named for. See its section below. `[2026-11-12]` This row said "Unpublished (leading `_`)"; **the underscore is gone and so is Jekyll**, so nothing here is unpublished — `/robots.txt` is what keeps it out of search results |
 | `books/python/` | ***Python from Zero*** — **started 2026-11-12. `TOC.md` and `CLAUDE.md` only, no manuscript.** 51 chapters built against the Fundamentals stage of `data-and-intelligence/books/python-roadmap.html`, approved by the owner and then reviewed twice and corrected. **It governs itself**: `books/python/CLAUDE.md`. **Nothing is drafted**, and the block is not the contents — decision 8's other half, the rules, is unwritten, and one is live for this book: which of the finished book's gates transfer. **It points at three other books rather than repeating them** — *Linux and Git from Zero*, *APIs to FastAPI*, and the roadmap page, which `[STATED]` nothing happens to |
@@ -371,6 +372,11 @@ and `utilities/text-check.py` proves it page by page.
 **Phones, measured at 320, 375 and 430px:** no page scrolls sideways. The CS&E on-ramp table held
 `min-width: 720px` inside a 351px card, so **the card scrolled** while the page did not; below 640px
 that table is laid out as blocks and the three column headings are hidden (they stay in the markup).
+**The guide's 45 generated tables stack too** `[2026-11-12]`: `utilities/build-di-guide.py` copies each
+table's own `<th>` into `data-label` on its cells (426 on one page), and `guide-override.css` prints
+them above the values below 640px. **It runs last in the page pipeline**, because the Python swaps
+match exact `<td>` strings and labelling first makes the build exit.
+
 **The Python roadmap's tables stack too**, and this is how: `table.grid` held 620px (480px when
 tight) inside a card about 340px wide. Each cell now carries its own column heading in a
 `data-label` attribute, copied from the table's own `<th>`, and the phone layout prints it above

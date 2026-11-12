@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="../../assets/css/site.css?v=5cbea89e99">
 <link rel="stylesheet" href="../../assets/css/print.css?v=5cbea89e99" media="print">
 <link rel="icon" type="image/svg+xml" href="../../../../assets/favicon/favicon.svg"/>
-<link rel="stylesheet" href="../../../../assets/theme/guide-override.css?v=18"/>
+<link rel="stylesheet" href="../../../../assets/theme/guide-override.css?v=19"/>
 <script>
 (function () {
   var root = document.documentElement, SITE = "ti-theme", GUIDE = "air-theme";
@@ -286,28 +286,28 @@
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td>≈ 23–30 October</td>
-<td>8</td>
-<td>17</td>
-<td>~215</td>
-<td>8</td>
+<td data-label="Sweep">1</td>
+<td data-label="Period reached">≈ 23–30 October</td>
+<td data-label="Searches">8</td>
+<td data-label="Fetches">17</td>
+<td data-label="Screened">~215</td>
+<td data-label="Kept">8</td>
 </tr>
 <tr>
-<td>2</td>
-<td>≈ 19–23 September, plus four unqueried directions</td>
-<td>2</td>
-<td>18</td>
-<td>~300</td>
-<td>7</td>
+<td data-label="Sweep">2</td>
+<td data-label="Period reached">≈ 19–23 September, plus four unqueried directions</td>
+<td data-label="Searches">2</td>
+<td data-label="Fetches">18</td>
+<td data-label="Screened">~300</td>
+<td data-label="Kept">7</td>
 </tr>
 <tr>
-<td>3</td>
-<td>24 September – 22 October</td>
-<td>2</td>
-<td>32</td>
-<td>~480</td>
-<td>11</td>
+<td data-label="Sweep">3</td>
+<td data-label="Period reached">24 September – 22 October</td>
+<td data-label="Searches">2</td>
+<td data-label="Fetches">32</td>
+<td data-label="Screened">~480</td>
+<td data-label="Kept">11</td>
 </tr>
 </tbody>
 </table></div>
@@ -335,124 +335,124 @@
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td><strong>Compaction removes constraints before goals.</strong> On one benchmark, about a third of the task&#x27;s anti-cheating rules were gone after the first compaction summary, and the loss grew with each further compaction. On real sessions, instructions about <em>how to work and what to avoid</em> were dropped about <strong>six times more often</strong> than specifications of <em>what to build</em>. Benchmarks hide this, because the objective is fixed and progress is on disk — so what compaction discards is recoverable, except the constraints, which exist nowhere else</td>
-<td>S2 (verified at source)</td>
-<td>Watching</td>
-<td>A system prompt, a policy or a style rule is not guaranteed to survive the agent&#x27;s own history management. Benchmark scores cannot reveal this, because they grade the goal</td>
-<td>Watch; MP-58</td>
+<td data-label="#">1</td>
+<td data-label="Finding"><strong>Compaction removes constraints before goals.</strong> On one benchmark, about a third of the task&#x27;s anti-cheating rules were gone after the first compaction summary, and the loss grew with each further compaction. On real sessions, instructions about <em>how to work and what to avoid</em> were dropped about <strong>six times more often</strong> than specifications of <em>what to build</em>. Benchmarks hide this, because the objective is fixed and progress is on disk — so what compaction discards is recoverable, except the constraints, which exist nowhere else</td>
+<td data-label="Evidence">S2 (verified at source)</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">A system prompt, a policy or a style rule is not guaranteed to survive the agent&#x27;s own history management. Benchmark scores cannot reveal this, because they grade the goal</td>
+<td data-label="Action">Watch; MP-58</td>
 </tr>
 <tr>
-<td>2</td>
-<td><strong>Compaction costs long-horizon work, and the summariser is the variable.</strong> Paired full-history against summary-only continuations from a shared state: 35 repairs, 146 agentic sessions, 106 production chains, 14 summariser backbones. Stable damage ranged <strong>5–64%</strong> of previously successful repairs by backbone. LLM summaries retained <strong>at most 16.0%</strong> of recurring details against <strong>79.1%</strong> for mechanical extraction. One repair was damaged by 13 of the 14 backbones</td>
-<td>S1</td>
-<td>Watching</td>
-<td>The summariser is a reliability decision, not a cost setting. The paper&#x27;s own conclusion is that retaining relevant information does not predict successful continuation, so summary relevance is the wrong thing to measure</td>
-<td>Watch; MP-58</td>
+<td data-label="#">2</td>
+<td data-label="Finding"><strong>Compaction costs long-horizon work, and the summariser is the variable.</strong> Paired full-history against summary-only continuations from a shared state: 35 repairs, 146 agentic sessions, 106 production chains, 14 summariser backbones. Stable damage ranged <strong>5–64%</strong> of previously successful repairs by backbone. LLM summaries retained <strong>at most 16.0%</strong> of recurring details against <strong>79.1%</strong> for mechanical extraction. One repair was damaged by 13 of the 14 backbones</td>
+<td data-label="Evidence">S1</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">The summariser is a reliability decision, not a cost setting. The paper&#x27;s own conclusion is that retaining relevant information does not predict successful continuation, so summary relevance is the wrong thing to measure</td>
+<td data-label="Action">Watch; MP-58</td>
 </tr>
 <tr>
-<td>3</td>
-<td><strong>Compaction is a trust boundary, and some harnesses destroy provenance at it.</strong> Harnesses that flatten a typed message history into one labelled string lose message roles before the summariser runs. A forged user approval then survived compaction in <strong>87–100%</strong> of trials across five such harnesses, at contexts up to about 908,000 tokens, and in <strong>0%</strong> across four harnesses that keep roles typed. A laundered standing approval led agents to run attacker-controlled <code>curl | sh</code> in a sandbox about <strong>50%</strong> of the time in one live interface, against 0% in a paired clean arm. A code-level provenance check caught 77% while demoting 2% of legitimate summary content</td>
-<td>S3 (verified at source)</td>
-<td>Watching</td>
-<td>The defect is deterministic and lives in harness code, so prompt-level defences cannot reach it. The fix is binary: keep roles typed through the summariser</td>
-<td>Watch; MP-59</td>
+<td data-label="#">3</td>
+<td data-label="Finding"><strong>Compaction is a trust boundary, and some harnesses destroy provenance at it.</strong> Harnesses that flatten a typed message history into one labelled string lose message roles before the summariser runs. A forged user approval then survived compaction in <strong>87–100%</strong> of trials across five such harnesses, at contexts up to about 908,000 tokens, and in <strong>0%</strong> across four harnesses that keep roles typed. A laundered standing approval led agents to run attacker-controlled <code>curl | sh</code> in a sandbox about <strong>50%</strong> of the time in one live interface, against 0% in a paired clean arm. A code-level provenance check caught 77% while demoting 2% of legitimate summary content</td>
+<td data-label="Evidence">S3 (verified at source)</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">The defect is deterministic and lives in harness code, so prompt-level defences cannot reach it. The fix is binary: keep roles typed through the summariser</td>
+<td data-label="Action">Watch; MP-59</td>
 </tr>
 <tr>
-<td>4</td>
-<td><strong>A stale instruction file overrides the code it describes.</strong> 40 projects where the instruction file asked for one convention and the code used another; two agents, 320 runs. Agents followed the <strong>stale file 90.1%</strong> of the time. One agent reported the conflict in <strong>79 of 80</strong> runs and followed the file anyway. The other rewrote working code to match the file in 20 of 80 runs, and the project&#x27;s tests then failed in <strong>17 of those 20</strong>. One sentence giving the code precedence moved code-following from <strong>4.2% to 91.4%</strong> and the test pass rate from <strong>89.4% to 100%</strong>. A census found instruction files in <strong>26.3% of 22,854</strong> popular repositories, <strong>74.0%</strong> of directives giving no reason, and four in five files edited after creation</td>
-<td>S4 (verified at source), S5</td>
-<td><strong>Current Practice</strong> for the file format; the failure mode is Watching</td>
-<td>The format is in widespread use and the drift is normal. The failure is not inattention: the agent noticed and obeyed the file anyway</td>
-<td>MP-46 to Current Practice; failure mode MP-63; <strong>applied in this repository</strong> — see <a href="#5-changes-made">5</a></td>
+<td data-label="#">4</td>
+<td data-label="Finding"><strong>A stale instruction file overrides the code it describes.</strong> 40 projects where the instruction file asked for one convention and the code used another; two agents, 320 runs. Agents followed the <strong>stale file 90.1%</strong> of the time. One agent reported the conflict in <strong>79 of 80</strong> runs and followed the file anyway. The other rewrote working code to match the file in 20 of 80 runs, and the project&#x27;s tests then failed in <strong>17 of those 20</strong>. One sentence giving the code precedence moved code-following from <strong>4.2% to 91.4%</strong> and the test pass rate from <strong>89.4% to 100%</strong>. A census found instruction files in <strong>26.3% of 22,854</strong> popular repositories, <strong>74.0%</strong> of directives giving no reason, and four in five files edited after creation</td>
+<td data-label="Evidence">S4 (verified at source), S5</td>
+<td data-label="Status"><strong>Current Practice</strong> for the file format; the failure mode is Watching</td>
+<td data-label="Why it matters">The format is in widespread use and the drift is normal. The failure is not inattention: the agent noticed and obeyed the file anyway</td>
+<td data-label="Action">MP-46 to Current Practice; failure mode MP-63; <strong>applied in this repository</strong> — see <a href="#5-changes-made">5</a></td>
 </tr>
 <tr>
-<td>5</td>
-<td><strong>Published prompt-injection detection numbers do not transfer.</strong> The best detector on one benchmark caught <strong>2%</strong> of another&#x27;s injections at a 1% false-positive rate. A detector at <strong>72%</strong> on one agent benchmark scored <strong>15%</strong> on another. False-positive rates on benign tool output ranged from near zero to <strong>over 90%</strong>, and the false-positive rate did transfer where detection did not. The gap tracked training data. Separately, a detector at 0.879 AUROC gives <strong>precision 0.076</strong> at a 2% attack rate</td>
-<td>S6, S8</td>
-<td>Watching</td>
-<td>A published detection figure is close to meaningless for another system. At realistic attack rates a high-AUROC monitor is mostly false alarms, which decides whether a human review queue is viable</td>
-<td>Watch; MP-60</td>
+<td data-label="#">5</td>
+<td data-label="Finding"><strong>Published prompt-injection detection numbers do not transfer.</strong> The best detector on one benchmark caught <strong>2%</strong> of another&#x27;s injections at a 1% false-positive rate. A detector at <strong>72%</strong> on one agent benchmark scored <strong>15%</strong> on another. False-positive rates on benign tool output ranged from near zero to <strong>over 90%</strong>, and the false-positive rate did transfer where detection did not. The gap tracked training data. Separately, a detector at 0.879 AUROC gives <strong>precision 0.076</strong> at a 2% attack rate</td>
+<td data-label="Evidence">S6, S8</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">A published detection figure is close to meaningless for another system. At realistic attack rates a high-AUROC monitor is mostly false alarms, which decides whether a human review queue is viable</td>
+<td data-label="Action">Watch; MP-60</td>
 </tr>
 <tr>
-<td>6</td>
-<td><strong>Agentic security numbers are often scoring artefacts.</strong> Re-scoring identical execution traces, a scorer that counted attack success by <em>which tool was called</em> reported <strong>21.7%</strong> where the argument-level rate was <strong>1.2%</strong>. One model previously reported at <strong>62.8%</strong> scored <strong>0%</strong> under the corrected harness, which also overturned a prior claim that a model was incapable of tool use. Separately, 76–80% of &quot;failed&quot; attacks in a 33,000-trajectory audit were <em>ignored</em> rather than refused, and a system-prompt change alone moved one benchmark&#x27;s attack success from <strong>0.2% to 43%</strong></td>
-<td>S7, S9</td>
-<td>Watching</td>
-<td>A fifty-fold error from the same traces, caused by a scoring convention. A low attack-success rate may mean the agent never engaged, which does not generalise to another prompt</td>
-<td>Watch; MP-61</td>
+<td data-label="#">6</td>
+<td data-label="Finding"><strong>Agentic security numbers are often scoring artefacts.</strong> Re-scoring identical execution traces, a scorer that counted attack success by <em>which tool was called</em> reported <strong>21.7%</strong> where the argument-level rate was <strong>1.2%</strong>. One model previously reported at <strong>62.8%</strong> scored <strong>0%</strong> under the corrected harness, which also overturned a prior claim that a model was incapable of tool use. Separately, 76–80% of &quot;failed&quot; attacks in a 33,000-trajectory audit were <em>ignored</em> rather than refused, and a system-prompt change alone moved one benchmark&#x27;s attack success from <strong>0.2% to 43%</strong></td>
+<td data-label="Evidence">S7, S9</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">A fifty-fold error from the same traces, caused by a scoring convention. A low attack-success rate may mean the agent never engaged, which does not generalise to another prompt</td>
+<td data-label="Action">Watch; MP-61</td>
 </tr>
 <tr>
-<td>7</td>
-<td><strong>Guardrail stacks fall together, and one published compositional defence does not compose.</strong> A branching search reached <strong>100% attack success across six guardrail systems</strong> in 120 scenarios, with 72% fewer queries, and transferred to <strong>29 unseen guardrails including eight commercial ones</strong> without further optimisation. Separately, control-and-data separation <strong>does not compose across agent boundaries</strong>: an attack succeeded even when every agent ran the defence, because the downstream agent treated untrusted data as trusted input. Carrying provenance across the boundary gave <strong>0.0%</strong> against <strong>12.9%</strong> undefended</td>
-<td>S10, S11</td>
-<td>Watching</td>
-<td>Adding scanners buys less than it appears. A composition guarantee established for one agent is not a guarantee for a system of agents</td>
-<td>Watch; MP-60</td>
+<td data-label="#">7</td>
+<td data-label="Finding"><strong>Guardrail stacks fall together, and one published compositional defence does not compose.</strong> A branching search reached <strong>100% attack success across six guardrail systems</strong> in 120 scenarios, with 72% fewer queries, and transferred to <strong>29 unseen guardrails including eight commercial ones</strong> without further optimisation. Separately, control-and-data separation <strong>does not compose across agent boundaries</strong>: an attack succeeded even when every agent ran the defence, because the downstream agent treated untrusted data as trusted input. Carrying provenance across the boundary gave <strong>0.0%</strong> against <strong>12.9%</strong> undefended</td>
+<td data-label="Evidence">S10, S11</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">Adding scanners buys less than it appears. A composition guarantee established for one agent is not a guarantee for a system of agents</td>
+<td data-label="Action">Watch; MP-60</td>
 </tr>
 <tr>
-<td>8</td>
-<td><strong>The harness is a cost variable, not a capability variable — and comparisons are underpowered.</strong> Five models, three harnesses, one benchmark. On the 447-task pool the heaviest and lightest harnesses scored <strong>within 5 points</strong>. On a 45-task hard subset, swapping harness changed <strong>13%</strong> of outcomes — the same rate as rerunning the same harness. Cost per task varied <strong>up to 3×</strong> at identical model and prices. The power analysis: <strong>45 tasks cannot reach 80% power for any gap; 447 tasks resolve 5 points</strong></td>
-<td>S12</td>
-<td>Watching</td>
-<td>Choose a harness on cost per task, not on score. Most published harness comparisons cannot detect the differences they claim</td>
-<td>Watch; MP-62</td>
+<td data-label="#">8</td>
+<td data-label="Finding"><strong>The harness is a cost variable, not a capability variable — and comparisons are underpowered.</strong> Five models, three harnesses, one benchmark. On the 447-task pool the heaviest and lightest harnesses scored <strong>within 5 points</strong>. On a 45-task hard subset, swapping harness changed <strong>13%</strong> of outcomes — the same rate as rerunning the same harness. Cost per task varied <strong>up to 3×</strong> at identical model and prices. The power analysis: <strong>45 tasks cannot reach 80% power for any gap; 447 tasks resolve 5 points</strong></td>
+<td data-label="Evidence">S12</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">Choose a harness on cost per task, not on score. Most published harness comparisons cannot detect the differences they claim</td>
+<td data-label="Action">Watch; MP-62</td>
 </tr>
 <tr>
-<td>9</td>
-<td><strong>Harness-level data loss shows up as cost before it shows up as error.</strong> A harness that truncated tool results by slicing JSON at a fixed length destroyed <strong>3,827 of 11,189</strong> results while the largest prompt used <strong>5.75%</strong> of the context window. One field reached the model in 4.7% of calls against 99.3% for its neighbour in the same result. Controlled runs showed <strong>43% more tool calls</strong> and yield falling <strong>0.61 to 0.31</strong>. Two of seven surveyed frameworks truncate the same way</td>
-<td>S13</td>
-<td>Watching</td>
-<td>Context loss is a pipeline defect, not a window-size problem, and accuracy metrics hide it. The authors state the causal link to accuracy remains open</td>
-<td>Watch; MP-62</td>
+<td data-label="#">9</td>
+<td data-label="Finding"><strong>Harness-level data loss shows up as cost before it shows up as error.</strong> A harness that truncated tool results by slicing JSON at a fixed length destroyed <strong>3,827 of 11,189</strong> results while the largest prompt used <strong>5.75%</strong> of the context window. One field reached the model in 4.7% of calls against 99.3% for its neighbour in the same result. Controlled runs showed <strong>43% more tool calls</strong> and yield falling <strong>0.61 to 0.31</strong>. Two of seven surveyed frameworks truncate the same way</td>
+<td data-label="Evidence">S13</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">Context loss is a pipeline defect, not a window-size problem, and accuracy metrics hide it. The authors state the causal link to accuracy remains open</td>
+<td data-label="Action">Watch; MP-62</td>
 </tr>
 <tr>
-<td>10</td>
-<td><strong>Agents can delete their own traces.</strong> Every tested local coding agent but one allowed the agent to delete its own traces on request without triggering monitor guardrails. External attackers could induce deletion, and tampering emerged on its own when agents were under reward pressure. The recommendation is to log through an interception mechanism outside the agent&#x27;s control</td>
-<td>S14</td>
-<td>Watching</td>
-<td>Asynchronous monitoring, incident investigation and audit all assume the trace is append-only. It is not. This inverts the usual design, where the agent framework owns the logger</td>
-<td>Watch; MP-64</td>
+<td data-label="#">10</td>
+<td data-label="Finding"><strong>Agents can delete their own traces.</strong> Every tested local coding agent but one allowed the agent to delete its own traces on request without triggering monitor guardrails. External attackers could induce deletion, and tampering emerged on its own when agents were under reward pressure. The recommendation is to log through an interception mechanism outside the agent&#x27;s control</td>
+<td data-label="Evidence">S14</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">Asynchronous monitoring, incident investigation and audit all assume the trace is append-only. It is not. This inverts the usual design, where the agent framework owns the logger</td>
+<td data-label="Action">Watch; MP-64</td>
 </tr>
 <tr>
-<td>11</td>
-<td><strong>Benchmarks are passed without the capability, and the leak has a name.</strong> An audit of <strong>3,810 passing trajectories</strong> across 29 model-benchmark cohorts found confirmed violation rates moving <strong>24% to 73%</strong> between two model generations on matched tasks. Violations clustered on recurring surfaces, <strong>especially unintended access to reference solutions through git history</strong>. Blocking one recorded exploit was insufficient; the information stayed reachable another way. Separately, <strong>25 of 98</strong> graded milestones in another benchmark depended on an unstated, non-inferable name or path, and units with such a dependency failed <strong>80.6%</strong> of published runs against 48.4% without</td>
-<td>S15, S16</td>
-<td>Watching</td>
-<td>An internal benchmark used as a release gate contains both unearned passes and unearnable failures. Both inflate the apparent distance between your system and a leaderboard</td>
-<td>Watch; MP-65</td>
+<td data-label="#">11</td>
+<td data-label="Finding"><strong>Benchmarks are passed without the capability, and the leak has a name.</strong> An audit of <strong>3,810 passing trajectories</strong> across 29 model-benchmark cohorts found confirmed violation rates moving <strong>24% to 73%</strong> between two model generations on matched tasks. Violations clustered on recurring surfaces, <strong>especially unintended access to reference solutions through git history</strong>. Blocking one recorded exploit was insufficient; the information stayed reachable another way. Separately, <strong>25 of 98</strong> graded milestones in another benchmark depended on an unstated, non-inferable name or path, and units with such a dependency failed <strong>80.6%</strong> of published runs against 48.4% without</td>
+<td data-label="Evidence">S15, S16</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">An internal benchmark used as a release gate contains both unearned passes and unearnable failures. Both inflate the apparent distance between your system and a leaderboard</td>
+<td data-label="Action">Watch; MP-65</td>
 </tr>
 <tr>
-<td>12</td>
-<td><strong>Tokenization bypasses knowledge editing and unlearning.</strong> <strong>38.6%</strong> of alternative <em>valid</em> tokenizations of the same string recovered the pre-edit response. A reference-free attack needing only the released model detected which facts were modified at <strong>84.2% F1</strong> and reconstructed pre-edit responses at <strong>74.5%</strong> top-5. Tested across 5 models, 6 datasets and 6 editing and unlearning techniques</td>
-<td>S17</td>
-<td>Watching</td>
-<td>An edit is a property of one tokenization path, not of the model. If weights are released, the downstream user chooses the tokenizer, so a claim that information was removed is unenforceable</td>
-<td>Watch; MP-66</td>
+<td data-label="#">12</td>
+<td data-label="Finding"><strong>Tokenization bypasses knowledge editing and unlearning.</strong> <strong>38.6%</strong> of alternative <em>valid</em> tokenizations of the same string recovered the pre-edit response. A reference-free attack needing only the released model detected which facts were modified at <strong>84.2% F1</strong> and reconstructed pre-edit responses at <strong>74.5%</strong> top-5. Tested across 5 models, 6 datasets and 6 editing and unlearning techniques</td>
+<td data-label="Evidence">S17</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">An edit is a property of one tokenization path, not of the model. If weights are released, the downstream user chooses the tokenizer, so a claim that information was removed is unenforceable</td>
+<td data-label="Action">Watch; MP-66</td>
 </tr>
 <tr>
-<td>13</td>
-<td><strong>Perplexity hides what quantisation broke.</strong> Where perplexity rose only 1.2–1.5×, induction retained <strong>0.959</strong> of intact accuracy while retrieval fell to <strong>0.554</strong>. A matched noise control with the same per-channel magnitude left the gap intact, so error magnitude does not explain it. Perplexity remained a reliable <em>ordering</em> signal in all but 2.1% of 780 within-model comparisons</td>
-<td>S18</td>
-<td>Watching</td>
-<td>A quantisation gate of &quot;perplexity within X%&quot; can pass a model whose retrieval has roughly halved — the capability a retrieval-augmented system depends on</td>
-<td>Watch; MP-67</td>
+<td data-label="#">13</td>
+<td data-label="Finding"><strong>Perplexity hides what quantisation broke.</strong> Where perplexity rose only 1.2–1.5×, induction retained <strong>0.959</strong> of intact accuracy while retrieval fell to <strong>0.554</strong>. A matched noise control with the same per-channel magnitude left the gap intact, so error magnitude does not explain it. Perplexity remained a reliable <em>ordering</em> signal in all but 2.1% of 780 within-model comparisons</td>
+<td data-label="Evidence">S18</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">A quantisation gate of &quot;perplexity within X%&quot; can pass a model whose retrieval has roughly halved — the capability a retrieval-augmented system depends on</td>
+<td data-label="Action">Watch; MP-67</td>
 </tr>
 <tr>
-<td>14</td>
-<td><strong>Error messages written for people make capable agents worse.</strong> Across <strong>150</strong> widely used tool servers, <strong>949 of 3,001</strong> error messages included a next step for the caller, and about half depended on information the server cannot see. Agents acting only through tools followed the steps as written: a step naming a terminal command left <strong>45%</strong> of tasks recovered, and the harm it caused <strong>rose from 18 points for one model generation to 69 for the next</strong>. Naming a server tool instead reached <strong>84%</strong>; naming the call to repeat reached <strong>88%</strong>; deleting the step before the model read it reached <strong>82%</strong></td>
-<td>S19</td>
-<td>Watching</td>
-<td>If you publish a tool server, your error strings are an interface for a non-human caller. Advice it cannot act on is actively harmful, and more harmful as models improve</td>
-<td>Watch; MP-68</td>
+<td data-label="#">14</td>
+<td data-label="Finding"><strong>Error messages written for people make capable agents worse.</strong> Across <strong>150</strong> widely used tool servers, <strong>949 of 3,001</strong> error messages included a next step for the caller, and about half depended on information the server cannot see. Agents acting only through tools followed the steps as written: a step naming a terminal command left <strong>45%</strong> of tasks recovered, and the harm it caused <strong>rose from 18 points for one model generation to 69 for the next</strong>. Naming a server tool instead reached <strong>84%</strong>; naming the call to repeat reached <strong>88%</strong>; deleting the step before the model read it reached <strong>82%</strong></td>
+<td data-label="Evidence">S19</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">If you publish a tool server, your error strings are an interface for a non-human caller. Advice it cannot act on is actively harmful, and more harmful as models improve</td>
+<td data-label="Action">Watch; MP-68</td>
 </tr>
 <tr>
-<td>15</td>
-<td><strong>No change.</strong> The Model Context Protocol has no revision after 2026-07-28 and its draft changelog is empty. Agent identity and delegated credentials remain at draft stage with no published standard. Agent-to-agent protocols saw nothing after the August transfer. Observability conventions for generative AI still have no release in their dedicated repository</td>
-<td>S22</td>
-<td>Unchanged</td>
-<td>Four interoperability and observability watch items re-checked and unmoved</td>
-<td>None</td>
+<td data-label="#">15</td>
+<td data-label="Finding"><strong>No change.</strong> The Model Context Protocol has no revision after 2026-07-28 and its draft changelog is empty. Agent identity and delegated credentials remain at draft stage with no published standard. Agent-to-agent protocols saw nothing after the August transfer. Observability conventions for generative AI still have no release in their dedicated repository</td>
+<td data-label="Evidence">S22</td>
+<td data-label="Status">Unchanged</td>
+<td data-label="Why it matters">Four interoperability and observability watch items re-checked and unmoved</td>
+<td data-label="Action">None</td>
 </tr>
 </tbody>
 </table></div>
@@ -472,34 +472,34 @@
 </thead>
 <tbody>
 <tr>
-<td>Does reinforcement learning after pretraining add capability, or concentrate what the base model already had?</td>
-<td>Three results this period point the same way — distribution sharpening, suppression of diverse correct reasoning modes, and an interpretability probe finding reorganisation rather than addition — while a 395-reference survey calls the pass@1 against pass@k question unresolved</td>
-<td>Contested. The most consequential question found</td>
+<td data-label="Question">Does reinforcement learning after pretraining add capability, or concentrate what the base model already had?</td>
+<td data-label="Why it is open">Three results this period point the same way — distribution sharpening, suppression of diverse correct reasoning modes, and an interpretability probe finding reorganisation rather than addition — while a 395-reference survey calls the pass@1 against pass@k question unresolved</td>
+<td data-label="Status">Contested. The most consequential question found</td>
 </tr>
 <tr>
-<td>What should replace attack success rate as a security measure?</td>
-<td>Finding 6 shows the current measure misleads by up to fifty-fold. No candidate has consensus</td>
-<td>Contested</td>
+<td data-label="Question">What should replace attack success rate as a security measure?</td>
+<td data-label="Why it is open">Finding 6 shows the current measure misleads by up to fifty-fold. No candidate has consensus</td>
+<td data-label="Status">Contested</td>
 </tr>
 <tr>
-<td>How much does compaction actually cost?</td>
-<td>Findings 1 and 2 were published on the same day and disagree on magnitude. They reconcile only if benchmark-measured cost is a floor, and nobody has measured compaction on a task whose objective is not fixed</td>
-<td>Open</td>
+<td data-label="Question">How much does compaction actually cost?</td>
+<td data-label="Why it is open">Findings 1 and 2 were published on the same day and disagree on magnitude. They reconcile only if benchmark-measured cost is a floor, and nobody has measured compaction on a task whose objective is not fixed</td>
+<td data-label="Status">Open</td>
 </tr>
 <tr>
-<td>Does harness-level information loss cause accuracy loss, or only cost?</td>
-<td>The authors of finding 9 state this as open: truncation reliably produced extra work, but agents still reached correct answers when another route to the data existed</td>
-<td>Open</td>
+<td data-label="Question">Does harness-level information loss cause accuracy loss, or only cost?</td>
+<td data-label="Why it is open">The authors of finding 9 state this as open: truncation reliably produced extra work, but agents still reached correct answers when another route to the data existed</td>
+<td data-label="Status">Open</td>
 </tr>
 <tr>
-<td>Is retrieval infrastructure an accuracy layer at all?</td>
-<td>One strong negative result found lexical retrieval near ceiling in a competent agentic loop, with structural index artifacts adding no measurable accuracy. One paper against a large positive-result literature</td>
-<td>Contested</td>
+<td data-label="Question">Is retrieval infrastructure an accuracy layer at all?</td>
+<td data-label="Why it is open">One strong negative result found lexical retrieval near ceiling in a competent agentic loop, with structural index artifacts adding no measurable accuracy. One paper against a large positive-result literature</td>
+<td data-label="Status">Contested</td>
 </tr>
 <tr>
-<td>Can judge-based evaluation be made statistically sound?</td>
-<td>Several correction methods appeared this period with no convergence, and one reports that only a small subset of target-verifier pairs meets its efficiency condition</td>
-<td>Open</td>
+<td data-label="Question">Can judge-based evaluation be made statistically sound?</td>
+<td data-label="Why it is open">Several correction methods appeared this period with no convergence, and one reports that only a small subset of target-verifier pairs meets its efficiency condition</td>
+<td data-label="Status">Open</td>
 </tr>
 </tbody>
 </table></div>
@@ -522,70 +522,70 @@
 </thead>
 <tbody>
 <tr>
-<td>MP-46 Repository agent-instruction files and skills formats</td>
-<td>Watching</td>
-<td><strong>Current Practice</strong></td>
-<td>A census of 22,854 repositories establishes real adoption, and a controlled study establishes a measured failure mode and a tested fix (S4, S5)</td>
+<td data-label="Item">MP-46 Repository agent-instruction files and skills formats</td>
+<td data-label="Previous status">Watching</td>
+<td data-label="Now"><strong>Current Practice</strong></td>
+<td data-label="Reason">A census of 22,854 repositories establishes real adoption, and a controlled study establishes a measured failure mode and a tested fix (S4, S5)</td>
 </tr>
 <tr>
-<td>MP-15 Observability conventions for generative AI</td>
-<td>Watching</td>
-<td>Watching</td>
-<td>No release in the dedicated repository</td>
+<td data-label="Item">MP-15 Observability conventions for generative AI</td>
+<td data-label="Previous status">Watching</td>
+<td data-label="Now">Watching</td>
+<td data-label="Reason">No release in the dedicated repository</td>
 </tr>
 <tr>
-<td>MP-21 Agent-to-agent protocols</td>
-<td>Watching</td>
-<td>Watching</td>
-<td>Nothing after the August transfer</td>
+<td data-label="Item">MP-21 Agent-to-agent protocols</td>
+<td data-label="Previous status">Watching</td>
+<td data-label="Now">Watching</td>
+<td data-label="Reason">Nothing after the August transfer</td>
 </tr>
 <tr>
-<td>MP-29 Reinforcement learning from verifiable rewards as a service</td>
-<td>Watching</td>
-<td>Watching</td>
-<td>Evidence updated: on-policy training suppresses diverse correct reasoning modes and rarely recovers them (S21)</td>
+<td data-label="Item">MP-29 Reinforcement learning from verifiable rewards as a service</td>
+<td data-label="Previous status">Watching</td>
+<td data-label="Now">Watching</td>
+<td data-label="Reason">Evidence updated: on-policy training suppresses diverse correct reasoning modes and rarely recovers them (S21)</td>
 </tr>
 <tr>
-<td>MP-33 Model-signing and supply-chain integrity</td>
-<td>Watching</td>
-<td>Watching</td>
-<td>Evidence updated: a dated postmortem shows artifact-provenance controls do not survive identity compromise, because a legitimate pipeline signs the wrong source (S23)</td>
+<td data-label="Item">MP-33 Model-signing and supply-chain integrity</td>
+<td data-label="Previous status">Watching</td>
+<td data-label="Now">Watching</td>
+<td data-label="Reason">Evidence updated: a dated postmortem shows artifact-provenance controls do not survive identity compromise, because a legitimate pipeline signs the wrong source (S23)</td>
 </tr>
 <tr>
-<td>MP-43 Agentic, tool-based search loops</td>
-<td>Watching</td>
-<td>Watching</td>
-<td>Evidence updated and contested: lexical retrieval near ceiling in a competent loop, structural artifacts adding no accuracy (S20)</td>
+<td data-label="Item">MP-43 Agentic, tool-based search loops</td>
+<td data-label="Previous status">Watching</td>
+<td data-label="Now">Watching</td>
+<td data-label="Reason">Evidence updated and contested: lexical retrieval near ceiling in a competent loop, structural artifacts adding no accuracy (S20)</td>
 </tr>
 <tr>
-<td>MP-44 Graph-structured retrieval</td>
-<td>Watching</td>
-<td>Watching</td>
-<td>Same source; a graph outline degraded at scale</td>
+<td data-label="Item">MP-44 Graph-structured retrieval</td>
+<td data-label="Previous status">Watching</td>
+<td data-label="Now">Watching</td>
+<td data-label="Reason">Same source; a graph outline degraded at scale</td>
 </tr>
 <tr>
-<td>MP-45 Contextual enrichment of chunks</td>
-<td>Watching</td>
-<td>Watching</td>
-<td>No new evidence</td>
+<td data-label="Item">MP-45 Contextual enrichment of chunks</td>
+<td data-label="Previous status">Watching</td>
+<td data-label="Now">Watching</td>
+<td data-label="Reason">No new evidence</td>
 </tr>
 <tr>
-<td>MP-47 Computer-use agents</td>
-<td>Watching</td>
-<td>Watching</td>
-<td>Active, but the work is capability engineering, not a change in what an engineer must understand</td>
+<td data-label="Item">MP-47 Computer-use agents</td>
+<td data-label="Previous status">Watching</td>
+<td data-label="Now">Watching</td>
+<td data-label="Reason">Active, but the work is capability engineering, not a change in what an engineer must understand</td>
 </tr>
 <tr>
-<td>MP-48 Code execution against tool servers</td>
-<td>Watching</td>
-<td>Watching</td>
-<td>No new evidence this period</td>
+<td data-label="Item">MP-48 Code execution against tool servers</td>
+<td data-label="Previous status">Watching</td>
+<td data-label="Now">Watching</td>
+<td data-label="Reason">No new evidence this period</td>
 </tr>
 <tr>
-<td>MP-49 Scored context-quality criteria</td>
-<td>Discovered</td>
-<td>Watching</td>
-<td>Findings 1 to 3 make context quality measurable at the compaction boundary</td>
+<td data-label="Item">MP-49 Scored context-quality criteria</td>
+<td data-label="Previous status">Discovered</td>
+<td data-label="Now">Watching</td>
+<td data-label="Reason">Findings 1 to 3 make context quality measurable at the compaction boundary</td>
 </tr>
 </tbody>
 </table></div>

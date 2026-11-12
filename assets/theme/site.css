@@ -479,6 +479,11 @@ html.js .reveal.visible {
 }
 .onramp-table tbody tr:last-child td { border-bottom: 0; }
 @media (max-width: 640px) {
+  /* The bar now carries three controls beside the name: the home menu, the switch and the
+     hamburger. At the old 26px spacing the group ran past the right edge and took the hamburger
+     with it — measured 23px past the edge at 375px and 46px at 320px. Tighten the spacing, and
+     at the narrowest widths the name and the controls each give up a little. */
+  .nav .right { gap: 14px; }
   .page-wrap { padding: 0 16px 72px; }
   .page-hero .hero-subtitle { font-size: 17px; line-height: 1.47; }
   .table-card { border-radius: 14px; margin: 0 -4px; }
@@ -681,4 +686,25 @@ html.js .reveal.visible {
   .switch { width: 46px; height: 28px; }
   .switch .knob { width: 24px; height: 24px; }
   .switch[aria-checked="true"] .knob { transform: translateX(18px); }
+}
+
+/* ---------- Very small phones ----------
+   320px is the narrowest screen the site is audited at. Everything in the bar has to fit there
+   with nothing cut off, so the name steps down a size and the controls close up. */
+@media (max-width: 400px) {
+  .nav .wrap { padding: 0 16px; gap: 12px; }
+  .nav .right { gap: 10px; }
+  .nav .brand { font-size: 16px; gap: 8px; }
+  .nav .brand-mark { width: 14px; height: 14px; }
+  .ti-home-btn { width: 28px; height: 28px; }
+  .ti-home-btn svg { width: 16px; height: 16px; }
+  .switch { width: 42px; height: 26px; }
+  .switch .knob { width: 22px; height: 22px; }
+  .switch[aria-checked="true"] .knob { transform: translateX(16px); }
+  .switch svg { width: 13px; height: 13px; }
+}
+@media (max-width: 340px) {
+  .nav .wrap { padding: 0 12px; gap: 8px; }
+  .nav .right { gap: 8px; }
+  .nav .brand { font-size: 15px; gap: 7px; }
 }

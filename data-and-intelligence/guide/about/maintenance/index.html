@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="../../assets/css/site.css?v=5cbea89e99">
 <link rel="stylesheet" href="../../assets/css/print.css?v=5cbea89e99" media="print">
 <link rel="icon" type="image/svg+xml" href="../../../../assets/favicon/favicon.svg"/>
-<link rel="stylesheet" href="../../../../assets/theme/guide-override.css?v=18"/>
+<link rel="stylesheet" href="../../../../assets/theme/guide-override.css?v=19"/>
 <script>
 (function () {
   var root = document.documentElement, SITE = "ti-theme", GUIDE = "air-theme";
@@ -316,16 +316,16 @@
 </thead>
 <tbody>
 <tr>
-<td>Today ≥ <code>next_curriculum_review_due</code></td>
-<td>Perform the <strong>12-week Curriculum Review</strong>. It includes a scan, so no separate scan is run</td>
+<td data-label="Condition">Today ≥ <code>next_curriculum_review_due</code></td>
+<td data-label="Action">Perform the <strong>12-week Curriculum Review</strong>. It includes a scan, so no separate scan is run</td>
 </tr>
 <tr>
-<td>Otherwise, today ≥ <code>next_modern_ai_scan_due</code></td>
-<td>Perform the <strong>4-week Modern AI Scan</strong></td>
+<td data-label="Condition">Otherwise, today ≥ <code>next_modern_ai_scan_due</code></td>
+<td data-label="Action">Perform the <strong>4-week Modern AI Scan</strong></td>
 </tr>
 <tr>
-<td>Neither is due</td>
-<td>Perform nothing. Report which action is next and its date</td>
+<td data-label="Condition">Neither is due</td>
+<td data-label="Action">Perform nothing. Report which action is next and its date</td>
 </tr>
 </tbody>
 </table></div>
@@ -348,28 +348,28 @@
 </thead>
 <tbody>
 <tr>
-<td><code>baseline</code></td>
-<td>The current baseline number in <a href="../curriculum/index.html" class="xref-link xref-link--curriculum">ROADMAP.md<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a></td>
+<td data-label="Field"><code>baseline</code></td>
+<td data-label="Meaning">The current baseline number in <a href="../curriculum/index.html" class="xref-link xref-link--curriculum">ROADMAP.md<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a></td>
 </tr>
 <tr>
-<td><code>baseline_date</code></td>
-<td>The date that baseline was accepted</td>
+<td data-label="Field"><code>baseline_date</code></td>
+<td data-label="Meaning">The date that baseline was accepted</td>
 </tr>
 <tr>
-<td><code>last_modern_ai_scan</code></td>
-<td>Date of the most recent scan, or <code>null</code></td>
+<td data-label="Field"><code>last_modern_ai_scan</code></td>
+<td data-label="Meaning">Date of the most recent scan, or <code>null</code></td>
 </tr>
 <tr>
-<td><code>last_curriculum_review</code></td>
-<td>Date of the most recent curriculum review</td>
+<td data-label="Field"><code>last_curriculum_review</code></td>
+<td data-label="Meaning">Date of the most recent curriculum review</td>
 </tr>
 <tr>
-<td><code>next_modern_ai_scan_due</code></td>
-<td>Date the next scan is due</td>
+<td data-label="Field"><code>next_modern_ai_scan_due</code></td>
+<td data-label="Meaning">Date the next scan is due</td>
 </tr>
 <tr>
-<td><code>next_curriculum_review_due</code></td>
-<td>Date the next curriculum review is due</td>
+<td data-label="Field"><code>next_curriculum_review_due</code></td>
+<td data-label="Meaning">Date the next curriculum review is due</td>
 </tr>
 </tbody>
 </table></div>
@@ -383,16 +383,16 @@
 </thead>
 <tbody>
 <tr>
-<td>A 4-week scan</td>
-<td><code>last_modern_ai_scan</code> = today; <code>next_modern_ai_scan_due</code> = today + 28 days</td>
+<td data-label="After">A 4-week scan</td>
+<td data-label="Set"><code>last_modern_ai_scan</code> = today; <code>next_modern_ai_scan_due</code> = today + 28 days</td>
 </tr>
 <tr>
-<td>A 12-week review</td>
-<td><code>last_curriculum_review</code> = today; <code>next_curriculum_review_due</code> = today + 84 days; <strong>and</strong> <code>last_modern_ai_scan</code> = today; <code>next_modern_ai_scan_due</code> = today + 28 days</td>
+<td data-label="After">A 12-week review</td>
+<td data-label="Set"><code>last_curriculum_review</code> = today; <code>next_curriculum_review_due</code> = today + 84 days; <strong>and</strong> <code>last_modern_ai_scan</code> = today; <code>next_modern_ai_scan_due</code> = today + 28 days</td>
 </tr>
 <tr>
-<td>An accepted new baseline</td>
-<td><code>baseline</code> and <code>baseline_date</code></td>
+<td data-label="After">An accepted new baseline</td>
+<td data-label="Set"><code>baseline</code> and <code>baseline_date</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -475,32 +475,32 @@ Record scientific evidence and engineering adoption as separate signals.</p>
 </thead>
 <tbody>
 <tr>
-<td><strong>Ignore</strong></td>
-<td>Recorded only to show it was considered</td>
+<td data-label="Action"><strong>Ignore</strong></td>
+<td data-label="Use when">Recorded only to show it was considered</td>
 </tr>
 <tr>
-<td><strong>Watch</strong></td>
-<td>Possibly important; evidence or adoption still thin</td>
+<td data-label="Action"><strong>Watch</strong></td>
+<td data-label="Use when">Possibly important; evidence or adoption still thin</td>
 </tr>
 <tr>
-<td><strong>Current Practice</strong></td>
-<td>Established enough to practise now, not yet durable curriculum</td>
+<td data-label="Action"><strong>Current Practice</strong></td>
+<td data-label="Use when">Established enough to practise now, not yet durable curriculum</td>
 </tr>
 <tr>
-<td><strong>Investigate at 12-week review</strong></td>
-<td>May require a permanent curriculum change</td>
+<td data-label="Action"><strong>Investigate at 12-week review</strong></td>
+<td data-label="Use when">May require a permanent curriculum change</td>
 </tr>
 <tr>
-<td><strong>Superseded</strong></td>
-<td>An existing current-practice item has been replaced</td>
+<td data-label="Action"><strong>Superseded</strong></td>
+<td data-label="Use when">An existing current-practice item has been replaced</td>
 </tr>
 <tr>
-<td><strong>Open problem</strong></td>
-<td>An unresolved question the track carries as a frontier, not as practice</td>
+<td data-label="Action"><strong>Open problem</strong></td>
+<td data-label="Use when">An unresolved question the track carries as a frontier, not as practice</td>
 </tr>
 <tr>
-<td><strong>Evidence update</strong></td>
-<td>Corrects or refreshes evidence without changing the curriculum</td>
+<td data-label="Action"><strong>Evidence update</strong></td>
+<td data-label="Use when">Corrects or refreshes evidence without changing the curriculum</td>
 </tr>
 </tbody>
 </table></div>
@@ -575,20 +575,20 @@ Record scientific evidence and engineering adoption as separate signals.</p>
 </thead>
 <tbody>
 <tr>
-<td><strong>Critical</strong></td>
-<td>The current curriculum would produce a meaningful capability defect</td>
+<td data-label="Class"><strong>Critical</strong></td>
+<td data-label="Meaning">The current curriculum would produce a meaningful capability defect</td>
 </tr>
 <tr>
-<td><strong>Important</strong></td>
-<td>A material improvement in scope, depth, sequencing or efficiency</td>
+<td data-label="Class"><strong>Important</strong></td>
+<td data-label="Meaning">A material improvement in scope, depth, sequencing or efficiency</td>
 </tr>
 <tr>
-<td><strong>Optional</strong></td>
-<td>A reasonable refinement, not needed for curriculum integrity</td>
+<td data-label="Class"><strong>Optional</strong></td>
+<td data-label="Meaning">A reasonable refinement, not needed for curriculum integrity</td>
 </tr>
 <tr>
-<td><strong>Evidence Update Only</strong></td>
-<td>Corrects evidence without changing the curriculum</td>
+<td data-label="Class"><strong>Evidence Update Only</strong></td>
+<td data-label="Meaning">Corrects evidence without changing the curriculum</td>
 </tr>
 </tbody>
 </table></div>
@@ -628,32 +628,32 @@ Record scientific evidence and engineering adoption as separate signals.</p>
 </thead>
 <tbody>
 <tr>
-<td>Research and analyze</td>
-<td>Adding or removing a Universal Core area</td>
+<td data-label="Maintenance may do without approval">Research and analyze</td>
+<td data-label="Requires explicit human approval">Adding or removing a Universal Core area</td>
 </tr>
 <tr>
-<td>Write scan and review reports</td>
-<td>Materially changing a block&#x27;s required depth</td>
+<td data-label="Maintenance may do without approval">Write scan and review reports</td>
+<td data-label="Requires explicit human approval">Materially changing a block&#x27;s required depth</td>
 </tr>
 <tr>
-<td>Update the state file</td>
-<td>Changing major prerequisites</td>
+<td data-label="Maintenance may do without approval">Update the state file</td>
+<td data-label="Requires explicit human approval">Changing major prerequisites</td>
 </tr>
 <tr>
-<td>Record watch items and statuses</td>
-<td>Promoting an Important Extension into Universal Core</td>
+<td data-label="Maintenance may do without approval">Record watch items and statuses</td>
+<td data-label="Requires explicit human approval">Promoting an Important Extension into Universal Core</td>
 </tr>
 <tr>
-<td>Update the current-practice column of <a href="../curriculum/index.html#6-modern-ai-research-science-and-engineering" class="xref-link xref-link--curriculum">ROADMAP.md §6<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a>, as limited in <a href="#scan-procedure">Scan Procedure</a></td>
-<td>Removing a required capability</td>
+<td data-label="Maintenance may do without approval">Update the current-practice column of <a href="../curriculum/index.html#6-modern-ai-research-science-and-engineering" class="xref-link xref-link--curriculum">ROADMAP.md §6<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a>, as limited in <a href="#scan-procedure">Scan Procedure</a></td>
+<td data-label="Requires explicit human approval">Removing a required capability</td>
 </tr>
 <tr>
-<td>Make <a href="#7-minor-changes">minor changes</a></td>
-<td>Substantially changing the mandatory resource burden</td>
+<td data-label="Maintenance may do without approval">Make <a href="#7-minor-changes">minor changes</a></td>
+<td data-label="Requires explicit human approval">Substantially changing the mandatory resource burden</td>
 </tr>
 <tr>
-<td><strong>Propose</strong> any curriculum change</td>
-<td>Any other significant change to <a href="../curriculum/index.html" class="xref-link xref-link--curriculum">ROADMAP.md<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a></td>
+<td data-label="Maintenance may do without approval"><strong>Propose</strong> any curriculum change</td>
+<td data-label="Requires explicit human approval">Any other significant change to <a href="../curriculum/index.html" class="xref-link xref-link--curriculum">ROADMAP.md<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a></td>
 </tr>
 </tbody>
 </table></div>
@@ -707,24 +707,24 @@ Record scientific evidence and engineering adoption as separate signals.</p>
 </thead>
 <tbody>
 <tr>
-<td>A significant accepted curriculum revision</td>
-<td>Increment the baseline number (Baseline 1 → Baseline 2)</td>
+<td data-label="Event">A significant accepted curriculum revision</td>
+<td data-label="Baseline">Increment the baseline number (Baseline 1 → Baseline 2)</td>
 </tr>
 <tr>
-<td>Typo fixes, formatting, broken links, citation metadata</td>
-<td>No change</td>
+<td data-label="Event">Typo fixes, formatting, broken links, citation metadata</td>
+<td data-label="Baseline">No change</td>
 </tr>
 <tr>
-<td>Site regeneration</td>
-<td>No change</td>
+<td data-label="Event">Site regeneration</td>
+<td data-label="Baseline">No change</td>
 </tr>
 <tr>
-<td>Scan or review reports; watch-item or status changes</td>
-<td>No change</td>
+<td data-label="Event">Scan or review reports; watch-item or status changes</td>
+<td data-label="Baseline">No change</td>
 </tr>
 <tr>
-<td>Current-practice edits within the scan&#x27;s limits</td>
-<td>No change</td>
+<td data-label="Event">Current-practice edits within the scan&#x27;s limits</td>
+<td data-label="Baseline">No change</td>
 </tr>
 </tbody>
 </table></div>
@@ -750,28 +750,28 @@ Record scientific evidence and engineering adoption as separate signals.</p>
 </thead>
 <tbody>
 <tr>
-<td><strong>F6 resource gap</strong></td>
-<td>F6 remains accepted but has no dedicated mandatory teaching resource; cross-references and optional material give partial support. Is there now an adequate resource that materially improves learning of F6 without unnecessary burden?</td>
+<td data-label="Item"><strong>F6 resource gap</strong></td>
+<td data-label="Question for the review">F6 remains accepted but has no dedicated mandatory teaching resource; cross-references and optional material give partial support. Is there now an adequate resource that materially improves learning of F6 without unnecessary burden?</td>
 </tr>
 <tr>
-<td><strong>One small model build</strong></td>
-<td>Does a single from-scratch small language model (E7) remain the most efficient route to model-mechanics understanding?</td>
+<td data-label="Item"><strong>One small model build</strong></td>
+<td data-label="Question for the review">Does a single from-scratch small language model (E7) remain the most efficient route to model-mechanics understanding?</td>
 </tr>
 <tr>
-<td><strong>Action-taking systems</strong></td>
-<td>Have agent-style systems become universal and durable enough to change their curriculum role or depth in F2?</td>
+<td data-label="Item"><strong>Action-taking systems</strong></td>
+<td data-label="Question for the review">Have agent-style systems become universal and durable enough to change their curriculum role or depth in F2?</td>
 </tr>
 <tr>
-<td><strong>Paid-resource depth</strong></td>
-<td>Page ranges for <em>AI Engineering</em> and <em>Designing Machine Learning Systems</em> come from official tables of contents; <em>AI Engineering</em>&#x27;s subsection depth is unverified from body text. Verify when feasible</td>
+<td data-label="Item"><strong>Paid-resource depth</strong></td>
+<td data-label="Question for the review">Page ranges for <em>AI Engineering</em> and <em>Designing Machine Learning Systems</em> come from official tables of contents; <em>AI Engineering</em>&#x27;s subsection depth is unverified from body text. Verify when feasible</td>
 </tr>
 <tr>
-<td><strong>Conditional ANN source</strong></td>
-<td>Does <em>AI Engineering</em>&#x27;s &quot;Retrieval Algorithms&quot; section teach approximate nearest-neighbour index choice? If so, drop the conditional <em>NLP in Action</em> §10.3 assignment in E8</td>
+<td data-label="Item"><strong>Conditional ANN source</strong></td>
+<td data-label="Question for the review">Does <em>AI Engineering</em>&#x27;s &quot;Retrieval Algorithms&quot; section teach approximate nearest-neighbour index choice? If so, drop the conditional <em>NLP in Action</em> §10.3 assignment in E8</td>
 </tr>
 <tr>
-<td><strong>Planned learner materials</strong></td>
-<td>Eleven curriculum-authored materials listed in <a href="../curriculum/index.html#planned-learner-materials" class="xref-link xref-link--curriculum">ROADMAP.md §11<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a> are implementation work, produced progressively. Track which exist; they are not research questions</td>
+<td data-label="Item"><strong>Planned learner materials</strong></td>
+<td data-label="Question for the review">Eleven curriculum-authored materials listed in <a href="../curriculum/index.html#planned-learner-materials" class="xref-link xref-link--curriculum">ROADMAP.md §11<span class="xref xref--curriculum" data-chrome><span class="visually-hidden"> (</span>Specification<span class="visually-hidden">)</span></span></a> are implementation work, produced progressively. Track which exist; they are not research questions</td>
 </tr>
 </tbody>
 </table></div>

@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="../../../assets/css/site.css?v=5cbea89e99">
 <link rel="stylesheet" href="../../../assets/css/print.css?v=5cbea89e99" media="print">
 <link rel="icon" type="image/svg+xml" href="../../../../../assets/favicon/favicon.svg"/>
-<link rel="stylesheet" href="../../../../../assets/theme/guide-override.css?v=18"/>
+<link rel="stylesheet" href="../../../../../assets/theme/guide-override.css?v=19"/>
 <script>
 (function () {
   var root = document.documentElement, SITE = "ti-theme", GUIDE = "air-theme";
@@ -361,34 +361,34 @@
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td>Retrieval returns nothing</td>
-<td>An index rebuild fails; a filter excludes everything</td>
+<td data-label="#">1</td>
+<td data-label="Fault">Retrieval returns nothing</td>
+<td data-label="What actually happens in production">An index rebuild fails; a filter excludes everything</td>
 </tr>
 <tr>
-<td>2</td>
-<td>Retrieval returns confidently wrong passages</td>
-<td>Embedding model swapped; a near-duplicate outranks the right passage</td>
+<td data-label="#">2</td>
+<td data-label="Fault">Retrieval returns confidently wrong passages</td>
+<td data-label="What actually happens in production">Embedding model swapped; a near-duplicate outranks the right passage</td>
 </tr>
 <tr>
-<td>3</td>
-<td>A tool raises an error</td>
-<td>A dependency times out, a credential expires</td>
+<td data-label="#">3</td>
+<td data-label="Fault">A tool raises an error</td>
+<td data-label="What actually happens in production">A dependency times out, a credential expires</td>
 </tr>
 <tr>
-<td>4</td>
-<td>A tool returns malformed output</td>
-<td>An upstream API changes a field name or a unit</td>
+<td data-label="#">4</td>
+<td data-label="Fault">A tool returns malformed output</td>
+<td data-label="What actually happens in production">An upstream API changes a field name or a unit</td>
 </tr>
 <tr>
-<td>5</td>
-<td>The context is truncated</td>
-<td>The history outgrows the budget and the middle is dropped</td>
+<td data-label="#">5</td>
+<td data-label="Fault">The context is truncated</td>
+<td data-label="What actually happens in production">The history outgrows the budget and the middle is dropped</td>
 </tr>
 <tr>
-<td>6</td>
-<td>The model&#x27;s step does not parse</td>
-<td>A model update changes the output format</td>
+<td data-label="#">6</td>
+<td data-label="Fault">The model&#x27;s step does not parse</td>
+<td data-label="What actually happens in production">A model update changes the output format</td>
 </tr>
 </tbody>
 </table></div>
@@ -492,39 +492,39 @@
 </thead>
 <tbody>
 <tr>
-<td>none</td>
-<td></td>
-<td></td>
+<td data-label="Fault">none</td>
+<td data-label="What the answer looks like"></td>
+<td data-label="Which field of the trace settles it in one look"></td>
 </tr>
 <tr>
-<td>empty</td>
-<td></td>
-<td></td>
+<td data-label="Fault">empty</td>
+<td data-label="What the answer looks like"></td>
+<td data-label="Which field of the trace settles it in one look"></td>
 </tr>
 <tr>
-<td>wrong</td>
-<td></td>
-<td></td>
+<td data-label="Fault">wrong</td>
+<td data-label="What the answer looks like"></td>
+<td data-label="Which field of the trace settles it in one look"></td>
 </tr>
 <tr>
-<td>tool_error</td>
-<td></td>
-<td></td>
+<td data-label="Fault">tool_error</td>
+<td data-label="What the answer looks like"></td>
+<td data-label="Which field of the trace settles it in one look"></td>
 </tr>
 <tr>
-<td>tool_malformed</td>
-<td></td>
-<td></td>
+<td data-label="Fault">tool_malformed</td>
+<td data-label="What the answer looks like"></td>
+<td data-label="Which field of the trace settles it in one look"></td>
 </tr>
 <tr>
-<td>truncated</td>
-<td></td>
-<td></td>
+<td data-label="Fault">truncated</td>
+<td data-label="What the answer looks like"></td>
+<td data-label="Which field of the trace settles it in one look"></td>
 </tr>
 <tr>
-<td>unparsable</td>
-<td></td>
-<td></td>
+<td data-label="Fault">unparsable</td>
+<td data-label="What the answer looks like"></td>
+<td data-label="Which field of the trace settles it in one look"></td>
 </tr>
 </tbody>
 </table></div>

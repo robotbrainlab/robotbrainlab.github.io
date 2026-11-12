@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="../../assets/css/site.css?v=5cbea89e99">
 <link rel="stylesheet" href="../../assets/css/print.css?v=5cbea89e99" media="print">
 <link rel="icon" type="image/svg+xml" href="../../../../assets/favicon/favicon.svg"/>
-<link rel="stylesheet" href="../../../../assets/theme/guide-override.css?v=18"/>
+<link rel="stylesheet" href="../../../../assets/theme/guide-override.css?v=19"/>
 <script>
 (function () {
   var root = document.documentElement, SITE = "ti-theme", GUIDE = "air-theme";
@@ -297,67 +297,67 @@
 </thead>
 <tbody>
 <tr>
-<td>The Model Context Protocol&#x27;s 2026-07-28 specification is current. It made the protocol core stateless, replaced server-initiated requests with multi-round-trip requests, hardened authorization, and deprecated roots, sampling, logging, dynamic client registration and the legacy HTTP+SSE transport. It treats tool descriptions as untrusted unless the server is trusted</td>
-<td>S1; landscape E12, E13</td>
-<td>Current Practice</td>
-<td>Learners connecting tools need the current specification, and need to expect deprecations</td>
-<td>Current Practice; named in the §7 current-practice column; the specification added as a current reference</td>
+<td data-label="Finding">The Model Context Protocol&#x27;s 2026-07-28 specification is current. It made the protocol core stateless, replaced server-initiated requests with multi-round-trip requests, hardened authorization, and deprecated roots, sampling, logging, dynamic client registration and the legacy HTTP+SSE transport. It treats tool descriptions as untrusted unless the server is trusted</td>
+<td data-label="Evidence">S1; landscape E12, E13</td>
+<td data-label="Status">Current Practice</td>
+<td data-label="Why it matters">Learners connecting tools need the current specification, and need to expect deprecations</td>
+<td data-label="Action">Current Practice; named in the §7 current-practice column; the specification added as a current reference</td>
 </tr>
 <tr>
-<td>OpenTelemetry&#x27;s generative-AI conventions are still at Development status and moved to a dedicated repository in June 2026</td>
-<td>S2; landscape E17</td>
-<td>Watching</td>
-<td>Tracing is current practice; its standard field names are not stable</td>
-<td>Watch. The guide teaches tracing as a practice and does not teach the conventions</td>
+<td data-label="Finding">OpenTelemetry&#x27;s generative-AI conventions are still at Development status and moved to a dedicated repository in June 2026</td>
+<td data-label="Evidence">S2; landscape E17</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">Tracing is current practice; its standard field names are not stable</td>
+<td data-label="Action">Watch. The guide teaches tracing as a practice and does not teach the conventions</td>
 </tr>
 <tr>
-<td>OWASP publishes a Top 10 for Agentic Applications (2026) alongside its LLM application list; its risks include goal hijack, tool misuse, identity and privilege abuse, agentic supply chain, unexpected code execution, and memory and context poisoning</td>
-<td>S3; landscape T21</td>
-<td>Current Practice</td>
-<td>The current checklist practitioners threat-model agents against</td>
-<td>Current Practice; added as a current reference (already a §14 Reference category)</td>
+<td data-label="Finding">OWASP publishes a Top 10 for Agentic Applications (2026) alongside its LLM application list; its risks include goal hijack, tool misuse, identity and privilege abuse, agentic supply chain, unexpected code execution, and memory and context poisoning</td>
+<td data-label="Evidence">S3; landscape T21</td>
+<td data-label="Status">Current Practice</td>
+<td data-label="Why it matters">The current checklist practitioners threat-model agents against</td>
+<td data-label="Action">Current Practice; added as a current reference (already a §14 Reference category)</td>
 </tr>
 <tr>
-<td>Anthropic&#x27;s &quot;Writing effective tools for agents&quot; (2025-09-11) was read directly. It recommends a few purposeful tools rather than one per endpoint, namespacing, high-signal outputs, token-efficient responses, helpful error messages and evaluation-driven tool improvement</td>
-<td>S4</td>
-<td>Current Practice</td>
-<td>Evidence update: the targeted research had verified this guide only indirectly</td>
-<td>Evidence update</td>
+<td data-label="Finding">Anthropic&#x27;s &quot;Writing effective tools for agents&quot; (2025-09-11) was read directly. It recommends a few purposeful tools rather than one per endpoint, namespacing, high-signal outputs, token-efficient responses, helpful error messages and evaluation-driven tool improvement</td>
+<td data-label="Evidence">S4</td>
+<td data-label="Status">Current Practice</td>
+<td data-label="Why it matters">Evidence update: the targeted research had verified this guide only indirectly</td>
+<td data-label="Action">Evidence update</td>
 </tr>
 <tr>
-<td>A2A reached a stable v1.0 in March 2026 and joined the Agentic AI Foundation in August 2026. The adoption figures found are self-reported by the project and its promoters</td>
-<td>S5; landscape E14</td>
-<td>Watching</td>
-<td>A possible second interoperability standard, but independent evidence of engineering adoption is thin</td>
-<td>Watch</td>
+<td data-label="Finding">A2A reached a stable v1.0 in March 2026 and joined the Agentic AI Foundation in August 2026. The adoption figures found are self-reported by the project and its promoters</td>
+<td data-label="Evidence">S5; landscape E14</td>
+<td data-label="Status">Watching</td>
+<td data-label="Why it matters">A possible second interoperability standard, but independent evidence of engineering adoption is thin</td>
+<td data-label="Action">Watch</td>
 </tr>
 <tr>
-<td>Recent preprints propose scoring context quality as a leading indicator of agent reliability</td>
-<td>S6</td>
-<td>Discovered</td>
-<td>Could sharpen context-engineering practice; one unreviewed preprint</td>
-<td>Record only</td>
+<td data-label="Finding">Recent preprints propose scoring context quality as a leading indicator of agent reliability</td>
+<td data-label="Evidence">S6</td>
+<td data-label="Status">Discovered</td>
+<td data-label="Why it matters">Could sharpen context-engineering practice; one unreviewed preprint</td>
+<td data-label="Action">Record only</td>
 </tr>
 <tr>
-<td>The production-agent study behind several claims was re-read: 68% of agents execute at most 10 steps before human intervention, 70% rely on prompting off-the-shelf models, 74% depend primarily on human evaluation, and reliability is the top challenge</td>
-<td>S7; landscape G16</td>
-<td>—</td>
-<td>The guide quotes these figures</td>
-<td>Evidence update</td>
+<td data-label="Finding">The production-agent study behind several claims was re-read: 68% of agents execute at most 10 steps before human intervention, 70% rely on prompting off-the-shelf models, 74% depend primarily on human evaluation, and reliability is the top challenge</td>
+<td data-label="Evidence">S7; landscape G16</td>
+<td data-label="Status">—</td>
+<td data-label="Why it matters">The guide quotes these figures</td>
+<td data-label="Action">Evidence update</td>
 </tr>
 <tr>
-<td>Re-read of the multi-agent failure taxonomy (MAST): 14 failure modes in three categories — system design, inter-agent misalignment, task verification — from over 1,600 annotated traces across 7 frameworks</td>
-<td>S8; landscape E6</td>
-<td>Current Practice</td>
-<td>The quantified multi-agent study the guide asks learners to consult</td>
-<td>Evidence update</td>
+<td data-label="Finding">Re-read of the multi-agent failure taxonomy (MAST): 14 failure modes in three categories — system design, inter-agent misalignment, task verification — from over 1,600 annotated traces across 7 frameworks</td>
+<td data-label="Evidence">S8; landscape E6</td>
+<td data-label="Status">Current Practice</td>
+<td data-label="Why it matters">The quantified multi-agent study the guide asks learners to consult</td>
+<td data-label="Action">Evidence update</td>
 </tr>
 <tr>
-<td>No change in the Baseline 2 evidence base was found for workflow patterns, context engineering, agent evaluation vocabulary, prompt caching, routing, serving mechanisms, parameter-efficient adaptation or preference tuning</td>
-<td>S9, S10; landscape §E</td>
-<td>Unchanged</td>
-<td>—</td>
-<td>None</td>
+<td data-label="Finding">No change in the Baseline 2 evidence base was found for workflow patterns, context engineering, agent evaluation vocabulary, prompt caching, routing, serving mechanisms, parameter-efficient adaptation or preference tuning</td>
+<td data-label="Evidence">S9, S10; landscape §E</td>
+<td data-label="Status">Unchanged</td>
+<td data-label="Why it matters">—</td>
+<td data-label="Action">None</td>
 </tr>
 </tbody>
 </table></div>
@@ -386,39 +386,39 @@
 </thead>
 <tbody>
 <tr>
-<td>System architecture</td>
-<td>Named agent patterns; quantified multi-agent studies</td>
-<td>Named workflow patterns — prompt chaining, routing, parallelization, orchestrator–workers, evaluator–optimizer; bounded autonomy with human intervention; quantified multi-agent studies</td>
+<td data-label="Row">System architecture</td>
+<td data-label="Before">Named agent patterns; quantified multi-agent studies</td>
+<td data-label="After">Named workflow patterns — prompt chaining, routing, parallelization, orchestrator–workers, evaluator–optimizer; bounded autonomy with human intervention; quantified multi-agent studies</td>
 </tr>
 <tr>
-<td>Context</td>
-<td>&quot;Context engineering&quot; conventions; memory-file formats</td>
-<td>&quot;Context engineering&quot; conventions — just-in-time retrieval, compaction, structured notes, sub-agents with their own context; memory kept outside the context window; memory-file formats</td>
+<td data-label="Row">Context</td>
+<td data-label="Before">&quot;Context engineering&quot; conventions; memory-file formats</td>
+<td data-label="After">&quot;Context engineering&quot; conventions — just-in-time retrieval, compaction, structured notes, sub-agents with their own context; memory kept outside the context window; memory-file formats</td>
 </tr>
 <tr>
-<td>Structured generation</td>
-<td>Provider strict modes</td>
-<td>Provider strict modes; schema support that varies by engine</td>
+<td data-label="Row">Structured generation</td>
+<td data-label="Before">Provider strict modes</td>
+<td data-label="After">Provider strict modes; schema support that varies by engine</td>
 </tr>
 <tr>
-<td>Tools and interoperability</td>
-<td>Specific protocols, primitives and deprecations</td>
-<td>Specific protocols, primitives and deprecations — currently the Model Context Protocol (2026-07-28 specification); agent-facing tool design; agent-to-agent protocols watched</td>
+<td data-label="Row">Tools and interoperability</td>
+<td data-label="Before">Specific protocols, primitives and deprecations</td>
+<td data-label="After">Specific protocols, primitives and deprecations — currently the Model Context Protocol (2026-07-28 specification); agent-facing tool design; agent-to-agent protocols watched</td>
 </tr>
 <tr>
-<td>Evaluation</td>
-<td>Evaluation platforms and vendor vocabulary</td>
-<td>Error analysis by open and axial coding; judges validated against labelled samples; agent evaluation over repeated trials with pass^k; evaluation platforms and vendor vocabulary</td>
+<td data-label="Row">Evaluation</td>
+<td data-label="Before">Evaluation platforms and vendor vocabulary</td>
+<td data-label="After">Error analysis by open and axial coding; judges validated against labelled samples; agent evaluation over repeated trials with pass^k; evaluation platforms and vendor vocabulary</td>
 </tr>
 <tr>
-<td>Inference and cost</td>
-<td>Engine settings; format-specific guidance; provider pricing</td>
-<td>Prompt-prefix caching layout; routing and cascades; pinned model versions; engine settings; format-specific guidance; provider pricing</td>
+<td data-label="Row">Inference and cost</td>
+<td data-label="Before">Engine settings; format-specific guidance; provider pricing</td>
+<td data-label="After">Prompt-prefix caching layout; routing and cascades; pinned model versions; engine settings; format-specific guidance; provider pricing</td>
 </tr>
 <tr>
-<td>Security</td>
-<td>Risk lists; specific attacks; guardrail products</td>
-<td>Risk lists — the OWASP LLM and agentic lists, MITRE ATLAS; limiting untrusted input, sensitive access and external action in one agent; specific attacks; guardrail products</td>
+<td data-label="Row">Security</td>
+<td data-label="Before">Risk lists; specific attacks; guardrail products</td>
+<td data-label="After">Risk lists — the OWASP LLM and agentic lists, MITRE ATLAS; limiting untrusted input, sensitive access and external action in one agent; specific attacks; guardrail products</td>
 </tr>
 </tbody>
 </table></div>

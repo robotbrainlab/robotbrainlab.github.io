@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="../../../assets/css/site.css?v=5cbea89e99">
 <link rel="stylesheet" href="../../../assets/css/print.css?v=5cbea89e99" media="print">
 <link rel="icon" type="image/svg+xml" href="../../../../../assets/favicon/favicon.svg"/>
-<link rel="stylesheet" href="../../../../../assets/theme/guide-override.css?v=18"/>
+<link rel="stylesheet" href="../../../../../assets/theme/guide-override.css?v=19"/>
 <script>
 (function () {
   var root = document.documentElement, SITE = "ti-theme", GUIDE = "air-theme";
@@ -355,19 +355,19 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Settled</strong></td>
-<td>Reproduced widely, stable for years, and not seriously disputed</td>
-<td>Build on it; explain it as fact; expect it to still be true next year</td>
+<td data-label="Confidence"><strong>Settled</strong></td>
+<td data-label="What it means">Reproduced widely, stable for years, and not seriously disputed</td>
+<td data-label="What you are entitled to do with it">Build on it; explain it as fact; expect it to still be true next year</td>
 </tr>
 <tr>
-<td><strong>Current practice</strong></td>
-<td>What competent engineers do now, with real evidence behind it, but shaped by tools and costs that change</td>
-<td>Use it, and say <em>when</em> you learned it; expect the details to move and the reasons to stay</td>
+<td data-label="Confidence"><strong>Current practice</strong></td>
+<td data-label="What it means">What competent engineers do now, with real evidence behind it, but shaped by tools and costs that change</td>
+<td data-label="What you are entitled to do with it">Use it, and say <em>when</em> you learned it; expect the details to move and the reasons to stay</td>
 </tr>
 <tr>
-<td><strong>Contested</strong></td>
-<td>The field disagrees, or the evidence is thin, or the result has not been reproduced independently</td>
-<td>Quote it as a claim with an author attached, never as background; design so that being wrong about it is survivable</td>
+<td data-label="Confidence"><strong>Contested</strong></td>
+<td data-label="What it means">The field disagrees, or the evidence is thin, or the result has not been reproduced independently</td>
+<td data-label="What you are entitled to do with it">Quote it as a claim with an author attached, never as background; design so that being wrong about it is survivable</td>
 </tr>
 </tbody>
 </table></div>
@@ -388,40 +388,40 @@
 </thead>
 <tbody>
 <tr>
-<td>Pretraining</td>
-<td>Capability comes mostly from scale and data curation; the model learns to predict the next token on very large general corpora</td>
-<td>Settled</td>
-<td>Treat the base model as a fixed input you did not make</td>
+<td data-label="Stage">Pretraining</td>
+<td data-label="The claim">Capability comes mostly from scale and data curation; the model learns to predict the next token on very large general corpora</td>
+<td data-label="Confidence">Settled</td>
+<td data-label="What to do about it">Treat the base model as a fixed input you did not make</td>
 </tr>
 <tr>
-<td>Supervised fine-tuning</td>
-<td>Training on demonstrations turns a next-token predictor into something that follows instructions; it is now one stage among several rather than the whole of alignment</td>
-<td>Settled as a technique; its <em>place in the pipeline</em> is current practice</td>
-<td>Expect SFT → preference → RL as the usual order, and expect the order to be revised</td>
+<td data-label="Stage">Supervised fine-tuning</td>
+<td data-label="The claim">Training on demonstrations turns a next-token predictor into something that follows instructions; it is now one stage among several rather than the whole of alignment</td>
+<td data-label="Confidence">Settled as a technique; its <em>place in the pipeline</em> is current practice</td>
+<td data-label="What to do about it">Expect SFT → preference → RL as the usual order, and expect the order to be revised</td>
 </tr>
 <tr>
-<td>Preference optimization</td>
-<td>Human comparisons are turned into a training signal, through a reward model with reinforcement learning, or directly through closed-form objectives</td>
-<td>RLHF settled; direct preference methods current practice, often as an intermediate stage</td>
-<td>Know both exist; do not assume a given model used either</td>
+<td data-label="Stage">Preference optimization</td>
+<td data-label="The claim">Human comparisons are turned into a training signal, through a reward model with reinforcement learning, or directly through closed-form objectives</td>
+<td data-label="Confidence">RLHF settled; direct preference methods current practice, often as an intermediate stage</td>
+<td data-label="What to do about it">Know both exist; do not assume a given model used either</td>
 </tr>
 <tr>
-<td>Reinforcement learning from verifiable rewards</td>
-<td>For tasks with programmatic checks — tests, exact answers — the reward is computed, not modelled, and this is how reasoning models are produced</td>
-<td>Current practice for reasoning models; the algorithmic details are active research</td>
-<td>Understand the idea; treat specific recipes as this season&#x27;s</td>
+<td data-label="Stage">Reinforcement learning from verifiable rewards</td>
+<td data-label="The claim">For tasks with programmatic checks — tests, exact answers — the reward is computed, not modelled, and this is how reasoning models are produced</td>
+<td data-label="Confidence">Current practice for reasoning models; the algorithmic details are active research</td>
+<td data-label="What to do about it">Understand the idea; treat specific recipes as this season&#x27;s</td>
 </tr>
 <tr>
-<td>Distillation</td>
-<td>A smaller student trained on a larger teacher&#x27;s outputs, or on its own outputs graded by the teacher, retains much of the capability at lower cost, and can restore capability lost to fine-tuning</td>
-<td>Current practice; on-policy variants emerging</td>
-<td>A live option whenever cost is the constraint; verify the retained capability yourself</td>
+<td data-label="Stage">Distillation</td>
+<td data-label="The claim">A smaller student trained on a larger teacher&#x27;s outputs, or on its own outputs graded by the teacher, retains much of the capability at lower cost, and can restore capability lost to fine-tuning</td>
+<td data-label="Confidence">Current practice; on-policy variants emerging</td>
+<td data-label="What to do about it">A live option whenever cost is the constraint; verify the retained capability yourself</td>
 </tr>
 <tr>
-<td>Test-time compute</td>
-<td>Spending inference on intermediate reasoning, sampling several answers, or verifying them buys accuracy you did not train for</td>
-<td>Current practice</td>
-<td>Remember that it moves cost from training to every request — which is step 16&#x27;s problem</td>
+<td data-label="Stage">Test-time compute</td>
+<td data-label="The claim">Spending inference on intermediate reasoning, sampling several answers, or verifying them buys accuracy you did not train for</td>
+<td data-label="Confidence">Current practice</td>
+<td data-label="What to do about it">Remember that it moves cost from training to every request — which is step 16&#x27;s problem</td>
 </tr>
 </tbody>
 </table></div>

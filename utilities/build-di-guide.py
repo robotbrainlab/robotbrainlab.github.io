@@ -22,11 +22,13 @@ Usage (from the repository root):
    data-and-intelligence/on-ramp.html.
 7. Writes a comment at the top of every page saying the page is generated and that a hand
    edit to it is erased by the next build.
-8. Replaces the guide's three-state theme button with the site's own two-state switch, and
+8. Gives every data cell the heading of its own column, so the tables stack on a phone
+   instead of scrolling sideways inside their own box.
+9. Replaces the guide's three-state theme button with the site's own two-state switch, and
    joins the two theme memories. The site stores the chosen theme as "ti-theme", the guide as
    "air-theme", so before this each side ignored the other and the theme changed when you
    crossed between them. Every page gets a small script that mirrors one into the other.
-9. Replaces data-intelligence/guide/ with the result.
+10. Replaces data-intelligence/guide/ with the result.
 """
 
 import os
@@ -42,7 +44,7 @@ SOURCE = REPO / "data-and-intelligence" / "research"   # [2026-11-11] was resear
 GUIDE = REPO / "data-and-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
 # Site theme override for the guide (assets/theme/guide-override.css). Bump when that file changes.
-OVERRIDE_VERSION = 18
+OVERRIDE_VERSION = 19
 
 # The site and the guide each remember the chosen theme under their own name: the site as
 # "ti-theme" (assets/theme/site.js), the guide as "air-theme" (its own generated script). Neither
@@ -351,6 +353,48 @@ def add_marker(html: str, page: str) -> str:
         sys.exit(f"Page does not start with a doctype, not patching: {page}")
     return MARKER + html
 
+# A table of data cannot hold its columns on a phone: the generator wraps each one in a
+# .table-wrap that scrolls sideways, so a column is always off the screen and the reader has to
+# drag the table while the page stays still. Each cell is given the heading of its own column,
+# copied from that table's <th>, and assets/theme/guide-override.css prints it above the value
+# below 640px. No new words: the headings are already in the table. Rows that merge cells, or
+# whose shape does not match the heading row, are left alone; they stack without labels.
+TABLE = re.compile(r"<table[^>]*>.*?</table>", re.S)
+TH = re.compile(r"<th[^>]*>(.*?)</th>", re.S)
+ROW = re.compile(r"<tr>(.*?)</tr>", re.S)
+CELL = re.compile(r"<td(\s[^>]*)?>")
+
+
+def label_tables(html: str) -> str:
+    """Give every data cell the heading of its own column, for the phone layout."""
+    def one_table(match: re.Match) -> str:
+        table = match.group(0)
+        heads = [re.sub(r"<[^>]+>", "", h).strip() for h in TH.findall(table)]
+        start = table.find("<tbody>")
+        if not heads or start == -1:
+            return table
+
+        def one_row(row_match: re.Match) -> str:
+            row = row_match.group(1)
+            if "colspan" in row or "<th" in row or "data-label" in row:
+                return row_match.group(0)
+            cells = list(CELL.finditer(row))
+            if len(cells) != len(heads):
+                return row_match.group(0)
+            out, last = [], 0
+            for i, cell in enumerate(cells):
+                attrs = cell.group(1) or ""
+                out.append(row[last:cell.start()])
+                label = heads[i].replace("&", "&amp;").replace('"', "&quot;")
+                out.append(f'<td data-label="{label}"{attrs}>')
+                last = cell.end()
+            out.append(row[last:])
+            return "<tr>" + "".join(out) + "</tr>"
+
+        return table[:start] + ROW.sub(one_row, table[start:])
+
+    return TABLE.sub(one_table, html)
+
 def home_link(rel_to_root: str) -> str:
     """The site's four destinations, behind one home button.
 
@@ -405,6 +449,8 @@ def add_home_link(out: Path) -> int:
             html = add_on_ramp(html, rel)
         html = swap_python_resource(html, rel)
         html = add_python_note(html, rel, up)
+        # Last: the labels rewrite every <td>, and the swaps above match exact <td> strings.
+        html = label_tables(html)
         page.write_text(html, encoding="utf-8")
         patched += 1
     return patched

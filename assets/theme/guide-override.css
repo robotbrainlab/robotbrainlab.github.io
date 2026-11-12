@@ -505,3 +505,28 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .prose .ti-update strong { color: var(--head); }
+
+/* ---------- Data tables on a phone ----------
+   The generator wraps each table in a .table-wrap that scrolls sideways, so on a phone a column
+   is always off the screen and the reader drags the table while the page stays still. Below
+   640px the rows are laid out as blocks and every cell carries its own column heading, which
+   utilities/build-di-guide.py copies into data-label from the table's own <th>. */
+@media (max-width: 640px) {
+  .table-wrap { overflow-x: visible; }
+  .table-wrap table,
+  .table-wrap tbody,
+  .table-wrap tr,
+  .table-wrap td { display: block; width: auto; }
+  .table-wrap table { min-width: 0; }
+  .table-wrap thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .table-wrap tbody tr { padding: .75rem 0; border-bottom: 1px solid var(--rule); }
+  .table-wrap tbody tr:last-child { border-bottom: 0; }
+  .table-wrap td { padding: 0 .25rem; border: 0; }
+  .table-wrap td + td { margin-top: .5rem; }
+  .table-wrap td[data-label]::before {
+    content: attr(data-label);
+    display: block; margin-bottom: .15rem;
+    font-family: var(--font-sans); font-size: .68rem; font-weight: 600;
+    letter-spacing: .02em; text-transform: uppercase; color: var(--muted);
+  }
+}

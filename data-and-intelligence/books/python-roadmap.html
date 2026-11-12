@@ -575,6 +575,31 @@
       color: var(--muted);
     }
   }
+
+  /* ---------- The bar on a phone ----------
+     The bar carries the name, the home menu, the switch and this page's own sections button.
+     At the stock spacing the group ran past the right edge and cut the last control off:
+     measured 68px past the edge at 320px, 13px at 375px. */
+  @media (max-width: 640px) {
+    .nav .right { gap: 14px; }
+  }
+  @media (max-width: 400px) {
+    .nav .wrap { padding: 0 16px; gap: 12px; }
+    .nav .right { gap: 10px; }
+    .nav .brand { font-size: 16px; gap: 8px; }
+    .nav .brand-mark { width: 14px; height: 14px; }
+    .ti-home-btn { width: 28px; height: 28px; }
+    .ti-home-btn svg { width: 16px; height: 16px; }
+    .switch { width: 42px; height: 26px; }
+    .switch .knob { width: 22px; height: 22px; }
+    .switch[aria-checked="true"] .knob { transform: translateX(16px); }
+    .switch svg { width: 13px; height: 13px; }
+  }
+  @media (max-width: 340px) {
+    .nav .wrap { padding: 0 12px; gap: 8px; }
+    .nav .right { gap: 8px; }
+    .nav .brand { font-size: 15px; gap: 7px; }
+  }
 </style>
 </head>
 <body>
