@@ -365,6 +365,12 @@ branch, so do it only if there is a reason, and never without asking.
   what is published. A difference means somebody hand-edited, or the source changed and nobody
   rebuilt. Slower, so it runs before publishing. **Do (1) now and leave (2) until it has bitten
   once** — that was the recommendation and the owner has not ruled on it.
+- **`[2026-11-12]` On both on-ramps, a book you can open looks exactly like one that does not
+  exist yet.** Measured: a live `.book-title a` and a Coming-soon `.book-title` both render
+  `rgb(245,245,247)` with no underline, so the only signal is the missing badge. **It is the site's
+  existing behaviour, not something the D&I on-ramp introduced** — the CS&E table has done this
+  since the restyle, with 5 live links and 5 Coming soon in one colour. Left alone because changing
+  it changes the CS&E page too, which is a live visual change. The owner has not ruled on it.
 - Git doesn't store empty folders. Use `.gitkeep` (as in `cse/end-to-end/`).
 - Only the 3 orphan pages still load Google Fonts and have their own inline `<style>`.
 - Headless screenshots: use Chrome with `--force-prefers-reduced-motion`, or the fade-ins may not have
