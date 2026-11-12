@@ -20,11 +20,13 @@ Usage (from the repository root):
    These are the only changes made to the generated pages; the roadmap's own files are untouched.
 6. Adds an "The On-Ramp" button to the guide's home page, left of its primary action, linking to
    data-and-intelligence/on-ramp.html.
-7. Replaces the guide's three-state theme button with the site's own two-state switch, and
+7. Writes a comment at the top of every page saying the page is generated and that a hand
+   edit to it is erased by the next build.
+8. Replaces the guide's three-state theme button with the site's own two-state switch, and
    joins the two theme memories. The site stores the chosen theme as "ti-theme", the guide as
    "air-theme", so before this each side ignored the other and the theme changed when you
    crossed between them. Every page gets a small script that mirrors one into the other.
-8. Replaces data-intelligence/guide/ with the result.
+9. Replaces data-intelligence/guide/ with the result.
 """
 
 import os
@@ -40,7 +42,7 @@ SOURCE = REPO / "data-and-intelligence" / "research"   # [2026-11-11] was resear
 GUIDE = REPO / "data-and-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
 # Site theme override for the guide (assets/theme/guide-override.css). Bump when that file changes.
-OVERRIDE_VERSION = 16
+OVERRIDE_VERSION = 18
 
 # The site and the guide each remember the chosen theme under their own name: the site as
 # "ti-theme" (assets/theme/site.js), the guide as "air-theme" (its own generated script). Neither
@@ -331,6 +333,24 @@ def add_on_ramp(html: str, page: str) -> str:
     return html.replace(ON_RAMP_ANCHOR, ON_RAMP)
 
 
+# Not one of the 75 pages said it was generated, so a hand edit to any of them looked like
+# ordinary work and was erased, silently, by the next build (main() deletes the whole folder and
+# writes it again). This goes at the top of every page, where anyone who opens the file sees it
+# first. It changes nothing a reader sees.
+MARKER = (
+    "<!-- Made by utilities/build-di-guide.py from data-and-intelligence/research/.\n"
+    "     Hand edits to this file are erased by the next build. Edit the source instead. -->\n"
+)
+
+
+def add_marker(html: str, page: str) -> str:
+    """Say, in the file itself, that the file is generated."""
+    # The generator writes it lower case; accept either, and stop if it is neither, rather than
+    # putting the comment somewhere a browser would show it.
+    if not html.lstrip()[:15].lower().startswith("<!doctype html>"):
+        sys.exit(f"Page does not start with a doctype, not patching: {page}")
+    return MARKER + html
+
 def home_link(rel_to_root: str) -> str:
     """The site's four destinations, behind one home button.
 
@@ -338,6 +358,10 @@ def home_link(rel_to_root: str) -> str:
     the three disciplines as plain links, so the guide was the odd one out; but the guide's bar
     already holds its own sections (Learn, Evidence, About) and cannot hold three more and still
     fit a phone. One home button with a menu holds all four and takes the width of an icon.
+
+    Each row goes to that discipline's own page, not to a section of the home page. The site's own
+    nav sends Mathematics to index.html#mathematics, and in a menu that reads as a broken link:
+    two of the four rows land on the same page and only the scroll position differs.
     """
     up = rel_to_root
     return (
@@ -350,7 +374,7 @@ def home_link(rel_to_root: str) -> str:
         '</button>'
         '<ul class="ti-home-list" hidden>'
         f'<li><a class="ti-root" href="{up}index.html">Home page</a></li>'
-        f'<li><a href="{up}index.html#mathematics">Mathematics</a></li>'
+        f'<li><a href="{up}mathematics/index.html">Mathematics</a></li>'
         f'<li><a href="{up}cse/index.html">CS &amp; Engineering</a></li>'
         f'<li><a class="ti-current" href="{up}data-and-intelligence/guide/index.html">Data &amp; Intelligence</a></li>'
         '</ul></div>'
@@ -372,6 +396,7 @@ def add_home_link(out: Path) -> int:
         html = html.replace(ANCHOR, home_link(up)).replace("</head>", icon + theme + THEME_BRIDGE + STYLE)
         if rel == HOME_PAGE:
             html = html.replace("</head>", HOME_STYLE)
+        html = add_marker(html, rel)
         html = swap_theme_control(html, rel)
         html = mark_subheads(rename(html, rel, rel == HOME_PAGE))
         # After rename(), deliberately: the section carries a button--primary of its own, and

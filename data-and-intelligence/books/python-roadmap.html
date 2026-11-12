@@ -553,6 +553,28 @@
   @media (prefers-color-scheme: dark) {
     html:not([data-theme]) .ti-home-list a.ti-root { color: #bf5af2; }
   }
+
+  /* ---------- Data tables on a phone ----------
+     table.grid holds 620px (480px when tight) inside a card about 340px wide, so the card became
+     a sideways scroller and a column was always off-screen. Below 640px each row is laid out as
+     blocks, and every cell carries the heading of its own column: the headings are already in the
+     table, copied into data-label, so no new words are introduced. */
+  @media (max-width: 640px) {
+    table.grid, table.grid tbody, table.grid tr, table.grid td { display: block; width: auto; }
+    table.grid { min-width: 0; }
+    table.grid.tight { min-width: 0; }
+    table.grid thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    table.grid tbody tr { padding: 14px 0; border-bottom: 1px solid var(--rule-soft); }
+    table.grid tbody tr:last-child { border-bottom: 0; }
+    table.grid td { padding: 0 16px; border: 0; }
+    table.grid td + td { margin-top: 10px; }
+    table.grid td[data-label]::before {
+      content: attr(data-label);
+      display: block; margin-bottom: 2px;
+      font-size: 11px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase;
+      color: var(--muted);
+    }
+  }
 </style>
 </head>
 <body>
@@ -582,7 +604,7 @@
         </button>
         <ul class="ti-home-list" hidden>
           <li><a class="ti-root" href="../../index.html">Home page</a></li>
-          <li><a href="../../index.html#mathematics">Mathematics</a></li>
+          <li><a href="../../mathematics/index.html">Mathematics</a></li>
           <li><a href="../../cse/index.html">CS &amp; Engineering</a></li>
           <li><a href="../guide/index.html">Data &amp; Intelligence</a></li>
         </ul>
@@ -734,10 +756,10 @@
         <table class="grid tight">
           <thead><tr><th scope="col" style="width:24%">Tag</th><th scope="col">Standard</th></tr></thead>
           <tbody>
-          <tr><td class="k">CORE</td><td>Know cold, without lookup. Non-negotiable</td></tr>
-          <tr><td class="k">PRO</td><td>Know well; look up specifics. Expected of a senior</td></tr>
-          <tr><td class="k">DEMAND</td><td>Know it exists. Learn it when a real problem arrives</td></tr>
-          <tr><td class="k">SPEC</td><td>Specialization. Most engineers never need it</td></tr>
+          <tr><td data-label="Tag" class="k">CORE</td><td data-label="Standard">Know cold, without lookup. Non-negotiable</td></tr>
+          <tr><td data-label="Tag" class="k">PRO</td><td data-label="Standard">Know well; look up specifics. Expected of a senior</td></tr>
+          <tr><td data-label="Tag" class="k">DEMAND</td><td data-label="Standard">Know it exists. Learn it when a real problem arrives</td></tr>
+          <tr><td data-label="Tag" class="k">SPEC</td><td data-label="Standard">Specialization. Most engineers never need it</td></tr>
           </tbody>
         </table>
       </div>
@@ -751,11 +773,11 @@
         <table class="grid">
           <thead><tr><th scope="col" style="width:27%">Where</th><th scope="col" style="width:14%">Cost</th><th scope="col">What it is good for</th></tr></thead>
           <tbody>
-          <tr><td class="k"><a href="https://exercism.org/tracks/python">Exercism mentoring</a></td><td>Free</td><td><strong>Start here.</strong> You are already on the track daily from Phase 1.1 &mdash; request mentoring on a solution instead of just marking it done. Mentors comment on idiom, which is exactly what a solo learner cannot see</td></tr>
-          <tr><td class="k"><a href="https://codereview.stackexchange.com/">Code Review Stack Exchange</a></td><td>Free</td><td>Whole working programs. Best for the phase projects. Post the Journal CLI; expect to be told things you did not want to hear</td></tr>
-          <tr><td class="k"><a href="https://discuss.python.org/">discuss.python.org</a></td><td>Free</td><td>Design questions rather than line-by-line review &mdash; &ldquo;is this the right shape?&rdquo; Useful from 1.3 onward, once the questions turn architectural</td></tr>
-          <tr><td class="k">A pull request to a real project</td><td>Free</td><td><strong>The best one.</strong> A maintainer reviewing your patch against their standards is worth ten self-assessments. Start with a documentation fix &mdash; the process matters more than the diff</td></tr>
-          <tr><td class="k">A colleague, or a paid mentor</td><td>Varies</td><td>If you have access to a working Python engineer this beats everything above on latency alone. Ask for thirty minutes against one file</td></tr>
+          <tr><td data-label="Where" class="k"><a href="https://exercism.org/tracks/python">Exercism mentoring</a></td><td data-label="Cost">Free</td><td data-label="What it is good for"><strong>Start here.</strong> You are already on the track daily from Phase 1.1 &mdash; request mentoring on a solution instead of just marking it done. Mentors comment on idiom, which is exactly what a solo learner cannot see</td></tr>
+          <tr><td data-label="Where" class="k"><a href="https://codereview.stackexchange.com/">Code Review Stack Exchange</a></td><td data-label="Cost">Free</td><td data-label="What it is good for">Whole working programs. Best for the phase projects. Post the Journal CLI; expect to be told things you did not want to hear</td></tr>
+          <tr><td data-label="Where" class="k"><a href="https://discuss.python.org/">discuss.python.org</a></td><td data-label="Cost">Free</td><td data-label="What it is good for">Design questions rather than line-by-line review &mdash; &ldquo;is this the right shape?&rdquo; Useful from 1.3 onward, once the questions turn architectural</td></tr>
+          <tr><td data-label="Where" class="k">A pull request to a real project</td><td data-label="Cost">Free</td><td data-label="What it is good for"><strong>The best one.</strong> A maintainer reviewing your patch against their standards is worth ten self-assessments. Start with a documentation fix &mdash; the process matters more than the diff</td></tr>
+          <tr><td data-label="Where" class="k">A colleague, or a paid mentor</td><td data-label="Cost">Varies</td><td data-label="What it is good for">If you have access to a working Python engineer this beats everything above on latency alone. Ask for thirty minutes against one file</td></tr>
           </tbody>
         </table>
       </div>
@@ -772,12 +794,12 @@
         <table class="grid">
           <thead><tr><th scope="col" style="width:24%">If you get through</th><th scope="col" style="width:13%">Status</th><th scope="col">Where that leaves you</th></tr></thead>
           <tbody>
-          <tr><td class="k">1.1 only</td><td>Started</td><td>You can write Python. You cannot yet write Python that anyone else should depend on</td></tr>
-          <tr><td class="k"><strong>1.1 &rarr; 1.2</strong></td><td><strong>Floor</strong></td><td><strong>The first point worth stopping at.</strong> Typed, tested, packaged, CI&rsquo;d work &mdash; the difference between a hobbyist and someone employable</td></tr>
-          <tr><td class="k"><strong>1.1 &rarr; 1.3</strong></td><td><strong>The goal</strong></td><td><strong>The point of this whole document.</strong> 1.3 is the plateau-breaker &mdash; it is why most self-taught developers stall, and why you will not. If you read one phase on this page, make it 1.3</td></tr>
-          <tr><td class="k">&hellip; plus one capstone</td><td>Provable</td><td>Something real to point at, and a defensible place to stop and go get a job</td></tr>
-          <tr><td class="k">All of Stage 1</td><td>Complete</td><td>Complete command of the language, applied. What this document was written for &mdash; but 1.3 is where the value concentrates</td></tr>
-          <tr><td class="k">Stage 2</td><td>Bonus</td><td><strong>Genuinely optional.</strong> Excellent, and most working Python engineers never do it. Read it when the language itself starts to feel like the constraint &mdash; not before</td></tr>
+          <tr><td data-label="If you get through" class="k">1.1 only</td><td data-label="Status">Started</td><td data-label="Where that leaves you">You can write Python. You cannot yet write Python that anyone else should depend on</td></tr>
+          <tr><td data-label="If you get through" class="k"><strong>1.1 &rarr; 1.2</strong></td><td data-label="Status"><strong>Floor</strong></td><td data-label="Where that leaves you"><strong>The first point worth stopping at.</strong> Typed, tested, packaged, CI&rsquo;d work &mdash; the difference between a hobbyist and someone employable</td></tr>
+          <tr><td data-label="If you get through" class="k"><strong>1.1 &rarr; 1.3</strong></td><td data-label="Status"><strong>The goal</strong></td><td data-label="Where that leaves you"><strong>The point of this whole document.</strong> 1.3 is the plateau-breaker &mdash; it is why most self-taught developers stall, and why you will not. If you read one phase on this page, make it 1.3</td></tr>
+          <tr><td data-label="If you get through" class="k">&hellip; plus one capstone</td><td data-label="Status">Provable</td><td data-label="Where that leaves you">Something real to point at, and a defensible place to stop and go get a job</td></tr>
+          <tr><td data-label="If you get through" class="k">All of Stage 1</td><td data-label="Status">Complete</td><td data-label="Where that leaves you">Complete command of the language, applied. What this document was written for &mdash; but 1.3 is where the value concentrates</td></tr>
+          <tr><td data-label="If you get through" class="k">Stage 2</td><td data-label="Status">Bonus</td><td data-label="Where that leaves you"><strong>Genuinely optional.</strong> Excellent, and most working Python engineers never do it. Read it when the language itself starts to feel like the constraint &mdash; not before</td></tr>
           </tbody>
         </table>
       </div>
@@ -802,12 +824,12 @@
       <table class="grid tight">
         <thead><tr><th scope="col" style="width:14%">Phase</th><th scope="col">Name</th></tr></thead>
         <tbody>
-        <tr><td class="num">1.1</td><td class="k"><a href="#f11">The Language</a></td></tr>
-        <tr><td class="num">1.2</td><td class="k"><a href="#f12">Writing It Properly</a></td></tr>
-        <tr><td class="num">1.3</td><td class="k"><a href="#f13">How Python Really Works</a></td></tr>
-        <tr><td class="num">1.4</td><td class="k"><a href="#f14">Concurrency</a></td></tr>
-        <tr><td class="num">1.5</td><td class="k"><a href="#f15">Applying Python</a></td></tr>
-        <tr><td class="num">1.6</td><td class="k"><a href="#f16">Capstones</a></td></tr>
+        <tr><td data-label="Phase" class="num">1.1</td><td data-label="Name" class="k"><a href="#f11">The Language</a></td></tr>
+        <tr><td data-label="Phase" class="num">1.2</td><td data-label="Name" class="k"><a href="#f12">Writing It Properly</a></td></tr>
+        <tr><td data-label="Phase" class="num">1.3</td><td data-label="Name" class="k"><a href="#f13">How Python Really Works</a></td></tr>
+        <tr><td data-label="Phase" class="num">1.4</td><td data-label="Name" class="k"><a href="#f14">Concurrency</a></td></tr>
+        <tr><td data-label="Phase" class="num">1.5</td><td data-label="Name" class="k"><a href="#f15">Applying Python</a></td></tr>
+        <tr><td data-label="Phase" class="num">1.6</td><td data-label="Name" class="k"><a href="#f16">Capstones</a></td></tr>
         </tbody>
         </table>
     </div>
@@ -875,19 +897,19 @@
         <table class="grid">
           <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
           <tbody>
-          <tr><td class="num">1</td><td class="k">Unit converter</td><td>f-string format specs, input validation</td></tr>
-          <tr><td class="num">2</td><td class="k">Bill splitter</td><td><code>Decimal</code>; cents must reconcile exactly</td></tr>
-          <tr><td class="num">3</td><td class="k">Number-guessing game</td><td>Loops, <code>match</code>, validated input</td></tr>
-          <tr><td class="num">4</td><td class="k">Word-frequency counter</td><td>Plain <code>dict</code> first, then <code>Counter</code> &mdash; compare</td></tr>
-          <tr><td class="num">5</td><td class="k">Contact book</td><td>Data-structure choice; justify every one</td></tr>
-          <tr><td class="num">6</td><td class="k">Text-utility module</td><td>~8 pure, documented functions. <strong>Make this the week-three public repo</strong> if you have not pushed one yet</td></tr>
-          <tr><td class="num">7</td><td class="k">Log parser</td><td><code>re</code> with named groups; malformed lines counted, not crashed on</td></tr>
-          <tr><td class="num">8</td><td class="k">File organizer</td><td><code>pathlib</code>; dry-run by default</td></tr>
-          <tr><td class="num">9</td><td class="k">CSV &rarr; JSON converter</td><td>Streaming, error handling, quarantined bad rows</td></tr>
-          <tr><td class="num">10</td><td class="k">Deck of cards</td><td><code>__repr__</code>, <code>__len__</code>, <code>__getitem__</code></td></tr>
-          <tr><td class="num">11</td><td class="k">Bank account</td><td><code>@property</code>, enforced invariants</td></tr>
-          <tr><td class="num">12</td><td class="k">Backup tool</td><td><code>shutil</code>, <code>zipfile</code>, <code>datetime</code></td></tr>
-          <tr><td class="num fin">&#9873;</td><td class="k">Journal CLI</td><td><strong>Phase project.</strong> Everything above. Markdown files, search, tags, backup. Runnable as <code>python -m</code></td></tr>
+          <tr><td data-label="#" class="num">1</td><td data-label="Project" class="k">Unit converter</td><td data-label="Exercises">f-string format specs, input validation</td></tr>
+          <tr><td data-label="#" class="num">2</td><td data-label="Project" class="k">Bill splitter</td><td data-label="Exercises"><code>Decimal</code>; cents must reconcile exactly</td></tr>
+          <tr><td data-label="#" class="num">3</td><td data-label="Project" class="k">Number-guessing game</td><td data-label="Exercises">Loops, <code>match</code>, validated input</td></tr>
+          <tr><td data-label="#" class="num">4</td><td data-label="Project" class="k">Word-frequency counter</td><td data-label="Exercises">Plain <code>dict</code> first, then <code>Counter</code> &mdash; compare</td></tr>
+          <tr><td data-label="#" class="num">5</td><td data-label="Project" class="k">Contact book</td><td data-label="Exercises">Data-structure choice; justify every one</td></tr>
+          <tr><td data-label="#" class="num">6</td><td data-label="Project" class="k">Text-utility module</td><td data-label="Exercises">~8 pure, documented functions. <strong>Make this the week-three public repo</strong> if you have not pushed one yet</td></tr>
+          <tr><td data-label="#" class="num">7</td><td data-label="Project" class="k">Log parser</td><td data-label="Exercises"><code>re</code> with named groups; malformed lines counted, not crashed on</td></tr>
+          <tr><td data-label="#" class="num">8</td><td data-label="Project" class="k">File organizer</td><td data-label="Exercises"><code>pathlib</code>; dry-run by default</td></tr>
+          <tr><td data-label="#" class="num">9</td><td data-label="Project" class="k">CSV &rarr; JSON converter</td><td data-label="Exercises">Streaming, error handling, quarantined bad rows</td></tr>
+          <tr><td data-label="#" class="num">10</td><td data-label="Project" class="k">Deck of cards</td><td data-label="Exercises"><code>__repr__</code>, <code>__len__</code>, <code>__getitem__</code></td></tr>
+          <tr><td data-label="#" class="num">11</td><td data-label="Project" class="k">Bank account</td><td data-label="Exercises"><code>@property</code>, enforced invariants</td></tr>
+          <tr><td data-label="#" class="num">12</td><td data-label="Project" class="k">Backup tool</td><td data-label="Exercises"><code>shutil</code>, <code>zipfile</code>, <code>datetime</code></td></tr>
+          <tr><td data-label="#" class="num fin">&#9873;</td><td data-label="Project" class="k">Journal CLI</td><td data-label="Exercises"><strong>Phase project.</strong> Everything above. Markdown files, search, tags, backup. Runnable as <code>python -m</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -930,17 +952,17 @@
         <table class="grid">
           <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
           <tbody>
-          <tr><td class="num">1</td><td class="k">Ruff everything</td><td>Add it to every repo you own; fix every finding</td></tr>
-          <tr><td class="num">2</td><td class="k">Retrofit tests</td><td>The Phase 1.1 journal, until you trust a refactor</td></tr>
-          <tr><td class="num">3</td><td class="k">Parametrize properly</td><td>20 cases, no duplicated test bodies</td></tr>
-          <tr><td class="num">4</td><td class="k">Property-test the text utilities</td><td>Hypothesis finds a bug you&rsquo;d never have tested for</td></tr>
-          <tr><td class="num">5</td><td class="k"><code>mypy --strict</code> pass</td><td>One project, zero <code>Any</code>; note the bugs it finds</td></tr>
-          <tr><td class="num">6</td><td class="k">Convert to <code>src</code> layout</td><td><code>pyproject.toml</code>, pre-commit, all tooling green</td></tr>
-          <tr><td class="num">7</td><td class="k">Publish to PyPI</td><td>TestPyPI first, then for real. Trivial counts</td></tr>
-          <tr><td class="num">8</td><td class="k">Replace every <code>print()</code></td><td><code>dictConfig</code>, levels per environment</td></tr>
-          <tr><td class="num">9</td><td class="k">History surgery</td><td>Interactive rebase on a messy branch</td></tr>
-          <tr><td class="num">10</td><td class="k">CI matrix</td><td>Lint, types, tests across three Python versions</td></tr>
-          <tr><td class="num fin">&#9873;</td><td class="k">Journal, professional grade</td><td><strong>Phase project.</strong> No new features. Typed, tested, CI&rsquo;d, published, README + CHANGELOG</td></tr>
+          <tr><td data-label="#" class="num">1</td><td data-label="Project" class="k">Ruff everything</td><td data-label="Exercises">Add it to every repo you own; fix every finding</td></tr>
+          <tr><td data-label="#" class="num">2</td><td data-label="Project" class="k">Retrofit tests</td><td data-label="Exercises">The Phase 1.1 journal, until you trust a refactor</td></tr>
+          <tr><td data-label="#" class="num">3</td><td data-label="Project" class="k">Parametrize properly</td><td data-label="Exercises">20 cases, no duplicated test bodies</td></tr>
+          <tr><td data-label="#" class="num">4</td><td data-label="Project" class="k">Property-test the text utilities</td><td data-label="Exercises">Hypothesis finds a bug you&rsquo;d never have tested for</td></tr>
+          <tr><td data-label="#" class="num">5</td><td data-label="Project" class="k"><code>mypy --strict</code> pass</td><td data-label="Exercises">One project, zero <code>Any</code>; note the bugs it finds</td></tr>
+          <tr><td data-label="#" class="num">6</td><td data-label="Project" class="k">Convert to <code>src</code> layout</td><td data-label="Exercises"><code>pyproject.toml</code>, pre-commit, all tooling green</td></tr>
+          <tr><td data-label="#" class="num">7</td><td data-label="Project" class="k">Publish to PyPI</td><td data-label="Exercises">TestPyPI first, then for real. Trivial counts</td></tr>
+          <tr><td data-label="#" class="num">8</td><td data-label="Project" class="k">Replace every <code>print()</code></td><td data-label="Exercises"><code>dictConfig</code>, levels per environment</td></tr>
+          <tr><td data-label="#" class="num">9</td><td data-label="Project" class="k">History surgery</td><td data-label="Exercises">Interactive rebase on a messy branch</td></tr>
+          <tr><td data-label="#" class="num">10</td><td data-label="Project" class="k">CI matrix</td><td data-label="Exercises">Lint, types, tests across three Python versions</td></tr>
+          <tr><td data-label="#" class="num fin">&#9873;</td><td data-label="Project" class="k">Journal, professional grade</td><td data-label="Exercises"><strong>Phase project.</strong> No new features. Typed, tested, CI&rsquo;d, published, README + CHANGELOG</td></tr>
           </tbody>
         </table>
       </div>
@@ -992,17 +1014,17 @@
         <table class="grid">
           <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
           <tbody>
-          <tr><td class="num">1</td><td class="k">Name-binding prediction drill</td><td>15 snippets on aliasing, mutation, defaults, closures. <strong>Predict every output in writing first.</strong> Highest-value exercise in the phase</td></tr>
-          <tr><td class="num">2</td><td class="k">Deep copy by hand</td><td>Nested structures without <code>copy</code>; then survive a reference cycle</td></tr>
-          <tr><td class="num">3</td><td class="k"><code>Vector</code></td><td>Arithmetic + sequence protocols; <code>repr()</code> round-trips through <code>eval()</code></td></tr>
-          <tr><td class="num">4</td><td class="k"><code>Money</code></td><td>Hashable, orderable, immutable; refuses cross-currency arithmetic</td></tr>
-          <tr><td class="num">5</td><td class="k">Custom mapping</td><td>Passes <code>isinstance(x, collections.abc.Mapping)</code></td></tr>
-          <tr><td class="num">6</td><td class="k"><code>@retry(times=3, backoff=2)</code></td><td>Works bare <em>and</em> parameterized, from one implementation</td></tr>
-          <tr><td class="num">7</td><td class="k">Memoizing decorator</td><td>Write it <em>before</em> reading <code>lru_cache</code>, then compare</td></tr>
-          <tr><td class="num">8</td><td class="k">Generator pipeline</td><td>Rewrite the 1.1 CSV converter; measure with <code>tracemalloc</code></td></tr>
-          <tr><td class="num">9</td><td class="k">Atomic file writer</td><td>Context manager; original intact on failure</td></tr>
-          <tr><td class="num">10</td><td class="k">Refactor to composition</td><td>1.1&rsquo;s class hierarchy &rarr; composition + <code>Protocol</code></td></tr>
-          <tr><td class="num fin">&#9873;</td><td class="k">Journal on the data model</td><td><strong>Phase project.</strong> Dataclasses, generator pipelines, context managers. Compare both versions in the README</td></tr>
+          <tr><td data-label="#" class="num">1</td><td data-label="Project" class="k">Name-binding prediction drill</td><td data-label="Exercises">15 snippets on aliasing, mutation, defaults, closures. <strong>Predict every output in writing first.</strong> Highest-value exercise in the phase</td></tr>
+          <tr><td data-label="#" class="num">2</td><td data-label="Project" class="k">Deep copy by hand</td><td data-label="Exercises">Nested structures without <code>copy</code>; then survive a reference cycle</td></tr>
+          <tr><td data-label="#" class="num">3</td><td data-label="Project" class="k"><code>Vector</code></td><td data-label="Exercises">Arithmetic + sequence protocols; <code>repr()</code> round-trips through <code>eval()</code></td></tr>
+          <tr><td data-label="#" class="num">4</td><td data-label="Project" class="k"><code>Money</code></td><td data-label="Exercises">Hashable, orderable, immutable; refuses cross-currency arithmetic</td></tr>
+          <tr><td data-label="#" class="num">5</td><td data-label="Project" class="k">Custom mapping</td><td data-label="Exercises">Passes <code>isinstance(x, collections.abc.Mapping)</code></td></tr>
+          <tr><td data-label="#" class="num">6</td><td data-label="Project" class="k"><code>@retry(times=3, backoff=2)</code></td><td data-label="Exercises">Works bare <em>and</em> parameterized, from one implementation</td></tr>
+          <tr><td data-label="#" class="num">7</td><td data-label="Project" class="k">Memoizing decorator</td><td data-label="Exercises">Write it <em>before</em> reading <code>lru_cache</code>, then compare</td></tr>
+          <tr><td data-label="#" class="num">8</td><td data-label="Project" class="k">Generator pipeline</td><td data-label="Exercises">Rewrite the 1.1 CSV converter; measure with <code>tracemalloc</code></td></tr>
+          <tr><td data-label="#" class="num">9</td><td data-label="Project" class="k">Atomic file writer</td><td data-label="Exercises">Context manager; original intact on failure</td></tr>
+          <tr><td data-label="#" class="num">10</td><td data-label="Project" class="k">Refactor to composition</td><td data-label="Exercises">1.1&rsquo;s class hierarchy &rarr; composition + <code>Protocol</code></td></tr>
+          <tr><td data-label="#" class="num fin">&#9873;</td><td data-label="Project" class="k">Journal on the data model</td><td data-label="Exercises"><strong>Phase project.</strong> Dataclasses, generator pipelines, context managers. Compare both versions in the README</td></tr>
           </tbody>
         </table>
       </div>
@@ -1037,12 +1059,12 @@
         <table class="grid">
           <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
           <tbody>
-          <tr><td class="num">1</td><td class="k">Threaded downloader</td><td>Worker pool over a <code>queue</code>, clean shutdown</td></tr>
-          <tr><td class="num">2</td><td class="k">Parallel file processor</td><td><code>ProcessPoolExecutor</code>; measure speedup, explain any gap</td></tr>
-          <tr><td class="num">3</td><td class="k">Async fetcher</td><td>Semaphore-bounded concurrency, per-request timeouts, retries</td></tr>
-          <tr><td class="num">4</td><td class="k">Cancellation drill</td><td><code>TaskGroup</code> with a task cancelled cleanly mid-flight</td></tr>
-          <tr><td class="num">5</td><td class="k">Sync vs threads vs async writeup</td><td>Same job three ways, measured. <strong>The writeup is the deliverable</strong></td></tr>
-          <tr><td class="num fin">&#9873;</td><td class="k">Concurrent data-processing tool</td><td><strong>Phase project.</strong> Generator pipelines &rarr; worker pool, bounded memory, graceful Ctrl-C, benchmarked</td></tr>
+          <tr><td data-label="#" class="num">1</td><td data-label="Project" class="k">Threaded downloader</td><td data-label="Exercises">Worker pool over a <code>queue</code>, clean shutdown</td></tr>
+          <tr><td data-label="#" class="num">2</td><td data-label="Project" class="k">Parallel file processor</td><td data-label="Exercises"><code>ProcessPoolExecutor</code>; measure speedup, explain any gap</td></tr>
+          <tr><td data-label="#" class="num">3</td><td data-label="Project" class="k">Async fetcher</td><td data-label="Exercises">Semaphore-bounded concurrency, per-request timeouts, retries</td></tr>
+          <tr><td data-label="#" class="num">4</td><td data-label="Project" class="k">Cancellation drill</td><td data-label="Exercises"><code>TaskGroup</code> with a task cancelled cleanly mid-flight</td></tr>
+          <tr><td data-label="#" class="num">5</td><td data-label="Project" class="k">Sync vs threads vs async writeup</td><td data-label="Exercises">Same job three ways, measured. <strong>The writeup is the deliverable</strong></td></tr>
+          <tr><td data-label="#" class="num fin">&#9873;</td><td data-label="Project" class="k">Concurrent data-processing tool</td><td data-label="Exercises"><strong>Phase project.</strong> Generator pipelines &rarr; worker pool, bounded memory, graceful Ctrl-C, benchmarked</td></tr>
           </tbody>
         </table>
       </div>
@@ -1086,14 +1108,14 @@
         <table class="grid">
           <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
           <tbody>
-          <tr><td class="num">1</td><td class="k">Task manager on SQLite</td><td>Schema design, foreign keys, parameterized queries</td></tr>
-          <tr><td class="num">2</td><td class="k">Add migrations</td><td>Alembic; three migrations including a data migration</td></tr>
-          <tr><td class="num">3</td><td class="k">API client</td><td>Pydantic-validated responses, timeouts, retries, transparent pagination</td></tr>
-          <tr><td class="num">4</td><td class="k">URL shortener</td><td>FastAPI: dependency injection, background tasks</td></tr>
-          <tr><td class="num">5</td><td class="k">CRUD API with auth</td><td>Password hashing, JWT, role checks, cursor pagination</td></tr>
-          <tr><td class="num">6</td><td class="k">Async endpoints</td><td><code>asyncio</code> from 1.4 under real request load</td></tr>
-          <tr><td class="num">7</td><td class="k">OWASP audit</td><td>All ten items against your own API; fix what you find</td></tr>
-          <tr><td class="num fin">&#9873;</td><td class="k">A service you&rsquo;d actually use</td><td><strong>Phase project.</strong> FastAPI + database + background work. Fully typed, fully tested, properly packaged &mdash; every habit from 1.2 still true of it</td></tr>
+          <tr><td data-label="#" class="num">1</td><td data-label="Project" class="k">Task manager on SQLite</td><td data-label="Exercises">Schema design, foreign keys, parameterized queries</td></tr>
+          <tr><td data-label="#" class="num">2</td><td data-label="Project" class="k">Add migrations</td><td data-label="Exercises">Alembic; three migrations including a data migration</td></tr>
+          <tr><td data-label="#" class="num">3</td><td data-label="Project" class="k">API client</td><td data-label="Exercises">Pydantic-validated responses, timeouts, retries, transparent pagination</td></tr>
+          <tr><td data-label="#" class="num">4</td><td data-label="Project" class="k">URL shortener</td><td data-label="Exercises">FastAPI: dependency injection, background tasks</td></tr>
+          <tr><td data-label="#" class="num">5</td><td data-label="Project" class="k">CRUD API with auth</td><td data-label="Exercises">Password hashing, JWT, role checks, cursor pagination</td></tr>
+          <tr><td data-label="#" class="num">6</td><td data-label="Project" class="k">Async endpoints</td><td data-label="Exercises"><code>asyncio</code> from 1.4 under real request load</td></tr>
+          <tr><td data-label="#" class="num">7</td><td data-label="Project" class="k">OWASP audit</td><td data-label="Exercises">All ten items against your own API; fix what you find</td></tr>
+          <tr><td data-label="#" class="num fin">&#9873;</td><td data-label="Project" class="k">A service you&rsquo;d actually use</td><td data-label="Exercises"><strong>Phase project.</strong> FastAPI + database + background work. Fully typed, fully tested, properly packaged &mdash; every habit from 1.2 still true of it</td></tr>
           </tbody>
         </table>
       </div>
@@ -1272,10 +1294,10 @@
       <table class="grid tight">
         <thead><tr><th scope="col" style="width:14%">Phase</th><th scope="col">Name</th></tr></thead>
         <tbody>
-        <tr><td class="num">2.1</td><td class="k"><a href="#a21">The Language, Completely</a></td></tr>
-        <tr><td class="num">2.2</td><td class="k"><a href="#a22">Concurrency and Performance</a></td></tr>
-        <tr><td class="num">2.3</td><td class="k"><a href="#a23">Architecture</a></td></tr>
-        <tr><td class="num">2.4</td><td class="k"><a href="#a24">Capstones</a></td></tr>
+        <tr><td data-label="Phase" class="num">2.1</td><td data-label="Name" class="k"><a href="#a21">The Language, Completely</a></td></tr>
+        <tr><td data-label="Phase" class="num">2.2</td><td data-label="Name" class="k"><a href="#a22">Concurrency and Performance</a></td></tr>
+        <tr><td data-label="Phase" class="num">2.3</td><td data-label="Name" class="k"><a href="#a23">Architecture</a></td></tr>
+        <tr><td data-label="Phase" class="num">2.4</td><td data-label="Name" class="k"><a href="#a24">Capstones</a></td></tr>
         </tbody>
         </table>
     </div>
@@ -1351,19 +1373,19 @@
         <table class="grid">
           <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
           <tbody>
-          <tr><td class="num">1</td><td class="k">Validated-attribute system</td><td>Descriptors: <code>Positive</code>, <code>MaxLength</code>, with errors a user can act on</td></tr>
-          <tr><td class="num">2</td><td class="k">Mini-ORM</td><td><code>Column()</code> descriptors that generate SQL from a class definition</td></tr>
-          <tr><td class="num">3</td><td class="k">Reimplement <code>property</code> and <code>cached_property</code></td><td>From first principles, then diff against the real source</td></tr>
-          <tr><td class="num">4</td><td class="k">Plugin registry with <code>__init_subclass__</code></td><td>The modern alternative to most metaclasses</td></tr>
-          <tr><td class="num">5</td><td class="k">The same registry with a metaclass</td><td>Then <strong>write down why version 4 is better.</strong> That writeup is the point</td></tr>
-          <tr><td class="num">6</td><td class="k">Declarative schema DSL</td><td>Class definition generates validation</td></tr>
-          <tr><td class="num">7</td><td class="k">Variance-correct generic container</td><td>Covariance, contravariance, and getting a type checker to agree</td></tr>
-          <tr><td class="num">8</td><td class="k">Signature-preserving decorator</td><td><code>ParamSpec</code> and <code>Concatenate</code></td></tr>
-          <tr><td class="num">9</td><td class="k">Stubs for an untyped library</td><td>One you actually use. Submit them to typeshed if they&rsquo;re good</td></tr>
-          <tr><td class="num">10</td><td class="k">Library-grade exception hierarchy</td><td>With a documented deprecation path using <code>warnings</code></td></tr>
-          <tr><td class="num">11</td><td class="k">Non-leaking cache</td><td><code>weakref</code>; prove it releases under memory pressure</td></tr>
-          <tr><td class="num">12</td><td class="k">Async correlation IDs</td><td><code>contextvars</code> surviving across task boundaries</td></tr>
-          <tr><td class="num fin">&#9873;</td><td class="k">Read <code>functools</code>, <code>contextlib</code> and <code>dataclasses</code> in full</td><td><strong>Phase project.</strong> Then write up <em>why</em> each design choice was made. <strong>This is the exit test of the entire stage</strong></td></tr>
+          <tr><td data-label="#" class="num">1</td><td data-label="Project" class="k">Validated-attribute system</td><td data-label="Exercises">Descriptors: <code>Positive</code>, <code>MaxLength</code>, with errors a user can act on</td></tr>
+          <tr><td data-label="#" class="num">2</td><td data-label="Project" class="k">Mini-ORM</td><td data-label="Exercises"><code>Column()</code> descriptors that generate SQL from a class definition</td></tr>
+          <tr><td data-label="#" class="num">3</td><td data-label="Project" class="k">Reimplement <code>property</code> and <code>cached_property</code></td><td data-label="Exercises">From first principles, then diff against the real source</td></tr>
+          <tr><td data-label="#" class="num">4</td><td data-label="Project" class="k">Plugin registry with <code>__init_subclass__</code></td><td data-label="Exercises">The modern alternative to most metaclasses</td></tr>
+          <tr><td data-label="#" class="num">5</td><td data-label="Project" class="k">The same registry with a metaclass</td><td data-label="Exercises">Then <strong>write down why version 4 is better.</strong> That writeup is the point</td></tr>
+          <tr><td data-label="#" class="num">6</td><td data-label="Project" class="k">Declarative schema DSL</td><td data-label="Exercises">Class definition generates validation</td></tr>
+          <tr><td data-label="#" class="num">7</td><td data-label="Project" class="k">Variance-correct generic container</td><td data-label="Exercises">Covariance, contravariance, and getting a type checker to agree</td></tr>
+          <tr><td data-label="#" class="num">8</td><td data-label="Project" class="k">Signature-preserving decorator</td><td data-label="Exercises"><code>ParamSpec</code> and <code>Concatenate</code></td></tr>
+          <tr><td data-label="#" class="num">9</td><td data-label="Project" class="k">Stubs for an untyped library</td><td data-label="Exercises">One you actually use. Submit them to typeshed if they&rsquo;re good</td></tr>
+          <tr><td data-label="#" class="num">10</td><td data-label="Project" class="k">Library-grade exception hierarchy</td><td data-label="Exercises">With a documented deprecation path using <code>warnings</code></td></tr>
+          <tr><td data-label="#" class="num">11</td><td data-label="Project" class="k">Non-leaking cache</td><td data-label="Exercises"><code>weakref</code>; prove it releases under memory pressure</td></tr>
+          <tr><td data-label="#" class="num">12</td><td data-label="Project" class="k">Async correlation IDs</td><td data-label="Exercises"><code>contextvars</code> surviving across task boundaries</td></tr>
+          <tr><td data-label="#" class="num fin">&#9873;</td><td data-label="Project" class="k">Read <code>functools</code>, <code>contextlib</code> and <code>dataclasses</code> in full</td><td data-label="Exercises"><strong>Phase project.</strong> Then write up <em>why</em> each design choice was made. <strong>This is the exit test of the entire stage</strong></td></tr>
           </tbody>
         </table>
       </div>
@@ -1398,13 +1420,13 @@
         <table class="grid">
           <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
           <tbody>
-          <tr><td class="num">1</td><td class="k">Mixed producer-consumer pipeline</td><td>Threads for I/O, processes for CPU, in one system</td></tr>
-          <tr><td class="num">2</td><td class="k">Graceful shutdown</td><td>Drains in-flight work on SIGTERM; prove nothing is lost</td></tr>
-          <tr><td class="num">3</td><td class="k">GIL vs free-threaded benchmark</td><td>Same workload, both builds, written up honestly including where it <em>didn&rsquo;t</em> help</td></tr>
-          <tr><td class="num">4</td><td class="k">Profile a slow service</td><td><code>py-spy</code>, fix the top three hotspots, flame graphs before and after</td></tr>
-          <tr><td class="num">5</td><td class="k">Halve peak memory</td><td>A data-heavy script; <code>tracemalloc</code> proves it</td></tr>
-          <tr><td class="num">6</td><td class="k"><code>__slots__</code> at scale</td><td>Measure memory and access speed across millions of instances</td></tr>
-          <tr><td class="num fin">&#9873;</td><td class="k">Make something provably fast</td><td><strong>Phase project.</strong> Take genuinely slow code, profile it, fix it. The writeup &mdash; numbers, flame graphs, and what you tried that failed &mdash; is half the deliverable</td></tr>
+          <tr><td data-label="#" class="num">1</td><td data-label="Project" class="k">Mixed producer-consumer pipeline</td><td data-label="Exercises">Threads for I/O, processes for CPU, in one system</td></tr>
+          <tr><td data-label="#" class="num">2</td><td data-label="Project" class="k">Graceful shutdown</td><td data-label="Exercises">Drains in-flight work on SIGTERM; prove nothing is lost</td></tr>
+          <tr><td data-label="#" class="num">3</td><td data-label="Project" class="k">GIL vs free-threaded benchmark</td><td data-label="Exercises">Same workload, both builds, written up honestly including where it <em>didn&rsquo;t</em> help</td></tr>
+          <tr><td data-label="#" class="num">4</td><td data-label="Project" class="k">Profile a slow service</td><td data-label="Exercises"><code>py-spy</code>, fix the top three hotspots, flame graphs before and after</td></tr>
+          <tr><td data-label="#" class="num">5</td><td data-label="Project" class="k">Halve peak memory</td><td data-label="Exercises">A data-heavy script; <code>tracemalloc</code> proves it</td></tr>
+          <tr><td data-label="#" class="num">6</td><td data-label="Project" class="k"><code>__slots__</code> at scale</td><td data-label="Exercises">Measure memory and access speed across millions of instances</td></tr>
+          <tr><td data-label="#" class="num fin">&#9873;</td><td data-label="Project" class="k">Make something provably fast</td><td data-label="Exercises"><strong>Phase project.</strong> Take genuinely slow code, profile it, fix it. The writeup &mdash; numbers, flame graphs, and what you tried that failed &mdash; is half the deliverable</td></tr>
           </tbody>
         </table>
       </div>
@@ -1435,10 +1457,10 @@
         <table class="grid">
           <thead><tr><th scope="col" style="width:46px">#</th><th scope="col" style="width:34%">Project</th><th scope="col">Exercises</th></tr></thead>
           <tbody>
-          <tr><td class="num">1</td><td class="k">Restructure with hexagonal layers</td><td>Domain, application, adapters &mdash; swap storage for in-memory in tests</td></tr>
-          <tr><td class="num">2</td><td class="k">Enforce module boundaries</td><td><code>import-linter</code> in CI; make a violation fail the build</td></tr>
-          <tr><td class="num">3</td><td class="k">Design a public API</td><td>Decide what&rsquo;s exposed, document it, then live with the decision</td></tr>
-          <tr><td class="num fin">&#9873;</td><td class="k">Ship a deprecation across two releases</td><td><strong>Phase project.</strong> Change a public API without breaking anyone. Warnings, a migration path, a changelog people can act on</td></tr>
+          <tr><td data-label="#" class="num">1</td><td data-label="Project" class="k">Restructure with hexagonal layers</td><td data-label="Exercises">Domain, application, adapters &mdash; swap storage for in-memory in tests</td></tr>
+          <tr><td data-label="#" class="num">2</td><td data-label="Project" class="k">Enforce module boundaries</td><td data-label="Exercises"><code>import-linter</code> in CI; make a violation fail the build</td></tr>
+          <tr><td data-label="#" class="num">3</td><td data-label="Project" class="k">Design a public API</td><td data-label="Exercises">Decide what&rsquo;s exposed, document it, then live with the decision</td></tr>
+          <tr><td data-label="#" class="num fin">&#9873;</td><td data-label="Project" class="k">Ship a deprecation across two releases</td><td data-label="Exercises"><strong>Phase project.</strong> Change a public API without breaking anyone. Warnings, a migration path, a changelog people can act on</td></tr>
           </tbody>
         </table>
       </div>
@@ -1640,44 +1662,44 @@
           <thead><tr><th scope="col" style="width:27%">When this happens</th><th scope="col" style="width:36%">Read</th><th scope="col">Then</th></tr></thead>
           <tbody>
           <tr>
-            <td class="k">Imports fail in a way that makes no sense &mdash; circular imports, a module shadowed, something resolving to the wrong file</td>
-            <td><a href="https://docs.python.org/3/reference/import.html">Language Reference ch. 5</a> &mdash; finders, loaders, <code>sys.meta_path</code> &middot; <a href="https://docs.python.org/3/library/importlib.html"><code>importlib</code></a></td>
-            <td>Trace the failure through the finder/loader machinery and write down the resolution. You&rsquo;ll hit it again</td>
+            <td data-label="When this happens" class="k">Imports fail in a way that makes no sense &mdash; circular imports, a module shadowed, something resolving to the wrong file</td>
+            <td data-label="Read"><a href="https://docs.python.org/3/reference/import.html">Language Reference ch. 5</a> &mdash; finders, loaders, <code>sys.meta_path</code> &middot; <a href="https://docs.python.org/3/library/importlib.html"><code>importlib</code></a></td>
+            <td data-label="Then">Trace the failure through the finder/loader machinery and write down the resolution. You&rsquo;ll hit it again</td>
           </tr>
           <tr>
-            <td class="k">A long-running process keeps growing</td>
-            <td><a href="https://docs.python.org/3/library/gc.html"><code>gc</code></a> &mdash; cycles and generational collection &middot; <a href="https://docs.python.org/3/library/tracemalloc.html"><code>tracemalloc</code></a> &middot; <a href="https://bloomberg.github.io/memray/"><code>memray</code></a> for the hard cases &middot; <a href="https://docs.python.org/3/library/weakref.html"><code>weakref</code></a></td>
-            <td>Find the cycle or the cache that never evicts. <code>sys.getsizeof</code> will lie to you; don&rsquo;t trust it alone</td>
+            <td data-label="When this happens" class="k">A long-running process keeps growing</td>
+            <td data-label="Read"><a href="https://docs.python.org/3/library/gc.html"><code>gc</code></a> &mdash; cycles and generational collection &middot; <a href="https://docs.python.org/3/library/tracemalloc.html"><code>tracemalloc</code></a> &middot; <a href="https://bloomberg.github.io/memray/"><code>memray</code></a> for the hard cases &middot; <a href="https://docs.python.org/3/library/weakref.html"><code>weakref</code></a></td>
+            <td data-label="Then">Find the cycle or the cache that never evicts. <code>sys.getsizeof</code> will lie to you; don&rsquo;t trust it alone</td>
           </tr>
           <tr>
-            <td class="k">Two equivalent functions benchmark differently</td>
-            <td><a href="https://docs.python.org/3/library/dis.html"><code>dis</code></a> &middot; <a href="https://peps.python.org/pep-0659/">PEP 659</a> &mdash; the specializing adaptive interpreter</td>
-            <td>Read the bytecode of both and explain the difference from it. If you can&rsquo;t, the difference is probably elsewhere</td>
+            <td data-label="When this happens" class="k">Two equivalent functions benchmark differently</td>
+            <td data-label="Read"><a href="https://docs.python.org/3/library/dis.html"><code>dis</code></a> &middot; <a href="https://peps.python.org/pep-0659/">PEP 659</a> &mdash; the specializing adaptive interpreter</td>
+            <td data-label="Then">Read the bytecode of both and explain the difference from it. If you can&rsquo;t, the difference is probably elsewhere</td>
           </tr>
           <tr>
-            <td class="k">You need to analyze or rewrite source programmatically &mdash; a linter, codemod, or custom check</td>
-            <td><a href="https://docs.python.org/3/library/ast.html"><code>ast</code></a> &middot; <a href="https://docs.python.org/3/library/inspect.html"><code>inspect</code></a></td>
-            <td>Work on the AST, never on text. Every regex-based refactor tool eventually corrupts something</td>
+            <td data-label="When this happens" class="k">You need to analyze or rewrite source programmatically &mdash; a linter, codemod, or custom check</td>
+            <td data-label="Read"><a href="https://docs.python.org/3/library/ast.html"><code>ast</code></a> &middot; <a href="https://docs.python.org/3/library/inspect.html"><code>inspect</code></a></td>
+            <td data-label="Then">Work on the AST, never on text. Every regex-based refactor tool eventually corrupts something</td>
           </tr>
           <tr>
-            <td class="k">You need to know what the interpreter is doing live &mdash; a debugger, profiler, or coverage tool</td>
-            <td><a href="https://docs.python.org/3/library/sys.monitoring.html"><code>sys.monitoring</code></a> (PEP 669) &middot; <code>sys.settrace</code> / <code>setprofile</code> &middot; <a href="https://peps.python.org/pep-0768/">PEP 768</a></td>
-            <td>This is how every Python debugger works. Useful the day you need to build one</td>
+            <td data-label="When this happens" class="k">You need to know what the interpreter is doing live &mdash; a debugger, profiler, or coverage tool</td>
+            <td data-label="Read"><a href="https://docs.python.org/3/library/sys.monitoring.html"><code>sys.monitoring</code></a> (PEP 669) &middot; <code>sys.settrace</code> / <code>setprofile</code> &middot; <a href="https://peps.python.org/pep-0768/">PEP 768</a></td>
+            <td data-label="Then">This is how every Python debugger works. Useful the day you need to build one</td>
           </tr>
           <tr>
-            <td class="k">Pure Python is genuinely too slow &mdash; and you have the profile to prove it</td>
-            <td><a href="https://docs.python.org/3/extending/">Extending and Embedding</a> &middot; <a href="https://pyo3.rs/">PyO3 user guide</a> for Rust &middot; <a href="https://docs.python.org/3/library/ctypes.html"><code>ctypes</code></a> / <code>cffi</code> for existing libraries</td>
-            <td>See Track A below. Don&rsquo;t start here without a profile &mdash; <em>&ldquo;it felt slow&rdquo;</em> is not a reason to leave Python</td>
+            <td data-label="When this happens" class="k">Pure Python is genuinely too slow &mdash; and you have the profile to prove it</td>
+            <td data-label="Read"><a href="https://docs.python.org/3/extending/">Extending and Embedding</a> &middot; <a href="https://pyo3.rs/">PyO3 user guide</a> for Rust &middot; <a href="https://docs.python.org/3/library/ctypes.html"><code>ctypes</code></a> / <code>cffi</code> for existing libraries</td>
+            <td data-label="Then">See Track A below. Don&rsquo;t start here without a profile &mdash; <em>&ldquo;it felt slow&rdquo;</em> is not a reason to leave Python</td>
           </tr>
           <tr>
-            <td class="k">Objects use more memory than they should</td>
-            <td><a href="https://docs.python.org/3/reference/datamodel.html#slots"><code>__slots__</code></a> &middot; interning behaviour &middot; <a href="https://docs.python.org/3/library/sys.html#sys.getsizeof"><code>sys.getsizeof</code></a> and its limits</td>
-            <td>Measure three representations of the same data before choosing one</td>
+            <td data-label="When this happens" class="k">Objects use more memory than they should</td>
+            <td data-label="Read"><a href="https://docs.python.org/3/reference/datamodel.html#slots"><code>__slots__</code></a> &middot; interning behaviour &middot; <a href="https://docs.python.org/3/library/sys.html#sys.getsizeof"><code>sys.getsizeof</code></a> and its limits</td>
+            <td data-label="Then">Measure three representations of the same data before choosing one</td>
           </tr>
           <tr>
-            <td class="k">A C extension misbehaves under free threading</td>
-            <td><a href="https://docs.python.org/3/howto/free-threading-python.html">Free-threading HOWTO</a> &middot; <a href="https://docs.python.org/3/howto/free-threading-extensions.html">C API support for free threading</a></td>
-            <td>Increasingly common as 3.13+ free-threaded builds spread</td>
+            <td data-label="When this happens" class="k">A C extension misbehaves under free threading</td>
+            <td data-label="Read"><a href="https://docs.python.org/3/howto/free-threading-python.html">Free-threading HOWTO</a> &middot; <a href="https://docs.python.org/3/howto/free-threading-extensions.html">C API support for free threading</a></td>
+            <td data-label="Then">Increasingly common as 3.13+ free-threaded builds spread</td>
           </tr>
           </tbody>
         </table>
@@ -1728,12 +1750,12 @@
         <table class="grid tight">
           <thead><tr><th scope="col" style="width:27%">Thing</th><th scope="col" style="width:11%">Tag</th><th scope="col">Why it might matter</th></tr></thead>
           <tbody>
-          <tr><td class="k">PyPy &middot; GraalPy</td><td>DEMAND</td><td>Alternative implementations. PyPy&rsquo;s JIT can be a large free win for long-running pure-Python workloads</td></tr>
-          <tr><td class="k">MicroPython &middot; CircuitPython</td><td>SPEC</td><td>Python on microcontrollers. A different language in practice &mdash; constrained, with a reduced stdlib</td></tr>
-          <tr><td class="k">Pyodide / WebAssembly</td><td>SPEC</td><td><a href="https://peps.python.org/pep-0776/">PEP 776</a>. Python in the browser, increasingly real</td></tr>
-          <tr><td class="k">iOS and Android</td><td>SPEC</td><td><a href="https://peps.python.org/pep-0730/">PEP 730</a> / <a href="https://peps.python.org/pep-0738/">738</a>. Officially supported platforms as of 3.13</td></tr>
-          <tr><td class="k">Template strings</td><td>DEMAND</td><td><a href="https://peps.python.org/pep-0750/">PEP 750</a>. Safe interpolation, new in 3.14</td></tr>
-          <tr><td class="k">Multiple interpreters</td><td>DEMAND</td><td><a href="https://peps.python.org/pep-0734/">PEP 734</a>. True parallelism without processes</td></tr>
+          <tr><td data-label="Thing" class="k">PyPy &middot; GraalPy</td><td data-label="Tag">DEMAND</td><td data-label="Why it might matter">Alternative implementations. PyPy&rsquo;s JIT can be a large free win for long-running pure-Python workloads</td></tr>
+          <tr><td data-label="Thing" class="k">MicroPython &middot; CircuitPython</td><td data-label="Tag">SPEC</td><td data-label="Why it might matter">Python on microcontrollers. A different language in practice &mdash; constrained, with a reduced stdlib</td></tr>
+          <tr><td data-label="Thing" class="k">Pyodide / WebAssembly</td><td data-label="Tag">SPEC</td><td data-label="Why it might matter"><a href="https://peps.python.org/pep-0776/">PEP 776</a>. Python in the browser, increasingly real</td></tr>
+          <tr><td data-label="Thing" class="k">iOS and Android</td><td data-label="Tag">SPEC</td><td data-label="Why it might matter"><a href="https://peps.python.org/pep-0730/">PEP 730</a> / <a href="https://peps.python.org/pep-0738/">738</a>. Officially supported platforms as of 3.13</td></tr>
+          <tr><td data-label="Thing" class="k">Template strings</td><td data-label="Tag">DEMAND</td><td data-label="Why it might matter"><a href="https://peps.python.org/pep-0750/">PEP 750</a>. Safe interpolation, new in 3.14</td></tr>
+          <tr><td data-label="Thing" class="k">Multiple interpreters</td><td data-label="Tag">DEMAND</td><td data-label="Why it might matter"><a href="https://peps.python.org/pep-0734/">PEP 734</a>. True parallelism without processes</td></tr>
           </tbody>
         </table>
       </div>
@@ -1816,14 +1838,14 @@ Acknowledge these and wait. Do not start teaching yet.</pre>
         <table class="grid tight">
           <thead><tr><th scope="col" style="width:58%">Where you are</th><th scope="col">Use</th></tr></thead>
           <tbody>
-          <tr><td>You have finished a reading item</td><td class="k">1</td></tr>
-          <tr><td>The topic is one where intuition is often wrong &mdash; names, mutability, scope, concurrency</td><td class="k">2</td></tr>
-          <tr><td>You think you have understood something and want to find out</td><td class="k">3</td></tr>
-          <tr><td>A listed project does not suit you, or is the wrong size</td><td class="k">4</td></tr>
-          <tr><td>You are about to start building</td><td class="k">5</td></tr>
-          <tr><td>You are stuck on a bug</td><td class="k">6</td></tr>
-          <tr><td>You have finished something and want it read</td><td class="k">7</td></tr>
-          <tr><td>You are starting a phase and the last one has gone cold</td><td class="k">8</td></tr>
+          <tr><td data-label="Where you are">You have finished a reading item</td><td data-label="Use" class="k">1</td></tr>
+          <tr><td data-label="Where you are">The topic is one where intuition is often wrong &mdash; names, mutability, scope, concurrency</td><td data-label="Use" class="k">2</td></tr>
+          <tr><td data-label="Where you are">You think you have understood something and want to find out</td><td data-label="Use" class="k">3</td></tr>
+          <tr><td data-label="Where you are">A listed project does not suit you, or is the wrong size</td><td data-label="Use" class="k">4</td></tr>
+          <tr><td data-label="Where you are">You are about to start building</td><td data-label="Use" class="k">5</td></tr>
+          <tr><td data-label="Where you are">You are stuck on a bug</td><td data-label="Use" class="k">6</td></tr>
+          <tr><td data-label="Where you are">You have finished something and want it read</td><td data-label="Use" class="k">7</td></tr>
+          <tr><td data-label="Where you are">You are starting a phase and the last one has gone cold</td><td data-label="Use" class="k">8</td></tr>
           </tbody>
         </table>
       </div>
@@ -2008,70 +2030,70 @@ for my answer before the next.
         <thead><tr><th scope="col" style="width:30%">Source</th><th scope="col" style="width:16%">Used in</th><th scope="col">How much</th></tr></thead>
         <tbody>
         <tr>
-          <td class="k"><a href="https://docs.python.org/3/">docs.python.org</a> &mdash; free</td>
-          <td>Every phase</td>
-          <td><strong>Fundamentals:</strong> the Tutorial entire &middot; 2 Language Reference chapters &middot; 10 HOWTOs &middot; ~28 Library Reference modules &middot; 4 PEPs &middot; 2 FAQs.<br>
+          <td data-label="Source" class="k"><a href="https://docs.python.org/3/">docs.python.org</a> &mdash; free</td>
+          <td data-label="Used in">Every phase</td>
+          <td data-label="How much"><strong>Fundamentals:</strong> the Tutorial entire &middot; 2 Language Reference chapters &middot; 10 HOWTOs &middot; ~28 Library Reference modules &middot; 4 PEPs &middot; 2 FAQs.<br>
           <strong>Advanced:</strong> Language Reference ch. 3, 4, 6&nbsp;&sect;6.2.9, 8 &middot; 3 HOWTOs &middot; 7 Library Reference modules &middot; 8 PEPs &middot; the typing specification</td>
         </tr>
         <tr>
-          <td class="k"><em>Fluent Python</em>, 2nd ed. &mdash; Ramalho</td>
-          <td>Fund. 1.3 &middot; Adv. 2.1</td>
-          <td><strong>12 chapters of 24</strong> in the fundamentals (1, 5&ndash;7, 9, 11&ndash;14, 16&ndash;18), then just <strong>3 more</strong> in Advanced (22, 23, 24). One book, spanning both stages</td>
+          <td data-label="Source" class="k"><em>Fluent Python</em>, 2nd ed. &mdash; Ramalho</td>
+          <td data-label="Used in">Fund. 1.3 &middot; Adv. 2.1</td>
+          <td data-label="How much"><strong>12 chapters of 24</strong> in the fundamentals (1, 5&ndash;7, 9, 11&ndash;14, 16&ndash;18), then just <strong>3 more</strong> in Advanced (22, 23, 24). One book, spanning both stages</td>
         </tr>
         <tr>
-          <td class="k"><em>Python Testing with pytest</em>, 2nd ed. &mdash; Okken</td>
-          <td>Fund. 1.2</td>
-          <td>Ch. 1&ndash;13 and 16 of 16. Skim 14, skip 15 (writing plugins)</td>
+          <td data-label="Source" class="k"><em>Python Testing with pytest</em>, 2nd ed. &mdash; Okken</td>
+          <td data-label="Used in">Fund. 1.2</td>
+          <td data-label="How much">Ch. 1&ndash;13 and 16 of 16. Skim 14, skip 15 (writing plugins)</td>
         </tr>
         <tr>
-          <td class="k"><em>Python Concurrency with asyncio</em> &mdash; Fowler</td>
-          <td>Adv. 2.2</td>
-          <td>Ch. 1&ndash;7, 11&ndash;12 and 14 of 14</td>
+          <td data-label="Source" class="k"><em>Python Concurrency with asyncio</em> &mdash; Fowler</td>
+          <td data-label="Used in">Adv. 2.2</td>
+          <td data-label="How much">Ch. 1&ndash;7, 11&ndash;12 and 14 of 14</td>
         </tr>
         <tr>
-          <td class="k"><em>High Performance Python</em>, 2nd ed. &mdash; Gorelick &amp; Ozsvald</td>
-          <td>Adv. 2.2</td>
-          <td>Ch. 1&ndash;2, 11&ndash;12 of 12</td>
+          <td data-label="Source" class="k"><em>High Performance Python</em>, 2nd ed. &mdash; Gorelick &amp; Ozsvald</td>
+          <td data-label="Used in">Adv. 2.2</td>
+          <td data-label="How much">Ch. 1&ndash;2, 11&ndash;12 of 12</td>
         </tr>
         <tr>
-          <td class="k"><a href="https://www.cosmicpython.com/">Architecture Patterns with Python</a> &mdash; free</td>
-          <td>Adv. 2.3</td>
-          <td>Part 1 (ch. 1&ndash;7) and ch. 13</td>
+          <td data-label="Source" class="k"><a href="https://www.cosmicpython.com/">Architecture Patterns with Python</a> &mdash; free</td>
+          <td data-label="Used in">Adv. 2.3</td>
+          <td data-label="How much">Part 1 (ch. 1&ndash;7) and ch. 13</td>
         </tr>
         <tr>
-          <td class="k"><a href="../../books/apis-to-fastapi/APIs%20to%20FastAPI.pdf" target="_blank" rel="noopener">APIs to FastAPI</a></td>
-          <td>Fund. 1.5</td>
-          <td>Ch. 1&ndash;8 of 17 before the FastAPI docs; Part III (ch. 9&ndash;16) alongside them. Not Python &mdash; it is the protocol and the service around it</td>
+          <td data-label="Source" class="k"><a href="../../books/apis-to-fastapi/APIs%20to%20FastAPI.pdf" target="_blank" rel="noopener">APIs to FastAPI</a></td>
+          <td data-label="Used in">Fund. 1.5</td>
+          <td data-label="How much">Ch. 1&ndash;8 of 17 before the FastAPI docs; Part III (ch. 9&ndash;16) alongside them. Not Python &mdash; it is the protocol and the service around it</td>
         </tr>
         <tr>
-          <td class="k"><a href="https://git-scm.com/book">Pro Git</a> &middot; <a href="https://use-the-index-luke.com/">Use the Index, Luke!</a> &mdash; both free</td>
-          <td>Fund. 1.2 &middot; 1.5</td>
-          <td>A few chapters each. Neither is Python, both are short</td>
+          <td data-label="Source" class="k"><a href="https://git-scm.com/book">Pro Git</a> &middot; <a href="https://use-the-index-luke.com/">Use the Index, Luke!</a> &mdash; both free</td>
+          <td data-label="Used in">Fund. 1.2 &middot; 1.5</td>
+          <td data-label="How much">A few chapters each. Neither is Python, both are short</td>
         </tr>
         <tr>
-          <td class="k"><em>CPython Internals</em> &mdash; Shaw</td>
-          <td>Mastery</td>
-          <td>Only the chapter matching the problem in front of you</td>
+          <td data-label="Source" class="k"><em>CPython Internals</em> &mdash; Shaw</td>
+          <td data-label="Used in">Mastery</td>
+          <td data-label="How much">Only the chapter matching the problem in front of you</td>
         </tr>
         <tr>
-          <td class="k">Framework docs &mdash; FastAPI &middot; SQLAlchemy &middot; Pydantic &middot; httpx</td>
-          <td>Fund. 1.5</td>
-          <td>Days each. No book substitute exists &mdash; they move too fast to be printed</td>
+          <td data-label="Source" class="k">Framework docs &mdash; FastAPI &middot; SQLAlchemy &middot; Pydantic &middot; httpx</td>
+          <td data-label="Used in">Fund. 1.5</td>
+          <td data-label="How much">Days each. No book substitute exists &mdash; they move too fast to be printed</td>
         </tr>
         <tr>
-          <td class="k">Quickstarts &mdash; uv &middot; ruff &middot; mypy &middot; Hypothesis &middot; Alembic &middot; psycopg &middot; tenacity &middot; Actions &middot; py-spy &middot; import-linter</td>
-          <td>As you install them</td>
-          <td>~20 minutes each. Setup reading, not study</td>
+          <td data-label="Source" class="k">Quickstarts &mdash; uv &middot; ruff &middot; mypy &middot; Hypothesis &middot; Alembic &middot; psycopg &middot; tenacity &middot; Actions &middot; py-spy &middot; import-linter</td>
+          <td data-label="Used in">As you install them</td>
+          <td data-label="How much">~20 minutes each. Setup reading, not study</td>
         </tr>
         <tr>
-          <td class="k"><a href="https://exercism.org/tracks/python">Exercism Python track</a> &mdash; free</td>
-          <td>Fund. 1.1, daily</td>
-          <td>Runs alongside the Tutorial. Drills, not reading</td>
+          <td data-label="Source" class="k"><a href="https://exercism.org/tracks/python">Exercism Python track</a> &mdash; free</td>
+          <td data-label="Used in">Fund. 1.1, daily</td>
+          <td data-label="How much">Runs alongside the Tutorial. Drills, not reading</td>
         </tr>
         <tr>
-          <td class="k"><em>Effective Python</em>, 3rd ed. &mdash; Slatkin</td>
-          <td>Optional, throughout</td>
-          <td>A few items at a time, from whichever chapter matches your phase. Never front to back. Nothing here depends on it</td>
+          <td data-label="Source" class="k"><em>Effective Python</em>, 3rd ed. &mdash; Slatkin</td>
+          <td data-label="Used in">Optional, throughout</td>
+          <td data-label="How much">A few items at a time, from whichever chapter matches your phase. Never front to back. Nothing here depends on it</td>
         </tr>
         </tbody>
         </table>
@@ -2105,10 +2127,10 @@ for my answer before the next.
         <table class="grid tight">
           <thead><tr><th scope="col" style="width:34%">Resource</th><th scope="col">Cadence</th></tr></thead>
           <tbody>
-          <tr><td class="k">What&rsquo;s New</td><td>Every release &mdash; the cheapest way to stay current</td></tr>
-          <tr><td class="k">Deprecations</td><td>Before every upgrade</td></tr>
-          <tr><td class="k">PEPs</td><td>Whenever a feature seems strange, read the PEP behind it</td></tr>
-          <tr><td class="k">CPython <code>Lib/</code> source</td><td>Whenever stdlib behaviour surprises you</td></tr>
+          <tr><td data-label="Resource" class="k">What&rsquo;s New</td><td data-label="Cadence">Every release &mdash; the cheapest way to stay current</td></tr>
+          <tr><td data-label="Resource" class="k">Deprecations</td><td data-label="Cadence">Before every upgrade</td></tr>
+          <tr><td data-label="Resource" class="k">PEPs</td><td data-label="Cadence">Whenever a feature seems strange, read the PEP behind it</td></tr>
+          <tr><td data-label="Resource" class="k">CPython <code>Lib/</code> source</td><td data-label="Cadence">Whenever stdlib behaviour surprises you</td></tr>
           </tbody>
         </table>
       </div>
@@ -2137,14 +2159,14 @@ for my answer before the next.
       <table class="grid">
         <thead><tr><th scope="col" style="width:22%">Skill</th><th scope="col" style="width:40%">What &ldquo;enough&rdquo; looks like</th><th scope="col">Covered here?</th></tr></thead>
         <tbody>
-        <tr><td class="k">SQL</td><td>Joins, indexes, transactions, query plans. <strong>If you learn one thing here, learn this</strong></td><td>Partly &mdash; Phase 1.5 covers enough to build with</td></tr>
-        <tr><td class="k">Git</td><td>Branching, rebasing, conflict resolution, PR workflow</td><td>Partly &mdash; Phase 1.2 covers the working essentials</td></tr>
-        <tr><td class="k">Unix / CLI</td><td>Shell, pipes, processes, permissions, SSH, <code>grep</code>/<code>sed</code>/<code>awk</code></td><td>No</td></tr>
-        <tr><td class="k">HTTP</td><td>Verbs, status codes, headers, auth, pagination</td><td>Yes &mdash; Phase 1.5, all five</td></tr>
-        <tr><td class="k">Web frameworks</td><td>One of FastAPI / Django / Flask, properly</td><td>Partly &mdash; Phase 1.5 uses FastAPI as a vehicle</td></tr>
-        <tr><td class="k">Docker &amp; deployment</td><td>Build an image, run it somewhere real</td><td>No &mdash; and deliberately not required by any capstone</td></tr>
-        <tr><td class="k">CI/CD</td><td>Lint and test on push</td><td>Partly &mdash; Phase 1.2 sets up test-and-lint CI</td></tr>
-        <tr><td class="k">Security hygiene</td><td>Secrets, injection, dependency vulnerabilities</td><td>No</td></tr>
+        <tr><td data-label="Skill" class="k">SQL</td><td data-label="What &amp;ldquo;enough&amp;rdquo; looks like">Joins, indexes, transactions, query plans. <strong>If you learn one thing here, learn this</strong></td><td data-label="Covered here?">Partly &mdash; Phase 1.5 covers enough to build with</td></tr>
+        <tr><td data-label="Skill" class="k">Git</td><td data-label="What &amp;ldquo;enough&amp;rdquo; looks like">Branching, rebasing, conflict resolution, PR workflow</td><td data-label="Covered here?">Partly &mdash; Phase 1.2 covers the working essentials</td></tr>
+        <tr><td data-label="Skill" class="k">Unix / CLI</td><td data-label="What &amp;ldquo;enough&amp;rdquo; looks like">Shell, pipes, processes, permissions, SSH, <code>grep</code>/<code>sed</code>/<code>awk</code></td><td data-label="Covered here?">No</td></tr>
+        <tr><td data-label="Skill" class="k">HTTP</td><td data-label="What &amp;ldquo;enough&amp;rdquo; looks like">Verbs, status codes, headers, auth, pagination</td><td data-label="Covered here?">Yes &mdash; Phase 1.5, all five</td></tr>
+        <tr><td data-label="Skill" class="k">Web frameworks</td><td data-label="What &amp;ldquo;enough&amp;rdquo; looks like">One of FastAPI / Django / Flask, properly</td><td data-label="Covered here?">Partly &mdash; Phase 1.5 uses FastAPI as a vehicle</td></tr>
+        <tr><td data-label="Skill" class="k">Docker &amp; deployment</td><td data-label="What &amp;ldquo;enough&amp;rdquo; looks like">Build an image, run it somewhere real</td><td data-label="Covered here?">No &mdash; and deliberately not required by any capstone</td></tr>
+        <tr><td data-label="Skill" class="k">CI/CD</td><td data-label="What &amp;ldquo;enough&amp;rdquo; looks like">Lint and test on push</td><td data-label="Covered here?">Partly &mdash; Phase 1.2 sets up test-and-lint CI</td></tr>
+        <tr><td data-label="Skill" class="k">Security hygiene</td><td data-label="What &amp;ldquo;enough&amp;rdquo; looks like">Secrets, injection, dependency vulnerabilities</td><td data-label="Covered here?">No</td></tr>
         </tbody>
         </table>
     </div>
@@ -2168,11 +2190,11 @@ for my answer before the next.
         <table class="grid tight">
           <thead><tr><th scope="col" style="width:36%">Domain</th><th scope="col">Note</th></tr></thead>
           <tbody>
-          <tr><td class="k">Data analysis / science</td><td>pandas, Polars, NumPy. The hard part is statistics, not Python</td></tr>
-          <tr><td class="k">Data engineering</td><td>Airflow/Dagster, Spark, Kafka. The closest adjacency to this path</td></tr>
-          <tr><td class="k">Backend / web</td><td>FastAPI or Django, plus SQL and HTTP. The usual next step from here</td></tr>
-          <tr><td class="k">DevOps / platform</td><td>Python is a tooling language here</td></tr>
-          <tr><td class="k">Scientific computing, quant, security, geospatial, embedded, GUI/games</td><td>Each is its own field</td></tr>
+          <tr><td data-label="Domain" class="k">Data analysis / science</td><td data-label="Note">pandas, Polars, NumPy. The hard part is statistics, not Python</td></tr>
+          <tr><td data-label="Domain" class="k">Data engineering</td><td data-label="Note">Airflow/Dagster, Spark, Kafka. The closest adjacency to this path</td></tr>
+          <tr><td data-label="Domain" class="k">Backend / web</td><td data-label="Note">FastAPI or Django, plus SQL and HTTP. The usual next step from here</td></tr>
+          <tr><td data-label="Domain" class="k">DevOps / platform</td><td data-label="Note">Python is a tooling language here</td></tr>
+          <tr><td data-label="Domain" class="k">Scientific computing, quant, security, geospatial, embedded, GUI/games</td><td data-label="Note">Each is its own field</td></tr>
           </tbody>
         </table>
       </div>

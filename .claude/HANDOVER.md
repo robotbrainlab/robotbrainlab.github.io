@@ -89,12 +89,12 @@ Notes:
 | `cse/index.html` | CS&E guide: **restyled**. Starts with the **On-Ramp** section (`#on-ramp`, the "from Zero" book table), then the knowledge tree. Sidebar contents + back-to-top live in `assets/theme/site.js` |
 | `books/` | **Every book, one folder per topic, with one shared LaTeX build in `books/latex/`.** `books/README.md` is the index. The website links straight at these PDFs; there is one copy of each |
 | `mathematics/index.html`, `cse/resources.html` | "Coming Soon" placeholders: **restyled** (linked from Home and the CS&E guide) |
-| `mathematics/resources.html`, `data-and-intelligence/llm-engineering.html`, `data-and-intelligence/resources.html` | **Orphans.** No page links to them (reachable by URL only). Not part of the restyle |
+| `mathematics/resources.html`, `data-and-intelligence/llm-engineering.html`, `data-and-intelligence/resources.html` | **Orphans.** No page links to them (reachable by URL only). `[2026-11-12]` **They are on the site theme now**, so "not part of the restyle" no longer holds: the two Coming Soon pages were rebuilt from `cse/resources.html`, and the resources page keeps its own markup with its components added to `assets/theme/site.css` (`.track-*`, `.resource-table`, `.cell-type`). Google Fonts and the old dark serif styling are gone from all three. Every text item is identical to the published page |
 | `data-and-intelligence/index.html` | Redirects to `guide/` |
 | `data-and-intelligence/books/python-roadmap.html` | Hand-written, self-contained page (its own CSS, JS and theme switch; no `assets/theme/` link). The Python resource for **both** the D&I guide and the CS&E on-ramp. Not generated — edit it directly. `[2026-11-12]` **It carries the site's chrome now**: the favicon (it had **none**, so its tab showed a blank icon), the gradient brand mark, the home menu, and the shared theme memory — it stored the theme under a third name, `pyroadmap-theme`, and had **no link back into the site at all**. Its own stylesheet was never off-design: same token names, same values as `assets/theme/site.css` |
 | `data-and-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site — **75 pages** `[2026-11-12]`, counted; this row said 72. Never edit by hand. Restyled by `assets/theme/guide-override.css`, which the build script links in |
-| `assets/theme/site.css`, `assets/theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=7` `[2026-11-12]`; this row said `?v=6`). `site.js` writes the theme under **both** names, `ti-theme` and the guide's `air-theme` |
-| `assets/theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `utilities/build-di-guide.py` (**currently `16`** `[2026-11-12]`; this row said `12`) |
+| `assets/theme/site.css`, `assets/theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=8` `[2026-11-12]`). `site.js` writes the theme under **both** names, `ti-theme` and the guide's `air-theme` |
+| `assets/theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `utilities/build-di-guide.py` (**currently `18`** `[2026-11-12]`) |
 | `assets/` | **Everything the browser downloads**, grouped 2026-11-11: `assets/theme/` and `assets/favicon/`. Kept out of `utilities/` on purpose — `robots.txt` disallows `/utilities/`, and blocking a site's own stylesheet and icon changes how search engines render it |
 | `assets/favicon/` | Site icon: "Apex", a neural network converging into a radiant star, the culmination of AI (gradient tile). Also added to the D&I guide pages by the build script |
 | `data-and-intelligence/research/` | Source of the D&I guide (a separate research repo; **this is its only copy**) |
@@ -363,9 +363,16 @@ and `utilities/text-check.py` proves it page by page.
 **Phones, measured at 320, 375 and 430px:** no page scrolls sideways. The CS&E on-ramp table held
 `min-width: 720px` inside a 351px card, so **the card scrolled** while the page did not; below 640px
 that table is laid out as blocks and the three column headings are hidden (they stay in the markup).
-Two things still scroll inside their own box on purpose: the Python roadmap's data tables, whose
-headings carry meaning that stacking would have to repeat as new words, and the guide's code and
-diagram blocks, which cannot reflow.
+**The Python roadmap's tables stack too**, and this is how: `table.grid` held 620px (480px when
+tight) inside a card about 340px wide. Each cell now carries its own column heading in a
+`data-label` attribute, copied from the table's own `<th>`, and the phone layout prints it above
+the value with `content: attr(data-label)`. **No new words**: 419 cells were labelled from headings
+that are already in the page, which is the one use of CSS `content:` the restyle rules allow.
+What still scrolls inside its box, and must: the guide's code and diagram blocks.
+
+**The home menu's rows go to four different pages.** Mathematics pointed at `index.html#mathematics`,
+copying the site's own nav, so two of the four rows landed on the home page and only the scroll
+position differed — which reads as a broken link. It points at `mathematics/index.html` now.
 
 ---
 
@@ -386,8 +393,12 @@ diagram blocks, which cannot reflow.
   `scrollX`, not `scrollWidth`: the guide's hidden drawers overflow but `overflow-x: clip` stops scrolling),
   overlapping or off-screen buttons, and long paragraphs that aren't justified. Load each page in a
   same-origin iframe of that width; this works even while the Browser pane is hidden.
-- **`[2026-11-12]` Protecting the generated guide — PENDING, and the owner asked to be shown this
-  when he opens a session.** `data-and-intelligence/guide/` is **75 pages** produced by
+- **`[2026-11-12]` Protecting the generated guide — **fix (1) is DONE**; (2) is still optional.**
+  Every page the build script writes now opens with a comment naming the script and saying a hand
+  edit is erased by the next build, and the script stops rather than writing the comment into a
+  page that does not start with a doctype. The drift check below is still unbuilt, and the advice
+  stands: leave it until the problem bites. The original note follows.
+- **`[2026-11-12]` Protecting the generated guide — the problem it solved.** `data-and-intelligence/guide/` is **75 pages** produced by
   `utilities/build-di-guide.py` from `data-and-intelligence/research/`. **A hand edit to any of
   them is erased by the next build, silently** — and **not one of the 75 says it is generated.**
   Checked 2026-11-12: zero carry a "do not edit" marker, so the only protection is the line in the
@@ -399,7 +410,7 @@ diagram blocks, which cannot reflow.
   what is published. A difference means somebody hand-edited, or the source changed and nobody
   rebuilt. Slower, so it runs before publishing. **Do (1) now and leave (2) until it has bitten
   once** — that was the recommendation and the owner has not ruled on it.
-- **`[2026-11-12]` **Half fixed.** On the **D&I** on-ramp a live book title now carries a thin blue underline (`.step-card .book-title a`), so it no longer looks like a *Coming soon* entry. **The CS&E table is unchanged** and still has the problem below; the owner has not ruled on giving it the same treatment.
+- **`[2026-11-12]` **Fixed on both on-ramps.** A live book title carries a thin blue underline on the D&I step cards (`.step-card .book-title a`) and in the CS&E table (`.onramp-table .book-title a`), so it no longer reads as a *Coming soon* entry. The note below is kept because it records what the defect was.
 - **`[2026-11-12]` On both on-ramps, a book you can open looks exactly like one that does not
   exist yet.** Measured: a live `.book-title a` and a Coming-soon `.book-title` both render
   `rgb(245,245,247)` with no underline, so the only signal is the missing badge. **It is the site's
