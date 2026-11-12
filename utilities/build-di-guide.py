@@ -18,7 +18,9 @@ Usage (from the repository root):
 5. Adds a dated note to the seven pages that record earlier research, design or review work,
    saying the tutorial they name has since been replaced. Their own text is left as written.
    These are the only changes made to the generated pages; the roadmap's own files are untouched.
-6. Replaces data-intelligence/guide/ with the result.
+6. Adds a short On-Ramp section to the guide's home page, above the two tracks, linking to
+   data-and-intelligence/on-ramp.html.
+7. Replaces data-intelligence/guide/ with the result.
 """
 
 import os
@@ -34,7 +36,7 @@ SOURCE = REPO / "data-and-intelligence" / "research"   # [2026-11-11] was resear
 GUIDE = REPO / "data-and-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
 # Site theme override for the guide (assets/theme/guide-override.css). Bump when that file changes.
-OVERRIDE_VERSION = 10
+OVERRIDE_VERSION = 11
 
 ANCHOR = '<div class="topbar-tools">'
 STYLE = """<style>
@@ -42,6 +44,25 @@ STYLE = """<style>
   @media (max-width: 700px) { .ti-home .tool-label { display: none; } }
 </style>
 </head>"""
+# The guide's home page only: a short on-ramp section, above the two tracks. The full table lives
+# on its own page in the site theme (data-and-intelligence/on-ramp.html); this is the way in, so the
+# guide's reader meets the three foundation books before the roadmap itself. The guide does not load
+# assets/theme/site.css, so everything here is styled in assets/theme/guide-override.css.
+ON_RAMP_ANCHOR = '  </header>\n\n  <section class="tracks"'
+ON_RAMP = """  <section class="ti-onramp" aria-label="On-ramp">
+    <p class="ti-onramp-kicker">Before you start</p>
+    <h2 class="ti-onramp-title">The On-Ramp</h2>
+    <p class="ti-onramp-lead">Three books, read in order, take you from no programming at all to
+      building real systems on language models. They are the foundation this roadmap assumes.</p>
+    <ol class="ti-onramp-list">
+      <li>Programming Language From Zero: Python <span class="ti-onramp-state">Coming soon</span></li>
+      <li>Machine Learning and Deep Learning <span class="ti-onramp-state">Coming soon</span></li>
+      <li>Modern AI Engineering from Zero <span class="ti-onramp-ready">Available</span></li>
+    </ol>
+    <p class="ti-onramp-actions"><a class="button button--primary" href="../on-ramp.html">See the On-Ramp <span aria-hidden="true">&rarr;</span></a></p>
+  </section>"""
+
+
 # The guide's home page only: justify its running text. Its lists hold step names and
 # titles rather than prose, and its lead is set larger than the body, so both stay ragged.
 HOME_PAGE = "index.html"
@@ -214,6 +235,13 @@ def rename(html: str, page: str, is_home: bool) -> str:
     return html
 
 
+def add_on_ramp(html: str, page: str) -> str:
+    """The guide's home page only: the on-ramp section, between the hero and the two tracks."""
+    if html.count(ON_RAMP_ANCHOR) != 1:
+        sys.exit(f"Expected one on-ramp anchor, found {html.count(ON_RAMP_ANCHOR)}, not patching: {page}")
+    return html.replace(ON_RAMP_ANCHOR, '  </header>\n\n' + ON_RAMP + '\n\n  <section class="tracks"')
+
+
 def home_link(rel_to_root: str) -> str:
     return (
         f'<div class="topbar-tools"><a class="tool-button ti-home" href="{rel_to_root}index.html" '
@@ -238,6 +266,10 @@ def add_home_link(out: Path) -> int:
         if rel == HOME_PAGE:
             html = html.replace("</head>", HOME_STYLE)
         html = mark_subheads(rename(html, rel, rel == HOME_PAGE))
+        # After rename(), deliberately: the section carries a button--primary of its own, and
+        # rename() asserts the home page has exactly one. Injecting first makes that check fail.
+        if rel == HOME_PAGE:
+            html = add_on_ramp(html, rel)
         html = swap_python_resource(html, rel)
         html = add_python_note(html, rel, up)
         page.write_text(html, encoding="utf-8")

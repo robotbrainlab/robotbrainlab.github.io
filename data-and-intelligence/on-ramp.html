@@ -20,6 +20,18 @@
     })();
   </script>
   <link rel="stylesheet" href="../assets/theme/site.css?v=6"/>
+  <style>
+    /* The book column is about 340px wide, well under the ~800px the handover says justified
+       text needs at this size, so justifying it stretches lines and hyphenates mid-word.
+       Ragged right here only; the rest of the site's justification is untouched. */
+    .onramp-table td .book-problem,
+    .onramp-table td .book-question,
+    .onramp-table td .book-labs {
+      text-align: left;
+      -webkit-hyphens: manual;
+      hyphens: manual;
+    }
+  </style>
 </head>
 <body>
 
