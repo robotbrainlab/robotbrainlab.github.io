@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="assets/css/site.css?v=5cbea89e99">
 <link rel="stylesheet" href="assets/css/print.css?v=5cbea89e99" media="print">
 <link rel="icon" type="image/svg+xml" href="../../assets/favicon/favicon.svg"/>
-<link rel="stylesheet" href="../../assets/theme/guide-override.css?v=19"/>
+<link rel="stylesheet" href="../../assets/theme/guide-override.css?v=20"/>
 <script>
 (function () {
   var root = document.documentElement, SITE = "ti-theme", GUIDE = "air-theme";
@@ -58,6 +58,11 @@
       set(SITE, next);
       set(GUIDE, next);
       sync();
+      /* The guide draws its diagrams with the colours of the theme that was in force, and
+         redraws them when it hears this. Its own button raised the event; the switch that
+         replaced the button has to raise it too, or a diagram keeps the old theme's colours
+         until the page is loaded again. */
+      document.dispatchEvent(new CustomEvent("themechange", { detail: { theme: next } }));
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);

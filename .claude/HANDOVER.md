@@ -377,6 +377,23 @@ and `utilities/text-check.py` proves it page by page.
   *Presentation only* **in their own prose** — the content-fidelity audit lists the footer strings
   it audited, and the governance and site-design records state the principle *"Canonical sources
   win"*. That is content, and it was read before it was kept, not matched.
+- **`[2026-11-12]` The switch raises `themechange`, and this is load-bearing.** The guide draws its
+  diagrams with the colours of the theme in force and redraws them on that event, which its own
+  three-state button raised. The switch that replaced the button did not, so a diagram kept the old
+  theme's colours until the page was loaded again. The injected switch script now dispatches
+  `new CustomEvent("themechange", { detail: { theme: next } })`, the same shape the guide expects.
+- **`[2026-11-12]` Two more pieces of chrome went.** *WIDE TABLE — SCROLL HORIZONTALLY*
+  (`.table-hint`, 87 of them) appeared below 47.99em, which is now exactly where the tables stack,
+  so it told the reader to scroll something that no longer scrolls; the stacking breakpoint was
+  moved from 640px to 47.99em to match the generator's own, and the hint is hidden there. And
+  `.heading-anchor`, the `#` for copying a section link, is hidden under `@media (hover: none)`:
+  with no hover to reveal it the generator showed it at half strength on **every** heading, which
+  on a phone is a grey mark after each one and a tap that goes nowhere useful.
+- **`[2026-11-12]` Two things that look like faults and are not**, both cost time today. The guide
+  renders a diagram only when it scrolls near (an IntersectionObserver with a 400px margin), so a
+  page measured straight after load reports every diagram unrendered. And **a hidden Browser pane
+  pauses observers**, so with the pane hidden no diagram ever renders and no reveal animation runs.
+  Read `data-and-intelligence/guide/assets/js/diagrams.js` before calling either one a defect.
 - **The gradient tile is on every page.** The mark beside *Data & Intelligence* in the guide now sits
   beside *Towards Intelligence* on all eight hand-written pages and beside *Python Roadmap*. It is
   `--grad` in a 16px rounded square, `aria-hidden`.

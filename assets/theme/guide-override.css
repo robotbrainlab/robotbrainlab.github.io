@@ -511,7 +511,11 @@ h1, h2, h3, h4, h5, h6,
    is always off the screen and the reader drags the table while the page stays still. Below
    640px the rows are laid out as blocks and every cell carries its own column heading, which
    utilities/build-di-guide.py copies into data-label from the table's own <th>. */
-@media (max-width: 640px) {
+@media (max-width: 47.99em) {
+  /* 47.99em is the generator's own breakpoint for "this table is too wide": below it the table
+     scrolled and a line above it read WIDE TABLE - SCROLL HORIZONTALLY. The table stacks now, so
+     there is nothing to scroll and the line is wrong. It goes with the scrolling. */
+  .table-hint { display: none; }
   .table-wrap { overflow-x: visible; }
   .table-wrap table,
   .table-wrap tbody,
@@ -529,4 +533,12 @@ h1, h2, h3, h4, h5, h6,
     font-family: var(--font-sans); font-size: .68rem; font-weight: 600;
     letter-spacing: .02em; text-transform: uppercase; color: var(--muted);
   }
+}
+
+/* A '#' sits after every heading, for copying a link to that section. It appears on hover on a
+   desktop, which costs nothing; on a touch screen there is no hover, so the generator shows it
+   at half strength on every heading, all the time. On a phone that is a grey mark after every
+   heading and a tap that goes nowhere a reader wants. */
+@media (hover: none) {
+  .heading-anchor { opacity: 0; }
 }

@@ -46,7 +46,7 @@ SOURCE = REPO / "data-and-intelligence" / "research"   # [2026-11-11] was resear
 GUIDE = REPO / "data-and-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
 # Site theme override for the guide (assets/theme/guide-override.css). Bump when that file changes.
-OVERRIDE_VERSION = 19
+OVERRIDE_VERSION = 20
 
 # The site and the guide each remember the chosen theme under their own name: the site as
 # "ti-theme" (assets/theme/site.js), the guide as "air-theme" (its own generated script). Neither
@@ -97,6 +97,11 @@ THEME_BRIDGE = """<script>
       set(SITE, next);
       set(GUIDE, next);
       sync();
+      /* The guide draws its diagrams with the colours of the theme that was in force, and
+         redraws them when it hears this. Its own button raised the event; the switch that
+         replaced the button has to raise it too, or a diagram keeps the old theme's colours
+         until the page is loaded again. */
+      document.dispatchEvent(new CustomEvent("themechange", { detail: { theme: next } }));
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
