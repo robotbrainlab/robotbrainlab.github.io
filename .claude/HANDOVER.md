@@ -358,11 +358,14 @@ and `utilities/text-check.py` proves it page by page.
   **It is on every page now** `[2026-11-12]`: the 75 guide pages and
   `data-and-intelligence/books/python-roadmap.html` carry their own copy, written by the build
   script and by the page itself; the eight hand-written pages share one in `assets/theme/site.css`
-  and `assets/theme/site.js` (`?v=9`). Those pages keep their three discipline links as well — the
-  links are the site's own convention, and on a phone they are behind the hamburger while the menu
-  stays in reach. Each page marks its own row, and *Home page* is purple (`--root`) above a rule.
+  and `assets/theme/site.js` (`?v=10`). **The three discipline links are gone from the bar**: they
+  said the same thing the menu says, on every page, right beside it. A bar is now the brand and its
+  tile on the left, the home button and the switch on the right. Each page's own section links stay
+  — the Python roadmap's six, the guide's *Learn / Evidence / About* — because those are that page's
+  navigation, not a copy of the menu, and the mobile menus are untouched. Each page marks its own
+  row, and *Home page* is purple (`--root`) above a rule.
 - **The gradient tile is on every page.** The mark beside *Data & Intelligence* in the guide now sits
-  beside *Towards Intelligence* on all five hand-written pages and beside *Python Roadmap*. It is
+  beside *Towards Intelligence* on all eight hand-written pages and beside *Python Roadmap*. It is
   `--grad` in a 16px rounded square, `aria-hidden`.
 
 **Phones, measured at 320, 375 and 430px:** no page scrolls sideways. The CS&E on-ramp table held
