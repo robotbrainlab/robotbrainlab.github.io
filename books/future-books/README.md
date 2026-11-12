@@ -230,7 +230,9 @@ This is the next piece of work, and it has not been done. What it has to settle:
   made it stand alone at the top.
 - **`[2026-11-12]` What mathematics floor that book writes from.** Decision 5 says it carries its
   own mathematics. From school algebra? From nothing? The answer changes how much of the book is
-  mathematics.
+  mathematics. **`[STATED 2026-11-12]` Deferred by the owner — *"for now, math is not a problem"*.
+  It cannot block anything: *Python* is written first and needs no mathematics decision.** Settle
+  it before the machine-learning book's contents are drawn, not before.
 - **`[2026-11-12]` What the deliberate overlap means in practice**, now that decision 9 allows it.
   Two books will teach attention. The rule has to say what each is allowed to assume of the other,
   what a reader who reads only one gets, and which book owns a term when both define it.
