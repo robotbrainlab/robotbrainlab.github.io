@@ -355,7 +355,12 @@ and `utilities/text-check.py` proves it page by page.
 - **A home menu replaces the back arrow.** One home button opens *Home page* (purple, ruled off),
   then Mathematics, CS & Engineering and Data & Intelligence. The site's bar carries those three as
   plain links; the guide's bar already holds its own sections and cannot fit three more on a phone.
-  The same menu is on `data-and-intelligence/books/python-roadmap.html`.
+  **It is on every page now** `[2026-11-12]`: the 75 guide pages and
+  `data-and-intelligence/books/python-roadmap.html` carry their own copy, written by the build
+  script and by the page itself; the eight hand-written pages share one in `assets/theme/site.css`
+  and `assets/theme/site.js` (`?v=9`). Those pages keep their three discipline links as well — the
+  links are the site's own convention, and on a phone they are behind the hamburger while the menu
+  stays in reach. Each page marks its own row, and *Home page* is purple (`--root`) above a rule.
 - **The gradient tile is on every page.** The mark beside *Data & Intelligence* in the guide now sits
   beside *Towards Intelligence* on all five hand-written pages and beside *Python Roadmap*. It is
   `--grad` in a 16px rounded square, `aria-hidden`.

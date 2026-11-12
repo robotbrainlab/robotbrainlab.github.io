@@ -37,6 +37,23 @@
     mq.addEventListener ? mq.addEventListener('change', onChange) : mq.addListener(onChange);
   }
 
+  /* ---------- Home menu ----------
+     One button holding the site home page and the three disciplines. The guide and the Python
+     roadmap carry the same control; theirs is written by their own page, this one is shared. */
+  var homeWrap = document.querySelector('.ti-home-menu');
+  if (homeWrap) {
+    var homeBtn = homeWrap.querySelector('.ti-home-btn');
+    var homeList = homeWrap.querySelector('.ti-home-list');
+    var shutHome = function () { homeList.hidden = true; homeBtn.setAttribute('aria-expanded', 'false'); };
+    homeBtn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      if (homeList.hidden) { homeList.hidden = false; homeBtn.setAttribute('aria-expanded', 'true'); }
+      else shutHome();
+    });
+    document.addEventListener('click', function (ev) { if (!homeWrap.contains(ev.target)) shutHome(); });
+    document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') shutHome(); });
+  }
+
   /* ---------- Mobile menu ---------- */
   var burger = document.querySelector('.nav-hamburger');
   var menu = document.querySelector('.mobile-menu');
