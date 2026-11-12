@@ -65,6 +65,20 @@ why there are three kinds and not six — see the note at the end of this sectio
   will go to ML&DL book."* **So a session does not start it, offer a table of contents for it, or
   draft a chapter of it.** Its decisions are in `books/future-books/README.md`.
 
+  **`[STATED 2026-11-12]` It takes kind 3's place when *Python from Zero* is finished**, and this
+  is the trigger, because a decision with no trigger means no. **The moment is the owner declaring
+  the Python book finished** — the same moment that fires `books/future-books/README.md`
+  decision 22, where the CS&E on-ramp stops pointing at the roadmap page and points at the book.
+  **One moment, three consequences:** that link changes, the Python on-ramp entries drop their
+  *Coming soon*, and kind 3 above is replaced, label and description, by:
+
+  | Label, exactly | Description, exactly |
+  |---|---|
+  | `Machine Learning and Deep Learning` | The second book: everything the AI-engineering book black-boxed, including the mathematics |
+
+  **Until he says the Python book is finished, nothing moves.** A built PDF is not the trigger; his
+  word is.
+
 **`[2026-11-12]` There are three kinds now, not six.** The owner removed the interview-prep book.
 **Folding the restyle into website work, and moving the machine-learning prohibition out of the
 list, is mine** — he was shown the argument and did not rule on it. The reason is mechanical as
