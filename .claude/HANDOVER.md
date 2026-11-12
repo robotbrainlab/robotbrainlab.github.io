@@ -92,7 +92,7 @@ Notes:
 | `mathematics/resources.html`, `data-and-intelligence/llm-engineering.html`, `data-and-intelligence/resources.html` | **Orphans.** No page links to them (reachable by URL only). Not part of the restyle |
 | `data-and-intelligence/index.html` | Redirects to `guide/` |
 | `data-and-intelligence/books/python-roadmap.html` | Hand-written, self-contained page (its own CSS, JS and theme switch; no `assets/theme/` link). The Python resource for **both** the D&I guide and the CS&E on-ramp. Not generated — edit it directly |
-| `data-and-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site (72 pages). Never edit by hand. Restyled by `assets/theme/guide-override.css`, which the build script links in |
+| `data-and-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site — **75 pages** `[2026-11-12]`, counted; this row said 72. Never edit by hand. Restyled by `assets/theme/guide-override.css`, which the build script links in |
 | `assets/theme/site.css`, `assets/theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=6`) |
 | `assets/theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `utilities/build-di-guide.py` (currently `10`) |
 | `assets/` | **Everything the browser downloads**, grouped 2026-11-11: `assets/theme/` and `assets/favicon/`. Kept out of `utilities/` on purpose — `robots.txt` disallows `/utilities/`, and blocking a site's own stylesheet and icon changes how search engines render it |
@@ -108,9 +108,12 @@ Notes:
 | `books/python/` | ***Python from Zero*** — **started 2026-11-12. `TOC.md` and `CLAUDE.md` only, no manuscript.** 51 chapters built against the Fundamentals stage of `data-and-intelligence/books/python-roadmap.html`, approved by the owner and then reviewed twice and corrected. **It governs itself**: `books/python/CLAUDE.md`. **Nothing is drafted**, and the block is not the contents — decision 8's other half, the rules, is unwritten, and one is live for this book: which of the finished book's gates transfer. **It points at three other books rather than repeating them** — *Linux and Git from Zero*, *APIs to FastAPI*, and the roadmap page, which `[STATED]` nothing happens to |
 | `books/future-books/README.md` | **Decisions for *Python* and *Machine Learning and Deep Learning*** — **21 decisions** with their reasons, the rejected alternatives, and the rules still to write. **It is the authority on both books**; neither book's own files restate a decision. `[2026-11-12]` This row said *"Nothing is started. Ten decisions"* — **Python started on 2026-11-12** (see the row above) and the count was out of date. The owner also ruled the books are written **sequentially**, so the file's parallel-writing section no longer describes the plan and is kept only because the ruling is reversible |
 | `books/modern-ai/` | ***Modern AI: Research, Science and Engineering*** — **in research, no manuscript.** `[2026-11-12]` It governs itself: `books/modern-ai/CLAUDE.md`, then `docs/ROADMAP.md`, whose **first section is an unanswered question from the owner that blocks everything else**. `docs/HOW-IT-WORKS.md` is the plain map of the process. **This row did not exist until today** |
+| `data-and-intelligence/on-ramp.html` | **The Data & Intelligence on-ramp**, added 2026-11-12. Three books in reading order — *Python from Zero* and *Machine Learning and Deep Learning* (both Coming soon) and *Modern AI Engineering from Zero*, which is live and carries its own last-updated date. Hand-written, uses `assets/theme/`, same markup as the CS&E on-ramp table. **Not linked from anywhere yet** |
 | `books/rag-from-zero/` | *RAG from Zero: A Practical Guide*, added 2026-11-12. **PDF only**, no Markdown source here, and **not linked from any page** |
 
-Removed on purpose, so don't recreate them: the Mathematics and D&I on-ramps, the separate `cse/on-ramp.html` page
+Removed on purpose, so don't recreate them: the Mathematics on-ramp (commit `a3c706f`,
+2026-09-26, which removed `mathematics/on-ramp.html` and its home-page link), the separate
+`cse/on-ramp.html` page
 (merged into the CS&E guide on 2026-09-27, so each discipline has one guide; the site is for the owner only, so no redirect is kept), and the old `redesign/`
 effort (a different, "technical" style the user rejected).
 
@@ -344,6 +347,19 @@ branch, so do it only if there is a reason, and never without asking.
   `scrollX`, not `scrollWidth`: the guide's hidden drawers overflow but `overflow-x: clip` stops scrolling),
   overlapping or off-screen buttons, and long paragraphs that aren't justified. Load each page in a
   same-origin iframe of that width; this works even while the Browser pane is hidden.
+- **`[2026-11-12]` Protecting the generated guide — PENDING, and the owner asked to be shown this
+  when he opens a session.** `data-and-intelligence/guide/` is **75 pages** produced by
+  `utilities/build-di-guide.py` from `data-and-intelligence/research/`. **A hand edit to any of
+  them is erased by the next build, silently** — and **not one of the 75 says it is generated.**
+  Checked 2026-11-12: zero carry a "do not edit" marker, so the only protection is the line in the
+  Map above, which works only if somebody read it. Two fixes, in order of cost:
+  **(1)** have the build script write an HTML comment at the top of every page it generates —
+  *"Made by `utilities/build-di-guide.py`. Hand edits are erased on the next build."* About five
+  lines, and it closes most of the risk because anyone who opens the file sees it first.
+  **(2)** a drift check beside `link-check.py`: rebuild into a temporary directory and compare with
+  what is published. A difference means somebody hand-edited, or the source changed and nobody
+  rebuilt. Slower, so it runs before publishing. **Do (1) now and leave (2) until it has bitten
+  once** — that was the recommendation and the owner has not ruled on it.
 - Git doesn't store empty folders. Use `.gitkeep` (as in `cse/end-to-end/`).
 - Only the 3 orphan pages still load Google Fonts and have their own inline `<style>`.
 - Headless screenshots: use Chrome with `--force-prefers-reduced-motion`, or the fade-ins may not have

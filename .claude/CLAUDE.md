@@ -21,6 +21,11 @@ AskUserQuestion tool):
 
 1. **Changing the HTML look.** This means the restyle to the reference design; content stays letter-for-letter.
 2. **Working on the website.** This means content, pages, links, books, the roadmap sources, publishing.
+   **`[2026-11-12]` One job is pending and the owner asked for it to come up when he opens a
+   session: protect the generated guide from hand edits.** `data-and-intelligence/guide/` is 75
+   pages built by `utilities/build-di-guide.py`; **not one of them says so**, and a hand edit to
+   any of them is silently erased by the next build. Two fixes were agreed in principle — the
+   cheap one first. See *Protecting the generated guide* in the handover's Gotchas.
 3. **Writing the interview-prep book.** The book in `books/interview-prep/`. It has nothing to do with the
    website and governs itself — go straight to `books/interview-prep/docs/HANDOVER.md` and `books/interview-prep/docs/BOOK-GUIDE.md`
    and follow those, not this file. **That book is finished** (2026-10-31, all 57 chapters and
