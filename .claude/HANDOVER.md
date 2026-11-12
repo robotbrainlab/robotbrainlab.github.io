@@ -91,10 +91,10 @@ Notes:
 | `mathematics/index.html`, `cse/resources.html` | "Coming Soon" placeholders: **restyled** (linked from Home and the CS&E guide) |
 | `mathematics/resources.html`, `data-and-intelligence/llm-engineering.html`, `data-and-intelligence/resources.html` | **Orphans.** No page links to them (reachable by URL only). Not part of the restyle |
 | `data-and-intelligence/index.html` | Redirects to `guide/` |
-| `data-and-intelligence/books/python-roadmap.html` | Hand-written, self-contained page (its own CSS, JS and theme switch; no `assets/theme/` link). The Python resource for **both** the D&I guide and the CS&E on-ramp. Not generated — edit it directly |
+| `data-and-intelligence/books/python-roadmap.html` | Hand-written, self-contained page (its own CSS, JS and theme switch; no `assets/theme/` link). The Python resource for **both** the D&I guide and the CS&E on-ramp. Not generated — edit it directly. `[2026-11-12]` **It carries the site's chrome now**: the favicon (it had **none**, so its tab showed a blank icon), the gradient brand mark, the home menu, and the shared theme memory — it stored the theme under a third name, `pyroadmap-theme`, and had **no link back into the site at all**. Its own stylesheet was never off-design: same token names, same values as `assets/theme/site.css` |
 | `data-and-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site — **75 pages** `[2026-11-12]`, counted; this row said 72. Never edit by hand. Restyled by `assets/theme/guide-override.css`, which the build script links in |
-| `assets/theme/site.css`, `assets/theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=6`) |
-| `assets/theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `utilities/build-di-guide.py` (**currently `12`** `[2026-11-12]`; this row said `10`) |
+| `assets/theme/site.css`, `assets/theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=7` `[2026-11-12]`; this row said `?v=6`). `site.js` writes the theme under **both** names, `ti-theme` and the guide's `air-theme` |
+| `assets/theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `utilities/build-di-guide.py` (**currently `16`** `[2026-11-12]`; this row said `12`) |
 | `assets/` | **Everything the browser downloads**, grouped 2026-11-11: `assets/theme/` and `assets/favicon/`. Kept out of `utilities/` on purpose — `robots.txt` disallows `/utilities/`, and blocking a site's own stylesheet and icon changes how search engines render it |
 | `assets/favicon/` | Site icon: "Apex", a neural network converging into a radiant star, the culmination of AI (gradient tile). Also added to the D&I guide pages by the build script |
 | `data-and-intelligence/research/` | Source of the D&I guide (a separate research repo; **this is its only copy**) |
@@ -108,7 +108,7 @@ Notes:
 | `books/python/` | ***Python from Zero*** — **started 2026-11-12. `TOC.md` and `CLAUDE.md` only, no manuscript.** 51 chapters built against the Fundamentals stage of `data-and-intelligence/books/python-roadmap.html`, approved by the owner and then reviewed twice and corrected. **It governs itself**: `books/python/CLAUDE.md`. **Nothing is drafted**, and the block is not the contents — decision 8's other half, the rules, is unwritten, and one is live for this book: which of the finished book's gates transfer. **It points at three other books rather than repeating them** — *Linux and Git from Zero*, *APIs to FastAPI*, and the roadmap page, which `[STATED]` nothing happens to |
 | `books/future-books/README.md` | **Decisions for *Python* and *Machine Learning and Deep Learning*** — **21 decisions** with their reasons, the rejected alternatives, and the rules still to write. **It is the authority on both books**; neither book's own files restate a decision. `[2026-11-12]` This row said *"Nothing is started. Ten decisions"* — **Python started on 2026-11-12** (see the row above) and the count was out of date. The owner also ruled the books are written **sequentially**, so the file's parallel-writing section no longer describes the plan and is kept only because the ruling is reversible |
 | `books/modern-ai/` | ***Modern AI: Research, Science and Engineering*** — **in research, no manuscript.** `[2026-11-12]` It governs itself: `books/modern-ai/CLAUDE.md`, then `docs/ROADMAP.md`, whose **first section, *“What is next — read this first”*, names the next action**: fetch a scope statement for each of the 62 categories the consolidation could not judge, before any area is cut. `[2026-11-12]` This row said that section was a question blocking everything; **the owner has since ruled four times and named that action, so the question is open but blocks nothing**. `docs/HOW-IT-WORKS.md` is the plain map of the process |
-| `data-and-intelligence/on-ramp.html` | **The Data & Intelligence on-ramp**, added 2026-11-12. **`[2026-11-12]` Done and live.** The guide's home page carries a **The On-Ramp** button left of its primary action, injected by `utilities/build-di-guide.py`. **That injection runs after `rename()`**, because the section once carried a `button--primary` of its own and `rename()` asserts the home page has exactly one — injecting first made the build exit. The button uses the roadmap's bare `button` class, so it needs no CSS. Three books in reading order — *Python from Zero* and *Machine Learning and Deep Learning* (both Coming soon) and *Modern AI Engineering from Zero*, which is live and carries its own last-updated date. Hand-written, uses `assets/theme/`, same markup as the CS&E on-ramp table, its width capped at 800px to match the guide's own column. **Reached from the guide's home page** |
+| `data-and-intelligence/on-ramp.html` | **The Data & Intelligence on-ramp**, added 2026-11-12. **`[2026-11-12]` Done and live.** The guide's home page carries a **The On-Ramp** button left of its primary action, injected by `utilities/build-di-guide.py`. **That injection runs after `rename()`**, because the section once carried a `button--primary` of its own and `rename()` asserts the home page has exactly one — injecting first made the build exit. The button uses the roadmap's bare `button` class, so it needs no CSS. Three books in reading order — *Python from Zero* and *Machine Learning and Deep Learning* (both Coming soon) and *Modern AI Engineering from Zero*, which is live and carries its own last-updated date. Hand-written, uses `assets/theme/`, width capped at 800px to match the guide's own column. `[2026-11-12]` **It is three `.step-card` blocks now, not a table** — it copied the CS&E on-ramp's three-column table, and with two columns the step number sat alone in an 18% gutter and the card ran into the footer. **Reached from the guide's home page** |
 | `books/rag-from-zero/` | *RAG from Zero: A Practical Guide*, added 2026-11-12. **PDF only**, no Markdown source here, and **not linked from any page** |
 
 Removed on purpose, so don't recreate them: the Mathematics on-ramp (commit `a3c706f`,
@@ -335,6 +335,40 @@ branch, so do it only if there is a reason, and never without asking.
 
 ---
 
+## `[2026-11-12]` One site, one set of chrome
+
+The guide and the site had drifted apart. Five things were put right, after the owner went through
+the pages himself and named each one. The rule held throughout: **not a letter of content changed**,
+and `utilities/text-check.py` proves it page by page.
+
+- **One theme memory.** The site stored the chosen theme as `ti-theme`, the guide as `air-theme`,
+  the Python roadmap as `pyroadmap-theme`. **Three memories, so the theme changed as you crossed
+  between them.** Now `site.js` writes the first two, the roadmap page writes the first two, and
+  `utilities/build-di-guide.py` puts a bridge in every guide page that applies an arriving choice
+  before first paint.
+- **The guide's theme control is the site's switch**, markup and behaviour, put in place of the
+  roadmap's three-state button by the build script. **The word *System* is gone** from the 75 pages
+  with it, and so is that state: a theme is light or dark everywhere now. That is the **only** text
+  the rebuild removes, and `text-check` shows it as one line per page.
+- **No pills in the top bar.** The guide's `.tool-button` is plain text at the site's link size.
+  Nothing in the site's own bar is a filled or outlined button, and now nothing in the guide's is.
+- **A home menu replaces the back arrow.** One home button opens *Home page* (purple, ruled off),
+  then Mathematics, CS & Engineering and Data & Intelligence. The site's bar carries those three as
+  plain links; the guide's bar already holds its own sections and cannot fit three more on a phone.
+  The same menu is on `data-and-intelligence/books/python-roadmap.html`.
+- **The gradient tile is on every page.** The mark beside *Data & Intelligence* in the guide now sits
+  beside *Towards Intelligence* on all five hand-written pages and beside *Python Roadmap*. It is
+  `--grad` in a 16px rounded square, `aria-hidden`.
+
+**Phones, measured at 320, 375 and 430px:** no page scrolls sideways. The CS&E on-ramp table held
+`min-width: 720px` inside a 351px card, so **the card scrolled** while the page did not; below 640px
+that table is laid out as blocks and the three column headings are hidden (they stay in the markup).
+Two things still scroll inside their own box on purpose: the Python roadmap's data tables, whose
+headings carry meaning that stacking would have to repeat as new words, and the guide's code and
+diagram blocks, which cannot reflow.
+
+---
+
 ## Gotchas
 
 - Keep `.gitignore` rules anchored to the root (`/assets/`, `/docs/`, `/CLAUDE.md`). An unanchored
@@ -365,6 +399,7 @@ branch, so do it only if there is a reason, and never without asking.
   what is published. A difference means somebody hand-edited, or the source changed and nobody
   rebuilt. Slower, so it runs before publishing. **Do (1) now and leave (2) until it has bitten
   once** — that was the recommendation and the owner has not ruled on it.
+- **`[2026-11-12]` **Half fixed.** On the **D&I** on-ramp a live book title now carries a thin blue underline (`.step-card .book-title a`), so it no longer looks like a *Coming soon* entry. **The CS&E table is unchanged** and still has the problem below; the owner has not ruled on giving it the same treatment.
 - **`[2026-11-12]` On both on-ramps, a book you can open looks exactly like one that does not
   exist yet.** Measured: a live `.book-title a` and a Coming-soon `.book-title` both render
   `rgb(245,245,247)` with no underline, so the only signal is the missing badge. **It is the site's

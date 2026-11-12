@@ -6,11 +6,12 @@
 <meta name="description" content="A sequenced roadmap for the Python language itself: Fundamentals, Advanced and Mastery. Exact chapters to read, projects to build, and explicit exit criteria.">
 <meta name="color-scheme" content="light dark">
 <title>Python Roadmap &mdash; Fundamentals, Advanced &amp; Mastery</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/favicon/favicon.svg">
 <script>
   /* Apply the saved (or system) theme before first paint to avoid a flash. */
   (function () {
     var t;
-    try { t = localStorage.getItem('pyroadmap-theme'); } catch (e) {}
+    try { t = localStorage.getItem('ti-theme'); } catch (e) {}
     if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', t);
     document.documentElement.classList.add('js');
@@ -518,6 +519,40 @@
   @media print {
     .navtoggle { display: none !important; }
   }
+
+  /* ---------- Site chrome: the gradient tile and the home menu ----------
+     This page is reached from the CS&E on-ramp and from ten pages of the Data & Intelligence
+     guide, and before this it carried no mark, no tab icon and no way back into the site. The
+     mark and the menu are the same ones those pages carry. */
+  .nav .brand { display: inline-flex; align-items: center; gap: 10px; }
+  .nav .brand-mark { flex: none; width: 16px; height: 16px; border-radius: 5px; background: var(--grad); }
+  .ti-home-menu { position: relative; display: flex; }
+  .ti-home-btn {
+    display: grid; place-items: center; width: 31px; height: 31px; padding: 0;
+    border: 0; border-radius: 999px; background: none; color: var(--text); opacity: .8;
+    cursor: pointer; transition: opacity .2s;
+  }
+  .ti-home-btn:hover { opacity: 1; }
+  .ti-home-btn:focus-visible { outline: 3px solid rgba(0, 113, 227, .5); outline-offset: 2px; }
+  .ti-home-btn svg { width: 18px; height: 18px; }
+  .ti-home-list {
+    position: absolute; top: calc(100% + 10px); right: 0; z-index: 200;
+    min-width: 200px; margin: 0; padding: 6px; list-style: none;
+    background: var(--card); border: 1px solid var(--rule); border-radius: 12px;
+    box-shadow: var(--shadow-hover);
+  }
+  .ti-home-list li { margin: 0; }
+  .ti-home-list li:first-child { padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid var(--rule-soft); }
+  .ti-home-list a {
+    display: block; padding: 8px 12px; border-radius: 8px;
+    font-size: 13px; letter-spacing: -0.01em; color: var(--text); text-decoration: none; opacity: .85;
+  }
+  .ti-home-list a:hover { background: var(--bg-alt); opacity: 1; text-decoration: none; }
+  .ti-home-list a.ti-root { color: #8944ab; font-weight: 600; opacity: 1; }
+  html[data-theme="dark"] .ti-home-list a.ti-root { color: #bf5af2; }
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) .ti-home-list a.ti-root { color: #bf5af2; }
+  }
 </style>
 </head>
 <body>
@@ -525,7 +560,7 @@
 <!-- ================= NAV ================= -->
 <nav class="nav" aria-label="Sections">
   <div class="wrap">
-    <a class="brand" href="#top">Python Roadmap</a>
+    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>Python Roadmap</a>
     <div class="right">
       <button class="navtoggle" id="navToggle" type="button"
               aria-expanded="false" aria-controls="navLinks" aria-label="Sections menu">
@@ -541,6 +576,17 @@
         <li><a href="#practice">Practice</a></li>
         <li><a href="#resources">Resources</a></li>
       </ul>
+      <div class="ti-home-menu">
+        <button class="ti-home-btn" type="button" aria-expanded="false" aria-haspopup="true" title="Towards Intelligence" aria-label="Towards Intelligence">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.2 12 3l9 7.2"/><path d="M5.4 9v11h13.2V9"/></svg>
+        </button>
+        <ul class="ti-home-list" hidden>
+          <li><a class="ti-root" href="../../index.html">Home page</a></li>
+          <li><a href="../../index.html#mathematics">Mathematics</a></li>
+          <li><a href="../../cse/index.html">CS &amp; Engineering</a></li>
+          <li><a href="../guide/index.html">Data &amp; Intelligence</a></li>
+        </ul>
+      </div>
       <button class="switch" id="themeToggle" type="button" role="switch"
               aria-checked="false" aria-label="Dark mode" title="Toggle dark mode">
         <span class="knob">
@@ -2180,7 +2226,9 @@ for my answer before the next.
     btn.addEventListener('click', function () {
       var n = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', n);
-      try { localStorage.setItem('pyroadmap-theme', n); } catch (e) {}
+      /* The site stores the theme as ti-theme and the Data & Intelligence guide as
+         air-theme. Write both, so the theme holds wherever the reader goes next. */
+      try { localStorage.setItem('ti-theme', n); localStorage.setItem('air-theme', n); } catch (e) {}
       sync();
     });
   }
@@ -2188,12 +2236,27 @@ for my answer before the next.
   if (window.matchMedia) {
     var mq = matchMedia('(prefers-color-scheme: dark)');
     var onChange = function (e) {
-      var saved; try { saved = localStorage.getItem('pyroadmap-theme'); } catch (err) {}
+      var saved; try { saved = localStorage.getItem('ti-theme'); } catch (err) {}
       if (!saved) { root.setAttribute('data-theme', e.matches ? 'dark' : 'light'); sync(); }
     };
     if (mq.addEventListener) mq.addEventListener('change', onChange);
     else if (mq.addListener) mq.addListener(onChange);
   }
+})();
+
+/* ---------- 1b. The home menu: the site's four destinations. ---------- */
+(function () {
+  var wrap = document.querySelector('.ti-home-menu');
+  if (!wrap) return;
+  var open = wrap.querySelector('.ti-home-btn'), list = wrap.querySelector('.ti-home-list');
+  function shut() { list.hidden = true; open.setAttribute('aria-expanded', 'false'); }
+  open.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    if (list.hidden) { list.hidden = false; open.setAttribute('aria-expanded', 'true'); }
+    else shut();
+  });
+  document.addEventListener('click', function (ev) { if (!wrap.contains(ev.target)) shut(); });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') shut(); });
 })();
 
 /* ---------- 2. Reveal on scroll. Runs first among the layout blocks, and

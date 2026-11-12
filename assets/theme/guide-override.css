@@ -28,6 +28,8 @@
   --rule-strong: #86868b;
 
   --accent: #0071e3;
+  --switch-off: #e9e9eb;
+  --switch-on: #0071e3;
   --accent-soft: rgba(0, 113, 227, 0.08);
   --accent-line: rgba(0, 113, 227, 0.35);
   --evidence: #8944ab;
@@ -67,6 +69,8 @@
     --rule-mid: #424245;
     --rule-strong: #6e6e73;
     --accent: #0a84ff;
+    --switch-off: #39393d;
+    --switch-on: #0a84ff;
     --accent-soft: rgba(10, 132, 255, 0.12);
     --accent-line: rgba(10, 132, 255, 0.42);
     --evidence: #bf5af2;
@@ -105,6 +109,8 @@
   --rule-mid: #424245;
   --rule-strong: #6e6e73;
   --accent: #0a84ff;
+  --switch-off: #39393d;
+  --switch-on: #0a84ff;
   --accent-soft: rgba(10, 132, 255, 0.12);
   --accent-line: rgba(10, 132, 255, 0.42);
   --evidence: #bf5af2;
@@ -146,10 +152,13 @@ body {
   backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--ti-nav-rule);
 }
+/* The site's own nav sets the brand at 21px / 600 / .011em and its links at 12px. The guide's
+   top bar is the same height already (--topbar-h is 52px), so matching these two makes the bar
+   read as the same bar on both sides of the boundary. */
 .brand {
-  font-size: 1.125rem;
+  font-size: 1.3125rem;
   font-weight: 600;
-  letter-spacing: .005em;
+  letter-spacing: .011em;
   text-transform: none;
 }
 .brand-mark {
@@ -161,16 +170,89 @@ body {
   background: var(--grad);
 }
 .primary-nav a,
-.primary-nav .is-unavailable { font-size: .8125rem; letter-spacing: -0.01em; }
+.primary-nav .is-unavailable { font-size: 12px; letter-spacing: -0.01em; }
+.primary-nav a { color: var(--text); opacity: .8; transition: opacity .2s, color .2s; }
+.primary-nav a:hover { opacity: 1; }
+.primary-nav a.is-current { opacity: 1; }
 .primary-nav a.is-current { color: var(--accent); }
 .primary-nav a.is-current::after { display: none; }
+/* Nothing in the site's own bar is a filled or outlined button: it carries text links and one
+   switch. The guide's bar had three buttons (back to the site, Contents on document pages, and
+   a three-state theme control). The theme control is replaced by the site's switch itself in
+   utilities/build-di-guide.py; the other two are given the site's nav-link treatment here, at
+   the same size and weight, with no pill around them. */
 .tool-button {
-  border-color: transparent;
-  background: var(--panel);
-  color: var(--text-soft);
-  transition: color .2s, background-color .2s;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  opacity: .8;
+  transition: opacity .2s, color .2s;
 }
-.tool-button:hover { color: var(--head); background: var(--panel-strong); border-color: transparent; }
+.tool-button:hover { opacity: 1; color: var(--text); background: none; border-color: transparent; }
+.topbar-tools { gap: 18px; }
+
+/* The home button and its menu: the site home page and the three disciplines, which every site
+   page carries as plain links in its own bar. They are a menu here because this bar already
+   holds the guide's own sections and must still fit a phone. */
+.ti-home-menu { position: relative; display: flex; }
+.ti-home-btn {
+  display: grid; place-items: center;
+  width: 31px; height: 31px; padding: 0;
+  border: 0; border-radius: 999px; background: none;
+  color: var(--text); opacity: .8; cursor: pointer;
+  transition: opacity .2s;
+}
+.ti-home-btn:hover { opacity: 1; }
+.ti-home-btn:focus-visible { outline: 3px solid rgba(0, 113, 227, .5); outline-offset: 2px; }
+.ti-home-btn svg { width: 18px; height: 18px; }
+.ti-home-list {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 200;
+  min-width: 200px; margin: 0; padding: 6px; list-style: none;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
+  box-shadow: var(--ti-card-shadow-hover);
+}
+.ti-home-list li { margin: 0; }
+.ti-home-list a {
+  display: block; padding: 8px 12px; border-radius: 8px;
+  font-size: 13px; letter-spacing: -0.01em; color: var(--text); text-decoration: none;
+}
+.ti-home-list a:hover { background: var(--panel); }
+/* The first row leaves the discipline behind and goes to the top of the site, so it is set
+   apart from the three that sit below it: its own colour, heavier, and a rule under it. */
+.ti-home-list a.ti-root { color: var(--evidence); font-weight: 600; }
+.ti-home-list li:first-child { padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid var(--rule); }
+.ti-home-list a.ti-current { color: var(--accent); }
+
+/* The site's two-state switch, copied from assets/theme/site.css, which the guide does not
+   load. Same size, same knob, same colours, so the control is the same control on both sides. */
+.switch {
+  position: relative; flex: none;
+  width: 51px; height: 31px; padding: 0; border: 0; border-radius: 999px;
+  background: var(--switch-off); cursor: pointer;
+  transition: background-color .3s ease;
+}
+.switch:focus-visible { outline: 3px solid rgba(0, 113, 227, .5); outline-offset: 2px; }
+.switch[aria-checked="true"] { background: var(--switch-on); }
+.switch .knob {
+  position: absolute; top: 2px; left: 2px;
+  width: 27px; height: 27px; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 3px 1px rgba(0,0,0,.06);
+  display: grid; place-items: center;
+  transition: transform .3s cubic-bezier(.3, 1.4, .5, 1);
+}
+.switch[aria-checked="true"] .knob { transform: translateX(20px); }
+.switch svg { width: 15px; height: 15px; position: absolute; transition: opacity .25s, transform .35s; }
+.switch .sun  { color: #ff9f0a; }
+.switch .moon { color: #3a3a3c; opacity: 0; transform: rotate(-60deg); }
+.switch[aria-checked="true"] .sun  { opacity: 0; transform: rotate(60deg); }
+.switch[aria-checked="true"] .moon { opacity: 1; transform: none; }
 .to-top {
   background: var(--ti-nav-bg);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
@@ -333,7 +415,10 @@ p.ti-subhead,
   .brand { flex: 0 1 auto; min-width: 0; gap: .5rem; font-size: 1rem; letter-spacing: 0; }
   .brand-mark { flex: none; width: .85rem; height: .85rem; border-radius: 4px; }
   .brand-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .topbar-tools { flex: none; gap: .35rem; }
+  .topbar-tools { flex: none; gap: .9rem; }
+  .switch { width: 46px; height: 28px; }
+  .switch .knob { width: 24px; height: 24px; }
+  .switch[aria-checked="true"] .knob { transform: translateX(18px); }
   .topbar-tools .tool-button { flex: none; justify-content: center; min-width: 2rem; height: 2rem; min-height: 2rem; padding: 0 .55rem; }
 
   /* Justified prose on phones too (the guide sets it ragged below 48em). Interface text inside

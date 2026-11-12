@@ -19,7 +19,7 @@
       document.documentElement.classList.add('js');
     })();
   </script>
-  <link rel="stylesheet" href="../assets/theme/site.css?v=6"/>
+  <link rel="stylesheet" href="../assets/theme/site.css?v=7"/>
   <style>
     /* The book column is about 340px wide, well under the ~800px the handover says justified
        text needs at this size, so justifying it stretches lines and hyphenates mid-word.
@@ -38,12 +38,12 @@
 <!-- NAV -->
 <nav class="nav nav--wide" aria-label="Sections">
   <div class="wrap">
-    <a href="../index.html" class="brand">Towards Intelligence</a>
+    <a href="../index.html" class="brand"><span class="brand-mark" aria-hidden="true"></span>Towards Intelligence</a>
     <div class="right">
       <ul class="links">
         <li><a href="../index.html#mathematics">Mathematics</a></li>
         <li><a href="../cse/index.html">CS &amp; Engineering</a></li>
-        <li><a href="on-ramp.html" class="active">Data &amp; Intelligence</a></li>
+        <li><a href="guide/index.html" class="active">Data &amp; Intelligence</a></li>
       </ul>
       <button class="switch" id="themeToggle" type="button" role="switch"
               aria-checked="false" aria-label="Dark mode" title="Toggle dark mode">
@@ -83,51 +83,40 @@
   <p class="part-subtitle">Three books, read in order, from no programming at all to building real systems on language models. Each one answers a single question and stands on its own. They assume no prior knowledge of their subject &mdash; only that you can read the one before. Read them before the guide, not instead of it.</p>
 </div>
 
-<div class="table-card reveal">
-<table class="onramp-table">
-  <thead>
-    <tr>
-      <th class="col-h-cat">Step</th>
-      <th class="col-h-course">Book</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="col-category">1</td>
-      <td>
-        <span class="cell-item">
-          <span class="course-target">The language, and the craft around it</span><br>
-          <span class="book-title">Programming Language From Zero: Python <span class="book-status">Coming soon</span></span>
-          <span class="book-problem">I want a computer to do something for me, and I can&rsquo;t yet tell it what to do.</span>
-          <span class="book-question">How do I get real command of Python &mdash; not just code that runs, but code I understand and other people can depend on?</span>
-        </span>
-      </td>
-    </tr>
-    <tr>
-      <td class="col-category">2</td>
-      <td>
-        <span class="cell-item">
-          <span class="course-target">The science and the engineering of learning systems</span><br>
-          <span class="book-title">Machine Learning and Deep Learning <span class="book-status">Coming soon</span></span>
-          <span class="book-problem">I can run a model, but I can&rsquo;t explain why training it works, and the mathematics is a wall.</span>
-          <span class="book-question">How does a machine learn from data, and why do the methods that work, work?</span>
-        </span>
-      </td>
-    </tr>
-    <tr>
-      <td class="col-category">3</td>
-      <td>
-        <span class="cell-item">
-          <span class="course-target">Building on language models</span><br>
-          <span class="book-title"><a href="../books/modern-ai-engineering-from-zero/Modern-AI-Engineering-from-Zero.pdf" target="_blank" rel="noopener">Modern AI Engineering from Zero</a></span>
-          <span class="book-problem">I can call a model&rsquo;s API, but I don&rsquo;t know what it is doing inside, what it costs, or why it fails.</span>
-          <span class="book-question">How do I build something real on top of a language model, and know why every piece of it is there?</span>
-          <span class="book-labs">Last updated &mdash; 31 October 2026</span>
-        </span>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<!-- Three books, one card each. This was a two-column table copied from the CS&E on-ramp,
+     which has three columns to fill; here it left the step number alone in a wide empty gutter
+     and the card ran straight into the footer. The words are unchanged: the table's two column
+     headings have no column to head any more, so they are kept for screen readers only. -->
+<div class="step-list reveal">
+  <p class="vh"><span>Step</span> <span>Book</span></p>
+  <article class="step-card">
+    <p class="step-num">1</p>
+    <div class="step-body">
+      <span class="course-target">The language, and the craft around it</span>
+      <span class="book-title">Programming Language From Zero: Python <span class="book-status">Coming soon</span></span>
+      <span class="book-problem">I want a computer to do something for me, and I can&rsquo;t yet tell it what to do.</span>
+      <span class="book-question">How do I get real command of Python &mdash; not just code that runs, but code I understand and other people can depend on?</span>
+    </div>
+  </article>
+  <article class="step-card">
+    <p class="step-num">2</p>
+    <div class="step-body">
+      <span class="course-target">The science and the engineering of learning systems</span>
+      <span class="book-title">Machine Learning and Deep Learning <span class="book-status">Coming soon</span></span>
+      <span class="book-problem">I can run a model, but I can&rsquo;t explain why training it works, and the mathematics is a wall.</span>
+      <span class="book-question">How does a machine learn from data, and why do the methods that work, work?</span>
+    </div>
+  </article>
+  <article class="step-card">
+    <p class="step-num">3</p>
+    <div class="step-body">
+      <span class="course-target">Building on language models</span>
+      <span class="book-title"><a href="../books/modern-ai-engineering-from-zero/Modern-AI-Engineering-from-Zero.pdf" target="_blank" rel="noopener">Modern AI Engineering from Zero</a></span>
+      <span class="book-problem">I can call a model&rsquo;s API, but I don&rsquo;t know what it is doing inside, what it costs, or why it fails.</span>
+      <span class="book-question">How do I build something real on top of a language model, and know why every piece of it is there?</span>
+      <span class="book-labs">Last updated &mdash; 31 October 2026</span>
+    </div>
+  </article>
 </div>
 
 </div><!-- /.wrap -->
@@ -140,7 +129,7 @@
   </div>
 </footer>
 
-<script src="../assets/theme/site.js?v=6"></script>
+<script src="../assets/theme/site.js?v=7"></script>
 
 </body>
 </html>

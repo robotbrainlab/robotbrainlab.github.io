@@ -7,8 +7,8 @@ Usage (from the repository root):
 
 1. Runs the roadmap's own generator (with its validation) into a temp directory.
    The roadmap source in data-and-intelligence/research/ is only read, never modified.
-2. Adds a "Towards Intelligence" link to each page's top bar, pointing back to
-   the site home page, adds the site icon and the site theme override (assets/theme/guide-override.css),
+2. Adds a home button to each page's top bar, holding the site home page and the three
+   disciplines, adds the site icon and the site theme override (assets/theme/guide-override.css),
    and justifies the running text on the guide's home page.
 3. Names the guide after the site's discipline ("Data & Intelligence") in its chrome, names the
    home page's two actions for where they go, and marks the bold-text sub-headings so they can
@@ -20,7 +20,11 @@ Usage (from the repository root):
    These are the only changes made to the generated pages; the roadmap's own files are untouched.
 6. Adds an "The On-Ramp" button to the guide's home page, left of its primary action, linking to
    data-and-intelligence/on-ramp.html.
-7. Replaces data-intelligence/guide/ with the result.
+7. Replaces the guide's three-state theme button with the site's own two-state switch, and
+   joins the two theme memories. The site stores the chosen theme as "ti-theme", the guide as
+   "air-theme", so before this each side ignored the other and the theme changed when you
+   crossed between them. Every page gets a small script that mirrors one into the other.
+8. Replaces data-intelligence/guide/ with the result.
 """
 
 import os
@@ -36,14 +40,103 @@ SOURCE = REPO / "data-and-intelligence" / "research"   # [2026-11-11] was resear
 GUIDE = REPO / "data-and-intelligence" / "guide"
 PYTHON = SOURCE / ".venv" / "bin" / "python"
 # Site theme override for the guide (assets/theme/guide-override.css). Bump when that file changes.
-OVERRIDE_VERSION = 12
+OVERRIDE_VERSION = 16
+
+# The site and the guide each remember the chosen theme under their own name: the site as
+# "ti-theme" (assets/theme/site.js), the guide as "air-theme" (its own generated script). Neither
+# read the other, so the theme changed as you crossed between them. This mirrors each into the
+# other. It runs in the head, before first paint, so an arriving choice is applied without a
+# flash. The site half of the bridge is in assets/theme/site.js.
+THEME_BRIDGE = """<script>
+(function () {
+  var root = document.documentElement, SITE = "ti-theme", GUIDE = "air-theme";
+  function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  /* Arrived from a site page that chose a theme this guide has not been told about. The guide
+     stores the choice under its own name, so write it there too and the guide's own script
+     agrees with the switch from the first paint. */
+  var guide = get(GUIDE), site = get(SITE);
+  if (guide !== "light" && guide !== "dark" && (site === "light" || site === "dark")) {
+    set(GUIDE, site);
+    root.setAttribute("data-theme", site);
+  }
+  /* The switch itself: two states, the same as every other page on the site. */
+  function current() {
+    var now = root.getAttribute("data-theme");
+    if (now === "dark" || now === "light") return now;
+    return (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+  }
+  function menu() {
+    var wrap = document.querySelector(".ti-home-menu");
+    if (!wrap) return;
+    var open = wrap.querySelector(".ti-home-btn"), list = wrap.querySelector(".ti-home-list");
+    function shut() { list.hidden = true; open.setAttribute("aria-expanded", "false"); }
+    open.addEventListener("click", function (ev) {
+      ev.stopPropagation();
+      if (list.hidden) { list.hidden = false; open.setAttribute("aria-expanded", "true"); }
+      else shut();
+    });
+    document.addEventListener("click", function (ev) { if (!wrap.contains(ev.target)) shut(); });
+    document.addEventListener("keydown", function (ev) { if (ev.key === "Escape") shut(); });
+  }
+  function start() {
+    menu();
+    var btn = document.getElementById("tiThemeSwitch");
+    if (!btn) return;
+    function sync() { btn.setAttribute("aria-checked", current() === "dark" ? "true" : "false"); }
+    sync();
+    btn.addEventListener("click", function () {
+      var next = current() === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      set(SITE, next);
+      set(GUIDE, next);
+      sync();
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+})();
+</script>
+"""
+
+
+# The site carries one theme control on every page: a two-state switch. The guide's generator
+# writes a three-state button instead (System / Light / Dark) with the state spelled out beside
+# it, which is a different control in a different shape. The site's own switch is put in its
+# place here, markup and behaviour, so both sides of the boundary carry the same thing. The
+# roadmap's own button is replaced, not hidden; its script then finds no [data-theme-toggle] and
+# leaves the theme alone, which is what we want, because the switch below drives it.
+THEME_BUTTON = (
+    '<button class="tool-button theme-toggle" type="button" data-theme-toggle '
+    'aria-label="Theme: System. Activate to change.">\n'
+    '        <span class="theme-glyph" aria-hidden="true"></span>'
+    '<span class="tool-label theme-label">System</span>\n'
+    '      </button>'
+)
+THEME_SWITCH = """<button class="switch" id="tiThemeSwitch" type="button" role="switch"
+              aria-checked="false" aria-label="Dark mode" title="Toggle dark mode">
+        <span class="knob">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2" fill="currentColor"/>
+            <path d="M12 2v2.5M12 19.5V22M4.2 4.2 6 6M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8 6 18M18 6l1.8-1.8"/>
+          </svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1Z"/>
+          </svg>
+        </span>
+      </button>"""
+
+
+def swap_theme_control(html: str, page: str) -> str:
+    """Put the site's switch where the guide's three-state button was."""
+    found = html.count(THEME_BUTTON)
+    if found != 1:
+        sys.exit(f"Expected one theme button, found {found}, not patching: {page}")
+    return html.replace(THEME_BUTTON, THEME_SWITCH)
 
 ANCHOR = '<div class="topbar-tools">'
-STYLE = """<style>
-  .ti-home { text-decoration: none; }
-  @media (max-width: 700px) { .ti-home .tool-label { display: none; } }
-</style>
-</head>"""
+# Everything the bar needs is in assets/theme/guide-override.css; nothing is left to say here.
+STYLE = "</head>"
 # The guide's home page only: one button into the on-ramp, beside the roadmap's own two. The full
 # table lives at data-and-intelligence/on-ramp.html in the site theme. A bare "button" is the
 # roadmap's own neutral outline style, so this needs no CSS of its own and stays secondary to the
@@ -239,10 +332,28 @@ def add_on_ramp(html: str, page: str) -> str:
 
 
 def home_link(rel_to_root: str) -> str:
+    """The site's four destinations, behind one home button.
+
+    This was a single back arrow reading "Towards Intelligence". Every site page instead carries
+    the three disciplines as plain links, so the guide was the odd one out; but the guide's bar
+    already holds its own sections (Learn, Evidence, About) and cannot hold three more and still
+    fit a phone. One home button with a menu holds all four and takes the width of an icon.
+    """
+    up = rel_to_root
     return (
-        f'<div class="topbar-tools"><a class="tool-button ti-home" href="{rel_to_root}index.html" '
-        'title="Back to Towards Intelligence" aria-label="Back to Towards Intelligence">'
-        '<span aria-hidden="true">&larr;</span><span class="tool-label">Towards Intelligence</span></a>'
+        '<div class="topbar-tools"><div class="ti-home-menu">'
+        '<button class="ti-home-btn" type="button" aria-expanded="false" aria-haspopup="true" '
+        'title="Towards Intelligence" aria-label="Towards Intelligence">'
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        '<path d="M3 10.2 12 3l9 7.2"/><path d="M5.4 9v11h13.2V9"/></svg>'
+        '</button>'
+        '<ul class="ti-home-list" hidden>'
+        f'<li><a class="ti-root" href="{up}index.html">Home page</a></li>'
+        f'<li><a href="{up}index.html#mathematics">Mathematics</a></li>'
+        f'<li><a href="{up}cse/index.html">CS &amp; Engineering</a></li>'
+        f'<li><a class="ti-current" href="{up}data-and-intelligence/guide/index.html">Data &amp; Intelligence</a></li>'
+        '</ul></div>'
     )
 
 
@@ -258,9 +369,10 @@ def add_home_link(out: Path) -> int:
         icon = f'<link rel="icon" type="image/svg+xml" href="{up}assets/favicon/favicon.svg"/>\n'
         theme = f'<link rel="stylesheet" href="{up}assets/theme/guide-override.css?v={OVERRIDE_VERSION}"/>\n'
         rel = page.relative_to(out).as_posix()
-        html = html.replace(ANCHOR, home_link(up)).replace("</head>", icon + theme + STYLE)
+        html = html.replace(ANCHOR, home_link(up)).replace("</head>", icon + theme + THEME_BRIDGE + STYLE)
         if rel == HOME_PAGE:
             html = html.replace("</head>", HOME_STYLE)
+        html = swap_theme_control(html, rel)
         html = mark_subheads(rename(html, rel, rel == HOME_PAGE))
         # After rename(), deliberately: the section carries a button--primary of its own, and
         # rename() asserts the home page has exactly one. Injecting first makes that check fail.
