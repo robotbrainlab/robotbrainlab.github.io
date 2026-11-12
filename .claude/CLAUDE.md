@@ -32,9 +32,13 @@ AskUserQuestion tool):
    Appendix B); a session here is an edit to it, not drafting.
 4. **`[2026-11-12]` Researching *Modern AI: Research, Science and Engineering*.** The book in
    `books/modern-ai/`. **It governs itself and does not follow this file** — go straight to
-   `books/modern-ai/CLAUDE.md`, which sends you to `books/modern-ai/docs/ROADMAP.md`. **Read that
-   roadmap's first section before anything else**: it opens with a question the owner has not
-   answered, about what he expected this process to be, **and nothing proceeds until he does.**
+   `books/modern-ai/CLAUDE.md`, which sends you to `books/modern-ai/docs/ROADMAP.md`. **Its
+   section *"What is next — read this first"* names the next action**, which the owner chose on
+   2026-11-12: fetch a scope statement for each of the 62 categories the consolidation could not
+   judge, before any area is cut. The roadmap's opening section records a question he has not
+   answered, about what he expected this process to be; `[2026-11-12]` **it is open but it does not
+   block the work** — this entry used to say nothing proceeds until he answers it, and he has since
+   ruled four times and named the next action.
    `books/modern-ai/docs/HOW-IT-WORKS.md` is the plain-language map of the whole process, written
    for him. Nothing about the website. **This option was missing from this list for six days while
    it was the only work happening.**

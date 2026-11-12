@@ -21,6 +21,41 @@ text re-reads the same words at full cost. **This is in addition to `briefs/docu
 which runs on a single document before it is called finished and after any rule change; the review
 here reads the rules as a set, which is what found the contradictions between files.
 
+## What is next — read this first
+
+**`[2026-11-12]` Step 4, part 3 is done and ruled on. The next action is a short, targeted research
+run**, and the owner chose it:
+
+> *"Read them first."*
+
+**What to fetch: a scope statement for each of the 62 categories the consolidation could not judge**
+— 33 AI Engineer World's Fair programme tracks and 29 ACL Rolling Review tracks. They are listed by
+name, by source, in `research/frames/CONSOLIDATED-2026-11-12.md` under *Unclear*, which also names
+the pages that would settle them: ARR's separate area-guide page, and a per-track description for
+the programme. **This is a fetch against a named list, not a new framing run.**
+
+**Why it comes before any cut.** 99 of 223 categories are undecided, and **almost the whole
+engineering vocabulary is among them** — *Evals*, *Inference*, *Context Engineering*, *Agent
+Reliability*, *AI Infrastructure*, *SWE Agents* and the rest. Of the 47 that did pass, 34 are
+academic-only and 12 of the remaining 13 are MLCommons benchmark suites. **Cutting now would cut
+the half that publishes scope statements and keep nothing of the half that does not**, which cannot
+serve `GOAL.md` §1.1's research-oriented engineer.
+
+**Then, and only then:** re-run the `UNCLEAR` dispositions in `docs/PROPOSAL-areas-2026-11-12.md`,
+and put the area list to the owner.
+
+**What he already ruled, on 2026-11-12** — all four are recorded in that proposal's own
+*THE OWNER'S RULING* section, and the rows below it are already updated:
+
+| | Ruling |
+|---|---|
+| The 99 undecided | **Read them before choosing any areas** |
+| The twelve MLCommons suites | **One area, all twelve named underneath** |
+| Robotics / Intelligent Robots / Control methods | **Keep all three; decide after the research** |
+| The five remaining same-ground pairs | **Keep apart for now** |
+
+**The list stands at 33 proposed areas**, nothing cut.
+
 ## `[STATED 2026-11-12]` An expectation gap, recorded before anything else is planned
 
 **The owner said this at the end of a long day, and it has never been written down:**
@@ -69,9 +104,15 @@ area ruling, because the answer changes what is worth building:
 - Or does he want something closer to what he pictured — and if so, what has to be given up to get
   it, since the five approvals exist to stop the failures `GOAL.md` §11 records?
 
-**Do not answer this for him, and do not start step 4's next action until he has.**
+**Do not answer this for him.**
 
-## Current position
+**`[2026-11-12, later the same day]` It no longer blocks the work, and this paragraph used to say
+it did.** After it was written the owner ruled four times on the area proposal and named the next
+action himself. **So the question above is still open and still worth asking — but as a question
+about the shape of the whole effort, not as a gate in front of step 4.** Carry on with *What is
+next*, below.
+
+## How step 4 got here
 
 **Step 4 is next. Two or more independent framing runs record what the field files; a consolidation
 run unions them into one candidate list; Claude proposes which of those areas the book covers, with
