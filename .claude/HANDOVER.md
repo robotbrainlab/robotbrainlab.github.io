@@ -1,6 +1,6 @@
 # Handover — Towards Intelligence (robotbrainlab.github.io)
 
-Last updated: 2026-10-08.
+Last updated: **2026-11-12**.
 
 ## What this repo is
 
@@ -21,7 +21,7 @@ all: `_sources` was dissolved into the sections it served, and `_backup` went to
 The repository is **public**, so every file was already readable on github.com. What changed is
 that a file now also has a web address, which search engines collect. **`/robots.txt` decides what
 they collect**: the finished books are findable, and markdown, chapters, records, labs, tools,
-`books/backlog/`, `books/modern-ai/`, *(dissolved 2026-11-11 — see below)*, `utilities/` and `backup/` are not.
+`books/backlog/`, `books/modern-ai/`, `utilities/` and `backup/` are not.
 
 ## Publishing
 
@@ -94,7 +94,7 @@ Notes:
 | `data-and-intelligence/books/python-roadmap.html` | Hand-written, self-contained page (its own CSS, JS and theme switch; no `assets/theme/` link). The Python resource for **both** the D&I guide and the CS&E on-ramp. Not generated — edit it directly |
 | `data-and-intelligence/guide/` | **Generated.** The AI Engineer Roadmap site — **75 pages** `[2026-11-12]`, counted; this row said 72. Never edit by hand. Restyled by `assets/theme/guide-override.css`, which the build script links in |
 | `assets/theme/site.css`, `assets/theme/site.js` | Shared styling + behaviour for all hand-written pages (currently `?v=6`) |
-| `assets/theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `utilities/build-di-guide.py` (currently `10`) |
+| `assets/theme/guide-override.css` | The D&I guide's restyle: remaps its design tokens (curriculum→blue, evidence→purple, Modern track→green) and components. Version is `OVERRIDE_VERSION` in `utilities/build-di-guide.py` (**currently `12`** `[2026-11-12]`; this row said `10`) |
 | `assets/` | **Everything the browser downloads**, grouped 2026-11-11: `assets/theme/` and `assets/favicon/`. Kept out of `utilities/` on purpose — `robots.txt` disallows `/utilities/`, and blocking a site's own stylesheet and icon changes how search engines render it |
 | `assets/favicon/` | Site icon: "Apex", a neural network converging into a radiant star, the culmination of AI (gradient tile). Also added to the D&I guide pages by the build script |
 | `data-and-intelligence/research/` | Source of the D&I guide (a separate research repo; **this is its only copy**) |
@@ -107,8 +107,8 @@ Notes:
 | `books/modern-ai-engineering-from-zero/` | ***Modern AI Engineering from Zero*** — a whole separate project living here for safekeeping. **`[2026-11-12]` The folder was `interview-prep/` until today**; the owner renamed it because the book outlived the interview deadline it was named for. See its section below. `[2026-11-12]` This row said "Unpublished (leading `_`)"; **the underscore is gone and so is Jekyll**, so nothing here is unpublished — `/robots.txt` is what keeps it out of search results |
 | `books/python/` | ***Python from Zero*** — **started 2026-11-12. `TOC.md` and `CLAUDE.md` only, no manuscript.** 51 chapters built against the Fundamentals stage of `data-and-intelligence/books/python-roadmap.html`, approved by the owner and then reviewed twice and corrected. **It governs itself**: `books/python/CLAUDE.md`. **Nothing is drafted**, and the block is not the contents — decision 8's other half, the rules, is unwritten, and one is live for this book: which of the finished book's gates transfer. **It points at three other books rather than repeating them** — *Linux and Git from Zero*, *APIs to FastAPI*, and the roadmap page, which `[STATED]` nothing happens to |
 | `books/future-books/README.md` | **Decisions for *Python* and *Machine Learning and Deep Learning*** — **21 decisions** with their reasons, the rejected alternatives, and the rules still to write. **It is the authority on both books**; neither book's own files restate a decision. `[2026-11-12]` This row said *"Nothing is started. Ten decisions"* — **Python started on 2026-11-12** (see the row above) and the count was out of date. The owner also ruled the books are written **sequentially**, so the file's parallel-writing section no longer describes the plan and is kept only because the ruling is reversible |
-| `books/modern-ai/` | ***Modern AI: Research, Science and Engineering*** — **in research, no manuscript.** `[2026-11-12]` It governs itself: `books/modern-ai/CLAUDE.md`, then `docs/ROADMAP.md`, whose **first section is an unanswered question from the owner that blocks everything else**. `docs/HOW-IT-WORKS.md` is the plain map of the process. **This row did not exist until today** |
-| `data-and-intelligence/on-ramp.html` | **The Data & Intelligence on-ramp**, added 2026-11-12. **`[STATED 2026-11-12]` The owner wants it INSIDE the D&I guide, not on the home page** — mirroring the CS&E on-ramp, which is a section at the top of `cse/index.html`. **That is not a page edit**: the guide is generated, so it means a new injection in `utilities/build-di-guide.py`, and the guide pages **do not load `assets/theme/site.css`**, so the table's styling has to be added to `assets/theme/guide-override.css` as well, with `OVERRIDE_VERSION` bumped. **Not done yet.** Three books in reading order — *Python from Zero* and *Machine Learning and Deep Learning* (both Coming soon) and *Modern AI Engineering from Zero*, which is live and carries its own last-updated date. Hand-written, uses `assets/theme/`, same markup as the CS&E on-ramp table. **Not linked from anywhere yet** |
+| `books/modern-ai/` | ***Modern AI: Research, Science and Engineering*** — **in research, no manuscript.** `[2026-11-12]` It governs itself: `books/modern-ai/CLAUDE.md`, then `docs/ROADMAP.md`, whose **first section, *“What is next — read this first”*, names the next action**: fetch a scope statement for each of the 62 categories the consolidation could not judge, before any area is cut. `[2026-11-12]` This row said that section was a question blocking everything; **the owner has since ruled four times and named that action, so the question is open but blocks nothing**. `docs/HOW-IT-WORKS.md` is the plain map of the process |
+| `data-and-intelligence/on-ramp.html` | **The Data & Intelligence on-ramp**, added 2026-11-12. **`[2026-11-12]` Done and live.** The guide's home page carries a **The On-Ramp** button left of its primary action, injected by `utilities/build-di-guide.py`. **That injection runs after `rename()`**, because the section once carried a `button--primary` of its own and `rename()` asserts the home page has exactly one — injecting first made the build exit. The button uses the roadmap's bare `button` class, so it needs no CSS. Three books in reading order — *Python from Zero* and *Machine Learning and Deep Learning* (both Coming soon) and *Modern AI Engineering from Zero*, which is live and carries its own last-updated date. Hand-written, uses `assets/theme/`, same markup as the CS&E on-ramp table, its width capped at 800px to match the guide's own column. **Reached from the guide's home page** |
 | `books/rag-from-zero/` | *RAG from Zero: A Practical Guide*, added 2026-11-12. **PDF only**, no Markdown source here, and **not linked from any page** |
 
 Removed on purpose, so don't recreate them: the Mathematics on-ramp (commit `a3c706f`,
@@ -159,7 +159,7 @@ per page, nothing pushed).
 
 | Page | Status |
 | --- | --- |
-| All reachable pages | **Done** (2026-09-26) in one commit: Home, the 2 Coming Soon pages, CS&E on-ramp (since merged into the CS&E guide), CS&E guide, and the D&I guide (72 pages via `assets/theme/guide-override.css`). Checks: 81/81 pages text/link/id-identical to the previous `main`, 0 broken internal links, *(dissolved 2026-11-11 — see below)* untouched |
+| All reachable pages | **Done** (2026-09-26) in one commit: Home, the 2 Coming Soon pages, CS&E on-ramp (since merged into the CS&E guide), CS&E guide, and the D&I guide (**75 pages** `[2026-11-12]`; this said 72, via `assets/theme/guide-override.css`). Checks: 81/81 pages text/link/id-identical to the previous `main`, 0 broken internal links, *(dissolved 2026-11-11 — see below)* untouched |
 | Orphans (`mathematics/resources`, `data-and-intelligence/resources`, `data-and-intelligence/llm-engineering`) | Deliberately left in the old style. Nothing links to them |
 ---
 
@@ -235,7 +235,7 @@ per page, nothing pushed).
     stays true. `\phasestrip{0}` highlights none of the four phases, which is correct before the loop starts.
 - **⚠ The Complete Software Engineering Guide cannot be rebuilt from Markdown in this repo.** Its
   `utilities/convert.sh` reads a Markdown library (`1-Product-Discovery/`, `2-Project-Planning/`,
-  `3-Writing-the-Code/`, `4-Building-Real-Applications/…`) that is **not in *(dissolved 2026-11-11 — see below)* and not anywhere on
+  `3-Writing-the-Code/`, `4-Building-Real-Applications/…`) that is **not in this repository and not anywhere on
   this machine** — searched 2026-10-08. Only the generated `LaTeX-Book/chapters/*.tex` survive, and they are
   committed. So `make` fails at the convert step, but `make pdf` works:
   ```
@@ -257,9 +257,9 @@ per page, nothing pushed).
   *Use the Index, Luke!* ch. 1–5 assumes you can already write a join. The failure is silent — a missing
   index doesn't error, it gets slow later — so `databases/TOC.md` is the next book worth writing.
 
-### *(dissolved 2026-11-11 — see below)* is the only copy
+### The book sources here are the only copy
 
-The originals outside this repo were deleted. Commit **every** file in *(dissolved 2026-11-11 — see below)* except `.venv/`
+The originals outside this repo were deleted. Commit **every** file under `books/` except `.venv/`
 and `.DS_Store`. The books' own `.gitignore` files exclude LaTeX output, so use `git add -f` and check that
 the number of files on disk matches the `git ls-files` count. Scan for secrets before committing
 (the repo is public).
@@ -270,9 +270,15 @@ the number of files on disk matches the `git ls-files` count. Scan for secrets b
 
 *Added 2026-10-23.*
 
-**What it is.** A book, *Modern AI Engineering from Zero*, written to prepare the owner for
-AI/LLM application-engineer interviews before 31 December 2026. 57 chapters and 4 appendices
-planned, about 1,040 pages. Part I (chapters 1–7, 68 printed pages) is finished.
+**What it is.** A book, *Modern AI Engineering from Zero*. **It is FINISHED** — 2026-10-31, all
+57 chapters and 4 appendices, 1,413 printed pages. `[2026-11-12]` This paragraph said Part I was
+finished and the rest planned. It was written while the book was being drafted, and it was out of
+date in the only sentence that mattered.
+
+**It was written to prepare the owner for AI/LLM application-engineer interviews before
+31 December 2026.** `[2026-11-12]` **That is no longer all it is**: it is step 3 of the Data &
+Intelligence on-ramp and is linked from the guide, so the note below about removing it when the
+job search ends no longer describes the plan.
 
 **Why it is in this repository.** It started as its own local repository. Its GitHub remote
 was configured but the repository was never created, so nothing was ever pushed and the only
@@ -283,13 +289,12 @@ already exists. **It is temporary** and will be removed once the job search ends
 was deleted on 2026-10-23, after checking that all 65 of its tracked files were byte-identical
 here and all 31 of its commits reachable. Do not go looking for it. The book is also published
 on the public repository, which the owner decided deliberately: the content is general
-technical material, and *(dissolved 2026-11-11 — see below)* was already public on the same terms.
+technical material, and the repository was already public on the same terms.
 
 **`[2026-11-12]` It IS on the website now.** The Data & Intelligence on-ramp links its PDF, and
 `/robots.txt` already allowed `/books/*/*.pdf`. **This paragraph said the opposite** — that it
 must never appear on the live site, guaranteed by a leading underscore and Jekyll. **Both are
-gone**: the underscore went on 2026-11-11 and Jekyll is off. It is not part of the restyle. `utilities/link-check.py` does not scan it either — it still reports 81 pages, the
-same as before the move.
+gone**: the underscore went on 2026-11-11 and Jekyll is off. It is not part of the restyle. `[2026-11-12]` The link check reports **85 pages**; this said 81.
 
 **Its history came with it.** The move was a subtree-style merge, not a copy, so all 31 of
 the book's own commits are in this repository's history. They are reachable but their paths
