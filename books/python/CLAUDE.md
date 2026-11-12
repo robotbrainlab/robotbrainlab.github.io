@@ -63,7 +63,12 @@ ten chapters means re-reading ten chapters.
   - ***APIs to FastAPI*** (`../apis-to-fastapi/`) — building a web service. **The book teaches
     none of it.** `[STATED 2026-11-12]` *"We have the API book already, just point it out there
     just like Linux and Git Book."* Part III stops at the Python a service needs.
-  - The roadmap page itself, which `[STATED 2026-11-12]` **nothing happens to.** It stays exactly
+  - The roadmap page itself. `[STATED 2026-11-12]` **Nothing happens to the page.** But
+    **`[STATED 2026-11-12, later the same day]` the CS&E on-ramp will stop pointing at it once
+    this book is finished** and will point at the book instead — one `href` in
+    `../../cse/index.html`, nothing else, and nothing until the book is done
+    (`../future-books/README.md` decision 22). **The Data & Intelligence guide's 10 links are a
+    separate question the owner has not ruled on** (decision 23). The page itself stays exactly
     as it is when this book ships. Do not repoint it, do not retire it, do not propose either.
 - **Six of the 49 roadmap projects are deliberately not placed**, each with the book that owns it.
   `TOC.md`'s header lists all six. **Never silently re-add one, and never silently drop another** —
