@@ -24,11 +24,13 @@ Usage (from the repository root):
    edit to it is erased by the next build.
 8. Gives every data cell the heading of its own column, so the tables stack on a phone
    instead of scrolling sideways inside their own box.
-9. Replaces the guide's three-state theme button with the site's own two-state switch, and
+9. Removes the two provenance lines in the page footer and the "Canonical source" row,
+   which name Markdown files that do not exist on this site.
+10. Replaces the guide's three-state theme button with the site's own two-state switch, and
    joins the two theme memories. The site stores the chosen theme as "ti-theme", the guide as
    "air-theme", so before this each side ignored the other and the theme changed when you
    crossed between them. Every page gets a small script that mirrors one into the other.
-10. Replaces data-intelligence/guide/ with the result.
+11. Replaces data-intelligence/guide/ with the result.
 """
 
 import os
@@ -160,8 +162,7 @@ ON_RAMP = (
 # titles rather than prose, and its lead is set larger than the body, so both stay ragged.
 HOME_PAGE = "index.html"
 HOME_STYLE = """<style>
-  main.home p:not(.home-actions):not(.ti-subhead):not(.home-lead),
-  .site-footer p { text-align: justify; hyphens: auto; }
+  main.home p:not(.home-actions):not(.ti-subhead):not(.home-lead) { text-align: justify; hyphens: auto; }
 </style>
 </head>"""
 
@@ -395,6 +396,25 @@ def label_tables(html: str) -> str:
 
     return TABLE.sub(one_table, html)
 
+# The generated pages ended with two lines about how they were made — "Generated from canonical
+# Markdown: LEARNING-GUIDE.md" and "Presentation only. Canonical sources take precedence over this
+# page." — and the document records carried a "Canonical source" row naming another .md file. Both
+# name files that do not exist on this site, so to a reader they are dead references. The
+# generator marks both data-chrome, which is its own word for "not the content". The dates beside
+# them (Date, Audit date, Research execution date) are the record's own facts and stay.
+PROVENANCE_FOOTER = re.compile(r'<footer class="site-footer"[^>]*>.*?</footer>\s*', re.S)
+CANONICAL_ROW = re.compile(
+    r'<div class="doc-meta-item"><dt>Canonical source</dt>.*?</div>\s*', re.S)
+EMPTY_META = re.compile(r'<dl class="doc-meta"[^>]*>\s*</dl>\s*', re.S)
+
+
+def drop_provenance(html: str) -> tuple:
+    """Take out the lines that talk about the files the page was built from."""
+    html, footers = PROVENANCE_FOOTER.subn("", html)
+    html, rows = CANONICAL_ROW.subn("", html)
+    html = EMPTY_META.sub("", html)
+    return html, footers, rows
+
 def home_link(rel_to_root: str) -> str:
     """The site's four destinations, behind one home button.
 
@@ -427,6 +447,7 @@ def home_link(rel_to_root: str) -> str:
 
 def add_home_link(out: Path) -> int:
     patched = 0
+    dropped = [0, 0]
     for page in sorted(out.rglob("*.html")):
         # Pages sit in data-intelligence/guide/<rel>; step up to the site root.
         depth = len(page.relative_to(out).parts) - 1 + 2
@@ -449,10 +470,15 @@ def add_home_link(out: Path) -> int:
             html = add_on_ramp(html, rel)
         html = swap_python_resource(html, rel)
         html = add_python_note(html, rel, up)
+        # After the note, which anchors on the doc-meta </dl> this may remove.
+        html, footers, rows = drop_provenance(html)
+        dropped[0] += footers
+        dropped[1] += rows
         # Last: the labels rewrite every <td>, and the swaps above match exact <td> strings.
         html = label_tables(html)
         page.write_text(html, encoding="utf-8")
         patched += 1
+    print(f"Removed {dropped[0]} provenance footers and {dropped[1]} 'Canonical source' rows")
     return patched
 
 

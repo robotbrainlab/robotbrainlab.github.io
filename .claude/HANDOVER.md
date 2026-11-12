@@ -365,6 +365,18 @@ and `utilities/text-check.py` proves it page by page.
   — the Python roadmap's six, the guide's *Learn / Evidence / About* — because those are that page's
   navigation, not a copy of the menu, and the mobile menus are untouched. Each page marks its own
   row, and *Home page* is purple (`--root`) above a rule.
+- **`[2026-11-12]` The provenance chrome is gone from the guide.** Every page ended with
+  *"Generated from canonical Markdown: LEARNING-GUIDE.md"* and *"Presentation only. Canonical
+  sources take precedence over this page."*, and 36 document records carried a **Canonical source**
+  row naming another `.md` file. All of it named files that do not exist on this site, so to a
+  reader they were dead references, and the generator marks both `data-chrome` — its own word for
+  *not the content*. `utilities/build-di-guide.py` removes them: **75 footers and 36 rows**. It runs
+  **after** the Python note, which anchors on the `doc-meta` `</dl>` it can delete.
+  **What stays, and why:** the dates in those records (*Date*, *Audit date*, *Research execution
+  date* and the rest) are the record's own facts; and five pages still say *canonical* or
+  *Presentation only* **in their own prose** — the content-fidelity audit lists the footer strings
+  it audited, and the governance and site-design records state the principle *"Canonical sources
+  win"*. That is content, and it was read before it was kept, not matched.
 - **The gradient tile is on every page.** The mark beside *Data & Intelligence* in the guide now sits
   beside *Towards Intelligence* on all eight hand-written pages and beside *Python Roadmap*. It is
   `--grad` in a 16px rounded square, `aria-hidden`.
