@@ -88,10 +88,28 @@ end
 -- cell (capped), never narrower than its longest word. Measured before inline code
 -- is rewritten (stringify ignores raw LaTeX).
 local CHAR_PT = 4.5   -- average advance at table size (serif 9 pt / mono 7.6 pt)
+-- [2026-11-13] Bold is wider, and this was measured as one average for both. In these
+-- books the first column of a table is bold far more often than not -- every Key Terms
+-- table is -- so the column that most often sets the minimum is the one most often
+-- under-measured. Chapter 6's strength-of-evidence table overflowed by 1.76 pt on
+-- "Announcement" and 0.91 pt on "Demonstration", which works out at about 4.65 pt per
+-- bold character against the 4.5 assumed here. 4.8 covers it with room.
+-- The two boxes shipped because the build gate was being skipped; they are not new.
+local BOLD_CHAR_PT = 4.8
+local function longest_bold_word(cell)
+  local n = 0
+  pandoc.walk_block(pandoc.Div(cell.contents), {
+    Strong = function(s)
+      for w in pandoc.utils.stringify(s):gmatch('%S+') do
+        n = math.max(n, utf8.len(w) or #w)
+      end
+    end })
+  return n
+end
 local function measure_table(tbl)
   local ncols = #tbl.colspecs
-  local maxlen, maxword = {}, {}
-  for c = 1, ncols do maxlen[c] = 3; maxword[c] = 3 end
+  local maxlen, maxword, boldword = {}, {}, {}
+  for c = 1, ncols do maxlen[c] = 3; maxword[c] = 3; boldword[c] = 0 end
   local function scan(rows)
     for _, row in ipairs(rows) do
       for c, cell in ipairs(row.cells) do
@@ -99,6 +117,7 @@ local function measure_table(tbl)
           local text = pandoc.utils.stringify(cell.contents)
           maxlen[c] = math.max(maxlen[c], utf8.len(text) or #text)
           for w in text:gmatch('%S+') do maxword[c] = math.max(maxword[c], utf8.len(w) or #w) end
+          boldword[c] = math.max(boldword[c], longest_bold_word(cell))
         end
       end
     end
@@ -107,7 +126,9 @@ local function measure_table(tbl)
   for _, body in ipairs(tbl.bodies) do scan(body.body) end
   local minshare, want, sum = {}, {}, 0
   for c = 1, ncols do
-    minshare[c] = (math.min(maxword[c], 18) * CHAR_PT + 8) / TEXT_WIDTH
+    local plain = math.min(maxword[c], 18) * CHAR_PT
+    local bold = math.min(boldword[c], 18) * BOLD_CHAR_PT
+    minshare[c] = (math.max(plain, bold) + 8) / TEXT_WIDTH
     want[c] = math.min(maxlen[c], 60) + 4
     sum = sum + want[c]
   end

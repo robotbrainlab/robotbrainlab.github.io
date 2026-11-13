@@ -43,7 +43,7 @@ own `front/`, `tools/`, `assets/`, `content/` or `cover/`. Only the guide does.
 | `rag-from-zero` | *RAG from Zero: A Practical Guide* | **Published** (first edition 2026-09-30), 9 chapters in 3 parts, 2 appendices, 74 pages. `[2026-11-12]` **PDF only** — no Markdown source and no `labs/` in this repository, though the book's copyright page says a `labs` folder accompanies it. Not linked from the website |
 | `web-applications` | *Web Applications from Zero* | Not published alone. Its six chapters are the pre-book inside the guide |
 | `modern-ai` | *Modern AI: Research, Science and Engineering* | **In research.** No manuscript yet |
-| `python` | *Python from Zero* | **Started 2026-11-12.** `TOC.md` only — 51 chapters, approved and reviewed. No manuscript. `CLAUDE.md` governs a session here |
+| `python` | *Python from Zero* | **Ready to write, 2026-11-13.** 51 chapters approved; `GATES.md` settles what says a chapter is finished, so both of decision 8's conditions are met. It builds today (`make -C books/latex BOOK=python`), with every chapter listed in `book.tex` and commented out. No chapter is drafted. `CLAUDE.md` governs a session here |
 | `future-books` | The decisions for *Python* and *Machine Learning and Deep Learning*, plus five topics that are a `TOC.md` and nothing else | **Decisions, not a book.** Python has started; Machine Learning and Deep Learning has not |
 
 ## `latex/` — the shared build

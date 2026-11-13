@@ -181,9 +181,17 @@ This is the next piece of work, and it has not been done. What it has to settle:
 - **Where the mathematics boundary now sits**, since decision 5 moves it.
   `../modern-ai-engineering-from-zero/docs/BOOK-GUIDE.md` §6 draws a line that the machine-learning book is meant
   to cross, so that book needs its own line drawn in its own terms.
-- **Which of the finished book's gates transfer unchanged**, which need changing, and which do not
-  apply. The machinery in `../modern-ai-engineering-from-zero/tools/` is reusable and is the part that took longest
-  to get right.
+- ~~**Which of the finished book's gates transfer unchanged**, which need changing, and which do
+  not apply.~~ — **`[STATED 2026-11-13]` CLOSED by the owner**, who read the proposal and ruled
+  *"you can go ahead with your recommendations."* **The ruling is `../python/GATES.md`**, tool by
+  tool: five transferred unchanged, eleven changed, three do not apply, and two are new. The
+  machinery is built and lives in `../python/tools/`.
+  **This was the last live item on this list for *Python from Zero*, so decision 8's second
+  condition is now met and drafting is unblocked.** Everything else still open below belongs to
+  *Machine Learning and Deep Learning*, or is a running list kept while writing.
+  **One rule the owner added in the same sitting**: *a gate must prove it read something* — every
+  gate prints how many files it read, and a gate that read zero files fails. He approved it after
+  three of the finished book's own gates were found to be reporting success over nothing.
 - ~~**What a chapter of an academic book in this language looks like**~~ — **`[2026-11-12]` CLOSED
   by decision 18**: the finished book's chapter shape, copied exactly. Decision 19 names the three
   things above the chapter that do not come with it.

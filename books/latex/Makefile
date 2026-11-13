@@ -15,7 +15,10 @@
 #   TEMPLATE_FILES := Makefile latexmkrc preamble.tex tools front .gitignore
 #
 # Most books use preamble.tex. Two are too different to merge and keep their own in styles/:
-# interview-prep and complete-software-engineering-guide. Their book.tex names the style file.
+# modern-ai-engineering-from-zero and complete-software-engineering-guide. Their book.tex names
+# the style file. [2026-11-13] The first was still called interview-prep.tex here and on disk,
+# after the book folder was renamed on 2026-11-12. book.tex already named the new one, so the
+# book could not build at all. The file is renamed; this comment said the old name.
 #
 # NEVER run `make clean` for complete-software-engineering-guide. Its Markdown library is not
 # in this repository, so chapters/*.tex is its only source and nothing can regenerate it.
@@ -54,9 +57,18 @@ pdf:
 	cd $(BOOKDIR) && $(LATEXMK) -r $(SHARED)/latexmkrc -xelatex \
 	    -interaction=nonstopmode -halt-on-error book.tex
 
+# [2026-11-13] A book's own tools/check.sh now wins, which is the override rule
+# books/README.md already states for front/, tools/, assets/ and cover/. This target
+# hard-coded the shared script, so modern-ai-engineering-from-zero never ran its own -
+# and the shared one still carries the bold-span glossary scan that that book replaced
+# because it was about 90% noise (LEDGER-DEFECTS entry 18).
 check:
 	$(need_book)
-	cd $(BOOKDIR) && bash $(SHARED)/tools/check.sh
+	@if [ -f "$(BOOKDIR)/tools/check.sh" ]; then \
+	  cd $(BOOKDIR) && bash tools/check.sh; \
+	else \
+	  cd $(BOOKDIR) && bash $(SHARED)/tools/check.sh; \
+	fi
 
 clean:
 	$(need_book)

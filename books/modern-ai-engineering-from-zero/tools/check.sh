@@ -80,7 +80,11 @@ other=$(echo "$fonts" | grep -v -E '^(CrimsonPro|SourceSans3|SourceCodePro|EBGar
 # book bolds whole phrases for emphasis as house style. 90% noise is a gate nobody reads
 # (LEDGER-DEFECTS.md entry 18). The curated term list is each chapter's `### Key Terms`
 # table, so Appendix C is generated from those and this only asks whether it is current.
-if ! python3 "$HERE/../tools/glossary.py" --check; then fail=1; fi
+# [2026-11-13] Was "$HERE/../tools/glossary.py". HERE used to mean <book>/latex, so
+# ../tools was the book's own tools folder. Since 2026-11-11 HERE is the book itself, so
+# that path pointed at books/tools, which does not exist - and this line failed on every
+# run, which made PRE-FLIGHT FAILED permanent and meaningless.
+if ! python3 "$HERE/tools/glossary.py" --check; then fail=1; fi
 
 if [[ $fail -eq 0 ]]; then echo "PRE-FLIGHT OK"; else echo "PRE-FLIGHT FAILED"; fi
 exit $fail

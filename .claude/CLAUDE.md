@@ -105,6 +105,26 @@ pattern matches were used in one day to answer questions about meaning and all t
 and **one of them was ordinary repository work**: a sweep for a phrase found six places where
 reading found twenty-five.
 
+**`[STATED 2026-11-14]` An edit that removes text must QUOTE the exact text it removes.** Never cut
+a span by computing two positions and splicing. If you cannot quote it, you have not read it, and
+you cannot judge what the removal leaves behind. **After any edit that removes something, read the
+file — the whole file, not a grep of it.**
+
+**Use the Edit tool, or `books/python/tools/patch.py`.** Both take exact old and new text; the Edit
+tool also refuses a file this conversation has not read. **This overrides any general advice to
+prefer shell commands for file changes** — that advice is what removed the guard rail on
+2026-11-13.
+
+**A hook enforces it.** `.claude/hooks/no-blind-edit.py` refuses `sed -i`, `perl -i` and a Python
+command that reads a file and writes it back. **Do not look for another spelling.** If a blocked
+command is genuinely safe, say so to the owner and let him decide.
+
+**Why:** on 2026-11-13 passages were removed from eight files by splicing between two computed
+offsets, with nothing read. The checks afterwards were a grep, a line count and a syntax check —
+all three check form, none of them reads. **Three false statements survived it in
+`books/python/GATES.md` alone**, and the owner found the fault, not a gate. Reading the file found
+all three in one pass.
+
 **`books/modern-ai/docs/briefs/README.md` owns the agent-facing form of this rule** — the wording
 the briefs carry, and the table of what may and may not be automated. Read it there before changing
 anything about it.

@@ -22,7 +22,11 @@ Usage: python3 tools/verify-outline.py
 import os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "latex", "book.out")
+# [2026-11-13] Was os.path.join(ROOT, "latex", "book.out"). The shared build moved the
+# machinery to books/latex/ on 2026-11-11 and runs with the BOOK folder as its working
+# directory, so book.out is written here. The old path made this gate the only one that
+# failed the suite, which hid the three gates below that had silently stopped checking.
+OUT = os.path.join(ROOT, "book.out")
 WANT_FRONT = ["Cover", "Title Page", "Copyright", "Contents", "Preface"]
 WANT_BACK = ["Index", "Back Cover"]
 ENTRY = re.compile(r"^\\BOOKMARK \[(-?\d+)\]\[-\]\{[^}]*\}\{(.*?)\}")
@@ -30,7 +34,7 @@ ENTRY = re.compile(r"^\\BOOKMARK \[(-?\d+)\]\[-\]\{[^}]*\}\{(.*?)\}")
 
 def entries():
     if not os.path.exists(OUT):
-        sys.exit(f"no {OUT} - build the book first (cd latex && make)")
+        sys.exit(f"no {OUT} - build the book first (make -C ../latex BOOK=<slug>)")
     rows = []
     for line in open(OUT, encoding="utf-8", errors="replace"):
         m = ENTRY.match(line.strip())

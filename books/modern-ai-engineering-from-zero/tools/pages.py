@@ -18,7 +18,8 @@ opener begins, and only the PDF knows where that is.
 import os, re, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PDF = os.path.join(ROOT, "latex", "book.pdf")
+# [2026-11-13] Was ROOT/latex/book.pdf, from the layout before 2026-11-11.
+PDF = os.path.join(ROOT, "book.pdf")
 
 
 def openers():
@@ -65,7 +66,7 @@ def estimates():
 
 def main():
     if not os.path.exists(PDF):
-        sys.exit(f"no PDF at {PDF} - run `cd latex && make` first")
+        sys.exit(f"no PDF at {PDF} - run `make -C ../latex BOOK=<slug>` first")
     found = openers()
     if not found:
         sys.exit("found no openers in the PDF - has the layout changed?")

@@ -1,0 +1,120 @@
+% ================================================================
+%  book.tex - master file: the order of the book.
+%  Build:  make -C ../latex BOOK=python
+%
+%  Each Markdown file markdown/<stem>.md becomes chapters/<stem>.tex;
+%  include it here with \input{chapters/<stem>}.
+%  Parts:  \bookpart{<roman numeral>}{<title>}{<what to ignore for now, or empty>}
+%
+%  [2026-11-13] Every chapter is listed below and COMMENTED OUT. A chapter joins the
+%  book by having its Markdown written and this line uncommented - nothing else.
+%  The four part names are the owner's, ruled on 2026-11-12; see TOC.md.
+% ================================================================
+\documentclass[10pt, twoside, openany]{book}
+\input{book-meta}
+\input{preamble}
+
+\begin{document}
+
+% The front and back matter get their own PDF bookmarks. Without them the outline pane
+% opens on "Preface" and there is no way to jump to the contents. \pdfbookmark takes the
+% level, the text and an anchor name; level -1 is the same level as a part, so the front
+% matter sits beside them. tools/verify-outline.py checks all seven are present and in
+% this order, so adding a front page without its bookmark fails the suite.
+\pdfbookmark[-1]{Cover}{bm:cover}
+\input{front/cover}
+
+\frontmatter
+\pdfbookmark[-1]{Title Page}{bm:titlepage}
+\input{front/titlepage}
+\pdfbookmark[-1]{Copyright}{bm:copyright}
+\input{front/copyright}
+\pdfbookmark[-1]{Contents}{bm:contents}
+\tableofcontents
+\input{front/preface}                 % includes chapters/00-preface (markdown/00-preface.md)
+
+\mainmatter
+
+% ---------------------------------------------------------------- Part I
+\bookpart{I}{Write It}
+  {the data model, the method resolution order, and every sentence that begins
+   "the reason this works is...". Part II is all of that. It also teaches none of the
+   shell, the editor or Git: read \textit{Linux and Git from Zero} first.}
+%\input{chapters/01-getting-python-and-running-something}
+%\input{chapters/02-values-types-and-operators}
+%\input{chapters/03-control-flow-and-functions}
+%\input{chapters/04-the-four-data-structures}
+%\input{chapters/05-modules-and-packages}
+%\input{chapters/06-files-paths-and-formats}
+%\input{chapters/07-text-and-the-encodings-under-it}
+%\input{chapters/08-errors-and-exceptions}
+%\input{chapters/09-classes-first-pass}
+%\input{chapters/10-the-standard-library-you-will-actually-reach-for}
+%\input{chapters/11-style-and-the-tool-that-enforces-it}
+%\input{chapters/12-testing-functions-fixtures-and-parametrization}
+%\input{chapters/13-testing-strategy-mocking-and-properties}
+%\input{chapters/14-type-hints}
+%\input{chapters/15-packaging-and-publishing}
+%\input{chapters/16-logging-and-configuration}
+%\input{chapters/17-continuous-integration}
+
+% ---------------------------------------------------------------- Part II
+\bookpart{II}{Why It Works That Way}
+  {descriptors, metaclasses and the C API. The first two are the Advanced stage and
+   the C API is further out still. Chapter 51 says where they are.}
+%\input{chapters/18-the-data-model}
+%\input{chapters/19-names-binding-and-scope}
+%\input{chapters/20-objects-copies-and-identity}
+%\input{chapters/21-special-methods-as-protocols}
+%\input{chapters/22-hashing-equality-and-immutability}
+%\input{chapters/23-functions-are-objects}
+%\input{chapters/24-decorators}
+%\input{chapters/25-iterators-and-generators}
+%\input{chapters/26-context-managers}
+%\input{chapters/27-modern-class-design}
+%\input{chapters/28-inheritance-super-and-the-mro}
+
+% ---------------------------------------------------------------- Part III
+\bookpart{III}{Build With It}
+  {deployment. Docker and hosting are outside this book. It also does not teach how to
+   build a web service: read \textit{APIs to FastAPI} for that.}
+%\input{chapters/29-i-o-bound-cpu-bound-and-the-gil}
+%\input{chapters/30-threads-and-queues}
+%\input{chapters/31-one-interface-two-executors}
+%\input{chapters/32-processes-underneath}
+%\input{chapters/33-asyncio}
+%\input{chapters/34-tasks-cancellation-and-taskgroup}
+%\input{chapters/35-choosing-a-model}
+%\input{chapters/36-storing-data-sqlite-and-sql}
+%\input{chapters/37-joins}
+%\input{chapters/38-indexes-and-why-your-query-is-slow}
+%\input{chapters/39-transactions}
+%\input{chapters/40-reading-a-query-plan}
+%\input{chapters/41-an-orm-and-what-it-hides}
+%\input{chapters/42-migrations}
+%\input{chapters/43-moving-to-postgres}
+%\input{chapters/44-validating-what-comes-in}
+%\input{chapters/45-calling-other-services}
+
+% ---------------------------------------------------------------- Part IV
+\bookpart{IV}{What Next}{}
+%\input{chapters/46-thread-security}
+%\input{chapters/47-thread-speed}
+%\input{chapters/48-thread-failure}
+%\input{chapters/49-thread-cost}
+%\input{chapters/50-the-three-capstones}
+%\input{chapters/51-what-this-book-does-not-teach}
+
+% ---------------------------------------------------------------- Appendices
+\appendix
+%\input{chapters/A-cheat-sheet}        % generated by tools/cheatsheet.py
+%\input{chapters/B-interview-bank}     % written LAST, from the finished chapters
+%\input{chapters/C-glossary}           % generated by tools/glossary.py; last appendix
+
+\backmatter
+\printindex
+
+\pdfbookmark[-1]{Back Cover}{bm:backcover}
+\input{front/backcover}
+
+\end{document}

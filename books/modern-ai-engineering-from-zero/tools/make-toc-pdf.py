@@ -83,13 +83,21 @@ def split_sections(lines):
 def main():
     toc = (ROOT / 'TOC.md').read_text().split('\n')
     with tempfile.TemporaryDirectory() as tmp:
-        build = Path(tmp) / 'tocbook'
+        # [2026-11-13] This used to copy ROOT/latex, because every book carried its own
+        # build. Since 2026-11-11 the build is shared at books/latex/ and the book holds
+        # only book.tex, book-meta.tex and markdown/. So the throwaway tree is now a
+        # throwaway BOOK beside a throwaway copy of the shared build, which is the same
+        # shape the real build expects.
+        build = Path(tmp) / 'tocbook'          # the throwaway book
+        shared = Path(tmp) / 'latex'           # the throwaway shared build
         (build / 'markdown').mkdir(parents=True)
-        shutil.copytree(ROOT / 'latex', build / 'latex',
+        shutil.copytree(ROOT.parent / 'latex', shared,
                         ignore=shutil.ignore_patterns('chapters', 'generated', '*.pdf', '*.aux',
                                                       '*.log', '*.toc', '*.out', '*.fls',
                                                       '*.fdb_latexmk', '*.xdv', '*.idx', '*.ilg',
                                                       '*.ind'))
+        shutil.copy(ROOT / 'book.tex', build / 'book.tex')
+        shutil.copy(ROOT / 'book-meta.tex', build / 'book-meta.tex')
         md = build / 'markdown'
         (md / '00-preface.md').write_text(PREFACE)
         stems = []
@@ -105,7 +113,7 @@ def main():
         if len(stems) != len(CHAPTERS):
             sys.exit(f'TOC.md is missing sections: expected {len(CHAPTERS)}, found {len(stems)}')
 
-        tex = build / 'latex'
+        tex = build                            # book.tex and book-meta.tex live here now
         book = (tex / 'book.tex').read_text()
         start = book.index('% Chapters are commented out')
         end = book.index('% ---------------------------------------------------------------- Appendices')
@@ -125,10 +133,11 @@ def main():
         (tex / 'book-meta.tex').write_text(meta)
 
         env = dict(os.environ, PATH='/Library/TeX/texbin:/opt/homebrew/bin:' + os.environ['PATH'])
-        r = subprocess.run(['make'], cwd=tex, env=env, capture_output=True, text=True)
+        r = subprocess.run(['make', '-C', str(shared), f'BOOK={build.name}'],
+                           cwd=tmp, env=env, capture_output=True, text=True)
         if r.returncode:
             sys.exit(r.stdout[-3000:] + r.stderr[-2000:])
-        shutil.copy(tex / 'book.pdf', ROOT / 'TOC.pdf')
+        shutil.copy(build / 'book.pdf', ROOT / 'TOC.pdf')
 
     pages = subprocess.run(['pdfinfo', str(ROOT / 'TOC.pdf')], capture_output=True, text=True).stdout
     print('TOC.pdf written.', [l for l in pages.split('\n') if l.startswith('Pages')][0])

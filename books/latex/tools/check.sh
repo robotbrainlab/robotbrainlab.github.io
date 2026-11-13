@@ -9,7 +9,13 @@
 #   * bold terms that are not in the glossary (a reminder, not an error)
 # ================================================================
 set -uo pipefail
-HERE="$(cd "$(dirname "$0")/.." && pwd)"
+# [2026-11-13] Was `HERE="$(cd "$(dirname "$0")/.." && pwd)"`. That was right when this
+# script lived inside each book, at <book>/latex/tools/. Since the shared move of
+# 2026-11-11 it lives at books/latex/tools/, so the old line resolved to books/latex and
+# this script walked OUT of the book it was asked to check. `make BOOK=<slug> check` then
+# reported "build first" for every book, including books with a PDF sitting right there.
+# The shared Makefile exports BOOK_DIR and cds into the book before calling this.
+HERE="${BOOK_DIR:-$PWD}"
 cd "$HERE"
 PDF="${PDF:-book.pdf}"; LOG="${PDF%.pdf}.log"
 MIN="${PAGES_MIN:-50}"; MAX="${PAGES_MAX:-100}"
@@ -72,7 +78,9 @@ other=$(echo "$fonts" | grep -v -E '^(CrimsonPro|SourceSans3|SourceCodePro|EBGar
 [[ -n "$other" ]] && echo "Other fonts:           $other"
 
 # Bold terms missing from the glossary (glossary = the Markdown file titled "# Glossary")
-python3 - "$HERE/${MARKDOWN_DIR:-../markdown}" <<'PY'
+# [2026-11-13] The default was `../markdown`, which was the book's markdown folder when
+# HERE meant <book>/latex. HERE is the book itself now, so the folder is `markdown`.
+python3 - "$HERE/${MARKDOWN_DIR:-markdown}" <<'PY'
 import re, sys, pathlib
 md = pathlib.Path(sys.argv[1])
 files = sorted(p for p in md.glob('*.md') if not p.name.startswith('_'))

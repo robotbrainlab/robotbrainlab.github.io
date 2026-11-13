@@ -30,9 +30,17 @@ import glob, os, re, sys
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 ENTRY = re.compile(r"\\index\{(.*?)\}")
 
+# [2026-11-13] Was ROOT/latex/chapters/*.tex. The shared build moved on 2026-11-11 and the
+# generated chapters are now ROOT/chapters/*.tex. This gate therefore read ZERO files and
+# printed "0 bad index entries / CLEAN" over 461 real entries, for two days, which is
+# exactly the failure the suite's own header warns about. The file count below is the
+# guard: a gate that read nothing must say so and fail.
+CHAPTERS = os.path.join(ROOT, "chapters", "*.tex")
+
+
 def findings():
     out = []
-    for path in sorted(glob.glob(os.path.join(ROOT, "latex", "chapters", "*.tex"))):
+    for path in sorted(glob.glob(CHAPTERS)):
         for n, line in enumerate(open(path, encoding="utf-8", errors="replace"), 1):
             for raw in ENTRY.findall(line):
                 entry = raw.split("@")[0]          # sort key, which is what makeindex groups on
@@ -44,10 +52,15 @@ def findings():
     return out
 
 def main():
+    files = sorted(glob.glob(CHAPTERS))
+    if not files:
+        print(f"VACUOUS - no generated chapters at {CHAPTERS}")
+        print("This gate checked nothing. Build the book first, or the path is wrong.")
+        return 1
     bad = findings()
     for f, n, entry, why in bad:
         print(f"  {f}:{n}  \\index{{{entry}}}  {why}")
-    print(f"\n{len(bad)} bad index entr{'y' if len(bad)==1 else 'ies'}")
+    print(f"\n{len(files)} file(s) read, {len(bad)} bad index entr{'y' if len(bad)==1 else 'ies'}")
     if bad:
         print("Un-bold the span, or use [**x**]{.noindex} / [**x**]{idx=\"term\"} - see filter.lua.")
         return 1

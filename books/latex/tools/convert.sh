@@ -63,9 +63,22 @@ echo "converted ${#files[@]} Markdown files -> chapters/"
 # book.tex and the Markdown folder should agree
 for f in "${files[@]}"; do
   stem="$(basename "$f" .md)"
-  grep -q -s "chapters/$stem}" "$HERE/book.tex" "$HERE"/front/*.tex ||
+  # [2026-11-13] $SHARED/front is searched too. front/ moved to books/latex/ on
+  # 2026-11-11, so a book without its own copy - which is every book but one - was told
+  # on every build that its preface "is not \\input in book.tex". It is: through
+  # front/preface.tex, which this check could no longer see.
+  grep -q -s "chapters/$stem}" "$HERE/book.tex" "$HERE"/front/*.tex "$SHARED"/front/*.tex ||
     echo "  note: $stem.md is not \\input in book.tex"
 done
-grep -o 'chapters/[^}]*}' "$HERE/book.tex" | sed 's#chapters/##; s#}##' | while read -r s; do
+# [2026-11-13] Commented-out lines are skipped. books/python/book.tex lists all 51
+# chapters with their \input commented out, so a chapter joins the book by being written
+# and having one line uncommented. Without this filter that book printed 54 notes about
+# chapters nobody claimed to have written yet, on every single build - which is the
+# cry-wolf failure: a warning you always see is a warning you stop reading.
+# `|| true` on the match: with every \input commented out there is nothing to find, and
+# grep exits 1. Under `set -e -o pipefail` that failed the whole convert step, which is
+# how a book with no chapters yet could not be built at all.
+{ grep -v '^[[:space:]]*%' "$HERE/book.tex" | grep -o 'chapters/[^}]*}' || true; } |
+  sed 's#chapters/##; s#}##' | while read -r s; do
   [[ -f "$HERE/chapters/$s.tex" ]] || echo "  note: book.tex inputs chapters/$s but there is no $s.md"
 done

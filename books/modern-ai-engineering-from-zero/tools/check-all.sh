@@ -29,29 +29,44 @@ for ch in markdown/[0-9][0-9]-*.md; do
     fail=1
   }
 done
-run "OUTLINE  the PDF outline nests correctly"          python3 tools/verify-outline.py
 run "GLOSSARY Appendix C matches every Key Terms table"  python3 tools/glossary.py --check
 run "CHEATSHT Appendix A matches every Worth Memorising"  python3 tools/cheatsheet.py --check
 
 printf '\n=== BUILD  0 overfull / 0 glyphs / 0 undefined ===\n'
-if [ -d latex ]; then
-  ( cd latex && make >/dev/null 2>&1 ) || { echo "build FAILED"; fail=1; }
-  if [ -f latex/book.log ]; then
+# [2026-11-13] This block was `if [ -d latex ]`, from the layout before 2026-11-11. That
+# folder has not existed since the shared build arrived, so the whole build gate was
+# SKIPPED IN SILENCE - no build, no counts, no failure. A gate that checks nothing must
+# say so, so the guard is now an else branch that fails.
+BOOK_SLUG="$(basename "$PWD")"
+if [ -f book.tex ] && [ -d ../latex ]; then
+  make -C ../latex BOOK="$BOOK_SLUG" >/dev/null 2>&1 || { echo "build FAILED"; fail=1; }
+  if [ -f book.log ]; then
     # The header has promised "0 undefined" since this gate was written and never
     # checked for it: the loop below only ever had Overfull and Missing character in
     # it. Found 2026-10-28 by a reviewer reading the gate's own output, which is
     # LEDGER-DEFECTS.md entry 35's lesson arriving from the other direction.
     for pat in 'Overfull' 'Missing character' 'undefined' 'Undefined'; do
-      n=$(grep -c "$pat" latex/book.log || true)
+      n=$(grep -c "$pat" book.log || true)
       printf '%-22s %s\n' "$pat" "$n"
       [ "$n" = "0" ] || fail=1
     done
+  else
+    echo "no book.log after the build - this gate checked NOTHING"; fail=1
   fi
+else
+  echo "no book.tex here, or no ../latex - this gate checked NOTHING"; fail=1
 fi
 
 # After the build, because it reads the generated chapters/*.tex.
 printf '\n=== INDEX  every automatic index entry is shaped like a term ===\n'
 python3 tools/verify-index.py || fail=1
+
+# [2026-11-13] Moved to AFTER the build. It reads book.out, which the build writes, so
+# running it first worked only while a stale book.out from an earlier build happened to be
+# lying there. On a clean tree it failed, and that false failure was the only thing the
+# suite reported - which hid the build gate doing nothing at all.
+printf '\n=== OUTLINE  the PDF outline nests correctly ===\n'
+python3 tools/verify-outline.py || fail=1
 
 printf '\n'
 if [ "$fail" = "0" ]; then echo "ALL GATES PASS"; else echo "GATES FAILED"; fi

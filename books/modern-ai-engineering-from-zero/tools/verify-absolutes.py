@@ -4,10 +4,16 @@
 Thirteen of twenty findings in one French review round were an absolute with its
 counter-example sitting in the same chapter. No gate can test an absolute, so this one
 does not try. It produces the list and the count, and the chapter's record must declare
-that many as tested. verify-record.py fails when the numbers disagree.
+that many as tested.
 
-That coupling is the point: a prose instruction to "check every always" is what gets
-skipped. A number that must match is not.
+**[2026-11-13] What is actually enforced, which is less than this file used to claim.**
+This docstring said "verify-record.py fails when the numbers disagree". It does not, and
+it never did: verify-record.py only checks that the record's `absolutes:` field is not
+empty. So the number on the record is a statement, not a measurement, and nothing compares
+it to the count below. The intended coupling - a number that must match - is the stronger
+design and is worth building where records start empty. It is written down as work for
+*Python from Zero* rather than asserted here, because a tool that describes a check it
+does not run is the same defect as a gate that passes without reading anything.
 
 Usage: python3 tools/verify-absolutes.py <chapter.md>   # prints the list and `absolutes: N`
 """
