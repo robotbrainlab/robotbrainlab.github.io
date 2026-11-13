@@ -138,7 +138,30 @@ book's own cover does not. **Do not "fix" either to match the other.**
 - **The repository is public.** Scan for secrets before every commit. Push only to the
   `github-robotbrainlab` remote; never as the `dlakshmizlk` account.
 
-## Style, in everything the owner reads
+## Two different styles. Do not mix them up
+
+### `[STATED 2026-11-14]` The BOOK's voice: *Modern AI Engineering from Zero*, chapter 1
+
+The owner was asked whether the book should be written at the level he asks of a reply — short,
+controlled, very plain — or at the finished book's level. **He chose the finished book:**
+*"I would prefer how modern AI book was."*
+
+**The reference is `../modern-ai-engineering-from-zero/markdown/01-what-a-model-is.md`.** The rules
+are `../modern-ai-engineering-from-zero/docs/BOOK-GUIDE.md` §7 and are not restated here. **Read
+that chapter before writing, not this summary** — what follows is where to look, not what it says.
+It is plain, and it is not clipped: it allows rhythm, and one vivid line where a mechanism needs
+one. What it does, observably:
+
+- **The short answer first**, in two or three sentences, then *"That is the whole of it."*
+- **It names the wrong picture and corrects it** — *"You do not download a brain."*
+- **An everyday comparison** for the unfamiliar thing: a currency rate, a map tile.
+- **A table for a contrast**, not for decoration.
+- **It says what it is simplifying**, and where the honest version is taught.
+- **It names the common beginner's error** rather than writing around it.
+- **Idea in words first; the code block comes after.**
+- A callout holds the exception. The main line stays in the body.
+
+### Style, in everything the owner reads — replies, not the book
 
 Plain, controlled English — about 80% ASD-STE100. Short sentences. Active voice. The answer first,
 then what was done and decided, then the explanation. Tables where they carry the information
