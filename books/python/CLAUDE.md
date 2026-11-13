@@ -140,11 +140,9 @@ book's own cover does not. **Do not "fix" either to match the other.**
 
 ## Two different styles. Do not mix them up
 
-### `[STATED 2026-11-14]` The BOOK's voice: *Modern AI Engineering from Zero*, chapter 1
+### The BOOK's voice: *Modern AI Engineering from Zero*, chapter 1
 
-The owner was asked whether the book should be written at the level he asks of a reply — short,
-controlled, very plain — or at the finished book's level. **He chose the finished book:**
-*"I would prefer how modern AI book was."*
+**The decision is `../future-books/README.md` decision 24** and is not restated here.
 
 **The reference is `../modern-ai-engineering-from-zero/markdown/01-what-a-model-is.md`.** The rules
 are `../modern-ai-engineering-from-zero/docs/BOOK-GUIDE.md` §7 and are not restated here. **Read
