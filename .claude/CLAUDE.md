@@ -47,12 +47,13 @@ why there are three kinds and not six — see the note at the end of this sectio
    judge, before any area is cut. The roadmap's second section records a question he has not
    answered, about what he expected this process to be; **it is open but it does not block the
    work.** Nothing about the website.
-3. **`[2026-11-12]` Writing *Python from Zero*.** The book in `books/python/`. **It governs
-   itself** — go straight to `books/python/CLAUDE.md`, which sends you to `books/python/TOC.md`.
-   **It started on 2026-11-12**: 51 chapters, approved by the owner, then reviewed twice and
-   corrected. **No chapter is drafted**, and the thing blocking that is **not** the contents — it
-   is decision 8's other half, the rules, and for this book one is live: **which of the finished
-   book's gates transfer.** Nothing about the website.
+3. **`[2026-11-14]` Writing *Python from Zero*.** The book in `books/python/`. **It governs
+   itself** — go straight to `books/python/CLAUDE.md`, which names the next action on its first
+   screen. **Nothing is blocked.** Both of decision 8's conditions are met: the contents were
+   approved on 2026-11-12, and the rules are `books/python/GATES.md`, ruled on 2026-11-13.
+   **The next action is to write chapter 1**, `01-getting-python-and-running-something`.
+   **One chapter at a time, and the owner is not asked to approve each one** — the two review
+   agents, the gates and the chapter record do that work. Nothing about the website.
 
 **Two things that are NOT session kinds, and why:**
 
